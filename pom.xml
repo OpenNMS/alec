@@ -31,6 +31,7 @@
 
     <modules>
         <module>connector</module>
+        <module>drools</module>
         <module>features</module>
     </modules>
 
@@ -65,6 +66,11 @@
             <dependency>
                 <groupId>org.opennms.oce.connector</groupId>
                 <artifactId>shell</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.drools</groupId>
+                <artifactId>engine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

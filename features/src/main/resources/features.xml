@@ -4,12 +4,23 @@
     <repository>mvn:org.kie/kie-karaf-features/${drools.version}/xml/features</repository>
 
     <feature name="oce" description="OpenNMS Correlation Engine" version="${project.version}">
-        <feature version="${drools.version}">drools-common</feature>
+        <feature version="${project.version}">oce-connector</feature>
+        <feature version="${project.version}">oce-drools-engine</feature>
+    </feature>
+
+    <feature name="oce-connector" description="OCE :: Connector" version="${project.version}">
         <feature version="1.0.0">kafka-streams</feature>
         <bundle>mvn:org.opennms.oce.connector/api/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.connector/impl/${project.version}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.oce.connector/shell/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-drools-engine" description="OCE :: Drools Engine" version="${project.version}">
+        <bundle dependency="true">mvn:org.opennms.oce.connector/api/${project.version}</bundle>
+        <feature version="${drools.version}">kie</feature>
+        <feature version="${drools.version}">drools-module</feature>
+        <bundle>mvn:org.opennms.oce.drools/engine/${project.version}</bundle>
     </feature>
 
     <feature name="kafka-streams" description="Kafka Streams" version="1.0.0">

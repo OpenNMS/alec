@@ -1,0 +1,10 @@
+package org.opennms.oce.drools.engine.sample;
+
+import org.opennms.oce.connector.api.Alarm
+
+rule "CanDrink"
+when
+    a: Alarm()
+then
+	a.getReductionKey();
+end

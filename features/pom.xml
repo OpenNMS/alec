@@ -56,4 +56,19 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opennms.oce.connector</groupId>
+            <artifactId>impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.connector</groupId>
+            <artifactId>shell</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.drools</groupId>
+            <artifactId>engine</artifactId>
+        </dependency>
+    </dependencies>
 </project>

@@ -28,12 +28,20 @@
 
 package org.opennms.oce.connector.impl;
 
+import java.util.Objects;
+
 import org.opennms.oce.connector.api.Alarm;
 
 public class AlarmImpl implements Alarm {
+    private final OpennmsModelProtos.Alarm alarm;
+
+    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
+        this.alarm = Objects.requireNonNull(alarm);
+    }
+
     @Override
     public String getReductionKey() {
-        return "some-reduction-key";
+        return alarm.getReductionKey();
     }
 
     @Override

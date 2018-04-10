@@ -28,15 +28,157 @@
 
 package org.opennms.oce.connector.impl;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.Consumed;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.InvalidStateStoreException;
+import org.apache.kafka.streams.errors.LogAndFailExceptionHandler;
+import org.apache.kafka.streams.errors.StreamsException;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.processor.FailOnInvalidTimestamp;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.opennms.oce.connector.api.Alarm;
 import org.opennms.oce.connector.api.AlarmRepository;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.InvalidProtocolBufferException;
 
 public class AlarmRepositoryImpl implements AlarmRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmRepositoryImpl.class);
+
+    private final ConfigurationAdmin configAdmin;
+
+    private static final String ALARM_STORE_NAME = "alarm_store";
+    private static final String KAFKA_STREAMS_PID = "org.opennms.oce.connector.client.kafka.streams";
+
+    private String alarmTopic;
+    private String eventTopic;
+    private String nodeTopic;
+
+    private KafkaStreams streams;
+
+    public AlarmRepositoryImpl(ConfigurationAdmin configAdmin) {
+        this.configAdmin = Objects.requireNonNull(configAdmin);
+    }
+
+    public void init() throws IOException {
+        final Properties streamProperties = loadStreamsProperties();
+
+        final StreamsBuilder builder = new StreamsBuilder();
+        builder.table(alarmTopic, Consumed.with(Serdes.String(), Serdes.ByteArray()),
+                Materialized.as(ALARM_STORE_NAME));
+        final Topology topology = builder.build();
+
+        final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            // Use the class-loader for the KStream class, since the kafka-client bundle
+            // does not import the required classes from the kafka-streams bundle
+            Thread.currentThread().setContextClassLoader(KStream.class.getClassLoader());
+            streams = new KafkaStreams(topology, streamProperties);
+        } finally {
+            Thread.currentThread().setContextClassLoader(currentClassLoader);
+        }
+
+        streams.setUncaughtExceptionHandler((t, e) ->
+                LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
+        try {
+            streams.start();
+        } catch (StreamsException | IllegalStateException e) {
+            LOG.error("Stream did not start succesfully.", e);
+        }
+    }
+
     @Override
     public List<Alarm> getAlarms() {
-        return Collections.singletonList(new AlarmImpl());
+        final List<Alarm> alarms = new ArrayList<>();
+        try {
+            waitUntilStoreIsQueryable().all().forEachRemaining(entry -> {
+                try {
+                    final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
+                    alarms.add(new AlarmImpl(alarm));
+                } catch (InvalidProtocolBufferException e) {
+                    LOG.error("Failed to parse alarm from bytes.", e);
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return alarms;
+    }
+
+    private ReadOnlyKeyValueStore<String, byte[]> waitUntilStoreIsQueryable() throws InterruptedException {
+        while (true) {
+            try {
+                return streams.store(ALARM_STORE_NAME, QueryableStoreTypes.keyValueStore());
+            } catch (InvalidStateStoreException ignored) {
+                Thread.sleep(100);
+            }
+        }
+    }
+
+    private Properties loadStreamsProperties() throws IOException {
+        final Properties streamsProperties = new Properties();
+        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties();
+        if (properties != null) {
+            final Enumeration<String> keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                final String key = keys.nextElement();
+                streamsProperties.put(key, properties.get(key));
+            }
+        }
+        streamsProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        streamsProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
+        streamsProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, "oce-connector");
+        //streamsProperties.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG,
+        //        LogAndFailExceptionHandler.class);
+        //streamsProperties.put(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, FailOnInvalidTimestamp.class);
+        if (streamsProperties.get(StreamsConfig.STATE_DIR_CONFIG) == null) {
+            Path kafkaDir = Paths.get(System.getProperty("karaf.data"), "kafka");
+            streamsProperties.put(StreamsConfig.STATE_DIR_CONFIG, kafkaDir.toString());
+        }
+        return streamsProperties;
+    }
+
+    public String getAlarmTopic() {
+        return alarmTopic;
+    }
+
+    public void setAlarmTopic(String alarmTopic) {
+        this.alarmTopic = alarmTopic;
+    }
+
+    public String getEventTopic() {
+        return eventTopic;
+    }
+
+    public void setEventTopic(String eventTopic) {
+        this.eventTopic = eventTopic;
+    }
+
+    public String getNodeTopic() {
+        return nodeTopic;
+    }
+
+    public void setNodeTopic(String nodeTopic) {
+        this.nodeTopic = nodeTopic;
     }
 }

@@ -46,8 +46,12 @@ public class AlarmRepositoryList implements Action {
     @Override
     public Object execute() throws Exception {
         final List<Alarm> alarms = alarmRepository.getAlarms();
-        for (Alarm alarm : alarms) {
-            System.out.println(alarm);
+        if (alarms.size() < 1) {
+            System.out.println("(No alarms)");
+        } else {
+            for (Alarm alarm : alarms) {
+                System.out.println(alarm);
+            }
         }
         return alarms;
     }

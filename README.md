@@ -22,6 +22,13 @@ Run the Karaf container:
 ./bin/karaf
 ```
 
+In the Karaf shell, point to your Kafka instance:
+```
+config:edit org.opennms.oce.connector.client.kafka.streams
+config:property-set bootstrap.servers 127.0.0.1:9092
+config:update
+```
+
 From a shell, add the features repository, and install the feature:
 ```
 feature:repo-add mvn:org.opennms.oce/oce-features/1.0.0-SNAPSHOT/xml

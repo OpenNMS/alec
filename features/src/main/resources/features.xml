@@ -5,8 +5,9 @@
 
     <feature name="oce" description="OpenNMS Correlation Engine" version="${project.version}">
         <feature version="${drools.version}">drools-common</feature>
-	<bundle>mvn:org.opennms.oce.connector/api/${project.version}</bundle>
-	<bundle>mvn:org.opennms.oce.connector/impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/shell/${project.version}</bundle>
     </feature>
 
 </features>

@@ -55,6 +55,16 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.oce.connector</groupId>
+                <artifactId>impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.connector</groupId>
+                <artifactId>shell</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j-api.version}</version>

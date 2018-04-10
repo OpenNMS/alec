@@ -1,10 +1,25 @@
 package org.opennms.oce.drools.engine.sample;
 
 import org.opennms.oce.connector.api.Alarm
+import org.opennms.oce.drools.model.Card
+import org.opennms.oce.drools.model.Device
+import org.opennms.oce.drools.model.Port
+import java.util.List
 
-rule "CanDrink"
+rule "CardDown"
 when
-    a: Alarm()
+    $card : Card(ports != null, ports.size > 0)
+    List(size >= $card.ports.size * 0.6) from collect (Port(failed == true) from $card.ports)
 then
-	a.getReductionKey();
+    // Card has failed!
+    $card.setFailed(true);
+end
+
+rule "CardRecovered"
+when
+    $card : Card(ports != null, ports.size > 0)
+    List(size < $card.ports.size * 0.6) from collect (Port(failed == true) from $card.ports)
+then
+    // Card has recovered!
+    $card.setFailed(false);
 end

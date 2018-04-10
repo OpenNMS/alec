@@ -28,10 +28,18 @@
 
 package org.opennms.oce.drools.engine;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.FactHandle;
+import org.opennms.oce.drools.model.Card;
+import org.opennms.oce.drools.model.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +48,9 @@ public class DroolsEngine {
     private static final Logger LOG = LoggerFactory.getLogger(DroolsEngine.class);
 
     private KieSession kieSession;
+
+    private List<Device> devices = new ArrayList<>();
+    private Map<String, FactHandle> idToFact = new HashMap<>();
 
     public void init() {
         try {
@@ -61,8 +72,22 @@ public class DroolsEngine {
         }
     }
 
+    public void addDevice(Device device) {
+        // Add all of the cards
+        devices.add(device);
+        for (Card card : device.getCards()) {
+            FactHandle factHandle = kieSession.insert(card);
+            idToFact.put(card.getId(), factHandle);
+        }
+    }
+
     public void correlate() {
-        kieSession.insert("hello");
+        for (Device device : devices) {
+            for (Card card : device.getCards()) {
+                FactHandle factHandle = idToFact.get(card.getId());
+                kieSession.update(factHandle, card);
+            }
+        }
         kieSession.fireAllRules();
     }
 }

@@ -59,8 +59,8 @@
 
     <dependencies>
        <dependency>
-         <groupId>org.opennms.oce</groupId>
-         <artifactId>oce-api</artifactId>
+         <groupId>org.opennms.oce.connector</groupId>
+         <artifactId>api</artifactId>
        </dependency>
     </dependencies>
 </project>

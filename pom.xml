@@ -38,6 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+	<drools.version>7.7.0.Final</drools.version>
         <guava.version>19.0</guava.version>
         <java.version>1.8</java.version>
 	<junit.version>4.12</junit.version>

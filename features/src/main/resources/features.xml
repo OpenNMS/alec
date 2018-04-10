@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="oce-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
+    <repository>mvn:org.kie/kie-karaf-features/${drools.version}/xml/features</repository>
+
     <feature name="oce" description="OpenNMS Correlation Engine" version="${project.version}">
+        <feature version="${drools.version}">drools-common</feature>
 	<bundle>mvn:org.opennms.oce/oce-api/${project.version}</bundle>
     </feature>
 

@@ -26,6 +26,7 @@ In the Karaf shell, point to your Kafka instance:
 ```
 config:edit org.opennms.oce.connector.client.kafka.streams
 config:property-set bootstrap.servers 127.0.0.1:9092
+config:property-set commit.interval.ms 5000
 config:update
 ```
 

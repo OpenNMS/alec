@@ -26,44 +26,37 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.impl;
+package org.opennms.oce.connector.shell;
 
-import java.util.Objects;
+import java.util.List;
 
-import org.opennms.oce.connector.model.Alarm;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.connector.api.ModelProvider;
+import org.opennms.oce.connector.model.Card;
+import org.opennms.oce.connector.model.Device;
+import org.opennms.oce.connector.model.Port;
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
-
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
-    }
+@Command(scope = "oce", name = "devices", description="Devices!")
+@Service
+public class DeviceList implements Action {
+    @Reference
+    private ModelProvider modelProvider;
 
     @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
+    public Object execute() throws Exception {
+        final List<Device> devices = modelProvider.getDevices();
+        for (Device device : devices) {
+            System.out.println(device);
+            for (Card card : device.getCards()) {
+                System.out.println("\t" + card);
+                for (Port port : card.getPorts()) {
+                    System.out.println("\t\t" + port);
+                }
+            }
         }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
-    }
-
-    @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+        return devices;
     }
 }

@@ -26,44 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.impl;
+package org.opennms.oce.connector.model;
 
 import java.util.Objects;
 
-import org.opennms.oce.connector.model.Alarm;
+public class Event {
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+    public static final String TRIGGER_UEI = "uei.opennms.org/alarms/trigger";
+    public static final String CLEAR_UEI = "uei.opennms.org/alarms/clear";
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
+    final String uei;
+    final String service;
+
+    public Event(String uei, String service) {
+        this.uei = Objects.requireNonNull(uei);
+        this.service = Objects.requireNonNull(service);
     }
 
-    @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
-        }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
+    public String getUei() {
+        return uei;
     }
 
-    @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
+    public String getService() {
+        return service;
     }
 
     @Override
     public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+        return String.format("Event[uei=%s, service=%s]", uei, service);
     }
 }

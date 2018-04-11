@@ -26,37 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.drools.model;
+package org.opennms.oce.connector.api;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opennms.oce.connector.model.Alarm;
 
-public class Device {
-    private String id;
-    private boolean failed;
-    private List<Card> cards = new ArrayList<>();
+public interface AlarmHandler {
 
-    public String getId() {
-        return id;
-    }
+    void onAlarmCreatedOrUpdated(Alarm alarm);
+    void onAlarmCleared(Alarm alarm);
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
-    }
-
-    public boolean isFailed() {
-        return failed;
-    }
-
-    public void setFailed(boolean failed) {
-        this.failed = failed;
-    }
 }

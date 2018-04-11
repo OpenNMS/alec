@@ -14,6 +14,11 @@
         <bundle>mvn:org.opennms.oce.connector/impl/${project.version}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle>mvn:org.opennms.oce.connector/shell/${project.version}</bundle>
+
+        <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
+        <bundle>wrap:mvn:com.squareup.okhttp3/logging-interceptor/${okhttp.version}</bundle>
+        <bundle>wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
     </feature>
 
     <feature name="oce-drools-engine" description="OCE :: Drools Engine" version="${project.version}">

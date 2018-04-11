@@ -26,30 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.drools.model;
+package org.opennms.oce.connector.api;
 
-public class Port {
-    private boolean failed;
-    private String id;
+import java.util.List;
 
-    public boolean isFailed() {
-        return failed;
-    }
+import org.opennms.oce.connector.model.Device;
 
-    public void setFailed(boolean failed) {
-        this.failed = failed;
-    }
+public interface ModelProvider {
 
-    public String getId() {
-        return id;
-    }
+    List<Device> getDevices();
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Port[id=%s, failed=%s]", id, failed);
-    }
 }

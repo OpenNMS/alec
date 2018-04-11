@@ -26,8 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.api;
+package org.opennms.oce.connector.model;
 
-public interface Alarm {
-    String getReductionKey();
+import java.util.Objects;
+
+public class Port {
+    private boolean failed;
+    private String id;
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Port port = (Port) o;
+        return failed == port.failed &&
+                Objects.equals(id, port.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(failed, id);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Port[id=%s, failed=%s]", id, failed);
+    }
 }

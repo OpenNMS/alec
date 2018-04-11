@@ -2,6 +2,14 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
-    <bean id="droolsEngine" class="org.opennms.oce.drools.engine.DroolsEngine" init-method="init" />
+    <reference id="modelProvider" interface="org.opennms.oce.connector.api.ModelProvider"/>
+    <reference id="alarmRepository" interface="org.opennms.oce.connector.api.AlarmRepository"/>
+    <reference id="eventForwarder" interface="org.opennms.oce.connector.api.EventForwarder"/>
+
+    <bean id="droolsEngine" class="org.opennms.oce.drools.engine.DroolsEngine" init-method="init" >
+        <argument ref="modelProvider"/>
+        <argument ref="alarmRepository"/>
+        <argument ref="eventForwarder"/>
+    </bean>
 
 </blueprint>

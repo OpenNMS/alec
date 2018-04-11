@@ -26,43 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.drools.model;
+package org.opennms.oce.connector.api;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opennms.oce.connector.model.Event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public interface EventForwarder {
 
-public class Card {
-    private static final Logger LOG = LoggerFactory.getLogger(Card.class);
+    void sendNow(Event event);
 
-    private String id;
-    private boolean failed;
-    private List<Port> ports = new ArrayList<>();
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public List<Port> getPorts() {
-        return ports;
-    }
-
-    public void setPorts(List<Port> ports) {
-        this.ports = ports;
-    }
-
-    public boolean isFailed() {
-        return failed;
-    }
-
-    public void setFailed(boolean failed) {
-        LOG.warn("Card {} changed state from {} to {}.", id, this.failed, failed);
-        this.failed = failed;
-    }
 }

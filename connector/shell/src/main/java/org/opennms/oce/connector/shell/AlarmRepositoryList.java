@@ -34,7 +34,7 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.connector.api.Alarm;
+import org.opennms.oce.connector.model.Alarm;
 import org.opennms.oce.connector.api.AlarmRepository;
 
 @Command(scope = "oce", name = "alarms", description="Alarms!")

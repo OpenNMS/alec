@@ -26,18 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.api;
+package org.opennms.oce.connector.model;
 
-import java.util.List;
+public interface Alarm {
+    String getRelatedEntityId();
 
-import org.opennms.oce.connector.model.Alarm;
-
-public interface AlarmRepository {
-
-    List<Alarm> getAlarms();
-
-    void registerHandler(AlarmHandler handler);
-
-    void unregisterHandler(AlarmHandler handler);
-
+    String getReductionKey();
 }

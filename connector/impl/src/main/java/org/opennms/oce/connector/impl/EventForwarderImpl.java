@@ -30,40 +30,27 @@ package org.opennms.oce.connector.impl;
 
 import java.util.Objects;
 
-import org.opennms.oce.connector.model.Alarm;
+import org.opennms.oce.connector.api.EventForwarder;
+import org.opennms.oce.connector.model.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+public class EventForwarderImpl implements EventForwarder {
+    private static final Logger LOG = LoggerFactory.getLogger(EventForwarderImpl.class);
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
+    private final OpennmsRestClient restClient;
+
+    public EventForwarderImpl(OpennmsRestClient restClient) {
+        this.restClient = Objects.requireNonNull(restClient);
     }
 
     @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
+    public void sendNow(Event event) {
+        LOG.info("Sending event {}.", event);
+        try {
+            restClient.sendEvent(event);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
-    }
-
-    @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
     }
 }

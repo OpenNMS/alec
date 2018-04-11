@@ -26,44 +26,44 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.impl;
+package org.opennms.oce.droosl.engine;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.opennms.oce.connector.api.AlarmHandler;
+import org.opennms.oce.connector.api.AlarmRepository;
 import org.opennms.oce.connector.model.Alarm;
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+public class MockAlarmRepository implements AlarmRepository {
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
+    private final Set<AlarmHandler> handlers = new HashSet<>();
+    private final List<Alarm> alarms = new ArrayList<>();
+
+    @Override
+    public List<Alarm> getAlarms() {
+        return alarms;
     }
 
     @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
-        }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
+    public void registerHandler(AlarmHandler handler) {
+        handlers.add(handler);
     }
 
     @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
+    public void unregisterHandler(AlarmHandler handler) {
+        handlers.remove(handler);
     }
 
-    @Override
-    public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+    void triggerAlarm(Alarm alarm) {
+        alarms.add(alarm);
+        handlers.forEach(h -> h.onAlarmCreatedOrUpdated(alarm));
+    }
+
+    void clearAlarm(Alarm alarm) {
+        alarms.remove(alarm);
+        handlers.forEach(h -> h.onAlarmCleared(alarm));
     }
 }

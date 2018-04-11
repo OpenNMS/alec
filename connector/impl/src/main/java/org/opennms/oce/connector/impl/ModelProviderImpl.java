@@ -28,42 +28,41 @@
 
 package org.opennms.oce.connector.impl;
 
-import java.util.Objects;
+import java.util.Collections;
+import java.util.List;
 
-import org.opennms.oce.connector.model.Alarm;
+import org.opennms.oce.connector.api.ModelProvider;
+import org.opennms.oce.connector.model.Card;
+import org.opennms.oce.connector.model.Device;
+import org.opennms.oce.connector.model.Port;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+public class ModelProviderImpl implements ModelProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(ModelProviderImpl.class);
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
-    }
+    private final List<Device> devices;
 
-    @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
+    public ModelProviderImpl() {
+        final int N_CARDS = 2;
+        final int N_PORTS = 4;
+        final Device device = new Device();
+        device.setId("n1");
+        for (int i = 1; i <= N_CARDS; i++) {
+            Card card = new Card();
+            card.setId(String.format("%s-c%d", device.getId(), i));
+            device.getCards().add(card);
+            for (int j = 1; j <= N_PORTS; j++) {
+                Port port = new Port();
+                port.setId(String.format("%s-p%d", card.getId(), j));
+                card.getPorts().add(port);
+            }
         }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
+        devices = Collections.singletonList(device);
     }
 
     @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+    public List<Device> getDevices() {
+        return devices;
     }
 }

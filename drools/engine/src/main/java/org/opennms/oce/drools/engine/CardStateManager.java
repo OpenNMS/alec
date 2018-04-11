@@ -26,44 +26,37 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.impl;
+package org.opennms.oce.drools.engine;
 
 import java.util.Objects;
 
-import org.opennms.oce.connector.model.Alarm;
+import org.opennms.oce.connector.api.EventForwarder;
+import org.opennms.oce.connector.model.Card;
+import org.opennms.oce.connector.model.Event;
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+public class CardStateManager {
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
+    private final EventForwarder eventForwarder;
+
+    public CardStateManager(EventForwarder eventForwarder) {
+        this.eventForwarder = Objects.requireNonNull(eventForwarder);
     }
 
-    @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
+    public void fail(Card card) {
+        if (card.isFailed()) {
+            // Nothing to do
+            return;
         }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
+        card.setFailed(true);
+        eventForwarder.sendNow(new Event(Event.TRIGGER_UEI,  card.getId()));
+    }
+
+    public void recover(Card card) {
+        if (!card.isFailed()) {
+            // Nothing to do
+            return;
         }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
-    }
-
-    @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+        card.setFailed(false);
+        eventForwarder.sendNow(new Event(Event.CLEAR_UEI, card.getId()));
     }
 }

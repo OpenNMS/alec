@@ -26,44 +26,59 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.connector.impl;
+package org.opennms.oce.connector.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-import org.opennms.oce.connector.model.Alarm;
+public class Device {
+    private String id;
+    private boolean failed;
+    private List<Card> cards = new ArrayList<>();
 
-public class AlarmImpl implements Alarm {
-    private final OpennmsModelProtos.Alarm alarm;
+    public String getId() {
+        return id;
+    }
 
-    public AlarmImpl(OpennmsModelProtos.Alarm alarm) {
-        this.alarm = Objects.requireNonNull(alarm);
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
+    }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
     }
 
     @Override
-    public String getRelatedEntityId() {
-        Long nodeId = null;
-        if (alarm.hasNodeCriteria()) {
-            nodeId = alarm.getNodeCriteria().getId();
-        }
-        Integer ifIndex = null;
-        if (alarm.hasLastEvent()) {
-             for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                 if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                     ifIndex = Integer.parseInt(eventParm.getValue());
-                 }
-             }
-        }
-        return String.format("n%d-c1-p%d", nodeId, ifIndex);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Device device = (Device) o;
+        return failed == device.failed &&
+                Objects.equals(id, device.id) &&
+                Objects.equals(cards, device.cards);
     }
 
     @Override
-    public String getReductionKey() {
-        return alarm.getReductionKey();
+    public int hashCode() {
+        return Objects.hash(id, failed, cards);
     }
 
     @Override
     public String toString() {
-        return String.format("Alarm[reduction-key=%s, related-entity-id=%s]",
-                getReductionKey(), getRelatedEntityId());
+        return String.format("Device[id=%s, num-cards=%d, failed=%s]",
+                id, cards == null ? 0 : cards.size(), failed);
     }
 }

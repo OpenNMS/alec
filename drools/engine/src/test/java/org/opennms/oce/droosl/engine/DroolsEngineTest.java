@@ -37,6 +37,8 @@ import org.opennms.oce.drools.model.Card;
 import org.opennms.oce.drools.model.Device;
 import org.opennms.oce.drools.model.Port;
 
+import java.util.function.Consumer;
+
 public class DroolsEngineTest {
 
     @Test
@@ -88,13 +90,20 @@ public class DroolsEngineTest {
         assertThat(c1.isFailed(), equalTo(true));
         assertThat(c2.isFailed(), equalTo(false));
 
-//        // FIXME: Broken
-//        // Recover P5
-//        p5.setFailed(false);
-//        droolsEngine.correlate();
-//        assertThat(c1.isFailed(), equalTo(false));
-//        assertThat(c2.isFailed(), equalTo(false));
+        // Recover P5
+        p5.setFailed(false);
+        droolsEngine.correlate();
+        assertThat(c1.isFailed(), equalTo(false));
+        assertThat(c2.isFailed(), equalTo(false));
 
         droolsEngine.destroy();
+    }
+
+    private static void walkPorts(Device device, Consumer<Port> callback) {
+        for (Card card : device.getCards()) {
+            for (Port port : card.getPorts()) {
+                callback.accept(port);
+            }
+         }
     }
 }

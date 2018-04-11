@@ -82,10 +82,13 @@ public class DroolsEngine {
     }
 
     public void correlate() {
+        // FIXME: Wrong and inneficient
         for (Device device : devices) {
             for (Card card : device.getCards()) {
                 FactHandle factHandle = idToFact.get(card.getId());
-                kieSession.update(factHandle, card);
+                kieSession.delete(factHandle);
+                factHandle = kieSession.insert(card);
+                idToFact.put(card.getId(), factHandle);
             }
         }
         kieSession.fireAllRules();

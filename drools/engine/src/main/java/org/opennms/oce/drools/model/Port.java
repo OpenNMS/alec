@@ -47,4 +47,9 @@ public class Port {
     public void setId(String id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Port[id=%s, failed=%s]", id, failed);
+    }
 }

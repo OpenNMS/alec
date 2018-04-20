@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.Consumed;
@@ -110,7 +111,15 @@ public class AlarmRepositoryImpl implements AlarmRepository {
         try {
             streams.start();
         } catch (StreamsException | IllegalStateException e) {
-            LOG.error("Stream did not start succesfully.", e);
+            LOG.error("Stream did not start successfully.", e);
+        }
+    }
+
+    public void destroy() {
+        if (streams != null) {
+            if (!streams.close(1, TimeUnit.MINUTES)) {
+                LOG.error("Stream failed to close in 1 minute.");
+            }
         }
     }
 

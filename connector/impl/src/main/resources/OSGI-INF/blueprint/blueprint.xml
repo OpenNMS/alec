@@ -15,7 +15,7 @@
     </cm:property-placeholder>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
-    <bean id="alarmRepository" class="org.opennms.oce.connector.impl.AlarmRepositoryImpl" init-method="init">
+    <bean id="alarmRepository" class="org.opennms.oce.connector.impl.AlarmRepositoryImpl" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
         <property name="eventTopic" value="${eventTopic}"/>
         <property name="alarmTopic" value="${alarmTopic}"/>

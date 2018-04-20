@@ -28,11 +28,14 @@
 
 package org.opennms.oce.drools.engine;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.connector.api.EventForwarder;
 import org.opennms.oce.connector.model.Card;
 import org.opennms.oce.connector.model.Event;
+import org.opennms.oce.connector.model.Port;
 
 public class CardStateManager {
 
@@ -47,8 +50,12 @@ public class CardStateManager {
             // Nothing to do
             return;
         }
+        List<String> associatedReductionKeys = card.getPorts().stream()
+                .filter(Port::isFailed)
+                .map(p -> p.getAlarm().getReductionKey())
+                .collect(Collectors.toList());
         card.setFailed(true);
-        eventForwarder.sendNow(new Event(Event.TRIGGER_UEI,  card.getId()));
+        eventForwarder.sendNow(new Event(Event.TRIGGER_UEI,  card.getId(), associatedReductionKeys));
     }
 
     public void recover(Card card) {

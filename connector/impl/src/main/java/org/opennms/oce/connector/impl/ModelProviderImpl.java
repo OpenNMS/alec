@@ -44,17 +44,18 @@ public class ModelProviderImpl implements ModelProvider {
     private final List<Device> devices;
 
     public ModelProviderImpl() {
-        final int N_CARDS = 2;
-        final int N_PORTS = 4;
+        final int N_CARDS = 4;
+        final int N_PORTS = 8;
         final Device device = new Device();
-        device.setId("n1");
+        device.setId("n0");
+        int ifIndex = 1;
         for (int i = 1; i <= N_CARDS; i++) {
             Card card = new Card();
             card.setId(String.format("%s-c%d", device.getId(), i));
             device.getCards().add(card);
             for (int j = 1; j <= N_PORTS; j++) {
                 Port port = new Port();
-                port.setId(String.format("%s-p%d", card.getId(), j));
+                port.setId(String.format("%s-p%d", card.getId(), ifIndex++));
                 card.getPorts().add(port);
             }
         }

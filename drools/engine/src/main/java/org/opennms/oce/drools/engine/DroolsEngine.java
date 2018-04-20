@@ -88,6 +88,7 @@ public class DroolsEngine implements AlarmHandler {
             }
 
             alarmRepository.getAlarms().forEach(this::onAlarmCreatedOrUpdated);
+            // FIXME: Race condition
             alarmRepository.registerHandler(this);
         } catch (Exception e) {
             LOG.error("Failed to start KieSession.", e);
@@ -118,7 +119,7 @@ public class DroolsEngine implements AlarmHandler {
             // Already failed, nothing to do
             return;
         }
-        port.setFailed(true);
+        port.setAlarm(alarm);
         updateFactFor(getMatchingCardForAlarm(alarm));
     }
 
@@ -133,7 +134,7 @@ public class DroolsEngine implements AlarmHandler {
             // Already cleared, nothing to do
             return;
         }
-        port.setFailed(false);
+        port.setAlarm(null);
         updateFactFor(getMatchingCardForAlarm(alarm));
     }
 

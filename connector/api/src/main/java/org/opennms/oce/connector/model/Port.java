@@ -31,17 +31,21 @@ package org.opennms.oce.connector.model;
 import java.util.Objects;
 
 public class Port {
-    private boolean failed;
+    private Alarm alarm;
+
+    public Alarm getAlarm() {
+        return alarm;
+    }
+
+    public void setAlarm(Alarm alarm) {
+        this.alarm = alarm;
+    }
+
     private String id;
 
     public boolean isFailed() {
-        return failed;
+        return alarm != null;
     }
-
-    public void setFailed(boolean failed) {
-        this.failed = failed;
-    }
-
     public String getId() {
         return id;
     }
@@ -55,17 +59,18 @@ public class Port {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Port port = (Port) o;
-        return failed == port.failed &&
+        return Objects.equals(alarm, port.alarm) &&
                 Objects.equals(id, port.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(failed, id);
+
+        return Objects.hash(alarm, id);
     }
 
     @Override
     public String toString() {
-        return String.format("Port[id=%s, failed=%s]", id, failed);
+        return String.format("Port[id=%s, alarm=%s]", id, alarm);
     }
 }

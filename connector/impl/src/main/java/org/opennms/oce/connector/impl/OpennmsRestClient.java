@@ -102,8 +102,16 @@ public class OpennmsRestClient {
                 "    <parm>\n" +
                 "     <parmName><![CDATA[service]]></parmName>\n" +
                 "     <value type=\"string\" encoding=\"text\"><![CDATA[" + event.getService() + "]]></value>\n" +
-                "    </parm>\n" +
-                "   </parms>\n" +
+                "    </parm>\n";
+        if (!event.getAssociatedReductionKeys().isEmpty()) {
+            xml = xml + "    <parm>\n" +
+                    "     <parmName><![CDATA[impacts]]></parmName>\n" +
+                    "     <value type=\"string\" encoding=\"text\"><![CDATA[";
+            Gson g = new Gson();
+            xml = xml + g.toJson(event.getAssociatedReductionKeys());
+            xml = xml + "]]></value>\n" + "    </parm>\n";
+        }
+        xml  = xml + "   </parms>\n" +
                 "   <severity>Critical</severity>\n" +
                 "  </event>\n";
         final HttpUrl url = baseUrl.newBuilder()

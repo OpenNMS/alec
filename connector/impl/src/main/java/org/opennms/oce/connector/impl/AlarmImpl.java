@@ -53,7 +53,7 @@ public class AlarmImpl implements Alarm {
                  }
              }
         }
-        return String.format("n%d-c%d-p%d", nodeId != null ? nodeId : 0, Math.floorDiv(ifIndex-1, ModelProviderImpl.N_PORTS) + 1, ifIndex);
+        return String.format("n%d-c%d-p%d", nodeId != null ? nodeId : 0, ifIndex != null ? Math.floorDiv(ifIndex-1, ModelProviderImpl.N_PORTS) + 1 : 0, ifIndex != null ? ifIndex : 0);
     }
 
     @Override

@@ -30,6 +30,15 @@ config:property-set commit.interval.ms 5000
 config:update
 ```
 
+Now, point to your OpenNMS instance:
+```
+config:edit org.opennms.oce.connector.client
+config:property-set url http://127.0.0.1:8980/opennms
+config:property-set username admin
+config:property-set password admin
+config:update
+```
+
 From a shell, add the features repository, and install the feature:
 ```
 feature:repo-add mvn:org.opennms.oce/oce-features/1.0.0-SNAPSHOT/xml

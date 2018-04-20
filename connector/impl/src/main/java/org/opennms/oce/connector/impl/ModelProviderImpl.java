@@ -41,11 +41,12 @@ import org.slf4j.LoggerFactory;
 public class ModelProviderImpl implements ModelProvider {
     private static final Logger LOG = LoggerFactory.getLogger(ModelProviderImpl.class);
 
+    final static int N_CARDS = 4;
+    final static int N_PORTS = 8;
+
     private final List<Device> devices;
 
     public ModelProviderImpl() {
-        final int N_CARDS = 4;
-        final int N_PORTS = 8;
         final Device device = new Device();
         device.setId("n0");
         int ifIndex = 1;

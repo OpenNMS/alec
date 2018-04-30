@@ -30,23 +30,24 @@ package org.opennms.oce.model.shell;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.api.ModelObject;
 
 @Command(scope = "oce", name = "displayModel", description="Display the topology model")
 @Service
 public class DisplayModel implements Action {
     @Reference
-    private Model model;
+    private ModelBuilder builder;
 
     @Override
     public Object execute() throws Exception {
+        Model model = builder.buildModel();
         for (String type : model.getTypes()) {
             System.out.println("(TYPE :: " + type + ")");
             final Map<String, ModelObject> objects = model.getObjectsByIdForType(type);

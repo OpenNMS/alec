@@ -34,19 +34,21 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.api.ModelObject;
 
 @Command(scope = "oce", name = "modelObjectById", description="Model Object Listing by Id")
 @Service
 public class GetObject implements Action {
     @Reference
-    private Model model;
+    private ModelBuilder builder;
 
     @Argument(index = 0, name = "id", description = "This is ID for the modelObject", required = true, multiValued = false)
     private String id;
 
     @Override
     public Object execute() throws Exception {
+        Model model = builder.buildModel();
         final ModelObject modelObject = model.getObjectById(id);
         if (modelObject == null) {
             System.out.println("(No modelObject for id: " + id + ")");

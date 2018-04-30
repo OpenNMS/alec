@@ -37,19 +37,21 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.api.ModelObject;
 
 @Command(scope = "oce", name = "modelObjectByType", description="Model Objects Listing by Type")
 @Service
 public class ObjectList implements Action {
     @Reference
-    private Model model;
+    private ModelBuilder builder;
 
     @Argument(index = 0, name = "type", description = "This is the Model type to enumerate", required = true, multiValued = false) 
     String type; 
     
     @Override
     public Object execute() throws Exception {
+        Model model = builder.buildModel();
         final Map<String, ModelObject> objects = model.getObjectsByIdForType(type);
         if (objects == null || objects.size() < 1) {
             System.out.println("(No objects for type " + type + ")");

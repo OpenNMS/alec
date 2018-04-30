@@ -95,7 +95,7 @@ public class OpennmsRestClient {
 
     void sendEvent(Event event) throws Exception {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
-        String xml = "<event >                          \n" +
+        String xml = "<event>\n" +
                 "   <uei>"+ event.getUei() + "</uei>\n" +
                 "   <source>oce</source> \n" +
                 "   <parms>\n" +

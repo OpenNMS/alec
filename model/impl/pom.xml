@@ -5,12 +5,17 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.connector</groupId>
-    <artifactId>api</artifactId>
-    <name>OCE :: Connector :: API</name>
+    <groupId>org.opennms.oce.model</groupId>
+    <artifactId>impl</artifactId>
+    <name>OCE :: Model :: Impl.</name>
     <packaging>bundle</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>org.opennms.oce.model</groupId>
+            <artifactId>api</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -18,7 +23,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-	    <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

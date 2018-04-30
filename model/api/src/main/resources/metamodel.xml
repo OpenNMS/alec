@@ -1,0 +1,7 @@
+<meta-model>
+    <model-object-def type="Model" special="true" do-not-delete="me"/>
+    <model-object-def type="Device"/>
+    <model-object-def type="Card"/>
+    <model-object-def type="Port"/>
+    <model-object-def type="Link"/>
+</meta-model>

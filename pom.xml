@@ -33,6 +33,7 @@
         <module>connector</module>
         <module>drools</module>
         <module>features</module>
+        <module>model</module>
     </modules>
 
     <properties>

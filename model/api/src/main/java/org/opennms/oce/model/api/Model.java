@@ -31,7 +31,7 @@ package org.opennms.oce.model.api;
 import java.util.Map;
 import java.util.Set;
 
-public interface TopologyModel {
+public interface Model {
 
     ModelObject getObjectById(String id);
 

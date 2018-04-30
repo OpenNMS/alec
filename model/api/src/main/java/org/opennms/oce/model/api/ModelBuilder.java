@@ -30,6 +30,6 @@ package org.opennms.oce.model.api;
 
 public interface ModelBuilder {
 
-    TopologyModel buildModel();
+    Model buildModel();
 
 }

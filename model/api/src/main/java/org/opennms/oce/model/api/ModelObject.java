@@ -35,10 +35,14 @@ public interface ModelObject {
      */
     String getType();
 
+    void setType(String type);
+
     /**
      * nullable
      */
     String getSubType();
+
+    void setSubType(String subType);
 
     /**
      * non-null
@@ -48,9 +52,13 @@ public interface ModelObject {
      */
     String uniqueId();
 
+    void setUniqueId(String uniqueId);
+
     /**
      * nullable
      */
     String friendlyName();
+
+    void setFriendlyName(String friendlyName);
 
 }

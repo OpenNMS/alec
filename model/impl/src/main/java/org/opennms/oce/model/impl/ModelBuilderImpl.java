@@ -1,7 +1,6 @@
 package org.opennms.oce.model.impl;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -9,7 +8,9 @@ import javax.xml.bind.Unmarshaller;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.impl.MetaModel;
+import org.opennms.oce.model.api.ModelObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /*******************************************************************************
@@ -41,28 +42,32 @@ import org.opennms.oce.model.impl.MetaModel;
  *******************************************************************************/
 
 public class ModelBuilderImpl implements ModelBuilder {
+    private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
+
     @Override
     public Model buildModel()  {
 
         Model model = ModelImpl.getInstance();
-
+        LOG.info("buildModel: enter");
         //something very simple for a while
         try {
-            FileInputStream adrFile = new FileInputStream("metamodel");
-
+            //FileInputStream file = new FileInputStream("metamodel");
+            File file = new File("metamodel.xml");
             JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller um = ctx.createUnmarshaller();
-            MetaModel rootElement = (MetaModel) um.unmarshal(adrFile);
-            System.out.println("Hello World from Model Builder");
+            MetaModel rootElement = (MetaModel) um.unmarshal(file);
+
+            ModelObject mo = new ModelObjectImpl();
+
+            mo.setType(rootElement.getModelObjectList().get(0));
+            mo.setFriendlyName("Just dummy name");
+
+            LOG.info("Hello World from Model Builder");
         }
         catch(JAXBException e ) {
-            //TODO handle exception here
-            System.out.println("Model builder:" + e.getMessage());
+            LOG.error("Model builder has issues with jaxb: ", e);
         }
-        catch(FileNotFoundException f) {
-            //TODO handle exception here
-            System.out.println("Model builder:" + f.getMessage());
-        }
+
         return model;
 
     }

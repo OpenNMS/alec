@@ -39,13 +39,13 @@ public class MetaModel {
     @XmlElementWrapper(name = "meta-model")
     // XmlElement sets the name of the entities
     @XmlElement(name = "model-object-def")
-    private ArrayList<ModelObjectImpl> modelObjectList;
+    private ArrayList<String> modelObjectList;
 
-    public void setModelObjectList(ArrayList<ModelObjectImpl> modelObjectList) {
+    public void setModelObjectList(ArrayList<String> modelObjectList) {
         this.modelObjectList = modelObjectList;
     }
 
-    public ArrayList<ModelObjectImpl> getModelObjectList() {
+    public ArrayList<String> getModelObjectList() {
         return modelObjectList;
     }
 }

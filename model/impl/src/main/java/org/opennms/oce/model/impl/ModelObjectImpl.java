@@ -31,20 +31,31 @@ import org.opennms.oce.model.api.ModelObject;
  *******************************************************************************/
 
 public class ModelObjectImpl implements ModelObject {
+    private String type;
+    private String subType;
+    private String uniqueId;
+    private String friendlyName;
     /**
      * non-null
      */
     public String getType() {
-        return null;
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     /**
      * nullable
      */
     public String getSubType(){
-        return null;
+        return subType;
     }
 
+    public void setSubType(String subType) {
+
+    }
     /**
      * non-null
      *
@@ -52,13 +63,21 @@ public class ModelObjectImpl implements ModelObject {
      * @return uuid
      */
     public String uniqueId(){
-        return null;
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
     /**
      * nullable
      */
     public String friendlyName(){
-        return null;
+        return friendlyName;
+    }
+
+    public void setFriendlyName(String friendlyName) {
+        this.friendlyName = friendlyName;
     }
 }

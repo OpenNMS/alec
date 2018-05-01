@@ -82,22 +82,17 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.model</groupId>
+                <artifactId>impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.model</groupId>
                 <artifactId>shell</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.drools</groupId>
                 <artifactId>engine</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opennms.oce.model</groupId>
-                <artifactId>api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opennms.oce.model</groupId>
-                <artifactId>impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

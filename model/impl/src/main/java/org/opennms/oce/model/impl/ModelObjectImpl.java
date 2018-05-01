@@ -1,3 +1,5 @@
+package org.opennms.oce.model.impl;
+
 import org.opennms.oce.model.api.ModelObject;
 
 /*******************************************************************************

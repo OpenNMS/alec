@@ -1,10 +1,4 @@
-import java.util.Map;
-import java.util.Set;
-
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
-
-/*******************************************************************************
+package org.opennms.oce.model.impl; /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
  * Copyright (C) 2018 The OpenNMS Group, Inc.
@@ -32,25 +26,26 @@ import org.opennms.oce.model.api.ModelObject;
  *     http://www.opennms.com/
  *******************************************************************************/
 
-public class TopologyModel implements Model {
-    @Override
-    public ModelObject getObjectById(String id) {
+import java.util.ArrayList;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
-        return null;
+//This statement means that class "org.opennms.oce.model.impl.MetaModel.java" is the root-element
+@XmlRootElement
+public class MetaModel {
+
+    // XmLElementWrapper generates a wrapper element around XML representation
+    @XmlElementWrapper(name = "meta-model")
+    // XmlElement sets the name of the entities
+    @XmlElement(name = "model-object-def")
+    private ArrayList<ModelObjectImpl> modelObjectList;
+
+    public void setModelObjectList(ArrayList<ModelObjectImpl> modelObjectList) {
+        this.modelObjectList = modelObjectList;
     }
 
-    /**
-     * If type does not exist, return null
-     */
-    @Override
-    public Map<String, ModelObject> getObjectsByIdForType(String type) {
-
-        return null;
-    }
-
-    @Override
-    public Set<String> getTypes() {
-
-        return null;
+    public ArrayList<ModelObjectImpl> getModelObjectList() {
+        return modelObjectList;
     }
 }

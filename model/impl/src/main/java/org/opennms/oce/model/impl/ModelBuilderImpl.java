@@ -1,13 +1,16 @@
-import java.io.File;
+package org.opennms.oce.model.impl;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.opennms.oce.model.impl.MetaModel;
+
 
 /*******************************************************************************
  * This file is part of OpenNMS(R).
@@ -39,30 +42,28 @@ import org.w3c.dom.NodeList;
 
 public class ModelBuilderImpl implements ModelBuilder {
     @Override
-    public Model buildModel() {
+    public Model buildModel()  {
+
+        Model model = ModelImpl.getInstance();
 
         //something very simple for a while
         try {
+            FileInputStream adrFile = new FileInputStream("metamodel");
 
-            File fXmlFile = new File("metamodel.xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
-
-            doc.getDocumentElement().normalize();
-
-            NodeList nList = doc.getElementsByTagName("model-object-def");
-
-            for (int temp = 0; temp < nList.getLength(); temp++) {
-
-                Node nNode = nList.item(temp);
-
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
+            Unmarshaller um = ctx.createUnmarshaller();
+            MetaModel rootElement = (MetaModel) um.unmarshal(adrFile);
+            System.out.println("Hello World from Model Builder");
         }
-        return new TopologyModel();
+        catch(JAXBException e ) {
+            //TODO handle exception here
+            System.out.println("Model builder:" + e.getMessage());
+        }
+        catch(FileNotFoundException f) {
+            //TODO handle exception here
+            System.out.println("Model builder:" + f.getMessage());
+        }
+        return model;
 
     }
 }

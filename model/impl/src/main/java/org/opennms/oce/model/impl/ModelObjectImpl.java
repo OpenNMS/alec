@@ -1,5 +1,7 @@
 package org.opennms.oce.model.impl;
 
+import java.util.Set;
+
 import org.opennms.oce.model.api.ModelObject;
 
 /*******************************************************************************
@@ -35,6 +37,9 @@ public class ModelObjectImpl implements ModelObject {
     private String subType;
     private String uniqueId;
     private String friendlyName;
+    private ModelObject parent;
+    private Set<ModelObject> children;
+    
     /**
      * non-null
      */
@@ -79,5 +84,15 @@ public class ModelObjectImpl implements ModelObject {
 
     public void setFriendlyName(String friendlyName) {
         this.friendlyName = friendlyName;
+    }
+
+    @Override
+    public ModelObject getParent() {
+        return parent;
+    }
+
+    @Override
+    public Set<ModelObject> getChildren() {
+        return children;
     }
 }

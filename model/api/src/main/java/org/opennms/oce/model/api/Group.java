@@ -28,27 +28,23 @@
 
 package org.opennms.oce.model.api;
 
-import java.util.Set;
+public interface Group {
 
-public interface ModelObject {
+    enum Type {
+        CHILDREN,
+        DEPENDS_ON,
+        DEPENDENCY_OF, // UN
+      }
+    
+    ModelObject getOwner();
 
-    ModelObject getParent();
-
-    Set<ModelObject> getChildren();
-
-    /**
-     * non-null
-     */
+    // TODO - create ENUM
     String getType();
-
-    void setType(String type);
-
-    /**
-     * nullable
-     */
-    String getSubType();
-
-    void setSubType(String subType);
+    
+    int getNumberMembers();
+    int getNumberNormalState();
+    int getNumberNonServiceAffecting();
+    int getNumberServiceAffecting();
 
     /**
      * non-null
@@ -56,15 +52,11 @@ public interface ModelObject {
      * A globally unique id
      * @return uuid
      */
-    String uniqueId();
-
-    void setUniqueId(String uniqueId);
+    String getNumber();
 
     /**
      * nullable
      */
     String friendlyName();
-
-    void setFriendlyName(String friendlyName);
 
 }

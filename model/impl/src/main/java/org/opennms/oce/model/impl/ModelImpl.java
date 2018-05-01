@@ -39,6 +39,7 @@ import org.opennms.oce.model.api.ModelObject;
 public class ModelImpl implements Model {
 
     private Map<String, ModelObject> modelMap = new HashMap<>();
+    private ModelObject root;
     private static Model model;
 
     /**
@@ -84,6 +85,11 @@ public class ModelImpl implements Model {
                 byIdForType.put(entry.getKey(), entry.getValue());
         }
         return byIdForType;
+    }
+
+    @Override
+    public ModelObject getRoot() {
+        return root;
     }
 
     @Override

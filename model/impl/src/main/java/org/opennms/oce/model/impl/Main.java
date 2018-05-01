@@ -28,23 +28,9 @@
 
 package org.opennms.oce.model.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
-import org.opennms.oce.model.v1.schema.Inventory;
-import org.opennms.oce.model.v1.schema.MetaModel;
-import org.xml.sax.SAXException;
-
 public class Main {
 
-    public static void main(String[] args) throws JAXBException, SAXException, IOException {
+    /*public static void main(String[] args) throws JAXBException, SAXException, IOException {
         final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final Schema schema = sf.newSchema( Main.class.getResource("/model.xsd"));
 
@@ -65,5 +51,5 @@ public class Main {
             inventory = (Inventory) unmarshaller.unmarshal(is);
         }
         System.out.println(inventory);
-    }
+    }*/
 }

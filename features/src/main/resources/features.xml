@@ -13,6 +13,8 @@
         <bundle>mvn:org.opennms.oce.model/api/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.model/impl/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.model/shell/${project.version}</bundle>
+        <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-tools/0.11.1</bundle>
+        <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-runtime/0.11.1</bundle>
     </feature>
 
     <feature name="oce-connector" description="OCE :: Connector" version="${project.version}">

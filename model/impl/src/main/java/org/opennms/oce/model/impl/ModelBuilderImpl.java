@@ -3,17 +3,19 @@ package org.opennms.oce.model.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.api.ModelObject;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 /*******************************************************************************
@@ -51,29 +53,44 @@ public class ModelBuilderImpl implements ModelBuilder {
     @Override
     public Model buildModel()  {
         ModelImpl model = (ModelImpl)ModelImpl.getInstance();
+
         //something very simple for a while
         try {
-            Bundle bundle = bcontext.getBundle();
+            final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final Schema schema = sf.newSchema( Main.class.getResource("/model.xsd"));
+
+            final MetaModel metaModel;
+            try (InputStream is = bcontext.getBundle().getEntry("/metamodel.xml").openStream()) {
+                final JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
+                final Unmarshaller unmarshaller = ctx.createUnmarshaller();
+                unmarshaller.setSchema(schema);
+                metaModel = (MetaModel) unmarshaller.unmarshal(is);
+            }
+            LOG.info("Meta model : " + metaModel);
+
+
+            /*Bundle bundle = bcontext.getBundle();
             InputStream is = bundle.getEntry("/metamodel.xml").openStream();
 
-            JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
+            JAXBContext ctx = JAXBContext.newInstance(MetaModels.class);
             Unmarshaller um = ctx.createUnmarshaller();
-            MetaModel metaModel = (MetaModel) um.unmarshal(is);
+            MetaModels metaModels = (MetaModels) um.unmarshal(is);
 
-            ModelObject mo = new ModelObjectImpl();
-            //TODO remove debugging garbage
-            LOG.info("real type: " + metaModel.getMetaModelAttributes().get(0).getType());
+            for(MetaModel metaModel :  metaModels.getMetaModels()) {
+                ModelObject mo = new ModelObjectImpl();
+                mo.setType(metaModel.getMetaModelAttributes().get(0).getType());
+                mo.setFriendlyName(metaModel.getMetaModelAttributes().get(0).getType());
 
-            //For a while just to return something
-            mo.setType(metaModel.getMetaModelAttributes().get(0).getType());
-            mo.setFriendlyName("Just dummy name");
+                model.setObjectById(metaModel.getMetaModelAttributes().get(0).getType(), mo);
+                //TODO remove debugging garbage
+                LOG.info(" type: " + mo.getType());
 
-            model.setObjectById("root", mo);
-
-        }
-        catch (IOException e) {
+            }*/
+        } catch (IOException e) {
             LOG.error("Model builder failed: ", e);
-        }catch(JAXBException e ) {
+        } catch (SAXException e) {
+            LOG.error("Model builder failed: ", e);
+        } catch(JAXBException e ) {
             LOG.error("Model builder has issues with jaxb: ", e);
         }
 

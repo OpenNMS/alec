@@ -33,10 +33,25 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-//This statement means that class "org.opennms.oce.model.impl.MetaModel.java" is the root-element
+//This statement means that class "org.opennms.oce.model.impl.MetaModels.java" is the root-element
 @XmlRootElement( name = "meta-model")
-public class MetaModel {
+public class MetaModels {
 
+    private ArrayList<MetaModel> metaModels;
+
+    @XmlElement(name = "model-object-def")
+    public void setMetaModels(ArrayList<MetaModel> metaModels) {
+        this.metaModels = metaModels;
+    }
+
+    public ArrayList<MetaModel> getMetaModels() {
+        return metaModels;
+    }
+
+
+}
+
+class MetaModel {
     private ArrayList<MetaModelAttribute> metaModelAttributes;
 
     @XmlElement(name = "model-object-def")
@@ -47,21 +62,20 @@ public class MetaModel {
     public ArrayList<MetaModelAttribute> getMetaModelAttributes() {
         return metaModelAttributes;
     }
+
+    @XmlType(propOrder = {"type"})
+    @XmlRootElement(name = "model-object-def")
+    class MetaModelAttribute {
+        private String type;
+
+        @XmlAttribute(name = "type", required = true)
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
 }
 
-@XmlType( propOrder = { "type"} )
-@XmlRootElement( name = "model-object-def" )
-class MetaModelAttribute {
-    private String type;
-
-    @XmlAttribute( name = "type", required = true )
-    public void setType( String type )
-    {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-}

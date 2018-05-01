@@ -59,7 +59,7 @@ public class ModelImpl implements Model {
 
         for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
         {
-            if(entry.getValue().uniqueId().equals(id))
+            if(entry.getValue().getId().equals(id))
                return entry.getValue();
         }
 

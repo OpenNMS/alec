@@ -42,6 +42,9 @@ public interface Model {
 
     Set<String> getTypes();
 
+    /**
+     * The root of the model tree.
+     */
     ModelObject getRoot();
 
 }

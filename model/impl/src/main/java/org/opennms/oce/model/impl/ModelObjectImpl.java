@@ -61,13 +61,15 @@ public class ModelObjectImpl implements ModelObject {
     public void setSubType(String subType) {
         this.subType = subType;
     }
+
     /**
      * non-null
      *
      * A globally unique id
      * @return uuid
      */
-    public String uniqueId(){
+    @Override
+    public String getId(){
         return uniqueId;
     }
 
@@ -78,7 +80,8 @@ public class ModelObjectImpl implements ModelObject {
     /**
      * nullable
      */
-    public String friendlyName(){
+    @Override
+    public String getFriendlyName(){
         return friendlyName;
     }
 

@@ -12,12 +12,6 @@ public class GroupImpl implements Group {
     }
 
     @Override
-    public String getType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public int getNumberMembers() {
         // TODO Auto-generated method stub
         return 0;
@@ -39,18 +33,6 @@ public class GroupImpl implements Group {
     public int getNumberServiceAffecting() {
         // TODO Auto-generated method stub
         return 0;
-    }
-
-    @Override
-    public String getNumber() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String friendlyName() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

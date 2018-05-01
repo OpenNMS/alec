@@ -30,33 +30,14 @@ package org.opennms.oce.model.api;
 
 public interface Group {
 
-    enum Type {
-        CHILDREN,
-        DEPENDS_ON,
-        DEPENDENCY_OF, // UN
-      }
-    
+    /**
+     * Each group is owned by a single model object.
+     */
     ModelObject getOwner();
 
-    // TODO - create ENUM
-    String getType();
-    
     int getNumberMembers();
     int getNumberNormalState();
     int getNumberNonServiceAffecting();
     int getNumberServiceAffecting();
-
-    /**
-     * non-null
-     *
-     * A globally unique id
-     * @return uuid
-     */
-    String getNumber();
-
-    /**
-     * nullable
-     */
-    String friendlyName();
 
 }

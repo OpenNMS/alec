@@ -36,35 +36,12 @@ public interface ModelObject {
 
     Set<ModelObject> getChildren();
 
-    /**
-     * non-null
-     */
     String getType();
 
-    void setType(String type);
-
-    /**
-     * nullable
-     */
     String getSubType();
 
-    void setSubType(String subType);
+    String getId();
 
-    /**
-     * non-null
-     *
-     * A globally unique id
-     * @return uuid
-     */
-    String uniqueId();
-
-    void setUniqueId(String uniqueId);
-
-    /**
-     * nullable
-     */
-    String friendlyName();
-
-    void setFriendlyName(String friendlyName);
+    String getFriendlyName();
 
 }

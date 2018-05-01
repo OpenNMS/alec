@@ -57,7 +57,7 @@ public class ModelBuilderImpl implements ModelBuilder {
         //something very simple for a while
         try {
             final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            final Schema schema = sf.newSchema( Main.class.getResource("/model.xsd"));
+            final Schema schema = sf.newSchema( bcontext.getBundle().getResource("/model.xsd"));
 
             final MetaModel metaModel;
             try (InputStream is = bcontext.getBundle().getEntry("/metamodel.xml").openStream()) {

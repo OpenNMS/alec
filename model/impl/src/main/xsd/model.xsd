@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://xmlns.opennms.org/xsd/oce/model/v1.0.0"
+        xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:this="http://xmlns.opennms.org/xsd/oce/model/v1.0.0"
+        elementFormDefault="qualified">
+    <annotation>
+        <documentation>XML schema for the OpenNMS Correlation Model</documentation>
+    </annotation>
+
+    <element name="meta-model">
+        <annotation>
+            <documentation>Top-level element for a meta-model</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Model object definitions -->
+                <element ref="this:model-object-def" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="model-object-def">
+        <annotation>
+            <documentation>Definition for a model object type</documentation>
+        </annotation>
+        <complexType>
+            <sequence>
+                <element ref="this:parent-ref" minOccurs="1" maxOccurs="unbounded" />
+                <element ref="this:relative-ref" minOccurs="0" maxOccurs="unbounded" />
+                <element ref="this:associate-ref" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+            <!-- type -->
+            <attribute name="type" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <element name="parent-ref">
+        <annotation>
+            <documentation>Parent Relationship</documentation>
+        </annotation>
+        <complexType>
+            <!-- type -->
+            <attribute name="type" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <element name="relative-ref">
+        <annotation>
+            <documentation>Relative Relationship</documentation>
+        </annotation>
+        <complexType>
+            <!-- type -->
+            <attribute name="type" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <element name="associate-ref">
+        <annotation>
+            <documentation>Associate Relationship</documentation>
+        </annotation>
+        <complexType>
+            <!-- type -->
+            <attribute name="type" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <!-- Inventory -->
+    <element name="inventory">
+        <annotation>
+            <documentation>Top-level element for the inventory</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Model object instances -->
+                <element ref="this:model-object" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="model-object">
+        <annotation>
+            <documentation>Definition for a model object instance</documentation>
+        </annotation>
+        <complexType>
+            <!-- id -->
+            <attribute name="id" type="string" use="required" />
+            <!-- type -->
+            <attribute name="type" type="string" use="required" />
+            <!-- subtype -->
+            <attribute name="subtype" type="string" use="optional" />
+            <!-- friendly-name -->
+            <attribute name="friendly-name" type="string" use="optional" />
+
+            <!-- parent type -->
+            <attribute name="parent-type" type="string" use="required" />
+            <!-- parent id -->
+            <attribute name="parent-id" type="string" use="required" />
+        </complexType>
+    </element>
+</schema>

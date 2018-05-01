@@ -1,0 +1,18 @@
+<!-- List of types and their relationships -->
+<meta-model xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+    <model-object-def type="Model">
+        <parent-ref type="Model"/>
+    </model-object-def>
+    <model-object-def type="Device">
+        <parent-ref type="Model"/>
+    </model-object-def>
+    <model-object-def type="Card">
+        <parent-ref type="Device"/>
+    </model-object-def>
+    <model-object-def type="Port">
+        <parent-ref type="Card"/>
+    </model-object-def>
+    <model-object-def type="Link">
+        <parent-ref type="Port"/>
+    </model-object-def>
+</meta-model>

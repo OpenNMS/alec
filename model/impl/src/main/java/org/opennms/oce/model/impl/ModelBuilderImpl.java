@@ -1,6 +1,7 @@
 package org.opennms.oce.model.impl;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -9,6 +10,8 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.api.ModelObject;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,32 +46,42 @@ import org.slf4j.LoggerFactory;
 
 public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
+    private BundleContext bcontext;
 
     @Override
     public Model buildModel()  {
-
-        Model model = ModelImpl.getInstance();
-        LOG.info("buildModel: enter");
+        ModelImpl model = (ModelImpl)ModelImpl.getInstance();
         //something very simple for a while
         try {
-            //FileInputStream file = new FileInputStream("metamodel");
-            File file = new File("metamodel.xml");
+            Bundle bundle = bcontext.getBundle();
+            InputStream is = bundle.getEntry("/metamodel.xml").openStream();
+
             JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller um = ctx.createUnmarshaller();
-            MetaModel rootElement = (MetaModel) um.unmarshal(file);
+            MetaModel metaModel = (MetaModel) um.unmarshal(is);
 
             ModelObject mo = new ModelObjectImpl();
+            //TODO remove debugging garbage
+            LOG.info("real type: " + metaModel.getMetaModelAttributes().get(0).getType());
 
-            mo.setType(rootElement.getModelObjectList().get(0));
+            //For a while just to return something
+            mo.setType(metaModel.getMetaModelAttributes().get(0).getType());
             mo.setFriendlyName("Just dummy name");
 
-            LOG.info("Hello World from Model Builder");
+            model.setObjectById("root", mo);
+
         }
-        catch(JAXBException e ) {
+        catch (IOException e) {
+            LOG.error("Model builder failed: ", e);
+        }catch(JAXBException e ) {
             LOG.error("Model builder has issues with jaxb: ", e);
         }
 
         return model;
 
+    }
+
+    public void setBcontext(BundleContext bcontext) {
+        this.bcontext = bcontext;
     }
 }

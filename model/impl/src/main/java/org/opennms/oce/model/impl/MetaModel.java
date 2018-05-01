@@ -27,25 +27,41 @@ package org.opennms.oce.model.impl; /*******************************************
  *******************************************************************************/
 
 import java.util.ArrayList;
+
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 //This statement means that class "org.opennms.oce.model.impl.MetaModel.java" is the root-element
-@XmlRootElement
+@XmlRootElement( name = "meta-model")
 public class MetaModel {
 
-    // XmLElementWrapper generates a wrapper element around XML representation
-    @XmlElementWrapper(name = "meta-model")
-    // XmlElement sets the name of the entities
+    private ArrayList<MetaModelAttribute> metaModelAttributes;
+
     @XmlElement(name = "model-object-def")
-    private ArrayList<String> modelObjectList;
-
-    public void setModelObjectList(ArrayList<String> modelObjectList) {
-        this.modelObjectList = modelObjectList;
+    public void setMetaModelAttributes(ArrayList<MetaModelAttribute> metaModelAttributes) {
+        this.metaModelAttributes = metaModelAttributes;
     }
 
-    public ArrayList<String> getModelObjectList() {
-        return modelObjectList;
+    public ArrayList<MetaModelAttribute> getMetaModelAttributes() {
+        return metaModelAttributes;
     }
+}
+
+@XmlType( propOrder = { "type"} )
+@XmlRootElement( name = "model-object-def" )
+class MetaModelAttribute {
+    private String type;
+
+    @XmlAttribute( name = "type", required = true )
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
 }

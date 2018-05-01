@@ -54,7 +54,7 @@ public class ModelObjectImpl implements ModelObject {
     }
 
     public void setSubType(String subType) {
-
+        this.subType = subType;
     }
     /**
      * non-null

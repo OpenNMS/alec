@@ -1,6 +1,7 @@
 package org.opennms.oce.model.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +56,18 @@ public class ModelImpl implements Model {
     @Override
     public ModelObject getObjectById(String id) {
 
+        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
+        {
+            if(entry.getValue().uniqueId().equals(id))
+               return entry.getValue();
+        }
+
         return null;
+    }
+
+    public void setObjectById(String id, ModelObject obj) {
+
+        modelMap.put(id, obj);
     }
 
     /**
@@ -64,12 +76,23 @@ public class ModelImpl implements Model {
     @Override
     public Map<String, ModelObject> getObjectsByIdForType(String type) {
 
-        return null;
+        Map<String, ModelObject> byIdForType = new HashMap<>();
+
+        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
+        {
+            if(entry.getValue().getType().equals(type))
+                byIdForType.put(entry.getKey(), entry.getValue());
+        }
+        return byIdForType;
     }
 
     @Override
     public Set<String> getTypes() {
-
-        return null;
+        Set<String> typeSet = new HashSet<>();
+        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
+        {
+            typeSet.add(entry.getValue().getType());
+        }
+        return typeSet;
     }
 }

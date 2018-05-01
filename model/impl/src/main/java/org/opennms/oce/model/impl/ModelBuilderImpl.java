@@ -60,7 +60,7 @@ public class ModelBuilderImpl implements ModelBuilder {
             Unmarshaller um = ctx.createUnmarshaller();
             MetaModel metaModel = (MetaModel) um.unmarshal(is);
 
-            ModelObject mo = new ModelObjectImpl();
+            ModelObjectImpl mo = new ModelObjectImpl();
             //TODO remove debugging garbage
             LOG.info("real type: " + metaModel.getMetaModelAttributes().get(0).getType());
 

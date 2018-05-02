@@ -20,8 +20,8 @@
         <parents-ref>
             <parent-ref type="Model"/>
         </parents-ref>
-        <peer-refs>
+        <peers-ref>
             <peer-ref type="Port"/> <!-- This implies that the link is the owner -->
-        </peer-refs>
+        </peers-ref>
     </model-object-def>
 </meta-model>

@@ -61,6 +61,11 @@ public class MetaModel {
             for(MetaModelParentRef parentRef : mm.getParentRef().getParentRef()) {
                 sb.append("       Parent ref : " + parentRef.getType()+ "\n");
             }
+
+            if(mm.getPeerRef() == null) continue;
+            for(MetaModelPeerRef peerRef : mm.getPeerRef().getPeerRef()) {
+                sb.append("       Peer ref : " + peerRef.getType()+ "\n");
+            }
         }
         return sb.toString();
     }
@@ -73,6 +78,9 @@ class MetaModelObjectDef {
 
     @XmlElement(name = "parents-ref")
     private MetaModelParentsRef parentsRef;
+
+    @XmlElement(name = "peers-ref")
+    private MetaModelPeersRef peersRef;
 
     public void setType(String type) {
         this.type = type;
@@ -89,6 +97,15 @@ class MetaModelObjectDef {
     @XmlElement(name = "parents-ref")
     public MetaModelParentsRef getParentRef() {
         return parentsRef;
+    }
+
+    public void setPeersRef(MetaModelPeersRef peersRef) {
+        this.peersRef = peersRef;
+    }
+
+    @XmlElement(name = "peers-ref")
+    public MetaModelPeersRef getPeerRef() {
+        return peersRef;
     }
 }
 
@@ -109,6 +126,35 @@ class MetaModelParentsRef {
 
 @XmlAccessorType(XmlAccessType.FIELD)
 class MetaModelParentRef {
+    @XmlAttribute
+    private String type;
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+class MetaModelPeersRef {
+    @XmlElement(name = "peer-ref")
+    private List<MetaModelPeerRef> peerRef;
+
+    public List<MetaModelPeerRef> getPeerRef() {
+        return peerRef;
+    }
+
+    public void setPeerRef(List<MetaModelPeerRef> peerRef) {
+        this.peerRef = peerRef;
+    }
+}
+
+
+@XmlAccessorType(XmlAccessType.FIELD)
+class MetaModelPeerRef {
     @XmlAttribute
     private String type;
 

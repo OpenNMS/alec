@@ -46,22 +46,24 @@ import org.slf4j.LoggerFactory;
 public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
     private final String METAMODEL_RESOURCE = "/metamodel.xml";
+    private final String INVENTORY_RESOURCE = "/inventory.xml";
     private BundleContext bcontext;
 
     @Override
     public Model buildModel()  {
         ModelImpl model = (ModelImpl)ModelImpl.getInstance();
 
-        //something very simple for a while
-        try {
-            Bundle bundle = bcontext.getBundle();
-            InputStream is = bundle.getEntry(METAMODEL_RESOURCE).openStream();
-            LOG.info("METAMODEL_RESOURCE : " + METAMODEL_RESOURCE);
+
+        try (InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
             JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller um = ctx.createUnmarshaller();
             MetaModel metaModel = (MetaModel) um.unmarshal(is);
 
             LOG.info("MetaModels : " + metaModel);
+
+            //Inventory inventory =  getInventory();
+
+            //LOG.info("Inventory : " + inventory);
 
             //Temporary commented
             /*for(MetaModelObjectDef metaModelElement :  metaModel.getMetaModel()) {
@@ -86,7 +88,29 @@ public class ModelBuilderImpl implements ModelBuilder {
         }
 
         return model;
+    }
 
+    private Inventory getInventory() throws JAXBException, IOException {
+        try(InputStream is = getResourceStream(INVENTORY_RESOURCE)) {
+            JAXBContext ctx = JAXBContext.newInstance(Inventory.class);
+            Unmarshaller um = ctx.createUnmarshaller();
+            Inventory inventory = (Inventory) um.unmarshal(is);
+
+            //do some tweaks here before return
+            return inventory;
+        }
+    }
+
+    private InputStream getResourceStream(final String resource) throws IOException{
+        Bundle bundle = bcontext.getBundle();
+
+        if(bcontext != null) {
+            return bundle.getEntry(resource).openStream();
+        } else {
+            //This currently doesn't work
+            InputStream inStream = ModelBuilderImpl.class.getResourceAsStream("/metamodel.xml");
+            return inStream;
+        }
     }
 
     public void setBcontext(BundleContext bcontext) {

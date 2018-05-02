@@ -6,7 +6,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.model</groupId>
-    <artifactId>api</artifactId>
+    <artifactId>org.opennms.oce.model.api</artifactId>
     <name>OCE :: Model :: API</name>
     <packaging>bundle</packaging>
 
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-	        <scope>test</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

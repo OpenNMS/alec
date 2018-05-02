@@ -6,17 +6,17 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.connector</groupId>
-    <artifactId>impl</artifactId>
+    <artifactId>org.opennms.oce.connector.impl</artifactId>
     <name>OCE :: Connector :: Impl.</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.connector</groupId>
-            <artifactId>api</artifactId>
+            <artifactId>org.opennms.oce.connector.api</artifactId>
         </dependency>
         <dependency>
-            <groupId> com.google.protobuf</groupId>
+            <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
 

@@ -6,7 +6,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.drools</groupId>
-    <artifactId>engine</artifactId>
+    <artifactId>org.opennms.oce.drools.engine</artifactId>
     <name>OCE :: Drools :: Engine</name>
     <packaging>bundle</packaging>
 
@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.connector</groupId>
-            <artifactId>api</artifactId>
+            <artifactId>org.opennms.oce.connector.api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.drools</groupId>

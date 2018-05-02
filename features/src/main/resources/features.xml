@@ -10,9 +10,9 @@
     </feature>
 
     <feature name="oce-model" description="OCE :: Model" version="${project.version}">
-        <bundle>mvn:org.opennms.oce.model/api/${project.version}</bundle>
-        <bundle>mvn:org.opennms.oce.model/impl/${project.version}</bundle>
-        <bundle>mvn:org.opennms.oce.model/shell/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.shell/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-tools/0.11.1</bundle>
         <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-runtime/0.11.1</bundle>
         <bundle dependency="true">mvn:javax.xml.bind/jaxb-api/2.3.0</bundle>
@@ -21,10 +21,10 @@
 
     <feature name="oce-connector" description="OCE :: Connector" version="${project.version}">
         <feature version="1.0.0">kafka-streams</feature>
-        <bundle>mvn:org.opennms.oce.connector/api/${project.version}</bundle>
-        <bundle>mvn:org.opennms.oce.connector/impl/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/org.opennms.oce.connector.api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/org.opennms.oce.connector.impl/${project.version}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
-        <bundle>mvn:org.opennms.oce.connector/shell/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.connector/org.opennms.oce.connector.shell/${project.version}</bundle>
 
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -33,10 +33,10 @@
     </feature>
 
     <feature name="oce-drools-engine" description="OCE :: Drools Engine" version="${project.version}">
-        <bundle dependency="true">mvn:org.opennms.oce.connector/api/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.opennms.oce.connector/org.opennms.oce.connector.api/${project.version}</bundle>
         <feature version="${drools.version}">kie</feature>
         <feature version="${drools.version}">drools-module</feature>
-        <bundle>mvn:org.opennms.oce.drools/engine/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.drools/org.opennms.oce.drools.engine/${project.version}</bundle>
     </feature>
 
     <feature name="kafka-streams" description="Kafka Streams" version="1.0.0">

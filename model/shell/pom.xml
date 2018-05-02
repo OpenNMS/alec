@@ -6,7 +6,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.model</groupId>
-    <artifactId>shell</artifactId>
+    <artifactId>org.opennms.oce.model.shell</artifactId>
     <name>OCE :: Model :: Shell</name>
     <packaging>bundle</packaging>
 
@@ -31,12 +31,12 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.model</groupId>
-            <artifactId>api</artifactId>
+            <artifactId>org.opennms.oce.model.api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.opennms.oce.model</groupId>
-            <artifactId>impl</artifactId>
+            <artifactId>org.opennms.oce.model.impl</artifactId>
         </dependency>
 
 	<dependency>

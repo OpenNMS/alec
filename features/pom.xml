@@ -60,23 +60,23 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.connector</groupId>
-            <artifactId>impl</artifactId>
+            <artifactId>org.opennms.oce.connector.impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.connector</groupId>
-            <artifactId>shell</artifactId>
+            <artifactId>org.opennms.oce.connector.shell</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.drools</groupId>
-            <artifactId>engine</artifactId>
+            <artifactId>org.opennms.oce.drools.engine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.model</groupId>
-            <artifactId>impl</artifactId>
+            <artifactId>org.opennms.oce.model.impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.model</groupId>
-            <artifactId>shell</artifactId>
+            <artifactId>org.opennms.oce.model.shell</artifactId>
         </dependency>
     </dependencies>
 </project>

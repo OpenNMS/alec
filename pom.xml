@@ -62,37 +62,37 @@
         <dependencies>
             <dependency>
                 <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>api</artifactId>
+                <artifactId>org.opennms.oce.connector.api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>impl</artifactId>
+                <artifactId>org.opennms.oce.connector.impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>shell</artifactId>
+                <artifactId>org.opennms.oce.connector.shell</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.model</groupId>
-                <artifactId>api</artifactId>
+                <artifactId>org.opennms.oce.model.api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.model</groupId>
-                <artifactId>impl</artifactId>
+                <artifactId>org.opennms.oce.model.impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.model</groupId>
-                <artifactId>shell</artifactId>
+                <artifactId>org.opennms.oce.model.shell</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.drools</groupId>
-                <artifactId>engine</artifactId>
+                <artifactId>org.opennms.oce.drools.engine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

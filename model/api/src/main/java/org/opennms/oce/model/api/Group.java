@@ -28,6 +28,8 @@
 
 package org.opennms.oce.model.api;
 
+import java.util.Set;
+
 public interface Group {
 
     /**
@@ -39,5 +41,7 @@ public interface Group {
     int getNumberNormalState();
     int getNumberNonServiceAffecting();
     int getNumberServiceAffecting();
+
+    Set<ModelObject> getMembers();
 
 }

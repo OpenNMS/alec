@@ -1,7 +1,24 @@
 <meta-model>
-    <model-object-def type="Model" special="true" do-not-delete="me"/>
-    <model-object-def type="Device"/>
-    <model-object-def type="Card"/>
-    <model-object-def type="Port"/>
-    <model-object-def type="Link"/>
+    <model-object-def type="Model"/>
+    <model-object-def type="Device">
+        <parents-ref>
+            <parent-ref type="Model"/>
+        </parents-ref>
+    </model-object-def>
+    <model-object-def type="Card">
+        <parents-ref>
+            <parent-ref type="Model"/>
+        </parents-ref>
+    </model-object-def>
+    <model-object-def type="Port">
+        <parents-ref>
+            <parent-ref type="Device"/>
+            <parent-ref type="Card"/>
+        </parents-ref>
+    </model-object-def>
+    <model-object-def type="Link">
+        <parents-ref>
+            <parent-ref type="Port"/>
+        </parents-ref>
+    </model-object-def>
 </meta-model>

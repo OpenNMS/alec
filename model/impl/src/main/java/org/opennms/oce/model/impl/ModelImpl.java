@@ -101,4 +101,14 @@ public class ModelImpl implements Model {
         }
         return typeSet;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
+        {
+            sb.append("Model object: " + entry.getKey() + " with type: " + entry.getValue().getType() + "\n");
+        }
+        return sb.toString();
+    }
 }

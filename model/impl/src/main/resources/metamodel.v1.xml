@@ -10,7 +10,6 @@
         <parent-ref type="Device"/>
     </model-object-def>
     <model-object-def type="Port">
-        <parent-ref type="Device"/>
         <parent-ref type="Card"/>
     </model-object-def>
     <model-object-def type="Link">

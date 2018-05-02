@@ -7,7 +7,7 @@
     </model-object-def>
     <model-object-def type="Card">
         <parents-ref>
-            <parent-ref type="Model"/>
+            <parent-ref type="Device"/>
         </parents-ref>
     </model-object-def>
     <model-object-def type="Port">
@@ -18,7 +18,10 @@
     </model-object-def>
     <model-object-def type="Link">
         <parents-ref>
-            <parent-ref type="Port"/>
+            <parent-ref type="Model"/>
         </parents-ref>
+        <peer-refs>
+            <peer-ref type="Port"/> <!-- This implies that the link is the owner -->
+        </peer-refs>
     </model-object-def>
 </meta-model>

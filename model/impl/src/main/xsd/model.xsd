@@ -79,11 +79,27 @@
         </complexType>
     </element>
 
+
+    <element name="peer-ref">
+        <annotation>
+            <documentation>Peer Reference</documentation>
+        </annotation>
+        <complexType>
+            <attribute name="type" type="string" use="required" />
+            <attribute name="id" type="string" use="required" />
+            <attribute name="endpoint" type="string" use="required" /> <!-- TODO: Only allow A or Z -->
+        </complexType>
+    </element>
+
     <element name="model-object">
         <annotation>
             <documentation>Definition for a model object instance</documentation>
         </annotation>
         <complexType>
+            <sequence>
+                <element ref="this:peer-ref" minOccurs="0" maxOccurs="2" />
+            </sequence>
+
             <!-- id -->
             <attribute name="id" type="string" use="required" />
             <!-- type -->

@@ -61,9 +61,9 @@ public class ModelBuilderImpl implements ModelBuilder {
 
             LOG.info("MetaModels : " + metaModel);
 
-            //Inventory inventory =  getInventory();
+            Inventory inventory =  getInventory();
 
-            //LOG.info("Inventory : " + inventory);
+            LOG.info("Inventory : " + inventory);
 
             //Temporary commented
             /*for(MetaModelObjectDef metaModelElement :  metaModel.getMetaModel()) {

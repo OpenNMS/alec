@@ -25,8 +25,6 @@ package org.opennms.oce.model.impl; /*******************************************
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-
-
 import java.util.ArrayList;
 import java.util.List;
 

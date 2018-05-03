@@ -1,25 +1,25 @@
 <!-- Lists of instances of the types defined in the meta-model -->
 <inventory xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
     <!-- The model -->
-    <model-object type="Model" id="test" parent-type="" parent-id=""/>
+    <model-object-entry type="Model" id="test" parent-type="" parent-id=""/>
 
     <!-- Devices -->
-    <model-object type="Device" id="n1" parent-type="Model" parent-id="test"/>
+    <model-object-entry type="Device" id="n1" parent-type="Model" parent-id="test"/>
 
     <!-- Cards -->
-    <model-object type="Card" id="n1-c1" parent-type="Device" parent-id="n1" />
-    <model-object type="Card" id="n1-c2" parent-type="Device" parent-id="n1" />
+    <model-object-entry type="Card" id="n1-c1" parent-type="Device" parent-id="n1" />
+    <model-object-entry type="Card" id="n1-c2" parent-type="Device" parent-id="n1" />
 
     <!-- Ports -->
-    <model-object type="Port" id="n1-c1-p1" parent-type="Card" parent-id="n1-c1" />
-    <model-object type="Port" id="n1-c1-p2" parent-type="Card" parent-id="n1-c1" />
+    <model-object-entry type="Port" id="n1-c1-p1" parent-type="Card" parent-id="n1-c1" />
+    <model-object-entry type="Port" id="n1-c1-p2" parent-type="Card" parent-id="n1-c1" />
 
-    <model-object type="Port" id="n1-c2-p1" parent-type="Card" parent-id="n1-c2" />
-    <model-object type="Port" id="n1-c2-p2" parent-type="Card" parent-id="n1-c2" />
+    <model-object-entry type="Port" id="n1-c2-p1" parent-type="Card" parent-id="n1-c2" />
+    <model-object-entry type="Port" id="n1-c2-p2" parent-type="Card" parent-id="n1-c2" />
 
     <!-- Link -->
-    <model-object type="Link" id="n1-c1-p1___n1-c2-p1" parent-type="Model" parent-id="test">
+    <model-object-entry type="Link" id="n1-c1-p1___n1-c2-p1" parent-type="Model" parent-id="test">
         <peer-ref type="Port" id="n1-c1-p1" endpoint="A"/>
         <peer-ref type="Port" id="n1-c2-p1" endpoint="Z"/>
-    </model-object>
+    </model-object-entry>
 </inventory>

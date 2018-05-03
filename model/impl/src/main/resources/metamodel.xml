@@ -1,27 +1,19 @@
-<meta-model>
-    <model-object-def type="Model"/>
+<meta-model xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+    <model-object-def type="Model">
+        <parent-def-ref type="Model"/>
+    </model-object-def>
     <model-object-def type="Device">
-        <parents-ref>
-            <parent-ref type="Model"/>
-        </parents-ref>
+        <parent-def-ref type="Model"/>
     </model-object-def>
     <model-object-def type="Card">
-        <parents-ref>
-            <parent-ref type="Device"/>
-        </parents-ref>
+        <parent-def-ref type="Device"/>
     </model-object-def>
     <model-object-def type="Port">
-        <parents-ref>
-            <parent-ref type="Device"/>
-            <parent-ref type="Card"/>
-        </parents-ref>
+        <parent-def-ref type="Device"/>
+        <parent-def-ref type="Card"/>
     </model-object-def>
     <model-object-def type="Link">
-        <parents-ref>
-            <parent-ref type="Model"/>
-        </parents-ref>
-        <peers-ref>
-            <peer-ref type="Port"/> <!-- This implies that the link is the owner -->
-        </peers-ref>
+        <parent-def-ref type="Model"/>
+        <peer-def-ref type="Port"/> <!-- This implies that the link is the owner -->
     </model-object-def>
 </meta-model>

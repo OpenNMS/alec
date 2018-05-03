@@ -28,14 +28,30 @@
 
 package org.opennms.oce.model.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.opennms.oce.model.v1.schema.Inventory;
+import org.opennms.oce.model.v1.schema.MetaModel;
+import org.xml.sax.SAXException;
+
+
 public class Main {
 
-    /*public static void main(String[] args) throws JAXBException, SAXException, IOException {
+    public static void main(String[] args) throws JAXBException, SAXException, IOException {
+        final File file = new File("/Users/skochetkov/dev/opennms/oce/model/impl/src/main/xsd/model.xsd");
         final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        final Schema schema = sf.newSchema( Main.class.getResource("/model.xsd"));
-
+        final Schema schema = sf.newSchema(file.toURL());
         final MetaModel metaModel;
-        try (InputStream is = Main.class.getResourceAsStream("/metamodel.v1.xml")) {
+        try (InputStream is = Main.class.getResourceAsStream("/metamodel.xml")) {
             final JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
@@ -44,12 +60,12 @@ public class Main {
         System.out.println(metaModel);
 
         final Inventory inventory;
-        try (InputStream is = Main.class.getResourceAsStream("/inventory.v1.xml")) {
+        try (InputStream is = Main.class.getResourceAsStream("/inventory.xml")) {
             final JAXBContext ctx = JAXBContext.newInstance(Inventory.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
             inventory = (Inventory) unmarshaller.unmarshal(is);
         }
         System.out.println(inventory);
-    }*/
+    }
 }

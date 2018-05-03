@@ -26,16 +26,16 @@
         </annotation>
         <complexType>
             <sequence>
-                <element ref="this:parent-ref" minOccurs="1" maxOccurs="unbounded" />
-                <element ref="this:relative-ref" minOccurs="0" maxOccurs="unbounded" />
-                <element ref="this:associate-ref" minOccurs="0" maxOccurs="unbounded" />
+                <element ref="this:parent-def-ref" minOccurs="1" maxOccurs="unbounded" />
+                <element ref="this:peer-def-ref" minOccurs="0" maxOccurs="unbounded" />
+                <element ref="this:relative-def-ref" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
             <!-- type -->
             <attribute name="type" type="string" use="required" />
         </complexType>
     </element>
 
-    <element name="parent-ref">
+    <element name="parent-def-ref">
         <annotation>
             <documentation>Parent Relationship</documentation>
         </annotation>
@@ -44,10 +44,9 @@
             <attribute name="type" type="string" use="required" />
         </complexType>
     </element>
-
-    <element name="relative-ref">
+    <element name="peer-def-ref">
         <annotation>
-            <documentation>Relative Relationship</documentation>
+            <documentation>Peer Relationship</documentation>
         </annotation>
         <complexType>
             <!-- type -->
@@ -55,9 +54,9 @@
         </complexType>
     </element>
 
-    <element name="associate-ref">
+    <element name="relative-def-ref">
         <annotation>
-            <documentation>Associate Relationship</documentation>
+            <documentation>Relative Relationship</documentation>
         </annotation>
         <complexType>
             <!-- type -->
@@ -74,7 +73,7 @@
         <complexType>
             <sequence>
                 <!-- Model object instances -->
-                <element ref="this:model-object" minOccurs="1" maxOccurs="unbounded" />
+                <element ref="this:model-object-entry" minOccurs="1" maxOccurs="unbounded" />
             </sequence>
         </complexType>
     </element>
@@ -91,7 +90,7 @@
         </complexType>
     </element>
 
-    <element name="model-object">
+    <element name="model-object-entry">
         <annotation>
             <documentation>Definition for a model object instance</documentation>
         </annotation>

@@ -39,22 +39,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement( name = "inventory")
 public class Inventory {
 
-    private ArrayList<ModelObject> modelObjects;
+    private ArrayList<InventoryElement> inventoryElements;
 
     @XmlElement(name = "model-object")
-    public void setModelObjects(ArrayList<ModelObject> modelObjects) {
-        this.modelObjects = modelObjects;
+    public void setInventoryElements(ArrayList<InventoryElement> inventoryElements) {
+        this.inventoryElements = inventoryElements;
     }
 
-    public ArrayList<ModelObject> getModelObjects() {
-        return modelObjects;
+    public ArrayList<InventoryElement> getInventoryElements() {
+        return inventoryElements;
     }
 
     @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
-        for(ModelObject mo : getModelObjects()) {
+        for(InventoryElement mo : getInventoryElements()) {
             sb.append(" Element : " + "\n");
             sb.append("    Type : " + mo.getType() + "\n");
         }
@@ -63,7 +63,7 @@ public class Inventory {
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)
-class ModelObject {
+class InventoryElement {
     @XmlAttribute
     private String type;
 

@@ -78,7 +78,6 @@
         </complexType>
     </element>
 
-
     <element name="peer-ref">
         <annotation>
             <documentation>Peer Reference</documentation>
@@ -90,6 +89,16 @@
         </complexType>
     </element>
 
+    <element name="relative-ref">
+        <annotation>
+            <documentation>Relative Reference</documentation>
+        </annotation>
+        <complexType>
+            <attribute name="type" type="string" use="required" />
+            <attribute name="id" type="string" use="required" />
+        </complexType>
+    </element>
+
     <element name="model-object-entry">
         <annotation>
             <documentation>Definition for a model object instance</documentation>
@@ -97,6 +106,7 @@
         <complexType>
             <sequence>
                 <element ref="this:peer-ref" minOccurs="0" maxOccurs="2" />
+                <element ref="this:relative-ref" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
 
             <!-- id -->

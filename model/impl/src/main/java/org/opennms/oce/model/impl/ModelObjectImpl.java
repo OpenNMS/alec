@@ -60,7 +60,7 @@ public class ModelObjectImpl implements ModelObject {
     	this.parent = parent;
     	this.type = type;
     	this.friendlyName = friendlyName;
-    	if (type != "model") {
+    	if (type != "model" && parent != null) {
         	// Parent must be null for the Root of the Model
             ((ModelObjectImpl) parent).addChild(this);
     	}
@@ -118,6 +118,14 @@ public class ModelObjectImpl implements ModelObject {
     @Override
     public ModelObject getParent() {
         return parent;
+    }
+
+    public void setParent(ModelObject parent) {
+        this.parent = parent;
+        if (type != "model") {
+            // Parent must be null for the Root of the Model
+            ((ModelObjectImpl) parent).addChild(this);
+        }
     }
 
     @Override

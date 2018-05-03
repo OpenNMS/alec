@@ -50,13 +50,10 @@ import org.xml.sax.SAXException;
 
 public class Main {
 
-    private Map<String, Map<String, ModelObjectImpl>> typeBuckets = new HashMap<>();
-
-    private void buildModel(MetaModel metaModel, Inventory inventory, ModelImpl model) {
+    private Map<String, Map<String, ModelObjectImpl>> prepareModel(MetaModel metaModel, Inventory inventory) {
 
         //First, we create buckets of types to fill them later in pass #2
-
-
+        Map<String, Map<String, ModelObjectImpl>> typeBuckets = new HashMap<>();
         for(ModelObjectDef mod : metaModel.getModelObjectDef()) {
             typeBuckets.put(mod.getType(), new HashMap<>());
         }
@@ -71,7 +68,7 @@ public class Main {
         //Third, building relationships (we traverse inventory instead of map of maps because there could be one to many relationships)
         for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
             //Find the entity
-            ModelObjectImpl obj = findObjectByTypeAndId(moe.getId(), moe.getType());
+            ModelObjectImpl obj = findObjectByTypeAndId(moe.getId(), moe.getType(), typeBuckets);
             String parentType = moe.getParentType();
             String parentId = moe.getParentId();
 
@@ -85,23 +82,25 @@ public class Main {
             //skip if the parent is not found
             if(parent == null) continue;
 
-            //obj.setParentId(parent.g);
+            obj.setParent(parent);
 
         }
 
+        return typeBuckets;
+
         //Setting up root of the model
-        ModelObjectImpl parent = new ModelObjectImpl("", null, "Model", "root");
+        /*ModelObjectImpl parent = new ModelObjectImpl("", null, "Model", "root");
         model.setRoot(parent);
 
         for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
 
             ModelObjectImpl moi = new ModelObjectImpl(moe.getId(), parent, moe.getType(), moe.getFriendlyName());
-        }
+        }*/
 
 
     }
 
-    private ModelObjectImpl findObjectByTypeAndId(String uniqueId, String type) {
+    private ModelObjectImpl findObjectByTypeAndId(String uniqueId, String type, Map<String, Map<String, ModelObjectImpl>> typeBuckets) {
         Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(type);
         if(typeBucket == null) return null;
 
@@ -137,7 +136,16 @@ public class Main {
         ModelImpl model = (ModelImpl)ModelImpl.getInstance();
 
         //ModelBuilder builder = new ModelBuilderImpl();
-        buildModel(metaModel, inventory, model);
+        Map<String, Map<String, ModelObjectImpl>> typeBuckets = prepareModel(metaModel, inventory);
+
+        //Setting up root of the model
+        /*ModelObjectImpl parent = new ModelObjectImpl("", null, "Model", "root");
+        model.setRoot(parent);
+
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+
+            ModelObjectImpl moi = new ModelObjectImpl(moe.getId(), parent, moe.getType(), moe.getFriendlyName());
+        }*/
 
         System.out.println(model);
     }

@@ -22,14 +22,15 @@ public class AlarmPropagationTest {
         // TODO - add Link for testing
         // TODO - abstract this to TestUtility - tbd read in XML model....
 
-        ModelObject modelObject = new ModelObjectImpl((ModelObject) null, "model", "MODEL");
-        ModelObject eswitch = new ModelObjectImpl(modelObject, "switch", "SWITCH01");
-        ModelObject card1 = new ModelObjectImpl(eswitch, "card", "CARD_01");
-        ModelObject card2 = new ModelObjectImpl(eswitch, "card", "CARD_02");
-        ModelObject port1 = new ModelObjectImpl(card1, "port", "PORT_01");
-        ModelObject port2 = new ModelObjectImpl(card1, "port", "PORT_02");
-        ModelObject port3 = new ModelObjectImpl(card2, "port", "PORT_03");
-        ModelObject port4 = new ModelObjectImpl(card2, "port", "PORT_04");
+        // TODO For David - Probably model has to be Model, switch -> Switch etc
+        ModelObject modelObject = new ModelObjectImpl("MODEL", (ModelObject) null, "model", "MODEL");
+        ModelObject eswitch = new ModelObjectImpl("SWITCH01", modelObject, "switch", "SWITCH01");
+        ModelObject card1 = new ModelObjectImpl("CARD_01", eswitch, "card", "CARD_01");
+        ModelObject card2 = new ModelObjectImpl("CARD_02", eswitch, "card", "CARD_02");
+        ModelObject port1 = new ModelObjectImpl("PORT_01", card1, "port", "PORT_01");
+        ModelObject port2 = new ModelObjectImpl("PORT_02", card1, "port", "PORT_02");
+        ModelObject port3 = new ModelObjectImpl("PORT_03", card2, "port", "PORT_03");
+        ModelObject port4 = new ModelObjectImpl("PORT_04", card2, "port", "PORT_04");
 
         when(modelBuilder.buildModel()).thenReturn(model);
         when(model.getRoot()).thenReturn(modelObject);

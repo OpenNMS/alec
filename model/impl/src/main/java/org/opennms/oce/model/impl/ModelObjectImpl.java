@@ -51,7 +51,8 @@ public class ModelObjectImpl implements ModelObject {
 		// TODO Auto-generated constructor stub
 	}
 
-    public ModelObjectImpl(ModelObject parent, String type, String friendlyName) {
+    public ModelObjectImpl(String uniqueId, ModelObject parent, String type, String friendlyName) {
+        this.uniqueId = uniqueId;
     	this.parent = parent;
     	this.type = type;
     	this.friendlyName = friendlyName;

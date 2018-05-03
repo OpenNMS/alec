@@ -92,6 +92,10 @@ public class ModelImpl implements Model {
         return root;
     }
 
+    public void setRoot(ModelObject root) {
+        this.root =  root;
+    }
+
     @Override
     public Set<String> getTypes() {
         Set<String> typeSet = new HashSet<>();

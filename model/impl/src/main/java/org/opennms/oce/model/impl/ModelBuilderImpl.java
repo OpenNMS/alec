@@ -14,7 +14,6 @@ import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.v1.schema.Inventory;
 import org.opennms.oce.model.v1.schema.MetaModel;
-import org.opennms.oce.model.v1.schema.ModelObjectDef;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -65,7 +64,7 @@ public class ModelBuilderImpl implements ModelBuilder {
             final Schema schema = getSchema(SCHEMA_RESOURCE);
 
 
-            ModelObjectDef metaModel = getModelObject(schema);
+            MetaModel metaModel = getModelObject(schema);
 
             LOG.info("MetaModels : " + metaModel);
 
@@ -73,21 +72,10 @@ public class ModelBuilderImpl implements ModelBuilder {
 
             LOG.info("Inventory : " + inventory);
 
-            //Temporary commented
-            /*for(MetaModelObjectDef metaModelElement :  metaModel.getMetaModel()) {
-                ModelObjectImpl mo = new ModelObjectImpl();
-                //LOG.info(" Type: " + metaModelElement.getType());
-                //mo.setType(metaModelElement.getMetaModelAttributes().get(0).getType());
-               // mo.setFriendlyName(metaModelElement.getMetaModelAttributes().get(0).getType());
-
-                //model.setObjectById(metaModelElement.getMetaModelAttributes().get(0).getType(), mo);
-                //TODO remove debugging garbage
-                //LOG.info(" type: " + mo.getType());
-
-            }*/
+            buildModel(metaModel, inventory, model);
 
             //TODO remove debugging garbage
-            LOG.info("Model : " + model);
+            LOG.info("Build Model : " + model);
         } catch (IOException e) {
             LOG.error("Model builder failed: ", e);
         } catch (SAXException e) {
@@ -100,15 +88,19 @@ public class ModelBuilderImpl implements ModelBuilder {
         return model;
     }
 
-    private ModelObjectDef getModelObject(final Schema schema) throws JAXBException, IOException {
+    private void buildModel(MetaModel metaModel, Inventory inventory, ModelImpl model) {
+
+    }
+
+    private MetaModel getModelObject(final Schema schema) throws JAXBException, IOException {
         try(InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
             JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
-            MetaModel modelObjectDef = (MetaModel) unmarshaller.unmarshal(is);
+            MetaModel metaModel = (MetaModel) unmarshaller.unmarshal(is);
 
             //do some tweaks here before return
-            return null;
+            return metaModel;
         }
     }
 

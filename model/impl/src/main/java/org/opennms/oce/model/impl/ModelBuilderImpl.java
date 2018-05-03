@@ -102,7 +102,7 @@ public class ModelBuilderImpl implements ModelBuilder {
 
     private ModelObjectDef getModelObject(final Schema schema) throws JAXBException, IOException {
         try(InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
-            JAXBContext ctx = JAXBContext.newInstance(ModelObjectDef.class);
+            JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
             MetaModel modelObjectDef = (MetaModel) unmarshaller.unmarshal(is);

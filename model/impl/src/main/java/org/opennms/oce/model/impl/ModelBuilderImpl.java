@@ -3,16 +3,23 @@ package org.opennms.oce.model.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelBuilder;
+import org.opennms.oce.model.v1.schema.Inventory;
+import org.opennms.oce.model.v1.schema.MetaModel;
+import org.opennms.oce.model.v1.schema.ModelObjectDef;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 
 /*******************************************************************************
@@ -47,21 +54,22 @@ public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
     private final String METAMODEL_RESOURCE = "/metamodel.xml";
     private final String INVENTORY_RESOURCE = "/inventory.xml";
+    private final String SCHEMA_RESOURCE = "/model.xsd";
     private BundleContext bcontext;
 
     @Override
     public Model buildModel()  {
         ModelImpl model = (ModelImpl)ModelImpl.getInstance();
 
+        try {
+            final Schema schema = getSchema(SCHEMA_RESOURCE);
 
-        try (InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
-            JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            MetaModel metaModel = (MetaModel) um.unmarshal(is);
+
+            ModelObjectDef metaModel = getModelObject(schema);
 
             LOG.info("MetaModels : " + metaModel);
 
-            Inventory inventory =  getInventory();
+            Inventory inventory =  getInventory(schema);
 
             LOG.info("Inventory : " + inventory);
 
@@ -82,6 +90,8 @@ public class ModelBuilderImpl implements ModelBuilder {
             LOG.info("Model : " + model);
         } catch (IOException e) {
             LOG.error("Model builder failed: ", e);
+        } catch (SAXException e) {
+            LOG.error("Model builder failed with SAXException: ", e);
         } catch(JAXBException e ) {
             e.printStackTrace();
             LOG.error("Model builder has issues with jaxb: ", e);
@@ -90,27 +100,46 @@ public class ModelBuilderImpl implements ModelBuilder {
         return model;
     }
 
-    private Inventory getInventory() throws JAXBException, IOException {
+    private ModelObjectDef getModelObject(final Schema schema) throws JAXBException, IOException {
+        try(InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
+            JAXBContext ctx = JAXBContext.newInstance(ModelObjectDef.class);
+            Unmarshaller unmarshaller = ctx.createUnmarshaller();
+            unmarshaller.setSchema(schema);
+            MetaModel modelObjectDef = (MetaModel) unmarshaller.unmarshal(is);
+
+            //do some tweaks here before return
+            return null;
+        }
+    }
+
+    private Inventory getInventory(final Schema schema) throws JAXBException, IOException {
         try(InputStream is = getResourceStream(INVENTORY_RESOURCE)) {
             JAXBContext ctx = JAXBContext.newInstance(Inventory.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            Inventory inventory = (Inventory) um.unmarshal(is);
+            Unmarshaller unmarshaller = ctx.createUnmarshaller();
+            unmarshaller.setSchema(schema);
+            Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
 
             //do some tweaks here before return
             return inventory;
         }
     }
 
-    private InputStream getResourceStream(final String resource) throws IOException{
+    private InputStream getResourceStream(final String resource) throws IOException {
         Bundle bundle = bcontext.getBundle();
 
         if(bcontext != null) {
             return bundle.getEntry(resource).openStream();
         } else {
             //This currently doesn't work
-            InputStream inStream = ModelBuilderImpl.class.getResourceAsStream("/metamodel.xml");
+            InputStream inStream = ModelBuilderImpl.class.getResourceAsStream(resource);
             return inStream;
         }
+    }
+
+    private Schema getSchema(final String resource) throws SAXException {
+        Bundle bundle = bcontext.getBundle();
+        final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        return sf.newSchema(bundle.getEntry(resource));
     }
 
     public void setBcontext(BundleContext bcontext) {

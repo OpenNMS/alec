@@ -63,6 +63,7 @@ public class GenerateGraph implements Action {
         String graph = generateGraph();
         Files.write(Paths.get(outputFile ), graph.getBytes());
         System.out.println("Wrote inventory graph to " + outputFile);
+        System.out.println("Convert this to a graph at https://graphs.grevian.org/graph");
         return graph;
     }
     

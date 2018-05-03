@@ -44,4 +44,7 @@ public interface Group {
 
     Set<ModelObject> getMembers();
 
+    void updateOperationalState(ModelObject object, OperationalState previous);
+
+    void updateServiceState(ModelObject object, ServiceState previous);
 }

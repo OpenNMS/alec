@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessType;
 
 @XmlRootElement( name = "meta-model")
-public class MetaModel {
+public class MetaModelContainer {
 
     private ArrayList<MetaModelObjectDef> metaModel;
 

@@ -42,13 +42,13 @@ public interface ModelObject {
 
     Set<ModelObject> getNephews(); // Dependencies
 
-    Group getChildGroup(ModelObject child);
+    Group getChildGroup(String objectType);
     
-    Group getPeerGroup(ModelObject peer);
+    Group getPeerGroup(String objectType);
     
-    Group getNephewGroup(ModelObject nephew);
+    Group getNephewGroup(String objectType);
     
-    Group getUncleGroup(ModelObject uncle);
+    Group getUncleGroup(String objectType);
     
     String getType();
 
@@ -58,6 +58,12 @@ public interface ModelObject {
 
     String getFriendlyName();
     
-    
+    OperationalState getOperationalState();
+
+    void setOperationalState(OperationalState state);
+
+    ServiceState getServiceState();
+
+    void setServiceState(ServiceState state);
 
 }

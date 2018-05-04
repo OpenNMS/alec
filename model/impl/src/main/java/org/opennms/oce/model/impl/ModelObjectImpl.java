@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.opennms.oce.model.api.Group;
 import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.model.api.OperationalState;
+import org.opennms.oce.model.api.ServiceState;
 
 /*******************************************************************************
  * This file is part of OpenNMS(R).
@@ -46,16 +48,19 @@ public class ModelObjectImpl implements ModelObject {
     private Map<String, Group> peers = new HashMap<>(0);
     private Map<String, Group> nephews = new HashMap<>(0);
     private Map<String, Group> uncles = new HashMap<>(0);
+    private OperationalState operationalState = OperationalState.NORMAL;
+    private ServiceState serviceState = ServiceState.IN;
     
     public ModelObjectImpl() {
 		// TODO Auto-generated constructor stub
 	}
 
-    public ModelObjectImpl(ModelObject parent, String type, String friendlyName) {
+    public ModelObjectImpl(String uniqueId, ModelObject parent, String type, String friendlyName) {
+        this.uniqueId = uniqueId;
     	this.parent = parent;
     	this.type = type;
     	this.friendlyName = friendlyName;
-    	if (type != "model") {
+    	if (type != "model" && parent != null) {
         	// Parent must be null for the Root of the Model
             ((ModelObjectImpl) parent).addChild(this);
     	}
@@ -115,6 +120,14 @@ public class ModelObjectImpl implements ModelObject {
         return parent;
     }
 
+    public void setParent(ModelObject parent) {
+        this.parent = parent;
+        if (type != "model") {
+            // Parent must be null for the Root of the Model
+            ((ModelObjectImpl) parent).addChild(this);
+        }
+    }
+
     @Override
     public Set<ModelObject> getChildren() {
         return children.values().stream().map(g -> g.getMembers()).flatMap(x -> x.stream()).collect(Collectors.toSet());
@@ -155,28 +168,25 @@ public class ModelObjectImpl implements ModelObject {
         ((GroupImpl) getGroup(map, member.getType())).addMember(member);
     }
 
-	@Override
-	public Group getChildGroup(ModelObject child) {
-		return children.get(child.getType());
+    @Override
+    public Group getChildGroup(String objectType) {
+        return children.get(objectType);
+    }
 
-	}
+    @Override
+    public Group getPeerGroup(String objectType) {
+        return peers.get(objectType);
+    }
 
-	@Override
-	public Group getPeerGroup(ModelObject peer) {
-		return peers.get(peer.getType());
+    @Override
+    public Group getNephewGroup(String objectType) {
+        return nephews.get(objectType);
+    }
 
-	}
-
-	@Override
-	public Group getNephewGroup(ModelObject nephew) {
-		return nephews.get(nephew.getType());
-
-	}
-
-	@Override
-	public Group getUncleGroup(ModelObject uncle) {
-		return uncles.get(uncle.getType());
-	}
+    @Override
+    public Group getUncleGroup(String objectType) {
+        return uncles.get(objectType);
+    }
 
 	private Group getGroup(Map<String, Group> map, String type) {
 		Group g = map.get(type);
@@ -191,5 +201,57 @@ public class ModelObjectImpl implements ModelObject {
 	public String toString() {
 		return "MO[" + type + "," + uniqueId + "]";
 	}
-	
+
+    @Override
+    public OperationalState getOperationalState() {
+        return operationalState;
+    }
+
+    @Override
+    public void setOperationalState(OperationalState state) {
+        OperationalState previous = operationalState;
+        operationalState = state;
+        propagateOperationalStateChange(previous);
+    }
+
+    @Override
+    public ServiceState getServiceState() {
+        return serviceState;
+    }
+
+    @Override
+    public void setServiceState(ServiceState state) {
+        ServiceState previous = serviceState;
+        serviceState = state;
+        propagateServiceStateChange(previous);
+    }
+
+    private void propagateOperationalStateChange(OperationalState previous) {
+        parent.getChildGroup(type).updateOperationalState(this, previous);
+        updateOperationalState(getPeerGroup(type), previous);
+        updateOperationalState(getUncleGroup(type), previous);
+    }
+
+    private void propagateServiceStateChange(ServiceState previous) {
+        parent.getChildGroup(type).updateServiceState(this, previous);
+        updateServiceState(getPeerGroup(type), previous);
+        updateServiceState(getUncleGroup(type), previous);
+    }
+
+    // Update the Group OpStatus if this ModelObject has a group of that type
+    private void updateOperationalState(Group group, OperationalState previous) {
+        if (group == null) {
+            return;
+        }
+        group.updateOperationalState(this, previous);
+    }
+
+    // Update the Group SvcStatus if this ModelObject has a group of that type
+    private void updateServiceState(Group group, ServiceState previous) {
+        if (group == null) {
+            return;
+        }
+        group.updateServiceState(this, previous);
+    }
+
 }

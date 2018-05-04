@@ -31,6 +31,8 @@ package org.opennms.oce.model.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -41,16 +43,79 @@ import javax.xml.validation.SchemaFactory;
 
 import org.opennms.oce.model.v1.schema.Inventory;
 import org.opennms.oce.model.v1.schema.MetaModel;
+import org.opennms.oce.model.v1.schema.ModelObjectDef;
+import org.opennms.oce.model.v1.schema.ModelObjectEntry;
 import org.xml.sax.SAXException;
 
 
 public class Main {
 
-    public static void main(String[] args) throws JAXBException, SAXException, IOException {
+    private Map<String, Map<String, ModelObjectImpl>> prepareModel(MetaModel metaModel, Inventory inventory) {
+
+        //First, we create buckets of types to fill them later in pass #2
+        Map<String, Map<String, ModelObjectImpl>> typeBuckets = new HashMap<>();
+        for(ModelObjectDef mod : metaModel.getModelObjectDef()) {
+            typeBuckets.put(mod.getType(), new HashMap<>());
+        }
+
+        //Second, we fill up type buckets with inventory items based on their types (no relationships yet)
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+
+            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(moe.getType());
+            typeBucket.put(moe.getId(), new ModelObjectImpl(moe.getId(), null, moe.getType(), moe.getFriendlyName()));
+        }
+
+        //Third, building relationships (we traverse inventory instead of map of maps because there could be one to many relationships)
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+            //Find the entity
+            ModelObjectImpl obj = findObjectByTypeAndId(moe.getId(), moe.getType(), typeBuckets);
+            String parentType = moe.getParentType();
+            String parentId = moe.getParentId();
+
+            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(parentType);
+
+            //skip if the parent is not found
+            if(typeBucket == null) continue;
+
+            ModelObjectImpl parent = typeBucket.get(parentId);
+
+            //skip if the parent is not found
+            if(parent == null) continue;
+
+            obj.setParent(parent);
+
+        }
+
+        return typeBuckets;
+
+        //Setting up root of the model
+        /*ModelObjectImpl parent = new ModelObjectImpl("", null, "Model", "root");
+        model.setRoot(parent);
+
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+
+            ModelObjectImpl moi = new ModelObjectImpl(moe.getId(), parent, moe.getType(), moe.getFriendlyName());
+        }*/
+
+
+    }
+
+    private ModelObjectImpl findObjectByTypeAndId(String uniqueId, String type, Map<String, Map<String, ModelObjectImpl>> typeBuckets) {
+        Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(type);
+        if(typeBucket == null) return null;
+
+        return typeBucket.get(uniqueId);
+
+    }
+
+    public void doSomeStuff()  throws JAXBException, SAXException, IOException  {
+        final MetaModel metaModel;
+        final org.opennms.oce.model.v1.schema.Inventory inventory;
+
         final File file = new File("/Users/skochetkov/dev/opennms/oce/model/impl/src/main/xsd/model.xsd");
         final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final Schema schema = sf.newSchema(file.toURL());
-        final MetaModel metaModel;
+
         try (InputStream is = Main.class.getResourceAsStream("/metamodel.xml")) {
             final JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
@@ -59,13 +124,34 @@ public class Main {
         }
         System.out.println(metaModel);
 
-        final Inventory inventory;
+
         try (InputStream is = Main.class.getResourceAsStream("/inventory.xml")) {
-            final JAXBContext ctx = JAXBContext.newInstance(Inventory.class);
+            final JAXBContext ctx = JAXBContext.newInstance(org.opennms.oce.model.v1.schema.Inventory.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
             inventory = (Inventory) unmarshaller.unmarshal(is);
         }
         System.out.println(inventory);
+
+        ModelImpl model = (ModelImpl)ModelImpl.getInstance();
+
+        //ModelBuilder builder = new ModelBuilderImpl();
+        Map<String, Map<String, ModelObjectImpl>> typeBuckets = prepareModel(metaModel, inventory);
+
+        //Setting up root of the model
+        /*ModelObjectImpl parent = new ModelObjectImpl("", null, "Model", "root");
+        model.setRoot(parent);
+
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+
+            ModelObjectImpl moi = new ModelObjectImpl(moe.getId(), parent, moe.getType(), moe.getFriendlyName());
+        }*/
+
+        System.out.println(model);
+    }
+
+    public static void main(String[] args) throws JAXBException, SAXException, IOException {
+        Main m = new Main();
+        m.doSomeStuff();
     }
 }

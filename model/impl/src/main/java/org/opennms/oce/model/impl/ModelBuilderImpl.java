@@ -2,6 +2,8 @@ package org.opennms.oce.model.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -15,6 +17,7 @@ import org.opennms.oce.model.api.ModelBuilder;
 import org.opennms.oce.model.v1.schema.Inventory;
 import org.opennms.oce.model.v1.schema.MetaModel;
 import org.opennms.oce.model.v1.schema.ModelObjectDef;
+import org.opennms.oce.model.v1.schema.ModelObjectEntry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -52,6 +55,7 @@ import org.xml.sax.SAXException;
 
 public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
+    private Map<String, Map<String, ModelObjectImpl>> typeBuckets = new HashMap<>();
     private final String METAMODEL_RESOURCE = "/metamodel.xml";
     private final String INVENTORY_RESOURCE = "/inventory.xml";
     private final String SCHEMA_RESOURCE = "/model.xsd";
@@ -65,7 +69,7 @@ public class ModelBuilderImpl implements ModelBuilder {
             final Schema schema = getSchema(SCHEMA_RESOURCE);
 
 
-            ModelObjectDef metaModel = getModelObject(schema);
+            MetaModel metaModel = getModelObject(schema);
 
             LOG.info("MetaModels : " + metaModel);
 
@@ -73,21 +77,10 @@ public class ModelBuilderImpl implements ModelBuilder {
 
             LOG.info("Inventory : " + inventory);
 
-            //Temporary commented
-            /*for(MetaModelObjectDef metaModelElement :  metaModel.getMetaModel()) {
-                ModelObjectImpl mo = new ModelObjectImpl();
-                //LOG.info(" Type: " + metaModelElement.getType());
-                //mo.setType(metaModelElement.getMetaModelAttributes().get(0).getType());
-               // mo.setFriendlyName(metaModelElement.getMetaModelAttributes().get(0).getType());
-
-                //model.setObjectById(metaModelElement.getMetaModelAttributes().get(0).getType(), mo);
-                //TODO remove debugging garbage
-                //LOG.info(" type: " + mo.getType());
-
-            }*/
+            buildModel(metaModel, inventory, model);
 
             //TODO remove debugging garbage
-            LOG.info("Model : " + model);
+            LOG.info("Build Model : " + model);
         } catch (IOException e) {
             LOG.error("Model builder failed: ", e);
         } catch (SAXException e) {
@@ -100,15 +93,72 @@ public class ModelBuilderImpl implements ModelBuilder {
         return model;
     }
 
-    private ModelObjectDef getModelObject(final Schema schema) throws JAXBException, IOException {
+    private void buildModel(MetaModel metaModel, Inventory inventory, ModelImpl model) {
+        prepareModel(metaModel, inventory);
+
+        //Setting up root of the model
+        ModelObjectImpl parent = new ModelObjectImpl("Model", null, "Model", "root");
+        model.setRoot(parent);
+
+        // TODO - Build model out of map of maps of relationships (typeBuckets)
+
+    }
+
+    private Map<String, Map<String, ModelObjectImpl>> prepareModel(MetaModel metaModel, Inventory inventory) {
+
+        //First, we create buckets of types to fill them later in pass #2
+        for(ModelObjectDef mod : metaModel.getModelObjectDef()) {
+            typeBuckets.put(mod.getType(), new HashMap<>());
+        }
+
+        //Second, we fill up type buckets with inventory items based on their types (no relationships yet)
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+
+            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(moe.getType());
+            typeBucket.put(moe.getId(), new ModelObjectImpl(moe.getId(), null, moe.getType(), moe.getFriendlyName()));
+        }
+
+        //Third, building relationships (we traverse inventory instead of map of maps because there could be one to many relationships)
+        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+            //Find the entity
+            ModelObjectImpl obj = findObjectByTypeAndId(moe.getId(), moe.getType());
+            String parentType = moe.getParentType();
+            String parentId = moe.getParentId();
+
+            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(parentType);
+
+            //skip if the parent is not found
+            if(typeBucket == null) continue;
+
+            ModelObjectImpl parent = typeBucket.get(parentId);
+
+            //skip if the parent is not found
+            if(parent == null) continue;
+
+            obj.setParent(parent);
+
+        }
+
+        return typeBuckets;
+    }
+
+    private ModelObjectImpl findObjectByTypeAndId(String uniqueId, String type) {
+        Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(type);
+        if(typeBucket == null) return null;
+
+        return typeBucket.get(uniqueId);
+
+    }
+
+    private MetaModel getModelObject(final Schema schema) throws JAXBException, IOException {
         try(InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
             JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
             Unmarshaller unmarshaller = ctx.createUnmarshaller();
             unmarshaller.setSchema(schema);
-            MetaModel modelObjectDef = (MetaModel) unmarshaller.unmarshal(is);
+            MetaModel metaModel = (MetaModel) unmarshaller.unmarshal(is);
 
             //do some tweaks here before return
-            return null;
+            return metaModel;
         }
     }
 

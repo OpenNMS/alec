@@ -2,6 +2,7 @@ package org.opennms.oce.model.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,9 +40,9 @@ import org.opennms.oce.model.api.ServiceState;
  *******************************************************************************/
 
 public class ModelObjectImpl implements ModelObject {
-    private String type;
+    private final String type;
     private String subType;
-    private String uniqueId;
+    private final String id;
     private String friendlyName;
     private ModelObject parent;
     private Map<String, Group> children = new HashMap<>(0);
@@ -51,30 +52,17 @@ public class ModelObjectImpl implements ModelObject {
     private OperationalState operationalState = OperationalState.NORMAL;
     private ServiceState serviceState = ServiceState.IN;
     
-    public ModelObjectImpl() {
-		// TODO Auto-generated constructor stub
-	}
 
-    public ModelObjectImpl(String uniqueId, ModelObject parent, String type, String friendlyName) {
-        this.uniqueId = uniqueId;
-    	this.parent = parent;
-    	this.type = type;
-    	this.friendlyName = friendlyName;
-    	if (type != "model" && parent != null) {
-        	// Parent must be null for the Root of the Model
-            ((ModelObjectImpl) parent).addChild(this);
-    	}
+    public ModelObjectImpl(String type, String id) {
+        this.type = Objects.requireNonNull(type);
+        this.id = Objects.requireNonNull(id);
     }
-    
+
     /**
      * non-null
      */
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     /**
@@ -96,11 +84,7 @@ public class ModelObjectImpl implements ModelObject {
      */
     @Override
     public String getId(){
-        return uniqueId;
-    }
-
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
+        return id;
     }
 
     /**
@@ -199,7 +183,7 @@ public class ModelObjectImpl implements ModelObject {
 
 	@Override
 	public String toString() {
-		return "MO[" + type + "," + uniqueId + "]";
+		return "MO[" + type + "," + id + "]";
 	}
 
     @Override

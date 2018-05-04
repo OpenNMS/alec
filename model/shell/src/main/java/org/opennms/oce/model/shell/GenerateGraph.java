@@ -79,8 +79,16 @@ public class GenerateGraph implements Action {
     private void walkModel(ModelObject parent, Set<ModelObject> children, StringBuilder sb) {
         for (ModelObject child : children) {
             sb.append("\n\t");
-            sb.append(parent.getFriendlyName()).append(" -- ").append(child.getFriendlyName()).append(";");
+            sb.append(getDisplayName(parent)).append(" -- ").append(getDisplayName(child)).append(";");
             walkModel(child, child.getChildren(), sb);
+        }
+    }
+
+    private String getDisplayName(ModelObject mo) {
+        if (mo.getFriendlyName() != null) {
+            return mo.getFriendlyName();
+        } else {
+            return String.format("%s(%s)", mo.getId(), mo.getType());
         }
     }
 }

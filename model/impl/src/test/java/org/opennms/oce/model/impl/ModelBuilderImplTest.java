@@ -52,6 +52,7 @@ public class ModelBuilderImplTest {
         ModelBuilder modelBuilder = new ModelBuilderImpl();
         Model model = modelBuilder.buildModel();
 
+        System.out.println("Types: " + model.getTypes());
 
         assertThat(model.getTypes(), hasItem("Device"));
         assertThat(model.getTypes(), hasItem("Link"));
@@ -64,7 +65,7 @@ public class ModelBuilderImplTest {
         assertThat(root.getParent(), nullValue());
 
         // as defined in the inventory
-        assertThat(root.getId(), equalTo("test"));
+        assertThat(root.getId(), equalTo(ModelBuilderImpl.MODEL_ROOT_ID));
 
         Set<ModelObject> rootChildren = root.getChildren();
         assertThat(rootChildren, hasSize(2));
@@ -89,7 +90,7 @@ public class ModelBuilderImplTest {
                 .findFirst()
                 .get();
 
-        // Get back to the link from the port
+        // Get back to the port from the link
         assertThat(rootLinkPeerA.getPeers(), hasSize(1));
         assertThat(rootLinkPeerZ.getPeers(), hasSize(1));
 

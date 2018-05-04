@@ -1,30 +1,3 @@
-package org.opennms.oce.model.impl;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.v1.schema.Inventory;
-import org.opennms.oce.model.v1.schema.MetaModel;
-import org.opennms.oce.model.v1.schema.ModelObjectDef;
-import org.opennms.oce.model.v1.schema.ModelObjectEntry;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
-
-
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
@@ -53,146 +26,184 @@ import org.xml.sax.SAXException;
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.oce.model.impl;
+
+import static org.opennms.oce.model.impl.ModelObjectKey.key;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelBuilder;
+import org.opennms.oce.model.v1.schema.Inventory;
+import org.opennms.oce.model.v1.schema.MetaModel;
+import org.opennms.oce.model.v1.schema.ModelObjectEntry;
+import org.opennms.oce.model.v1.schema.PeerRef;
+import org.opennms.oce.model.v1.schema.RelativeRef;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+
 public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
-    private Map<String, Map<String, ModelObjectImpl>> typeBuckets = new HashMap<>();
-    private final String METAMODEL_RESOURCE = "/metamodel.xml";
-    private final String INVENTORY_RESOURCE = "/inventory.xml";
-    private final String SCHEMA_RESOURCE = "/model.xsd";
-    private BundleContext bcontext;
+
+    public static final String MODEL_ROOT_TYPE = "Model";
+    public static final String MODEL_ROOT_ID = "model";
+
+    private static final String METAMODEL_RESOURCE = "/metamodel.xml";
+    private static final String INVENTORY_RESOURCE = "/inventory.xml";
+    private static final String SCHEMA_RESOURCE = "/model.v1.xsd";
+
+    private final BundleContext bundleContext;
+    private final Schema modelSchema;
+    private final JAXBContext jaxbContext;
+
+    public ModelBuilderImpl() {
+        this(null);
+    }
+
+    public ModelBuilderImpl(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+
+        // Pre-emptively the schema and JAXB context
+        final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            modelSchema = sf.newSchema(getResource(SCHEMA_RESOURCE));
+            jaxbContext = JAXBContext.newInstance(MetaModel.class, Inventory.class);
+        } catch (SAXException|JAXBException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
-    public Model buildModel()  {
-        ModelImpl model = (ModelImpl)ModelImpl.getInstance();
-
+    public Model buildModel() {
+        // Load the meta-model and inventory
+        final MetaModel metaModel;
+        final Inventory inventory;
         try {
-            final Schema schema = getSchema(SCHEMA_RESOURCE);
+            metaModel = getModelObject();
+            LOG.info("Loaded meta-model with {} object.", metaModel.getModelObjectDef().size());
+            LOG.debug("Meta-model: {}", metaModel);
 
-
-            MetaModel metaModel = getModelObject(schema);
-
-            LOG.info("MetaModels : " + metaModel);
-
-            Inventory inventory =  getInventory(schema);
-
-            LOG.info("Inventory : " + inventory);
-
-            buildModel(metaModel, inventory, model);
-
-            //TODO remove debugging garbage
-            LOG.info("Build Model : " + model);
-        } catch (IOException e) {
-            LOG.error("Model builder failed: ", e);
-        } catch (SAXException e) {
-            LOG.error("Model builder failed with SAXException: ", e);
-        } catch(JAXBException e ) {
-            e.printStackTrace();
-            LOG.error("Model builder has issues with jaxb: ", e);
+            inventory =  getInventory();
+            LOG.info("Loaded inventory with {} objects.", inventory.getModelObjectEntry().size());
+            LOG.debug("Inventory: {}", inventory);
+        } catch (IOException|JAXBException e) {
+            LOG.error("Model loading failed: ", e);
+            throw new RuntimeException(e);
         }
 
-        return model;
-    }
+        // Create the initial model objects and index them by type/id
+        final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.getModelObjectEntry().stream()
+                .collect(Collectors.toMap(moe -> key(moe.getType(), moe.getId()), ModelBuilderImpl::toModelObject));
 
-    private void buildModel(MetaModel metaModel, Inventory inventory, ModelImpl model) {
-        prepareModel(metaModel, inventory);
-
-        //Setting up root of the model
-        ModelObjectImpl parent = new ModelObjectImpl("Model", null, "Model", "root");
-        model.setRoot(parent);
-
-        // TODO - Build model out of map of maps of relationships (typeBuckets)
-
-    }
-
-    private Map<String, Map<String, ModelObjectImpl>> prepareModel(MetaModel metaModel, Inventory inventory) {
-
-        //First, we create buckets of types to fill them later in pass #2
-        for(ModelObjectDef mod : metaModel.getModelObjectDef()) {
-            typeBuckets.put(mod.getType(), new HashMap<>());
+        // Validate
+        if (mosByKey.size() != inventory.getModelObjectEntry().size()) {
+            throw new IllegalStateException("Duplicate type/id found in inventory!"); // TODO: Help identify the dupe
         }
 
-        //Second, we fill up type buckets with inventory items based on their types (no relationships yet)
-        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
+        // Now build out the relationships
+        inventory.getModelObjectEntry().forEach(moe -> {
+            final ModelObjectKey key = key(moe.getType(), moe.getId());
+            final ModelObjectImpl mo = mosByKey.get(key);
+            if (mo == null) {
+                // Should not happen
+                throw new IllegalStateException("Oops. Cannot find an MO with key: " + key);
+            }
 
-            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(moe.getType());
-            typeBucket.put(moe.getId(), new ModelObjectImpl(moe.getId(), null, moe.getType(), moe.getFriendlyName()));
+            if (MODEL_ROOT_TYPE.equals(mo.getType())) {
+                // This is the root element, nothing else to do here
+                return;
+            }
+
+            // Setup the parent
+            final ModelObjectKey parentKey = key(moe.getParentType(), moe.getParentId());
+            final ModelObjectImpl parentMo = mosByKey.get(parentKey);
+            if (parentMo == null) {
+                throw new IllegalStateException("Oops. Cannot find parent MO with key: " + parentKey + " on MO with key: " + key);
+            }
+            mo.setParent(parentMo);
+            parentMo.addChild(mo);
+
+            // Setup the peers
+            for (PeerRef peerRef : moe.getPeerRef()) {
+                final ModelObjectKey peerKey = key(peerRef.getType(), peerRef.getId());
+                final ModelObjectImpl peerMo = mosByKey.get(peerKey);
+                if (peerMo == null) {
+                    throw new IllegalStateException("Oops. Cannot find peer MO with key: " + peerKey + " on MO with key: " + key);
+                }
+                mo.addPeer(peerMo);
+                peerMo.addPeer(mo);
+            }
+
+            // Setup the relatives
+            for (RelativeRef relativeRef : moe.getRelativeRef()) {
+                final ModelObjectKey relativeKey = key(relativeRef.getType(), relativeRef.getId());
+                final ModelObjectImpl relativeMo = mosByKey.get(relativeKey);
+                if (relativeMo == null) {
+                    throw new IllegalStateException("Oops. Cannot find relative MO with key: " + relativeRef + " on MO with key: " + key);
+                }
+                mo.addUncle(relativeMo);
+                relativeMo.addNephew(mo);
+            }
+        });
+
+        // Find the root
+        final ModelObjectImpl rootMo = mosByKey.get(key(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
+        if (rootMo == null) {
+            throw new IllegalStateException("Inventory must contain a single object of type '"
+                    + MODEL_ROOT_TYPE + "' with id '" + MODEL_ROOT_ID + "'");
         }
 
-        //Third, building relationships (we traverse inventory instead of map of maps because there could be one to many relationships)
-        for(ModelObjectEntry moe : inventory.getModelObjectEntry()) {
-            //Find the entity
-            ModelObjectImpl obj = findObjectByTypeAndId(moe.getId(), moe.getType());
-            String parentType = moe.getParentType();
-            String parentId = moe.getParentId();
-
-            Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(parentType);
-
-            //skip if the parent is not found
-            if(typeBucket == null) continue;
-
-            ModelObjectImpl parent = typeBucket.get(parentId);
-
-            //skip if the parent is not found
-            if(parent == null) continue;
-
-            obj.setParent(parent);
-
-        }
-
-        return typeBuckets;
+        // Create a new model instance
+        return new ModelImpl(rootMo);
     }
 
-    private ModelObjectImpl findObjectByTypeAndId(String uniqueId, String type) {
-        Map<String, ModelObjectImpl> typeBucket = typeBuckets.get(type);
-        if(typeBucket == null) return null;
-
-        return typeBucket.get(uniqueId);
-
+    private static ModelObjectImpl toModelObject(ModelObjectEntry moe) {
+        final ModelObjectImpl mo = new ModelObjectImpl(moe.getType(), moe.getId());
+        mo.setFriendlyName(moe.getFriendlyName());
+        return mo;
     }
 
-    private MetaModel getModelObject(final Schema schema) throws JAXBException, IOException {
-        try(InputStream is = getResourceStream(METAMODEL_RESOURCE)) {
-            JAXBContext ctx = JAXBContext.newInstance(MetaModel.class);
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            unmarshaller.setSchema(schema);
-            MetaModel metaModel = (MetaModel) unmarshaller.unmarshal(is);
-
-            //do some tweaks here before return
-            return metaModel;
+    private MetaModel getModelObject() throws JAXBException, IOException {
+        try (InputStream is = getResource(METAMODEL_RESOURCE).openStream()) {
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            unmarshaller.setSchema(modelSchema);
+            return (MetaModel) unmarshaller.unmarshal(is);
         }
     }
 
-    private Inventory getInventory(final Schema schema) throws JAXBException, IOException {
-        try(InputStream is = getResourceStream(INVENTORY_RESOURCE)) {
-            JAXBContext ctx = JAXBContext.newInstance(Inventory.class);
-            Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            unmarshaller.setSchema(schema);
-            Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
-
-            //do some tweaks here before return
-            return inventory;
+    private Inventory getInventory() throws JAXBException, IOException {
+        try (InputStream is = getResource(INVENTORY_RESOURCE).openStream()) {
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            unmarshaller.setSchema(modelSchema);
+            return (Inventory) unmarshaller.unmarshal(is);
         }
     }
 
-    private InputStream getResourceStream(final String resource) throws IOException {
-        Bundle bundle = bcontext.getBundle();
-
-        if(bcontext != null) {
-            return bundle.getEntry(resource).openStream();
+    private URL getResource(final String resource) {
+        if (bundleContext != null) {
+            return bundleContext.getBundle().getResource(resource);
         } else {
-            //This currently doesn't work
-            InputStream inStream = ModelBuilderImpl.class.getResourceAsStream(resource);
-            return inStream;
+            // No bundle context is specified, use resources relative to the current class
+            return ModelBuilderImpl.class.getResource(resource);
         }
     }
 
-    private Schema getSchema(final String resource) throws SAXException {
-        Bundle bundle = bcontext.getBundle();
+    private Schema getSchema() throws SAXException {
         final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        return sf.newSchema(bundle.getEntry(resource));
+        return sf.newSchema(getResource(SCHEMA_RESOURCE));
     }
 
-    public void setBcontext(BundleContext bcontext) {
-        this.bcontext = bcontext;
-    }
 }

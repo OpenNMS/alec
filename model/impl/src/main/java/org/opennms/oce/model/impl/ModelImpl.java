@@ -1,13 +1,3 @@
-package org.opennms.oce.model.impl;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
-
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
@@ -36,55 +26,47 @@ import org.opennms.oce.model.api.ModelObject;
  *     http://www.opennms.com/
  *******************************************************************************/
 
+package org.opennms.oce.model.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelObject;
+
 public class ModelImpl implements Model {
 
-    private Map<String, ModelObject> modelMap = new HashMap<>();
-    private ModelObject root;
-    private static Model model;
+    private final Map<String, Map<String, ModelObject>> mosByTypeAndById = new HashMap<>();
+    private final ModelObject root;
 
-    /**
-     * Making impl singleton
-     */
-    private ModelImpl() {}
-
-    public static Model getInstance() {
-        if(model == null)
-            model = new ModelImpl();
-
-        return model;
+    public ModelImpl(ModelObject root) {
+        this.root = Objects.requireNonNull(root);
+        // Index the tree
+        index(root);
     }
 
     @Override
     public ModelObject getObjectById(String id) {
-
-        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
-        {
-            if(entry.getValue().getId().equals(id))
-               return entry.getValue();
+        // FIXME: Are the ids globally unique, or only unique by type? Should probably only be by type
+        for (String types : mosByTypeAndById.keySet()) {
+            final ModelObject mo = mosByTypeAndById.get(types).get(id);
+            if (mo != null) {
+                return mo;
+            }
         }
-
         return null;
     }
 
-    public void setObjectById(String id, ModelObject obj) {
-
-        modelMap.put(id, obj);
-    }
-
-    /**
-     * If type does not exist, return null
-     */
     @Override
     public Map<String, ModelObject> getObjectsByIdForType(String type) {
+        return mosByTypeAndById.get(type);
+    }
 
-        Map<String, ModelObject> byIdForType = new HashMap<>();
-
-        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
-        {
-            if(entry.getValue().getType().equals(type))
-                byIdForType.put(entry.getKey(), entry.getValue());
-        }
-        return byIdForType;
+    @Override
+    public Set<String> getTypes() {
+        return mosByTypeAndById.keySet();
     }
 
     @Override
@@ -92,27 +74,14 @@ public class ModelImpl implements Model {
         return root;
     }
 
-    public void setRoot(ModelObject root) {
-        this.root =  root;
-    }
+    private void index(ModelObject mo) {
+        // Index
+        final Map<String, ModelObject> mosById = mosByTypeAndById.computeIfAbsent(mo.getType(), e -> new HashMap<>());
+        mosById.put(mo.getId(), mo);
 
-    @Override
-    public Set<String> getTypes() {
-        Set<String> typeSet = new HashSet<>();
-        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
-        {
-            typeSet.add(entry.getValue().getType());
+        // Recurse
+        for (ModelObject child : mo.getChildren()) {
+            index(child);
         }
-        return typeSet;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, ModelObject> entry : modelMap.entrySet())
-        {
-            sb.append("Model object: " + entry.getKey() + " with type: " + entry.getValue().getType() + "\n");
-        }
-        return sb.toString();
     }
 }

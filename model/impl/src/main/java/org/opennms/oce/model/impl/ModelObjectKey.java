@@ -28,50 +28,41 @@
 
 package org.opennms.oce.model.impl;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+public class ModelObjectKey {
 
-@XmlRootElement( name = "inventory")
-public class Inventory {
+    private final List<String> tokens;
 
-    private ArrayList<InventoryElement> inventoryElements;
-
-    @XmlElement(name = "model-object")
-    public void setInventoryElements(ArrayList<InventoryElement> inventoryElements) {
-        this.inventoryElements = inventoryElements;
+    public static ModelObjectKey key(String... tokens) {
+        return new ModelObjectKey(tokens);
     }
 
-    public ArrayList<InventoryElement> getInventoryElements() {
-        return inventoryElements;
+    public ModelObjectKey(String... tokens) {
+        this.tokens = Arrays.asList(tokens);
+    }
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ModelObjectKey that = (ModelObjectKey) o;
+        return Objects.equals(tokens, that.tokens);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tokens);
     }
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder();
-        for(InventoryElement mo : getInventoryElements()) {
-            sb.append(" Element : " + "\n");
-            sb.append("    Type : " + mo.getType() + "\n");
-        }
-        return sb.toString();
-    }
-}
-
-@XmlAccessorType(XmlAccessType.FIELD)
-class InventoryElement {
-    @XmlAttribute
-    private String type;
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
+        return tokens.toString();
     }
 }

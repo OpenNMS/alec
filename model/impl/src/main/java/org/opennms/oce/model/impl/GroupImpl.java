@@ -88,6 +88,7 @@ public class GroupImpl implements Group {
         assertInGroup(object);
         incrementOperationStatus(object.getOperationalState());
         decrementOperationStatus(previous);
+        validateState();
     }
 
     @Override
@@ -99,19 +100,21 @@ public class GroupImpl implements Group {
 
     public void addMember(ModelObject member) {
         // TODO - assert NOT in group?
-        members.add(member);
-        if (member.getServiceState() == ServiceState.IN) {
-            incrementOperationStatus(member.getOperationalState());
+        if(members.add(member)) {
+            if (member.getServiceState() == ServiceState.IN) {
+                incrementOperationStatus(member.getOperationalState());
+            }
         }
     }
 
     public void removeMember(ModelObject member) {
         assertInGroup(member);
-        members.remove(member);
-        // TODO - maybe serviceState needs to be tracked internally in the group.
-        // Otherwise, if a modelObject fails to report change, the opStatus changes can be corrupted. 
-        if (member.getServiceState() == ServiceState.IN) {
-            decrementOperationStatus(member.getOperationalState());
+        if(members.remove(member)) {
+            // TODO - maybe serviceState needs to be tracked internally in the group.
+            // Otherwise, if a modelObject fails to report change, the opStatus changes can be corrupted.
+            if (member.getServiceState() == ServiceState.IN) {
+                decrementOperationStatus(member.getOperationalState());
+            }
         }
     }
 
@@ -152,6 +155,12 @@ public class GroupImpl implements Group {
     private void assertInGroup(ModelObject object) {
         if (!members.contains(object)) {
             throw new InvalidParameterException("invalid invocation from a modelObject not in the group");
+        }
+    }
+
+    private void validateState() {
+        if (members.size() != normalStateCount + nonServiceAffectingCount + serviceAffectingCount) {
+            throw new IllegalStateException("State counts don't add up to total group member size.");
         }
     }
 

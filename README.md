@@ -22,6 +22,40 @@ Run the Karaf container:
 ./bin/karaf
 ```
 
+In the Karaf shell, add the features repository:
+```
+feature:repo-add mvn:org.opennms.oce/oce-features/1.0.0-SNAPSHOT/xml
+```
+
+### Correlation Model Testing
+
+Optionally point to your meta-model and inventory, if none is provided a simple example will be used:
+```
+config:edit org.opennms.oce.model
+config:property-set metamodelPath /tmp/cpn.metamodel.xml
+config:property-set inventoryPath /tmp/cpn.inventory.xml
+config:update
+```
+
+Now load the model related feature:
+```
+feature:install oce-model
+```
+
+Generate the graph:
+```
+oce:generateGraph -o /tmp/cpn.graph.dot
+```
+
+From a Linux shell, generate a visual representation of the graph:
+```
+dot -Tpng /tmp/cpn.graph.dot -o /tmp/cpn.graph.png
+xdg-open /tmp/cpn.graph.png
+```
+
+### OpenNMS Integration
+
+
 In the Karaf shell, point to your Kafka instance:
 ```
 config:edit org.opennms.oce.connector.client.kafka.streams
@@ -41,7 +75,6 @@ config:update
 
 From a shell, add the features repository, and install the feature:
 ```
-feature:repo-add mvn:org.opennms.oce/oce-features/1.0.0-SNAPSHOT/xml
 feature:install oce
 ```
 

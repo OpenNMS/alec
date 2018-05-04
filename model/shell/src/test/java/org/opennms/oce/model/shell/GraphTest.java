@@ -17,8 +17,8 @@ public class GraphTest {
         String dotGraph = generator.generateGraph();
 
         // Verify some known relationships
-        assertThat(dotGraph, containsString("Test Model -- n1(Device);"));
-        assertThat(dotGraph, containsString("n1(Device) -- n1-c2(Card);"));
+        assertThat(dotGraph, containsString("\"Test Model\" -- \"n1(Device)\";"));
+        assertThat(dotGraph, containsString("\"n1(Device)\" -- \"n1-c2(Card)\";"));
     }
 
 }

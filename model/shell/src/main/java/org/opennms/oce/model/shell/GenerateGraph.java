@@ -85,11 +85,21 @@ public class GenerateGraph implements Action {
     }
 
     private String getDisplayName(ModelObject mo) {
+        String effectiveName;
         if (mo.getFriendlyName() != null) {
-            return mo.getFriendlyName();
+            effectiveName = mo.getFriendlyName();
         } else {
-            return String.format("%s(%s)", mo.getId(), mo.getType());
+            effectiveName = String.format("%s(%s)", mo.getId(), mo.getType());
         }
+
+        // Remove any existing double quotes
+        effectiveName = effectiveName.replaceAll("\"", "");
+
+        // Wrap the string in quotes
+        effectiveName = "\"" + effectiveName + "\"";
+
+        // We're safe now
+        return effectiveName;
     }
 }
 

@@ -30,8 +30,10 @@ package org.opennms.oce.model.impl;
 
 import static org.opennms.oce.model.impl.ModelObjectKey.key;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Strings;
+
 public class ModelBuilderImpl implements ModelBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
 
@@ -68,6 +72,9 @@ public class ModelBuilderImpl implements ModelBuilder {
     private final BundleContext bundleContext;
     private final Schema modelSchema;
     private final JAXBContext jaxbContext;
+
+    private String metamodelPath = METAMODEL_RESOURCE;
+    private String inventoryPath = INVENTORY_RESOURCE;
 
     public ModelBuilderImpl() {
         this(null);
@@ -105,13 +112,9 @@ public class ModelBuilderImpl implements ModelBuilder {
         }
 
         // Create the initial model objects and index them by type/id
+        // NOTE: This will throw a IllegalStateException if a duplicate key is found
         final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.getModelObjectEntry().stream()
                 .collect(Collectors.toMap(moe -> key(moe.getType(), moe.getId()), ModelBuilderImpl::toModelObject));
-
-        // Validate
-        if (mosByKey.size() != inventory.getModelObjectEntry().size()) {
-            throw new IllegalStateException("Duplicate type/id found in inventory!"); // TODO: Help identify the dupe
-        }
 
         // Now build out the relationships
         inventory.getModelObjectEntry().forEach(moe -> {
@@ -170,6 +173,30 @@ public class ModelBuilderImpl implements ModelBuilder {
         return new ModelImpl(rootMo);
     }
 
+    public String getMetamodelPath() {
+        return metamodelPath;
+    }
+
+    public void setMetamodelPath(String metamodelPath) {
+        if (Strings.isNullOrEmpty(metamodelPath)) {
+            this.metamodelPath = METAMODEL_RESOURCE;
+        } else {
+            this.metamodelPath = metamodelPath;
+        }
+    }
+
+    public String getInventoryPath() {
+        return inventoryPath;
+    }
+
+    public void setInventoryPath(String inventoryPath) {
+        if (Strings.isNullOrEmpty(inventoryPath)) {
+            this.inventoryPath = INVENTORY_RESOURCE;
+        } else {
+            this.inventoryPath = inventoryPath;
+        }
+    }
+
     private static ModelObjectImpl toModelObject(ModelObjectEntry moe) {
         final ModelObjectImpl mo = new ModelObjectImpl(moe.getType(), moe.getId());
         mo.setFriendlyName(moe.getFriendlyName());
@@ -177,7 +204,7 @@ public class ModelBuilderImpl implements ModelBuilder {
     }
 
     private MetaModel getModelObject() throws JAXBException, IOException {
-        try (InputStream is = getResource(METAMODEL_RESOURCE).openStream()) {
+        try (InputStream is = getResource(metamodelPath).openStream()) {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(modelSchema);
             return (MetaModel) unmarshaller.unmarshal(is);
@@ -185,7 +212,7 @@ public class ModelBuilderImpl implements ModelBuilder {
     }
 
     private Inventory getInventory() throws JAXBException, IOException {
-        try (InputStream is = getResource(INVENTORY_RESOURCE).openStream()) {
+        try (InputStream is = getResource(inventoryPath).openStream()) {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             unmarshaller.setSchema(modelSchema);
             return (Inventory) unmarshaller.unmarshal(is);
@@ -193,17 +220,31 @@ public class ModelBuilderImpl implements ModelBuilder {
     }
 
     private URL getResource(final String resource) {
-        if (bundleContext != null) {
-            return bundleContext.getBundle().getResource(resource);
-        } else {
-            // No bundle context is specified, use resources relative to the current class
-            return ModelBuilderImpl.class.getResource(resource);
+        // First attempt to load the resource from the filesystem
+        final File file = new File(resource);
+        if (file.canRead()) {
+            try {
+                return file.toURI().toURL();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
         }
-    }
 
-    private Schema getSchema() throws SAXException {
-        final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        return sf.newSchema(getResource(SCHEMA_RESOURCE));
+        // Next, attempt to load the resource from the classpath
+        final URL classpathResourceUrl = getClass().getResource(resource);
+        if (classpathResourceUrl != null) {
+            return classpathResourceUrl;
+        }
+
+        // Finally, if a bundle context is set, then try loading it from there
+        if (bundleContext != null) {
+            final URL bundleResourceUrl = bundleContext.getBundle().getResource(resource);
+            if (bundleResourceUrl != null) {
+                return bundleResourceUrl;
+            }
+        }
+
+        throw new IllegalArgumentException("Failed to locate resource on the filesystem and in the classpath: " + resource);
     }
 
 }

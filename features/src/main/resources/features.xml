@@ -18,6 +18,10 @@
         <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-runtime/0.11.1</bundle>
         <bundle dependency="true">mvn:javax.xml.bind/jaxb-api/2.3.0</bundle>
         <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-core/2.3.0</bundle>
+
+        <bundle>mvn:org.apache.commons/commons-csv/${commons.csv.version}</bundle>
+        <bundle>wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
+
     </feature>
 
     <feature name="oce-connector" description="OCE :: Connector" version="${project.version}">

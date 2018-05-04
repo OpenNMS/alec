@@ -42,6 +42,11 @@ Now load the model related feature:
 feature:install oce-model
 ```
 
+Playback some state changes:
+```
+oce:state-manager -i /tmp/cpn.events.csv
+```
+
 Generate the graph:
 ```
 oce:generateGraph -o /tmp/cpn.graph.dot

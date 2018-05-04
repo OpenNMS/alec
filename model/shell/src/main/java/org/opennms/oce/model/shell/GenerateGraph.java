@@ -30,14 +30,17 @@ package org.opennms.oce.model.shell;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.api.ModelBuilder;
+import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
 
 @Command(scope = "oce", name = "generateGraph", description="Generate DOT file of inventory graph.")
@@ -45,17 +48,19 @@ import org.opennms.oce.model.api.ModelObject;
 public class GenerateGraph implements Action {
 	
     @Reference
-    private ModelBuilder builder;
+    private Model model;
     
+    private Map<String, String> nodes = new HashMap<>();
+
     @Option(name="-o", description="Output file")
     private String outFile;
 
     public GenerateGraph() {
 	}
 
-	public GenerateGraph(ModelBuilder builder) {
-		this.builder = builder;
-	}
+    public GenerateGraph(Model model) {
+        this.model = model;
+    }
 
     @Override
     public Object execute() throws Exception {
@@ -69,19 +74,77 @@ public class GenerateGraph implements Action {
     
     public String generateGraph() {
         StringBuilder sb = new StringBuilder("graph {");
-        sb.append("\r\t");
-        ModelObject root = builder.buildModel().getRoot();
-        walkModel(root, root.getChildren(), sb);
+        ModelObject root = model.getRoot();
+        walkChildren(root, root.getChildren(), sb);
+        sb.append("\n");
+        sb.append(nodes.values().stream().collect(Collectors.joining("\n")));
         sb.append("\n}\n");
         return sb.toString();
     }
     
-    private void walkModel(ModelObject parent, Set<ModelObject> children, StringBuilder sb) {
+    private void walkChildren(ModelObject parent, Set<ModelObject> children, StringBuilder sb) {
         for (ModelObject child : children) {
-            sb.append("\n\t");
-            sb.append(getDisplayName(parent)).append(" -- ").append(getDisplayName(child)).append(";");
-            walkModel(child, child.getChildren(), sb);
+            // Collect Each node description - uniquely via the map
+            nodes.put(getDisplayName(parent), getNode(parent));
+            nodes.put(getDisplayName(child), getNode(child));
+            // Add an edge for each relationship
+            sb.append(getEdge(parent, child));
+            // Add Dependency and Peer relations
+            sb.append(getNonChildRelations(child));
+            // recurse through each child.
+            walkChildren(child, child.getChildren(), sb);
         }
+    }
+
+    private String getNonChildRelations(ModelObject object) {
+        //
+        StringBuilder sb = new StringBuilder();
+        for (ModelObject peer : object.getPeers()) {
+            nodes.put(getDisplayName(peer), getNode(peer));
+            sb.append(getPeerEdge(object, peer));
+        }
+        for (ModelObject peer : object.getUncles()) {
+            nodes.put(getDisplayName(peer), getNode(peer));
+            sb.append(getDependentEdge(object, peer));
+        }
+        return sb.toString();
+    }
+
+    // An edge looks like "CARD_01 -- PORT_01;"
+    private String getEdge(ModelObject parent, ModelObject child) {
+        return "\n  " + getDisplayName(parent) + " -- " + getDisplayName(child) + ";";
+    }
+
+    // A PEER edge is colored BLUE
+    private String getPeerEdge(ModelObject object, ModelObject peer) {
+        return "\n  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"blue\"];";
+    }
+
+    // A UNCLE/DEPENDANT edge is colored ORANGE
+    private String getDependentEdge(ModelObject object, ModelObject peer) {
+        return "\n  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"orange\"];";
+    }
+
+    // A node definition looks like "CARD_02[color=green];"
+    private String getNode(ModelObject object) {
+        String color = "white";
+        switch (object.getOperationalState()) {
+        case NORMAL:
+            color = "green";
+            break;
+        case NSA:
+            color = "orange1";
+            break;
+        case SA:
+            color = "red";
+            break;
+        case UNKNOWN:
+        default:
+            // Y'atta notice this....
+            color = "pink";
+            break;
+        }
+        return "  " + getDisplayName(object) + "[color=" + color + "];";
     }
 
     private String getDisplayName(ModelObject mo) {

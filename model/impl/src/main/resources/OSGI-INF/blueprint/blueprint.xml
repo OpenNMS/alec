@@ -10,11 +10,17 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <service interface="org.opennms.oce.model.api.ModelBuilder">
-        <bean class="org.opennms.oce.model.impl.ModelBuilderImpl">
-            <argument ref="blueprintBundleContext"/>
-            <property name="metamodelPath" value="${metamodelPath}"/>
-            <property name="inventoryPath" value="${inventoryPath}"/>
-        </bean>
-    </service>
+    <!-- Create and expose the builder -->
+    <bean id="modelBuilder" class="org.opennms.oce.model.impl.ModelBuilderImpl">
+        <argument ref="blueprintBundleContext"/>
+        <property name="metamodelPath" value="${metamodelPath}"/>
+        <property name="inventoryPath" value="${inventoryPath}"/>
+    </bean>
+    <service ref="modelBuilder" interface="org.opennms.oce.model.api.ModelBuilder"/>
+
+    <!-- Create and expose an instance of the model -->
+    <bean id="model" factory-ref="modelBuilder" factory-method="buildModel"/>
+    <service ref="model" interface="org.opennms.oce.model.api.Model"/>
+
+
 </blueprint>

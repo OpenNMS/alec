@@ -31,6 +31,7 @@ package org.opennms.oce.model.shell;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,20 +44,39 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
 
-@Command(scope = "oce", name = "generateGraph", description="Generate DOT file of inventory graph.")
+@Command(scope = "oce", name = "generateGraph", description = "Generate DOT file of inventory graph.")
 @Service
 public class GenerateGraph implements Action {
-	
+
+    private static final String START_GRAPH = "graph {";
+    private static final String END_GRAPH = "\n}\n";
+
     @Reference
     private Model model;
-    
-    private Map<String, String> nodes = new HashMap<>();
 
-    @Option(name="-o", description="Output file")
+    // Used to collect dotGraph encoded nodes for rendering
+    private Map<String, String> graphNodes = new HashMap<>();
+
+    // Used to collect dotGraph encoded edges for rendering
+    private Set<String> graphEdges = new HashSet<>();
+
+    // Used to collect nodes during partial traversal
+    private Set<ModelObject> collected = new HashSet<>();
+
+    @Option(name = "-o", description = "Output file")
     private String outFile;
 
+    @Option(name = "-i", aliases = "--id", description = "Object Id")
+    private String objectId;
+
+    @Option(name = "-z", aliases = "--zoom", description = "Zoom Level")
+    private String zoomLevel;
+
+    // Converted ZoomLevel
+    Integer zoom;
+
     public GenerateGraph() {
-	}
+    }
 
     public GenerateGraph(Model model) {
         this.model = model;
@@ -66,45 +86,112 @@ public class GenerateGraph implements Action {
     public Object execute() throws Exception {
         String outputFile = outFile != null ? outFile : "inventory.dot";
         String graph = generateGraph();
-        Files.write(Paths.get(outputFile ), graph.getBytes());
+        Files.write(Paths.get(outputFile), graph.getBytes());
         System.out.println("Wrote inventory graph to " + outputFile);
         System.out.println("Convert this to a graph at https://graphs.grevian.org/graph");
         return graph;
     }
-    
+
     public String generateGraph() {
-        StringBuilder sb = new StringBuilder("graph {");
-        ModelObject root = model.getRoot();
-        walkChildren(root, root.getChildren(), sb);
+        validateSzl();
+        if (objectId == null || objectId.isEmpty()) {
+            walkModel(model.getRoot());
+        } else {
+            walkObject(model.getObjectById(objectId));
+        }
+        return buildGraph();
+    }
+
+    private String buildGraph() {
+        StringBuilder sb = new StringBuilder(START_GRAPH);
+        sb.append(graphEdges.stream().collect(Collectors.joining("\n")));
         sb.append("\n");
-        sb.append(nodes.values().stream().collect(Collectors.joining("\n")));
-        sb.append("\n}\n");
+        sb.append(graphNodes.values().stream().collect(Collectors.joining("\n")));
+        sb.append(END_GRAPH);
         return sb.toString();
     }
-    
-    private void walkChildren(ModelObject parent, Set<ModelObject> children, StringBuilder sb) {
+
+    // Setter for unit tests
+    void setObjectId(String id) {
+        objectId = id;
+    }
+
+    // Setter for unit tests
+    void setZoomLevel(String zoom) {
+        zoomLevel = zoom;
+    }
+
+    // Walk the entire model
+    private void walkModel(ModelObject root) {
+        walkChildren(root, root.getChildren());
+    }
+
+    private void walkChildren(ModelObject parent, Set<ModelObject> children) {
         for (ModelObject child : children) {
             // Collect Each node description - uniquely via the map
-            nodes.put(getDisplayName(parent), getNode(parent));
-            nodes.put(getDisplayName(child), getNode(child));
+            graphNodes.put(getDisplayName(parent), getNode(parent));
+            graphNodes.put(getDisplayName(child), getNode(child));
             // Add an edge for each relationship
-            sb.append(getEdge(parent, child));
+            graphEdges.add(getEdge(parent, child));
             // Add Dependency and Peer relations
-            sb.append(getNonChildRelations(child));
+            graphEdges.add(getNonChildRelations(child));
             // recurse through each child.
-            walkChildren(child, child.getChildren(), sb);
+            walkChildren(child, child.getChildren());
+        }
+    }
+
+    // Walk a specific modelObject
+    private void walkObject(ModelObject object) {
+        int szl = zoom > 0 ? zoom : 1; // Default to a depth of 1
+        Set<ModelObject> current = new HashSet<>();
+        current.add(object);
+        graphNodes.put(getDisplayName(object), getNode(object));
+        walkNeighbors(current, szl--);
+    }
+
+    // Walk model objects that have not yet been collected and reduce scope each iteration
+    private void walkNeighbors(Set<ModelObject> last, Integer zoom) {
+        if (zoom <= 0) {
+            // we've reached the maximium depth for this graph
+            return;
+        }
+        for (ModelObject object : last) {
+            Set<ModelObject> neighbors = new HashSet<>();
+            ModelObject parent = object.getParent();
+            if (parent != model.getRoot() && !collected.contains(parent)) {
+                graphNodes.put(getDisplayName(parent), getNode(parent));
+                graphEdges.add(getEdge(object, parent));
+                neighbors.add(parent);
+            }
+            neighbors.addAll(object.getPeers().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
+            for (ModelObject peer : object.getPeers()) {
+                graphNodes.put(getDisplayName(peer), getNode(peer));
+                graphEdges.add(getPeerEdge(object, peer));
+            }
+            neighbors.addAll(object.getUncles().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
+            for (ModelObject dependent : object.getUncles()) {
+                graphNodes.put(getDisplayName(dependent), getNode(dependent));
+                graphEdges.add(getDependentEdge(object, dependent));
+            }
+            neighbors.addAll(object.getChildren().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
+            for (ModelObject child : object.getChildren()) {
+                graphNodes.put(getDisplayName(child), getNode(child));
+                // defining reverse order prevents duplicate parent-child / child-parent links 
+                graphEdges.add(getEdge(child, object));
+            }
+            collected.addAll(neighbors);
+            walkNeighbors(neighbors, zoom - 1);
         }
     }
 
     private String getNonChildRelations(ModelObject object) {
-        //
         StringBuilder sb = new StringBuilder();
         for (ModelObject peer : object.getPeers()) {
-            nodes.put(getDisplayName(peer), getNode(peer));
+            graphNodes.put(getDisplayName(peer), getNode(peer));
             sb.append(getPeerEdge(object, peer));
         }
         for (ModelObject peer : object.getUncles()) {
-            nodes.put(getDisplayName(peer), getNode(peer));
+            graphNodes.put(getDisplayName(peer), getNode(peer));
             sb.append(getDependentEdge(object, peer));
         }
         return sb.toString();
@@ -112,17 +199,17 @@ public class GenerateGraph implements Action {
 
     // An edge looks like "CARD_01 -- PORT_01;"
     private String getEdge(ModelObject parent, ModelObject child) {
-        return "\n  " + getDisplayName(parent) + " -- " + getDisplayName(child) + ";";
+        return "  " + getDisplayName(parent) + " -- " + getDisplayName(child) + ";";
     }
 
     // A PEER edge is colored BLUE
     private String getPeerEdge(ModelObject object, ModelObject peer) {
-        return "\n  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"blue\"];";
+        return "  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"blue\"];";
     }
 
     // A UNCLE/DEPENDANT edge is colored ORANGE
     private String getDependentEdge(ModelObject object, ModelObject peer) {
-        return "\n  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"orange\"];";
+        return "  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"orange\"];";
     }
 
     // A node definition looks like "CARD_02[color=green];"
@@ -140,7 +227,6 @@ public class GenerateGraph implements Action {
             break;
         case UNKNOWN:
         default:
-            // Y'atta notice this....
             color = "pink";
             break;
         }
@@ -164,5 +250,17 @@ public class GenerateGraph implements Action {
         // We're safe now
         return effectiveName;
     }
-}
 
+    private void validateSzl() {
+        if (zoomLevel == null || zoomLevel.isEmpty()) {
+            return; // zoom is 0
+        }
+        try {
+            zoom = Integer.valueOf(zoomLevel);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid Zoom Level: " + zoomLevel + " - it must be an integer value");
+            throw (e);
+        }
+    }
+
+}

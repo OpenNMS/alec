@@ -57,6 +57,8 @@ public class GenerateGraph implements Action {
     // Used to collect dotGraph encoded nodes for rendering
     private Map<String, String> graphNodes = new HashMap<>();
 
+    private Map<Integer, String> rankedNodes = new HashMap<>();
+
     // Used to collect dotGraph encoded edges for rendering
     private Set<String> graphEdges = new HashSet<>();
 
@@ -158,7 +160,7 @@ public class GenerateGraph implements Action {
         for (ModelObject object : last) {
             Set<ModelObject> neighbors = new HashSet<>();
             ModelObject parent = object.getParent();
-            if (parent != model.getRoot() && !collected.contains(parent)) {
+            if (parent != model.getRoot()) {
                 graphNodes.put(getDisplayName(parent), getNode(parent));
                 graphEdges.add(getEdge(object, parent));
                 neighbors.add(parent);

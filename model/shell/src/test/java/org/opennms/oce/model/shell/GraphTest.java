@@ -83,12 +83,10 @@ public class GraphTest {
         // Model should never print
         assertThat(dotGraph, not(containsString("Test Model")));
 
-        // Device shoudl be in the graph
+        // Device should be in the graph
         assertThat(dotGraph, containsString("Device"));
-        // There should be 11 edges
-        assertThat(Arrays.stream(dotGraph.split("\n")).filter(s -> s.contains(" -- ")).count(), equalTo(9L));
-
-        System.out.println(dotGraph);
+        // There should be 10 edges
+        assertThat(Arrays.stream(dotGraph.split("\n")).filter(s -> s.contains(" -- ")).count(), equalTo(10L));
     }
 
     @Test
@@ -105,7 +103,5 @@ public class GraphTest {
         assertThat(dotGraph, not(containsString("Device")));
         // There should be 5 edges
         assertThat(Arrays.stream(dotGraph.split("\n")).filter(s -> s.contains(" -- ")).count(), equalTo(6L));
-
-        System.out.println(dotGraph);
     }
 }

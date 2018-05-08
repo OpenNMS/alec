@@ -13,6 +13,7 @@
     <modules>
         <module>api</module>
         <module>impl</module>
+        <module>jaxb</module>
         <module>shell</module>
     </modules>
 </project>

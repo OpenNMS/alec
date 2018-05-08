@@ -88,6 +88,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.model</groupId>
+                <artifactId>org.opennms.oce.model.jaxb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.model</groupId>
                 <artifactId>org.opennms.oce.model.shell</artifactId>
                 <version>${project.version}</version>
             </dependency>

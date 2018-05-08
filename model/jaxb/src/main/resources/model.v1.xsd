@@ -124,4 +124,88 @@
             <attribute name="parent-id" type="string" use="required" />
         </complexType>
     </element>
+
+
+    <element name="alarms">
+        <annotation>
+            <documentation>Top-level element for a list of alarms</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Alarm definition -->
+                <element ref="this:alarm" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="alarm">
+        <annotation>
+            <documentation>Definition for an instance of an alarm</documentation>
+        </annotation>
+        <complexType>
+            <attribute name="source" type="string" use="optional" />
+            <attribute name="severity" type="this:severity" use="required" />
+            <attribute name="id" type="string" use="required" />
+            <attribute name="time" type="long" use="required" />
+            <attribute name="summary" type="string" use="required" />
+            <attribute name="description" type="string" use="required" />
+            <attribute name="resource" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <simpleType name="severity" final="restriction" >
+        <restriction base="string">
+            <enumeration value="critical" />
+            <enumeration value="major" />
+            <enumeration value="minor" />
+            <enumeration value="warning" />
+            <enumeration value="normal" />
+            <enumeration value="cleared" />
+            <enumeration value="indeterminate" />
+        </restriction>
+    </simpleType>
+
+    <element name="incidents">
+        <annotation>
+            <documentation>Top-level element for a list of incidents</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Incident definitions -->
+                <element ref="this:incident" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="incident">
+        <annotation>
+            <documentation>Definition for an instance of an incident</documentation>
+        </annotation>
+        <complexType>
+            <sequence>
+                <element ref="this:alarm-ref" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+            <attribute name="source" type="string" use="optional" />
+            <attribute name="severity" type="this:severity" use="required" />
+            <attribute name="id" type="string" use="required" />
+            <attribute name="time" type="long" use="required" />
+            <attribute name="summary" type="string" use="required" />
+            <attribute name="description" type="string" use="required" />
+        </complexType>
+    </element>
+
+    <element name="alarm-ref">
+        <annotation>
+            <documentation>Alarm Reference</documentation>
+        </annotation>
+        <complexType>
+            <sequence>
+                <element ref="this:alarm-ref" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+            <attribute name="id" type="string" use="required" />
+        </complexType>
+    </element>
+
 </schema>

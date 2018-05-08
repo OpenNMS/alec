@@ -231,7 +231,7 @@ public class ModelBuilderImpl implements ModelBuilder {
         }
 
         // Next, attempt to load the resource from the classpath
-        final URL classpathResourceUrl = getClass().getResource(resource);
+        final URL classpathResourceUrl = MetaModel.class.getResource(resource);
         if (classpathResourceUrl != null) {
             return classpathResourceUrl;
         }

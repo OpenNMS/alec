@@ -11,6 +11,7 @@
 
     <feature name="oce-model" description="OCE :: Model" version="${project.version}">
         <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.jaxb/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.impl/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.shell/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/19.0</bundle>

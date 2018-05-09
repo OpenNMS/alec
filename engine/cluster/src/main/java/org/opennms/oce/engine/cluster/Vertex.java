@@ -26,10 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Engine extends AlarmProcessor {
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
-    void tick(long timestampInMillis);
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 
+public class Vertex {
+    private final ResourceKey resourceKey;
+    private final List<Alarm> alarms = new LinkedList<>();
+
+    public Vertex(ResourceKey resourceKey) {
+        this.resourceKey = Objects.requireNonNull(resourceKey);
+    }
+
+    public ResourceKey getResourceKey() {
+        return resourceKey;
+    }
+
+    public void addOrUpdateAlarm(Alarm alarm) {
+        alarms.add(alarm);
+    }
 }

@@ -26,10 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Engine extends AlarmProcessor {
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
 
-    void tick(long timestampInMillis);
-
+public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
+    @Override
+    public double compute(double[] a, double[] b) throws DimensionMismatchException {
+        return 0;
+    }
 }

@@ -56,10 +56,13 @@ import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
+
+import com.google.gson.Gson;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Incidents.
@@ -70,6 +73,8 @@ import org.opennms.oce.model.v1.schema.Incidents;
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
 public class ProcessAlarms implements Action, IncidentHandler {
+
+    private static final Gson gson = new Gson();
 
     @Reference
     private Model model;
@@ -166,6 +171,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
         return engine;
     }
 
+
     private static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm) {
         return new Alarm() {
             @Override
@@ -176,6 +182,11 @@ public class ProcessAlarms implements Action, IncidentHandler {
             @Override
             public long getTime() {
                 return alarm.getTime();
+            }
+
+            @Override
+            public ResourceKey getResourceKey() {
+                return new ResourceKey((List<String>)gson.fromJson(alarm.getResource(), List.class));
             }
         };
     }

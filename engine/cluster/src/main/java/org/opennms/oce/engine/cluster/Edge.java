@@ -26,10 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Engine extends AlarmProcessor {
-
-    void tick(long timestampInMillis);
-
+public class Edge {
 }

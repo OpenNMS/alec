@@ -26,10 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Engine extends AlarmProcessor {
+import org.apache.commons.math3.ml.clustering.Clusterable;
 
-    void tick(long timestampInMillis);
-
+public class AlarmInSpaceTime implements Clusterable {
+    @Override
+    public double[] getPoint() {
+        return new double[0];
+    }
 }

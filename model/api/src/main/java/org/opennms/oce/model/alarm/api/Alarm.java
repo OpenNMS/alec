@@ -28,12 +28,12 @@
 
 package org.opennms.oce.model.alarm.api;
 
-import java.util.Set;
-
 public interface Alarm {
 
     String getId();
 
     long getTime();
+
+    ResourceKey getResourceKey();
 
 }

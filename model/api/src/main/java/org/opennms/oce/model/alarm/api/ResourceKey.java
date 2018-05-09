@@ -26,10 +26,53 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.model.alarm.api;
 
-public interface Engine extends AlarmProcessor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
-    void tick(long timestampInMillis);
+public class ResourceKey {
+
+    private final List<String> tokens;
+
+    public static ResourceKey key(String... tokens) {
+        return new ResourceKey(tokens);
+    }
+
+    public static ResourceKey key(List<String> tokens) {
+        return new ResourceKey(tokens);
+    }
+
+    public ResourceKey(List<String> tokens) {
+        this.tokens = new ArrayList<>(tokens);
+    }
+
+    public ResourceKey(String... tokens) {
+        this.tokens = Arrays.asList(tokens);
+    }
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResourceKey that = (ResourceKey) o;
+        return Objects.equals(tokens, that.tokens);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tokens);
+    }
+
+    @Override
+    public String toString() {
+        return tokens.toString();
+    }
 
 }

@@ -57,7 +57,7 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.build.directory}/generated-sources</source>
+                                <source>${project.build.directory}/generated-sources/jaxb</source>
                             </sources>
                         </configuration>
                     </execution>

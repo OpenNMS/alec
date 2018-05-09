@@ -26,41 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.api;
+package org.opennms.oce.engine.common;
 
-import org.opennms.oce.model.v1.schema.Alarm;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-/**
- * Receives Alarms and creates Incidents.
- *
- */
-public interface AlarmProcessor {
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.Incident;
 
-    /**
-     * Called on each new Alarm.
-     * 
-     * @param alarm
-     */
-    void onAlarm(Alarm alarm);
+public class IncidentBean implements Incident {
+    private String id;
+    private Set<Alarm> alarms = new LinkedHashSet<>();
 
-    /**
-     * Set the initial inventory.
-     * TODO - updates to inventory.
-     * @param inventory
-     */
-    void setInventory(Model inventory);
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    /**
-     * An opaque String representation of options used to modify the Processors behavior. 
-     * @param options
-     */
-    void setOptionString(String options);
+    @Override
+    public String getId() {
+        return id;
+    }
 
-    /**
-     * Passes the reference to the IncidentHandler.
-     * The IncidentHandler exposes <code>onIncident()</code> callback for creating and updating Incidents. 
-     * @param handler
-     */
-    void registerIncidentHandler(IncidentHandler handler);
+    public void addAlarm(Alarm alarm) {
+        alarms.add(alarm);
 
+    }
+
+    @Override
+    public Set<Alarm> getAlarms() {
+        return alarms;
+    }
 }

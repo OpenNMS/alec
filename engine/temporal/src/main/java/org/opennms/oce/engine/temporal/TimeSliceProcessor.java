@@ -26,24 +26,24 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.impl;
+package org.opennms.oce.engine.temporal;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.opennms.oce.model.api.AlarmProcessor;
-import org.opennms.oce.model.api.IncidentHandler;
+import org.opennms.oce.engine.api.Engine;
+import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.engine.common.IncidentBean;
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.v1.schema.Alarm;
-import org.opennms.oce.model.v1.schema.AlarmRef;
-import org.opennms.oce.model.v1.schema.Incident;
 
 /**
  * A toy processor that simply correlates on time slices
  *
  */
-public class TimeSliceProcessor implements AlarmProcessor {
+public class TimeSliceProcessor implements Engine {
 
     IncidentHandler handler;
 
@@ -56,22 +56,22 @@ public class TimeSliceProcessor implements AlarmProcessor {
 
     long windowStop = 0;
 
-    Incident current;
+    IncidentBean current;
 
     @Override
     public void onAlarm(Alarm alarm) {
         // There is a presumption that alarms will be presented 
         //      in chronological order for this toy implementation.
         if (isInCurrentWindow(alarm)) {
-            addToCurtrent(alarm);
+            addToCurrrent(alarm);
         } else {
             newWindow(alarm);
         }
 
     }
 
-    private void addToCurtrent(Alarm alarm) {
-        current.getAlarmRef().add(getAlarmRef(alarm));
+    private void addToCurrrent(Alarm alarm) {
+        current.addAlarm(alarm);
     }
 
     private boolean isInCurrentWindow(Alarm alarm) {
@@ -86,15 +86,9 @@ public class TimeSliceProcessor implements AlarmProcessor {
         }
         windowStart = alarm.getTime();
         windowStop = windowStart + sliceMillis;
-        current = new Incident();
+        current = new IncidentBean();
         current.setId(UUID.randomUUID().toString());
-        current.getAlarmRef().add(getAlarmRef(alarm));
-    }
-
-    private AlarmRef getAlarmRef(Alarm alarm) {
-        AlarmRef ref = new AlarmRef();
-        ref.setId(alarm.getId());
-        return ref;
+        current.addAlarm(alarm);
     }
 
     @Override
@@ -107,9 +101,8 @@ public class TimeSliceProcessor implements AlarmProcessor {
         // Ignored by this processor;
     }
 
-    @Override
-    public void setOptionString(String options) {
-        // TODO - use this to change time-slice sizing?
+    public void setSliceMillis(int sliceMillis) {
+        this.sliceMillis = sliceMillis;
     }
 
 }

@@ -12,6 +12,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.oce.model</groupId>
+            <artifactId>org.opennms.oce.model.jaxb</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>

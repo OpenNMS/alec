@@ -14,7 +14,7 @@
         <module>api</module>
         <module>common</module>
         <module>temporal</module>
-	<!-- <module>cluster</module> -->
+	<module>cluster</module>
     </modules>
 </project>
 

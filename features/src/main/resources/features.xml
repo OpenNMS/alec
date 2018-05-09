@@ -29,10 +29,25 @@
     </feature>
 
     <feature name="oce-engine" description="OCE :: Engine" version="${project.version}">
+        <feature version="${project.version}">oce-engine-temporal</feature>
+        <feature version="${project.version}">oce-engine-cluster</feature>
+    </feature>
+
+    <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
+        <feature version="${project.version}">oce-engine-api</feature>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
+        <feature version="${project.version}">oce-engine-api</feature>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.cluster/${project.version}</bundle>
+	<bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
+    </feature>
+
+    <feature name="oce-engine-api" description="OCE :: Engine :: API" version="${project.version}">
         <bundle>mvn:org.opennms.oce.model/org.opennms.oce.model.api/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.api/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.common/${project.version}</bundle>
-        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
     </feature>
 
     <feature name="oce-connector" description="OCE :: Connector" version="${project.version}">

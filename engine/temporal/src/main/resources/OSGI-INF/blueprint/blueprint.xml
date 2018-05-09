@@ -1,0 +1,18 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="temporalEngineProperties" persistent-id="org.opennms.oce.engine.temporal" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="sliceMillis" value="1000"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <!-- Create and expose the engine factory -->
+    <service interface="org.opennms.oce.engine.api.EngineFactory">
+        <bean class="org.opennms.oce.engine.temporal.TimeSliceEngineFactory">
+            <property name="sliceMillis" value="${sliceMillis}"/>
+        </bean>
+    </service>
+
+</blueprint>

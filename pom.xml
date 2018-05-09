@@ -32,6 +32,7 @@
     <modules>
         <module>connector</module>
         <module>drools</module>
+        <module>engine</module>
         <module>features</module>
         <module>model</module>
     </modules>
@@ -74,6 +75,16 @@
             <dependency>
                 <groupId>org.opennms.oce.connector</groupId>
                 <artifactId>org.opennms.oce.connector.shell</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.engine</groupId>
+                <artifactId>org.opennms.oce.engine.api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.engine</groupId>
+                <artifactId>org.opennms.oce.engine.common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

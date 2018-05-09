@@ -26,17 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.api;
+package org.opennms.oce.model.alarm.api;
 
-import org.opennms.oce.model.v1.schema.Incident;
+import java.util.Set;
 
-public interface IncidentHandler {
+public interface Alarm {
 
-    /**
-     * Callback to receive new and updated Incidents.
-     * 
-     * @param i the incident.
-     */
-    void onIncident(Incident i);
+    String getId();
+
+    long getTime();
 
 }

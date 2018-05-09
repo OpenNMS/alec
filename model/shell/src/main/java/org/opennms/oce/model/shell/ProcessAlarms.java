@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -45,16 +46,19 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.api.AlarmProcessor;
-import org.opennms.oce.model.api.IncidentHandler;
+import org.opennms.oce.engine.api.AlarmProcessor;
+import org.opennms.oce.engine.api.Engine;
+import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.impl.TimeSliceProcessor;
-import org.opennms.oce.model.v1.schema.Alarm;
+import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
-import org.opennms.oce.model.v1.schema.Incident;
 import org.opennms.oce.model.v1.schema.Incidents;
 
 /**
@@ -70,17 +74,18 @@ public class ProcessAlarms implements Action, IncidentHandler {
     @Reference
     private Model model;
 
+    @Reference
+    private List<EngineFactory> engineFactories;
+
     @Option(name = "-i", description = "Input file", required = true)
     private String inFile;
 
     @Option(name = "-o", description = "Output file", required = false)
     private String outFile; // Default to "incidents.xml"
 
-    @Option(name = "-e", description = "processor Engine", required = false)
-    private String engine; // Default to Temporal - TimeSlice Engine
-
-    @Option(name = "-p", description = "Options string passed to the engine", required = false)
-    private String engineOptions;
+    @Option(name = "-e", description = "Processor Engine Name", required = false)
+    @Completion(EngineNameCompleter.class)
+    private String engineName;
 
     Map<String, Incident> incidents = new HashMap<>();
 
@@ -95,8 +100,8 @@ public class ProcessAlarms implements Action, IncidentHandler {
     }
 
     private Map<String, Incident> processAlarms(List<Alarm> alarms) throws JAXBException, IOException {
-        AlarmProcessor processor = getProcessor(engine);
-        alarms.stream().forEach(alarm -> processor.onAlarm(alarm));
+        AlarmProcessor processor = getEngine();
+        alarms.forEach(processor::onAlarm);
         write(incidents);
         return incidents;
     }
@@ -118,14 +123,17 @@ public class ProcessAlarms implements Action, IncidentHandler {
 
     private List<Alarm> getAlarms(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Alarms.class);
+            JAXBContext jaxbContext;
             try {
                 jaxbContext = JAXBContext.newInstance(Alarms.class);
             } catch (JAXBException e) {
                 throw new RuntimeException(e);
             }
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return ((Alarms) unmarshaller.unmarshal(is)).getAlarm();
+            Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
+            return alarms.getAlarm().stream()
+                    .map(ProcessAlarms::toEngineAlarm)
+                    .collect(Collectors.toList());
         }
     }
 
@@ -135,22 +143,52 @@ public class ProcessAlarms implements Action, IncidentHandler {
             JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             Incidents list = new Incidents();
-            list.getIncident().addAll(incidents.values());
+            list.getIncident().addAll(incidents.values().stream()
+                .map(ProcessAlarms::toModelIncident)
+                .collect(Collectors.toList()));
             marshaller.marshal(list, os);
         }
     }
 
-    /**
-     * Determine the Processor to use and initialize it.
-     * @param engine
-     * @return
-     */
-    private AlarmProcessor getProcessor(String engine) {
-        AlarmProcessor processor = new TimeSliceProcessor();
-        processor.setOptionString(engineOptions);
-        processor.setInventory(model);
-        processor.registerIncidentHandler(this);
-        return processor;
+    private Engine getEngine() {
+        final Engine engine = engineFactories.stream().filter(e -> e.getName().toLowerCase().equals(engineName))
+                .findFirst()
+                .orElseThrow(() -> {
+                    final String engineNames = engineFactories.stream()
+                            .map(EngineFactory::getName)
+                            .collect(Collectors.joining( "," ));
+                    return new RuntimeException("No engine found for " + engineName
+                            + ". Available engines include: " + engineNames);
+                })
+                .createEngine();
+        engine.setInventory(model);
+        engine.registerIncidentHandler(this);
+        return engine;
+    }
+
+    private static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm) {
+        return new Alarm() {
+            @Override
+            public String getId() {
+                return alarm.getId();
+            }
+
+            @Override
+            public long getTime() {
+                return alarm.getTime();
+            }
+        };
+    }
+
+    private static org.opennms.oce.model.v1.schema.Incident toModelIncident(Incident incident) {
+        org.opennms.oce.model.v1.schema.Incident modelIncident = new org.opennms.oce.model.v1.schema.Incident();
+        modelIncident.setId(incident.getId());
+        for (Alarm a : incident.getAlarms()) {
+            AlarmRef alarmRef = new AlarmRef();
+            alarmRef.setId(a.getId());
+            modelIncident.getAlarmRef().add(alarmRef);
+        }
+        return modelIncident;
     }
 
 }

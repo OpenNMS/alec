@@ -43,10 +43,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.model.shell.graph.EdgeType;
+import org.opennms.oce.model.shell.graph.ModelVisitor;
+import org.opennms.oce.model.shell.graph.ModelWalker;
 
 @Command(scope = "oce", name = "generateGraph", description = "Generate DOT file of inventory graph.")
 @Service
-public class GenerateGraph implements Action {
+public class GenerateGraph implements Action, ModelVisitor {
 
     private static final String START_GRAPH = "graph {";
     private static final String END_GRAPH = "\n}\n";
@@ -97,9 +100,10 @@ public class GenerateGraph implements Action {
     public String generateGraph() {
         validateSzl();
         if (objectId == null || objectId.isEmpty()) {
-            walkModel(model.getRoot());
+            ModelWalker.visit(model, this);
         } else {
-            walkObject(model.getObjectById(objectId));
+            int szl = zoom > 0 ? zoom : 1; // Default to a depth of 1
+            ModelWalker.visitNeighbors(model.getObjectById(objectId), szl, this);
         }
         return buildGraph();
     }
@@ -121,82 +125,6 @@ public class GenerateGraph implements Action {
     // Setter for unit tests
     void setZoomLevel(String zoom) {
         zoomLevel = zoom;
-    }
-
-    // Walk the entire model
-    private void walkModel(ModelObject root) {
-        walkChildren(root, root.getChildren());
-    }
-
-    private void walkChildren(ModelObject parent, Set<ModelObject> children) {
-        for (ModelObject child : children) {
-            // Collect Each node description - uniquely via the map
-            graphNodes.put(getDisplayName(parent), getNode(parent));
-            graphNodes.put(getDisplayName(child), getNode(child));
-            // Add an edge for each relationship
-            graphEdges.add(getEdge(parent, child));
-            // Add Dependency and Peer relations
-            graphEdges.add(getNonChildRelations(child));
-            // recurse through each child.
-            walkChildren(child, child.getChildren());
-        }
-    }
-
-    // Walk a specific modelObject
-    private void walkObject(ModelObject object) {
-        int szl = zoom > 0 ? zoom : 1; // Default to a depth of 1
-        Set<ModelObject> current = new HashSet<>();
-        current.add(object);
-        graphNodes.put(getDisplayName(object), getNode(object));
-        walkNeighbors(current, szl--);
-    }
-
-    // Walk model objects that have not yet been collected and reduce scope each iteration
-    private void walkNeighbors(Set<ModelObject> last, Integer zoom) {
-        if (zoom <= 0) {
-            // we've reached the maximium depth for this graph
-            return;
-        }
-        for (ModelObject object : last) {
-            Set<ModelObject> neighbors = new HashSet<>();
-            ModelObject parent = object.getParent();
-            if (parent != model.getRoot()) {
-                graphNodes.put(getDisplayName(parent), getNode(parent));
-                graphEdges.add(getEdge(object, parent));
-                neighbors.add(parent);
-            }
-            neighbors.addAll(object.getPeers().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject peer : object.getPeers()) {
-                graphNodes.put(getDisplayName(peer), getNode(peer));
-                graphEdges.add(getPeerEdge(object, peer));
-            }
-            neighbors.addAll(object.getUncles().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject dependent : object.getUncles()) {
-                graphNodes.put(getDisplayName(dependent), getNode(dependent));
-                graphEdges.add(getDependentEdge(object, dependent));
-            }
-            neighbors.addAll(object.getChildren().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject child : object.getChildren()) {
-                graphNodes.put(getDisplayName(child), getNode(child));
-                // defining reverse order prevents duplicate parent-child / child-parent links 
-                graphEdges.add(getEdge(child, object));
-            }
-            collected.addAll(neighbors);
-            walkNeighbors(neighbors, zoom - 1);
-        }
-    }
-
-    private String getNonChildRelations(ModelObject object) {
-        StringBuilder sb = new StringBuilder();
-        for (ModelObject peer : object.getPeers()) {
-            graphNodes.put(getDisplayName(peer), getNode(peer));
-            sb.append(getPeerEdge(object, peer));
-        }
-        for (ModelObject peer : object.getUncles()) {
-            graphNodes.put(getDisplayName(peer), getNode(peer));
-            sb.append(getDependentEdge(object, peer));
-        }
-        return sb.toString();
     }
 
     // An edge looks like "CARD_01 -- PORT_01;"
@@ -265,4 +193,25 @@ public class GenerateGraph implements Action {
         }
     }
 
+    @Override
+    public void visitNode(ModelObject node) {
+        graphNodes.put(getDisplayName(node), getNode(node));
+    }
+
+    @Override
+    public void visitEdge(ModelObject nodeA, ModelObject nodeZ, EdgeType type) {
+        graphNodes.put(getDisplayName(nodeA), getNode(nodeA));
+        graphNodes.put(getDisplayName(nodeZ), getNode(nodeZ));
+        switch(type) {
+            case PARENT:
+                graphEdges.add(getEdge(nodeZ, nodeA));
+                break;
+            case UNCLE:
+                graphEdges.add(getDependentEdge(nodeZ, nodeA));
+                break;
+            case PEER:
+                graphEdges.add(getPeerEdge(nodeZ, nodeA));
+                break;
+        }
+    }
 }

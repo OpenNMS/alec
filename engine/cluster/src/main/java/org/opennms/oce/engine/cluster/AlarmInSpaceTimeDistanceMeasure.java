@@ -42,11 +42,11 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
 
     @Override
     public double compute(double[] a, double[] b) throws DimensionMismatchException {
-        double timeA = a[0];
-        double timeB = b[0];
+        final double timeA = a[0];
+        final double timeB = b[0];
 
-        long vertexIdA = (long)a[1];
-        long vertexIdB = (long)b[1];
+        final long vertexIdA = (long)a[1];
+        final long vertexIdB = (long)b[1];
 
         int numHops = 0;
         if (vertexIdA != vertexIdB) {
@@ -57,9 +57,13 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
             }
         }
 
-        // TODO: Revise function, match with what's defined in ClusterEngine
-        double delta = Math.abs(timeA - timeB) / 1000 + numHops;
+        final double delta = compute(timeA, timeB, numHops);
         System.out.printf("Distance between %d and %d is: %.4f\n", vertexIdA, vertexIdB, delta);
         return delta;
+    }
+
+    public static double compute(double timeA, double timeB, int numHops) {
+        // TODO: Revise function, match with what's defined in ClusterEngine
+        return Math.abs(timeA - timeB) / 1000 + numHops;
     }
 }

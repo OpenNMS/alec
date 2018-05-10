@@ -35,6 +35,7 @@
         <module>engine</module>
         <module>features</module>
         <module>model</module>
+        <module>wrap</module>
     </modules>
 
     <properties>
@@ -110,6 +111,11 @@
             <dependency>
                 <groupId>org.opennms.oce.drools</groupId>
                 <artifactId>org.opennms.oce.drools.engine</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.wrap</groupId>
+                <artifactId>org.opennms.oce.wrap.jung</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

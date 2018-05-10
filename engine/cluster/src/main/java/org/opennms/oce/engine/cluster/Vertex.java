@@ -36,10 +36,12 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 
 public class Vertex {
+    private final long id;
     private final ResourceKey resourceKey;
     private final List<Alarm> alarms = new LinkedList<>();
 
-    public Vertex(ResourceKey resourceKey) {
+    public Vertex(long id, ResourceKey resourceKey) {
+        this.id = id;
         this.resourceKey = Objects.requireNonNull(resourceKey);
     }
 
@@ -49,5 +51,13 @@ public class Vertex {
 
     public void addOrUpdateAlarm(Alarm alarm) {
         alarms.add(alarm);
+    }
+
+    public List<Alarm> getAlarms() {
+        return alarms;
+    }
+
+    public long getId() {
+        return id;
     }
 }

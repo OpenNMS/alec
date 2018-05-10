@@ -28,12 +28,38 @@
 
 package org.opennms.oce.engine.cluster;
 
+import java.util.Objects;
+
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
+    private final ClusterEngine clusterEngine;
+
+    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine) {
+        this.clusterEngine = Objects.requireNonNull(clusterEngine);
+    }
+
     @Override
     public double compute(double[] a, double[] b) throws DimensionMismatchException {
-        return 0;
+        double timeA = a[0];
+        double timeB = b[0];
+
+        long vertexIdA = (long)a[1];
+        long vertexIdB = (long)b[1];
+
+        int numHops = 0;
+        if (vertexIdA != vertexIdB) {
+            numHops = clusterEngine.getNumHopsBetween(vertexIdA, vertexIdB);
+            if (numHops == 0) {
+                // No path
+                numHops = Integer.MAX_VALUE;
+            }
+        }
+
+        // TODO: Revise function, match with what's defined in ClusterEngine
+        double delta = Math.abs(timeA - timeB) / 1000 + numHops;
+        System.out.printf("Distance between %d and %d is: %.4f\n", vertexIdA, vertexIdB, delta);
+        return delta;
     }
 }

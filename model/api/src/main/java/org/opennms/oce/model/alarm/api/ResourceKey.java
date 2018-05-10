@@ -54,7 +54,20 @@ public class ResourceKey {
     }
 
     public List<String> getTokens() {
-        return tokens;
+        // Ensure that the key remains immutable
+        return new ArrayList<>(tokens);
+    }
+
+    public ResourceKey getParentKey() {
+        if (tokens.size() < 1) {
+            return this;
+        } else {
+            return ResourceKey.key(tokens.subList(0, tokens.size()-1));
+        }
+    }
+
+    public int length() {
+        return tokens.size();
     }
 
     @Override

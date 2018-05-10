@@ -32,8 +32,12 @@ public interface Alarm {
 
     String getId();
 
+    String getReductionKey();
+
     long getTime();
 
     ResourceKey getResourceKey();
+
+    boolean isClear();
 
 }

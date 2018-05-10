@@ -151,6 +151,7 @@
             <attribute name="summary" type="string" use="required" />
             <attribute name="description" type="string" use="required" />
             <attribute name="resource" type="string" use="required" />
+            <attribute name="reduction-key" type="string" use="required" />
         </complexType>
     </element>
 

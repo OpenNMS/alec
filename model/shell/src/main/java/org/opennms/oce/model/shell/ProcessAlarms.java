@@ -53,7 +53,6 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.api.AlarmProcessor;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.api.IncidentHandler;
@@ -64,8 +63,8 @@ import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
+import org.opennms.oce.model.v1.schema.Severity;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 /**
@@ -194,7 +193,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
         // Handle New and Updated incidents from the processor impl
         // TODO - for now - simply overwrite any incident.
         // it is on the ProcessorImpl to maintain last correct state.
-        System.out.println("Incident: " + i.getId());
+        System.out.printf("Incident with id %s has %d alarms.\n", i.getId(), i.getAlarms().size());
         incidents.put(i.getId(), i);
     }
 
@@ -253,6 +252,11 @@ public class ProcessAlarms implements Action, IncidentHandler {
             }
 
             @Override
+            public String getReductionKey() {
+                return alarm.getReductionKey();
+            }
+
+            @Override
             public long getTime() {
                 return alarm.getTime();
             }
@@ -260,6 +264,11 @@ public class ProcessAlarms implements Action, IncidentHandler {
             @Override
             public ResourceKey getResourceKey() {
                 return new ResourceKey((List<String>)gson.fromJson(alarm.getResource(), List.class));
+            }
+
+            @Override
+            public boolean isClear() {
+                return alarm.getSeverity().equals(Severity.CLEARED);
             }
         };
     }

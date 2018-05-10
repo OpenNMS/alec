@@ -31,6 +31,7 @@ package org.opennms.oce.engine.cluster;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.ResourceKey;
@@ -50,7 +51,12 @@ public class Vertex {
     }
 
     public void addOrUpdateAlarm(Alarm alarm) {
-        alarms.add(alarm);
+        if (alarm.isClear()) {
+            List<Alarm> alarmsToClear = alarms.stream().filter(a -> a.getReductionKey().equals(alarm.getReductionKey())).collect(Collectors.toList());
+            alarms.removeAll(alarmsToClear);
+        } else {
+            alarms.add(alarm);
+        }
     }
 
     public List<Alarm> getAlarms() {

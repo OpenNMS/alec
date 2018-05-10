@@ -33,7 +33,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -51,6 +53,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
@@ -288,6 +293,8 @@ public class ClusterEngine implements Engine {
             // Index it
             resourceToVertexMap.put(vertex.getResourceKey(), vertex);
             idtoVertexMap.put(vertex.getId(), vertex);
+            // Invalidate the hop cache, since the graph has changed
+            hops.invalidateAll();
             // Add it to the graph
             g.addVertex(vertex);
         }
@@ -305,15 +312,56 @@ public class ClusterEngine implements Engine {
     }
 
     public int getNumHopsBetween(long vertexIdA, long vertexIdB) {
-        final Vertex vertexA = idtoVertexMap.get(vertexIdA);
-        if (vertexA == null) {
-            throw new IllegalStateException("Cound not find vertex with id: " + vertexIdA);
+        if (vertexIdA == vertexIdB) {
+            return 0;
         }
-        final Vertex vertexB = idtoVertexMap.get(vertexIdB);
-        if (vertexB == null) {
-            throw new IllegalStateException("Cound not find vertex with id: " + vertexIdB);
+        final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
+        try {
+            return hops.get(key);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return shortestPath.getPath(vertexA, vertexB).size();
+    }
+
+    private final LoadingCache<EdgeKey, Integer> hops = CacheBuilder.newBuilder()
+            .maximumSize(10000)
+            .build(new CacheLoader<EdgeKey, Integer>() {
+                        public Integer load(EdgeKey key) {
+                            final Vertex vertexA = idtoVertexMap.get(key.vertexIdA);
+                            if (vertexA == null) {
+                                throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdA);
+                            }
+                            final Vertex vertexB = idtoVertexMap.get(key.vertexIdB);
+                            if (vertexB == null) {
+                                throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdB);
+                            }
+                            return shortestPath.getPath(vertexA, vertexB).size();
+                        }
+                    });
+
+    private static class EdgeKey {
+        private long vertexIdA;
+        private long vertexIdB;
+
+        public EdgeKey(long vertexIdA, long vertexIdB) {
+            this.vertexIdA = vertexIdA;
+            this.vertexIdB = vertexIdB;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EdgeKey edgeKey = (EdgeKey) o;
+            return vertexIdA == edgeKey.vertexIdA &&
+                    vertexIdB == edgeKey.vertexIdB;
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(vertexIdA, vertexIdB);
+        }
     }
 
     @VisibleForTesting

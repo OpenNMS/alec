@@ -30,4 +30,8 @@ package org.opennms.oce.engine.api;
 
 public interface Engine extends AlarmProcessor {
 
+    long getTickResolutionMs();
+
+    void tick(long timestampInMillis);
+
 }

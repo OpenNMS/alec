@@ -105,4 +105,14 @@ public class TimeSliceProcessor implements Engine {
         this.sliceMillis = sliceMillis;
     }
 
+    @Override
+    public long getTickResolutionMs() {
+        return sliceMillis;
+    }
+
+    @Override
+    public void tick(long timestampInMillis) {
+        // TODO: Drive buckets from tick instead of next alarm
+    }
+
 }

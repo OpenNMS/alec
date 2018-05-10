@@ -26,18 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Alarm {
+import java.util.Objects;
 
-    String getId();
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.opennms.oce.model.alarm.api.Alarm;
 
-    String getReductionKey();
+public class AlarmInSpaceTime implements Clusterable {
+    private final Alarm alarm;
+    private final double[] point;
 
-    long getTime();
+    public AlarmInSpaceTime(Vertex vertex, Alarm alarm) {
+        Objects.requireNonNull(vertex);
+        this.alarm = Objects.requireNonNull(alarm);
+        point = new double[]{alarm.getTime(), vertex.getId()};
+    }
 
-    ResourceKey getResourceKey();
+    @Override
+    public double[] getPoint() {
+        return point;
+    }
 
-    boolean isClear();
+    public String getAlarmId() {
+        return alarm.getId();
+    }
 
+    public Alarm getAlarm() {
+        return alarm;
+    }
 }

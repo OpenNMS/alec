@@ -26,18 +26,44 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Alarm {
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-    String getId();
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 
-    String getReductionKey();
+public class Vertex {
+    private final long id;
+    private final ResourceKey resourceKey;
+    private final List<Alarm> alarms = new LinkedList<>();
 
-    long getTime();
+    public Vertex(long id, ResourceKey resourceKey) {
+        this.id = id;
+        this.resourceKey = Objects.requireNonNull(resourceKey);
+    }
 
-    ResourceKey getResourceKey();
+    public ResourceKey getResourceKey() {
+        return resourceKey;
+    }
 
-    boolean isClear();
+    public void addOrUpdateAlarm(Alarm alarm) {
+        if (alarm.isClear()) {
+            List<Alarm> alarmsToClear = alarms.stream().filter(a -> a.getReductionKey().equals(alarm.getReductionKey())).collect(Collectors.toList());
+            alarms.removeAll(alarmsToClear);
+        } else {
+            alarms.add(alarm);
+        }
+    }
 
+    public List<Alarm> getAlarms() {
+        return alarms;
+    }
+
+    public long getId() {
+        return id;
+    }
 }

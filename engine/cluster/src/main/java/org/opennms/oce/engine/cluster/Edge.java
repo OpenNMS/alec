@@ -26,18 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Alarm {
-
-    String getId();
-
-    String getReductionKey();
-
-    long getTime();
-
-    ResourceKey getResourceKey();
-
-    boolean isClear();
-
+public class Edge {
 }

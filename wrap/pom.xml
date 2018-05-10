@@ -6,15 +6,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>engine</artifactId>
-    <name>OCE :: Engine</name>
+    <artifactId>wrap</artifactId>
+    <name>OCE :: Wrap</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>api</module>
-        <module>common</module>
-        <module>temporal</module>
-	<module>cluster</module>
+        <module>jung</module>
     </modules>
 </project>
 

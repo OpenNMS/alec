@@ -34,6 +34,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,16 +53,19 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.api.AlarmProcessor;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
+import org.opennms.oce.model.v1.schema.Severity;
+
+import com.google.gson.Gson;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Incidents.
@@ -70,6 +76,8 @@ import org.opennms.oce.model.v1.schema.Incidents;
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
 public class ProcessAlarms implements Action, IncidentHandler {
+
+    private static final Gson gson = new Gson();
 
     @Reference
     private Model model;
@@ -100,10 +108,78 @@ public class ProcessAlarms implements Action, IncidentHandler {
     }
 
     private Map<String, Incident> processAlarms(List<Alarm> alarms) throws JAXBException, IOException {
-        AlarmProcessor processor = getEngine();
-        alarms.forEach(processor::onAlarm);
+        System.out.printf("Processing %d alarms.\n", alarms.size());
+        final Engine engine = getEngine();
+        final List<Alarm> sortedAlarms = alarms.stream()
+                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
+                .collect(Collectors.toList());
+
+        if (sortedAlarms.size() < 1) {
+            // No alarms, nothing to do here
+            return Collections.emptyMap();
+        }
+
+        long tickResolutionMs = engine.getTickResolutionMs();
+        final long firstTimestamp = sortedAlarms.get(0).getTime();
+        final long lastTimestamp = sortedAlarms.get(sortedAlarms.size()-1).getTime();
+        final long startTime = System.currentTimeMillis();
+
+        Long lastTick = null;
+        for (Alarm alarm : sortedAlarms) {
+            final long now = alarm.getTime();
+            if (lastTick == null) {
+                lastTick = now - 1;
+                printTick(lastTick, firstTimestamp, lastTimestamp, startTime);
+                engine.tick(lastTick);
+            } else if (lastTick + tickResolutionMs < now) {
+                for (long t = lastTick; t < now; t+= tickResolutionMs) {
+                    lastTick = t;
+                    printTick(t, firstTimestamp, lastTimestamp, startTime);
+                    engine.tick(t);
+                }
+            }
+            engine.onAlarm(alarm);
+        }
+        // One last tick
+        lastTick += tickResolutionMs;
+        engine.tick(lastTick);
+
         write(incidents);
         return incidents;
+    }
+
+    private void printTick(long tick, long firstTimestamp, long lastTimeStamp, long startTime) {
+        double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
+        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed\n", new Date(tick), tick,
+                percentageComplete, getElaspsed(startTime));
+    }
+
+    private static String getElaspsed(long start) {
+        // Copied from https://stackoverflow.com/questions/6710094/how-to-format-an-elapsed-time-interval-in-hhmmss-sss-format-in-java
+        double t = System.currentTimeMillis() - start;
+        if(t < 1000d)
+            return slf(t) + "ms";
+        if(t < 60000d)
+            return slf(t / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        if(t < 3600000d)
+            return slf(t / 60000d) + "m " +
+                    slf((t % 60000d) / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        if(t < 86400000d)
+            return slf(t / 3600000d) + "h " +
+                    slf((t % 3600000d) / 60000d) + "m " +
+                    slf((t % 60000d) / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        return slf(t / 86400000d) + "d " +
+                slf((t % 86400000d) / 3600000d) + "h " +
+                slf((t % 3600000d) / 60000d) + "m " +
+                slf((t % 60000d) / 1000d) + "s " +
+                slf(t % 1000d) + "ms";
+    }
+
+    private static String slf(double n) {
+        return String.valueOf(Double.valueOf(Math.floor(n)).longValue());
     }
 
     @Override
@@ -117,7 +193,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
         // Handle New and Updated incidents from the processor impl
         // TODO - for now - simply overwrite any incident.
         // it is on the ProcessorImpl to maintain last correct state.
-        System.out.println("Incident: " + i.getId());
+        System.out.printf("Incident with id %s has %d alarms.\n", i.getId(), i.getAlarms().size());
         incidents.put(i.getId(), i);
     }
 
@@ -139,6 +215,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
 
     private void write(Map<String, Incident> incidents) throws JAXBException, IOException {
         String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
+        System.out.printf("Writing %d incidents to %s.\n", incidents.size(), filepath);
         try (OutputStream os = Files.newOutputStream(Paths.get(filepath))) {
             JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -166,6 +243,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
         return engine;
     }
 
+
     private static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm) {
         return new Alarm() {
             @Override
@@ -174,8 +252,23 @@ public class ProcessAlarms implements Action, IncidentHandler {
             }
 
             @Override
+            public String getReductionKey() {
+                return alarm.getReductionKey();
+            }
+
+            @Override
             public long getTime() {
                 return alarm.getTime();
+            }
+
+            @Override
+            public ResourceKey getResourceKey() {
+                return new ResourceKey((List<String>)gson.fromJson(alarm.getResource(), List.class));
+            }
+
+            @Override
+            public boolean isClear() {
+                return alarm.getSeverity().equals(Severity.CLEARED);
             }
         };
     }

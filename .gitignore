@@ -26,3 +26,5 @@ bin/
 java/bin/
 *.swp
 *.iml
+
+dependency-reduced-pom.xml

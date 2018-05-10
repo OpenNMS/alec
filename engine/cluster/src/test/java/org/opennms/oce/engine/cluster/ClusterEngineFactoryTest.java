@@ -26,18 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Alarm {
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsSame.sameInstance;
+import static org.junit.Assert.assertThat;
 
-    String getId();
+import org.junit.Test;
 
-    String getReductionKey();
+public class ClusterEngineFactoryTest {
 
-    long getTime();
+    @Test
+    public void canCreateEngine() {
+        ClusterEngineFactory factory = new ClusterEngineFactory();
+        ClusterEngine engine1 = factory.createEngine();
+        assertThat(engine1, notNullValue());
 
-    ResourceKey getResourceKey();
-
-    boolean isClear();
-
+        ClusterEngine engine2 = factory.createEngine();
+        assertThat(engine2, notNullValue());
+        assertThat(engine1, not(sameInstance(engine2)));
+    }
 }

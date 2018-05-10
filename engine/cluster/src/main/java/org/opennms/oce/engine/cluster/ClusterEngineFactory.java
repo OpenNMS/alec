@@ -26,18 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.cluster;
 
-public interface Alarm {
+import org.opennms.oce.engine.api.EngineFactory;
 
-    String getId();
+public class ClusterEngineFactory implements EngineFactory {
+    @Override
+    public String getName() {
+        return "cluster";
+    }
 
-    String getReductionKey();
-
-    long getTime();
-
-    ResourceKey getResourceKey();
-
-    boolean isClear();
-
+    @Override
+    public ClusterEngine createEngine() {
+        return new ClusterEngine();
+    }
 }

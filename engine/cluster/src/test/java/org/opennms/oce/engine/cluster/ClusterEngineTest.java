@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
@@ -96,6 +97,7 @@ public class ClusterEngineTest implements IncidentHandler {
     @Test
     public void canClusterAlarms() {
         long now = System.currentTimeMillis();
+        engine.setTickResolutionMs(TimeUnit.SECONDS.toMillis(30));
 
         // Trigger two alarms on the same resource very close in time
         ResourceKey key = new ResourceKey("a", "b", "c", "d");

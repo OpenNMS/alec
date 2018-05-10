@@ -98,7 +98,7 @@ public class ClusterEngine implements Engine {
     private final Map<String, IncidentBean> alarmIdToIncidentMap = new HashMap<>();
     private final Map<String, IncidentBean> incidentsById = new HashMap<>();
 
-    private long tickResolutionMs = TimeUnit.SECONDS.toMillis(30);
+    private long tickResolutionMs = TimeUnit.MINUTES.toMillis(1);
 
     private IncidentHandler incidentHandler;
 
@@ -106,9 +106,12 @@ public class ClusterEngine implements Engine {
 
     private double epsilon = 100d;
 
+    private boolean alarmsChangedSinceLastTick = false;
+
     @Override
     public synchronized void onAlarm(Alarm alarm) {
        getVertexForResource(alarm.getResourceKey()).addOrUpdateAlarm(alarm);
+       alarmsChangedSinceLastTick = true;
     }
 
     @Override
@@ -126,6 +129,12 @@ public class ClusterEngine implements Engine {
         return tickResolutionMs;
     }
 
+
+    public void setTickResolutionMs(long tickResolutionMs) {
+        this.tickResolutionMs = tickResolutionMs;
+    }
+
+
     @Override
     public void tick(long timestampInMillis) {
         if (timestampInMillis - lastRun >= tickResolutionMs) {
@@ -135,7 +144,13 @@ public class ClusterEngine implements Engine {
     }
 
     public void onTick(long timestampInMillis) {
-        // FIXME: Very innefficient to do this every tick
+        if (!alarmsChangedSinceLastTick) {
+            return;
+        }
+        // Reset
+        alarmsChangedSinceLastTick = false;
+
+        // FIXME: Inefficient to do this every tick
         final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
                 .map(v -> v.getAlarms().stream()
                             .map(a -> new AlarmInSpaceTime(v,a))
@@ -150,8 +165,6 @@ public class ClusterEngine implements Engine {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Got cluster with {} alarms.", clusterOfAlarms.getPoints().size());
             }
-
-
 
             final Set<IncidentBean> incidents = mapClusterToIncidents(clusterOfAlarms,
                     alarmIdToIncidentMap, incidentsById, incidentIdGenerator);

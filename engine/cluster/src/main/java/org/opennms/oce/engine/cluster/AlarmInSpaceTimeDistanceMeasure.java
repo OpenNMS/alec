@@ -58,7 +58,7 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         }
 
         final double delta = compute(timeA, timeB, numHops);
-        System.out.printf("Distance between %d and %d is: %.4f\n", vertexIdA, vertexIdB, delta);
+        //System.out.printf("Distance between %d and %d is: %.4f\n", vertexIdA, vertexIdB, delta);
         return delta;
     }
 

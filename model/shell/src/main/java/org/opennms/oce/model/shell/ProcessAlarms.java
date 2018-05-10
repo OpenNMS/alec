@@ -34,6 +34,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +65,7 @@ import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
 
+import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 /**
@@ -105,10 +109,48 @@ public class ProcessAlarms implements Action, IncidentHandler {
     }
 
     private Map<String, Incident> processAlarms(List<Alarm> alarms) throws JAXBException, IOException {
-        AlarmProcessor processor = getEngine();
-        alarms.forEach(processor::onAlarm);
+        System.out.printf("Processing %d alarms.\n", alarms.size());
+        final Engine engine = getEngine();
+        final List<Alarm> sortedAlarms = alarms.stream()
+                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
+                .collect(Collectors.toList());
+
+        if (sortedAlarms.size() < 1) {
+            // No alarms, nothing to do here
+            return Collections.emptyMap();
+        }
+
+        long tickResolutionMs = engine.getTickResolutionMs();
+        final long firstTimestamp = sortedAlarms.get(0).getTime();
+        final long lastTimestamp = sortedAlarms.get(sortedAlarms.size()-1).getTime();
+
+        Long lastTick = null;
+        for (Alarm alarm : sortedAlarms) {
+            final long now = alarm.getTime();
+            if (lastTick == null) {
+                lastTick = now - 1;
+                printTick(lastTick, firstTimestamp, lastTimestamp);
+                engine.tick(lastTick);
+            } else if (lastTick + tickResolutionMs < now) {
+                for (long t = lastTick; t < now; t+= tickResolutionMs) {
+                    lastTick = t;
+                    printTick(t, firstTimestamp, lastTimestamp);
+                    engine.tick(t);
+                }
+            }
+            engine.onAlarm(alarm);
+        }
+        // One last tick
+        lastTick += tickResolutionMs;
+        engine.tick(lastTick);
+
         write(incidents);
         return incidents;
+    }
+
+    private void printTick(long tick, long firstTimestamp, long lastTimeStamp) {
+        double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
+        System.out.printf("Tick at %s (%d) - %.2f%% complete\n", new Date(tick), tick, percentageComplete);
     }
 
     @Override
@@ -144,6 +186,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
 
     private void write(Map<String, Incident> incidents) throws JAXBException, IOException {
         String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
+        System.out.printf("Writing %d incidents to %s.\n", incidents.size(), filepath);
         try (OutputStream os = Files.newOutputStream(Paths.get(filepath))) {
             JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
             Marshaller marshaller = jaxbContext.createMarshaller();

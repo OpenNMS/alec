@@ -123,18 +123,19 @@ public class ProcessAlarms implements Action, IncidentHandler {
         long tickResolutionMs = engine.getTickResolutionMs();
         final long firstTimestamp = sortedAlarms.get(0).getTime();
         final long lastTimestamp = sortedAlarms.get(sortedAlarms.size()-1).getTime();
+        final long startTime = System.currentTimeMillis();
 
         Long lastTick = null;
         for (Alarm alarm : sortedAlarms) {
             final long now = alarm.getTime();
             if (lastTick == null) {
                 lastTick = now - 1;
-                printTick(lastTick, firstTimestamp, lastTimestamp);
+                printTick(lastTick, firstTimestamp, lastTimestamp, startTime);
                 engine.tick(lastTick);
             } else if (lastTick + tickResolutionMs < now) {
                 for (long t = lastTick; t < now; t+= tickResolutionMs) {
                     lastTick = t;
-                    printTick(t, firstTimestamp, lastTimestamp);
+                    printTick(t, firstTimestamp, lastTimestamp, startTime);
                     engine.tick(t);
                 }
             }
@@ -148,9 +149,38 @@ public class ProcessAlarms implements Action, IncidentHandler {
         return incidents;
     }
 
-    private void printTick(long tick, long firstTimestamp, long lastTimeStamp) {
+    private void printTick(long tick, long firstTimestamp, long lastTimeStamp, long startTime) {
         double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
-        System.out.printf("Tick at %s (%d) - %.2f%% complete\n", new Date(tick), tick, percentageComplete);
+        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed\n", new Date(tick), tick,
+                percentageComplete, getElaspsed(startTime));
+    }
+
+    private static String getElaspsed(long start) {
+        // Copied from https://stackoverflow.com/questions/6710094/how-to-format-an-elapsed-time-interval-in-hhmmss-sss-format-in-java
+        double t = System.currentTimeMillis() - start;
+        if(t < 1000d)
+            return slf(t) + "ms";
+        if(t < 60000d)
+            return slf(t / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        if(t < 3600000d)
+            return slf(t / 60000d) + "m " +
+                    slf((t % 60000d) / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        if(t < 86400000d)
+            return slf(t / 3600000d) + "h " +
+                    slf((t % 3600000d) / 60000d) + "m " +
+                    slf((t % 60000d) / 1000d) + "s " +
+                    slf(t % 1000d) + "ms";
+        return slf(t / 86400000d) + "d " +
+                slf((t % 86400000d) / 3600000d) + "h " +
+                slf((t % 3600000d) / 60000d) + "m " +
+                slf((t % 60000d) / 1000d) + "s " +
+                slf(t % 1000d) + "ms";
+    }
+
+    private static String slf(double n) {
+        return String.valueOf(Double.valueOf(Math.floor(n)).longValue());
     }
 
     @Override

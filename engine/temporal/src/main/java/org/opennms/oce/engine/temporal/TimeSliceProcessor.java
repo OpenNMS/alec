@@ -49,8 +49,8 @@ public class TimeSliceProcessor implements Engine {
 
     List<Incident> incidents = new ArrayList<>();
 
-    // Initial hard-coded default of 1 second.
-    int sliceMillis = 1000; // time slice size in millis
+    // Initial hard-coded default of 10 seconds.
+    int sliceMillis = 10000; // time slice size in millis
 
     long windowStart = 0;
 
@@ -75,7 +75,6 @@ public class TimeSliceProcessor implements Engine {
     }
 
     private boolean isInCurrentWindow(Alarm alarm) {
-        System.out.println(alarm.getId() + " : " + alarm.getTime() + " -- [" + windowStart + "," + windowStop + "]");
         return alarm.getTime() >= windowStart && alarm.getTime() < windowStop;
     }
 

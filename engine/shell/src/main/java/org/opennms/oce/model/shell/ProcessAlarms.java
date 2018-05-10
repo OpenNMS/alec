@@ -56,16 +56,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.engine.common.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.v1.schema.AlarmRef;
 import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
-import org.opennms.oce.model.v1.schema.Severity;
-
-import com.google.gson.Gson;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Incidents.
@@ -76,8 +72,6 @@ import com.google.gson.Gson;
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
 public class ProcessAlarms implements Action, IncidentHandler {
-
-    private static final Gson gson = new Gson();
 
     @Reference
     private Model model;
@@ -208,7 +202,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
             return alarms.getAlarm().stream()
-                    .map(ProcessAlarms::toEngineAlarm)
+                    .map(EngineUtils::toEngineAlarm)
                     .collect(Collectors.toList());
         }
     }
@@ -221,7 +215,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
             Marshaller marshaller = jaxbContext.createMarshaller();
             Incidents list = new Incidents();
             list.getIncident().addAll(incidents.values().stream()
-                .map(ProcessAlarms::toModelIncident)
+                .map(EngineUtils::toModelIncident)
                 .collect(Collectors.toList()));
             marshaller.marshal(list, os);
         }
@@ -241,47 +235,6 @@ public class ProcessAlarms implements Action, IncidentHandler {
         engine.setInventory(model);
         engine.registerIncidentHandler(this);
         return engine;
-    }
-
-
-    private static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm) {
-        return new Alarm() {
-            @Override
-            public String getId() {
-                return alarm.getId();
-            }
-
-            @Override
-            public String getReductionKey() {
-                return alarm.getReductionKey();
-            }
-
-            @Override
-            public long getTime() {
-                return alarm.getTime();
-            }
-
-            @Override
-            public ResourceKey getResourceKey() {
-                return new ResourceKey((List<String>)gson.fromJson(alarm.getResource(), List.class));
-            }
-
-            @Override
-            public boolean isClear() {
-                return alarm.getSeverity().equals(Severity.CLEARED);
-            }
-        };
-    }
-
-    private static org.opennms.oce.model.v1.schema.Incident toModelIncident(Incident incident) {
-        org.opennms.oce.model.v1.schema.Incident modelIncident = new org.opennms.oce.model.v1.schema.Incident();
-        modelIncident.setId(incident.getId());
-        for (Alarm a : incident.getAlarms()) {
-            AlarmRef alarmRef = new AlarmRef();
-            alarmRef.setId(a.getId());
-            modelIncident.getAlarmRef().add(alarmRef);
-        }
-        return modelIncident;
     }
 
 }

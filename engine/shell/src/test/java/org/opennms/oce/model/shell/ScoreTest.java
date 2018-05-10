@@ -32,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ScoreTest {
@@ -54,11 +55,23 @@ public class ScoreTest {
         Path seventyPercent = Paths.get("src", "test", "resources", "TwentyPercent.xml");
         Score score = new Score(baseline, seventyPercent);
         // Test for Incidents
-        assertEquals(20, score.getAccuracy());
+        assertEquals(24, score.getAccuracy());
         assertEquals(1, score.getTypeOneErrorCount());
-        assertEquals(79, score.getFalseNegativeCount());
+        assertEquals(63, score.getFalseNegativeCount());
         // Test for Alarms coverage
         assertEquals(26, score.getAlarmAccuracy());
     }
 
+    @Ignore
+    @Test
+    public void testProcessor() throws Exception {
+        Path baseline = Paths.get("src", "test", "resources", "cpn.incidents.xml");
+        Path seventyPercent = Paths.get("src", "test", "resources", "incidents.xml");
+        Score score = new Score(baseline, seventyPercent);
+        // Output scores:
+        System.out.println("Accuracy (%): " + score.getAccuracy());
+        System.out.println("False Positives: " + score.getTypeOneErrorCount());
+        System.out.println("False Negatives: " + score.getFalseNegativeCount());
+        System.out.println("AlarmAccuracy (%): " + score.getAlarmAccuracy());
+    }
 }

@@ -6,20 +6,22 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.engine</groupId>
-    <artifactId>org.opennms.oce.engine.temporal</artifactId>
-    <name>OCE :: Engine :: Temporal</name>
+    <artifactId>org.opennms.oce.engine.itest</artifactId>
+    <name>OCE :: Engine :: ITEST</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.common</artifactId>
+            <artifactId>org.opennms.oce.engine.driver</artifactId>
         </dependency>
-
-    	<dependency>
-	   	  <groupId>junit</groupId>
-		  <artifactId>junit</artifactId>
-		  <scope>test</scope>
-	   </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.temporal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.model</groupId>
+            <artifactId>org.opennms.oce.model.api</artifactId>
+        </dependency>
     </dependencies>
 </project>

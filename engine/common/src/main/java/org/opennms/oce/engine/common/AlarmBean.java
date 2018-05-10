@@ -28,25 +28,25 @@
 
 package org.opennms.oce.engine.common;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 
-public class IncidentBean implements Incident {
+public class AlarmBean implements Alarm {
+
     private String id;
-    private Set<Alarm> alarms = new LinkedHashSet<>();
 
-    public IncidentBean() {
+    private long time;
+
+    public AlarmBean() {
     }
 
-    public IncidentBean(String id) {
+    public AlarmBean(String id) {
         this.id = id;
     }
 
-    public void setId(String id) {
+    public AlarmBean(String id, long time) {
         this.id = id;
+        this.time = time;
     }
 
     @Override
@@ -54,13 +54,35 @@ public class IncidentBean implements Incident {
         return id;
     }
 
-    public void addAlarm(Alarm alarm) {
-        alarms.add(alarm);
+    @Override
+    public long getTime() {
+        return time;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     @Override
-    public Set<Alarm> getAlarms() {
-        return alarms;
+    public String getReductionKey() {
+        // TODO Auto-generated method stub
+        return null;
     }
+
+    @Override
+    public ResourceKey getResourceKey() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isClear() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

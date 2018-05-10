@@ -14,7 +14,10 @@
         <module>api</module>
         <module>common</module>
         <module>temporal</module>
-	<module>cluster</module>
+        <module>cluster</module>
+        <module>driver</module>
+        <module>shell</module>
+        <module>itest</module>
     </modules>
 </project>
 

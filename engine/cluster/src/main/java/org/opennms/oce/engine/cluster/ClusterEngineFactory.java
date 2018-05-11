@@ -37,6 +37,11 @@ public class ClusterEngineFactory implements EngineFactory {
     }
 
     @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
     public ClusterEngine createEngine() {
         return new ClusterEngine();
     }

@@ -109,6 +109,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.oce.engine</groupId>
+                <artifactId>org.opennms.oce.engine.cluster</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.oce.model</groupId>
                 <artifactId>org.opennms.oce.model.api</artifactId>
                 <version>${project.version}</version>

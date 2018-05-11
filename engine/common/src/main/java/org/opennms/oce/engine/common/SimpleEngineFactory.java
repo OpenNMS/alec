@@ -46,6 +46,11 @@ public class SimpleEngineFactory<T extends Engine> implements EngineFactory {
     }
 
     @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
     public T createEngine() {
         try {
             return clazz.newInstance();

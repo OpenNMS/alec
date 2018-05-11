@@ -20,8 +20,24 @@
             <artifactId>org.opennms.oce.engine.temporal</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.model</groupId>
-            <artifactId>org.opennms.oce.model.api</artifactId>
+            <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.cluster</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -35,9 +35,13 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
     private final ClusterEngine clusterEngine;
+    private final double timeWeight;
+    private final double hopWeight;
 
-    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine) {
+    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine, double timeWeight, double hopWeight) {
         this.clusterEngine = Objects.requireNonNull(clusterEngine);
+        this.timeWeight = timeWeight;
+        this.hopWeight = hopWeight;
     }
 
     @Override
@@ -62,8 +66,13 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         return delta;
     }
 
-    public static double compute(double timeA, double timeB, int numHops) {
+    public double compute(double timeA, double timeB, int numHops) {
         // TODO: Revise function, match with what's defined in ClusterEngine
-        return Math.abs(timeA - timeB) / 1000 + numHops;
+        return timeWeight * Math.abs(timeA - timeB) + hopWeight * numHops;
+    }
+
+    public static double computeStatic(double timeA, double timeB, int numHops) {
+        // TODO: Revise function, match with what's defined in ClusterEngine
+        return Math.abs(timeA - timeB) + numHops;
     }
 }

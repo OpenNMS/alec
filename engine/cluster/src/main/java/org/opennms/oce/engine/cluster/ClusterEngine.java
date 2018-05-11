@@ -96,7 +96,7 @@ public class ClusterEngine implements Engine {
 
     private final Graph<Vertex, Edge> g = new SparseMultigraph<>();
     private final DijkstraShortestPath<Vertex, Edge> shortestPath = new DijkstraShortestPath<>(g);
-    private final AlarmInSpaceTimeDistanceMeasure distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this);
+    private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
 
     private final Map<ResourceKey, Vertex> resourceToVertexMap = new HashMap<>();
     private final Map<Long, Vertex> idtoVertexMap = new HashMap<>();
@@ -109,11 +109,21 @@ public class ClusterEngine implements Engine {
 
     private long lastRun = 0;
 
-    private double epsilon = 100d;
+    private final double epsilon;
 
     private long alarmTimeoutMs = TimeUnit.HOURS.toMillis(2);
 
     private boolean alarmsChangedSinceLastTick = false;
+
+    public ClusterEngine() {
+        // TODO: Deduplicate defaults with factory
+        this(1000d,1/1000d,1d);
+    }
+
+    public ClusterEngine(double epsilon, double timeWeight, double hopWeight) {
+        this.epsilon = epsilon;
+        distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, timeWeight, hopWeight);
+    }
 
     @Override
     public synchronized void onAlarm(Alarm alarm) {
@@ -290,7 +300,7 @@ public class ClusterEngine implements Engine {
                     final double timeB = candidate.getTime();
                     // TODO: Incorporate the hops here
                     final int numHops = 0;
-                    final double distance = AlarmInSpaceTimeDistanceMeasure.compute(timeA, timeB, 0);
+                    final double distance = AlarmInSpaceTimeDistanceMeasure.computeStatic(timeA, timeB, 0);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
                 // TODO: Add more deterministic behavior when the distances are the same

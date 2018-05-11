@@ -31,6 +31,7 @@ package org.opennms.oce.engine.driver;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,19 +44,26 @@ import org.opennms.oce.model.alarm.api.Incident;
 
 public class MatrixBasedScoringStrategy implements ScoringStrategy {
     @Override
+    public String getName() {
+        return "matrix";
+    }
+
+    @Override
     public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
         final ScoreReportBean report = new ScoreReportBean();
 
         // Gather the complete set of unique alarm ids
-        final List<String> alarmIdBasis = new ArrayList<>();
+        final Set<String> allAlarmIds = new HashSet<>();
         baseline.stream()
                 .flatMap(i -> i.getAlarms().stream())
                 .map(Alarm::getId)
-                .forEach(alarmIdBasis::add);
+                .forEach(allAlarmIds::add);
         sut.stream()
                 .flatMap(i -> i.getAlarms().stream())
                 .map(Alarm::getId)
-                .forEach(alarmIdBasis::add);
+                .forEach(allAlarmIds::add);
+
+        final List<String> alarmIdBasis = new ArrayList<>(allAlarmIds);
         alarmIdBasis.sort(Comparator.naturalOrder());
 
         final int N = alarmIdBasis.size();
@@ -72,7 +80,7 @@ public class MatrixBasedScoringStrategy implements ScoringStrategy {
         // Build a spare N*N matrix
         SparseRealMatrix m1 = getMatrix(baseline, alarmIdToIndexMap);
         SparseRealMatrix m2 = getMatrix(sut, alarmIdToIndexMap);
-        report.setScore(m1.subtract(m2).getNorm());
+        report.setScore(m1.multiply(m2.transpose()).getNorm());
         return report;
     }
 
@@ -104,11 +112,6 @@ public class MatrixBasedScoringStrategy implements ScoringStrategy {
             }
         }
         return m;
-    }
-
-    @Override
-    public String getName() {
-        return this.getName();
     }
 
 }

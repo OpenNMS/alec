@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opennms.oce.engine.shell.Score;
 
 public class ScoreTest {
 

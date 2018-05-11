@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.shell;
+package org.opennms.oce.engine.shell;
 
 import java.io.IOException;
 import java.io.InputStream;

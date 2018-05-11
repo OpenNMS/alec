@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.shell;
+package org.opennms.oce.engine;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,7 +46,7 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
 
-public class ProcessorTest implements IncidentHandler {
+public class EngineTest implements IncidentHandler {
 
     List<Incident> incidents;
 

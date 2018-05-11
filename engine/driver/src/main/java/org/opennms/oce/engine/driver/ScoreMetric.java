@@ -26,18 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.driver;
 
-import java.util.Set;
+public interface ScoreMetric {
 
-import org.opennms.oce.model.alarm.api.Incident;
+    String getName();
 
-/**
- * @author smith
- *
- */
-public interface ScoringStrategy {
+    double getValue();
 
-    ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
-
+    String getDescription();
 }

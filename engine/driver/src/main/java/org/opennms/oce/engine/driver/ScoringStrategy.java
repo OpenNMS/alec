@@ -26,22 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.driver;
 
-import java.util.List;
+import java.util.Set;
 
-public interface ScoreReport {
+import org.opennms.oce.model.alarm.api.Incident;
 
-    /**
-     * A positive value greater than or equal to zero
-     *  where the low the value, the closer the evaluation is to the baseline,
-     *  with 0 being equivalent to the baseline.
-     */
-    double getScore();
+/**
+ * @author smith
+ *
+ */
+public interface ScoringStrategy {
 
-    /**
-     * A List of ScoreMetrics that are appropriate for the Engine under test 
-     *  and which provide further context on the score against the baseline.
-     */
-    List<ScoreMetric> getMetrics();
+    ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
+
 }

@@ -26,13 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.api;
+package org.opennms.oce.engine.driver;
 
-public interface ScoreMetric {
+import java.util.List;
 
-    String getName();
+public interface ScoreReport {
 
-    double getValue();
+    /**
+     * A positive value greater than or equal to zero
+     *  where the low the value, the closer the evaluation is to the baseline,
+     *  with 0 being equivalent to the baseline.
+     */
+    double getScore();
 
-    String getDescription();
+    /**
+     * A List of ScoreMetrics that are appropriate for the Engine under test 
+     *  and which provide further context on the score against the baseline.
+     */
+    List<ScoreMetric> getMetrics();
 }

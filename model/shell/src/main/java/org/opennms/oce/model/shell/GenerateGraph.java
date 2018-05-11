@@ -33,7 +33,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -51,7 +53,7 @@ import org.opennms.oce.model.shell.graph.ModelWalker;
 @Service
 public class GenerateGraph implements Action, ModelVisitor {
 
-    private static final String START_GRAPH = "graph {";
+    private static final String START_GRAPH = "graph {\n";
     private static final String END_GRAPH = "\n}\n";
 
     @Reference
@@ -60,7 +62,8 @@ public class GenerateGraph implements Action, ModelVisitor {
     // Used to collect dotGraph encoded nodes for rendering
     private Map<String, String> graphNodes = new HashMap<>();
 
-    private Map<Integer, String> rankedNodes = new HashMap<>();
+    // Used to collect dotGraph encoded nodes for ranking
+    private Map<Integer, Set<String>> rankedNodes = new TreeMap<>();
 
     // Used to collect dotGraph encoded edges for rendering
     private Set<String> graphEdges = new HashSet<>();
@@ -110,6 +113,7 @@ public class GenerateGraph implements Action, ModelVisitor {
 
     private String buildGraph() {
         StringBuilder sb = new StringBuilder(START_GRAPH);
+        sb.append(graphRank());
         sb.append(graphEdges.stream().collect(Collectors.joining("\n")));
         sb.append("\n");
         sb.append(graphNodes.values().stream().collect(Collectors.joining("\n")));
@@ -179,6 +183,22 @@ public class GenerateGraph implements Action, ModelVisitor {
 
         // We're safe now
         return effectiveName;
+    }
+
+    // Group Nodes in similaqr Ranks. Keep rank groups to a manageble size
+    private Object graphRank() {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Integer, Set<String>> entrySet : rankedNodes.entrySet()) {
+            Integer rank = entrySet.getKey();
+            Set<String> nodeSet = entrySet.getValue();
+            if (nodeSet.size() < 10) {
+                sb.append("\n {rank=" + rank + "; " + nodeSet.stream().collect(Collectors.joining(" ")) + "}");
+            } else {
+                // TODO - split nodes into chunks
+                sb.append("\n {rank=same; " + nodeSet.stream().collect(Collectors.joining(" ")) + "}");
+            }
+        }
+        return sb.toString();
     }
 
     private void validateSzl() {

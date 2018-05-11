@@ -28,8 +28,6 @@
 package org.opennms.oce.model.shell;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -37,40 +35,42 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.v1.schema.AlarmRef;
-import org.opennms.oce.model.v1.schema.Incident;
-import org.opennms.oce.model.v1.schema.Incidents;
+import org.opennms.oce.engine.common.EngineUtils;
+import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.Incident;
 
-// Derive a score comparing a Set of Tickets to a Base Sample
+// Derive a score comparing a Set of Incidents to a Base Sample
 @Command(scope = "oce", name = "scoreIncidents", description = "Score Correlated Incidents against a baseline.")
 @Service
 public class Score implements Action {
 
+    // Input Baseline Incident Set 
     private Set<Incident> baseline;
 
-    private Set<Incident> unmatchedBaseline = new HashSet<>();
-
-    private Set<Incident> intersection = new HashSet<>();
-
+    // Incident Set to Score
     private Set<Incident> sut;
 
-    private Set<Incident> unmatchedSut = new HashSet<>();
+    private Set<String> baselineSignatures = new HashSet<>();
 
-    private Set<AlarmRef> baselineAlarms;
+    private Set<String> intersection = new HashSet<>();
 
-    private Set<AlarmRef> sutAlarms;
+    private Set<String> missed = new HashSet<>();
 
-    private Set<AlarmRef> intersectionAlarms = new HashSet<>();
+    private Set<String> sutSignatures = new HashSet<>();
 
-    private Set<AlarmRef> unmatchedAlarms = new HashSet<>();
+    private Set<String> baselineAlarms;
+
+    private Set<String> sutAlarms;
+
+    private Set<String> intersectionAlarms = new HashSet<>();
+
+    private Set<String> unmatchedAlarms = new HashSet<>();
 
     @Argument(index = 0, name = "baseline", description = "This is the path for the baseline incidents.xml file.", required = true, multiValued = false)
     private String baselineFile;
@@ -98,23 +98,6 @@ public class Score implements Action {
         createSets(basepath, sutPath);
     }
 
-    private void createSets(Path basepath, Path sutPath) throws JAXBException, IOException {
-        baseline = getIncidents(basepath);
-        sut = getIncidents(sutPath);
-        intersection.addAll(baseline);
-        intersection.retainAll(sut);
-        unmatchedBaseline.addAll(baseline);
-        unmatchedBaseline.removeAll(sut);
-        unmatchedSut.addAll(sut);
-        unmatchedSut.removeAll(baseline);
-        baselineAlarms = baseline.stream().map(i -> i.getAlarmRef()).flatMap(Collection::stream).collect(Collectors.toSet());
-        sutAlarms = sut.stream().map(i -> i.getAlarmRef()).flatMap(Collection::stream).collect(Collectors.toSet());
-        intersectionAlarms.addAll(baselineAlarms);
-        intersectionAlarms.retainAll(sutAlarms);
-        unmatchedAlarms.addAll(baselineAlarms);
-        unmatchedAlarms.removeAll(sutAlarms);
-    }
-
     // Percentage of the Base Tickets correctly found in the SUT
     public int getAccuracy() {
         int retained = intersection.size();
@@ -139,29 +122,40 @@ public class Score implements Action {
         return baseline.size() - intersection.size();
     }
 
-    public int getProximityScore() {
-        int score = 0;
-        for (Incident i : unmatchedBaseline) {
-            // Do we find anything close in the SUT?
-            // Perhaps consider a "near-match" for anything that matches > 50% or more than 2?
-            // TODO - this will need to be tunable....
-            // e.g. a "distance" score where 'x' is closest match in SUT - in practice, this would be search by an AlarmId not TicketId (WIP)
-            Incident x = getIncident(unmatchedSut, i.getId());
-            score += Math.abs(i.getAlarmRef().size() - x.getAlarmRef().size());
-        }
-        // FIXME
-        return score;
+    private void createSets(Path basepath, Path sutPath) throws JAXBException, IOException {
+        baseline = getIncidents(basepath);
+        sut = getIncidents(sutPath);
+        createAlarmSignatures(baseline, sut);
+        baselineAlarms = baseline.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
+        sutAlarms = sut.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
+        intersectionAlarms.addAll(baselineAlarms);
+        intersectionAlarms.retainAll(sutAlarms);
+        unmatchedAlarms.addAll(baselineAlarms);
+        unmatchedAlarms.removeAll(sutAlarms);
     }
 
-    private static Set<Incident> getIncidents(Path path) throws JAXBException, IOException {
-        try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return new HashSet<Incident>(((Incidents) unmarshaller.unmarshal(is)).getIncident());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+    // Read Incidents from XML file and filter out any w/o Alarms
+    private Set<Incident> getIncidents(Path pathspec) throws JAXBException, IOException {
+        Set<Incident> incidents = EngineUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
+        return incidents;
+    }
+
+    private void createAlarmSignatures(Set<Incident> baseline, Set<Incident> sut) {
+        baselineSignatures.addAll(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
+        intersection.addAll(baselineSignatures);
+        sutSignatures.addAll(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
+        intersection.retainAll(sutSignatures);
+        missed.addAll(baselineSignatures);
+        missed.removeAll(intersection);
+    }
+
+    private String getIncidentSignature(Incident i) {
+        return getAlarmSignature(i.getAlarms());
+    }
+
+    // Create a standardized signature from a List of Alarms
+    private String getAlarmSignature(Set<Alarm> alarms) {
+        return alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
     }
 
     private static Incident getIncident(Set<Incident> incidents, String id) {

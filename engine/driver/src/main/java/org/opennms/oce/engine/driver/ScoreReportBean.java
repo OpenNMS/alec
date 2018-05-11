@@ -26,16 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.driver;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface Incident {
+public class ScoreReportBean implements ScoreReport {
+    private double score;
+    private List<ScoreMetricBean> metrics = new ArrayList<>();
 
-    String getId();
+    @Override
+    public double getScore() {
+        return score;
+    }
 
-    long getCreationTime();
+    public void setScore(double score) {
+        this.score = score;
+    }
 
-    Set<Alarm> getAlarms();
+    @Override
+    public List<ScoreMetricBean> getMetrics() {
+        return metrics;
+    }
 
+    public void setMetrics(List<ScoreMetricBean> metrics) {
+        this.metrics = metrics;
+    }
 }

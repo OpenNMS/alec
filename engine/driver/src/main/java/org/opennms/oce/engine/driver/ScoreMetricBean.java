@@ -26,16 +26,37 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.model.alarm.api;
+package org.opennms.oce.engine.driver;
 
-import java.util.Set;
+public class ScoreMetricBean implements ScoreMetric {
+    private String name;
+    private double value;
+    private String description;
 
-public interface Incident {
+    @Override
+    public String getName() {
+        return name;
+    }
 
-    String getId();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    long getCreationTime();
+    @Override
+    public double getValue() {
+        return value;
+    }
 
-    Set<Alarm> getAlarms();
+    public void setValue(double value) {
+        this.value = value;
+    }
 
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

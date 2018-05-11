@@ -37,6 +37,7 @@ import org.opennms.oce.model.alarm.api.Incident;
 public class IncidentBean implements Incident {
     private String id;
     private Set<Alarm> alarms = new LinkedHashSet<>();
+    private long creationTime;
 
     public IncidentBean() {
     }
@@ -54,9 +55,17 @@ public class IncidentBean implements Incident {
         return id;
     }
 
+    @Override
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
+    }
+
     public void addAlarm(Alarm alarm) {
         alarms.add(alarm);
-
     }
 
     @Override

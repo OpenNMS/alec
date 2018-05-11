@@ -209,7 +209,7 @@
             <attribute name="source" type="string" use="optional" />
             <attribute name="severity" type="this:severity" use="required" />
             <attribute name="id" type="string" use="required" />
-            <attribute name="time" type="long" use="required" />
+            <attribute name="creation-time" type="long" use="required" />
             <attribute name="summary" type="string" use="required" />
             <attribute name="description" type="string" use="required" />
         </complexType>

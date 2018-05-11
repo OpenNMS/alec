@@ -99,6 +99,7 @@ public class EngineUtils {
 
     public static Incident toEngineIncident(org.opennms.oce.model.v1.schema.Incident incident) {
         IncidentBean engineIncident = new IncidentBean(incident.getId());
+        engineIncident.setCreationTime(incident.getCreationTime());
         for (AlarmRef a : incident.getAlarmRef()) {
             Alarm alarm = new AlarmBean(a.getId());
             engineIncident.addAlarm(alarm);

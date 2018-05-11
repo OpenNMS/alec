@@ -43,5 +43,5 @@ public interface ScoreReport {
      * A List of ScoreMetrics that are appropriate for the Engine under test 
      *  and which provide further context on the score against the baseline.
      */
-    List<ScoreMetric> getMetrics();
+    List<? extends ScoreMetric> getMetrics();
 }

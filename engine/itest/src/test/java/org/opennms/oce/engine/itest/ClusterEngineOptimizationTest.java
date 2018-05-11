@@ -47,6 +47,7 @@ import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.junit.Ignore;
@@ -54,7 +55,6 @@ import org.junit.Test;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.engine.driver.MatrixBasedScoringStrategy;
 import org.opennms.oce.engine.driver.ScoreReport;
 import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
@@ -62,6 +62,7 @@ import org.opennms.oce.model.alarm.api.Incident;
 
 import com.google.common.collect.Sets;
 
+@Ignore("Needs local data")
 public class ClusterEngineOptimizationTest {
 
     @Test
@@ -69,12 +70,20 @@ public class ClusterEngineOptimizationTest {
         final EngineAsFunction engineAsFunction = new EngineAsFunction();
         BOBYQAOptimizer optimizer = new BOBYQAOptimizer(6);
         ObjectiveFunction function = new ObjectiveFunction(engineAsFunction);
-        InitialGuess initialGuess = new InitialGuess(new double[]{1000d, 1/1000d, 1d});
+        InitialGuess initialGuess = new InitialGuess(new double[]{10000.0, 10.0000000001, 9.9});
         SimpleBounds bounds = new SimpleBounds(new double[]{0.1d,1e-10,0.1d}, new double[]{Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY});
         MaxIter maxIter = new MaxIter(10000);
         MaxEval maxEval = new MaxEval(maxIter.getMaxIter() * 10);
-        PointValuePair p = optimizer.optimize(function,initialGuess,bounds,maxIter,maxEval);
+        PointValuePair p = optimizer.optimize(function,initialGuess,bounds,maxIter,maxEval, GoalType.MINIMIZE);
         System.out.printf("Found point at %s with value %.2f\n", Arrays.toString(p.getPoint()), p.getValue());
+    }
+
+    @Test
+    public void runSpecific() throws JAXBException, IOException {
+        double[] point = new double[]{10000.0, 10.0000000001, 9.9};
+        final EngineAsFunction engineAsFunction = new EngineAsFunction();
+        double result = engineAsFunction.value(point);
+        System.out.printf("Found point at %s with value %.2f\n", Arrays.toString(point), result);
     }
 
     private static class EngineAsFunction implements MultivariateFunction {

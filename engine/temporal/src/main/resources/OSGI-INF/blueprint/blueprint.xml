@@ -4,7 +4,7 @@
     <!-- Configuration properties -->
     <cm:property-placeholder id="temporalEngineProperties" persistent-id="org.opennms.oce.engine.temporal" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="sliceMillis" value="1000"/>
+            <cm:property name="sliceMillis" value="10000"/>
         </cm:default-properties>
     </cm:property-placeholder>
 

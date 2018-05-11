@@ -111,7 +111,9 @@ public class TimeSliceProcessor implements Engine {
 
     @Override
     public void tick(long timestampInMillis) {
-        // TODO: Drive buckets from tick instead of next alarm
+        if (current != null) {
+            handler.onIncident(current);
+        }
     }
 
 }

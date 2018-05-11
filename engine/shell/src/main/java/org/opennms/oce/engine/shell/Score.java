@@ -30,8 +30,7 @@ package org.opennms.oce.engine.shell;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,9 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.engine.driver.ScoreMetric;
+import org.opennms.oce.engine.driver.ScoreReport;
+import org.opennms.oce.engine.driver.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Incident;
 
 // Derive a score comparing a Set of Incidents to a Base Sample
@@ -50,27 +51,11 @@ import org.opennms.oce.model.alarm.api.Incident;
 @Service
 public class Score implements Action {
 
-    // Input Baseline Incident Set 
-    private Set<Incident> baseline;
+    private ScoringStrategy strategy;
 
-    // Incident Set to Score
-    private Set<Incident> sut;
+    private double score;
 
-    private Set<String> baselineSignatures = new HashSet<>();
-
-    private Set<String> intersection = new HashSet<>();
-
-    private Set<String> missed = new HashSet<>();
-
-    private Set<String> sutSignatures = new HashSet<>();
-
-    private Set<String> baselineAlarms;
-
-    private Set<String> sutAlarms;
-
-    private Set<String> intersectionAlarms = new HashSet<>();
-
-    private Set<String> unmatchedAlarms = new HashSet<>();
+    private List<ScoreMetric> metrics;
 
     @Argument(index = 0, name = "baseline", description = "This is the path for the baseline incidents.xml file.", required = true, multiValued = false)
     private String baselineFile;
@@ -80,58 +65,36 @@ public class Score implements Action {
 
     @Override
     public Object execute() throws Exception {
-        // calculate the scores 
-        createSets(Paths.get(baselineFile), Paths.get(scoreFile));
-        // Print scores to SysOut
-        System.out.println("Accuracy: " + getAccuracy());
-        System.out.println("Type I Errors: " + getTypeOneErrorCount());
-        System.out.println("Type II Errors: " + getFalseNegativeCount());
-        //
-        System.out.println("Alarm Accuracy: " + getAlarmAccuracy());
-        return null;
+        evaluate(Paths.get(baselineFile), Paths.get(scoreFile));
+        printScore();
+        return score;
     }
 
     public Score() {
     }
 
-    public Score(Path basepath, Path sutPath) throws JAXBException, IOException {
-        createSets(basepath, sutPath);
+    public Score(Path basepath, Path sutPath, ScoringStrategy strategy) throws JAXBException, IOException {
+        this.strategy = strategy;
+        evaluate(basepath, sutPath);
     }
 
-    // Percentage of the Base Tickets correctly found in the SUT
-    public int getAccuracy() {
-        int retained = intersection.size();
-        return retained * 100 / baseline.size();
+    public double getScore() {
+        return score;
     }
 
-    // Percentage of the Alarms correctly found in the SUT
-    public int getAlarmAccuracy() {
-        int retained = intersectionAlarms.size();
-        return retained * 100 / baselineAlarms.size();
+    public List<ScoreMetric> getMetrics() {
+        return metrics;
     }
 
-    // Type I Error
-    public int getTypeOneErrorCount() {
-        // TODO - this error may in fact infer a better algo and the discrepancy needs to be investigated.
-        return sut.size() - intersection.size();
+    // for Unit Tests
+    void setStrategy(ScoringStrategy strategy) {
+        this.strategy = strategy;
     }
 
-    // Type II Error
-    public int getFalseNegativeCount() {
-        // TODO - initially this may be overstating the error as the set to be scored may have generated Tickets that are good but don't match exactly.
-        return baseline.size() - intersection.size();
-    }
-
-    private void createSets(Path basepath, Path sutPath) throws JAXBException, IOException {
-        baseline = getIncidents(basepath);
-        sut = getIncidents(sutPath);
-        createAlarmSignatures(baseline, sut);
-        baselineAlarms = baseline.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
-        sutAlarms = sut.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
-        intersectionAlarms.addAll(baselineAlarms);
-        intersectionAlarms.retainAll(sutAlarms);
-        unmatchedAlarms.addAll(baselineAlarms);
-        unmatchedAlarms.removeAll(sutAlarms);
+    private void evaluate(Path basepath, Path sutPath) throws JAXBException, IOException {
+        ScoreReport report = strategy.score(getIncidents(basepath), getIncidents(sutPath));
+        score = report.getScore();
+        metrics = (List<ScoreMetric>) report.getMetrics();
     }
 
     // Read Incidents from XML file and filter out any w/o Alarms
@@ -140,32 +103,13 @@ public class Score implements Action {
         return incidents;
     }
 
-    private void createAlarmSignatures(Set<Incident> baseline, Set<Incident> sut) {
-        baselineSignatures.addAll(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
-        intersection.addAll(baselineSignatures);
-        sutSignatures.addAll(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
-        intersection.retainAll(sutSignatures);
-        missed.addAll(baselineSignatures);
-        missed.removeAll(intersection);
+    private void printScore() {
+        System.out.println("Score: " + score);
+        metrics.stream().forEach(m -> printMetric(m));
     }
 
-    private String getIncidentSignature(Incident i) {
-        return getAlarmSignature(i.getAlarms());
+    private static void printMetric(ScoreMetric m) {
+        System.out.println(m.getName() + " : " + m.getValue());
     }
 
-    // Create a standardized signature from a List of Alarms
-    private String getAlarmSignature(Set<Alarm> alarms) {
-        return alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
-    }
-
-    private static Incident getIncident(Set<Incident> incidents, String id) {
-        for (Incident i : incidents) {
-            // TODO - what we really want to do here is search for a ticket that contains a given alarmId
-            // Then we can make that the basis of our secondary comparison - i.e. how different are those two tickets?
-            if (i.getId().equals(id)) {
-                return i;
-            }
-        }
-        return null;
-    }
 }

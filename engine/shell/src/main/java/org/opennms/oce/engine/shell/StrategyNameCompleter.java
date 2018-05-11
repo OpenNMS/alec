@@ -26,52 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.shell;
 
-public class ScoreMetricBean implements ScoreMetric {
-    private String name;
-    private double value;
-    private String description;
+import java.util.List;
 
-    public ScoreMetricBean() {
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.opennms.oce.engine.driver.ScoringStrategy;
 
-    }
+@Service
+public class StrategyNameCompleter implements Completer {
 
-    public ScoreMetricBean(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
-
-    public ScoreMetricBean(String name, double value, String description) {
-        this.name = name;
-        this.value = value;
-        this.description = description;
-    }
+    @Reference
+    private List<ScoringStrategy> strategies;
 
     @Override
-    public String getName() {
-        return name;
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
+        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
+        return delegate.complete(session, commandLine, candidates);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public double getValue() {
-        return value;
-    }
-
-    public void setValue(double value) {
-        this.value = value;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

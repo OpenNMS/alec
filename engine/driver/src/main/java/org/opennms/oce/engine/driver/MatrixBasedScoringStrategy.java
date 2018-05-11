@@ -106,4 +106,9 @@ public class MatrixBasedScoringStrategy implements ScoringStrategy {
         return m;
     }
 
+    @Override
+    public String getName() {
+        return this.getName();
+    }
+
 }

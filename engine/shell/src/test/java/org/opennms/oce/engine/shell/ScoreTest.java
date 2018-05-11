@@ -25,54 +25,49 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.oce.model.shell;
+package org.opennms.oce.engine.shell;
 
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import org.opennms.oce.engine.shell.Score;
+import org.opennms.oce.engine.driver.ScoreMetric;
+import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 
 public class ScoreTest {
 
     @Test
-    public void testSameAccuracy100() throws Exception {
+    public void testIntersectionStrategySameAccuracy100() throws Exception {
         Path baseline = Paths.get("src", "test", "resources", "Baseline.xml");
-        Score score = new Score(baseline, baseline);
+        Score score = new Score(baseline, baseline, new SetIntersectionStrategy());
         // Test for Incidents
-        assertEquals(100, score.getAccuracy());
-        assertEquals(0, score.getTypeOneErrorCount());
+        assertEquals(0.0, score.getScore(), 0);
+
+        List<ScoreMetric> metrics = score.getMetrics();
+
+        assertEquals(3, metrics.size());
+
+        /*assertEquals(0, score.getTypeOneErrorCount());
         assertEquals(0, score.getFalseNegativeCount());
         // Test for Alarms coverage
-        assertEquals(100, score.getAlarmAccuracy());
+        assertEquals(100, score.getAlarmAccuracy());*/
     }
 
     @Test
-    public void testSeventyPercentAccuracy() throws Exception {
+    public void testIntersectionStrategySeventyPercentAccuracy() throws Exception {
         Path baseline = Paths.get("src", "test", "resources", "Baseline.xml");
         Path seventyPercent = Paths.get("src", "test", "resources", "TwentyPercent.xml");
-        Score score = new Score(baseline, seventyPercent);
-        // Test for Incidents
-        assertEquals(24, score.getAccuracy());
-        assertEquals(1, score.getTypeOneErrorCount());
-        assertEquals(63, score.getFalseNegativeCount());
-        // Test for Alarms coverage
-        assertEquals(26, score.getAlarmAccuracy());
+        Score score = new Score(baseline, seventyPercent, new SetIntersectionStrategy());
+
+        assertEquals(76.0, score.getScore(), 0);
+
+        List<ScoreMetric> metrics = score.getMetrics();
+
+        assertEquals(3, metrics.size());
+
     }
 
-    @Ignore
-    @Test
-    public void testProcessor() throws Exception {
-        Path baseline = Paths.get("src", "test", "resources", "cpn.incidents.xml");
-        Path seventyPercent = Paths.get("src", "test", "resources", "incidents.xml");
-        Score score = new Score(baseline, seventyPercent);
-        // Output scores:
-        System.out.println("Accuracy (%): " + score.getAccuracy());
-        System.out.println("False Positives: " + score.getTypeOneErrorCount());
-        System.out.println("False Negatives: " + score.getFalseNegativeCount());
-        System.out.println("AlarmAccuracy (%): " + score.getAlarmAccuracy());
-    }
 }

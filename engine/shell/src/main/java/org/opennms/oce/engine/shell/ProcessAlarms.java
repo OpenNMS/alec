@@ -35,12 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
@@ -54,9 +49,8 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.driver.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
@@ -69,13 +63,12 @@ import org.opennms.oce.model.v1.schema.Incidents;
  * Input an XML Document of Alarms and Output an XML document of Incidents.
  * Utilize an AlarmProcessor to create the incidents.
  * Alarms are simply serialized to the Processor.
- * 
  */
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
-public class ProcessAlarms implements Action, IncidentHandler {
+public class ProcessAlarms implements Action {
 
-    @Reference
+    @Reference(optional = true)
     private Model model;
 
     @Reference
@@ -91,106 +84,17 @@ public class ProcessAlarms implements Action, IncidentHandler {
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
-    Map<String, Incident> incidents = new HashMap<>();
-
-    // method for unit test harness
-    Map<String, Incident> test(Path alarmsPath) throws JAXBException, IOException {
-        List<Alarm> alarms = getAlarms(alarmsPath);
-        return processAlarms(alarms);
-    }
-
-    void setOutputFile(String out) {
-        outFile = out;
-    }
-
-    private Map<String, Incident> processAlarms(List<Alarm> alarms) throws JAXBException, IOException {
-        System.out.printf("Processing %d alarms.\n", alarms.size());
-        final Engine engine = getEngine();
-        final List<Alarm> sortedAlarms = alarms.stream()
-                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
-                .collect(Collectors.toList());
-
-        if (sortedAlarms.size() < 1) {
-            // No alarms, nothing to do here
-            return Collections.emptyMap();
-        }
-
-        long tickResolutionMs = engine.getTickResolutionMs();
-        final long firstTimestamp = sortedAlarms.get(0).getTime();
-        final long lastTimestamp = sortedAlarms.get(sortedAlarms.size()-1).getTime();
-        final long startTime = System.currentTimeMillis();
-
-        Long lastTick = null;
-        for (Alarm alarm : sortedAlarms) {
-            final long now = alarm.getTime();
-            if (lastTick == null) {
-                lastTick = now - 1;
-                printTick(lastTick, firstTimestamp, lastTimestamp, startTime);
-                engine.tick(lastTick);
-            } else if (lastTick + tickResolutionMs < now) {
-                for (long t = lastTick; t < now; t+= tickResolutionMs) {
-                    lastTick = t;
-                    printTick(t, firstTimestamp, lastTimestamp, startTime);
-                    engine.tick(t);
-                }
-            }
-            engine.onAlarm(alarm);
-        }
-        // One last tick
-        lastTick += tickResolutionMs;
-        engine.tick(lastTick);
-
-        write(incidents);
-        return incidents;
-    }
-
-    private void printTick(long tick, long firstTimestamp, long lastTimeStamp, long startTime) {
-        double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
-        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed\n", new Date(tick), tick,
-                percentageComplete, getElaspsed(startTime));
-    }
-
-    private static String getElaspsed(long start) {
-        // Copied from https://stackoverflow.com/questions/6710094/how-to-format-an-elapsed-time-interval-in-hhmmss-sss-format-in-java
-        double t = System.currentTimeMillis() - start;
-        if(t < 1000d)
-            return slf(t) + "ms";
-        if(t < 60000d)
-            return slf(t / 1000d) + "s " +
-                    slf(t % 1000d) + "ms";
-        if(t < 3600000d)
-            return slf(t / 60000d) + "m " +
-                    slf((t % 60000d) / 1000d) + "s " +
-                    slf(t % 1000d) + "ms";
-        if(t < 86400000d)
-            return slf(t / 3600000d) + "h " +
-                    slf((t % 3600000d) / 60000d) + "m " +
-                    slf((t % 60000d) / 1000d) + "s " +
-                    slf(t % 1000d) + "ms";
-        return slf(t / 86400000d) + "d " +
-                slf((t % 86400000d) / 3600000d) + "h " +
-                slf((t % 3600000d) / 60000d) + "m " +
-                slf((t % 60000d) / 1000d) + "s " +
-                slf(t % 1000d) + "ms";
-    }
-
-    private static String slf(double n) {
-        return String.valueOf(Double.valueOf(Math.floor(n)).longValue());
-    }
-
     @Override
     public Object execute() throws Exception {
-        List<Alarm> alarms = getAlarms(Paths.get(inFile));
-        return processAlarms(alarms);
-    }
-
-    @Override
-    public void onIncident(Incident i) {
-        // Handle New and Updated incidents from the processor impl
-        // TODO - for now - simply overwrite any incident.
-        // it is on the ProcessorImpl to maintain last correct state.
-        System.out.printf("Incident with id %s has %d alarms.\n", i.getId(), i.getAlarms().size());
-        incidents.put(i.getId(), i);
+        final EngineFactory engineFactory = getEngineFactory();
+        final List<Alarm> alarms = getAlarms(Paths.get(inFile));
+        final Driver driver = Driver.builder()
+                .withEngineFactory(engineFactory)
+                .withVerboseOutput()
+                .build();
+        final List<Incident> incidents = driver.run(model, alarms);
+        write(incidents);
+        return incidents;
     }
 
     private List<Alarm> getAlarms(Path path) throws JAXBException, IOException {
@@ -214,22 +118,22 @@ public class ProcessAlarms implements Action, IncidentHandler {
         }
     }
 
-    private void write(Map<String, Incident> incidents) throws JAXBException, IOException {
+    private void write(List<Incident> incidents) throws JAXBException, IOException {
         String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
         System.out.printf("Writing %d incidents to %s.\n", incidents.size(), filepath);
         try (OutputStream os = Files.newOutputStream(Paths.get(filepath))) {
             JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             Incidents list = new Incidents();
-            list.getIncident().addAll(incidents.values().stream()
+            list.getIncident().addAll(incidents.stream()
                 .map(EngineUtils::toModelIncident)
                 .collect(Collectors.toList()));
             marshaller.marshal(list, os);
         }
     }
 
-    private Engine getEngine() {
-        final Engine engine = engineFactories.stream().filter(e -> e.getName().toLowerCase().equals(engineName))
+    private EngineFactory getEngineFactory() {
+        return engineFactories.stream().filter(e -> e.getName().toLowerCase().equals(engineName))
                 .findFirst()
                 .orElseThrow(() -> {
                     final String engineNames = engineFactories.stream()
@@ -237,11 +141,7 @@ public class ProcessAlarms implements Action, IncidentHandler {
                             .collect(Collectors.joining( "," ));
                     return new RuntimeException("No engine found for " + engineName
                             + ". Available engines include: " + engineNames);
-                })
-                .createEngine();
-        engine.setInventory(model);
-        engine.registerIncidentHandler(this);
-        return engine;
+                });
     }
 
 }

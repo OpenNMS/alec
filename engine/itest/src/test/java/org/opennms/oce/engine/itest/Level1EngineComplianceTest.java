@@ -30,7 +30,6 @@ package org.opennms.oce.engine.itest;
 
 
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -67,8 +66,7 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                //{new TimeSliceEngineFactory()},
-                {new ClusterEngineFactory()}
+                { new TimeSliceEngineFactory() }, { new ClusterEngineFactory() }
         });
     }
 

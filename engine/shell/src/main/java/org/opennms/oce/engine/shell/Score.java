@@ -41,7 +41,7 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.common.EngineUtils;
+import org.opennms.oce.engine.driver.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 

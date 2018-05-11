@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.common;
+package org.opennms.oce.engine.driver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +45,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.opennms.oce.engine.common.AlarmBean;
+import org.opennms.oce.engine.common.IncidentBean;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;

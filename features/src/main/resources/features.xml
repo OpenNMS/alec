@@ -55,7 +55,7 @@
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.common/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-shell" description="OCE :: Engine :: SHELL" version="${project.version}">
+    <feature name="oce-engine-shell" description="OCE :: Engine :: Shell" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.shell/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.driver/${project.version}</bundle>

@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.engine</groupId>
     <artifactId>org.opennms.oce.engine.shell</artifactId>
-    <name>OCE :: Engine :: SHELL</name>
+    <name>OCE :: Engine :: Shell</name>
     <packaging>bundle</packaging>
 
     <dependencies>

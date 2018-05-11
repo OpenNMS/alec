@@ -111,12 +111,22 @@ public class ClusterEngine implements Engine {
 
     private double epsilon = 100d;
 
+    private long alarmTimeoutMs = TimeUnit.HOURS.toMillis(2);
+
     private boolean alarmsChangedSinceLastTick = false;
 
     @Override
     public synchronized void onAlarm(Alarm alarm) {
-       getVertexForResource(alarm.getResourceKey()).addOrUpdateAlarm(alarm);
+       getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
        alarmsChangedSinceLastTick = true;
+    }
+
+    private Vertex getVertexForAlarm(Alarm alarm) {
+        return alarm.getResourceKeys().stream().map(this::getVertexForResource)
+                // All the vertices returned should be the same, use the first
+                // TODO: Verify that they are all the same
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No resources on alarm: " + alarm));
     }
 
     @Override
@@ -154,6 +164,12 @@ public class ClusterEngine implements Engine {
         }
         // Reset
         alarmsChangedSinceLastTick = false;
+
+        // Clean up alarm that are older than alarmTimeoutMs
+        final long cutoffMs = timestampInMillis - alarmTimeoutMs;
+        for (Vertex v : g.getVertices()) {
+            v.removeAlarmsOlderThan(cutoffMs);
+        }
 
         // FIXME: Inefficient to do this every tick
         final List<AlarmInSpaceTime> alarms = g.getVertices().stream()

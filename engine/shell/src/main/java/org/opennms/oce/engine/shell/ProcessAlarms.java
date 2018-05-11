@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -61,6 +62,7 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.v1.schema.Alarms;
+import org.opennms.oce.model.v1.schema.Event;
 import org.opennms.oce.model.v1.schema.Incidents;
 
 /**
@@ -201,9 +203,14 @@ public class ProcessAlarms implements Action, IncidentHandler {
             }
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
-            return alarms.getAlarm().stream()
-                    .map(EngineUtils::toEngineAlarm)
-                    .collect(Collectors.toList());
+
+            final List<Alarm> engineAlarms = new ArrayList<>();
+            for (org.opennms.oce.model.v1.schema.Alarm alarm : alarms.getAlarm()) {
+                for (Event event : alarm.getEvent()) {
+                    engineAlarms.add(EngineUtils.toEngineAlarm(alarm, event));
+                }
+            }
+            return engineAlarms;
         }
     }
 

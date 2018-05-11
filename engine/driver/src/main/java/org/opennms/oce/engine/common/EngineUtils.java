@@ -58,7 +58,7 @@ public class EngineUtils {
 
     private static final Gson gson = new Gson();
 
-    public static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm) {
+    public static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm, org.opennms.oce.model.v1.schema.Event event) {
         return new Alarm() {
             @Override
             public String getId() {
@@ -67,22 +67,19 @@ public class EngineUtils {
 
             @Override
             public long getTime() {
-                return alarm.getTime();
+                return event.getTime();
             }
 
             @Override
-            public String getReductionKey() {
-                return alarm.getReductionKey();
-            }
-
-            @Override
-            public ResourceKey getResourceKey() {
-                return new ResourceKey((List<String>) gson.fromJson(alarm.getResource(), List.class));
+            public List<ResourceKey> getResourceKeys() {
+                return event.getResource().stream()
+                        .map(r ->  new ResourceKey((List<String>) gson.fromJson(r, List.class)))
+                        .collect(Collectors.toList());
             }
 
             @Override
             public boolean isClear() {
-                return alarm.getSeverity().equals(Severity.CLEARED);
+                return event.getSeverity().equals(Severity.CLEARED);
             }
         };
     }

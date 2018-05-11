@@ -28,8 +28,12 @@
 
 package org.opennms.oce.engine.cluster;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -39,7 +43,7 @@ import org.opennms.oce.model.alarm.api.ResourceKey;
 public class Vertex {
     private final long id;
     private final ResourceKey resourceKey;
-    private final List<Alarm> alarms = new LinkedList<>();
+    private final Map<String, Alarm> alarmsById = new LinkedHashMap<>();
 
     public Vertex(long id, ResourceKey resourceKey) {
         this.id = id;
@@ -52,18 +56,21 @@ public class Vertex {
 
     public void addOrUpdateAlarm(Alarm alarm) {
         if (alarm.isClear()) {
-            List<Alarm> alarmsToClear = alarms.stream().filter(a -> a.getReductionKey().equals(alarm.getReductionKey())).collect(Collectors.toList());
-            alarms.removeAll(alarmsToClear);
+            alarmsById.remove(alarm.getId());
         } else {
-            alarms.add(alarm);
+            alarmsById.put(alarm.getId(), alarm);
         }
     }
 
-    public List<Alarm> getAlarms() {
-        return alarms;
+    public Collection<Alarm> getAlarms() {
+        return alarmsById.values();
     }
 
     public long getId() {
         return id;
+    }
+
+    public void removeAlarmsOlderThan(long cutoffMs) {
+        alarmsById.entrySet().removeIf(entry -> entry.getValue().getTime() < cutoffMs);
     }
 }

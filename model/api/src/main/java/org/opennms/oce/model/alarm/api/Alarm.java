@@ -28,15 +28,15 @@
 
 package org.opennms.oce.model.alarm.api;
 
+import java.util.List;
+
 public interface Alarm {
 
     String getId();
 
-    String getReductionKey();
-
     long getTime();
 
-    ResourceKey getResourceKey();
+    List<ResourceKey> getResourceKeys();
 
     boolean isClear();
 

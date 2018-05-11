@@ -32,12 +32,19 @@ import java.util.Set;
 
 import org.opennms.oce.model.alarm.api.Incident;
 
-/**
- * @author smith
- *
- */
 public interface ScoringStrategy {
 
+    /**
+     * Issue a ScoreReport for a Set of Incitdents against a baseline.
+     * @param baseline The baseline set of Incidents
+     * @param sut The Set Under Test
+     * @return ScroreReport
+     */
     ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
+
+    /**
+     * The Name of the Strategy
+     */
+    String getName();
 
 }

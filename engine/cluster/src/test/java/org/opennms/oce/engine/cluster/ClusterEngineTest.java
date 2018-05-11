@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class ClusterEngineTest implements IncidentHandler {
         // Trigger some alarm
         Alarm alarm = mock(Alarm.class);
         ResourceKey key = new ResourceKey("a", "b", "c", "d");
-        when(alarm.getResourceKey()).thenReturn(key);
+        when(alarm.getResourceKeys()).thenReturn(Collections.singletonList(key));
         engine.onAlarm(alarm);
 
         // The graph should be updated
@@ -104,13 +105,13 @@ public class ClusterEngineTest implements IncidentHandler {
 
         Alarm alarm1 = mock(Alarm.class);
         when(alarm1.getId()).thenReturn("1");
-        when(alarm1.getResourceKey()).thenReturn(key);
+        when(alarm1.getResourceKeys()).thenReturn(Collections.singletonList(key));
         when(alarm1.getTime()).thenReturn(now);
         engine.onAlarm(alarm1);
 
         Alarm alarm2 = mock(Alarm.class);
         when(alarm2.getId()).thenReturn("2");
-        when(alarm2.getResourceKey()).thenReturn(key);
+        when(alarm2.getResourceKeys()).thenReturn(Collections.singletonList(key));
         when(alarm2.getTime()).thenReturn(now+1);
         engine.onAlarm(alarm2);
 
@@ -138,7 +139,7 @@ public class ClusterEngineTest implements IncidentHandler {
         ResourceKey otherKey = new ResourceKey("w", "x", "y", "z");
         Alarm alarm3 = mock(Alarm.class);
         when(alarm3.getId()).thenReturn("3");
-        when(alarm3.getResourceKey()).thenReturn(otherKey);
+        when(alarm3.getResourceKeys()).thenReturn(Collections.singletonList(otherKey));
         when(alarm3.getTime()).thenReturn(now+1);
         engine.onAlarm(alarm3);
 
@@ -155,7 +156,7 @@ public class ClusterEngineTest implements IncidentHandler {
         ResourceKey otherOtherKey = new ResourceKey("w", "x", "y", "z2");
         Alarm alarm4 = mock(Alarm.class);
         when(alarm4.getId()).thenReturn("4");
-        when(alarm4.getResourceKey()).thenReturn(otherOtherKey);
+        when(alarm4.getResourceKeys()).thenReturn(Collections.singletonList(otherOtherKey));
         when(alarm4.getTime()).thenReturn(now+1);
         engine.onAlarm(alarm4);
 

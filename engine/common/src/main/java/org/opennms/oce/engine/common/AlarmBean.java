@@ -28,6 +28,9 @@
 
 package org.opennms.oce.engine.common;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 
@@ -68,20 +71,12 @@ public class AlarmBean implements Alarm {
     }
 
     @Override
-    public String getReductionKey() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ResourceKey getResourceKey() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<ResourceKey> getResourceKeys() {
+        return Collections.emptyList();
     }
 
     @Override
     public boolean isClear() {
-        // TODO Auto-generated method stub
         return false;
     }
 

@@ -125,6 +125,22 @@
         </complexType>
     </element>
 
+    <element name="event">
+        <annotation>
+            <documentation>Definition for an instance of an event</documentation>
+        </annotation>
+        <complexType>
+            <sequence>
+                <element name="resource" type="string" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
+            <attribute name="source" type="string" use="optional" />
+            <attribute name="severity" type="this:severity" use="required" />
+            <attribute name="id" type="string" use="required" />
+            <attribute name="time" type="long" use="required" />
+            <attribute name="summary" type="string" use="required" />
+            <attribute name="description" type="string" use="required" />
+        </complexType>
+    </element>
 
     <element name="alarms">
         <annotation>
@@ -144,14 +160,16 @@
             <documentation>Definition for an instance of an alarm</documentation>
         </annotation>
         <complexType>
-            <attribute name="source" type="string" use="optional" />
-            <attribute name="severity" type="this:severity" use="required" />
+            <sequence>
+                <element ref="this:event" minOccurs="1" maxOccurs="unbounded" />
+                <element name="resource" type="string" minOccurs="1" maxOccurs="unbounded" />
+            </sequence>
             <attribute name="id" type="string" use="required" />
-            <attribute name="time" type="long" use="required" />
+            <attribute name="first-event-time" type="long" use="required" />
+            <attribute name="last-event-time" type="long" use="required" />
+            <attribute name="last-severity" type="this:severity" use="required" />
             <attribute name="summary" type="string" use="required" />
             <attribute name="description" type="string" use="required" />
-            <attribute name="resource" type="string" use="required" />
-            <attribute name="reduction-key" type="string" use="required" />
         </complexType>
     </element>
 

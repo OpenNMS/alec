@@ -68,7 +68,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new ClusterEngineFactory() }
+                //{ new ClusterEngineFactory() }
         });
     }
 
@@ -84,57 +84,6 @@ public class Level2EngineComplianceTest {
         driver = Driver.builder()
                 .withEngineFactory(factory)
                 .build();
-    }
-
-    private static Severity toSeverity(org.opennms.oce.model.v1.schema.Severity s) {
-        switch(s) {
-            case CRITICAL:
-            case MAJOR:
-                return Severity.MAJOR;
-            case MINOR:
-            case WARNING:
-                return Severity.MINOR;
-            case NORMAL:
-                return Severity.NORMAL;
-            case CLEARED:
-                return Severity.CLEARED;
-            case INDETERMINATE:
-                return Severity.NORMAL;
-        }
-        return null;
-    }
-
-    @Test
-    @Ignore
-    public void mockGen() throws JAXBException, IOException {
-        List<org.opennms.oce.model.v1.schema.Alarm> alarms = EngineUtils.getRawAlarms(Paths.get("/tmp/cpn.alarms.xml"));
-        printAlarm(alarms, "3919143");
-        printAlarm(alarms, "3919144");
-        printAlarm(alarms, "3919145");
-        printAlarm(alarms, "3919146");
-        printAlarm(alarms, "3919147");
-    }
-
-    private static void printAlarm(List<org.opennms.oce.model.v1.schema.Alarm> alarms, String alarmId) {
-        org.opennms.oce.model.v1.schema.Alarm alarm = alarms.stream().filter(a -> a.getId().equals(alarmId)).findFirst().get();
-        StringBuilder sb = new StringBuilder();
-        String firstSource = alarm.getEvent().get(0).getSource();
-        sb.append("alarms.addAll(new MockAlarmBuilder()\n");
-        sb.append(String.format(".withId(\"%s\")\n", alarm.getId()));
-        sb.append(String.format(".withComment(\"source: %s\")\n", firstSource));
-        Event lastEvent = null;
-        for (Event e : alarm.getEvent()) {
-            String comment = "";
-            if (lastEvent != null) {
-                comment = String.format(" // %d seconds since last event", Math.floorDiv(e.getTime() - lastEvent.getTime(), 1000));
-            } else {
-                comment = "// " + new Date(e.getTime());
-            }
-            sb.append(String.format(".withEvent(%sL, Severity.%s)%s\n", e.getTime(), toSeverity(e.getSeverity()), comment));
-            lastEvent= e;
-        }
-        sb.append(".build());\n");
-        System.out.println(sb);
     }
 
     @Test
@@ -418,40 +367,60 @@ public class Level2EngineComplianceTest {
         assertThat(getAlarmIdsInIncident(incidents.get(0)), containsInAnyOrder("3919143", "3919144", "3919145", "3919146", "3919147"));
     }
 
-    @Test
-    public void doIt() {
-        /* Actual:
-            <incident id="9" creation-time="0">
-        <alarm-ref id="3919172"/>
-        <alarm-ref id="3919170"/>
-        <alarm-ref id="3919171"/>
-        <alarm-ref id="3919173"/>
-        <alarm-ref id="3919168"/>
-    </incident>
-         */
-
-
-        /* Expected:
-            <incident severity="cleared" id="3919168" creation-time="1525582057000" summary="BGP neighbor found" description="BGP neighbor found">
-        <alarm-ref id="3919171"/> // BGP neighbor down vrf syslog
-        <alarm-ref id="3919168"/> // BGP neighbor loss VRF due to oper
-    </incident>
-
-
-        // 3919170 - no incident - Cisco BGP down trap
-        // 3919172 - no incident - BGP notification syslog
-        // 3919173 - no incident - BGP down trap
-         */
-
-
-
-
-    }
-
     private static Set<String> getAlarmIdsInIncident(Incident incident) {
         return incident.getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toSet());
     }
 
+    @Test
+    @Ignore("Utility code")
+    public void generateMockAlarmFromIncident() throws JAXBException, IOException {
+        List<org.opennms.oce.model.v1.schema.Alarm> alarms = EngineUtils.getRawAlarms(Paths.get("/tmp/cpn.alarms.xml"));
+        printAlarm(alarms, "3919143");
+        printAlarm(alarms, "3919144");
+        printAlarm(alarms, "3919145");
+        printAlarm(alarms, "3919146");
+        printAlarm(alarms, "3919147");
+    }
+
+    private static void printAlarm(List<org.opennms.oce.model.v1.schema.Alarm> alarms, String alarmId) {
+        org.opennms.oce.model.v1.schema.Alarm alarm = alarms.stream().filter(a -> a.getId().equals(alarmId)).findFirst().get();
+        StringBuilder sb = new StringBuilder();
+        String firstSource = alarm.getEvent().get(0).getSource();
+        sb.append("alarms.addAll(new MockAlarmBuilder()\n");
+        sb.append(String.format(".withId(\"%s\")\n", alarm.getId()));
+        sb.append(String.format(".withComment(\"source: %s\")\n", firstSource));
+        Event lastEvent = null;
+        for (Event e : alarm.getEvent()) {
+            String comment = "";
+            if (lastEvent != null) {
+                comment = String.format(" // %d seconds since last event", Math.floorDiv(e.getTime() - lastEvent.getTime(), 1000));
+            } else {
+                comment = "// " + new Date(e.getTime());
+            }
+            sb.append(String.format(".withEvent(%sL, Severity.%s)%s\n", e.getTime(), toSeverity(e.getSeverity()), comment));
+            lastEvent= e;
+        }
+        sb.append(".build());\n");
+        System.out.println(sb);
+    }
+
+    private static Severity toSeverity(org.opennms.oce.model.v1.schema.Severity s) {
+        switch(s) {
+            case CRITICAL:
+            case MAJOR:
+                return Severity.MAJOR;
+            case MINOR:
+            case WARNING:
+                return Severity.MINOR;
+            case NORMAL:
+                return Severity.NORMAL;
+            case CLEARED:
+                return Severity.CLEARED;
+            case INDETERMINATE:
+                return Severity.NORMAL;
+        }
+        return null;
+    }
 }

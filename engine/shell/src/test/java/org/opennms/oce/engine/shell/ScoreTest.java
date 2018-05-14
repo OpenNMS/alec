@@ -62,7 +62,7 @@ public class ScoreTest {
         Path seventyPercent = Paths.get("src", "test", "resources", "TwentyPercent.xml");
         Score score = new Score(baseline, seventyPercent, new SetIntersectionStrategy());
 
-        assertEquals(76.0, score.getScore(), 0);
+        assertEquals(75.90, score.getScore(), 1e-2);
 
         List<ScoreMetric> metrics = score.getMetrics();
 

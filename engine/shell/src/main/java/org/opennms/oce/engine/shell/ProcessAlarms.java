@@ -29,19 +29,15 @@
 package org.opennms.oce.engine.shell;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -55,8 +51,6 @@ import org.opennms.oce.engine.driver.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.v1.schema.Alarms;
-import org.opennms.oce.model.v1.schema.Event;
 import org.opennms.oce.model.v1.schema.Incidents;
 
 /**

@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
@@ -44,7 +46,7 @@ import org.opennms.oce.model.alarm.api.Incident;
  * @author smith
  *
  */
-public class SetIntersectionStrategy implements ScoringStrategy {
+public class SetIntersectionScoringStrategy implements ScoringStrategy {
 
     // Input Baseline Incident Set 
     private Set<Incident> baseline;
@@ -69,6 +71,11 @@ public class SetIntersectionStrategy implements ScoringStrategy {
     private Set<String> unmatchedAlarms = new HashSet<>();
 
     @Override
+    public String getName() {
+        return "set";
+    }
+
+    @Override
     public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
         this.baseline = baseline;
         this.sut = sut;
@@ -76,13 +83,9 @@ public class SetIntersectionStrategy implements ScoringStrategy {
 
         ScoreReportBean report = new ScoreReportBean();
         report.setScore(Math.abs(100d - getAccuracy()));
+        report.setMaxScore(100d);
         report.setMetrics(getMetrics());
         return report;
-    }
-
-    @Override
-    public String getName() {
-        return this.getName();
     }
 
     private List<ScoreMetricBean> getMetrics() {

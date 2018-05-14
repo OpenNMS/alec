@@ -58,10 +58,10 @@ import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.engine.driver.ScoreMetric;
-import org.opennms.oce.engine.driver.ScoreReport;
-import org.opennms.oce.engine.driver.ScoringStrategy;
-import org.opennms.oce.engine.driver.SetIntersectionStrategy;
+import org.opennms.oce.engine.score.impl.SetIntersectionScoringStrategy;
+import org.opennms.oce.engine.score.api.ScoreMetric;
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
@@ -166,7 +166,7 @@ public class ClusterEngineOptimizationTest {
             generatedIncidentsInSet = getIncidentsWithOneOrMoreAlarms(generatedIncidentsInSet);
 
             System.out.println("Scoring...");
-            final ScoringStrategy scoringStrategy = new SetIntersectionStrategy();
+            final ScoringStrategy scoringStrategy = new SetIntersectionScoringStrategy();
             final ScoreReport report = scoringStrategy.score(baseIncidents, generatedIncidentsInSet);
             System.out.printf("Score: %.2f\n", report.getScore());
             for (ScoreMetric metric : report.getMetrics()) {

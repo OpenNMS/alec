@@ -26,25 +26,54 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
-import java.util.Set;
+import org.opennms.oce.engine.score.api.ScoreMetric;
 
-import org.opennms.oce.model.alarm.api.Incident;
+public class ScoreMetricBean implements ScoreMetric {
+    private String name;
+    private double value;
+    private String description;
 
-public interface ScoringStrategy {
+    public ScoreMetricBean() {
 
-    /**
-     * Issue a ScoreReport for a Set of Incitdents against a baseline.
-     * @param baseline The baseline set of Incidents
-     * @param sut The Set Under Test
-     * @return ScroreReport
-     */
-    ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
+    }
 
-    /**
-     * The Name of the Strategy
-     */
-    String getName();
+    public ScoreMetricBean(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
+    public ScoreMetricBean(String name, double value, String description) {
+        this.name = name;
+        this.value = value;
+        this.description = description;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

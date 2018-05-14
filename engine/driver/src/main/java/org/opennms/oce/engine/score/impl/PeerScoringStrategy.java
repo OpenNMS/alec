@@ -26,19 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
 import com.google.common.collect.Maps;
 
-public class PeerBasedScoringStrategy implements ScoringStrategy {
+public class PeerScoringStrategy implements ScoringStrategy {
 
     @Override
     public String getName() {
@@ -97,7 +99,7 @@ public class PeerBasedScoringStrategy implements ScoringStrategy {
 
         final ScoreReportBean scoreReport = new ScoreReportBean();
         scoreReport.setScore(baselinePeersById.size() - score);
-        scoreReport.getMetrics().add(new ScoreMetricBean("maxScore", baselinePeersById.size(), "Max possible score when compared to this baseline"));
+        scoreReport.setMaxScore(baselinePeersById.size());
         scoreReport.getMetrics().add(new ScoreMetricBean("exactMatches", numExactMatches, "TODO"));
         scoreReport.getMetrics().add(new ScoreMetricBean("partialMatches", numPartialMatches, "TODO"));
         scoreReport.getMetrics().add(new ScoreMetricBean("mismatches", numMismatches, "TODO"));

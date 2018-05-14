@@ -25,28 +25,38 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.oce.engine.shell;
+
+package org.opennms.oce.engine.driver;
 
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
-import org.opennms.oce.engine.driver.ScoreMetric;
-import org.opennms.oce.engine.driver.SetIntersectionStrategy;
+import org.opennms.oce.engine.score.api.ScoreMetric;
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.impl.SetIntersectionScoringStrategy;
+import org.opennms.oce.model.alarm.api.Incident;
 
-public class ScoreTest {
+@Ignore
+public class SetIntersectionScoringStrategyTest {
 
     @Test
     public void testIntersectionStrategySameAccuracy100() throws Exception {
-        Path baseline = Paths.get("src", "test", "resources", "Baseline.xml");
-        Score score = new Score(baseline, baseline, new SetIntersectionStrategy());
-        // Test for Incidents
-        assertEquals(0.0, score.getScore(), 0);
+        Path baselineResource = Paths.get("src", "test", "resources", "Baseline.xml");
 
-        List<ScoreMetric> metrics = score.getMetrics();
+        Set<Incident> baseline  = EngineUtils.getIncidents(baselineResource);
+        SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
+        ScoreReport report = scorer.score(baseline, baseline);
+
+        // Test for Incidents
+        assertEquals(0.0, report.getScore(), 0);
+
+        List<? extends ScoreMetric> metrics = report.getMetrics();
 
         assertEquals(3, metrics.size());
 
@@ -58,16 +68,19 @@ public class ScoreTest {
 
     @Test
     public void testIntersectionStrategySeventyPercentAccuracy() throws Exception {
-        Path baseline = Paths.get("src", "test", "resources", "Baseline.xml");
-        Path seventyPercent = Paths.get("src", "test", "resources", "TwentyPercent.xml");
-        Score score = new Score(baseline, seventyPercent, new SetIntersectionStrategy());
+        Path baselineResource = Paths.get("src", "test", "resources", "Baseline.xml");
+        Path seventyPercentResource = Paths.get("src", "test", "resources", "TwentyPercent.xml");
 
-        assertEquals(75.90, score.getScore(), 1e-2);
+        Set<Incident> baseline  = EngineUtils.getIncidents(baselineResource);
+        Set<Incident> seventyPercent  = EngineUtils.getIncidents(seventyPercentResource);
 
-        List<ScoreMetric> metrics = score.getMetrics();
+        SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
+        ScoreReport report = scorer.score(baseline, seventyPercent);
+
+        assertEquals(75.90, report.getScore(), 1e-2);
+
+        List<? extends ScoreMetric> metrics = report.getMetrics();
 
         assertEquals(3, metrics.size());
-
     }
-
 }

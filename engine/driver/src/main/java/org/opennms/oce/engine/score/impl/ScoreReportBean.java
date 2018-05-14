@@ -26,13 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opennms.oce.engine.score.api.ScoreReport;
+
 public class ScoreReportBean implements ScoreReport {
     private double score;
+    private double maxScore = Double.POSITIVE_INFINITY;
     private List<ScoreMetricBean> metrics = new ArrayList<>();
 
     @Override
@@ -42,6 +45,15 @@ public class ScoreReportBean implements ScoreReport {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    @Override
+    public double getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(double maxScore) {
+        this.maxScore = maxScore;
     }
 
     @Override

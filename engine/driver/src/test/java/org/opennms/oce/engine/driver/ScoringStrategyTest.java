@@ -40,6 +40,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.common.IncidentBean;
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
+import org.opennms.oce.engine.score.impl.MatrixScoringStrategy;
+import org.opennms.oce.engine.score.impl.PeerScoringStrategy;
 
 import com.google.common.collect.Sets;
 
@@ -50,9 +54,9 @@ public class ScoringStrategyTest {
     @Parameterized.Parameters(name = "{index}: scorer({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                // { new SetIntersectionStrategy() }, Ignored, does not handle empty sets well
-                { new PeerBasedScoringStrategy() },
-                { new MatrixBasedScoringStrategy() }
+                // { new SetIntersectionScoringStrategy() }, Ignored, does not handle empty sets well
+                { new PeerScoringStrategy() },
+                { new MatrixScoringStrategy() }
         });
     }
 

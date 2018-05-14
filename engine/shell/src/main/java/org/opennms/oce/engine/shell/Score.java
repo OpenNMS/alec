@@ -39,13 +39,14 @@ import javax.xml.bind.JAXBException;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.engine.driver.PeerBasedScoringStrategy;
-import org.opennms.oce.engine.driver.ScoreMetric;
-import org.opennms.oce.engine.driver.ScoreReport;
-import org.opennms.oce.engine.driver.ScoringStrategy;
-import org.opennms.oce.engine.driver.SetIntersectionStrategy;
+import org.opennms.oce.engine.score.api.ScoreMetric;
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Incident;
 
 // Derive a score comparing a Set of Incidents to a Base Sample
@@ -53,11 +54,12 @@ import org.opennms.oce.model.alarm.api.Incident;
 @Service
 public class Score implements Action {
 
-    private ScoringStrategy strategy = new PeerBasedScoringStrategy();
+    @Reference
+    private List<ScoringStrategy> scoringStrategies;
 
-    private double score;
-
-    private List<ScoreMetric> metrics;
+    @Option(name = "-s", description = "Scoring strategy name", required = true)
+    @Completion(ScoreNameCompleter.class)
+    private String scoringStrategyName;
 
     @Argument(index = 0, name = "baseline", description = "This is the path for the baseline incidents.xml file.", required = true, multiValued = false)
     private String baselineFile;
@@ -67,51 +69,39 @@ public class Score implements Action {
 
     @Override
     public Object execute() throws Exception {
-        evaluate(Paths.get(baselineFile), Paths.get(scoreFile));
-        printScore();
-        return score;
+        evaluateAndPrint(getScoringStrategy(), Paths.get(baselineFile), Paths.get(scoreFile));
+        return null;
     }
 
-    public Score() {
-    }
-
-    public Score(Path basepath, Path sutPath, ScoringStrategy strategy) throws JAXBException, IOException {
-        this.strategy = strategy;
-        evaluate(basepath, sutPath);
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public List<ScoreMetric> getMetrics() {
-        return metrics;
-    }
-
-    // for Unit Tests
-    void setStrategy(ScoringStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    private void evaluate(Path basepath, Path sutPath) throws JAXBException, IOException {
+    private void evaluateAndPrint(ScoringStrategy strategy, Path basepath, Path sutPath) throws JAXBException, IOException {
         ScoreReport report = strategy.score(getIncidents(basepath), getIncidents(sutPath));
-        score = report.getScore();
-        metrics = (List<ScoreMetric>) report.getMetrics();
-    }
-
-    // Read Incidents from XML file and filter out any w/o Alarms
-    private Set<Incident> getIncidents(Path pathspec) throws JAXBException, IOException {
-        Set<Incident> incidents = EngineUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
-        return incidents;
-    }
-
-    private void printScore() {
-        System.out.println("Score: " + score);
-        metrics.stream().forEach(m -> printMetric(m));
+        System.out.printf("Score: %.4f", report.getScore());
+        if (Double.isFinite(report.getMaxScore())) {
+            System.out.printf(" (%.2f%%)", ((report.getMaxScore() - report.getScore()) / report.getMaxScore()) * 100);
+        }
+        System.out.println();
+        report.getMetrics().forEach(Score::printMetric);
     }
 
     private static void printMetric(ScoreMetric m) {
         System.out.println(m.getName() + " : " + m.getValue());
+    }
+
+    // Read Incidents from XML file and filter out any w/o Alarms
+    private Set<Incident> getIncidents(Path pathspec) throws JAXBException, IOException {
+        return EngineUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
+    }
+
+    private ScoringStrategy getScoringStrategy() {
+        return scoringStrategies.stream().filter(s -> s.getName().toLowerCase().equals(scoringStrategyName))
+                .findFirst()
+                .orElseThrow(() -> {
+                    final String strategyNames = scoringStrategies.stream()
+                            .map(ScoringStrategy::getName)
+                            .collect(Collectors.joining( "," ));
+                    return new RuntimeException("No scoring strategy found for " + scoringStrategyName
+                            + ". Available strategies include: " + strategyNames);
+                });
     }
 
 }

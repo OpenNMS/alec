@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,10 +39,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.linear.OpenMapRealMatrix;
 import org.apache.commons.math3.linear.SparseRealMatrix;
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
-public class MatrixBasedScoringStrategy implements ScoringStrategy {
+public class MatrixScoringStrategy implements ScoringStrategy {
     @Override
     public String getName() {
         return "matrix";

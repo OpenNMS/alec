@@ -53,6 +53,7 @@
     <feature name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.topology/${project.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
     <feature name="oce-engine-api" description="OCE :: Engine :: API" version="${project.version}">

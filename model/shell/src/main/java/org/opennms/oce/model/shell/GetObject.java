@@ -43,13 +43,16 @@ public class GetObject implements Action {
     @Reference
     private ModelBuilder builder;
 
-    @Argument(index = 0, name = "id", description = "This is ID for the modelObject", required = true, multiValued = false)
+    @Argument(index = 0, name = "type", description = "This is TYPE for the modelObject", required = true, multiValued = false)
+    private String type;
+
+    @Argument(index = 1, name = "id", description = "This is ID for the modelObject", required = true, multiValued = false)
     private String id;
 
     @Override
     public Object execute() throws Exception {
         Model model = builder.buildModel();
-        final ModelObject modelObject = model.getObjectById(id);
+        final ModelObject modelObject = model.getObjectById(type, id);
         if (modelObject == null) {
             System.out.println("(No modelObject for id: " + id + ")");
         } else {

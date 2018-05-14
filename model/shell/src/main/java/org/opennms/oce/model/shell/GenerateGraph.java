@@ -74,6 +74,9 @@ public class GenerateGraph implements Action, ModelVisitor {
     @Option(name = "-o", description = "Output file")
     private String outFile;
 
+    @Option(name = "-t", aliases = "--type", description = "Object Type for specified id")
+    private String objectType;
+
     @Option(name = "-i", aliases = "--id", description = "Object Id")
     private String objectId;
 
@@ -106,7 +109,7 @@ public class GenerateGraph implements Action, ModelVisitor {
             ModelWalker.visit(model, this);
         } else {
             int szl = zoom > 0 ? zoom : 1; // Default to a depth of 1
-            ModelWalker.visitNeighbors(model.getObjectById(objectId), szl, this);
+            ModelWalker.visitNeighbors(model.getObjectById(objectType, objectId), szl, this);
         }
         return buildGraph();
     }
@@ -120,6 +123,9 @@ public class GenerateGraph implements Action, ModelVisitor {
         sb.append(END_GRAPH);
         return sb.toString();
     }
+
+    // Setter for unit tests
+    void setObjectType(String type) { objectType = type; }
 
     // Setter for unit tests
     void setObjectId(String id) {

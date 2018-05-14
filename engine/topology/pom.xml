@@ -31,7 +31,10 @@
             <artifactId>kie-api</artifactId>
             <version>${drools.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
 
     	<dependency>
 	   	  <groupId>junit</groupId>

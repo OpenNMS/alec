@@ -30,6 +30,8 @@ package org.opennms.oce.model.api;
 
 import java.util.Set;
 
+import org.opennms.oce.model.alarm.api.Alarm;
+
 public interface ModelObject {
 
     ModelObject getParent();
@@ -65,5 +67,9 @@ public interface ModelObject {
     ServiceState getServiceState();
 
     void setServiceState(ServiceState state);
+
+    void onAlarm(Alarm alarm);
+
+    Set<Alarm> getAlarms();
 
 }

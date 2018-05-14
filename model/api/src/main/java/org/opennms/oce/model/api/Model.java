@@ -33,7 +33,7 @@ import java.util.Set;
 
 public interface Model {
 
-    ModelObject getObjectById(String id);
+    ModelObject getObjectById(String type, String id);
 
     /**
      * If type does not exist, return null

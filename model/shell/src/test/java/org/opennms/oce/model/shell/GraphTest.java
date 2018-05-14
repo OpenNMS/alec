@@ -50,9 +50,9 @@ public class GraphTest {
     public void buildModel() {
         model = modelBuilder.buildModel();
         // another to NSA
-        model.getObjectById("n1-c1-p2").setOperationalState(OperationalState.NSA);
+        model.getObjectById("Port","n1-c1-p2").setOperationalState(OperationalState.NSA);
         // Set one port to SA
-        model.getObjectById("n1-c2-p1").setOperationalState(OperationalState.SA);
+        model.getObjectById("Port","n1-c2-p1").setOperationalState(OperationalState.SA);
     }
 
     @Test
@@ -75,6 +75,7 @@ public class GraphTest {
     @Test
     public void szlDepth3Test() {
         GenerateGraph generator = new GenerateGraph(model);
+        generator.setObjectType("Link");
         generator.setObjectId("n1-c1-p1___n1-c2-p1");
         generator.setZoomLevel("3");
 
@@ -94,6 +95,7 @@ public class GraphTest {
     @Test
     public void szlDepth2Test() {
         GenerateGraph generator = new GenerateGraph(model);
+        generator.setObjectType("Link");
         generator.setObjectId("n1-c1-p1___n1-c2-p1");
         generator.setZoomLevel("1");
 

@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.api.Group;
 import org.opennms.oce.model.api.ModelObject;
 import org.opennms.oce.model.api.OperationalState;
@@ -208,6 +209,16 @@ public class ModelObjectImpl implements ModelObject {
         ServiceState previous = serviceState;
         serviceState = state;
         propagateServiceStateChange(previous);
+    }
+
+    @Override
+    public void onAlarm(Alarm alarm) {
+
+    }
+
+    @Override
+    public Set<Alarm> getAlarms() {
+        return null;
     }
 
     private void propagateOperationalStateChange(OperationalState previous) {

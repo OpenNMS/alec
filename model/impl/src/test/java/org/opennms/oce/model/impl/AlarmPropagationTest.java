@@ -23,13 +23,13 @@ public class AlarmPropagationTest {
     @Test
     public void canPropagateState() {
         ModelObject modelObject = testModel.getRoot();
-        ModelObject eswitch = testModel.getObjectById("n1");
-        ModelObject card1 = testModel.getObjectById("n1-c1");
-        ModelObject card2 = testModel.getObjectById("n1-c2");
-        ModelObject port1 = testModel.getObjectById("n1-c1-p1");
-        ModelObject port2 = testModel.getObjectById("n1-c1-p2");
-        ModelObject port3 = testModel.getObjectById("n1-c2-p1");
-        ModelObject port4 = testModel.getObjectById("n1-c2-p2");
+        ModelObject eswitch = testModel.getObjectById("Device", "n1");
+        ModelObject card1 = testModel.getObjectById("Card", "n1-c1");
+        ModelObject card2 = testModel.getObjectById("Card","n1-c2");
+        ModelObject port1 = testModel.getObjectById("Port", "n1-c1-p1");
+        ModelObject port2 = testModel.getObjectById("Port","n1-c1-p2");
+        ModelObject port3 = testModel.getObjectById("Port","n1-c2-p1");
+        ModelObject port4 = testModel.getObjectById("Port","n1-c2-p2");
 
         // Vreify initial State
         assertEquals(port1.getServiceState(), ServiceState.IN);

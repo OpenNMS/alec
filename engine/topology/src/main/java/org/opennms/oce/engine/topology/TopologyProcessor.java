@@ -37,14 +37,21 @@ import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
 
 /**
  * A topology driver processor with Rules Engine
  *
  */
 public class TopologyProcessor implements Engine {
+
+    private static Logger LOG = LoggerFactory.getLogger(TopologyProcessor.class);
 
     IncidentHandler handler;
 
@@ -58,11 +65,14 @@ public class TopologyProcessor implements Engine {
             throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
         }
 
-        // TODO - find the inventory item and apply the alarm 
-        ModelObject object = getObjectForAlarm(alarm);
-        // TODO - Add Alarm to ModelObject - TODO - update ModelObject API
-        // ModelObject will determine if alarm affects its state and if it should propagate.
-        // ModelObjecdt.setAlarm(alarm) could return boolean indicator if state is changed in order to trigger fireAllRules();
+        // Find the associated model object for this alarm, we assume there is a single model object
+        final ModelObject object = getObjectForAlarm(alarm);
+        if (object == null) {
+            LOG.warn("No model object found for alarm: {}. The alarm will not be processed.", alarm);
+            return;
+        }
+
+        object.onAlarm(alarm);
     }
 
     @Override
@@ -86,8 +96,24 @@ public class TopologyProcessor implements Engine {
     }
 
     private ModelObject getObjectForAlarm(Alarm alarm) {
-        // TODO Auto-generated method stub
-        return null;
+        final ResourceKey resourceKey = Iterables.getFirst(alarm.getResourceKeys(), null);
+        if (resourceKey == null) {
+            throw new IllegalStateException("Alarms must have at least one resource key.");
+        }
+
+        final String lastToken = Iterables.getLast(resourceKey.getTokens());
+        if (lastToken == null) {
+            throw new IllegalStateException("Tokens must have at least one element");
+        }
+
+
+        final int idx = lastToken.indexOf(",");
+        if (idx < 1) {
+            throw new IllegalStateException("Improperly formatted token. Type must be defined: " + lastToken);
+        }
+        final String type = lastToken.substring(0, idx);
+        final String id = lastToken.substring(idx+1, lastToken.length());
+        return inventory.getObjectById(type, id);
     }
 
 }

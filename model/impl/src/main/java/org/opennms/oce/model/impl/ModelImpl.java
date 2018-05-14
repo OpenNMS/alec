@@ -28,6 +28,7 @@
 
 package org.opennms.oce.model.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -48,15 +49,8 @@ public class ModelImpl implements Model {
     }
 
     @Override
-    public ModelObject getObjectById(String id) {
-        // FIXME: Are the ids globally unique, or only unique by type? Should probably only be by type
-        for (String types : mosByTypeAndById.keySet()) {
-            final ModelObject mo = mosByTypeAndById.get(types).get(id);
-            if (mo != null) {
-                return mo;
-            }
-        }
-        return null;
+    public ModelObject getObjectById(String type, String id) {
+        return mosByTypeAndById.getOrDefault(type, Collections.emptyMap()).get(id);
     }
 
     @Override

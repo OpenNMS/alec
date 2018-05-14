@@ -29,19 +29,15 @@
 package org.opennms.oce.engine.shell;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -55,8 +51,6 @@ import org.opennms.oce.engine.driver.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.v1.schema.Alarms;
-import org.opennms.oce.model.v1.schema.Event;
 import org.opennms.oce.model.v1.schema.Incidents;
 
 /**
@@ -87,7 +81,7 @@ public class ProcessAlarms implements Action {
     @Override
     public Object execute() throws Exception {
         final EngineFactory engineFactory = getEngineFactory();
-        final List<Alarm> alarms = getAlarms(Paths.get(inFile));
+        final List<Alarm> alarms = EngineUtils.getAlarms(Paths.get(inFile));
         final Driver driver = Driver.builder()
                 .withEngineFactory(engineFactory)
                 .withVerboseOutput()
@@ -97,26 +91,6 @@ public class ProcessAlarms implements Action {
         return incidents;
     }
 
-    private List<Alarm> getAlarms(Path path) throws JAXBException, IOException {
-        try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext;
-            try {
-                jaxbContext = JAXBContext.newInstance(Alarms.class);
-            } catch (JAXBException e) {
-                throw new RuntimeException(e);
-            }
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
-
-            final List<Alarm> engineAlarms = new ArrayList<>();
-            for (org.opennms.oce.model.v1.schema.Alarm alarm : alarms.getAlarm()) {
-                for (Event event : alarm.getEvent()) {
-                    engineAlarms.add(EngineUtils.toEngineAlarm(alarm, event));
-                }
-            }
-            return engineAlarms;
-        }
-    }
 
     private void write(List<Incident> incidents) throws JAXBException, IOException {
         String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;

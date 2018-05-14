@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.api;
 
 import java.util.Set;
 

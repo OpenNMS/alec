@@ -26,35 +26,59 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opennms.oce.engine.score.api.ScoreMetric;
 
-public class ScoreReportBean implements ScoreReport {
-    private double score;
-    private List<ScoreMetricBean> metrics = new ArrayList<>();
+public class ScoreMetricBean implements ScoreMetric {
+    private String name;
+    private double value;
+    private String description;
+
+    public ScoreMetricBean() {
+
+    }
+
+    public ScoreMetricBean(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    public ScoreMetricBean(String name, double value, String description) {
+        this.name = name;
+        this.value = value;
+        this.description = description;
+    }
 
     @Override
-    public double getScore() {
-        return score;
+    public String getName() {
+        return name;
     }
 
-    public void setScore(double score) {
-        this.score = score;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
-    public List<ScoreMetricBean> getMetrics() {
-        return metrics;
+    public double getValue() {
+        return value;
     }
 
-    public void setMetrics(List<ScoreMetricBean> metrics) {
-        this.metrics = metrics;
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
     public String toString() {
-        return Double.toString(score) + metrics;
+        return name + ":" + Double.valueOf(value);
     }
 }

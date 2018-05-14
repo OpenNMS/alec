@@ -40,7 +40,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -52,11 +51,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -65,7 +60,6 @@ import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.driver.Driver;
-import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
@@ -135,7 +129,6 @@ public class Level1EngineComplianceTest {
      * TODO: Ensure that 2+ incidents are created instead of 1
      */
     @Test
-    @Ignore("Currently broken in the clustering engine")
     public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)

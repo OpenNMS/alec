@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,14 +35,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.opennms.oce.engine.score.api.ScoreReport;
+import org.opennms.oce.engine.score.api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
 /**
+ * FIXME: Should be stateless.
+ *
  * @author smith
  *
  */
-public class SetIntersectionStrategy implements ScoringStrategy {
+public class SetIntersectionScoringStrategy implements ScoringStrategy {
 
     // Input Baseline Incident Set 
     private Set<Incident> baseline;
@@ -67,20 +71,21 @@ public class SetIntersectionStrategy implements ScoringStrategy {
     private Set<String> unmatchedAlarms = new HashSet<>();
 
     @Override
+    public String getName() {
+        return "set";
+    }
+
+    @Override
     public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
         this.baseline = baseline;
         this.sut = sut;
         createSets();
 
         ScoreReportBean report = new ScoreReportBean();
-        report.setScore(Math.abs(100 - getAccuracy()));
+        report.setScore(Math.abs(100d - getAccuracy()));
+        report.setMaxScore(100d);
         report.setMetrics(getMetrics());
         return report;
-    }
-
-    @Override
-    public String getName() {
-        return this.getName();
     }
 
     private List<ScoreMetricBean> getMetrics() {
@@ -93,9 +98,9 @@ public class SetIntersectionStrategy implements ScoringStrategy {
 
     
     // Percentage of the Base Tickets correctly found in the SUT
-    public int getAccuracy() {
+    public double getAccuracy() {
         int retained = intersection.size();
-        return retained * 100 / baseline.size();
+        return retained * 100 / (double)baseline.size();
     }
 
     // Percentage of the Alarms correctly found in the SUT
@@ -144,7 +149,9 @@ public class SetIntersectionStrategy implements ScoringStrategy {
 
     // Create a standardized signature from a List of Alarms
     private String getAlarmSignature(Set<Alarm> alarms) {
-        return alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
+        String sig =  alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
+        //System.out.println(sig);
+        return sig;
     }
 
     private static Incident getIncident(Set<Incident> incidents, String id) {

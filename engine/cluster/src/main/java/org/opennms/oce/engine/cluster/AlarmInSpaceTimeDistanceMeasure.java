@@ -32,12 +32,19 @@ import java.util.Objects;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
+    private static final Logger LOG = LoggerFactory.getLogger(AlarmInSpaceTimeDistanceMeasure.class);
     private final ClusterEngine clusterEngine;
+    private final double alpha;
+    private final double beta;
 
-    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine) {
+    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine, double alpha, double beta) {
         this.clusterEngine = Objects.requireNonNull(clusterEngine);
+        this.alpha = alpha;
+        this.beta = beta;
     }
 
     @Override
@@ -57,13 +64,17 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
             }
         }
 
-        final double delta = compute(timeA, timeB, numHops);
-        //System.out.printf("Distance between %d and %d is: %.4f\n", vertexIdA, vertexIdB, delta);
-        return delta;
+        final double distance = compute(timeA, timeB, numHops);
+        ///System.err.printf("a: %d, b: %d, timeDelta: %.0f, hops: %d, distance: %.4f\n", vertexIdA, vertexIdB, Math.abs(timeA - timeB), numHops, distance);
+        //if (LOG.isTraceEnabled()) {
+        //    LOG.trace("d({},{},{}): {}", timeA,timeB, numHops, distance);
+        //}
+        return distance;
     }
 
-    public static double compute(double timeA, double timeB, int numHops) {
-        // TODO: Revise function, match with what's defined in ClusterEngine
-        return Math.abs(timeA - timeB) / 1000 + numHops;
+    public double compute(double timeA, double timeB, int numHops) {
+        //return alpha * ( beta * (Math.abs(timeA - timeB) / 1000) + (1-beta) * (Math.exp(numHops) - 1));
+        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * numHops);
     }
+
 }

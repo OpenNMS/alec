@@ -29,13 +29,9 @@
 package org.opennms.oce.engine.cluster;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.ResourceKey;
@@ -55,11 +51,7 @@ public class Vertex {
     }
 
     public void addOrUpdateAlarm(Alarm alarm) {
-        if (alarm.isClear()) {
-            alarmsById.remove(alarm.getId());
-        } else {
-            alarmsById.put(alarm.getId(), alarm);
-        }
+        alarmsById.put(alarm.getId(), alarm);
     }
 
     public Collection<Alarm> getAlarms() {
@@ -70,7 +62,24 @@ public class Vertex {
         return id;
     }
 
-    public void removeAlarmsOlderThan(long cutoffMs) {
-        alarmsById.entrySet().removeIf(entry -> entry.getValue().getTime() < cutoffMs);
+    public void garbageCollectAlarms(long timestampInMillis, long problemTimeoutMs, long clearTimeoutMs) {
+        final long problemCutoffMs = timestampInMillis - problemTimeoutMs;
+        final long clearCutoffMs = timestampInMillis - clearTimeoutMs;
+
+        alarmsById.entrySet().removeIf(entry -> {
+            final Alarm alarm = entry.getValue();
+            if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
+                return true;
+            } else if (!alarm.isClear() && alarm.getTime() < problemCutoffMs) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Vertex[id=%s, resourceKey=%s]", id, resourceKey);
     }
 }

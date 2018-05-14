@@ -26,57 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.driver;
+package org.opennms.oce.engine.score.api;
 
-public class ScoreMetricBean implements ScoreMetric {
-    private String name;
-    private double value;
-    private String description;
+import java.util.List;
 
-    public ScoreMetricBean() {
+public interface ScoreReport {
 
-    }
+    /**
+     * A positive value greater than or equal to zero
+     *  where the low the value, the closer the evaluation is to the baseline,
+     *  with 0 being equivalent to the baseline.
+     */
+    double getScore();
 
-    public ScoreMetricBean(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
+    /**
+     * The maximum possible score that could have been achieved
+     * when comparing two sets of incidents.
+     *
+     * infinity if unbounded
+     */
+    double getMaxScore();
 
-    public ScoreMetricBean(String name, double value, String description) {
-        this.name = name;
-        this.value = value;
-        this.description = description;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public double getValue() {
-        return value;
-    }
-
-    public void setValue(double value) {
-        this.value = value;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @Override
-    public String toString() {
-        return name + ":" + Double.valueOf(value);
-    }
+    /**
+     * A List of ScoreMetrics that are appropriate for the Engine under test 
+     *  and which provide further context on the score against the baseline.
+     */
+    List<? extends ScoreMetric> getMetrics();
 }

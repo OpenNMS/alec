@@ -31,6 +31,11 @@ package org.opennms.oce.engine.cluster;
 import org.opennms.oce.engine.api.EngineFactory;
 
 public class ClusterEngineFactory implements EngineFactory {
+
+    private double epsilon = ClusterEngine.DEFAULT_EPSILON;
+    private double alpha = ClusterEngine.DEFAULT_ALPHA;
+    private double beta = ClusterEngine.DEFAULT_BETA;
+
     @Override
     public String getName() {
         return "cluster";
@@ -43,6 +48,30 @@ public class ClusterEngineFactory implements EngineFactory {
 
     @Override
     public ClusterEngine createEngine() {
-        return new ClusterEngine();
+        return new ClusterEngine(epsilon, alpha, beta);
+    }
+
+    public double getEpsilon() {
+        return epsilon;
+    }
+
+    public void setEpsilon(double epsilon) {
+        this.epsilon = epsilon;
+    }
+
+    public double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
+    }
+
+    public double getBeta() {
+        return beta;
+    }
+
+    public void setBeta(double beta) {
+        this.beta = beta;
     }
 }

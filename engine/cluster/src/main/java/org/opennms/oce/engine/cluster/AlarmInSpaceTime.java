@@ -55,4 +55,8 @@ public class AlarmInSpaceTime implements Clusterable {
     public Alarm getAlarm() {
         return alarm;
     }
+
+    public long getAlarmTime() {
+        return alarm.getTime();
+    }
 }

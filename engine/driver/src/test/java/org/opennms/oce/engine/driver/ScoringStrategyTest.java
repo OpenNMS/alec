@@ -29,35 +29,56 @@
 package org.opennms.oce.engine.driver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.common.IncidentBean;
 
 import com.google.common.collect.Sets;
 
-public class MatrixBasedScoringStrategyTest {
+@RunWith(Parameterized.class)
+public class ScoringStrategyTest {
+    private static final double delta = 1e-10;
 
-    private static final double delta = 0.00001;
-    private MatrixBasedScoringStrategy scorer = new MatrixBasedScoringStrategy();
+    @Parameterized.Parameters(name = "{index}: scorer({0})")
+    public static Iterable<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                // { new SetIntersectionStrategy() }, Ignored, does not handle empty sets well
+                { new PeerBasedScoringStrategy() },
+                { new MatrixBasedScoringStrategy() }
+        });
+    }
+
+    private final ScoringStrategy scorer;
+
+    public ScoringStrategyTest(ScoringStrategy scoringStrategy) {
+        this.scorer = Objects.requireNonNull(scoringStrategy);
+    }
 
     @Test
     public void canComputeScores() {
         // Comparing two empty sets should generate a score of 0
         ScoreReport report = scorer.score(Sets.newHashSet(), Sets.newHashSet());
-        assertThat(report.getScore(), closeTo(0, delta));
+        assertThat(report.getScore(), closeTo(0.0d, delta));
 
         // Comparing two empty incidents should generate a score of 0
         IncidentBean emtpyIncident = new IncidentBean();
         report = scorer.score(Sets.newHashSet(emtpyIncident), Sets.newHashSet(emtpyIncident));
-        assertThat(report.getScore(), closeTo(0, delta));
+        assertThat(report.getScore(), closeTo(0.0d, delta));
 
-        // Comparing an incident with a single alarm to an empty incident should generate a score of 1
+        // Comparing an incident with a single alarm to an empty incident should generate a score greather than 0
         IncidentBean incident = new IncidentBean();
         AlarmBean alarm = new AlarmBean();
         incident.addAlarm(alarm);
         report = scorer.score(Sets.newHashSet(incident), Sets.newHashSet(emtpyIncident));
-        assertThat(report.getScore(), closeTo(1, delta));
+        assertThat(report.getScore(), greaterThan(0.0d));
     }
+
 }

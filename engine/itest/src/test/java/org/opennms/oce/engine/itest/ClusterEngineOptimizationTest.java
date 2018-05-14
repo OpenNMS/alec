@@ -30,12 +30,14 @@ package org.opennms.oce.engine.itest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,26 +54,73 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.driver.EngineUtils;
+import org.opennms.oce.engine.driver.ScoreMetric;
 import org.opennms.oce.engine.driver.ScoreReport;
+import org.opennms.oce.engine.driver.ScoringStrategy;
 import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 @Ignore("Needs local data")
 public class ClusterEngineOptimizationTest {
+
+    // Min @ epsilon: 2831.72, hopWeight: 16.85, timeWeight: 0.69, score: 34.93 -- new double[]{2831.71849627, 16.84762927, 0.69470697};
+    private static final double[] BEST_PARAMS = new double[]{ClusterEngine.DEFAULT_ALPHA, ClusterEngine.DEFAULT_BETA};
+
+    double[] currentParms = BEST_PARAMS;
+    double[] bestParams = currentParms;
+    double minScore;
+
+    @Test
+    public void randomWalk() throws JAXBException, IOException {
+        final EngineAsFunction engineAsFunction = new EngineAsFunction();
+
+        minScore = engineAsFunction.value(bestParams);
+        double otherScore = engineAsFunction.value(bestParams);
+        assertThat(minScore, equalTo(otherScore));
+
+        printMin();
+
+        Random r = new Random();
+        for (int i = 0; i < 500000; i++) {
+            double alpha = r.nextDouble() * 1000;
+            double beta = 0.4d + 0.6* r.nextDouble();
+
+            currentParms = new double[]{alpha, beta};
+
+            System.out.printf("alpha: %.2f beta: %.2f\n", currentParms[0], currentParms[1]);
+
+            double value = engineAsFunction.value(currentParms);
+            if (value < minScore) {
+                minScore = value;
+                bestParams= currentParms;
+            }
+            printMin();
+        }
+    }
+
+    private void printMin() {
+        System.out.printf("Min @ alpha: %.2f, beta: %.2f, score: %.2f -- new double[]{ %.8f, %.8f};\n",
+                bestParams[0], bestParams[1], minScore,
+                bestParams[0], bestParams[1]);
+    }
 
     @Test
     public void canOptimize() throws JAXBException, IOException {
         final EngineAsFunction engineAsFunction = new EngineAsFunction();
         BOBYQAOptimizer optimizer = new BOBYQAOptimizer(6);
         ObjectiveFunction function = new ObjectiveFunction(engineAsFunction);
-        InitialGuess initialGuess = new InitialGuess(new double[]{10000.0, 10.0000000001, 9.9});
-        SimpleBounds bounds = new SimpleBounds(new double[]{0.1d,1e-10,0.1d}, new double[]{Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY});
+
+        InitialGuess initialGuess = new InitialGuess(BEST_PARAMS);
+        SimpleBounds bounds = new SimpleBounds(new double[]{1d,1e-10}, new double[]{Double.POSITIVE_INFINITY, 1d});
         MaxIter maxIter = new MaxIter(10000);
         MaxEval maxEval = new MaxEval(maxIter.getMaxIter() * 10);
         PointValuePair p = optimizer.optimize(function,initialGuess,bounds,maxIter,maxEval, GoalType.MINIMIZE);
@@ -80,7 +129,7 @@ public class ClusterEngineOptimizationTest {
 
     @Test
     public void runSpecific() throws JAXBException, IOException {
-        double[] point = new double[]{10000.0, 10.0000000001, 9.9};
+        double[] point = BEST_PARAMS;
         final EngineAsFunction engineAsFunction = new EngineAsFunction();
         double result = engineAsFunction.value(point);
         System.out.printf("Found point at %s with value %.2f\n", Arrays.toString(point), result);
@@ -92,19 +141,18 @@ public class ClusterEngineOptimizationTest {
 
         public EngineAsFunction() throws JAXBException, IOException {
             System.out.println("Loading data...");
-            alarms = EngineUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml"));
+            alarms = ImmutableList.copyOf(EngineUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
             System.out.printf("Read %d alarms.\n", alarms.size());
             Set<Incident> incidents = EngineUtils.getIncidents(Paths.get("/tmp/cpn.incidents.xml"));
             System.out.printf("Read %d incidents.\n", incidents.size());
-            baseIncidents = getIncidentsWithOneOrMoreAlarms(incidents);
+            baseIncidents = ImmutableSet.copyOf(getIncidentsWithOneOrMoreAlarms(incidents));
         }
 
         @Override
         public double value(double[] point) {
             ClusterEngineFactory factory = new ClusterEngineFactory();
-            factory.setEpsilon(point[0]);
-            factory.setHopWeight(point[1]);
-            factory.setTimeWeight(point[2]);
+            factory.setAlpha(point[0]);
+            factory.setBeta(point[1]);
 
             Driver driver = Driver.builder()
                     .withEngineFactory(factory)
@@ -118,9 +166,12 @@ public class ClusterEngineOptimizationTest {
             generatedIncidentsInSet = getIncidentsWithOneOrMoreAlarms(generatedIncidentsInSet);
 
             System.out.println("Scoring...");
-            final SetIntersectionStrategy scoringStrategy = new SetIntersectionStrategy();
+            final ScoringStrategy scoringStrategy = new SetIntersectionStrategy();
             final ScoreReport report = scoringStrategy.score(baseIncidents, generatedIncidentsInSet);
             System.out.printf("Score: %.2f\n", report.getScore());
+            for (ScoreMetric metric : report.getMetrics()) {
+                System.out.printf("\tMetric - Name: %s, Value: %.2f\n", metric.getName(), metric.getValue());
+            }
             return report.getScore();
         }
     }
@@ -151,4 +202,29 @@ public class ClusterEngineOptimizationTest {
         PointValuePair p = optimizer.optimize(function,initialGuess,bounds,maxIter,maxEval);
         System.out.printf("Found point at %s with value %.2f\n", Arrays.toString(p.getPoint()), p.getValue());
     }
+
+
+    @Test
+    @Ignore("Example")
+    public void canReproduce() throws JAXBException, IOException {
+        /*
+        Running simulation at point [437.70467462237895, 42.27697777946783, 0.16868898831888357]...
+        Generated: 203 incidents.
+        Initial incident count: 203
+        Incident count after removing singles: 203
+        Scoring...
+        Score: 19.18
+            Metric - Name: AlarmAccuracy, Value: 79.00
+            Metric - Name: FalsePositives, Value: 85.00
+            Metric - Name: FalseNegatives, Value: 28.00
+         */
+        final EngineAsFunction engineAsFunction = new EngineAsFunction();
+        Random r = new Random();
+        while (true) {
+            engineAsFunction.value(new double[]{r.nextDouble() * 1000,r.nextDouble() * 1000,r.nextDouble() * 1000});
+            double result = engineAsFunction.value(new double[]{437.70467462237895, 42.27697777946783, 0.16868898831888357});
+            assertThat(result, closeTo(41.10, 1e-2));
+        }
+    }
+
 }

@@ -41,9 +41,11 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.driver.EngineUtils;
+import org.opennms.oce.engine.driver.PeerBasedScoringStrategy;
 import org.opennms.oce.engine.driver.ScoreMetric;
 import org.opennms.oce.engine.driver.ScoreReport;
 import org.opennms.oce.engine.driver.ScoringStrategy;
+import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 import org.opennms.oce.model.alarm.api.Incident;
 
 // Derive a score comparing a Set of Incidents to a Base Sample
@@ -51,7 +53,7 @@ import org.opennms.oce.model.alarm.api.Incident;
 @Service
 public class Score implements Action {
 
-    private ScoringStrategy strategy;
+    private ScoringStrategy strategy = new PeerBasedScoringStrategy();
 
     private double score;
 

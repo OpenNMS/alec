@@ -39,6 +39,8 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
 /**
+ * FIXME: Should be stateless.
+ *
  * @author smith
  *
  */
@@ -73,7 +75,7 @@ public class SetIntersectionStrategy implements ScoringStrategy {
         createSets();
 
         ScoreReportBean report = new ScoreReportBean();
-        report.setScore(Math.abs(100 - getAccuracy()));
+        report.setScore(Math.abs(100d - getAccuracy()));
         report.setMetrics(getMetrics());
         return report;
     }
@@ -93,9 +95,9 @@ public class SetIntersectionStrategy implements ScoringStrategy {
 
     
     // Percentage of the Base Tickets correctly found in the SUT
-    public int getAccuracy() {
+    public double getAccuracy() {
         int retained = intersection.size();
-        return retained * 100 / baseline.size();
+        return retained * 100 / (double)baseline.size();
     }
 
     // Percentage of the Alarms correctly found in the SUT
@@ -144,7 +146,9 @@ public class SetIntersectionStrategy implements ScoringStrategy {
 
     // Create a standardized signature from a List of Alarms
     private String getAlarmSignature(Set<Alarm> alarms) {
-        return alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
+        String sig =  alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
+        //System.out.println(sig);
+        return sig;
     }
 
     private static Incident getIncident(Set<Incident> incidents, String id) {

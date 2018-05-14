@@ -29,6 +29,7 @@
 package org.opennms.oce.engine.common;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.opennms.oce.model.alarm.api.Alarm;
@@ -71,5 +72,26 @@ public class IncidentBean implements Incident {
     @Override
     public Set<Alarm> getAlarms() {
         return alarms;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IncidentBean that = (IncidentBean) o;
+        return creationTime == that.creationTime &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(alarms, that.alarms);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, alarms, creationTime);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("IncidentBean[id=%s, creationTime=%d, alarms=%s]", id, creationTime, alarms);
     }
 }

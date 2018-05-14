@@ -134,6 +134,21 @@ public class EngineUtils {
         }
     }
 
+    public static List<org.opennms.oce.model.v1.schema.Alarm> getRawAlarms(Path path) throws JAXBException, IOException {
+        try (InputStream is = Files.newInputStream(path)) {
+            JAXBContext jaxbContext;
+            try {
+                jaxbContext = JAXBContext.newInstance(Alarms.class);
+            } catch (JAXBException e) {
+                throw new RuntimeException(e);
+            }
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
+
+            return  alarms.getAlarm();
+        }
+    }
+
     public static List<Alarm> getAlarms(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
             JAXBContext jaxbContext;

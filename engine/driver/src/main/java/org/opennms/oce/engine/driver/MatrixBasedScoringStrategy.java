@@ -80,7 +80,7 @@ public class MatrixBasedScoringStrategy implements ScoringStrategy {
         // Build a spare N*N matrix
         SparseRealMatrix m1 = getMatrix(baseline, alarmIdToIndexMap);
         SparseRealMatrix m2 = getMatrix(sut, alarmIdToIndexMap);
-        report.setScore(m1.multiply(m2.transpose()).getNorm());
+        report.setScore(m1.subtract(m2).getNorm());
         return report;
     }
 

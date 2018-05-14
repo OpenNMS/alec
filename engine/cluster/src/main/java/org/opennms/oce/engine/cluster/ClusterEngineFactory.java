@@ -31,9 +31,10 @@ package org.opennms.oce.engine.cluster;
 import org.opennms.oce.engine.api.EngineFactory;
 
 public class ClusterEngineFactory implements EngineFactory {
-    private double epsilon = 1000d;
-    private double timeWeight = 1/1000d;
-    private double hopWeight = 1;
+
+    private double epsilon = ClusterEngine.DEFAULT_EPSILON;
+    private double alpha = ClusterEngine.DEFAULT_ALPHA;
+    private double beta = ClusterEngine.DEFAULT_BETA;
 
     @Override
     public String getName() {
@@ -47,7 +48,7 @@ public class ClusterEngineFactory implements EngineFactory {
 
     @Override
     public ClusterEngine createEngine() {
-        return new ClusterEngine(epsilon, timeWeight, hopWeight);
+        return new ClusterEngine(epsilon, alpha, beta);
     }
 
     public double getEpsilon() {
@@ -58,19 +59,19 @@ public class ClusterEngineFactory implements EngineFactory {
         this.epsilon = epsilon;
     }
 
-    public double getTimeWeight() {
-        return timeWeight;
+    public double getAlpha() {
+        return alpha;
     }
 
-    public void setTimeWeight(double timeWeight) {
-        this.timeWeight = timeWeight;
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
     }
 
-    public double getHopWeight() {
-        return hopWeight;
+    public double getBeta() {
+        return beta;
     }
 
-    public void setHopWeight(double hopWeight) {
-        this.hopWeight = hopWeight;
+    public void setBeta(double beta) {
+        this.beta = beta;
     }
 }

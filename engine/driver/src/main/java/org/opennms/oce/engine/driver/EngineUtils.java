@@ -49,6 +49,7 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.common.IncidentBean;
 import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.v1.schema.AlarmRef;
@@ -64,6 +65,7 @@ public class EngineUtils {
     private static final Gson gson = new Gson();
 
     public static Alarm toEngineAlarm(org.opennms.oce.model.v1.schema.Alarm alarm, org.opennms.oce.model.v1.schema.Event event) {
+        // TODO: Use the bean!
         return new Alarm() {
             @Override
             public String getId() {
@@ -84,7 +86,12 @@ public class EngineUtils {
 
             @Override
             public boolean isClear() {
-                return event.getSeverity().equals(Severity.CLEARED);
+                return AlarmSeverity.CLEARED.equals(getSeverity());
+            }
+
+            @Override
+            public AlarmSeverity getSeverity() {
+                return toAlarmSeverity(event.getSeverity());
             }
         };
     }
@@ -167,6 +174,24 @@ public class EngineUtils {
             Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
             return alarms.getAlarm();
         }
+    }
+
+    public static AlarmSeverity toAlarmSeverity(Severity severity) {
+        switch (severity) {
+            case CRITICAL:
+                return AlarmSeverity.CRITICAL;
+            case MAJOR:
+                return AlarmSeverity.MAJOR;
+            case MINOR:
+                return AlarmSeverity.MINOR;
+            case WARNING:
+                return AlarmSeverity.WARNING;
+            case NORMAL:
+                return AlarmSeverity.NORMAL;
+            case CLEARED:
+                return AlarmSeverity.CLEARED;
+        }
+        return AlarmSeverity.INDETERMINATE;
     }
 
 }

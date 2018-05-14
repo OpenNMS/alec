@@ -28,18 +28,22 @@
 
 package org.opennms.oce.model.alarm.api;
 
-import java.util.List;
+public enum AlarmSeverity {
+    CRITICAL(7), // This event means numerous devices on the network are affected by the event. Everyone who can should stop what they are doing and focus on fixing the problem.
+    MAJOR(6), // A device is completely down or in danger of going down. Attention needs to be paid to this problem immediately.
+    MINOR(5), // A part of a device (a service, and interface, a power supply, etc.) has stopped functioning. The device needs attention.
+    WARNING(4), // An event has occurred that may require action. This severity can also be used to indicate a condition that should be noted (logged) but does not require direct action.
+    NORMAL(3), // Informational message. No action required.
+    CLEARED(2), // This severity is reserved for use in Alarms to indicate that an alarm describes a self-clearing error condition has been corrected and service is restored. This severity should never be used in event definitions. Please use "Normal" severity for events that clear an alarm.
+    INDETERMINATE(1);
 
-public interface Alarm {
+    final int value;
 
-    String getId();
+    AlarmSeverity(int value) {
+        this.value = value;
+    }
 
-    long getTime();
-
-    List<ResourceKey> getResourceKeys();
-
-    boolean isClear();
-
-    AlarmSeverity getSeverity();
-
+    public int getValue() {
+        return value;
+    }
 }

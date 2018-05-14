@@ -63,6 +63,7 @@ import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
@@ -147,7 +148,7 @@ public class Level1EngineComplianceTest {
                     .withId("" + i)
                     .withResourceKey(new ResourceKey(""+ i % 2, "" + i % 5));
             for (int j = 0; j < 100; j++) {
-                builder.withEvent((i+1)*(j+1),  j % 2 == 0 ? MockAlarmBuilder.Severity.MINOR : MockAlarmBuilder.Severity.CLEARED);
+                builder.withEvent((i+1)*(j+1),  j % 2 == 0 ? AlarmSeverity.MINOR : AlarmSeverity.CLEARED);
             }
             alarms.addAll(builder.build());
         }

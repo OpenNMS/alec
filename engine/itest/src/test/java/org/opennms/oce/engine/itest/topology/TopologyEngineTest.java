@@ -28,10 +28,10 @@
 
 package org.opennms.oce.engine.itest.topology;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,12 +45,11 @@ import org.opennms.oce.engine.itest.Level2EngineComplianceTest;
 import org.opennms.oce.engine.itest.MockAlarmBuilder;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.impl.ModelBuilderImpl;
-
-import com.google.common.collect.Lists;
 
 public class TopologyEngineTest {
 
@@ -81,20 +80,20 @@ public class TopologyEngineTest {
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
                 .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
-                .withEvent(SECONDS.toMillis(1), MockAlarmBuilder.Severity.MAJOR)
-                .withEvent(SECONDS.toMillis(301), MockAlarmBuilder.Severity.CLEARED) // 5 minutes later
+                .withEvent(SECONDS.toMillis(1), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(301), AlarmSeverity.CLEARED) // 5 minutes later
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a2")
                 .withResourceKey(new ResourceKey("Port,n2-c1-p1"))
-                .withEvent(SECONDS.toMillis(31), MockAlarmBuilder.Severity.MAJOR)
-                .withEvent(SECONDS.toMillis(331), MockAlarmBuilder.Severity.CLEARED) // 5 minutes later
+                .withEvent(SECONDS.toMillis(31), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(331), AlarmSeverity.CLEARED) // 5 minutes later
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a3")
                 .withResourceKey(new ResourceKey("Port,n1-c2-p2"))
-                .withEvent(SECONDS.toMillis(61), MockAlarmBuilder.Severity.MAJOR)
-                .withEvent(SECONDS.toMillis(121), MockAlarmBuilder.Severity.CLEARED) // ~1 minute later
+                .withEvent(SECONDS.toMillis(61), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(121), AlarmSeverity.CLEARED) // ~1 minute later
                 .build());
 
         Driver driver = Driver.builder()

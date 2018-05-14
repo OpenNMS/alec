@@ -1,12 +1,17 @@
 package org.opennms.oce.model.impl;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.api.Group;
 import org.opennms.oce.model.api.ModelObject;
 import org.opennms.oce.model.api.OperationalState;
@@ -52,7 +57,7 @@ public class ModelObjectImpl implements ModelObject {
     private Map<String, Group> uncles = new HashMap<>(0);
     private OperationalState operationalState = OperationalState.NORMAL;
     private ServiceState serviceState = ServiceState.IN;
-    
+    private final Map<String, Alarm> outstandingAlarmsById = new LinkedHashMap<>();
 
     public ModelObjectImpl(String type, String id) {
         this.type = Objects.requireNonNull(type);
@@ -194,6 +199,10 @@ public class ModelObjectImpl implements ModelObject {
 
     @Override
     public void setOperationalState(OperationalState state) {
+        if (state == operationalState) {
+            return; // Nothing to do
+        }
+
         OperationalState previous = operationalState;
         operationalState = state;
         propagateOperationalStateChange(previous);
@@ -213,7 +222,24 @@ public class ModelObjectImpl implements ModelObject {
 
     @Override
     public void onAlarm(Alarm alarm) {
+        if (alarm.isClear()) {
+            outstandingAlarmsById.remove(alarm.getId());
+        } else {
+            outstandingAlarmsById.put(alarm.getId(), alarm);
+        }
 
+        final Optional<AlarmSeverity> highestSeverity = outstandingAlarmsById.values().stream()
+                .map(Alarm::getSeverity)
+                .max(Comparator.comparing(AlarmSeverity::getValue));
+        final OperationalState effectiveOperationalState;
+        if (!highestSeverity.isPresent() || highestSeverity.get().getValue() <= AlarmSeverity.NORMAL.getValue()) {
+            effectiveOperationalState = OperationalState.NORMAL;
+        } else if (highestSeverity.get().getValue() >= AlarmSeverity.MAJOR.getValue()) {
+            effectiveOperationalState = OperationalState.SA;
+        } else {
+            effectiveOperationalState = OperationalState.NSA;
+        }
+        setOperationalState(effectiveOperationalState);
     }
 
     @Override

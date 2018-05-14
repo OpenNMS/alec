@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 
 public class AlarmBean implements Alarm {
@@ -43,7 +44,7 @@ public class AlarmBean implements Alarm {
 
     private List<ResourceKey> resourceKeys = new ArrayList<>();
 
-    private boolean isClear;
+    private AlarmSeverity severity = AlarmSeverity.INDETERMINATE;
 
     public AlarmBean() {
     }
@@ -82,11 +83,16 @@ public class AlarmBean implements Alarm {
 
     @Override
     public boolean isClear() {
-        return isClear;
+        return AlarmSeverity.CLEARED.equals(severity);
     }
 
-    public void setClear(boolean clear) {
-        isClear = clear;
+    public void setSeverity(AlarmSeverity severity) {
+        this.severity = severity;
+    }
+
+    @Override
+    public AlarmSeverity getSeverity() {
+        return severity;
     }
 
     @Override
@@ -95,18 +101,18 @@ public class AlarmBean implements Alarm {
         if (o == null || getClass() != o.getClass()) return false;
         AlarmBean alarmBean = (AlarmBean) o;
         return time == alarmBean.time &&
-                isClear == alarmBean.isClear &&
                 Objects.equals(id, alarmBean.id) &&
-                Objects.equals(resourceKeys, alarmBean.resourceKeys);
+                Objects.equals(resourceKeys, alarmBean.resourceKeys) &&
+                severity == alarmBean.severity;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, resourceKeys, isClear);
+        return Objects.hash(id, time, resourceKeys, severity);
     }
 
     @Override
     public String toString() {
-        return String.format("AlarmBean[id=%s, time=%s, resourceKeys=%s, isClear=%s]", id, time, resourceKeys, isClear);
+        return String.format("AlarmBean[id=%s, time=%s, resourceKeys=%s, severity=%s]", id, time, resourceKeys, severity);
     }
 }

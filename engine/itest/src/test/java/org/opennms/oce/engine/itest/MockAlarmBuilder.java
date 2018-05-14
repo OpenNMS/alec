@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.opennms.oce.engine.common.AlarmBean;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 
 public class MockAlarmBuilder {
@@ -55,7 +56,7 @@ public class MockAlarmBuilder {
         return this;
     }
 
-    public MockAlarmBuilder withEvent(long time, Severity severity) {
+    public MockAlarmBuilder withEvent(long time, AlarmSeverity severity) {
         events.add(new MockEvent(time, severity));
         return this;
     }
@@ -69,24 +70,17 @@ public class MockAlarmBuilder {
             alarm.setId(id);
             alarm.getResourceKeys().add(resourceKey);
             alarm.setTime(event.getTime());
-            alarm.setClear(event.getSeverity().equals(Severity.CLEARED));
+            alarm.setSeverity(event.getSeverity());
             alarms.add(alarm);
         }
         return alarms;
     }
 
-    public static enum Severity {
-        MAJOR,
-        MINOR,
-        NORMAL,
-        CLEARED
-    }
-
     private static class MockEvent {
         private long time;
-        private Severity severity;
+        private AlarmSeverity severity;
 
-        public MockEvent(long time, Severity severity) {
+        public MockEvent(long time, AlarmSeverity severity) {
             this.time = time;
             this.severity = severity;
         }
@@ -95,7 +89,7 @@ public class MockAlarmBuilder {
             return time;
         }
 
-        public Severity getSeverity() {
+        public AlarmSeverity getSeverity() {
             return severity;
         }
     }

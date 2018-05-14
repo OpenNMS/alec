@@ -28,15 +28,17 @@
 
 package org.opennms.oce.engine.topology;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.kie.api.KieBase;
+import org.kie.api.KieServices;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
@@ -49,15 +51,33 @@ import com.google.common.collect.Iterables;
  * A topology driver processor with Rules Engine
  *
  */
-public class TopologyProcessor implements Engine {
+public class TopologyEngine implements Engine {
 
-    private static Logger LOG = LoggerFactory.getLogger(TopologyProcessor.class);
+    private static Logger LOG = LoggerFactory.getLogger(TopologyEngine.class);
 
-    IncidentHandler handler;
-
-    List<Incident> incidents = new ArrayList<>();
+    private IncidentHandler handler;
 
     private Model inventory;
+
+    private final KieSession kieSession;
+
+    public TopologyEngine() {
+        KieServices ks = KieServices.Factory.get();
+        KieContainer kcont = ks.newKieClasspathContainer(getClass().getClassLoader());
+        KieBase kbase = kcont.getKieBase("topologyKBase");
+        kieSession = kbase.newKieSession();
+        kieSession.setGlobal("actionMgr", new ActionManager(this));
+
+        LOG.info("KieSession started.");
+    }
+
+    @Override
+    public void destroy() {
+        if (kieSession != null) {
+            kieSession.dispose();
+            LOG.info("KieSession disposed.");
+        }
+    }
 
     @Override
     public void onAlarm(Alarm alarm) {
@@ -92,7 +112,10 @@ public class TopologyProcessor implements Engine {
 
     @Override
     public void tick(long timestampInMillis) {
-        // TODO - update Rules context?
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Tick at {} ({})", new Date(timestampInMillis), timestampInMillis);
+        }
+        kieSession.fireAllRules();
     }
 
     private ModelObject getObjectForAlarm(Alarm alarm) {
@@ -116,4 +139,7 @@ public class TopologyProcessor implements Engine {
         return inventory.getObjectById(type, id);
     }
 
+    public IncidentHandler getIncidentHandler() {
+        return handler;
+    }
 }

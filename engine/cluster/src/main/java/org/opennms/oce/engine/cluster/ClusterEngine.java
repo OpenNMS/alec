@@ -173,6 +173,11 @@ public class ClusterEngine implements Engine {
         }
     }
 
+    @Override
+    public void destroy() {
+        // no-op
+    }
+
     public void onTick(long timestampInMillis) {
         if (!alarmsChangedSinceLastTick) {
             return;

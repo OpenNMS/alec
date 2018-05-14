@@ -93,6 +93,9 @@ public class Driver {
         lastTick += tickResolutionMs;
         engine.tick(lastTick);
 
+        // Destroy
+        engine.destroy();
+
         return new ArrayList<>(session.incidents.values());
     }
 

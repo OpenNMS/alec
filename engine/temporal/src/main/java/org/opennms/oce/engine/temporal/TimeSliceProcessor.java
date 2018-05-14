@@ -116,4 +116,9 @@ public class TimeSliceProcessor implements Engine {
         }
     }
 
+    @Override
+    public void destroy() {
+        // no-op
+    }
+
 }

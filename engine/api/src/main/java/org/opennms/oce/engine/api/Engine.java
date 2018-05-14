@@ -34,4 +34,6 @@ public interface Engine extends AlarmProcessor {
 
     void tick(long timestampInMillis);
 
+    void destroy();
+
 }

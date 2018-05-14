@@ -373,7 +373,7 @@ public class Level2EngineComplianceTest {
         assertThat(getAlarmIdsInIncident(incidents.get(0)), containsInAnyOrder("3919143", "3919144", "3919145", "3919146", "3919147"));
     }
 
-    private static Set<String> getAlarmIdsInIncident(Incident incident) {
+    public static Set<String> getAlarmIdsInIncident(Incident incident) {
         return incident.getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toSet());

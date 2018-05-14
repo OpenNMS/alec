@@ -29,8 +29,11 @@
 package org.opennms.oce.engine.itest.topology;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,8 +41,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.engine.driver.Driver;
+import org.opennms.oce.engine.itest.Level2EngineComplianceTest;
+import org.opennms.oce.engine.itest.MockAlarmBuilder;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
+import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.impl.ModelBuilderImpl;
 
@@ -70,8 +77,33 @@ public class TopologyEngineTest {
     @Test
     @Ignore
     public void canTriggerIncident() {
+        final List<Alarm> alarms = new ArrayList<>();
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a1")
+                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withEvent(SECONDS.toMillis(1), MockAlarmBuilder.Severity.MAJOR)
+                .withEvent(SECONDS.toMillis(301), MockAlarmBuilder.Severity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a2")
+                .withResourceKey(new ResourceKey("Port,n2-c1-p1"))
+                .withEvent(SECONDS.toMillis(31), MockAlarmBuilder.Severity.MAJOR)
+                .withEvent(SECONDS.toMillis(331), MockAlarmBuilder.Severity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a3")
+                .withResourceKey(new ResourceKey("Port,n1-c2-p2"))
+                .withEvent(SECONDS.toMillis(61), MockAlarmBuilder.Severity.MAJOR)
+                .withEvent(SECONDS.toMillis(121), MockAlarmBuilder.Severity.CLEARED) // ~1 minute later
+                .build());
 
-        List<Incident> incidents = Lists.newArrayList();
+        Driver driver = Driver.builder()
+                .withEngineFactory(topologyEngineFactory)
+                .build();
+        List<Incident> incidents = driver.run(model, alarms);
+
         assertThat(incidents, hasSize(1));
+        Incident incident = incidents.get(0);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
     }
 }

@@ -28,24 +28,22 @@
 
 package org.opennms.oce.engine.topology;
 
-import org.opennms.oce.engine.common.SimpleEngineFactory;
+import java.util.Objects;
 
-public class TopologyEngineFactory extends SimpleEngineFactory<TopologyEngine> {
+import org.opennms.oce.model.api.Group;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public TopologyEngineFactory() {
-        super(TopologyEngine.class);
+public class ActionManager {
+    private static final Logger LOG = LoggerFactory.getLogger(ActionManager.class);
+
+    private final TopologyEngine topologyEngine;
+
+    public ActionManager(TopologyEngine topologyEngine) {
+        this.topologyEngine = Objects.requireNonNull(topologyEngine);
     }
 
-    @Override
-    public String getName() {
-        return "topology";
+    public void doIt(Group group) {
+        LOG.info("Group: {}", group);
     }
-
-    @Override
-    public TopologyEngine createEngine() {
-        final TopologyEngine engine = super.createEngine();
-        return engine;
-    }
-
 }
-

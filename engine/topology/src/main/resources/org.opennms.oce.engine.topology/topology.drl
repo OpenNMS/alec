@@ -1,0 +1,53 @@
+package org.opennms.oce.engine.topology;
+
+import org.opennms.oce.model.api.Group;
+
+global org.opennms.oce.engine.topology.ActionManager actionMgr
+
+rule "LinkDown"
+when
+ $group : Group(owner.type == "link")
+then
+ actionMgr.doIt($group);
+end
+
+/*
+When:
+
+There is a Group object in the working memory with:
+ownerSuperClass == Card
+memberSuperClass == Port
+memberCount > memberSaCount
+memberSaCount == 1
+memberSaCountTrend == INCREASING
+ownerUniqueId is stored in (a local variable called) 'groupOwnerUniqueId'
+There isn't a ModelObject in the working memory with:
+superClass == Card
+uniqueId == groupOwnerUniqueId
+operationalState == NSA
+Then:
+
+Force NSA state change on Model Object in topology model with:
+superClass == Card
+uniqueId == groupOwnerUniqueId
+*/
+
+/*
+rule "CardDown"
+when
+    $card : Card(ports != null, ports.size > 0)
+    List(size >= $card.ports.size * 0.6) from collect (Port(failed == true) from $card.ports)
+then
+    // Card has failed!
+    stateMgr.fail($card);
+end
+
+rule "CardRecovered"
+when
+    $card : Card(ports != null, ports.size > 0)
+    List(size < $card.ports.size * 0.6) from collect (Port(failed == true) from $card.ports)
+then
+    // Card has recovered!
+    stateMgr.recover($card);
+end
+*/

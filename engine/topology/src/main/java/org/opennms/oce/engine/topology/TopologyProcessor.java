@@ -30,6 +30,7 @@ package org.opennms.oce.engine.topology;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
@@ -71,7 +72,7 @@ public class TopologyProcessor implements Engine {
 
     @Override
     public long getTickResolutionMs() {
-        return 100; // TODO 
+        return TimeUnit.SECONDS.toMillis(1);
     }
 
     @Override

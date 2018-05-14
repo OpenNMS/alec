@@ -2,6 +2,7 @@ package org.opennms.oce.model.impl;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.opennms.oce.model.api.Group;
 import org.opennms.oce.model.api.ModelObject;
 import org.opennms.oce.model.api.OperationalState;
 import org.opennms.oce.model.api.ServiceState;
+
+import com.google.common.collect.Sets;
 
 /*******************************************************************************
  * This file is part of OpenNMS(R).
@@ -178,7 +181,7 @@ public class ModelObjectImpl implements ModelObject {
         return uncles.get(objectType);
     }
 
-	private Group getGroup(Map<String, Group> map, String type) {
+    private Group getGroup(Map<String, Group> map, String type) {
 		Group g = map.get(type);
 		if (g == null) {
 			g = new GroupImpl(this);
@@ -244,7 +247,7 @@ public class ModelObjectImpl implements ModelObject {
 
     @Override
     public Set<Alarm> getAlarms() {
-        return null;
+        return Sets.newHashSet(outstandingAlarmsById.values());
     }
 
     private void propagateOperationalStateChange(OperationalState previous) {

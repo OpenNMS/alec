@@ -74,8 +74,40 @@ public class TopologyEngineTest {
     }
 
     @Test
-    @Ignore
-    public void canTriggerIncident() {
+    public void canTriggerIncidentOnCardDown() {
+        final List<Alarm> alarms = new ArrayList<>();
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a1")
+                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withEvent(SECONDS.toMillis(1), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(301), AlarmSeverity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a2")
+                .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+                .withEvent(SECONDS.toMillis(31), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(331), AlarmSeverity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a3")
+                .withResourceKey(new ResourceKey("Port,n2-c1-p1"))
+                .withEvent(SECONDS.toMillis(61), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(121), AlarmSeverity.CLEARED) // ~1 minute later
+                .build());
+
+        Driver driver = Driver.builder()
+                .withEngineFactory(topologyEngineFactory)
+                .build();
+        List<Incident> incidents = driver.run(model, alarms);
+
+        assertThat(incidents, hasSize(1));
+        Incident incident = incidents.get(0);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
+    }
+
+    @Test
+    @Ignore("Needs link group handling")
+    public void canTriggerIncidentOnLinkDown() {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")

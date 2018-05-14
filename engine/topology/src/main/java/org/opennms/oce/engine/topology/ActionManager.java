@@ -30,6 +30,7 @@ package org.opennms.oce.engine.topology;
 
 import java.util.Objects;
 
+import org.opennms.oce.engine.common.IncidentBean;
 import org.opennms.oce.model.api.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,13 @@ public class ActionManager {
         this.topologyEngine = Objects.requireNonNull(topologyEngine);
     }
 
-    public void doIt(Group group) {
-        LOG.info("Group: {}", group);
+    public void createIncidentOnFailure(Group group) {
+        LOG.info("Got failure for: {}", group);
+
+        IncidentBean incident = new IncidentBean();
+        group.getMembers().stream()
+                .flatMap(mo -> mo.getAlarms().stream())
+                .forEach(incident::addAlarm);
+        topologyEngine.getIncidentHandler().onIncident(incident);
     }
 }

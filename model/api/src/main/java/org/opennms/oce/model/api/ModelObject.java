@@ -51,7 +51,7 @@ public interface ModelObject {
     Group getNephewGroup(String objectType);
     
     Group getUncleGroup(String objectType);
-    
+
     String getType();
 
     String getSubType();

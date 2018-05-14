@@ -12,12 +12,13 @@
 
     <modules>
         <module>api</module>
-        <module>common</module>
-        <module>temporal</module>
         <module>cluster</module>
+        <module>common</module>
         <module>driver</module>
-        <module>shell</module>
         <module>itest</module>
+        <module>shell</module>
+        <module>temporal</module>
+        <module>topology</module>
     </modules>
 </project>
 

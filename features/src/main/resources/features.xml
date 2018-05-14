@@ -31,14 +31,10 @@
     </feature>
 
     <feature name="oce-engine" description="OCE :: Engine" version="${project.version}">
-        <feature version="${project.version}">oce-engine-temporal</feature>
         <feature version="${project.version}">oce-engine-cluster</feature>
+        <feature version="${project.version}">oce-engine-temporal</feature>
+        <feature version="${project.version}">oce-engine-topology</feature>
         <feature version="${project.version}">oce-engine-shell</feature>
-    </feature>
-
-    <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
-        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
     </feature>
 
     <feature name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
@@ -47,6 +43,16 @@
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.jung/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.cluster/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
+        <feature version="${project.version}">oce-engine-api</feature>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
+        <feature version="${project.version}">oce-engine-api</feature>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.topology/${project.version}</bundle>
     </feature>
 
     <feature name="oce-engine-api" description="OCE :: Engine :: API" version="${project.version}">

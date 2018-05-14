@@ -110,6 +110,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.engine</groupId>
+                <artifactId>org.opennms.oce.engine.topology</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.engine</groupId>
                 <artifactId>org.opennms.oce.engine.cluster</artifactId>
                 <version>${project.version}</version>
             </dependency>

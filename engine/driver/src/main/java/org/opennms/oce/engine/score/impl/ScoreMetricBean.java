@@ -76,4 +76,9 @@ public class ScoreMetricBean implements ScoreMetric {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return name + ":" + Double.valueOf(value);
+    }
 }

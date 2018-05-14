@@ -64,4 +64,9 @@ public class ScoreReportBean implements ScoreReport {
     public void setMetrics(List<ScoreMetricBean> metrics) {
         this.metrics = metrics;
     }
+
+    @Override
+    public String toString() {
+        return Double.toString(score) + metrics;
+    }
 }

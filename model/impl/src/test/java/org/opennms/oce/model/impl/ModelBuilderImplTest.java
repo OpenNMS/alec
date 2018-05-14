@@ -30,6 +30,7 @@ package org.opennms.oce.model.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -68,7 +69,7 @@ public class ModelBuilderImplTest {
         assertThat(root.getId(), equalTo(ModelBuilderImpl.MODEL_ROOT_ID));
 
         Set<ModelObject> rootChildren = root.getChildren();
-        assertThat(rootChildren, hasSize(2));
+        assertThat(rootChildren, hasSize(greaterThanOrEqualTo(2)));
 
         // TODO: How to get children of a specific type
         ModelObject rootLink = rootChildren.stream()
@@ -86,7 +87,7 @@ public class ModelBuilderImplTest {
                 .findFirst()
                 .get();
         ModelObject rootLinkPeerZ = rootLinkPeers.stream()
-                .filter(mo -> mo.getId().equals("n1-c2-p1"))
+                .filter(mo -> mo.getId().equals("n2-c1-p1"))
                 .findFirst()
                 .get();
 

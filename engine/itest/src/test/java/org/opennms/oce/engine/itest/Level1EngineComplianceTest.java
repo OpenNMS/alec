@@ -135,7 +135,6 @@ public class Level1EngineComplianceTest {
      * TODO: Ensure that 2+ incidents are created instead of 1
      */
     @Test
-    @Ignore("Currently broken in the clustering engine")
     public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)

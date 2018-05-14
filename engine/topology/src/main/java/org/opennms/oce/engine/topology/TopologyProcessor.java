@@ -36,6 +36,7 @@ import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelObject;
 
 /**
  * A topology driver processor with Rules Engine
@@ -52,6 +53,10 @@ public class TopologyProcessor implements Engine {
     @Override
     public void onAlarm(Alarm alarm) {
         // TODO - find the inventory item and apply the alarm 
+        ModelObject object = getObjectForAlarm(alarm);
+        // TODO - Add Alarm to ModelObject - TODO - update ModelObject API
+        // ModelObject will determine if alarm affects its state and if it should propagate.
+        // ModelObjecdt.setAlarm(alarm) could return boolean indicator if state is changed in order to trigger fireAllRules();
     }
 
     @Override
@@ -72,6 +77,11 @@ public class TopologyProcessor implements Engine {
     @Override
     public void tick(long timestampInMillis) {
         // TODO - update Rules context?
+    }
+
+    private ModelObject getObjectForAlarm(Alarm alarm) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

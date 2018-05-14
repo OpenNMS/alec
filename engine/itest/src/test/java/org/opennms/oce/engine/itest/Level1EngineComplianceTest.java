@@ -31,19 +31,32 @@ package org.opennms.oce.engine.itest;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -52,10 +65,13 @@ import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.driver.Driver;
+import org.opennms.oce.engine.driver.SetIntersectionStrategy;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
+
+import com.google.common.collect.Sets;
 
 /**
  * Level 1 compliance: All engines should pass this one.
@@ -86,7 +102,7 @@ public class Level1EngineComplianceTest {
     }
 
     @Test
-    public void canCreateEngine() {
+    public void canCreateDistinctEngines() {
         Engine engine1 = factory.createEngine();
         assertThat(engine1, notNullValue());
 
@@ -96,7 +112,7 @@ public class Level1EngineComplianceTest {
     }
 
     @Test
-    public void testFiveAlarmsWithSameTimeOnSameResource() {
+    public void canCorrelateFiveAlarmsWithSameTimeOnSameResource() {
         final List<Alarm> alarms = getAlarms(5, 20, new ResourceKey("n1"));
         final List<Incident> incidents = driver.run(alarms);
 
@@ -105,6 +121,78 @@ public class Level1EngineComplianceTest {
 
         // All five alarms should be in the same incident
         assertThat(incidents.get(0).getAlarms(), containsInAnyOrder(alarms.toArray()));
+
+        // The incident should have been created some time after the first alarm
+        final long minTimestamp = alarms.stream().mapToLong(Alarm::getTime).sorted().findFirst().getAsLong();
+        // TODO: Not currently implemented
+        //assertThat(incidents.get(0).getCreationTime(), greaterThanOrEqualTo(minTimestamp));
+    }
+
+    /**
+     * Given some noisy data verify that the results from multiple runs.
+     * Also run these in parallel to also make sure that different instances of the engine are properly isolated.
+     *
+     * TODO: Ensure that 2+ incidents are created instead of 1
+     */
+    @Test
+    @Ignore("Currently broken in the clustering engine")
+    public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
+        // Generate some noisy alarms. We need to ensure that these:
+        // * Are the same from one test run to another (i.e. no random value)
+        // * They will generate 1 or more incidents
+        final List<Alarm> alarms = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            MockAlarmBuilder builder = new MockAlarmBuilder()
+                    .withId("" + i)
+                    .withResourceKey(new ResourceKey(""+ i % 2, "" + i % 5));
+            for (int j = 0; j < 100; j++) {
+                builder.withEvent((i+1)*(j+1),  j % 2 == 0 ? MockAlarmBuilder.Severity.MINOR : MockAlarmBuilder.Severity.CLEARED);
+            }
+            alarms.addAll(builder.build());
+        }
+
+        final List<Incident> initialIncidents = driver.run(alarms);
+        // Expect 1+ incidents
+        assertThat(initialIncidents, hasSize(greaterThanOrEqualTo(1)));
+
+        // Now rerun the driver several times in series, and expect the same results
+        final int K = 20;
+        for (int k = 0; k < K; k++) {
+            final List<Incident> subsequentIncidents = driver.run(alarms);
+            compareIncidents(initialIncidents, subsequentIncidents);
+
+            Set<Incident> initialIncidentsInSet = Sets.newHashSet(initialIncidents);
+            Set<Incident> generatedIncidentsInSet = Sets.newHashSet(subsequentIncidents);
+        }
+
+        // Rerun the driver again over serveral threads and expect the same results
+        final ExecutorService executor = Executors.newFixedThreadPool(10);
+        final List<CompletableFuture<List<Incident>>> incidentFutures = new ArrayList<>();
+        for (int k = 0; k < K; k++) {
+            incidentFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
+        }
+        CompletableFuture.allOf(incidentFutures.toArray(new CompletableFuture[0])).get();
+        for (CompletableFuture<List<Incident>> incidentFuture : incidentFutures) {
+            compareIncidents(initialIncidents, incidentFuture.get());
+        }
+    }
+
+    private static void compareIncidents(List<Incident> base, List<Incident> sut) {
+        // Incident IDs may vary, so we take a closer look
+        assertThat(sut, hasSize(base.size()));
+
+        // Extract the alarmIds and compare both their contents and orders
+        for (int l = 0; l < base.size(); l++) {
+            final List<String> initialAlarmIds = getAlarmIdsFromIncident(base.get(l));
+            final List<String> subsequentAlarmIds = getAlarmIdsFromIncident(sut.get(l));
+            assertThat(subsequentAlarmIds, equalTo(initialAlarmIds));
+        }
+    }
+
+    private static List<String> getAlarmIdsFromIncident(Incident incident) {
+        return incident.getAlarms().stream()
+                .map(Alarm::getId)
+                .collect(Collectors.toList());
     }
 
     // Get nAlarms all occurring at the same time in seconds

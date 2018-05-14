@@ -29,7 +29,6 @@
 package org.opennms.oce.engine.common;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +42,8 @@ public class AlarmBean implements Alarm {
     private long time;
 
     private List<ResourceKey> resourceKeys = new ArrayList<>();
+
+    private boolean isClear;
 
     public AlarmBean() {
     }
@@ -81,7 +82,11 @@ public class AlarmBean implements Alarm {
 
     @Override
     public boolean isClear() {
-        return false;
+        return isClear;
+    }
+
+    public void setClear(boolean clear) {
+        isClear = clear;
     }
 
     @Override
@@ -90,17 +95,18 @@ public class AlarmBean implements Alarm {
         if (o == null || getClass() != o.getClass()) return false;
         AlarmBean alarmBean = (AlarmBean) o;
         return time == alarmBean.time &&
+                isClear == alarmBean.isClear &&
                 Objects.equals(id, alarmBean.id) &&
                 Objects.equals(resourceKeys, alarmBean.resourceKeys);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, resourceKeys);
+        return Objects.hash(id, time, resourceKeys, isClear);
     }
 
     @Override
     public String toString() {
-        return String.format("AlarmBean[id=%s, time=%s, resourceKeys=%s]", id, time, resourceKeys);
+        return String.format("AlarmBean[id=%s, time=%s, resourceKeys=%s, isClear=%s]", id, time, resourceKeys, isClear);
     }
 }

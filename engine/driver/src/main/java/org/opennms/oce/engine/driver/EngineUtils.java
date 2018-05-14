@@ -51,6 +51,7 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.v1.schema.AlarmRef;
+import org.opennms.oce.model.v1.schema.Alarms;
 import org.opennms.oce.model.v1.schema.Incidents;
 import org.opennms.oce.model.v1.schema.Severity;
 
@@ -128,6 +129,20 @@ public class EngineUtils {
             Incidents list = new Incidents();
             list.getIncident().addAll(incidents.values().stream().map(EngineUtils::toModelIncident).collect(Collectors.toList()));
             marshaller.marshal(list, os);
+        }
+    }
+
+    public static List<org.opennms.oce.model.v1.schema.Alarm> getRawAlarms(Path path) throws JAXBException, IOException {
+        try (InputStream is = Files.newInputStream(path)) {
+            JAXBContext jaxbContext;
+            try {
+                jaxbContext = JAXBContext.newInstance(Alarms.class);
+            } catch (JAXBException e) {
+                throw new RuntimeException(e);
+            }
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
+            return alarms.getAlarm();
         }
     }
 

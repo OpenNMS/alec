@@ -54,21 +54,21 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
     // Incident Set to Score
     private Set<Incident> sut;
 
-    private Set<String> baselineSignatures = new HashSet<>();
+    private Set<String> baselineSignatures;
 
-    private Set<String> intersection = new HashSet<>();
+    private Set<String> intersection;
 
-    private Set<String> missed = new HashSet<>();
+    private Set<String> missed;
 
-    private Set<String> sutSignatures = new HashSet<>();
+    private Set<String> sutSignatures;
 
     private Set<String> baselineAlarms;
 
     private Set<String> sutAlarms;
 
-    private Set<String> intersectionAlarms = new HashSet<>();
+    private Set<String> intersectionAlarms;
 
-    private Set<String> unmatchedAlarms = new HashSet<>();
+    private Set<String> unmatchedAlarms;
 
     @Override
     public String getName() {
@@ -127,18 +127,24 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
         createAlarmSignatures(baseline, sut);
         baselineAlarms = baseline.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
         sutAlarms = sut.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
+        intersectionAlarms = new HashSet<>();
         intersectionAlarms.addAll(baselineAlarms);
         intersectionAlarms.retainAll(sutAlarms);
+        unmatchedAlarms = new HashSet<>();
         unmatchedAlarms.addAll(baselineAlarms);
         unmatchedAlarms.removeAll(sutAlarms);
     }
 
 
     private void createAlarmSignatures(Set<Incident> baseline, Set<Incident> sut) {
+        baselineSignatures = new HashSet<>();
         baselineSignatures.addAll(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
+        intersection = new HashSet<>();
         intersection.addAll(baselineSignatures);
+        sutSignatures = new HashSet<>();
         sutSignatures.addAll(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
         intersection.retainAll(sutSignatures);
+        missed = new HashSet<>();
         missed.addAll(baselineSignatures);
         missed.removeAll(intersection);
     }
@@ -150,7 +156,6 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
     // Create a standardized signature from a List of Alarms
     private String getAlarmSignature(Set<Alarm> alarms) {
         String sig =  alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
-        //System.out.println(sig);
         return sig;
     }
 

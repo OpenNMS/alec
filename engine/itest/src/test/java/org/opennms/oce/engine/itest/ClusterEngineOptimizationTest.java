@@ -159,7 +159,7 @@ public class ClusterEngineOptimizationTest {
                     .build();
 
             System.out.printf("Running simulation at point %s...\n", Arrays.toString(point));
-            final List<Incident> generatedIncidents = driver.run(alarms);
+            final List<Incident> generatedIncidents = driver.run(null, alarms);
             System.out.printf("Generated: %d incidents.\n", generatedIncidents.size());
             Set<Incident> generatedIncidentsInSet = Sets.newHashSet(generatedIncidents);
             assertThat(generatedIncidentsInSet.size(), equalTo(generatedIncidents.size()));

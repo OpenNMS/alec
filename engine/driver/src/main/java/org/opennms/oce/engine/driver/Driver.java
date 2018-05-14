@@ -53,10 +53,6 @@ public class Driver {
         this.engineFactory = engineFactory;
     }
 
-    public List<Incident> run(List<Alarm> alarms) {
-        return run(null, alarms);
-    }
-
     public List<Incident> run(Model model, List<Alarm> alarms) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();

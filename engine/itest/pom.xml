@@ -23,7 +23,17 @@
             <groupId>org.opennms.oce.engine</groupId>
             <artifactId>org.opennms.oce.engine.cluster</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.topology</artifactId>
+        </dependency>
 
+
+        <dependency>
+            <groupId>org.opennms.oce.model</groupId>
+            <artifactId>org.opennms.oce.model.impl</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

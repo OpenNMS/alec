@@ -61,9 +61,12 @@ import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
+import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
+import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.impl.ModelBuilderImpl;
 
 import com.google.common.collect.Sets;
 
@@ -76,12 +79,14 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new TimeSliceEngineFactory() }, { new ClusterEngineFactory() }
+                { new TimeSliceEngineFactory() }, { new ClusterEngineFactory() },
+                // { new TopologyEngineFactory() }
         });
     }
 
     private final EngineFactory factory;
     private Driver driver;
+    private Model model;
     private final AtomicLong alarmIdGenerator = new AtomicLong();
 
     public Level1EngineComplianceTest(EngineFactory factory) {
@@ -93,6 +98,9 @@ public class Level1EngineComplianceTest {
         driver = Driver.builder()
                 .withEngineFactory(factory)
                 .build();
+
+        final ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
+        model = modelBuilder.buildModel();
     }
 
     @Test
@@ -108,7 +116,7 @@ public class Level1EngineComplianceTest {
     @Test
     public void canCorrelateFiveAlarmsWithSameTimeOnSameResource() {
         final List<Alarm> alarms = getAlarms(5, 20, new ResourceKey("n1"));
-        final List<Incident> incidents = driver.run(alarms);
+        final List<Incident> incidents = driver.run(model, alarms);
 
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
@@ -144,14 +152,14 @@ public class Level1EngineComplianceTest {
             alarms.addAll(builder.build());
         }
 
-        final List<Incident> initialIncidents = driver.run(alarms);
+        final List<Incident> initialIncidents = driver.run(model, alarms);
         // Expect 1+ incidents
         assertThat(initialIncidents, hasSize(greaterThanOrEqualTo(1)));
 
         // Now rerun the driver several times in series, and expect the same results
         final int K = 20;
         for (int k = 0; k < K; k++) {
-            final List<Incident> subsequentIncidents = driver.run(alarms);
+            final List<Incident> subsequentIncidents = driver.run(model, alarms);
             compareIncidents(initialIncidents, subsequentIncidents);
 
             Set<Incident> initialIncidentsInSet = Sets.newHashSet(initialIncidents);
@@ -162,7 +170,7 @@ public class Level1EngineComplianceTest {
         final ExecutorService executor = Executors.newFixedThreadPool(10);
         final List<CompletableFuture<List<Incident>>> incidentFutures = new ArrayList<>();
         for (int k = 0; k < K; k++) {
-            incidentFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
+            incidentFutures.add(CompletableFuture.supplyAsync(() -> driver.run(model, alarms), executor));
         }
         CompletableFuture.allOf(incidentFutures.toArray(new CompletableFuture[0])).get();
         for (CompletableFuture<List<Incident>> incidentFuture : incidentFutures) {

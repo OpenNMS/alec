@@ -57,6 +57,8 @@ import org.opennms.oce.engine.driver.EngineUtils;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 import org.opennms.oce.model.alarm.api.ResourceKey;
+import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.impl.ModelBuilderImpl;
 import org.opennms.oce.model.v1.schema.Event;
 
 /**
@@ -74,6 +76,7 @@ public class Level2EngineComplianceTest {
 
     private final EngineFactory factory;
     private Driver driver;
+    private Model model;
 
     public Level2EngineComplianceTest(EngineFactory factory) {
         this.factory = Objects.requireNonNull(factory);
@@ -84,6 +87,9 @@ public class Level2EngineComplianceTest {
         driver = Driver.builder()
                 .withEngineFactory(factory)
                 .build();
+
+        final ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
+        model = modelBuilder.buildModel();
     }
 
     @Test
@@ -127,7 +133,7 @@ public class Level2EngineComplianceTest {
         // 3919127 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:39 EDT 2018
         // 3919128 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:38 EDT 2018
 
-        final List<Incident> incidents = driver.run(alarms);
+        final List<Incident> incidents = driver.run(model, alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms
@@ -306,7 +312,7 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525594919000L, Severity.NORMAL) // 4 seconds since last event
                 .build());
 
-        final List<Incident> incidents = driver.run(alarms);
+        final List<Incident> incidents = driver.run(model, alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms
@@ -360,7 +366,7 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525580250000L, Severity.CLEARED) // 15 seconds since last event
                 .build());
 
-        final List<Incident> incidents = driver.run(alarms);
+        final List<Incident> incidents = driver.run(model, alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms

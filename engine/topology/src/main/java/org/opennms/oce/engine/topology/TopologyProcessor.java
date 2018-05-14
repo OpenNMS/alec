@@ -30,6 +30,7 @@ package org.opennms.oce.engine.topology;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.opennms.oce.engine.api.Engine;
@@ -53,6 +54,10 @@ public class TopologyProcessor implements Engine {
 
     @Override
     public void onAlarm(Alarm alarm) {
+        if (inventory == null) {
+            throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
+        }
+
         // TODO - find the inventory item and apply the alarm 
         ModelObject object = getObjectForAlarm(alarm);
         // TODO - Add Alarm to ModelObject - TODO - update ModelObject API
@@ -67,7 +72,7 @@ public class TopologyProcessor implements Engine {
 
     @Override
     public void setInventory(Model inventory) {
-        this.inventory = inventory;
+        this.inventory = Objects.requireNonNull(inventory, "Inventory is required for the topology engine.");
     }
 
     @Override

@@ -35,14 +35,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.engine.score.api.ScoreMetric;
 import org.opennms.oce.engine.score.api.ScoreReport;
 import org.opennms.oce.engine.score.impl.SetIntersectionScoringStrategy;
 import org.opennms.oce.model.alarm.api.Incident;
 
-@Ignore
 public class SetIntersectionScoringStrategyTest {
 
     @Test
@@ -60,10 +58,8 @@ public class SetIntersectionScoringStrategyTest {
 
         assertEquals(3, metrics.size());
 
-        /*assertEquals(0, score.getTypeOneErrorCount());
-        assertEquals(0, score.getFalseNegativeCount());
-        // Test for Alarms coverage
-        assertEquals(100, score.getAlarmAccuracy());*/
+        // TODO - assert each metric
+
     }
 
     @Test
@@ -77,7 +73,7 @@ public class SetIntersectionScoringStrategyTest {
         SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
         ScoreReport report = scorer.score(baseline, seventyPercent);
 
-        assertEquals(75.90, report.getScore(), 1e-2);
+        assertEquals(78.78, report.getScore(), 1e-2);
 
         List<? extends ScoreMetric> metrics = report.getMetrics();
 

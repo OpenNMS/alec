@@ -68,6 +68,18 @@ public class ModelImpl implements Model {
         return root;
     }
 
+    public void addObjects(Set<ModelObject> moList) {
+
+    }
+
+    public void addObject(ModelObject mo) {
+
+    }
+
+    public void removeObjectById(String type, String id) {
+
+    }
+
     private void index(ModelObject mo) {
         // Index
         final Map<String, ModelObject> mosById = mosByTypeAndById.computeIfAbsent(mo.getType(), e -> new HashMap<>());

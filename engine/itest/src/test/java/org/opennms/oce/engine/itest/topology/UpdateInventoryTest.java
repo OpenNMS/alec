@@ -28,10 +28,22 @@
 
 package org.opennms.oce.engine.itest.topology;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import java.util.Set;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.model.api.Model;
+import org.opennms.oce.model.api.ModelObject;
 import org.opennms.oce.model.impl.ModelBuilderImpl;
 import org.opennms.oce.model.impl.ModelImpl;
 import org.opennms.oce.model.impl.ModelObjectImpl;
@@ -40,6 +52,8 @@ public class UpdateInventoryTest {
 
     TopologyEngineFactory topologyEngineFactory;
     Model model;
+    @Rule
+    public ExpectedException exceptionGrabber = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -73,7 +87,18 @@ public class UpdateInventoryTest {
          * -- A new device has peers (if applicable)
          */
 
+        //Assert that inventory and model are constructed properly
+        ModelObject root = model.getRoot();
+        assertThat(root, notNullValue());
+        assertThat(root.getParent(), nullValue());
+        int topLevelOfToplogyModelCount = root.getChildren().size();
 
+        //and have all levels of model object hierarchy (device, card, port)
+        assertThat(model.getTypes(), hasItem("Device"));
+        assertThat(model.getTypes(), hasItem("Card"));
+        assertThat(model.getTypes(), hasItem("Port"));
+
+        //Construct new device with one card and four ports
         final ModelObjectImpl device = new ModelObjectImpl("Device", "n3");
 
         final ModelObjectImpl card = new ModelObjectImpl("Card", "n3-c1");
@@ -90,7 +115,17 @@ public class UpdateInventoryTest {
         port3.setParent(card);
         port4.setParent(card);
 
+        /** Currently I place updating functionality in ModelImpl where model belongs to but:
+         * Design question: should updating model flow be delegated to ModelBuilder which is responsible for constructing initial model
+         * It can be passed as reference to another build function (updateModel) function which is similar to existing buildModel
+         */
+
         ((ModelImpl)model).addObject(device);
+
+        Set<ModelObject> topLevelOfToplogyModelAfterUpdate = root.getChildren();
+
+        assertThat(topLevelOfToplogyModelAfterUpdate, hasSize(greaterThanOrEqualTo(
+                topLevelOfToplogyModelCount + 1)));
     }
 
     @Test
@@ -107,6 +142,9 @@ public class UpdateInventoryTest {
 
         final ModelObjectImpl device = new ModelObjectImpl("Device", "n3");
 
+        // Exception to be thrown just before that method call
+        exceptionGrabber.expect(IllegalStateException.class);
+        // No such device in the model
         ((ModelImpl)model).removeObjectById(device.getType(), device.getId());
     }
 }

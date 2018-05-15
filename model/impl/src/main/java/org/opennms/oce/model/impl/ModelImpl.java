@@ -36,9 +36,12 @@ import java.util.Set;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModelImpl implements Model {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ModelImpl.class);
     private final Map<String, Map<String, ModelObject>> mosByTypeAndById = new HashMap<>();
     private final ModelObject root;
 
@@ -70,14 +73,58 @@ public class ModelImpl implements Model {
 
     public void addObjects(Set<ModelObject> moList) {
 
+        if(moList.isEmpty()) {
+            LOG.info("Loaded model objects list is empty.");
+            return;
+        }
+        else {
+            LOG.debug("Model object list size is : {}", moList.size());
+        }
+
+        /** simple iteration for a while
+         * THINGS TO CONSIDER:
+         * - If model objects in the list are somehow related to each other, eg parent child (device and card)
+         * -- define order of insertion/orchestration?
+         * -- can they be combined as single insertion?
+         * -- etc
+        **/
+        for(ModelObject mo : moList) {
+            addObject(mo);
+        }
     }
 
+    /**
+     * The assumption is that model object contains all its hierarchy, for example if it is device,
+     * then it should have cards and ports, but if it is a new card, then there should be parent provided
+     * @param mo
+     */
     public void addObject(ModelObject mo) {
+        addObject((ModelObjectImpl)mo);
+    }
 
+    /**
+     * Decouple abstraction from implementation
+     * @param mo
+     */
+    private void addObject(ModelObjectImpl mo) {
+        if(getObjectById(mo.getType(), mo.getId()) != null) {
+            throw new IllegalStateException("Object " + mo.getId() + " with type " + mo.getType() + " already exists '");
+        }
+
+        //TODO
+
+        // Check level of hierarchy
+        // -- If it is top level (device), attach to root
+        // -- If it is mid level (card), attach to the parent (check if parent exists)
+        // -- Consider other cases (find peers etc)
     }
 
     public void removeObjectById(String type, String id) {
+        if(getObjectById(type, id) == null) {
+            throw new IllegalStateException("Object " + id + " with type " + type + " doesn't exist'");
+        }
 
+        //TODO
     }
 
     private void index(ModelObject mo) {

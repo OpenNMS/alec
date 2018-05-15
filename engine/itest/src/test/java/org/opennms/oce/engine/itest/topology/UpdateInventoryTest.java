@@ -105,5 +105,8 @@ public class UpdateInventoryTest {
          *  Note: currently we do not consider detachments from uncles and nephews
          */
 
+        final ModelObjectImpl device = new ModelObjectImpl("Device", "n3");
+
+        ((ModelImpl)model).removeObjectById(device.getType(), device.getId());
     }
 }

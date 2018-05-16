@@ -100,7 +100,7 @@ public class GroupImpl implements Group {
 
     public void addMember(ModelObject member) {
         // TODO - assert NOT in group?
-        if(members.add(member)) {
+        if (members.add(member)) {
             if (member.getServiceState() == ServiceState.IN) {
                 incrementOperationStatus(member.getOperationalState());
             }
@@ -109,7 +109,7 @@ public class GroupImpl implements Group {
 
     public void removeMember(ModelObject member) {
         assertInGroup(member);
-        if(members.remove(member)) {
+        if (members.remove(member)) {
             // TODO - maybe serviceState needs to be tracked internally in the group.
             // Otherwise, if a modelObject fails to report change, the opStatus changes can be corrupted.
             if (member.getServiceState() == ServiceState.IN) {
@@ -164,4 +164,8 @@ public class GroupImpl implements Group {
         }
     }
 
+    @Override
+    public String toString() {
+        return "G[" + owner + " : " + members + "]";
+    }
 }

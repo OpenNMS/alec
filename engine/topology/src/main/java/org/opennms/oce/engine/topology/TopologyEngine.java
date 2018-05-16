@@ -30,12 +30,10 @@ package org.opennms.oce.engine.topology;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -53,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 /**
  * A topology driver processor with Rules Engine
@@ -104,22 +101,24 @@ public class TopologyEngine implements Engine {
         // Update the model object with the alarm
         object.onAlarm(alarm);
 
+        final Set<Group> alarmGroups = object.getAlarmGroups();
+        for (Group alarmGroup : alarmGroups) {
+            boolean shouldBeInDroolsContext = alarmGroup.getNumberNonServiceAffecting() > 0
+                    || alarmGroup.getNumberServiceAffecting() > 0;
+            boolean isInDroolsContext = groupToFactHandles.containsKey(alarmGroup);
 
-        final Group parentGroupOfCurrentType = object.getParent().getChildGroup(object.getType());
-        boolean shouldBeInDroolsContext = parentGroupOfCurrentType.getNumberNonServiceAffecting() > 0 || parentGroupOfCurrentType.getNumberServiceAffecting() > 0;
-        boolean isInDroolsContext = groupToFactHandles.containsKey(parentGroupOfCurrentType);
-
-        if (shouldBeInDroolsContext) {
-            if (isInDroolsContext) {
-                // Update the fact
-                kieSession.update(groupToFactHandles.get(parentGroupOfCurrentType), parentGroupOfCurrentType);
-            } else {
-                // Insert the fact
-                groupToFactHandles.put(parentGroupOfCurrentType, kieSession.insert(parentGroupOfCurrentType));
+            if (shouldBeInDroolsContext) {
+                if (isInDroolsContext) {
+                    // Update the fact
+                    kieSession.update(groupToFactHandles.get(alarmGroup), alarmGroup);
+                } else {
+                    // Insert the fact
+                    groupToFactHandles.put(alarmGroup, kieSession.insert(alarmGroup));
+                }
+            } else if (isInDroolsContext) {
+                // TODO: What is the right thing to do here?
+                kieSession.delete(groupToFactHandles.get(alarmGroup));
             }
-        } else if (isInDroolsContext) {
-            // TODO: What is the right thing to do here?
-            kieSession.delete(groupToFactHandles.get(parentGroupOfCurrentType));
         }
     }
 
@@ -157,13 +156,12 @@ public class TopologyEngine implements Engine {
             throw new IllegalStateException("Tokens must have at least one element");
         }
 
-
         final int idx = lastToken.indexOf(",");
         if (idx < 1) {
             throw new IllegalStateException("Improperly formatted token. Type must be defined: " + lastToken);
         }
         final String type = lastToken.substring(0, idx);
-        final String id = lastToken.substring(idx+1, lastToken.length());
+        final String id = lastToken.substring(idx + 1, lastToken.length());
         return inventory.getObjectById(type, id);
     }
 

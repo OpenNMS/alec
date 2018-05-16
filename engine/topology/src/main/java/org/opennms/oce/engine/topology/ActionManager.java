@@ -29,6 +29,7 @@
 package org.opennms.oce.engine.topology;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import org.opennms.oce.engine.common.IncidentBean;
 import org.opennms.oce.model.api.Group;
@@ -47,7 +48,7 @@ public class ActionManager {
     public void createIncidentOnFailure(Group group) {
         LOG.info("Got failure for: {}", group);
 
-        IncidentBean incident = new IncidentBean();
+        IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
         group.getMembers().stream()
                 .flatMap(mo -> mo.getAlarms().stream())
                 .forEach(incident::addAlarm);

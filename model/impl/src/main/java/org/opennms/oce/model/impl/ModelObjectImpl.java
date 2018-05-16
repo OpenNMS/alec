@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,17 +34,17 @@ import com.google.common.collect.Sets;
  *
  * OpenNMS(R) is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with OpenNMS(R).  If not, see:
- *      http://www.gnu.org/licenses/
+ * along with OpenNMS(R). If not, see:
+ * http://www.gnu.org/licenses/
  *
  * For more information contact:
- *     OpenNMS(R) Licensing <license@opennms.org>
- *     http://www.opennms.org/
- *     http://www.opennms.com/
+ * OpenNMS(R) Licensing <license@opennms.org>
+ * http://www.opennms.org/
+ * http://www.opennms.com/
  *******************************************************************************/
 
 public class ModelObjectImpl implements ModelObject {
@@ -77,7 +76,7 @@ public class ModelObjectImpl implements ModelObject {
     /**
      * nullable
      */
-    public String getSubType(){
+    public String getSubType() {
         return subType;
     }
 
@@ -89,10 +88,11 @@ public class ModelObjectImpl implements ModelObject {
      * non-null
      *
      * A globally unique id
+     * 
      * @return uuid
      */
     @Override
-    public String getId(){
+    public String getId() {
         return id;
     }
 
@@ -100,7 +100,7 @@ public class ModelObjectImpl implements ModelObject {
      * nullable
      */
     @Override
-    public String getFriendlyName(){
+    public String getFriendlyName() {
         return friendlyName;
     }
 
@@ -123,39 +123,39 @@ public class ModelObjectImpl implements ModelObject {
 
     @Override
     public Set<ModelObject> getChildren() {
-        return children.values().stream().map(g -> g.getMembers()).flatMap(x -> x.stream()).collect(Collectors.toSet());
+        return children.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
-	@Override
-	public Set<ModelObject> getPeers() {
-        return peers.values().stream().map(g -> g.getMembers()).flatMap(x -> x.stream()).collect(Collectors.toSet());
-	}
+    @Override
+    public Set<ModelObject> getPeers() {
+        return peers.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
+    }
 
-	@Override
-	public Set<ModelObject> getUncles() {
-        return uncles.values().stream().map(g -> g.getMembers()).flatMap(x -> x.stream()).collect(Collectors.toSet());
-	}
+    @Override
+    public Set<ModelObject> getUncles() {
+        return uncles.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
+    }
 
-	@Override
-	public Set<ModelObject> getNephews() {
-        return nephews.values().stream().map(g -> g.getMembers()).flatMap(x -> x.stream()).collect(Collectors.toSet());
-	}
+    @Override
+    public Set<ModelObject> getNephews() {
+        return nephews.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
+    }
 
-	public void addChild(ModelObject child) {
+    public void addChild(ModelObject child) {
         addMember(child, children);
-	}
+    }
 
-	public void addPeer(ModelObject child) {
+    public void addPeer(ModelObject child) {
         addMember(child, peers);
-	}
+    }
 
-	public void addNephew(ModelObject child) {
+    public void addNephew(ModelObject child) {
         addMember(child, nephews);
-	}
+    }
 
-	public void addUncle(ModelObject child) {
+    public void addUncle(ModelObject child) {
         addMember(child, uncles);
-	}
+    }
 
     private void addMember(ModelObject member, Map<String, Group> map) {
         ((GroupImpl) getGroup(map, member.getType())).addMember(member);
@@ -182,18 +182,18 @@ public class ModelObjectImpl implements ModelObject {
     }
 
     private Group getGroup(Map<String, Group> map, String type) {
-		Group g = map.get(type);
-		if (g == null) {
-			g = new GroupImpl(this);
-			map.put(type, g);
-		}
-		return g;
-	}
+        Group g = map.get(type);
+        if (g == null) {
+            g = new GroupImpl(this);
+            map.put(type, g);
+        }
+        return g;
+    }
 
-	@Override
-	public String toString() {
-		return "MO[" + type + "," + id + "]";
-	}
+    @Override
+    public String toString() {
+        return "MO[" + type + "," + id + "]";
+    }
 
     @Override
     public OperationalState getOperationalState() {
@@ -206,6 +206,7 @@ public class ModelObjectImpl implements ModelObject {
             return; // Nothing to do
         }
 
+        // Place the previous state into a local variable so we can pass it along with the current ModelObject
         OperationalState previous = operationalState;
         operationalState = state;
         propagateOperationalStateChange(previous);
@@ -251,15 +252,11 @@ public class ModelObjectImpl implements ModelObject {
     }
 
     private void propagateOperationalStateChange(OperationalState previous) {
-        parent.getChildGroup(type).updateOperationalState(this, previous);
-        updateOperationalState(getPeerGroup(type), previous);
-        updateOperationalState(getUncleGroup(type), previous);
+        getAlarmGroups().stream().forEach(g -> updateOperationalState(g, previous));
     }
 
     private void propagateServiceStateChange(ServiceState previous) {
-        parent.getChildGroup(type).updateServiceState(this, previous);
-        updateServiceState(getPeerGroup(type), previous);
-        updateServiceState(getUncleGroup(type), previous);
+        getAlarmGroups().stream().forEach(g -> updateServiceState(g, previous));
     }
 
     // Update the Group OpStatus if this ModelObject has a group of that type
@@ -276,6 +273,26 @@ public class ModelObjectImpl implements ModelObject {
             return;
         }
         group.updateServiceState(this, previous);
+    }
+
+    @Override
+    public Set<Group> getAlarmGroups() {
+        Set<Group> groups = new HashSet<>();
+        // Add the Parent's Child group
+        groups.add(parent.getChildGroup(type));
+        // Add the Peers' Peer groups
+        groups.addAll(getContainingPeerGroups());
+        // Add the Uncles' nephew groups
+        groups.addAll(getContainingUncleGroups());
+        return groups;
+    }
+
+    private Set<Group> getContainingUncleGroups() {
+        return getUncles().stream().map(u -> u.getNephewGroup(type)).collect(Collectors.toSet());
+    }
+
+    private Set<Group> getContainingPeerGroups() {
+        return getPeers().stream().map(u -> u.getPeerGroup(type)).collect(Collectors.toSet());
     }
 
 }

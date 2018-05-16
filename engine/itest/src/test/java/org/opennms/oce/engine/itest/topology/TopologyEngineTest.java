@@ -30,6 +30,7 @@ package org.opennms.oce.engine.itest.topology;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -38,7 +39,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.itest.Level2EngineComplianceTest;
@@ -100,13 +100,13 @@ public class TopologyEngineTest {
                 .build();
         List<Incident> incidents = driver.run(model, alarms);
 
-        assertThat(incidents, hasSize(1));
-        Incident incident = incidents.get(0);
+        assertThat(incidents, hasSize(4));
+        // The 2nd incident is the Card Down and must contain the 2 alarms
+        Incident incident = incidents.get(1);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
     }
 
     @Test
-    @Ignore("Needs link group handling")
     public void canTriggerIncidentOnLinkDown() {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
@@ -133,8 +133,12 @@ public class TopologyEngineTest {
                 .build();
         List<Incident> incidents = driver.run(model, alarms);
 
-        assertThat(incidents, hasSize(1));
-        Incident incident = incidents.get(0);
-        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
+        assertThat(incidents, hasSize(3));
+        Incident incident0 = incidents.get(0);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident0), contains("a1"));
+        Incident incident1 = incidents.get(1);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident1), containsInAnyOrder("a1", "a2"));
+        Incident incident2 = incidents.get(2);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
     }
 }

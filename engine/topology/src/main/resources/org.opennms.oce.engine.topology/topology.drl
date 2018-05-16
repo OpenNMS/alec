@@ -4,9 +4,17 @@ import org.opennms.oce.model.api.Group;
 
 global org.opennms.oce.engine.topology.ActionManager actionMgr
 
-rule "LinkDown"
-when
- $group : Group(owner.type == "Card", numberNormalState == 0)
-then
- actionMgr.createIncidentOnFailure($group);
+rule "CardDown"
+  when
+    $group : Group(owner.type == "Card", numberNormalState == 0)
+  then
+    actionMgr.createIncidentOnFailure($group);
 end
+
+rule "LinkDown"
+  when
+    $group : Group(owner.type == "Link", numberServiceAffecting > 0)
+  then
+    actionMgr.createIncidentOnFailure($group);
+end
+

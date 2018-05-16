@@ -41,7 +41,6 @@ import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
 import org.opennms.oce.model.impl.ModelBuilderImpl;
-import org.opennms.oce.model.impl.ModelImpl;
 import org.opennms.oce.model.impl.ModelObjectImpl;
 
 public class UpdateInventoryTest {
@@ -87,7 +86,6 @@ public class UpdateInventoryTest {
         ModelObject root = model.getRoot();
         assertThat(root, notNullValue());
         assertThat(root.getParent(), nullValue());
-        int topLevelOfToplogyModelCount = root.getChildren().size();
 
         //and have all levels of model object hierarchy (device, card, port)
         assertThat(model.getTypes(), hasItem("Device"));
@@ -111,22 +109,22 @@ public class UpdateInventoryTest {
         port3.setParent(card);
         port4.setParent(card);
 
-        /** Currently I place updating functionality in ModelImpl where model belongs to but:
+        /**
          * Design question: should updating model flow be delegated to ModelBuilder which is responsible for constructing initial model
          * It can be passed as reference to another build function (updateModel) function which is similar to existing buildModel
          */
 
-        ((ModelImpl)model).addObject(device);
+        model.addObject(device);
 
         //Try to add this device again...
         final ModelObjectImpl sameDevice = new ModelObjectImpl("Device", "n3");
 
         // Exception to be thrown just before that method call
         exceptionGrabber.expect(IllegalStateException.class);
-        ((ModelImpl)model).addObject(sameDevice);
+        model.addObject(sameDevice);
 
         // Expectation is that no exception happens
-        ((ModelImpl)model).removeObjectById(device.getType(), device.getId());
+        model.removeObjectById(device.getType(), device.getId());
     }
 
     @Test
@@ -146,6 +144,6 @@ public class UpdateInventoryTest {
         // Exception to be thrown just before that method call
         exceptionGrabber.expect(IllegalStateException.class);
         // No such device in the model
-        ((ModelImpl)model).removeObjectById(device.getType(), device.getId());
+        model.removeObjectById(device.getType(), device.getId());
     }
 }

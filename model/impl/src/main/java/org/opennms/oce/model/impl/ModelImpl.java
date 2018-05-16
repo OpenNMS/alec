@@ -30,9 +30,11 @@ package org.opennms.oce.model.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
 
 import org.opennms.oce.model.api.Model;
@@ -126,10 +128,37 @@ public class ModelImpl implements Model {
             mosByTypeAndById.put(type, new HashMap<>());
         }
 
+        //if there is no parent we assume that this is top level network element
+        if(mo.getParent() == null) {
+            mo.setParent(root);
+        }
+
         Map<String, ModelObject> typeMap = mosByTypeAndById.get(type);
         typeMap.put(mo.getId(), mo);
 
+        //handle hierarchy etc
 
+        Queue<ModelObject> q = new LinkedList<>();
+
+        q.add(mo);
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = q.poll();
+
+                if(mosByTypeAndById.get(currNode.getType()) == null) {
+                    mosByTypeAndById.put(currNode.getType(), new HashMap<>());
+                }
+
+                mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    q.add(someChild);
+                }
+            }
+        }
+
+        printModel();
         //TODO
 
         // Check level of hierarchy
@@ -155,6 +184,27 @@ public class ModelImpl implements Model {
         // Recurse
         for (ModelObject child : mo.getChildren()) {
             index(child);
+        }
+    }
+
+    private void printModel() {
+
+        Queue<ModelObject> q = new LinkedList<>();
+        LOG.info("Model is:");
+
+
+        q.add(root);
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = q.poll();
+
+                LOG.info(currNode.toString());
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    q.add(someChild);
+                }
+            }
         }
     }
 }

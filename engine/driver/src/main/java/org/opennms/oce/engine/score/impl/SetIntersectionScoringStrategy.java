@@ -29,7 +29,6 @@
 package org.opennms.oce.engine.score.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,34 +40,9 @@ import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 
 /**
- * FIXME: Should be stateless.
- *
- * @author smith
- *
+ * Scoring Strategy based on Set Intersection
  */
 public class SetIntersectionScoringStrategy implements ScoringStrategy {
-
-    // Input Baseline Incident Set 
-    private Set<Incident> baseline;
-
-    // Incident Set to Score
-    private Set<Incident> sut;
-
-    private Set<String> baselineSignatures = new HashSet<>();
-
-    private Set<String> intersection = new HashSet<>();
-
-    private Set<String> missed = new HashSet<>();
-
-    private Set<String> sutSignatures = new HashSet<>();
-
-    private Set<String> baselineAlarms;
-
-    private Set<String> sutAlarms;
-
-    private Set<String> intersectionAlarms = new HashSet<>();
-
-    private Set<String> unmatchedAlarms = new HashSet<>();
 
     @Override
     public String getName() {
@@ -77,92 +51,79 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
 
     @Override
     public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
-        this.baseline = baseline;
-        this.sut = sut;
-        createSets();
+        return generateReport(baseline, sut);
+    }
 
+    // Percentage of the Base Tickets correctly found in the SUT
+    public double getAccuracy(Set<Incident> baseline, Set<Incident> sut) {
+        return percentOf(baseline.size(), sut.size());
+    }
+
+    private double percentOf(int baseline, int sut) {
+        if (baseline == 0) {
+            if (baseline == sut) {
+                return 100d; // both sets are empty
+            }
+            return 0; // instead of divByZero
+        }
+        return (double) sut * 100 / (double) baseline;
+    }
+
+    private ScoreReport generateReport(Set<Incident> baseline, Set<Incident> sut) {
         ScoreReportBean report = new ScoreReportBean();
-        report.setScore(Math.abs(100d - getAccuracy()));
+        report.setScore(Math.abs(100d - getAccuracy(baseline, sut)));
         report.setMaxScore(100d);
-        report.setMetrics(getMetrics());
+        report.setMetrics(getMetrics(baseline, sut));
         return report;
     }
 
-    private List<ScoreMetricBean> getMetrics() {
+    private List<ScoreMetricBean> getMetrics(Set<Incident> baseline, Set<Incident> sut) {
+        int intersectionSize = getIntersectionSize(baseline, sut);
         List<ScoreMetricBean> metrics = new ArrayList<>();
-        metrics.add(getAlarmAccuracy());
-        metrics.add(getFalsePositives());
-        metrics.add(getFalseNegatives());
+        metrics.add(getAlarmAccuracy(getAlarms(baseline), getAlarms(sut)));
+        metrics.add(getFalsePositives(sut, intersectionSize));
+        metrics.add(getFalseNegatives(baseline, intersectionSize));
         return metrics;
     }
 
-    
-    // Percentage of the Base Tickets correctly found in the SUT
-    public double getAccuracy() {
-        int retained = intersection.size();
-        return retained * 100 / (double)baseline.size();
+    private Set<Alarm> getAlarms(Set<Incident> incidents) {
+        return incidents.stream().map(i -> i.getAlarms()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     // Percentage of the Alarms correctly found in the SUT
-    private ScoreMetricBean getAlarmAccuracy() {
+    private ScoreMetricBean getAlarmAccuracy(Set<Alarm> baseline, Set<Alarm> sut) {
         ScoreMetricBean metric = new ScoreMetricBean("AlarmAccuracy", "Percents of Alarms in the Baseline found in the Baseline.");
-        int retained = intersectionAlarms.size();
-        metric.setValue(retained * 100 / baselineAlarms.size());
+        metric.setValue(percentOf(baseline.size(), sut.size()));
         return metric;
     }
 
-    private ScoreMetricBean getFalsePositives() {
+    private ScoreMetricBean getFalsePositives(Set<Incident> sut, int intersectionSize) {
         ScoreMetricBean metric = new ScoreMetricBean("FalsePositives", "Number of Incidents in the SUT not found in the Baseline.");
-        metric.setValue(sut.size() - intersection.size());
+        metric.setValue(sut.size() - intersectionSize);
         return metric;
     }
 
-    private ScoreMetricBean getFalseNegatives() {
+    private ScoreMetricBean getFalseNegatives(Set<Incident> baseline, int intersectionSize) {
         ScoreMetricBean metric = new ScoreMetricBean("FalseNegatives", "Number of Incidents in the Baseline not included in the SUT.");
-        metric.setValue(baseline.size() - intersection.size());
+        metric.setValue(baseline.size() - intersectionSize);
         return metric;
     }
 
-    private void createSets() {
-        createAlarmSignatures(baseline, sut);
-        baselineAlarms = baseline.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
-        sutAlarms = sut.stream().map(i -> i.getAlarms()).flatMap(Collection::stream).map(a -> a.getId()).collect(Collectors.toSet());
-        intersectionAlarms.addAll(baselineAlarms);
-        intersectionAlarms.retainAll(sutAlarms);
-        unmatchedAlarms.addAll(baselineAlarms);
-        unmatchedAlarms.removeAll(sutAlarms);
+    // Calculate intersection size using modified hash
+    private int getIntersectionSize(Set<Incident> baseline, Set<Incident> sut) {
+        Set<String> signatures = new HashSet<>(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
+        signatures.retainAll(new HashSet<>(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet())));
+        return signatures.size();
     }
 
-
-    private void createAlarmSignatures(Set<Incident> baseline, Set<Incident> sut) {
-        baselineSignatures.addAll(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
-        intersection.addAll(baselineSignatures);
-        sutSignatures.addAll(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
-        intersection.retainAll(sutSignatures);
-        missed.addAll(baselineSignatures);
-        missed.removeAll(intersection);
-    }
-
+    // Cannot include ID or TIME in  the Incident signature
     private String getIncidentSignature(Incident i) {
         return getAlarmSignature(i.getAlarms());
     }
 
-    // Create a standardized signature from a List of Alarms
+    // Create a signature based only on Alarm Ids
     private String getAlarmSignature(Set<Alarm> alarms) {
-        String sig =  alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
-        //System.out.println(sig);
-        return sig;
-    }
-
-    private static Incident getIncident(Set<Incident> incidents, String id) {
-        for (Incident i : incidents) {
-            // TODO - what we really want to do here is search for a ticket that contains a given alarmId
-            // Then we can make that the basis of our secondary comparison - i.e. how different are those two tickets?
-            if (i.getId().equals(id)) {
-                return i;
-            }
-        }
-        return null;
+        return alarms.stream().map(a -> a.getId()).sorted().collect(Collectors.joining("."));
     }
 
 }

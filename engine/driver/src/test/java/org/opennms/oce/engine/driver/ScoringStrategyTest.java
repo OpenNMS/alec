@@ -54,7 +54,7 @@ public class ScoringStrategyTest {
     @Parameterized.Parameters(name = "{index}: scorer({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                // { new SetIntersectionScoringStrategy() }, Ignored, does not handle empty sets well
+                // { new SetIntersectionScoringStrategy() },
                 { new PeerScoringStrategy() },
                 { new MatrixScoringStrategy() }
         });
@@ -77,7 +77,7 @@ public class ScoringStrategyTest {
         report = scorer.score(Sets.newHashSet(emtpyIncident), Sets.newHashSet(emtpyIncident));
         assertThat(report.getScore(), closeTo(0.0d, delta));
 
-        // Comparing an incident with a single alarm to an empty incident should generate a score greather than 0
+        // Comparing an incident with a single alarm to an empty incident should generate a score greater than 0
         IncidentBean incident = new IncidentBean();
         AlarmBean alarm = new AlarmBean();
         incident.addAlarm(alarm);

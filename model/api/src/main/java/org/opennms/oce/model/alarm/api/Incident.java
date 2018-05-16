@@ -30,11 +30,15 @@ package org.opennms.oce.model.alarm.api;
 
 import java.util.Set;
 
+import org.opennms.oce.model.api.ModelObject;
+
 public interface Incident {
 
     String getId();
 
     long getCreationTime();
+
+    ModelObject getModelObject();
 
     Set<Alarm> getAlarms();
 

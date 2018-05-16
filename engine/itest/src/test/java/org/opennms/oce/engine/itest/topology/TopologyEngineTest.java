@@ -33,6 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,6 +105,7 @@ public class TopologyEngineTest {
         // The 2nd incident is the Card Down and must contain the 2 alarms
         Incident incident = incidents.get(1);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
+        assertThat(incident.getModelObject().getType(), is("Card"));
     }
 
     @Test
@@ -140,6 +142,8 @@ public class TopologyEngineTest {
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident1), containsInAnyOrder("a1", "a2"));
         Incident incident2 = incidents.get(2);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
+        assertThat(incident2.getModelObject().getType(), is("Link"));
+
     }
     
     @Test
@@ -176,12 +180,14 @@ public class TopologyEngineTest {
                 .build();
         List<Incident> incidents = driver.run(model, alarms);
 
-        assertThat(incidents, hasSize(3));
+        assertThat(incidents, hasSize(4));
         Incident incident0 = incidents.get(0);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident0), contains("a1"));
         Incident incident1 = incidents.get(1);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident1), containsInAnyOrder("a1", "a2"));
         Incident incident2 = incidents.get(2);
-        // assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a3"));
+        Incident incident3 = incidents.get(3);
+        assertThat(incident3.getModelObject().getType(), is("Device"));
     }
 }

@@ -53,18 +53,19 @@ public class ActionManager {
     public void createIncidentOnFailure(Group group) {
         LOG.info("Got failure for: {}", group);
 
+        ModelObject owner = group.getOwner();
         IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
+        incident.setModelObject(owner);
         group.getMembers().stream()
                 .flatMap(mo -> mo.getAlarms().stream())
                 .forEach(incident::addAlarm);
         topologyEngine.getIncidentHandler().onIncident(incident);
         // Impact the Group
-        synthesizeAlarm(group);
+        synthesizeAlarm(owner);
     }
 
-    private void synthesizeAlarm(Group group) {
+    private void synthesizeAlarm(ModelObject owner) {
         // Impact the Group Owner
-        ModelObject owner = group.getOwner();
         owner.setOperationalState(OperationalState.SA);
         AlarmBean alarm = new AlarmBean(UUID.randomUUID().toString());
         alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));

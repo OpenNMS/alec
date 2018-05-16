@@ -28,7 +28,9 @@
 
 package org.opennms.oce.model.impl;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +74,34 @@ public class ModelImpl implements Model {
     @Override
     public ModelObject getRoot() {
         return root;
+    }
+
+    @Override
+    public int getSize() {
+        //TODO efficiently
+        return 0;
+    }
+
+    @Override
+    public void printModel() {
+
+        Queue<ModelObject> q = new LinkedList<>();
+        LOG.info("Model is:");
+
+
+        q.add(root);
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = q.poll();
+
+                LOG.info(currNode.toString());
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    q.add(someChild);
+                }
+            }
+        }
     }
 
     @Override
@@ -137,7 +167,6 @@ public class ModelImpl implements Model {
         typeMap.put(mo.getId(), mo);
 
         //handle hierarchy etc
-
         Queue<ModelObject> q = new LinkedList<>();
 
         q.add(mo);
@@ -158,13 +187,9 @@ public class ModelImpl implements Model {
             }
         }
 
-        printModel();
         //TODO
-
         // Check level of hierarchy
-        // -- If it is top level (device), attach to root
         // -- If it is mid level (card), attach to the parent (check if parent exists)
-        // -- Consider other cases (find peers etc)
     }
 
     @Override
@@ -173,7 +198,39 @@ public class ModelImpl implements Model {
             throw new IllegalStateException("Object " + id + " with type " + type + " doesn't exist'");
         }
 
+        //start removing from the bottom up
+        Deque<ModelObject> stack = new ArrayDeque<ModelObject>();
+        Queue<ModelObject> stackToRemove = new LinkedList<>();
+
+        ModelObject obj = getObjectById(type, id);
+        stack.push(obj);
+        while(!stack.isEmpty()) {
+            int levelSize = stack.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = stack.pop();
+                stackToRemove.add(currNode);
+
+                if(mosByTypeAndById.get(currNode.getType()) == null) {
+                    mosByTypeAndById.put(currNode.getType(), new HashMap<>());
+                }
+
+                mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    stack.push(someChild);
+                }
+            }
+        }
+
+        ModelObject first = ((LinkedList<ModelObject>) stackToRemove).peekFirst();
+        ModelObject last = ((LinkedList<ModelObject>) stackToRemove).peekLast();
+
+        for(ModelObject objToRemove : stackToRemove) {
+            mosByTypeAndById.get(objToRemove.getType()).remove(objToRemove.getId());
+        }
+
         //TODO
+        // Handle cases of non top level objects (cards)
     }
 
     private void index(ModelObject mo) {
@@ -184,27 +241,6 @@ public class ModelImpl implements Model {
         // Recurse
         for (ModelObject child : mo.getChildren()) {
             index(child);
-        }
-    }
-
-    private void printModel() {
-
-        Queue<ModelObject> q = new LinkedList<>();
-        LOG.info("Model is:");
-
-
-        q.add(root);
-        while(!q.isEmpty()) {
-            int levelSize = q.size();
-            for(int i = 0; i < levelSize; i++) {
-                ModelObject currNode = q.poll();
-
-                LOG.info(currNode.toString());
-
-                for(ModelObject someChild : currNode.getChildren()) {
-                    q.add(someChild);
-                }
-            }
         }
     }
 }

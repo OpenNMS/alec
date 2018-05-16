@@ -139,11 +139,47 @@ public class UpdateInventoryTest {
          *  Note: currently we do not consider detachments from uncles and nephews
          */
 
-        final ModelObjectImpl device = new ModelObjectImpl("Device", "n3");
+        ModelObject root = model.getRoot();
+        assertThat(root, notNullValue());
+        assertThat(root.getParent(), nullValue());
+
+        //and have all levels of model object hierarchy (device, card, port)
+        assertThat(model.getTypes(), hasItem("Device"));
+        assertThat(model.getTypes(), hasItem("Card"));
+        assertThat(model.getTypes(), hasItem("Port"));
+
+        //Construct new device with one card and four ports
+        final ModelObjectImpl device = new ModelObjectImpl("Device", "n33");
+
+        final ModelObjectImpl card = new ModelObjectImpl("Card", "n33-c1");
+
+        final ModelObjectImpl port1 = new ModelObjectImpl("Port", "n33-c1-p1");
+        final ModelObjectImpl port2 = new ModelObjectImpl("Port", "n33-c1-p2");
+        final ModelObjectImpl port3 = new ModelObjectImpl("Port", "n33-c1-p3");
+        final ModelObjectImpl port4 = new ModelObjectImpl("Port", "n33-c1-p4");
+
+        card.setParent(device);
+
+        port1.setParent(card);
+        port2.setParent(card);
+        port3.setParent(card);
+        port4.setParent(card);
+
+        model.printModel();
+
+        model.addObject(device);
+
+        model.printModel();
+
+        model.removeObjectById(device.getType(), device.getId());
+
+        model.printModel();
+
+        final ModelObjectImpl nonExistingDevice = new ModelObjectImpl("Device", "n999");
 
         // Exception to be thrown just before that method call
         exceptionGrabber.expect(IllegalStateException.class);
         // No such device in the model
-        model.removeObjectById(device.getType(), device.getId());
+        model.removeObjectById(nonExistingDevice.getType(), nonExistingDevice.getId());
     }
 }

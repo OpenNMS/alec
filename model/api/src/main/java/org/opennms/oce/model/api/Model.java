@@ -48,6 +48,10 @@ public interface Model {
      */
     ModelObject getRoot();
 
+    int getSize();
+
+    void printModel();
+
     /**
      * To support both batch and single operations of updating model. Using list in case if we need ordering
      */

@@ -18,3 +18,9 @@ rule "LinkDown"
     actionMgr.createIncidentOnFailure($group);
 end
 
+rule "ChassisDown"
+  when
+    $group : Group(owner.type == "Device", numberNormalState == 0)
+  then
+    actionMgr.createIncidentOnFailure($group);
+end

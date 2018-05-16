@@ -141,4 +141,47 @@ public class TopologyEngineTest {
         Incident incident2 = incidents.get(2);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
     }
+    
+    @Test
+    public void canTriggerIncidentOnChassisDown() {
+        final List<Alarm> alarms = new ArrayList<>();
+        // Fail all ports on all cards of node: n1
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a1")
+                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withEvent(SECONDS.toMillis(1), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(301), AlarmSeverity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a2")
+                .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+                .withEvent(SECONDS.toMillis(31), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(331), AlarmSeverity.CLEARED) // 5 minutes later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a3")
+                .withResourceKey(new ResourceKey("Port,n1-c2-p1"))
+                .withEvent(SECONDS.toMillis(61), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(121), AlarmSeverity.CLEARED) // ~1 minute later
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a3")
+                .withResourceKey(new ResourceKey("Port,n1-c2-p2"))
+                .withEvent(SECONDS.toMillis(91), AlarmSeverity.MAJOR)
+                .withEvent(SECONDS.toMillis(151), AlarmSeverity.CLEARED) // ~1 minute later
+                .build());
+
+        Driver driver = Driver.builder()
+                .withEngineFactory(topologyEngineFactory)
+                .build();
+        List<Incident> incidents = driver.run(model, alarms);
+
+        assertThat(incidents, hasSize(3));
+        Incident incident0 = incidents.get(0);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident0), contains("a1"));
+        Incident incident1 = incidents.get(1);
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident1), containsInAnyOrder("a1", "a2"));
+        Incident incident2 = incidents.get(2);
+        // assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
+    }
 }

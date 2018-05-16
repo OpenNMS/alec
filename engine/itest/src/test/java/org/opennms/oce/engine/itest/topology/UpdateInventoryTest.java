@@ -29,13 +29,9 @@
 package org.opennms.oce.engine.itest.topology;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -122,10 +118,15 @@ public class UpdateInventoryTest {
 
         ((ModelImpl)model).addObject(device);
 
-        Set<ModelObject> topLevelOfToplogyModelAfterUpdate = root.getChildren();
+        //Try to add this device again...
+        final ModelObjectImpl sameDevice = new ModelObjectImpl("Device", "n3");
 
-        assertThat(topLevelOfToplogyModelAfterUpdate, hasSize(greaterThanOrEqualTo(
-                topLevelOfToplogyModelCount + 1)));
+        // Exception to be thrown just before that method call
+        exceptionGrabber.expect(IllegalStateException.class);
+        ((ModelImpl)model).addObject(sameDevice);
+
+        // Expectation is that no exception happens
+        ((ModelImpl)model).removeObjectById(device.getType(), device.getId());
     }
 
     @Test

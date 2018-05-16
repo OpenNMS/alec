@@ -28,6 +28,7 @@
 
 package org.opennms.oce.model.api;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,4 +48,16 @@ public interface Model {
      */
     ModelObject getRoot();
 
+    /**
+     * To support both batch and single operations of updating model. Using list in case if we need ordering
+     */
+    void updateObjects(List<ModelObject> moList);
+
+    void updateObject(ModelObject mo);
+
+    void addObjects(List<ModelObject> moList);
+
+    void addObject(ModelObject mo);
+
+    void removeObjectById(String type, String id);
 }

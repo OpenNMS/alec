@@ -30,6 +30,7 @@ package org.opennms.oce.model.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -71,7 +72,14 @@ public class ModelImpl implements Model {
         return root;
     }
 
-    public void addObjects(Set<ModelObject> moList) {
+    @Override
+    public void updateObjects(List<ModelObject> moList){}
+
+    @Override
+    public void updateObject(ModelObject mo){}
+
+    @Override
+    public void addObjects(List<ModelObject> moList) {
 
         if(moList.isEmpty()) {
             LOG.info("Loaded model objects list is empty.");
@@ -98,6 +106,7 @@ public class ModelImpl implements Model {
      * then it should have cards and ports, but if it is a new card, then there should be parent provided
      * @param mo
      */
+    @Override
     public void addObject(ModelObject mo) {
         addObject((ModelObjectImpl)mo);
     }
@@ -107,9 +116,19 @@ public class ModelImpl implements Model {
      * @param mo
      */
     private void addObject(ModelObjectImpl mo) {
-        if(getObjectById(mo.getType(), mo.getId()) != null) {
-            throw new IllegalStateException("Object " + mo.getId() + " with type " + mo.getType() + " already exists '");
+        String type = mo.getType();
+        if(getObjectById(type, mo.getId()) != null) {
+            throw new IllegalStateException("Object " + mo.getId() + " with type " + type + " already exists '");
         }
+
+        //checking if this is a new type, if yes, create new typ
+        if(mosByTypeAndById.get(type) == null) {
+            mosByTypeAndById.put(type, new HashMap<>());
+        }
+
+        Map<String, ModelObject> typeMap = mosByTypeAndById.get(type);
+        typeMap.put(mo.getId(), mo);
+
 
         //TODO
 
@@ -119,6 +138,7 @@ public class ModelImpl implements Model {
         // -- Consider other cases (find peers etc)
     }
 
+    @Override
     public void removeObjectById(String type, String id) {
         if(getObjectById(type, id) == null) {
             throw new IllegalStateException("Object " + id + " with type " + type + " doesn't exist'");

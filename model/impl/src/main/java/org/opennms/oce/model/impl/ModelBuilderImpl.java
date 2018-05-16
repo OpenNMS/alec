@@ -110,7 +110,10 @@ public class ModelBuilderImpl implements ModelBuilder {
             LOG.error("Model loading failed: ", e);
             throw new RuntimeException(e);
         }
+        return buildModel(metaModel, inventory);
+    }
 
+    public Model buildModel(MetaModel metaModel, Inventory inventory) {
         // Create the initial model objects and index them by type/id
         // NOTE: This will throw a IllegalStateException if a duplicate key is found
         final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.getModelObjectEntry().stream()

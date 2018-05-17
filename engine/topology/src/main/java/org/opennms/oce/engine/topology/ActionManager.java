@@ -60,13 +60,11 @@ public class ActionManager {
                 .flatMap(mo -> mo.getAlarms().stream())
                 .forEach(incident::addAlarm);
         topologyEngine.getIncidentHandler().onIncident(incident);
-        // Impact the Group
-        synthesizeAlarm(owner);
     }
 
-    private void synthesizeAlarm(ModelObject owner) {
-        // Impact the Group Owner
-        owner.setOperationalState(OperationalState.SA);
+    // Impact the Group Owner
+    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus) {
+        owner.setOperationalState(operationalStatus);
         AlarmBean alarm = new AlarmBean(UUID.randomUUID().toString());
         alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));
         alarm.setSeverity(AlarmSeverity.MAJOR);

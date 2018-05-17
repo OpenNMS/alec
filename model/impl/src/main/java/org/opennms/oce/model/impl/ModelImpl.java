@@ -28,17 +28,25 @@
 
 package org.opennms.oce.model.impl;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Set;
 
 import org.opennms.oce.model.api.Model;
 import org.opennms.oce.model.api.ModelObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ModelImpl implements Model {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ModelImpl.class);
     private final Map<String, Map<String, ModelObject>> mosByTypeAndById = new HashMap<>();
     private final ModelObject root;
 
@@ -66,6 +74,163 @@ public class ModelImpl implements Model {
     @Override
     public ModelObject getRoot() {
         return root;
+    }
+
+    @Override
+    public int getSize() {
+        //TODO efficiently
+        return 0;
+    }
+
+    @Override
+    public void printModel() {
+
+        Queue<ModelObject> q = new LinkedList<>();
+        LOG.info("Model is:");
+
+
+        q.add(root);
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = q.poll();
+
+                LOG.info(currNode.toString());
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    q.add(someChild);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateObjects(List<ModelObject> moList){}
+
+    @Override
+    public void updateObject(ModelObject mo){}
+
+    @Override
+    public void addObjects(List<ModelObject> moList) {
+
+        if(moList.isEmpty()) {
+            LOG.info("Loaded model objects list is empty.");
+            return;
+        }
+        else {
+            LOG.debug("Model object list size is : {}", moList.size());
+        }
+
+        /** simple iteration for a while
+         * THINGS TO CONSIDER:
+         * - If model objects in the list are somehow related to each other, eg parent child (device and card)
+         * -- define order of insertion/orchestration?
+         * -- can they be combined as single insertion?
+         * -- etc
+        **/
+        for(ModelObject mo : moList) {
+            addObject(mo);
+        }
+    }
+
+    /**
+     * The assumption is that model object contains all its hierarchy, for example if it is device,
+     * then it should have cards and ports, but if it is a new card, then there should be parent provided
+     * @param mo
+     */
+    @Override
+    public void addObject(ModelObject mo) {
+        addObject((ModelObjectImpl)mo);
+    }
+
+    /**
+     * Decouple abstraction from implementation
+     * @param mo
+     */
+    private void addObject(ModelObjectImpl mo) {
+        String type = mo.getType();
+        if(getObjectById(type, mo.getId()) != null) {
+            throw new IllegalStateException("Object " + mo.getId() + " with type " + type + " already exists '");
+        }
+
+        //checking if this is a new type, if yes, create new typ
+        if(mosByTypeAndById.get(type) == null) {
+            mosByTypeAndById.put(type, new HashMap<>());
+        }
+
+        //if there is no parent we assume that this is top level network element
+        if(mo.getParent() == null) {
+            mo.setParent(root);
+        }
+
+        Map<String, ModelObject> typeMap = mosByTypeAndById.get(type);
+        typeMap.put(mo.getId(), mo);
+
+        //handle hierarchy etc
+        Queue<ModelObject> q = new LinkedList<>();
+
+        q.add(mo);
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = q.poll();
+
+                if(mosByTypeAndById.get(currNode.getType()) == null) {
+                    mosByTypeAndById.put(currNode.getType(), new HashMap<>());
+                }
+
+                mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    q.add(someChild);
+                }
+            }
+        }
+
+        //TODO
+        // Check level of hierarchy
+        // -- If it is mid level (card), attach to the parent (check if parent exists)
+    }
+
+    @Override
+    public void removeObjectById(String type, String id) {
+        if(getObjectById(type, id) == null) {
+            throw new IllegalStateException("Object " + id + " with type " + type + " doesn't exist'");
+        }
+
+        //start removing from the bottom up
+        Deque<ModelObject> stack = new ArrayDeque<ModelObject>();
+        Queue<ModelObject> stackToRemove = new LinkedList<>();
+
+        ModelObject obj = getObjectById(type, id);
+        stack.push(obj);
+        while(!stack.isEmpty()) {
+            int levelSize = stack.size();
+            for(int i = 0; i < levelSize; i++) {
+                ModelObject currNode = stack.pop();
+                stackToRemove.add(currNode);
+
+                if(mosByTypeAndById.get(currNode.getType()) == null) {
+                    mosByTypeAndById.put(currNode.getType(), new HashMap<>());
+                }
+
+                mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
+
+                for(ModelObject someChild : currNode.getChildren()) {
+                    stack.push(someChild);
+                }
+            }
+        }
+
+        ModelObject first = ((LinkedList<ModelObject>) stackToRemove).peekFirst();
+        ModelObject last = ((LinkedList<ModelObject>) stackToRemove).peekLast();
+
+        for(ModelObject objToRemove : stackToRemove) {
+            mosByTypeAndById.get(objToRemove.getType()).remove(objToRemove.getId());
+        }
+
+        //TODO
+        // Handle cases of non top level objects (cards)
     }
 
     private void index(ModelObject mo) {

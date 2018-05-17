@@ -34,9 +34,11 @@ import java.util.Set;
 
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.model.api.ModelObject;
 
 public class IncidentBean implements Incident {
     private String id;
+    private ModelObject modelObject;
     private Set<Alarm> alarms = new LinkedHashSet<>();
     private long creationTime;
 
@@ -74,6 +76,14 @@ public class IncidentBean implements Incident {
         return alarms;
     }
 
+    @Override
+    public ModelObject getModelObject() {
+        return modelObject;
+    }
+
+    public void setModelObject(ModelObject object) {
+        modelObject = object;
+    }
 
     @Override
     public boolean equals(Object o) {

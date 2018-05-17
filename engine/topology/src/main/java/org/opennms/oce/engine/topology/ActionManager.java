@@ -31,8 +31,13 @@ package org.opennms.oce.engine.topology;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.opennms.oce.engine.common.AlarmBean;
 import org.opennms.oce.engine.common.IncidentBean;
+import org.opennms.oce.model.alarm.api.AlarmSeverity;
+import org.opennms.oce.model.alarm.api.ResourceKey;
 import org.opennms.oce.model.api.Group;
+import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.model.api.OperationalState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +53,22 @@ public class ActionManager {
     public void createIncidentOnFailure(Group group) {
         LOG.info("Got failure for: {}", group);
 
+        ModelObject owner = group.getOwner();
         IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
+        incident.setModelObject(owner);
         group.getMembers().stream()
                 .flatMap(mo -> mo.getAlarms().stream())
                 .forEach(incident::addAlarm);
         topologyEngine.getIncidentHandler().onIncident(incident);
+    }
+
+    // Impact the Group Owner
+    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus) {
+        owner.setOperationalState(operationalStatus);
+        AlarmBean alarm = new AlarmBean(UUID.randomUUID().toString());
+        alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));
+        alarm.setSeverity(AlarmSeverity.MAJOR);
+        // Send the synthetic alarm to the engine.
+        topologyEngine.onAlarm(alarm);
     }
 }

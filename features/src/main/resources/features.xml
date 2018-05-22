@@ -52,6 +52,8 @@
 
     <feature name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
+        <feature version="${drools.version}">kie</feature>
+        <feature version="${drools.version}">drools-module</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.topology/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>

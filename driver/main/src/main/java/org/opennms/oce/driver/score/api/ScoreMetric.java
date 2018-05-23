@@ -26,29 +26,13 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.driver.score.api;
 
-import java.util.List;
+public interface ScoreMetric {
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+    String getName();
 
-@Service
-public class ScoreNameCompleter implements Completer {
+    double getValue();
 
-    @Reference
-    private List<ScoringStrategy> strategies;
-
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
-    }
-
+    String getDescription();
 }

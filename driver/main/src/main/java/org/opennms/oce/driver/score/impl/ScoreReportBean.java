@@ -26,29 +26,47 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.driver.score.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+import org.opennms.oce.driver.score.api.ScoreReport;
 
-@Service
-public class ScoreNameCompleter implements Completer {
-
-    @Reference
-    private List<ScoringStrategy> strategies;
+public class ScoreReportBean implements ScoreReport {
+    private double score;
+    private double maxScore = Double.POSITIVE_INFINITY;
+    private List<ScoreMetricBean> metrics = new ArrayList<>();
 
     @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
+    public double getScore() {
+        return score;
     }
 
+    public void setScore(double score) {
+        this.score = score;
+    }
+
+    @Override
+    public double getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(double maxScore) {
+        this.maxScore = maxScore;
+    }
+
+    @Override
+    public List<ScoreMetricBean> getMetrics() {
+        return metrics;
+    }
+
+    public void setMetrics(List<ScoreMetricBean> metrics) {
+        this.metrics = metrics;
+    }
+
+    @Override
+    public String toString() {
+        return Double.toString(score) + metrics;
+    }
 }

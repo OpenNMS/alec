@@ -35,6 +35,7 @@ import com.google.gson.Gson;
 import okhttp3.Credentials;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -90,8 +91,7 @@ public class OpennmsRestClient {
         return info.version;
     }
 
-    /*
-    void sendEvent(Event event) throws Exception {
+    void sendEvent(OpennmsEvent event) throws Exception {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
         String xml = "<event>\n" +
                 "   <uei>"+ event.getUei() + "</uei>\n" +
@@ -125,7 +125,6 @@ public class OpennmsRestClient {
             throw new Exception(String.format("Sending event failed with: %s", response.message()));
         }
     }
-    */
 
     void clearAlarm(long alarmId) throws Exception {
         performActionOnAlarm(alarmId, "clear", "true");

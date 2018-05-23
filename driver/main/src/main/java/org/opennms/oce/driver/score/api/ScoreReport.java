@@ -26,29 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.driver.score.api;
 
 import java.util.List;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+public interface ScoreReport {
 
-@Service
-public class ScoreNameCompleter implements Completer {
+    /**
+     * A positive value greater than or equal to zero
+     *  where the low the value, the closer the evaluation is to the baseline,
+     *  with 0 being equivalent to the baseline.
+     */
+    double getScore();
 
-    @Reference
-    private List<ScoringStrategy> strategies;
+    /**
+     * The maximum possible score that could have been achieved
+     * when comparing two sets of incidents.
+     *
+     * infinity if unbounded
+     */
+    double getMaxScore();
 
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
-    }
-
+    /**
+     * A List of ScoreMetrics that are appropriate for the Engine under test 
+     *  and which provide further context on the score against the baseline.
+     */
+    List<? extends ScoreMetric> getMetrics();
 }

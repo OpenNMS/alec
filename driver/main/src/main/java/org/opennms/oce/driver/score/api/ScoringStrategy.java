@@ -26,29 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.driver.score.api;
 
-import java.util.List;
+import java.util.Set;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+import org.opennms.oce.datasource.api.Incident;
 
-@Service
-public class ScoreNameCompleter implements Completer {
+public interface ScoringStrategy {
 
-    @Reference
-    private List<ScoringStrategy> strategies;
+    /**
+     * Issue a ScoreReport for a Set of Incitdents against a baseline.
+     * @param baseline The baseline set of Incidents
+     * @param sut The Set Under Test
+     * @return ScroreReport
+     */
+    ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
 
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
-    }
+    /**
+     * The Name of the Strategy
+     */
+    String getName();
 
 }

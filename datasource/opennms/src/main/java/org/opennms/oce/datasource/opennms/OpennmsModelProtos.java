@@ -1716,7 +1716,7 @@ public final class OpennmsModelProtos {
   }
 
   public interface EventOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Event)
+      // @@protoc_insertion_point(interface_extends:OpennmsEvent)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1841,14 +1841,14 @@ public final class OpennmsModelProtos {
     OpennmsModelProtos.NodeCriteriaOrBuilder getNodeCriteriaOrBuilder();
   }
   /**
-   * Protobuf type {@code Event}
+   * Protobuf type {@code OpennmsEvent}
    */
   public  static final class Event extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:Event)
+      // @@protoc_insertion_point(message_implements:OpennmsEvent)
       EventOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use Event.newBuilder() to construct.
+    // Use OpennmsEvent.newBuilder() to construct.
     private Event(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
@@ -2586,11 +2586,11 @@ public final class OpennmsModelProtos {
       return builder;
     }
     /**
-     * Protobuf type {@code Event}
+     * Protobuf type {@code OpennmsEvent}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Event)
+        // @@protoc_insertion_point(builder_implements:OpennmsEvent)
         OpennmsModelProtos.EventOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -2604,7 +2604,7 @@ public final class OpennmsModelProtos {
                 OpennmsModelProtos.Event.class, OpennmsModelProtos.Event.Builder.class);
       }
 
-      // Construct using org.opennms.oce.connector.impl.OpennmsModelProtos.Event.newBuilder()
+      // Construct using org.opennms.oce.connector.impl.OpennmsModelProtos.OpennmsEvent.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -3728,10 +3728,10 @@ public final class OpennmsModelProtos {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:Event)
+      // @@protoc_insertion_point(builder_scope:OpennmsEvent)
     }
 
-    // @@protoc_insertion_point(class_scope:Event)
+    // @@protoc_insertion_point(class_scope:OpennmsEvent)
     private static final OpennmsModelProtos.Event DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new OpennmsModelProtos.Event();
@@ -3892,15 +3892,15 @@ public final class OpennmsModelProtos {
     long getAckTime();
 
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     boolean hasLastEvent();
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     OpennmsModelProtos.Event getLastEvent();
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     OpennmsModelProtos.EventOrBuilder getLastEventOrBuilder();
 
@@ -4580,19 +4580,19 @@ public final class OpennmsModelProtos {
     public static final int LAST_EVENT_FIELD_NUMBER = 15;
     private OpennmsModelProtos.Event lastEvent_;
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     public boolean hasLastEvent() {
       return lastEvent_ != null;
     }
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     public OpennmsModelProtos.Event getLastEvent() {
       return lastEvent_ == null ? OpennmsModelProtos.Event.getDefaultInstance() : lastEvent_;
     }
     /**
-     * <code>.Event last_event = 15;</code>
+     * <code>.OpennmsEvent last_event = 15;</code>
      */
     public OpennmsModelProtos.EventOrBuilder getLastEventOrBuilder() {
       return getLastEvent();
@@ -6098,13 +6098,13 @@ public final class OpennmsModelProtos {
       private com.google.protobuf.SingleFieldBuilderV3<
           OpennmsModelProtos.Event, OpennmsModelProtos.Event.Builder, OpennmsModelProtos.EventOrBuilder> lastEventBuilder_;
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public boolean hasLastEvent() {
         return lastEventBuilder_ != null || lastEvent_ != null;
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public OpennmsModelProtos.Event getLastEvent() {
         if (lastEventBuilder_ == null) {
@@ -6114,7 +6114,7 @@ public final class OpennmsModelProtos {
         }
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public Builder setLastEvent(OpennmsModelProtos.Event value) {
         if (lastEventBuilder_ == null) {
@@ -6130,7 +6130,7 @@ public final class OpennmsModelProtos {
         return this;
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public Builder setLastEvent(
           OpennmsModelProtos.Event.Builder builderForValue) {
@@ -6144,7 +6144,7 @@ public final class OpennmsModelProtos {
         return this;
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public Builder mergeLastEvent(OpennmsModelProtos.Event value) {
         if (lastEventBuilder_ == null) {
@@ -6162,7 +6162,7 @@ public final class OpennmsModelProtos {
         return this;
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public Builder clearLastEvent() {
         if (lastEventBuilder_ == null) {
@@ -6176,7 +6176,7 @@ public final class OpennmsModelProtos {
         return this;
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public OpennmsModelProtos.Event.Builder getLastEventBuilder() {
 
@@ -6184,7 +6184,7 @@ public final class OpennmsModelProtos {
         return getLastEventFieldBuilder().getBuilder();
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       public OpennmsModelProtos.EventOrBuilder getLastEventOrBuilder() {
         if (lastEventBuilder_ != null) {
@@ -6195,7 +6195,7 @@ public final class OpennmsModelProtos {
         }
       }
       /**
-       * <code>.Event last_event = 15;</code>
+       * <code>.OpennmsEvent last_event = 15;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           OpennmsModelProtos.Event, OpennmsModelProtos.Event.Builder, OpennmsModelProtos.EventOrBuilder>
@@ -11276,7 +11276,7 @@ public final class OpennmsModelProtos {
       "st_event_time\030\n \001(\004\022\023\n\013description\030\013 \001(\t" +
       "\022\023\n\013log_message\030\014 \001(\t\022\020\n\010ack_user\030\r \001(\t\022" +
       "\020\n\010ack_time\030\016 \001(\004\022\032\n\nlast_event\030\017 \001(\0132\006." +
-      "Event\022\027\n\017last_event_time\030\020 \001(\004\022\020\n\010if_ind" +
+      "OpennmsEvent\022\027\n\017last_event_time\030\020 \001(\004\022\020\n\010if_ind" +
       "ex\030\021 \001(\r\022\035\n\025operator_instructions\030\022 \001(\t\022" +
       "\021\n\tclear_key\030\023 \001(\t\"D\n\004Type\022\026\n\022PROBLEM_WI" +
       "TH_CLEAR\020\000\022\t\n\005CLEAR\020\001\022\031\n\025PROBLEM_WITHOUT" +

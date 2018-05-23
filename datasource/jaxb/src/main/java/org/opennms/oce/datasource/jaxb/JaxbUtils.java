@@ -61,6 +61,9 @@ import com.google.gson.Gson;
 
 public class JaxbUtils {
 
+
+    private static final String SCHEMA_RESOURCE = "/model.v1.xsd";
+
     private static final Gson gson = new Gson();
 
     public static Alarm toAlarm(org.opennms.oce.datasource.v1.schema.Alarm alarm, org.opennms.oce.datasource.v1.schema.Event event) {

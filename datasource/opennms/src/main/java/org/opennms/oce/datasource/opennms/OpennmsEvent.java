@@ -26,29 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.datasource.opennms;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+public class OpennmsEvent {
 
-@Service
-public class ScoreNameCompleter implements Completer {
+    public static final String TRIGGER_UEI = "uei.opennms.org/alarms/trigger";
+    public static final String CLEAR_UEI = "uei.opennms.org/alarms/clear";
 
-    @Reference
-    private List<ScoringStrategy> strategies;
+    final String uei;
+    final String service;
+    final List<String> associatedReductionKeys;
+
+    public OpennmsEvent(String uei, String service) {
+        this(uei, service, Collections.emptyList());
+    }
+
+    public OpennmsEvent(String uei, String service, List<String> associatedReductionKeys) {
+        this.uei = Objects.requireNonNull(uei);
+        this.service = Objects.requireNonNull(service);
+        this.associatedReductionKeys = Objects.requireNonNull(associatedReductionKeys);
+    }
+
+    public String getUei() {
+        return uei;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public List<String> getAssociatedReductionKeys() {
+        return associatedReductionKeys;
+    }
 
     @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
+    public String toString() {
+        return String.format("OpennmsEvent[uei=%s, service=%s, rkeys=%s]", uei, service, associatedReductionKeys);
     }
 
 }

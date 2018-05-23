@@ -58,10 +58,10 @@ import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.driver.Driver;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.engine.score.impl.SetIntersectionScoringStrategy;
-import org.opennms.oce.engine.score.api.ScoreMetric;
-import org.opennms.oce.engine.score.api.ScoreReport;
-import org.opennms.oce.engine.score.api.ScoringStrategy;
+import impl.SetIntersectionScoringStrategy;
+import api.ScoreMetric;
+import api.ScoreReport;
+import api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Alarm;
 import org.opennms.oce.model.alarm.api.Incident;
 

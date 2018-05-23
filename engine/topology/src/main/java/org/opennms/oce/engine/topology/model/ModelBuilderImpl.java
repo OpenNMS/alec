@@ -206,48 +206,5 @@ public class ModelBuilderImpl implements ModelBuilder {
         return mo;
     }
 
-    private MetaModel getModelObject() throws JAXBException, IOException {
-        try (InputStream is = getResource(metamodelPath).openStream()) {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(modelSchema);
-            return (MetaModel) unmarshaller.unmarshal(is);
-        }
-    }
-
-    private Inventory getInventory() throws JAXBException, IOException {
-        try (InputStream is = getResource(inventoryPath).openStream()) {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(modelSchema);
-            return (Inventory) unmarshaller.unmarshal(is);
-        }
-    }
-
-    private URL getResource(final String resource) {
-        // First attempt to load the resource from the filesystem
-        final File file = new File(resource);
-        if (file.canRead()) {
-            try {
-                return file.toURI().toURL();
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        // Next, attempt to load the resource from the classpath
-        final URL classpathResourceUrl = MetaModel.class.getResource(resource);
-        if (classpathResourceUrl != null) {
-            return classpathResourceUrl;
-        }
-
-        // Finally, if a bundle context is set, then try loading it from there
-        if (bundleContext != null) {
-            final URL bundleResourceUrl = bundleContext.getBundle().getResource(resource);
-            if (bundleResourceUrl != null) {
-                return bundleResourceUrl;
-            }
-        }
-
-        throw new IllegalArgumentException("Failed to locate resource on the filesystem and in the classpath: " + resource);
-    }
 
 }

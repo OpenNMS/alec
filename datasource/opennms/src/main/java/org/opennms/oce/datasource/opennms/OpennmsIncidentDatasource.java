@@ -26,29 +26,31 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.datasource.opennms;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.IncidentDatasource;
 
-@Service
-public class ScoreNameCompleter implements Completer {
+public class OpennmsIncidentDatasource implements IncidentDatasource {
+    private final OpennmsRestClient restClient;
 
-    @Reference
-    private List<ScoringStrategy> strategies;
+    public OpennmsIncidentDatasource(OpennmsRestClient restClient) {
+        this.restClient = Objects.requireNonNull(restClient);
+    }
 
     @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
+    public List<Incident> getIncidents() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void forwardIncident(Incident incident) throws Exception {
+        OpennmsEvent e = new OpennmsEvent(OpennmsEvent.TRIGGER_UEI, "svc", Collections.emptyList());
+        restClient.sendEvent(e);
     }
 
 }

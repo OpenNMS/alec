@@ -1,0 +1,39 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="modelProperties" persistent-id="org.opennms.oce.datasource.jaxb" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="metamodelPath" value=""/>
+            <cm:property name="inventoryPath" value=""/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <!-- Create the resource loader -->
+    <bean id="resourceLoader" class=" org.opennms.oce.datasource.jaxb.ResourceLoader">
+        <argument ref="blueprintBundleContext"/>
+    </bean>
+
+    <!-- Load the resources -->
+    <bean id="alarms" factory-ref="resourceLoader" factory-method="getAlarms"/>
+    <bean id="incidents" factory-ref="resourceLoader" factory-method="getIncidents"/>
+    <bean id="inventory" factory-ref="resourceLoader" factory-method="getInventory"/>
+
+    <!-- Create and expose the static data sources -->
+    <bean id="alarmDatasource" class="org.opennms.oce.datasource.common.StaticAlarmDatasource">
+        <argument ref="alarms"/>
+    </bean>
+    <service ref="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
+
+    <bean id="incidentDatasource" class="org.opennms.oce.datasource.common.StaticIncidentDatasource">
+        <argument ref="incidents"/>
+    </bean>
+    <service ref="incidentDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
+
+    <bean id="inventoryDatasource" class="org.opennms.oce.datasource.common.StaticInventoryDatasource">
+        <argument ref="inventory"/>
+    </bean>
+    <service ref="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
+
+</blueprint>

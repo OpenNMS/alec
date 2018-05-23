@@ -44,9 +44,9 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.engine.score.api.ScoreMetric;
-import org.opennms.oce.engine.score.api.ScoreReport;
-import org.opennms.oce.engine.score.api.ScoringStrategy;
+import api.ScoreMetric;
+import api.ScoreReport;
+import api.ScoringStrategy;
 import org.opennms.oce.model.alarm.api.Incident;
 
 // Derive a score comparing a Set of Incidents to a Base Sample

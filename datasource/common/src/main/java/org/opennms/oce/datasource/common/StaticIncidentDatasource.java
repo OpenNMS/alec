@@ -26,29 +26,28 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.datasource.common;
 
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.IncidentDatasource;
 
-@Service
-public class ScoreNameCompleter implements Completer {
+public class StaticIncidentDatasource implements IncidentDatasource {
+    private final List<Incident> incidents;
 
-    @Reference
-    private List<ScoringStrategy> strategies;
-
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
+    public StaticIncidentDatasource(List<Incident> incidents) {
+        this.incidents = Objects.requireNonNull(incidents);
     }
 
+    @Override
+    public List<Incident> getIncidents() {
+        return incidents;
+    }
+
+    @Override
+    public void forwardIncident(Incident incident) {
+        // pass
+    }
 }

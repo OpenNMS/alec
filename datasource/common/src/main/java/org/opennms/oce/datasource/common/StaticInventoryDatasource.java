@@ -26,29 +26,40 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.datasource.common;
 
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import api.ScoringStrategy;
+import org.opennms.oce.datasource.api.InventoryDatasource;
+import org.opennms.oce.datasource.api.InventoryHandler;
+import org.opennms.oce.datasource.api.InventoryObject;
 
-@Service
-public class ScoreNameCompleter implements Completer {
+public class StaticInventoryDatasource implements InventoryDatasource {
 
-    @Reference
-    private List<ScoringStrategy> strategies;
+    private final List<InventoryObject> inventory;
 
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        strategies.forEach(s -> delegate.getStrings().add(s.getName()));
-        return delegate.complete(session, commandLine, candidates);
+    public StaticInventoryDatasource(List<InventoryObject> inventory) {
+        this.inventory = Objects.requireNonNull(inventory);
     }
 
+    @Override
+    public List<InventoryObject> getInventory() {
+        return inventory;
+    }
+
+    @Override
+    public List<InventoryObject> getInventoryAndRegisterHandler(InventoryHandler handler) {
+        return inventory;
+    }
+
+    @Override
+    public void registerHandler(InventoryHandler handler) {
+        // pass
+    }
+
+    @Override
+    public void unregisterHandler(InventoryHandler handler) {
+        // pass
+    }
 }

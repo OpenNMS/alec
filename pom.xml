@@ -74,6 +74,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.oce.datasource</groupId>
+                <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.datasource</groupId>
                 <artifactId>org.opennms.oce.datasource.opennms</artifactId>
                 <version>${project.version}</version>
             </dependency>

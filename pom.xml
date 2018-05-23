@@ -30,7 +30,7 @@
     </developers>
 
     <modules>
-        <module>connector</module>
+        <module>datasource</module>
         <module>engine</module>
         <module>features</module>
         <module>model</module>
@@ -63,18 +63,18 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>org.opennms.oce.connector.api</artifactId>
+                <groupId>org.opennms.oce.datasource</groupId>
+                <artifactId>org.opennms.oce.datasource.api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>org.opennms.oce.connector.impl</artifactId>
+                <groupId>org.opennms.oce.datasource</groupId>
+                <artifactId>org.opennms.oce.datasource.common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opennms.oce.connector</groupId>
-                <artifactId>org.opennms.oce.connector.shell</artifactId>
+                <groupId>org.opennms.oce.datasource</groupId>
+                <artifactId>org.opennms.oce.datasource.opennms</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

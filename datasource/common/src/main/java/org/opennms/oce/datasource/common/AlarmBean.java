@@ -79,7 +79,7 @@ public class AlarmBean implements Alarm {
 
     @Override
     public boolean isClear() {
-        return false;
+        return Severity.CLEARED.equals(severity);
     }
 
     public void setResourceKeys(List<ResourceKey> resourceKeys) {

@@ -36,7 +36,7 @@ import org.apache.karaf.shell.api.console.CommandLine;
 import org.apache.karaf.shell.api.console.Completer;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.StringsCompleter;
-import org.opennms.oce.driver.score.api.ScoringStrategy;
+import org.opennms.oce.features.score.api.ScoringStrategy;
 
 @Service
 public class ScoreNameCompleter implements Completer {

@@ -48,7 +48,8 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.driver.main.Driver;
+import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
 
 /**
@@ -65,7 +66,7 @@ public class Level2EngineComplianceTest {
     }
 
     private final EngineFactory factory;
-    private Driver driver;
+    private TestDriver driver;
 
     public Level2EngineComplianceTest(EngineFactory factory) {
         this.factory = Objects.requireNonNull(factory);
@@ -73,7 +74,7 @@ public class Level2EngineComplianceTest {
 
     @Before
     public void setUp() {
-        driver = Driver.builder()
+        driver = TestDriver.builder()
                 .withEngineFactory(factory)
                 .build();
     }
@@ -298,7 +299,7 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525594919000L, Severity.NORMAL) // 4 seconds since last event
                 .build());
 
-        final List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, alarms);
+        final List<Incident> incidents = driver.run(alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms
@@ -352,7 +353,7 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525580250000L, Severity.CLEARED) // 15 seconds since last event
                 .build());
 
-        final List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, alarms);
+        final List<Incident> incidents = driver.run(alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms

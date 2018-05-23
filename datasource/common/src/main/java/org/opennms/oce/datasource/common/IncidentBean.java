@@ -28,15 +28,19 @@
 
 package org.opennms.oce.datasource.common;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.ResourceKey;
 
 public class IncidentBean implements Incident {
     private String id;
     private long creationTime;
+    private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Set<Alarm> alarms = new LinkedHashSet<>();
 
     public IncidentBean() { }
@@ -61,6 +65,19 @@ public class IncidentBean implements Incident {
 
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
+    }
+
+    @Override
+    public List<ResourceKey> getResourceKeys() {
+        return resourceKeys;
+    }
+
+    public void setResourceKeys(List<ResourceKey> resourceKeys) {
+        this.resourceKeys = resourceKeys;
+    }
+
+    public void addResourceKey(ResourceKey resourceKey) {
+        resourceKeys.add(resourceKey);
     }
 
     @Override

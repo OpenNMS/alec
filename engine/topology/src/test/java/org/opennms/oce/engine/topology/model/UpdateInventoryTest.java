@@ -37,12 +37,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
 
 public class UpdateInventoryTest {
 
-    TopologyEngineFactory topologyEngineFactory;
-    ModelImpl model;
+    private TopologyEngineFactory topologyEngineFactory;
+
+    private ModelImpl model;
 
     @Rule
     public ExpectedException exceptionGrabber = ExpectedException.none();
@@ -51,8 +53,8 @@ public class UpdateInventoryTest {
     public void setUp() {
         topologyEngineFactory = new TopologyEngineFactory();
 
-        ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
-        model = modelBuilder.buildModel();
+        // Build the sample network model
+        model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
     }
 
     /**

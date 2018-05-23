@@ -45,9 +45,9 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.driver.score.api.ScoreMetric;
-import org.opennms.oce.driver.score.api.ScoreReport;
-import org.opennms.oce.driver.score.api.ScoringStrategy;
+import org.opennms.oce.features.score.api.ScoreMetric;
+import org.opennms.oce.features.score.api.ScoreReport;
+import org.opennms.oce.features.score.api.ScoringStrategy;
 
 // Derive a score comparing a Set of Incidents to a Base Sample
 @Command(scope = "oce", name = "scoreIncidents", description = "Score Correlated Incidents against a baseline.")

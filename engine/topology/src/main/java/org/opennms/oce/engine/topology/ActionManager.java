@@ -55,7 +55,7 @@ public class ActionManager {
 
         ModelObjectImpl owner = group.getOwner();
         IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
-        // FIXME: incident.setModelObject(owner);
+        incident.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
         group.getMembers().stream()
                 .flatMap(mo -> mo.getAlarms().stream())
                 .forEach(incident::addAlarm);

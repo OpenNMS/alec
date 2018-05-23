@@ -51,7 +51,7 @@ public class ObjectList implements Action {
     
     @Override
     public Object execute() throws Exception {
-        ModelImpl model = builder.buildModel();
+        ModelImpl model = null; // builder.buildModel();
         final Map<String, ModelObjectImpl> objects = model.getObjectsByIdForType(type);
         if (objects == null || objects.size() < 1) {
             System.out.println("(No objects for type " + type + ")");

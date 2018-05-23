@@ -51,7 +51,7 @@ public class GetObject implements Action {
 
     @Override
     public Object execute() throws Exception {
-        ModelImpl model = builder.buildModel();
+        ModelImpl model = null; //builder.buildModel();
         final ModelObjectImpl modelObject = model.getObjectById(type, id);
         if (modelObject == null) {
             System.out.println("(No modelObject for id: " + id + ")");

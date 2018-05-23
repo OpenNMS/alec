@@ -33,6 +33,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,14 +57,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.driver.main.Driver;
-import org.opennms.oce.driver.score.api.ScoreMetric;
-import org.opennms.oce.driver.score.api.ScoreReport;
-import org.opennms.oce.driver.score.api.ScoringStrategy;
-import org.opennms.oce.driver.score.impl.SetIntersectionScoringStrategy;
+import org.opennms.oce.datasource.jaxb.JaxbUtils;
+import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
+import org.opennms.oce.features.score.api.ScoreMetric;
+import org.opennms.oce.features.score.api.ScoreReport;
+import org.opennms.oce.features.score.api.ScoringStrategy;
+import org.opennms.oce.features.score.impl.SetIntersectionScoringStrategy;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -139,9 +142,9 @@ public class ClusterEngineOptimizationTest {
 
         public EngineAsFunction() throws JAXBException, IOException {
             System.out.println("Loading data...");
-            alarms = Collections.emptyList(); // FIXME: ImmutableList.copyOf(EngineUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
+            alarms = ImmutableList.copyOf(JaxbUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
             System.out.printf("Read %d alarms.\n", alarms.size());
-            Set<Incident> incidents = Collections.emptySet(); // FIXME: EngineUtils.getIncidents(Paths.get("/tmp/cpn.incidents.xml"));
+            Set<Incident> incidents = JaxbUtils.getIncidents(Paths.get("/tmp/cpn.incidents.xml"));
             System.out.printf("Read %d incidents.\n", incidents.size());
             baseIncidents = ImmutableSet.copyOf(getIncidentsWithOneOrMoreAlarms(incidents));
         }
@@ -152,12 +155,12 @@ public class ClusterEngineOptimizationTest {
             factory.setAlpha(point[0]);
             factory.setBeta(point[1]);
 
-            Driver driver = null; /* FIXME: Driver.builder()
+            TestDriver driver = TestDriver.builder()
                     .withEngineFactory(factory)
-                    .build(); */
+                    .build();
 
             System.out.printf("Running simulation at point %s...\n", Arrays.toString(point));
-            final List<Incident> generatedIncidents = Collections.emptyList(); // FIXME:  driver.run(null, alarms);
+            final List<Incident> generatedIncidents = driver.run(alarms);
             System.out.printf("Generated: %d incidents.\n", generatedIncidents.size());
             Set<Incident> generatedIncidentsInSet = Sets.newHashSet(generatedIncidents);
             assertThat(generatedIncidentsInSet.size(), equalTo(generatedIncidents.size()));

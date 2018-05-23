@@ -1,0 +1,19 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+    <!-- Matrix scoring strategy -->
+    <service interface="org.opennms.oce.features.score.api.ScoringStrategy">
+        <bean class="org.opennms.oce.features.score.impl.MatrixScoringStrategy"/>
+    </service>
+
+    <!-- Peer scoring strategy -->
+    <service interface="org.opennms.oce.features.score.api.ScoringStrategy">
+        <bean class="org.opennms.oce.features.score.impl.PeerScoringStrategy"/>
+    </service>
+
+    <!-- Set intersection scoring strategy -->
+    <service interface="org.opennms.oce.features.score.api.ScoringStrategy">
+        <bean class="org.opennms.oce.features.score.impl.SetIntersectionScoringStrategy"/>
+    </service>
+
+</blueprint>

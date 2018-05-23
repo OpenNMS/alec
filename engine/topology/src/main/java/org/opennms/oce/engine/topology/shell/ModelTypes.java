@@ -45,7 +45,7 @@ public class ModelTypes implements Action {
 
     @Override
     public Object execute() throws Exception {
-        ModelImpl model = builder.buildModel();
+        ModelImpl model = null; // builder.buildModel();
         final Set<String> types = model.getTypes();
         if (types == null || types.isEmpty()) {
             System.out.println("No model types");

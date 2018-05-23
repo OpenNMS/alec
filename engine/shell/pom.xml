@@ -38,6 +38,10 @@
             <artifactId>org.opennms.oce.driver.main</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.oce.features</groupId>
+            <artifactId>org.opennms.oce.features.score</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <version>${karaf.version}</version>

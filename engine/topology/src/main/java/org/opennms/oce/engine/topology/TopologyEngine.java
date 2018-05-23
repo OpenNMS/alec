@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +47,7 @@ import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.engine.topology.model.GroupImpl;
+import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
 import org.opennms.oce.engine.topology.model.ModelImpl;
 import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 import org.slf4j.Logger;
@@ -82,15 +82,22 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
-    public void destroy() {
-        if (kieSession != null) {
-            kieSession.dispose();
-            LOG.info("KieSession disposed.");
-        }
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+        // TODO: How to process initial alarms and incidents?
+        this.inventory = ModelBuilderImpl.buildModel(inventory);
     }
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
+        onAlarm(alarm);
+    }
+
+    @Override
+    public void onAlarmCleared(Alarm alarm) {
+        onAlarm(alarm);
+    }
+
+    private void onAlarm(Alarm alarm) {
         if (inventory == null) {
             throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
         }
@@ -126,18 +133,18 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
-    public void onAlarmCleared(Alarm alarm) {
+    public void onInventoryAdded(InventoryObject inventoryObject) {
+        // TODO
+    }
+
+    @Override
+    public void onInventoryRemoved(InventoryObject inventoryObject) {
         // TODO
     }
 
     @Override
     public void registerIncidentHandler(IncidentHandler handler) {
         this.handler = handler;
-    }
-
-    @Override
-    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
-
     }
 
     @Override
@@ -151,6 +158,14 @@ public class TopologyEngine implements Engine {
             LOG.debug("Tick at {} ({})", new Date(timestampInMillis), timestampInMillis);
         }
         kieSession.fireAllRules();
+    }
+
+    @Override
+    public void destroy() {
+        if (kieSession != null) {
+            kieSession.dispose();
+            LOG.info("KieSession disposed.");
+        }
     }
 
     private ModelObjectImpl getObjectForAlarm(Alarm alarm) {
@@ -177,14 +192,4 @@ public class TopologyEngine implements Engine {
         return handler;
     }
 
-
-    @Override
-    public void onInventoryAdded(InventoryObject inventoryObject) {
-
-    }
-
-    @Override
-    public void onInventoryRemoved(InventoryObject inventoryObject) {
-
-    }
 }

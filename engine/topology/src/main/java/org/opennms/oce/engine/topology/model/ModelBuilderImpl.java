@@ -28,80 +28,37 @@
 
 package org.opennms.oce.engine.topology.model;
 
+import static org.opennms.oce.engine.topology.model.ModelObjectKey.key;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
+import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
+
 public class ModelBuilderImpl {
 
     public static final String MODEL_ROOT_TYPE = "Model";
     public static final String MODEL_ROOT_ID = "model";
 
-
-    public ModelImpl buildModel() {
-        ModelObjectImpl root = new ModelObjectImpl(MODEL_ROOT_TYPE, MODEL_ROOT_ID);
-        return new ModelImpl(root);
-    }
-
-    /*
-    private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
-
-    public static final String MODEL_ROOT_TYPE = "Model";
-    public static final String MODEL_ROOT_ID = "model";
-
-    private static final String METAMODEL_RESOURCE = "/metamodel.xml";
-    private static final String INVENTORY_RESOURCE = "/inventory.xml";
-    private static final String SCHEMA_RESOURCE = "/model.v1.xsd";
-
-    private final BundleContext bundleContext;
-    private final Schema modelSchema;
-    private final JAXBContext jaxbContext;
-
-    private String metamodelPath = METAMODEL_RESOURCE;
-    private String inventoryPath = INVENTORY_RESOURCE;
-
-    public ModelBuilderImpl() {
-        this(null);
-    }
-
-    public ModelBuilderImpl(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-
-        // Pre-emptively the schema and JAXB context
-        final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        try {
-            modelSchema = sf.newSchema(getResource(SCHEMA_RESOURCE));
-            jaxbContext = JAXBContext.newInstance(MetaModel.class, Inventory.class);
-        } catch (SAXException|JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Model buildModel() {
-        // Load the meta-model and inventory
-        final MetaModel metaModel;
-        final Inventory inventory;
-        try {
-            metaModel = getModelObject();
-            LOG.info("Loaded meta-model with {} object.", metaModel.getModelObjectDef().size());
-            LOG.debug("Meta-model: {}", metaModel);
-
-            inventory =  getInventory();
-            LOG.info("Loaded inventory with {} objects.", inventory.getModelObjectEntry().size());
-            LOG.debug("Inventory: {}", inventory);
-        } catch (IOException|JAXBException e) {
-            LOG.error("Model loading failed: ", e);
-            throw new RuntimeException(e);
-        }
-        return buildModel(metaModel, inventory);
-    }
-
-    public Model buildModel(MetaModel metaModel, Inventory inventory) {
+    public static ModelImpl buildModel(List<InventoryObject> inventory) {
         // Create the initial model objects and index them by type/id
         // NOTE: This will throw a IllegalStateException if a duplicate key is found
-        final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.getModelObjectEntry().stream()
+        final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.stream()
                 .collect(Collectors.toMap(moe -> key(moe.getType(), moe.getId()), ModelBuilderImpl::toModelObject));
 
+        // Create the root element if missing
+        final ModelObjectKey rootKey = key(MODEL_ROOT_TYPE, MODEL_ROOT_ID);
+        final ModelObjectImpl rootMo = mosByKey.computeIfAbsent(rootKey, (key) -> new ModelObjectImpl(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
+        // Also index the root element at the null key, so that entries without a parent type/id will be assocated with the root
+        final ModelObjectKey nullKey = key(null, null);
+        mosByKey.put(nullKey, rootMo);
+
         // Now build out the relationships
-        inventory.getModelObjectEntry().forEach(moe -> {
-            final ModelObjectKey key = key(moe.getType(), moe.getId());
+        inventory.forEach(io -> {
+            final ModelObjectKey key = key(io.getType(), io.getId());
             final ModelObjectImpl mo = mosByKey.get(key);
             if (mo == null) {
                 // Should not happen
@@ -114,7 +71,7 @@ public class ModelBuilderImpl {
             }
 
             // Setup the parent
-            final ModelObjectKey parentKey = key(moe.getParentType(), moe.getParentId());
+            final ModelObjectKey parentKey = key(io.getParentType(), io.getParentId());
             final ModelObjectImpl parentMo = mosByKey.get(parentKey);
             if (parentMo == null) {
                 throw new IllegalStateException("Oops. Cannot find parent MO with key: " + parentKey + " on MO with key: " + key);
@@ -123,7 +80,7 @@ public class ModelBuilderImpl {
             parentMo.addChild(mo);
 
             // Setup the peers
-            for (PeerRef peerRef : moe.getPeerRef()) {
+            for (InventoryObjectPeerRef peerRef : io.getPeers()) {
                 final ModelObjectKey peerKey = key(peerRef.getType(), peerRef.getId());
                 final ModelObjectImpl peerMo = mosByKey.get(peerKey);
                 if (peerMo == null) {
@@ -134,7 +91,7 @@ public class ModelBuilderImpl {
             }
 
             // Setup the relatives
-            for (RelativeRef relativeRef : moe.getRelativeRef()) {
+            for (InventoryObjectRelativeRef relativeRef : io.getRelatives()) {
                 final ModelObjectKey relativeKey = key(relativeRef.getType(), relativeRef.getId());
                 final ModelObjectImpl relativeMo = mosByKey.get(relativeKey);
                 if (relativeMo == null) {
@@ -145,46 +102,15 @@ public class ModelBuilderImpl {
             }
         });
 
-        // Find the root
-        final ModelObjectImpl rootMo = mosByKey.get(key(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
-        if (rootMo == null) {
-            throw new IllegalStateException("Inventory must contain a single object of type '"
-                    + MODEL_ROOT_TYPE + "' with id '" + MODEL_ROOT_ID + "'");
-        }
-
         // Create a new model instance
         return new ModelImpl(rootMo);
     }
 
-    public String getMetamodelPath() {
-        return metamodelPath;
-    }
-
-    public void setMetamodelPath(String metamodelPath) {
-        if (Strings.isNullOrEmpty(metamodelPath)) {
-            this.metamodelPath = METAMODEL_RESOURCE;
-        } else {
-            this.metamodelPath = metamodelPath;
-        }
-    }
-
-    public String getInventoryPath() {
-        return inventoryPath;
-    }
-
-    public void setInventoryPath(String inventoryPath) {
-        if (Strings.isNullOrEmpty(inventoryPath)) {
-            this.inventoryPath = INVENTORY_RESOURCE;
-        } else {
-            this.inventoryPath = inventoryPath;
-        }
-    }
-
-    private static ModelObjectImpl toModelObject(ModelObjectEntry moe) {
-        final ModelObjectImpl mo = new ModelObjectImpl(moe.getType(), moe.getId());
-        mo.setFriendlyName(moe.getFriendlyName());
+    private static ModelObjectImpl toModelObject(InventoryObject io) {
+        final ModelObjectImpl mo = new ModelObjectImpl(io.getType(), io.getId());
+        mo.setFriendlyName(io.getFriendlyName());
         return mo;
     }
-    */
+
 
 }

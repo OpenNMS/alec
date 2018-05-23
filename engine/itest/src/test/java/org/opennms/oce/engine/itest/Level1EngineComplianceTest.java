@@ -61,7 +61,8 @@ import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.driver.main.Driver;
+import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.cluster.ClusterEngineFactory;
@@ -84,7 +85,7 @@ public class Level1EngineComplianceTest {
     }
 
     private final EngineFactory factory;
-    private Driver driver;
+    private TestDriver driver;
     private final AtomicLong alarmIdGenerator = new AtomicLong();
 
     public Level1EngineComplianceTest(EngineFactory factory) {
@@ -93,7 +94,7 @@ public class Level1EngineComplianceTest {
 
     @Before
     public void setUp() {
-        driver = Driver.builder()
+        driver = TestDriver.builder()
                 .withEngineFactory(factory)
                 .build();
     }
@@ -111,7 +112,7 @@ public class Level1EngineComplianceTest {
     @Test
     public void canCorrelateFiveAlarmsWithSameTimeOnSameResource() {
         final List<Alarm> alarms = getAlarms(5, 20, new ResourceKey("n1"));
-        final List<Incident> incidents = Collections.emptyList(); // FIXME:  driver.run(model, alarms);
+        final List<Incident> incidents = driver.run(alarms);
 
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
@@ -147,14 +148,14 @@ public class Level1EngineComplianceTest {
             alarms.addAll(builder.build());
         }
 
-        final List<Incident> initialIncidents = Collections.emptyList(); // FIXME:driver.run(model, alarms);
+        final List<Incident> initialIncidents = driver.run(alarms);
         // Expect 1+ incidents
         assertThat(initialIncidents, hasSize(greaterThanOrEqualTo(1)));
 
         // Now rerun the driver several times in series, and expect the same results
         final int K = 20;
         for (int k = 0; k < K; k++) {
-            final List<Incident> subsequentIncidents = Collections.emptyList(); // FIXME:driver.run(model, alarms);
+            final List<Incident> subsequentIncidents = driver.run(alarms);
             compareIncidents(initialIncidents, subsequentIncidents);
 
             Set<Incident> initialIncidentsInSet = Sets.newHashSet(initialIncidents);
@@ -165,7 +166,7 @@ public class Level1EngineComplianceTest {
         final ExecutorService executor = Executors.newFixedThreadPool(10);
         final List<CompletableFuture<List<Incident>>> incidentFutures = new ArrayList<>();
         for (int k = 0; k < K; k++) {
-            incidentFutures.add(CompletableFuture.supplyAsync(() -> Collections.emptyList() /* FIXME:driver.run(model, alarms)*/, executor));
+            incidentFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
         }
         CompletableFuture.allOf(incidentFutures.toArray(new CompletableFuture[0])).get();
         for (CompletableFuture<List<Incident>> incidentFuture : incidentFutures) {

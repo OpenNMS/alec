@@ -42,8 +42,8 @@ public interface InventoryObject {
 
     String getFriendlyName();
 
-    List<InventoryObjectPeerRef> getPeers();
+    List<? extends InventoryObjectPeerRef> getPeers();
 
-    List<InventoryObjectRelativeRef> getRelatives();
+    List<? extends InventoryObjectRelativeRef> getRelatives();
 
 }

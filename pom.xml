@@ -34,6 +34,7 @@
         <module>driver</module>
         <module>engine</module>
         <module>features</module>
+        <module>karaf-features</module>
         <module>wrap</module>
     </modules>
 
@@ -88,6 +89,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.oce.driver</groupId>
+                <artifactId>org.opennms.oce.driver.test</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.oce.engine</groupId>
                 <artifactId>org.opennms.oce.engine.api</artifactId>
                 <version>${project.version}</version>
@@ -120,6 +126,11 @@
             <dependency>
                 <groupId>org.opennms.oce.engine</groupId>
                 <artifactId>org.opennms.oce.engine.cluster</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce.features</groupId>
+                <artifactId>org.opennms.oce.features.score</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

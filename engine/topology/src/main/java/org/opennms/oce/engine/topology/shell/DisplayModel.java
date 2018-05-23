@@ -47,7 +47,7 @@ public class DisplayModel implements Action {
 
     @Override
     public Object execute() throws Exception {
-        ModelImpl model = builder.buildModel();
+        ModelImpl model = null; //builder.buildModel();
         for (String type : model.getTypes()) {
             System.out.println("(TYPE :: " + type + ")");
             final Map<String, ModelObjectImpl> objects = model.getObjectsByIdForType(type);

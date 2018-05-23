@@ -40,15 +40,14 @@ import static org.hamcrest.Matchers.sameInstance;
 import java.util.Set;
 
 import org.junit.Test;
+import org.opennms.oce.driver.test.MockInventory;
 
 public class ModelBuilderImplTest {
 
     @Test
     public void canGenerateModel() {
-
-        // We assume the impl is loading "inventory.xml" and "metamodel.xml" from resources
-        ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
-        ModelImpl model = modelBuilder.buildModel();
+        // Build the sample network model
+        ModelImpl model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
 
         System.out.println("Types: " + model.getTypes());
 

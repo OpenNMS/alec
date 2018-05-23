@@ -28,6 +28,7 @@
 
 package org.opennms.oce.datasource.api;
 
+import java.util.List;
 import java.util.Set;
 
 public interface Incident {
@@ -36,7 +37,7 @@ public interface Incident {
 
     long getCreationTime();
 
-    //ModelObject getModelObject();
+    List<ResourceKey> getResourceKeys();
 
     Set<Alarm> getAlarms();
 

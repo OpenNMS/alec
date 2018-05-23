@@ -30,11 +30,12 @@ package org.opennms.oce.engine.itest;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,31 +44,27 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.MockInventory;
+import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
 
 public class TopologyEngineTest {
 
-    TopologyEngineFactory topologyEngineFactory;
-    ModelImpl model;
+    private TopologyEngineFactory topologyEngineFactory;
+    private List<InventoryObject> inventory = MockInventory.SAMPLE_NETWORK;
 
     @Before
     public void setUp() {
         topologyEngineFactory = new TopologyEngineFactory();
-
-        ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
-        model = modelBuilder.buildModel();
     }
 
     @Test
     public void canRunEngineWithNoAlarms() {
-        Driver driver = null; /*Driver.builder()
-                .withEngineFactory(topologyEngineFactory)
-                .build();*/
-        List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, Collections.emptyList());
+        List<Incident> incidents = run(Collections.emptyList());
         assertThat(incidents, hasSize(0));
     }
 
@@ -93,16 +90,13 @@ public class TopologyEngineTest {
                 .withEvent(SECONDS.toMillis(121), Severity.CLEARED) // ~1 minute later
                 .build());
 
-        Driver driver = null; /* FIXME: Driver.builder()
-                .withEngineFactory(topologyEngineFactory)
-                .build(); */
-        List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, alarms);
+        List<Incident> incidents = run(alarms);
 
         assertThat(incidents, hasSize(4));
         // The 2nd incident is the Card Down and must contain the 2 alarms
         Incident incident = incidents.get(1);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
-        // FIXME: assertThat(incident.getModelObject().getType(), is("Card"));
+        assertThat(incident.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
     }
 
     @Test
@@ -127,10 +121,7 @@ public class TopologyEngineTest {
                 .withEvent(SECONDS.toMillis(121), Severity.CLEARED) // ~1 minute later
                 .build());
 
-        Driver driver =  null; /* Driver.builder()
-                .withEngineFactory(topologyEngineFactory)
-                .build();*/
-        List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, alarms);
+        List<Incident> incidents = run(alarms);
 
         assertThat(incidents, hasSize(3));
         Incident incident0 = incidents.get(0);
@@ -139,8 +130,7 @@ public class TopologyEngineTest {
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident1), containsInAnyOrder("a1", "a2"));
         Incident incident2 = incidents.get(2);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a2"));
-        // FIXME: assertThat(incident2.getModelObject().getType(), is("Link"));
-
+        assertThat(incident2.getResourceKeys().get(0), equalTo(ResourceKey.key("Link", "n1-c1-p1___n2-c1-p1")));
     }
     
     @Test
@@ -172,10 +162,7 @@ public class TopologyEngineTest {
                 .withEvent(SECONDS.toMillis(151), Severity.CLEARED) // ~1 minute later
                 .build());
 
-        Driver driver = null; /* FIXME: Driver.builder()
-                .withEngineFactory(topologyEngineFactory)
-                .build(); */
-        List<Incident> incidents = Collections.emptyList(); // FIXME: driver.run(model, alarms);
+        List<Incident> incidents = run(alarms);
 
         assertThat(incidents, hasSize(4));
         Incident incident0 = incidents.get(0);
@@ -185,6 +172,13 @@ public class TopologyEngineTest {
         Incident incident2 = incidents.get(2);
         assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident2), contains("a3"));
         Incident incident3 = incidents.get(3);
-        // FIXMME: assertThat(incident3.getModelObject().getType(), is("Device"));
+        assertThat(incident3.getResourceKeys().get(0), equalTo(ResourceKey.key("Device", "n1")));
+    }
+
+    private List<Incident> run(List<Alarm> alarms) {
+        final TestDriver driver = TestDriver.builder()
+                .withEngineFactory(topologyEngineFactory)
+                .build();
+        return driver.run(alarms, inventory);
     }
 }

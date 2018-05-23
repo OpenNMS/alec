@@ -24,12 +24,22 @@
             <artifactId>org.opennms.oce.engine.topology</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.opennms.oce.driver</groupId>
-            <artifactId>org.opennms.oce.driver.main</artifactId>
+            <artifactId>org.opennms.oce.driver.test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.features</groupId>
+            <artifactId>org.opennms.oce.features.score</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

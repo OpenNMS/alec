@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.oce.driver.test.MockInventory;
 
 public class AlarmPropagationTest {
 
@@ -14,7 +15,7 @@ public class AlarmPropagationTest {
     @Before
     public void setUp() {
         ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
-        testModel = modelBuilder.buildModel();
+        testModel = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
     }
 
     @Test

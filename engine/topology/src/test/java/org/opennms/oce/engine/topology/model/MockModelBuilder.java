@@ -26,20 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.itest;
+package org.opennms.oce.engine.topology.model;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.impl.ModelBuilderImpl;
-import org.opennms.oce.model.v1.schema.Inventory;
-import org.opennms.oce.model.v1.schema.MetaModel;
-import org.opennms.oce.model.v1.schema.ModelObjectEntry;
-import org.opennms.oce.model.v1.schema.PeerRef;
-import org.opennms.oce.model.v1.schema.RelativeRef;
 
 public class MockModelBuilder {
+    /*
     private final List<ModelObjectEntry> modelObjects = new ArrayList<>();
 
     public MockModelBuilder withModelObject(String type, String id) {
@@ -106,6 +98,7 @@ public class MockModelBuilder {
         final ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
         return modelBuilder.buildModel(metaModel, inventory);
     }
+    */
 
 
 }

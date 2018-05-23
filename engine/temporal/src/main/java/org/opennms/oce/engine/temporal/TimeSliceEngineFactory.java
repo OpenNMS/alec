@@ -28,14 +28,10 @@
 
 package org.opennms.oce.engine.temporal;
 
-import org.opennms.oce.engine.common.SimpleEngineFactory;
+import org.opennms.oce.engine.api.EngineFactory;
 
-public class TimeSliceEngineFactory extends SimpleEngineFactory<TimeSliceProcessor> {
+public class TimeSliceEngineFactory implements EngineFactory {
     private Integer sliceMillis;
-
-    public TimeSliceEngineFactory() {
-        super(TimeSliceProcessor.class);
-    }
 
     @Override
     public String getName() {
@@ -44,7 +40,7 @@ public class TimeSliceEngineFactory extends SimpleEngineFactory<TimeSliceProcess
 
     @Override
     public TimeSliceProcessor createEngine() {
-        final TimeSliceProcessor engine = super.createEngine();
+        final TimeSliceProcessor engine = new TimeSliceProcessor();
         if (sliceMillis != null) {
             engine.setSliceMillis(sliceMillis);
         }

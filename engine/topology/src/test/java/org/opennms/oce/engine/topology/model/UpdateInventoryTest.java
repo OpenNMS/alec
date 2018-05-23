@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.itest.topology;
+package org.opennms.oce.engine.topology.model;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -38,15 +38,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
-import org.opennms.oce.model.impl.ModelBuilderImpl;
-import org.opennms.oce.model.impl.ModelObjectImpl;
 
 public class UpdateInventoryTest {
 
     TopologyEngineFactory topologyEngineFactory;
-    Model model;
+    ModelImpl model;
+
     @Rule
     public ExpectedException exceptionGrabber = ExpectedException.none();
 
@@ -83,7 +80,7 @@ public class UpdateInventoryTest {
          */
 
         //Assert that inventory and model are constructed properly
-        ModelObject root = model.getRoot();
+        ModelObjectImpl root = model.getRoot();
         assertThat(root, notNullValue());
         assertThat(root.getParent(), nullValue());
 
@@ -139,7 +136,7 @@ public class UpdateInventoryTest {
          *  Note: currently we do not consider detachments from uncles and nephews
          */
 
-        ModelObject root = model.getRoot();
+        ModelObjectImpl root = model.getRoot();
         assertThat(root, notNullValue());
         assertThat(root.getParent(), nullValue());
 

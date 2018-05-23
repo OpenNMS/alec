@@ -30,6 +30,7 @@ package org.opennms.oce.engine.shell;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,11 +44,10 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.driver.EngineUtils;
-import api.ScoreMetric;
-import api.ScoreReport;
-import api.ScoringStrategy;
-import org.opennms.oce.model.alarm.api.Incident;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.driver.score.api.ScoreMetric;
+import org.opennms.oce.driver.score.api.ScoreReport;
+import org.opennms.oce.driver.score.api.ScoringStrategy;
 
 // Derive a score comparing a Set of Incidents to a Base Sample
 @Command(scope = "oce", name = "scoreIncidents", description = "Score Correlated Incidents against a baseline.")
@@ -89,7 +89,8 @@ public class Score implements Action {
 
     // Read Incidents from XML file and filter out any w/o Alarms
     private Set<Incident> getIncidents(Path pathspec) throws JAXBException, IOException {
-        return EngineUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
+        return Collections.emptySet();
+        // FIXME: return EngineUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
     }
 
     private ScoringStrategy getScoringStrategy() {

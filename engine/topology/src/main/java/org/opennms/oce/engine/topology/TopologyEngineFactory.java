@@ -28,13 +28,9 @@
 
 package org.opennms.oce.engine.topology;
 
-import org.opennms.oce.engine.common.SimpleEngineFactory;
+import org.opennms.oce.engine.api.EngineFactory;
 
-public class TopologyEngineFactory extends SimpleEngineFactory<TopologyEngine> {
-
-    public TopologyEngineFactory() {
-        super(TopologyEngine.class);
-    }
+public class TopologyEngineFactory implements EngineFactory {
 
     @Override
     public String getName() {
@@ -43,8 +39,7 @@ public class TopologyEngineFactory extends SimpleEngineFactory<TopologyEngine> {
 
     @Override
     public TopologyEngine createEngine() {
-        final TopologyEngine engine = super.createEngine();
-        return engine;
+        return new TopologyEngine();
     }
 
 }

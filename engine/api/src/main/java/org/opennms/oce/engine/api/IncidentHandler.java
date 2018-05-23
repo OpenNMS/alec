@@ -28,7 +28,8 @@
 
 package org.opennms.oce.engine.api;
 
-import org.opennms.oce.model.alarm.api.Incident;
+
+import org.opennms.oce.datasource.api.Incident;
 
 public interface IncidentHandler {
 

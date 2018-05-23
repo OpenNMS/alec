@@ -34,18 +34,18 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
+import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.model.ModelImpl;
 
 @Command(scope = "oce", name = "modelTypes", description="Model Types Listing")
 @Service
 public class ModelTypes implements Action {
     @Reference
-    private ModelBuilder builder;
+    private ModelBuilderImpl builder;
 
     @Override
     public Object execute() throws Exception {
-        Model model = builder.buildModel();
+        ModelImpl model = builder.buildModel();
         final Set<String> types = model.getTypes();
         if (types == null || types.isEmpty()) {
             System.out.println("No model types");

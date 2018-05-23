@@ -34,34 +34,34 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 
 public class ModelWalker {
 
-    public static void visit(Model model, ModelVisitor visitor) {
+    public static void visit(ModelImpl model, ModelVisitor visitor) {
         // Walk the entire model
         walkChildren(model.getRoot(), model.getRoot().getChildren(), visitor);
     }
 
-    public static void visitNeighbors(ModelObject object, int szl, ModelVisitor visitor) {
+    public static void visitNeighbors(ModelObjectImpl object, int szl, ModelVisitor visitor) {
         // Used to collect nodes during partial traversal
-        final Set<ModelObject> collected = new HashSet<>();
+        final Set<ModelObjectImpl> collected = new HashSet<>();
         visitor.visitNode(object);
         walkNeighbors(Collections.singleton(object), szl, visitor, collected);
     }
 
-    private static void walkChildren(ModelObject parent, Set<ModelObject> children, ModelVisitor visitor) {
-        for (ModelObject child : children) {
+    private static void walkChildren(ModelObjectImpl parent, Set<ModelObjectImpl> children, ModelVisitor visitor) {
+        for (ModelObjectImpl child : children) {
             visitor.visitNode(child);
             visitor.visitEdge(child, parent, EdgeType.PARENT);
 
-            for (ModelObject peer : child.getPeers()) {
+            for (ModelObjectImpl peer : child.getPeers()) {
                 // Bi-directional peers
                 visitor.visitEdge(child, peer, EdgeType.PEER);
                 visitor.visitEdge(peer, child, EdgeType.PEER);
             }
-            for (ModelObject uncle : child.getUncles()) {
+            for (ModelObjectImpl uncle : child.getUncles()) {
                 visitor.visitEdge(child, uncle, EdgeType.UNCLE);
             }
 
@@ -73,29 +73,29 @@ public class ModelWalker {
     /**
      * Walk model objects that have not yet been collected and reduce scope each iteration
      */
-    private static void walkNeighbors(Set<ModelObject> last, Integer szl, ModelVisitor visitor, Set<ModelObject> collected) {
+    private static void walkNeighbors(Set<ModelObjectImpl> last, Integer szl, ModelVisitor visitor, Set<ModelObjectImpl> collected) {
         if (szl <= 0) {
             // we've reached the maximium depth for this graph
             return;
         }
-        for (ModelObject object : last) {
-            Set<ModelObject> neighbors = new LinkedHashSet<>();
-            ModelObject parent = object.getParent();
+        for (ModelObjectImpl object : last) {
+            Set<ModelObjectImpl> neighbors = new LinkedHashSet<>();
+            ModelObjectImpl parent = object.getParent();
             if (!isRoot(parent)) {
                 visitor.visitEdge(object, parent, EdgeType.PARENT);
                 neighbors.add(parent);
             }
             neighbors.addAll(object.getPeers().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject peer : object.getPeers()) {
+            for (ModelObjectImpl peer : object.getPeers()) {
                 visitor.visitEdge(object, peer, EdgeType.PEER);
                 visitor.visitEdge(peer, object, EdgeType.PEER);
             }
             neighbors.addAll(object.getUncles().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject dependent : object.getUncles()) {
+            for (ModelObjectImpl dependent : object.getUncles()) {
                 visitor.visitEdge(dependent, object, EdgeType.UNCLE);
             }
             neighbors.addAll(object.getChildren().stream().filter(o -> !collected.contains(o)).collect(Collectors.toSet()));
-            for (ModelObject child : object.getChildren()) {
+            for (ModelObjectImpl child : object.getChildren()) {
                 visitor.visitEdge(child, object, EdgeType.PARENT);
             }
             collected.addAll(neighbors);
@@ -103,7 +103,7 @@ public class ModelWalker {
         }
     }
 
-    private static boolean isRoot(ModelObject mo) {
+    private static boolean isRoot(ModelObjectImpl mo) {
         return mo.getParent() == null || mo.getParent().equals(mo);
     }
 

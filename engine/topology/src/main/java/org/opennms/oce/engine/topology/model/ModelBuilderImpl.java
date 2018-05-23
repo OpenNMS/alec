@@ -28,38 +28,18 @@
 
 package org.opennms.oce.engine.topology.model;
 
-import static org.opennms.oce.model.impl.ModelObjectKey.key;
+public class ModelBuilderImpl {
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-import java.util.stream.Collectors;
+    public static final String MODEL_ROOT_TYPE = "Model";
+    public static final String MODEL_ROOT_ID = "model";
 
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.v1.schema.Inventory;
-import org.opennms.oce.model.v1.schema.MetaModel;
-import org.opennms.oce.model.v1.schema.ModelObjectEntry;
-import org.opennms.oce.model.v1.schema.PeerRef;
-import org.opennms.oce.model.v1.schema.RelativeRef;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
+    public ModelImpl buildModel() {
+        ModelObjectImpl root = new ModelObjectImpl(MODEL_ROOT_TYPE, MODEL_ROOT_ID);
+        return new ModelImpl(root);
+    }
 
-import com.google.common.base.Strings;
-
-public class ModelBuilderImpl implements ModelBuilder {
+    /*
     private static final Logger LOG = LoggerFactory.getLogger(ModelBuilderImpl.class);
 
     public static final String MODEL_ROOT_TYPE = "Model";
@@ -205,6 +185,6 @@ public class ModelBuilderImpl implements ModelBuilder {
         mo.setFriendlyName(moe.getFriendlyName());
         return mo;
     }
-
+    */
 
 }

@@ -28,12 +28,12 @@
 
 package org.opennms.oce.engine.topology.shell.graph;
 
-import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 
 public interface ModelVisitor {
 
-    void visitNode(ModelObject node);
+    void visitNode(ModelObjectImpl node);
 
-    void visitEdge(ModelObject nodeA, ModelObject nodeZ, EdgeType type);
+    void visitEdge(ModelObjectImpl nodeA, ModelObjectImpl nodeZ, EdgeType type);
 
 }

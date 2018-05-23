@@ -13,7 +13,6 @@
     <modules>
         <module>api</module>
         <module>cluster</module>
-        <module>common</module>
         <module>itest</module>
         <module>shell</module>
         <module>temporal</module>

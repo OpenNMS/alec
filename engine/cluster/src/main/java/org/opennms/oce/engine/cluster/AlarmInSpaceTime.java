@@ -31,7 +31,7 @@ package org.opennms.oce.engine.cluster;
 import java.util.Objects;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.opennms.oce.model.alarm.api.Alarm;
+import org.opennms.oce.datasource.api.Alarm;
 
 public class AlarmInSpaceTime implements Clusterable {
     private final Alarm alarm;

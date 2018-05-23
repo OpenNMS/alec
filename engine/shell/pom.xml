@@ -34,16 +34,8 @@
             <artifactId>org.opennms.oce.engine.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.driver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.model</groupId>
-            <artifactId>org.opennms.oce.model.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.model</groupId>
-            <artifactId>org.opennms.oce.model.shell</artifactId>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.main</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>

@@ -1,41 +1,37 @@
 package org.opennms.oce.engine.topology.model;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.api.ModelObject;
-import org.opennms.oce.model.api.OperationalState;
-import org.opennms.oce.model.api.ServiceState;
 
 public class AlarmPropagationTest {
 
-    private Model testModel;
+    private ModelImpl testModel;
 
     @Before
     public void setUp() {
-        ModelBuilder modelBuilder = new ModelBuilderImpl();
+        ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
         testModel = modelBuilder.buildModel();
     }
 
     @Test
     public void canPropagateState() {
-        ModelObject modelObject = testModel.getRoot();
-        ModelObject eswitch = testModel.getObjectById("Device", "n1");
-        ModelObject card1 = testModel.getObjectById("Card", "n1-c1");
-        ModelObject card2 = testModel.getObjectById("Card", "n1-c2");
-        ModelObject port1 = testModel.getObjectById("Port", "n1-c1-p1");
-        ModelObject port2 = testModel.getObjectById("Port", "n1-c1-p2");
-        ModelObject port3 = testModel.getObjectById("Port", "n1-c2-p1");
-        ModelObject port4 = testModel.getObjectById("Port", "n1-c2-p2");
-        ModelObject link = testModel.getObjectById("Link", "n1-c1-p1___n2-c1-p1");
+        ModelObjectImpl ModelObjectImpl = testModel.getRoot();
+        ModelObjectImpl eswitch = testModel.getObjectById("Device", "n1");
+        ModelObjectImpl card1 = testModel.getObjectById("Card", "n1-c1");
+        ModelObjectImpl card2 = testModel.getObjectById("Card", "n1-c2");
+        ModelObjectImpl port1 = testModel.getObjectById("Port", "n1-c1-p1");
+        ModelObjectImpl port2 = testModel.getObjectById("Port", "n1-c1-p2");
+        ModelObjectImpl port3 = testModel.getObjectById("Port", "n1-c2-p1");
+        ModelObjectImpl port4 = testModel.getObjectById("Port", "n1-c2-p2");
+        ModelObjectImpl link = testModel.getObjectById("Link", "n1-c1-p1___n2-c1-p1");
 
         // Verify initial State
         assertThat(port1.getServiceState(), is(ServiceState.IN));
-        // ... all modelObjects
+        // ... all ModelObjectImpls
 
         assertEquals(port1.getOperationalState(), OperationalState.NORMAL);
         // ...

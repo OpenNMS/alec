@@ -33,8 +33,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.ResourceKey;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.ResourceKey;
 
 public class Vertex {
     private final long id;

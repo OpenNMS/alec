@@ -28,12 +28,29 @@
 
 package org.opennms.oce.engine.api;
 
-public interface Engine extends AlarmProcessor {
+import java.util.List;
+
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmHandler;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryHandler;
+import org.opennms.oce.datasource.api.InventoryObject;
+
+public interface Engine extends AlarmHandler, InventoryHandler {
+
+    void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory);
 
     long getTickResolutionMs();
 
     void tick(long timestampInMillis);
 
     void destroy();
+
+    /**
+     * Passes the reference to the IncidentHandler.
+     * The IncidentHandler exposes <code>onIncident()</code> callback for creating and updating Incidents.
+     * @param handler
+     */
+    void registerIncidentHandler(IncidentHandler handler);
 
 }

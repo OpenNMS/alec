@@ -35,26 +35,26 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 
 @Command(scope = "oce", name = "displayModel", description="Display the topology model")
 @Service
 public class DisplayModel implements Action {
     @Reference
-    private ModelBuilder builder;
+    private ModelBuilderImpl builder;
 
     @Override
     public Object execute() throws Exception {
-        Model model = builder.buildModel();
+        ModelImpl model = builder.buildModel();
         for (String type : model.getTypes()) {
             System.out.println("(TYPE :: " + type + ")");
-            final Map<String, ModelObject> objects = model.getObjectsByIdForType(type);
+            final Map<String, ModelObjectImpl> objects = model.getObjectsByIdForType(type);
             if (objects == null || objects.size() < 1) {
                 System.out.println("(No objects for type " + type + ")");
             } else {
-                for (Entry<String, ModelObject> entry : objects.entrySet()) {
+                for (Entry<String, ModelObjectImpl> entry : objects.entrySet()) {
                     System.out.println(entry.getKey() + " : " + entry.getValue());
                 }
             }

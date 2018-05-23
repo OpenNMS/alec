@@ -28,16 +28,7 @@
 
 package org.opennms.oce.engine.shell;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -46,12 +37,6 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.driver.Driver;
-import org.opennms.oce.engine.driver.EngineUtils;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.v1.schema.Incidents;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Incidents.
@@ -61,9 +46,6 @@ import org.opennms.oce.model.v1.schema.Incidents;
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
 public class ProcessAlarms implements Action {
-
-    @Reference(optional = true)
-    private Model model;
 
     @Reference
     private List<EngineFactory> engineFactories;
@@ -78,6 +60,12 @@ public class ProcessAlarms implements Action {
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
+    @Override
+    public Object execute() throws Exception {
+        return null;
+    }
+
+    /*
     @Override
     public Object execute() throws Exception {
         final EngineFactory engineFactory = getEngineFactory();
@@ -118,5 +106,5 @@ public class ProcessAlarms implements Action {
                             + ". Available engines include: " + engineNames);
                 });
     }
-
+    */
 }

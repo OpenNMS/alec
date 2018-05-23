@@ -43,11 +43,11 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
-import org.opennms.oce.model.shell.graph.EdgeType;
-import org.opennms.oce.model.shell.graph.ModelVisitor;
-import org.opennms.oce.model.shell.graph.ModelWalker;
+import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.shell.graph.EdgeType;
+import org.opennms.oce.engine.topology.shell.graph.ModelVisitor;
+import org.opennms.oce.engine.topology.shell.graph.ModelWalker;
 
 @Command(scope = "oce", name = "generateGraph", description = "Generate DOT file of inventory graph.")
 @Service
@@ -57,7 +57,7 @@ public class GenerateGraph implements Action, ModelVisitor {
     private static final String END_GRAPH = "\n}\n";
 
     @Reference
-    private Model model;
+    private ModelImpl model;
 
     // Used to collect dotGraph encoded nodes for rendering
     private Map<String, String> graphNodes = new HashMap<>();
@@ -69,7 +69,7 @@ public class GenerateGraph implements Action, ModelVisitor {
     private Set<String> graphEdges = new HashSet<>();
 
     // Used to collect nodes during partial traversal
-    private Set<ModelObject> collected = new HashSet<>();
+    private Set<ModelObjectImpl> collected = new HashSet<>();
 
     @Option(name = "-o", description = "Output file")
     private String outFile;
@@ -89,7 +89,7 @@ public class GenerateGraph implements Action, ModelVisitor {
     public GenerateGraph() {
     }
 
-    public GenerateGraph(Model model) {
+    public GenerateGraph(ModelImpl model) {
         this.model = model;
     }
 
@@ -138,22 +138,22 @@ public class GenerateGraph implements Action, ModelVisitor {
     }
 
     // An edge looks like "CARD_01 -- PORT_01;"
-    private String getEdge(ModelObject parent, ModelObject child) {
+    private String getEdge(ModelObjectImpl parent, ModelObjectImpl child) {
         return "  " + getDisplayName(parent) + " -- " + getDisplayName(child) + ";";
     }
 
     // A PEER edge is colored BLUE
-    private String getPeerEdge(ModelObject object, ModelObject peer) {
+    private String getPeerEdge(ModelObjectImpl object, ModelObjectImpl peer) {
         return "  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"blue\"];";
     }
 
     // A UNCLE/DEPENDANT edge is colored ORANGE
-    private String getDependentEdge(ModelObject object, ModelObject peer) {
+    private String getDependentEdge(ModelObjectImpl object, ModelObjectImpl peer) {
         return "  " + getDisplayName(object) + " -- " + getDisplayName(peer) + "[color=\"orange\"];";
     }
 
     // A node definition looks like "CARD_02[color=green];"
-    private String getNode(ModelObject object) {
+    private String getNode(ModelObjectImpl object) {
         String color = "white";
         switch (object.getOperationalState()) {
         case NORMAL:
@@ -173,7 +173,7 @@ public class GenerateGraph implements Action, ModelVisitor {
         return "  " + getDisplayName(object) + "[color=" + color + "];";
     }
 
-    private String getDisplayName(ModelObject mo) {
+    private String getDisplayName(ModelObjectImpl mo) {
         String effectiveName;
         if (mo.getFriendlyName() != null) {
             effectiveName = mo.getFriendlyName();
@@ -220,22 +220,22 @@ public class GenerateGraph implements Action, ModelVisitor {
     }
 
     @Override
-    public void visitNode(ModelObject node) {
+    public void visitNode(ModelObjectImpl node) {
         graphNodes.put(getDisplayName(node), getNode(node));
     }
 
     @Override
-    public void visitEdge(ModelObject nodeA, ModelObject nodeZ, EdgeType type) {
+    public void visitEdge(ModelObjectImpl nodeA, ModelObjectImpl nodeZ, EdgeType type) {
         graphNodes.put(getDisplayName(nodeA), getNode(nodeA));
         graphNodes.put(getDisplayName(nodeZ), getNode(nodeZ));
-        switch(type) {
-            case EdgeType.PARENT:
+        switch (type) {
+            case PARENT:
                 graphEdges.add(getEdge(nodeZ, nodeA));
                 break;
-            case EdgeType.UNCLE:
+            case UNCLE:
                 graphEdges.add(getDependentEdge(nodeZ, nodeA));
                 break;
-            case EdgeType.PEER:
+            case PEER:
                 graphEdges.add(getPeerEdge(nodeZ, nodeA));
                 break;
         }

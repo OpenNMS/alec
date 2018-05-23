@@ -42,10 +42,16 @@ public class AlarmBean implements Alarm {
     private Severity severity;
 
     public AlarmBean() {
+        this(null);
     }
 
     public AlarmBean(String id) {
+        this(id, System.currentTimeMillis());
+    }
+
+    public AlarmBean(String id, long time) {
         this.id = id;
+        this.time = time;
     }
 
     @Override

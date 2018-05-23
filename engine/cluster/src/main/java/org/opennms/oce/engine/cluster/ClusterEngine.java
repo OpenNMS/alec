@@ -44,13 +44,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.engine.common.IncidentBean;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.alarm.api.ResourceKey;
-import org.opennms.oce.model.api.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,12 +130,6 @@ public class ClusterEngine implements Engine {
         distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
     }
 
-    @Override
-    public synchronized void onAlarm(Alarm alarm) {
-       getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
-       alarmsChangedSinceLastTick = true;
-    }
-
     private Vertex getVertexForAlarm(Alarm alarm) {
         return alarm.getResourceKeys().stream().map(this::getVertexForResource)
                 // All the vertices returned should be the same, use the first
@@ -145,14 +139,10 @@ public class ClusterEngine implements Engine {
     }
 
     @Override
-    public void setInventory(Model inventory) {
-        // ignored for now
-    }
-
-    @Override
     public void registerIncidentHandler(IncidentHandler handler) {
         this.incidentHandler = handler;
     }
+
 
     @Override
     public long getTickResolutionMs() {
@@ -171,6 +161,11 @@ public class ClusterEngine implements Engine {
             onTick(timestampInMillis);
             lastRun = timestampInMillis;
         }
+    }
+
+    @Override
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+        // TODO
     }
 
     @Override
@@ -291,6 +286,28 @@ public class ClusterEngine implements Engine {
             }
         }
         return incidents;
+    }
+
+    @Override
+    public void onAlarmCreatedOrUpdated(Alarm alarm) {
+        getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
+        alarmsChangedSinceLastTick = true;
+    }
+
+    @Override
+    public void onAlarmCleared(Alarm alarm) {
+        getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
+        alarmsChangedSinceLastTick = true;
+    }
+
+    @Override
+    public void onInventoryAdded(InventoryObject inventoryObject) {
+        // pass
+    }
+
+    @Override
+    public void onInventoryRemoved(InventoryObject inventoryObject) {
+        // pass
     }
 
     private static class CandidateAlarmWithDistance {

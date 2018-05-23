@@ -32,12 +32,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.engine.common.IncidentBean;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.api.Model;
 
 /**
  * A toy processor that simply correlates on time slices
@@ -59,15 +59,19 @@ public class TimeSliceProcessor implements Engine {
     IncidentBean current;
 
     @Override
-    public void onAlarm(Alarm alarm) {
-        // There is a presumption that alarms will be presented 
+    public void onAlarmCreatedOrUpdated(Alarm alarm) {
+        // There is a presumption that alarms will be presented
         //      in chronological order for this toy implementation.
         if (isInCurrentWindow(alarm)) {
             addToCurrrent(alarm);
         } else {
             newWindow(alarm);
         }
+    }
 
+    @Override
+    public void onAlarmCleared(Alarm alarm) {
+        // TODO
     }
 
     private void addToCurrrent(Alarm alarm) {
@@ -95,13 +99,13 @@ public class TimeSliceProcessor implements Engine {
         this.handler = handler;
     }
 
-    @Override
-    public void setInventory(Model inventory) {
-        // Ignored by this processor;
-    }
-
     public void setSliceMillis(int sliceMillis) {
         this.sliceMillis = sliceMillis;
+    }
+
+    @Override
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+        // TODO
     }
 
     @Override
@@ -121,4 +125,13 @@ public class TimeSliceProcessor implements Engine {
         // no-op
     }
 
+    @Override
+    public void onInventoryAdded(InventoryObject inventoryObject) {
+        // pass
+    }
+
+    @Override
+    public void onInventoryRemoved(InventoryObject inventoryObject) {
+        // pass
+    }
 }

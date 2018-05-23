@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine;
+package org.opennms.oce.engine.temporal;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,15 +38,13 @@ import java.util.stream.IntStream;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.oce.engine.api.AlarmProcessor;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.engine.common.AlarmBean;
-import org.opennms.oce.engine.temporal.TimeSliceProcessor;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
 
-
-public class EngineTest implements IncidentHandler {
+public class TemporalEngineTest implements IncidentHandler {
 
     List<Incident> incidents;
 
@@ -59,25 +57,25 @@ public class EngineTest implements IncidentHandler {
 
     @Test
     public void testFiveAlarmsSameTime() {
-        AlarmProcessor processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceProcessor();
         processor.registerIncidentHandler(this);
         List<Alarm> alarms = getAlarms(5, 20);
-        alarms.forEach(processor::onAlarm);
+        alarms.forEach(processor::onAlarmCreatedOrUpdated);
         // Terminate the test
         sendterminalAlarm(processor, 100);
         // All five alarms should be in a single incident
         assertEquals(1, incidents.size());
         // All 5 Alarms should be there
         assertEquals(5,
-                     incidents.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
+                incidents.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
     }
 
     @Test
     public void testTwoAlarmsSameIncident() {
-        AlarmProcessor processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceProcessor();
         processor.registerIncidentHandler(this);
         List<Alarm> alarms = getAlarms(2, 20);
-        alarms.forEach(processor::onAlarm);
+        alarms.forEach(processor::onAlarmCreatedOrUpdated);
         // Terminate the test
         sendterminalAlarm(processor, 100);
         // 1 incident
@@ -88,15 +86,15 @@ public class EngineTest implements IncidentHandler {
 
     @Test
     public void testTwoIncidents() {
-        AlarmProcessor processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceProcessor();
         processor.registerIncidentHandler(this);
         // First Incident
-        processor.onAlarm(new AlarmBean("A", 11000));
-        processor.onAlarm(new AlarmBean("B", 12000));
-        processor.onAlarm(new AlarmBean("C", 13000));
+        processor.onAlarmCreatedOrUpdated(new AlarmBean("A", 11000));
+        processor.onAlarmCreatedOrUpdated(new AlarmBean("B", 12000));
+        processor.onAlarmCreatedOrUpdated(new AlarmBean("C", 13000));
         // Second Incident
-        processor.onAlarm(new AlarmBean("X", 31000));
-        processor.onAlarm(new AlarmBean("Y", 32000));
+        processor.onAlarmCreatedOrUpdated(new AlarmBean("X", 31000));
+        processor.onAlarmCreatedOrUpdated(new AlarmBean("Y", 32000));
 
         // Terminate the test
         sendterminalAlarm(processor, 100);
@@ -114,7 +112,7 @@ public class EngineTest implements IncidentHandler {
     private List<Alarm> getAlarms(int nAlarms, long seconds) {
         List<Alarm> alarms = new ArrayList<>();
         IntStream.range(0, nAlarms).forEach(index -> alarms.add(new AlarmBean(Integer.toString(index + 1) + "." + getRandom(),
-                                                                              seconds * 1000)));
+                seconds * 1000)));
         return alarms;
     }
 
@@ -122,9 +120,9 @@ public class EngineTest implements IncidentHandler {
         return Integer.toString(r.nextInt(10000));
     }
 
-    private void sendterminalAlarm(AlarmProcessor processor, long t) {
+    private void sendterminalAlarm(Engine processor, long t) {
         Alarm terminalAlarm = new AlarmBean("terminal-alarm", t * 1000);
-        processor.onAlarm(terminalAlarm);
+        processor.onAlarmCreatedOrUpdated(terminalAlarm);
     }
 
     @Override

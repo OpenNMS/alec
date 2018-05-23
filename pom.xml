@@ -83,6 +83,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.oce.driver</groupId>
+                <artifactId>org.opennms.oce.driver.main</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.oce.engine</groupId>
                 <artifactId>org.opennms.oce.engine.api</artifactId>
                 <version>${project.version}</version>
@@ -90,11 +95,6 @@
             <dependency>
                 <groupId>org.opennms.oce.engine</groupId>
                 <artifactId>org.opennms.oce.engine.common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opennms.oce.engine</groupId>
-                <artifactId>org.opennms.oce.engine.driver</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

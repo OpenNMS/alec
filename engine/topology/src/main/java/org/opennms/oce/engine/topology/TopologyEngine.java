@@ -30,6 +30,7 @@ package org.opennms.oce.engine.topology;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,13 +41,15 @@ import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.ResourceKey;
-import org.opennms.oce.model.api.Group;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelObject;
+import org.opennms.oce.engine.topology.model.GroupImpl;
+import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +65,11 @@ public class TopologyEngine implements Engine {
 
     private IncidentHandler handler;
 
-    private Model inventory;
+    private ModelImpl inventory;
 
     private final KieSession kieSession;
 
-    private Map<Group, FactHandle> groupToFactHandles = new HashMap<>();
+    private Map<GroupImpl, FactHandle> groupToFactHandles = new HashMap<>();
 
     public TopologyEngine() {
         KieServices ks = KieServices.Factory.get();
@@ -87,13 +90,13 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
-    public void onAlarm(Alarm alarm) {
+    public void onAlarmCreatedOrUpdated(Alarm alarm) {
         if (inventory == null) {
             throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
         }
 
         // Find the associated model object for this alarm, we assume there is a single model object
-        final ModelObject object = getObjectForAlarm(alarm);
+        final ModelObjectImpl object = getObjectForAlarm(alarm);
         if (object == null) {
             LOG.warn("No model object found for alarm: {}. The alarm will not be processed.", alarm);
             return;
@@ -101,8 +104,8 @@ public class TopologyEngine implements Engine {
         // Update the model object with the alarm
         object.onAlarm(alarm);
 
-        final Set<Group> alarmGroups = object.getAlarmGroups();
-        for (Group alarmGroup : alarmGroups) {
+        final Set<GroupImpl> alarmGroups = object.getAlarmGroups();
+        for (GroupImpl alarmGroup : alarmGroups) {
             boolean shouldBeInDroolsContext = alarmGroup.getNumberNonServiceAffecting() > 0
                     || alarmGroup.getNumberServiceAffecting() > 0;
             boolean isInDroolsContext = groupToFactHandles.containsKey(alarmGroup);
@@ -123,13 +126,18 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
+    public void onAlarmCleared(Alarm alarm) {
+        // TODO
+    }
+
+    @Override
     public void registerIncidentHandler(IncidentHandler handler) {
         this.handler = handler;
     }
 
     @Override
-    public void setInventory(Model inventory) {
-        this.inventory = Objects.requireNonNull(inventory, "Inventory is required for the topology engine.");
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+
     }
 
     @Override
@@ -145,7 +153,7 @@ public class TopologyEngine implements Engine {
         kieSession.fireAllRules();
     }
 
-    private ModelObject getObjectForAlarm(Alarm alarm) {
+    private ModelObjectImpl getObjectForAlarm(Alarm alarm) {
         final ResourceKey resourceKey = Iterables.getFirst(alarm.getResourceKeys(), null);
         if (resourceKey == null) {
             throw new IllegalStateException("Alarms must have at least one resource key.");
@@ -167,5 +175,16 @@ public class TopologyEngine implements Engine {
 
     public IncidentHandler getIncidentHandler() {
         return handler;
+    }
+
+
+    @Override
+    public void onInventoryAdded(InventoryObject inventoryObject) {
+
+    }
+
+    @Override
+    public void onInventoryRemoved(InventoryObject inventoryObject) {
+
     }
 }

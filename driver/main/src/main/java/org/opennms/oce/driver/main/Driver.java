@@ -28,31 +28,37 @@
 
 package org.opennms.oce.driver.main;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.opennms.oce.engine.api.Engine;
+import org.opennms.oce.datasource.api.AlarmDatasource;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.api.Model;
 
 public class Driver {
 
+    private final AlarmDatasource alarmDatasource;
+    private final InventoryDatasource inventoryDatasource;
+    private final IncidentDatasource incidentDatasource;
     private final EngineFactory engineFactory;
     private boolean verbose = false;
 
-    private Driver(EngineFactory engineFactory) {
+    private Driver(AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource, IncidentDatasource incidentDatasource, EngineFactory engineFactory) {
+        this.alarmDatasource = alarmDatasource;
+        this.inventoryDatasource = inventoryDatasource;
+        this.incidentDatasource = incidentDatasource;
         this.engineFactory = engineFactory;
     }
 
+    public void run() {
+
+    }
+    
+    /*
     public List<Incident> run(Model model, List<Alarm> alarms) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
@@ -98,6 +104,7 @@ public class Driver {
 
         return new ArrayList<>(session.incidents.values());
     }
+    */
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
@@ -154,8 +161,27 @@ public class Driver {
     }
 
     public static class DriverBuilder {
+        private AlarmDatasource alarmDatasource;
+        private InventoryDatasource inventoryDatasource;
+        private IncidentDatasource incidentDatasource;
         private EngineFactory engineFactory;
         private Boolean verbose;
+
+        public DriverBuilder withAlarmDatasource(AlarmDatasource alarmDatasource) {
+            this.alarmDatasource = alarmDatasource;
+            return this;
+        }
+
+        public DriverBuilder withInventoryDatasource(InventoryDatasource inventoryDatasource) {
+            this.inventoryDatasource = inventoryDatasource;
+            return this;
+        }
+
+        public DriverBuilder withIncidentDatasource(IncidentDatasource incidentDatasource) {
+            this.incidentDatasource = incidentDatasource;
+            return this;
+        }
+
 
         public DriverBuilder withEngineFactory(EngineFactory engineFactory) {
             this.engineFactory = engineFactory;
@@ -168,10 +194,19 @@ public class Driver {
         }
 
         public Driver build() {
+            if (alarmDatasource == null) {
+                throw new IllegalArgumentException("Alarm datasource is required.");
+            }
+            if (inventoryDatasource == null) {
+                throw new IllegalArgumentException("Inventory datasource is required.");
+            }
+            if (incidentDatasource == null) {
+                throw new IllegalArgumentException("Incident datasource is required.");
+            }
             if (engineFactory == null) {
                 throw new IllegalArgumentException("Engine factory is required.");
             }
-            final Driver driver = new Driver(engineFactory);
+            final Driver driver = new Driver(alarmDatasource, inventoryDatasource, incidentDatasource, engineFactory);
             if (verbose != null) {
                 driver.setVerbose(verbose);
             }

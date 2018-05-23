@@ -32,16 +32,11 @@ import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.opennms.oce.model.api.Group;
-import org.opennms.oce.model.api.ModelObject;
-import org.opennms.oce.model.api.OperationalState;
-import org.opennms.oce.model.api.ServiceState;
+public class GroupImpl {
 
-public class GroupImpl implements Group {
+    private ModelObjectImpl owner;
 
-    private ModelObject owner;
-
-    private Set<ModelObject> members = new HashSet<>();
+    private Set<ModelObjectImpl> members = new HashSet<>();
 
     private int normalStateCount;
 
@@ -49,56 +44,56 @@ public class GroupImpl implements Group {
 
     private int serviceAffectingCount;
 
-    public GroupImpl(ModelObject owner) {
+    public GroupImpl(ModelObjectImpl owner) {
         this.owner = owner;
     }
 
-    @Override
-    public ModelObject getOwner() {
+    
+    public ModelObjectImpl getOwner() {
         return owner;
     }
 
-    @Override
+    
     public int getNumberMembers() {
         return members.size();
     }
 
-    @Override
+    
     public int getNumberNormalState() {
         return normalStateCount;
     }
 
-    @Override
+    
     public int getNumberNonServiceAffecting() {
         return nonServiceAffectingCount;
     }
 
-    @Override
+    
     public int getNumberServiceAffecting() {
         return serviceAffectingCount;
     }
 
-    @Override
-    public Set<ModelObject> getMembers() {
+    
+    public Set<ModelObjectImpl> getMembers() {
         return members;
     }
 
-    @Override
-    public void updateOperationalState(ModelObject object, OperationalState previous) {
+    
+    public void updateOperationalState(ModelObjectImpl object, OperationalState previous) {
         assertInGroup(object);
         incrementOperationStatus(object.getOperationalState());
         decrementOperationStatus(previous);
         validateState();
     }
 
-    @Override
-    public void updateServiceState(ModelObject object, ServiceState previous) {
+    
+    public void updateServiceState(ModelObjectImpl object, ServiceState previous) {
         assertInGroup(object);
         // TODO - handle an object moving from IN service to OUT of service as a REMOVE
         // TODO - handle an object moving from OUT of service to IN service as an ADD
     }
 
-    public void addMember(ModelObject member) {
+    public void addMember(ModelObjectImpl member) {
         // TODO - assert NOT in group?
         if (members.add(member)) {
             if (member.getServiceState() == ServiceState.IN) {
@@ -107,11 +102,11 @@ public class GroupImpl implements Group {
         }
     }
 
-    public void removeMember(ModelObject member) {
+    public void removeMember(ModelObjectImpl member) {
         assertInGroup(member);
         if (members.remove(member)) {
             // TODO - maybe serviceState needs to be tracked internally in the group.
-            // Otherwise, if a modelObject fails to report change, the opStatus changes can be corrupted.
+            // Otherwise, if a ModelObjectImpl fails to report change, the opStatus changes can be corrupted.
             if (member.getServiceState() == ServiceState.IN) {
                 decrementOperationStatus(member.getOperationalState());
             }
@@ -152,9 +147,9 @@ public class GroupImpl implements Group {
         }
     }
 
-    private void assertInGroup(ModelObject object) {
+    private void assertInGroup(ModelObjectImpl object) {
         if (!members.contains(object)) {
-            throw new InvalidParameterException("invalid invocation from a modelObject not in the group");
+            throw new InvalidParameterException("invalid invocation from a ModelObjectImpl not in the group");
         }
     }
 
@@ -164,7 +159,7 @@ public class GroupImpl implements Group {
         }
     }
 
-    @Override
+    
     public String toString() {
         return "G[" + owner + " : " + members + "]";
     }

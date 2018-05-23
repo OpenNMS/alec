@@ -48,11 +48,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.engine.common.IncidentBean;
-import org.opennms.oce.model.alarm.api.Alarm;
-import org.opennms.oce.model.alarm.api.Incident;
-import org.opennms.oce.model.alarm.api.ResourceKey;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -82,14 +82,14 @@ public class ClusterEngineTest implements IncidentHandler {
         Alarm alarm = mock(Alarm.class);
         ResourceKey key = new ResourceKey("a", "b", "c", "d");
         when(alarm.getResourceKeys()).thenReturn(Collections.singletonList(key));
-        engine.onAlarm(alarm);
+        engine.onAlarmCreatedOrUpdated(alarm);
 
         // The graph should be updated
         assertThat(graph.getVertexCount(), equalTo(4));
         assertThat(graph.getEdgeCount(), equalTo(3));
 
         // Now trigger the same alarm again
-        engine.onAlarm(alarm);
+        engine.onAlarmCreatedOrUpdated(alarm);
 
         // The graph should not have changed
         assertThat(graph.getVertexCount(), equalTo(4));
@@ -99,7 +99,7 @@ public class ClusterEngineTest implements IncidentHandler {
         alarm = mock(Alarm.class);
         key = new ResourceKey("a", "b", "c", "z");
         when(alarm.getResourceKeys()).thenReturn(Collections.singletonList(key));
-        engine.onAlarm(alarm);
+        engine.onAlarmCreatedOrUpdated(alarm);
 
         // The graph should be updated
         assertThat(graph.getVertexCount(), equalTo(5));
@@ -118,13 +118,13 @@ public class ClusterEngineTest implements IncidentHandler {
         when(alarm1.getId()).thenReturn("1");
         when(alarm1.getResourceKeys()).thenReturn(Collections.singletonList(key));
         when(alarm1.getTime()).thenReturn(now);
-        engine.onAlarm(alarm1);
+        engine.onAlarmCreatedOrUpdated(alarm1);
 
         Alarm alarm2 = mock(Alarm.class);
         when(alarm2.getId()).thenReturn("2");
         when(alarm2.getResourceKeys()).thenReturn(Collections.singletonList(key));
         when(alarm2.getTime()).thenReturn(now+1);
-        engine.onAlarm(alarm2);
+        engine.onAlarmCreatedOrUpdated(alarm2);
 
         // No incidents should be created yet
         assertThat(incidentsById.keySet(), hasSize(0));
@@ -152,7 +152,7 @@ public class ClusterEngineTest implements IncidentHandler {
         when(alarm3.getId()).thenReturn("3");
         when(alarm3.getResourceKeys()).thenReturn(Collections.singletonList(otherKey));
         when(alarm3.getTime()).thenReturn(now+1);
-        engine.onAlarm(alarm3);
+        engine.onAlarmCreatedOrUpdated(alarm3);
 
         // And a 4th alarm near the last one in time, but on another resource
         ResourceKey otherOtherKey = new ResourceKey("w", "x", "y", "z1");
@@ -160,7 +160,7 @@ public class ClusterEngineTest implements IncidentHandler {
         when(alarm4.getId()).thenReturn("4");
         when(alarm4.getResourceKeys()).thenReturn(Collections.singletonList(otherOtherKey));
         when(alarm4.getTime()).thenReturn(now+1);
-        engine.onAlarm(alarm4);
+        engine.onAlarmCreatedOrUpdated(alarm4);
 
         // Tick again
         now = now + engine.getTickResolutionMs()*2;

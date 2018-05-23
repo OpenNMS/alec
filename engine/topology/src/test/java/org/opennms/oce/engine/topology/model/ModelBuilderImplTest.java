@@ -28,6 +28,7 @@
 
 package org.opennms.oce.engine.topology.model;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -39,9 +40,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import java.util.Set;
 
 import org.junit.Test;
-import org.opennms.oce.model.api.Model;
-import org.opennms.oce.model.api.ModelBuilder;
-import org.opennms.oce.model.api.ModelObject;
 
 public class ModelBuilderImplTest {
 
@@ -49,8 +47,8 @@ public class ModelBuilderImplTest {
     public void canGenerateModel() {
 
         // We assume the impl is loading "inventory.xml" and "metamodel.xml" from resources
-        ModelBuilder modelBuilder = new ModelBuilderImpl();
-        Model model = modelBuilder.buildModel();
+        ModelBuilderImpl modelBuilder = new ModelBuilderImpl();
+        ModelImpl model = modelBuilder.buildModel();
 
         System.out.println("Types: " + model.getTypes());
 
@@ -58,7 +56,7 @@ public class ModelBuilderImplTest {
         assertThat(model.getTypes(), hasItem("Link"));
         // ... and others
 
-        ModelObject root = model.getRoot();
+        ModelObjectImpl root = model.getRoot();
         assertThat(root, notNullValue());
 
         // Parent of the root should always be null
@@ -67,25 +65,25 @@ public class ModelBuilderImplTest {
         // as defined in the inventory
         assertThat(root.getId(), equalTo(ModelBuilderImpl.MODEL_ROOT_ID));
 
-        Set<ModelObject> rootChildren = root.getChildren();
+        Set<ModelObjectImpl> rootChildren = root.getChildren();
         assertThat(rootChildren, hasSize(greaterThanOrEqualTo(2)));
 
         // TODO: How to get children of a specific type
-        ModelObject rootLink = rootChildren.stream()
+        ModelObjectImpl rootLink = rootChildren.stream()
                 .filter(mo -> mo.getType().equals("Link"))
                 .findFirst()
                 .get();
         assertThat(rootLink, notNullValue());
 
 
-        Set<ModelObject> rootLinkPeers = rootLink.getPeers();
+        Set<ModelObjectImpl> rootLinkPeers = rootLink.getPeers();
         assertThat(rootLinkPeers, hasSize(2));
 
-        ModelObject rootLinkPeerA = rootLinkPeers.stream()
+        ModelObjectImpl rootLinkPeerA = rootLinkPeers.stream()
                 .filter(mo -> mo.getId().equals("n1-c1-p1"))
                 .findFirst()
                 .get();
-        ModelObject rootLinkPeerZ = rootLinkPeers.stream()
+        ModelObjectImpl rootLinkPeerZ = rootLinkPeers.stream()
                 .filter(mo -> mo.getId().equals("n2-c1-p1"))
                 .findFirst()
                 .get();
@@ -94,10 +92,10 @@ public class ModelBuilderImplTest {
         assertThat(rootLinkPeerA.getPeers(), hasSize(1));
         assertThat(rootLinkPeerZ.getPeers(), hasSize(1));
 
-        ModelObject n1c1 = rootLinkPeerA.getParent();
+        ModelObjectImpl n1c1 = rootLinkPeerA.getParent();
         assertThat(n1c1.getId(), equalTo("n1-c1"));
 
-        ModelObject n1 = n1c1.getParent();
+        ModelObjectImpl n1 = n1c1.getParent();
         assertThat(n1.getId(), equalTo("n1"));
 
         // Back at the same root

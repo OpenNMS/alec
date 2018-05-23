@@ -13,10 +13,6 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.driver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
             <artifactId>org.opennms.oce.engine.temporal</artifactId>
         </dependency>
         <dependency>
@@ -30,8 +26,8 @@
 
 
         <dependency>
-            <groupId>org.opennms.oce.model</groupId>
-            <artifactId>org.opennms.oce.model.impl</artifactId>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.main</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

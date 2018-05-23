@@ -26,30 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.engine.topology.model.graph;
 
-
-import java.util.List;
-
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.api.console.CommandLine;
-import org.apache.karaf.shell.api.console.Completer;
-import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.StringsCompleter;
-import org.opennms.oce.engine.api.EngineFactory;
-
-@Service
-public class EngineNameCompleter implements Completer {
-
-    @Reference
-    private List<EngineFactory> engineFactories;
-
-    @Override
-    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
-        StringsCompleter delegate = new StringsCompleter();
-        engineFactories.forEach(f -> delegate.getStrings().add(f.getName()));
-        return delegate.complete(session, commandLine, candidates);
-    }
-
+public enum EdgeType {
+    PARENT,
+    UNCLE,
+    PEER;
 }

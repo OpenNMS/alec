@@ -26,10 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.topology.shell.graph;
+package org.opennms.oce.engine.topology.model.graph;
 
-public enum EdgeType {
-    PARENT,
-    UNCLE,
-    PEER;
+import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+
+public interface ModelVisitor {
+
+    void visitNode(ModelObjectImpl node);
+
+    void visitEdge(ModelObjectImpl nodeA, ModelObjectImpl nodeZ, EdgeType type);
+
 }

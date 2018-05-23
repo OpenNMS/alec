@@ -26,9 +26,14 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.shell;
+package org.opennms.oce.features.shell;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -36,6 +41,10 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.jaxb.JaxbUtils;
+import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
 
 /**
@@ -56,43 +65,27 @@ public class ProcessAlarms implements Action {
     @Option(name = "-o", description = "Output file", required = false)
     private String outFile; // Default to "incidents.xml"
 
-    @Option(name = "-e", description = "Processor Engine Name", required = false)
+    @Option(name = "-e", description = "Engine Name", required = true)
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
     @Override
     public Object execute() throws Exception {
-        return null;
-    }
-
-    /*
-    @Override
-    public Object execute() throws Exception {
         final EngineFactory engineFactory = getEngineFactory();
-        final List<Alarm> alarms = EngineUtils.getAlarms(Paths.get(inFile));
-        final Driver driver = Driver.builder()
+        final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(inFile));
+        final TestDriver driver = TestDriver.builder()
                 .withEngineFactory(engineFactory)
                 .withVerboseOutput()
                 .build();
-        final List<Incident> incidents = driver.run(model, alarms);
+        final List<Incident> incidents = driver.run(alarms);
         write(incidents);
         return incidents;
     }
 
-
-    private void write(List<Incident> incidents) throws JAXBException, IOException {
+    private void write(List<Incident> incidents) throws IOException, JAXBException {
         String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
         System.out.printf("Writing %d incidents to %s.\n", incidents.size(), filepath);
-        try (OutputStream os = Files.newOutputStream(Paths.get(filepath))) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            Incidents list = new Incidents();
-            list.getIncident().addAll(incidents.stream()
-                .map(EngineUtils::toModelIncident)
-                .collect(Collectors.toList()));
-            marshaller.marshal(list, os);
-        }
+        JaxbUtils.writeIncidents(incidents, Paths.get(filepath));
     }
 
     private EngineFactory getEngineFactory() {
@@ -106,5 +99,4 @@ public class ProcessAlarms implements Action {
                             + ". Available engines include: " + engineNames);
                 });
     }
-    */
 }

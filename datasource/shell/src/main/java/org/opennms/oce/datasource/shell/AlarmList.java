@@ -28,33 +28,34 @@
 
 package org.opennms.oce.datasource.shell;
 
+import java.util.List;
+
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmDatasource;
 
-@Command(scope = "oce", name = "devices", description="Devices!")
+import jdk.nashorn.internal.ir.annotations.Reference;
+
+@Command(scope = "oce", name = "alarms", description="Alarms!")
 @Service
-public class DeviceList implements Action {
+public class AlarmList implements Action {
+
+    @Reference
+    private AlarmDatasource alarmDatasource;
+
     @Override
-    public Object execute() throws Exception {
+    public Object execute() {
+        final List<? extends Alarm> alarms = alarmDatasource.getAlarms();
+        if (alarms.size() < 1) {
+            System.out.println("(No alarms)");
+        } else {
+            for (Alarm alarm : alarms) {
+                System.out.println(alarm);
+            }
+        }
         return null;
     }
 
-    /*@Reference
-    private ModelProvider modelProvider;
-
-    @Override
-    public Object execute() throws Exception {
-        final List<Device> devices = modelProvider.getDevices();
-        for (Device device : devices) {
-            System.out.println(device);
-            for (Card card : device.getCards()) {
-                System.out.println("\t" + card);
-                for (Port port : card.getPorts()) {
-                    System.out.println("\t\t" + port);
-                }
-            }
-        }
-        return devices;
-    }*/
 }

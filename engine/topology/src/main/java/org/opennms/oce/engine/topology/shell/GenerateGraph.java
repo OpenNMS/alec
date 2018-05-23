@@ -43,13 +43,15 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.datasource.api.InventoryDatasource;
+import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
 import org.opennms.oce.engine.topology.model.ModelImpl;
 import org.opennms.oce.engine.topology.model.ModelObjectImpl;
-import org.opennms.oce.engine.topology.shell.graph.EdgeType;
-import org.opennms.oce.engine.topology.shell.graph.ModelVisitor;
-import org.opennms.oce.engine.topology.shell.graph.ModelWalker;
+import org.opennms.oce.engine.topology.model.graph.EdgeType;
+import org.opennms.oce.engine.topology.model.graph.ModelVisitor;
+import org.opennms.oce.engine.topology.model.graph.ModelWalker;
 
-@Command(scope = "oce", name = "generateGraph", description = "Generate DOT file of inventory graph.")
+@Command(scope = "topology", name = "generate-graph", description = "Generate DOT file of inventory graph.")
 @Service
 public class GenerateGraph implements Action, ModelVisitor {
 
@@ -57,7 +59,7 @@ public class GenerateGraph implements Action, ModelVisitor {
     private static final String END_GRAPH = "\n}\n";
 
     @Reference
-    private ModelImpl model;
+    private InventoryDatasource inventoryDatasource;
 
     // Used to collect dotGraph encoded nodes for rendering
     private Map<String, String> graphNodes = new HashMap<>();
@@ -86,24 +88,19 @@ public class GenerateGraph implements Action, ModelVisitor {
     // Converted ZoomLevel
     Integer zoom;
 
-    public GenerateGraph() {
-    }
-
-    public GenerateGraph(ModelImpl model) {
-        this.model = model;
-    }
-
     @Override
     public Object execute() throws Exception {
-        String outputFile = outFile != null ? outFile : "inventory.dot";
-        String graph = generateGraph();
+        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final String graph = generateGraph(model);
+
+        final String outputFile = outFile != null ? outFile : "inventory.dot";
         Files.write(Paths.get(outputFile), graph.getBytes());
         System.out.println("Wrote inventory graph to " + outputFile);
         System.out.println("Convert this to a graph at https://graphs.grevian.org/graph");
         return graph;
     }
 
-    public String generateGraph() {
+    public String generateGraph(ModelImpl model) {
         validateSzl();
         if (objectId == null || objectId.isEmpty()) {
             ModelWalker.visit(model, this);
@@ -240,4 +237,5 @@ public class GenerateGraph implements Action, ModelVisitor {
                 break;
         }
     }
+
 }

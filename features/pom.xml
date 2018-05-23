@@ -11,5 +11,6 @@
 
     <modules>
         <module>score</module>
+        <module>shell</module>
     </modules>
 </project>

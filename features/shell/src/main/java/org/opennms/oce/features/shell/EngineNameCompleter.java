@@ -26,35 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.shell;
+package org.opennms.oce.features.shell;
 
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Command;
+
+import java.util.List;
+
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.opennms.oce.engine.api.EngineFactory;
 
-@Command(scope = "oce", name = "alarms", description="Alarms!")
 @Service
-public class AlarmRepositoryList implements Action {
+public class EngineNameCompleter implements Completer {
+
+    @Reference
+    private List<EngineFactory> engineFactories;
+
     @Override
-    public Object execute() throws Exception {
-        return null;
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
+        engineFactories.forEach(f -> delegate.getStrings().add(f.getName()));
+        return delegate.complete(session, commandLine, candidates);
     }
 
-
-    /*
-    @Reference
-    private AlarmRepository alarmRepository;
-
-    @Override
-    public Object execute() throws Exception {
-        final List<Alarm> alarms = alarmRepository.getAlarms();
-        if (alarms.size() < 1) {
-            System.out.println("(No alarms)");
-        } else {
-            for (Alarm alarm : alarms) {
-                System.out.println(alarm);
-            }
-        }
-        return alarms;
-    }*/
 }

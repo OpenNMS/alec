@@ -14,7 +14,6 @@
         <module>api</module>
         <module>cluster</module>
         <module>itest</module>
-        <module>shell</module>
         <module>temporal</module>
         <module>topology</module>
     </modules>

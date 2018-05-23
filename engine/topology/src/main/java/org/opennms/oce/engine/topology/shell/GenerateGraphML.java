@@ -41,24 +41,27 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.datasource.api.InventoryDatasource;
+import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
 import org.opennms.oce.engine.topology.model.ModelImpl;
 import org.opennms.oce.engine.topology.model.ModelObjectImpl;
-import org.opennms.oce.engine.topology.shell.graph.EdgeType;
-import org.opennms.oce.engine.topology.shell.graph.ModelVisitor;
-import org.opennms.oce.engine.topology.shell.graph.ModelWalker;
+import org.opennms.oce.engine.topology.model.graph.EdgeType;
+import org.opennms.oce.engine.topology.model.graph.ModelVisitor;
+import org.opennms.oce.engine.topology.model.graph.ModelWalker;
 
-@Command(scope = "oce", name = "generateGraph", description = "Generate a GraphML document")
+@Command(scope = "topology", name = "generate-graphml", description = "Generate a GraphML document")
 @Service
 public class GenerateGraphML implements Action {
 
     @Reference
-    private ModelImpl model;
+    private InventoryDatasource inventoryDatasource;
 
     private Map<String, ModelObjectImpl> graphNodes = new LinkedHashMap<>();
     private Set<Edge> graphEdges = new LinkedHashSet<>();
 
     @Override
     public Object execute() throws IOException {
+        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
         final StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +

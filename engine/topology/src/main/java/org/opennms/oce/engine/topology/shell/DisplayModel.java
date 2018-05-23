@@ -35,19 +35,21 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
 import org.opennms.oce.engine.topology.model.ModelImpl;
 import org.opennms.oce.engine.topology.model.ModelObjectImpl;
 
-@Command(scope = "oce", name = "displayModel", description="Display the topology model")
+@Command(scope = "topology", name = "display-model", description="Build and display the model using the latest available inventory.")
 @Service
 public class DisplayModel implements Action {
+
     @Reference
-    private ModelBuilderImpl builder;
+    private InventoryDatasource inventoryDatasource;
 
     @Override
-    public Object execute() throws Exception {
-        ModelImpl model = null; //builder.buildModel();
+    public Object execute() {
+        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
         for (String type : model.getTypes()) {
             System.out.println("(TYPE :: " + type + ")");
             final Map<String, ModelObjectImpl> objects = model.getObjectsByIdForType(type);
@@ -61,4 +63,5 @@ public class DisplayModel implements Action {
         }
         return null;
     }
+
 }

@@ -174,4 +174,16 @@ public class JaxbUtils {
         }
     }
 
+    public static void writeIncidents(List<Incident> incidents, Path path) throws IOException, JAXBException {
+        try (OutputStream os = Files.newOutputStream(path)) {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            Incidents list = new Incidents();
+            list.getIncident().addAll(incidents.stream()
+                    .map(JaxbUtils::toModelIncident)
+                    .collect(Collectors.toList()));
+            marshaller.marshal(list, os);
+        }
+    }
 }

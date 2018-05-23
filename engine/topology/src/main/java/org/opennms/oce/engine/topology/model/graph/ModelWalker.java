@@ -26,11 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.topology.shell.graph;
+package org.opennms.oce.engine.topology.model.graph;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class ModelWalker {
     }
 
     public static void visitNeighbors(ModelObjectImpl object, int szl, ModelVisitor visitor) {
+        Objects.requireNonNull(object);
         // Used to collect nodes during partial traversal
         final Set<ModelObjectImpl> collected = new HashSet<>();
         visitor.visitNode(object);

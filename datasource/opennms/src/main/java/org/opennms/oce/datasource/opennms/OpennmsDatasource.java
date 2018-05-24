@@ -58,6 +58,9 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.AlarmHandler;
+import org.opennms.oce.datasource.api.InventoryDatasource;
+import org.opennms.oce.datasource.api.InventoryHandler;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -65,24 +68,26 @@ import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class OpennmsAlarmDatasource implements AlarmDatasource {
+public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OpennmsAlarmDatasource.class);
-
-    private final ConfigurationAdmin configAdmin;
+    private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
     private static final String ALARM_STORE_NAME = "alarm_store";
+    private static final String NODE_STORE_NAME = "node_store";
     private static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
-    private final Set<AlarmHandler> handlers = new HashSet<>();
-    private final Map<String, OpennmsModelProtos.Alarm> alarmsByReductionKey = new HashMap<>();
 
+    private final ConfigurationAdmin configAdmin;
     private String alarmTopic;
     private String eventTopic;
     private String nodeTopic;
 
+    private final Set<AlarmHandler> alarmHandlers = new HashSet<>();
+    private final Set<InventoryHandler> inventoryHandlers = new HashSet<>();
+    private final Map<String, OpennmsModelProtos.Alarm> alarmsByReductionKey = new HashMap<>();
+    private final Map<String, OpennmsModelProtos.Node> nodesByCriteria = new HashMap<>();
     private KafkaStreams streams;
 
-    public OpennmsAlarmDatasource(ConfigurationAdmin configAdmin) {
+    public OpennmsDatasource(ConfigurationAdmin configAdmin) {
         this.configAdmin = Objects.requireNonNull(configAdmin);
     }
 
@@ -95,6 +100,11 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
                 Materialized.as(ALARM_STORE_NAME))
                 // Process alarms as they come in
                 .toStream().foreach(this::handleNewOrUpdatedAlarm);
+        // Build a view of the nodes for lookup
+        builder.table(nodeTopic, Consumed.with(Serdes.String(), Serdes.ByteArray()),
+                Materialized.as(NODE_STORE_NAME))
+                // Process alarms as they come in
+                .toStream().foreach(this::handleNewOrUpdatedNode);
         final Topology topology = builder.build();
 
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -136,17 +146,17 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
             throw new RuntimeException(ex);
         }
 
-        synchronized (handlers) {
+        synchronized (alarmHandlers) {
             LOG.info("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
             if (alarm == null) {
-                OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
+                final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
                 if (lastAlarm != null) {
-                    handlers.forEach(h -> h.onAlarmCleared(OpennmsMapper.toAlarm(lastAlarm)));
+                    alarmHandlers.forEach(h -> h.onAlarmCleared(OpennmsMapper.toAlarm(lastAlarm)));
                 } else {
                     LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
                 }
             } else {
-                handlers.forEach(h -> h.onAlarmCreatedOrUpdated(OpennmsMapper.toAlarm(alarm)));
+                alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(OpennmsMapper.toAlarm(alarm)));
             }
         }
         alarmsByReductionKey.put(reductionKey, alarm);
@@ -156,7 +166,7 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
     public List<AlarmBean> getAlarms() {
         final List<AlarmBean> alarms = new ArrayList<>();
         try {
-            waitUntilStoreIsQueryable().all().forEachRemaining(entry -> {
+            waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
                 try {
                     final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
                     alarms.add(OpennmsMapper.toAlarm(alarm));
@@ -172,7 +182,7 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
 
     @Override
     public List<? extends Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        synchronized (handlers) {
+        synchronized (alarmHandlers) {
             // Lock to make sure we don't miss any alarms between the call to register and get
             registerHandler(handler);
             return getAlarms();
@@ -181,18 +191,95 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
 
     @Override
     public void registerHandler(AlarmHandler handler) {
-        handlers.add(handler);
+        alarmHandlers.add(handler);
     }
 
     @Override
     public void unregisterHandler(AlarmHandler handler) {
-        handlers.remove(handler);
+        alarmHandlers.remove(handler);
     }
 
-    private ReadOnlyKeyValueStore<String, byte[]> waitUntilStoreIsQueryable() throws InterruptedException {
+
+    private void handleNewOrUpdatedNode(String nodeCriteria, byte[] nodeBytes) {
+        final OpennmsModelProtos.Node node;
+        try {
+            if (nodeBytes == null) {
+                node = null;
+            } else {
+                node = OpennmsModelProtos.Node.parseFrom(nodeBytes);
+            }
+        } catch (InvalidProtocolBufferException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        synchronized (inventoryHandlers) {
+            LOG.info("handleNewOrUpdatedNode({}, {})", nodeCriteria, node);
+            if (node == null) {
+                final OpennmsModelProtos.Node lastNode = nodesByCriteria.get(nodeCriteria);
+                if (lastNode != null) {
+                    inventoryHandlers.forEach(h -> h.onInventoryRemoved(OpennmsMapper.toInventoryObjects(lastNode)));
+                } else {
+                    LOG.warn("No existing node found with criteria {}. Skipping callbacks.", nodeCriteria);
+                }
+            } else {
+                // TODO: Was it added or updated? If it was updated, we may need to call remove first.
+                inventoryHandlers.forEach(h -> h.onInventoryAdded(OpennmsMapper.toInventoryObjects(node)));
+            }
+        }
+        nodesByCriteria.put(nodeCriteria, node);
+    }
+
+    @Override
+    public List<InventoryObject> getInventory() {
+        final List<InventoryObject> inventory = new ArrayList<>();
+        try {
+            waitUntilNodeStoreIsQueryable().all().forEachRemaining(entry -> {
+                try {
+                    final OpennmsModelProtos.Node node = OpennmsModelProtos.Node.parseFrom(entry.value);
+                    inventory.addAll(OpennmsMapper.toInventoryObjects(node));
+                } catch (InvalidProtocolBufferException e) {
+                    LOG.error("Failed to parse node from bytes.", e);
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return inventory;
+    }
+
+    @Override
+    public List<InventoryObject> getInventoryAndRegisterHandler(InventoryHandler handler) {
+        synchronized (inventoryHandlers) {
+            // Lock to make sure we don't miss any alarms between the call to register and get
+            registerHandler(handler);
+            return getInventory();
+        }
+    }
+
+    @Override
+    public void registerHandler(InventoryHandler handler) {
+        inventoryHandlers.add(handler);
+    }
+
+    @Override
+    public void unregisterHandler(InventoryHandler handler) {
+        inventoryHandlers.remove(handler);
+    }
+
+    private ReadOnlyKeyValueStore<String, byte[]> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
         while (true) {
             try {
                 return streams.store(ALARM_STORE_NAME, QueryableStoreTypes.keyValueStore());
+            } catch (InvalidStateStoreException ignored) {
+                Thread.sleep(100);
+            }
+        }
+    }
+
+    private ReadOnlyKeyValueStore<String, byte[]> waitUntilNodeStoreIsQueryable() throws InterruptedException {
+        while (true) {
+            try {
+                return streams.store(NODE_STORE_NAME, QueryableStoreTypes.keyValueStore());
             } catch (InvalidStateStoreException ignored) {
                 Thread.sleep(100);
             }
@@ -242,4 +329,6 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
     public void setNodeTopic(String nodeTopic) {
         this.nodeTopic = nodeTopic;
     }
+
+
 }

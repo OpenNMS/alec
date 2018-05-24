@@ -28,10 +28,12 @@
 
 package org.opennms.oce.datasource.api;
 
+import java.util.Collection;
+
 public interface InventoryHandler {
 
-    void onInventoryAdded(InventoryObject inventoryObject);
+    void onInventoryAdded(Collection<InventoryObject> inventoryObject);
 
-    void onInventoryRemoved(InventoryObject inventoryObject);
+    void onInventoryRemoved(Collection<InventoryObject> inventoryObject);
 
 }

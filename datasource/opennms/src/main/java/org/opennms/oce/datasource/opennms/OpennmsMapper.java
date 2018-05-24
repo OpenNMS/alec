@@ -29,16 +29,19 @@
 package org.opennms.oce.datasource.opennms;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.InventoryObjectBean;
 
 public class OpennmsMapper {
 
     public static String NODE_INVENTORY_TYPE = "Node";
-
+    public static String SNMP_INTERFACE_INVENTORY_TYPE = "Interface";
 
     protected static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
         final AlarmBean bean = new AlarmBean();
@@ -82,5 +85,37 @@ public class OpennmsMapper {
         return Severity.INDETERMINATE;
     }
 
+    public static Collection<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node) {
+        final List<InventoryObject> inventory = new ArrayList<>();
+        final InventoryObjectBean nodeObj = new InventoryObjectBean();
+        nodeObj.setType(NODE_INVENTORY_TYPE);
+        nodeObj.setId(toNodeCriteria(node));
+        nodeObj.setFriendlyName(node.getLabel());
+        inventory.add(nodeObj);
 
+        // Add the SNMP interfaces too
+        node.getSnmpInterfaceList().stream()
+                .map(iff -> toInventoryObject(iff, nodeObj))
+                .forEach(inventory::add);
+
+        return inventory;
+    }
+
+    public static InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryObject parent) {
+        final InventoryObjectBean snmpInterfaceObj = new InventoryObjectBean();
+        snmpInterfaceObj.setType(SNMP_INTERFACE_INVENTORY_TYPE);
+        snmpInterfaceObj.setId(parent.getId() + ":" + snmpInterface.getIfIndex());
+        snmpInterfaceObj.setFriendlyName(snmpInterface.getIfAlias());
+        snmpInterfaceObj.setParentType(parent.getType());
+        snmpInterfaceObj.setParentId(parent.getId());
+        return snmpInterfaceObj;
+    }
+
+    private static String toNodeCriteria(OpennmsModelProtos.Node node) {
+        if (node.getForeignSource() != null && node.getForeignId() != null) {
+            return node.getForeignSource() + ":" + node.getForeignId();
+        } else {
+            return Long.valueOf(node.getId()).toString();
+        }
+    }
 }

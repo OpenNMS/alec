@@ -30,9 +30,14 @@ package org.opennms.oce.datasource.opennms;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 
+import java.util.Collection;
+
 import org.junit.Test;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
@@ -44,7 +49,7 @@ public class OpennmsMapperTest {
         // Map an empty alarm and make sure no exceptions are thrown
         OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
                 .build();
-        AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
+        OpennmsMapper.toAlarm(alarm);
 
         // Now map a complete alarm and verify all of the properties
         alarm = OpennmsModelProtos.Alarm.newBuilder()
@@ -57,11 +62,58 @@ public class OpennmsMapperTest {
                         .setId(22)
                         .build())
                 .build();
-        alarmBean = OpennmsMapper.toAlarm(alarm);
+        AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
         assertThat(alarmBean.getId(), equalTo(alarm.getReductionKey()));
         assertThat(alarmBean.getTime(), equalTo(alarm.getLastEventTime()));
         assertThat(alarmBean.getSeverity(), equalTo(Severity.CRITICAL));
         assertThat(alarmBean.getResourceKeys(), contains(ResourceKey.key(OpennmsMapper.NODE_INVENTORY_TYPE, "FS:FID"),
                 ResourceKey.key(OpennmsMapper.NODE_INVENTORY_TYPE, "22")));
     }
+
+    @Test
+    public void canMapNodes() {
+        // Map an empty alarm and make sure no exceptions are thrown
+        OpennmsModelProtos.Node node = OpennmsModelProtos.Node.newBuilder()
+                .build();
+        Collection<InventoryObject> inventory = OpennmsMapper.toInventoryObjects(node);
+        assertThat(inventory, hasSize(1));
+        // Now map a complete node and verify all of the properties
+        node = OpennmsModelProtos.Node.newBuilder()
+                .setForeignSource("FS")
+                .setForeignId("FID")
+                .setId(22)
+                .setLabel("n1")
+                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
+                        .setIfIndex(1)
+                        .setIfAlias("eth0")
+                        .build())
+                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
+                        .setIfIndex(2)
+                        .setIfAlias("eth1")
+                        .build())
+                .build();
+        inventory = OpennmsMapper.toInventoryObjects(node);
+        assertThat(inventory, hasSize(3));
+        InventoryObject nodeObj = getObjectWithTypeAndId(inventory, OpennmsMapper.NODE_INVENTORY_TYPE, "FS:FID");
+        assertThat(nodeObj.getParentType(), nullValue());
+        assertThat(nodeObj.getParentId(), nullValue());
+        assertThat(nodeObj.getPeers(), hasSize(0));
+        assertThat(nodeObj.getRelatives(), hasSize(0));
+
+        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:1");
+        assertThat(eth0Object.getParentType(), equalTo(nodeObj.getType()));
+        assertThat(eth0Object.getParentId(), equalTo(nodeObj.getId()));
+
+        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:2");
+        assertThat(eth1Object.getParentType(), equalTo(nodeObj.getType()));
+        assertThat(eth1Object.getParentId(), equalTo(nodeObj.getId()));
+    }
+
+    private static InventoryObject getObjectWithTypeAndId(Collection<InventoryObject> inventory, String type, String id) {
+        return inventory.stream()
+                .filter(obj -> type.equals(obj.getType()) && id.equals(obj.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format("No object found with type: %s and id: %s", type, id)));
+    }
+
 }

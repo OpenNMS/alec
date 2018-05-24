@@ -57,9 +57,9 @@ public class OpennmsMapper {
         if (alarm.hasNodeCriteria()) {
             final OpennmsModelProtos.NodeCriteria nodeCriteria = alarm.getNodeCriteria();
             if (nodeCriteria.getForeignSource() != null && nodeCriteria.getForeignId() != null) {
-                resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE, nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId()));
+                resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE + "," + nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId()));
             }
-            resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE, Long.valueOf(nodeCriteria.getId()).toString()));
+            resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE + "," +  Long.valueOf(nodeCriteria.getId()).toString()));
         }
         return resourceKeys;
     }

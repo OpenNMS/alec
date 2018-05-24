@@ -61,6 +61,7 @@ import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.common.AlarmBean;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,12 +151,30 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             if (alarm == null) {
                 final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
                 if (lastAlarm != null) {
-                    alarmHandlers.forEach(h -> h.onAlarmCleared(OpennmsMapper.toAlarm(lastAlarm)));
+                    final AlarmBean alarmBean = OpennmsMapper.toAlarm(lastAlarm);
+                    if (alarmBean.getResourceKeys().size() >= 1) {
+                        alarmHandlers.forEach(h -> {
+                            try {
+                                h.onAlarmCleared(alarmBean);
+                            } catch (Exception e) {
+                                LOG.error("onAlarmCleared() call failed with alarm: {} on handler: {}", alarmBean, h, e);
+                            }
+                        });
+                    }
                 } else {
                     LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
                 }
             } else {
-                alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(OpennmsMapper.toAlarm(alarm)));
+                final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
+                if (alarmBean.getResourceKeys().size() >= 1) {
+                    alarmHandlers.forEach(h -> {
+                        try {
+                            h.onAlarmCreatedOrUpdated(alarmBean);
+                        } catch (Exception e) {
+                            LOG.error("onAlarmCreatedOrUpdated() call failed with alarm: {} on handler: {}", alarmBean, h, e);
+                        }
+                    });
+                }
             }
         }
         alarmsByReductionKey.put(reductionKey, alarm);

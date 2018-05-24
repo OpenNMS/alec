@@ -93,20 +93,24 @@ public class OpennmsMapperTest {
                         .build())
                 .build();
         inventory = OpennmsMapper.toInventoryObjects(node);
-        assertThat(inventory, hasSize(3));
+        assertThat(inventory, hasSize(4));
         InventoryObject nodeObj = getObjectWithTypeAndId(inventory, OpennmsMapper.NODE_INVENTORY_TYPE, "FS:FID");
         assertThat(nodeObj.getParentType(), nullValue());
         assertThat(nodeObj.getParentId(), nullValue());
         assertThat(nodeObj.getPeers(), hasSize(0));
         assertThat(nodeObj.getRelatives(), hasSize(0));
 
-        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:1");
-        assertThat(eth0Object.getParentType(), equalTo(nodeObj.getType()));
-        assertThat(eth0Object.getParentId(), equalTo(nodeObj.getId()));
+        InventoryObject cardObj = getObjectWithTypeAndId(inventory, OpennmsMapper.CARD_INVENTORY_TYPE, "FS:FID:Card0");
+        assertThat(cardObj.getParentType(), equalTo(nodeObj.getType()));
+        assertThat(cardObj.getParentId(), equalTo(nodeObj.getId()));
 
-        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:2");
-        assertThat(eth1Object.getParentType(), equalTo(nodeObj.getType()));
-        assertThat(eth1Object.getParentId(), equalTo(nodeObj.getId()));
+        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:Card0:1");
+        assertThat(eth0Object.getParentType(), equalTo(cardObj.getType()));
+        assertThat(eth0Object.getParentId(), equalTo(cardObj.getId()));
+
+        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:Card0:2");
+        assertThat(eth1Object.getParentType(), equalTo(cardObj.getType()));
+        assertThat(eth1Object.getParentId(), equalTo(cardObj.getId()));
     }
 
     private static InventoryObject getObjectWithTypeAndId(Collection<InventoryObject> inventory, String type, String id) {

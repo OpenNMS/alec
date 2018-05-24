@@ -41,6 +41,7 @@ import org.opennms.oce.datasource.common.InventoryObjectBean;
 public class OpennmsMapper {
 
     public static String NODE_INVENTORY_TYPE = "Node";
+    public static String CARD_INVENTORY_TYPE = "Card";
     public static String SNMP_INTERFACE_INVENTORY_TYPE = "Interface";
 
     protected static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
@@ -93,11 +94,19 @@ public class OpennmsMapper {
         nodeObj.setFriendlyName(node.getLabel());
         inventory.add(nodeObj);
 
-        // Add the SNMP interfaces too
-        node.getSnmpInterfaceList().stream()
-                .map(iff -> toInventoryObject(iff, nodeObj))
-                .forEach(inventory::add);
+        if (node.getSnmpInterfaceList().size() > 0) {
+            // One or more SNMP interfaces are present, attach these to a card
+            final InventoryObjectBean cardObj = new InventoryObjectBean();
+            cardObj.setType(CARD_INVENTORY_TYPE);
+            cardObj.setId(nodeObj.getId() + ":Card0");
+            cardObj.setParentType(nodeObj.getType());
+            cardObj.setParentId(nodeObj.getId());
+            inventory.add(cardObj);
 
+            node.getSnmpInterfaceList().stream()
+                    .map(iff -> toInventoryObject(iff, cardObj))
+                    .forEach(inventory::add);
+        }
         return inventory;
     }
 

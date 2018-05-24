@@ -29,6 +29,7 @@
 package org.opennms.oce.engine.temporal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,12 +127,12 @@ public class TimeSliceProcessor implements Engine {
     }
 
     @Override
-    public void onInventoryAdded(InventoryObject inventoryObject) {
+    public void onInventoryAdded(Collection<InventoryObject> inventory) {
         // pass
     }
 
     @Override
-    public void onInventoryRemoved(InventoryObject inventoryObject) {
+    public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         // pass
     }
 }

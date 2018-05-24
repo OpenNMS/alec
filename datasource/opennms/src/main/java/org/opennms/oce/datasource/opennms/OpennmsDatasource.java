@@ -61,7 +61,6 @@ import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.common.AlarmBean;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,8 +162,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     }
 
     @Override
-    public List<AlarmBean> getAlarms() {
-        final List<AlarmBean> alarms = new ArrayList<>();
+    public List<Alarm> getAlarms() {
+        final List<Alarm> alarms = new ArrayList<>();
         try {
             waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
                 try {
@@ -181,7 +180,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     }
 
     @Override
-    public List<? extends Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
+    public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
         synchronized (alarmHandlers) {
             // Lock to make sure we don't miss any alarms between the call to register and get
             registerHandler(handler);

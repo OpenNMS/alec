@@ -26,39 +26,73 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.driver.main;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.AlarmDatasource;
-import org.opennms.oce.datasource.api.AlarmHandler;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.engine.api.Engine;
+import org.opennms.oce.engine.api.IncidentHandler;
 
-public class StaticAlarmDatasource implements AlarmDatasource {
-    private final List<Alarm> alarms;
+import com.google.common.collect.ImmutableList;
 
-    public StaticAlarmDatasource(List<Alarm> alarms) {
-        this.alarms = Objects.requireNonNull(alarms);
+public class TickLoggingEngine implements Engine {
+    private final List<Long> ticks = new ArrayList<>();
+
+    @Override
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+
     }
 
     @Override
-    public List<Alarm> getAlarms() {
-        return alarms;
+    public long getTickResolutionMs() {
+        return 100;
     }
 
     @Override
-    public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        return alarms;
+    public synchronized void tick(long timestampInMillis) {
+        ticks.add(timestampInMillis);
     }
 
     @Override
-    public void registerHandler(AlarmHandler handler) {
-        // pass
+    public void destroy() {
+
     }
 
     @Override
-    public void unregisterHandler(AlarmHandler handler) {
-        // pass
+    public void registerIncidentHandler(IncidentHandler handler) {
+
+    }
+
+    @Override
+    public void onAlarmCreatedOrUpdated(Alarm alarm) {
+
+    }
+
+    @Override
+    public void onAlarmCleared(Alarm alarm) {
+
+    }
+
+    @Override
+    public void onInventoryAdded(Collection<InventoryObject> inventoryObject) {
+
+    }
+
+    @Override
+    public void onInventoryRemoved(Collection<InventoryObject> inventoryObject) {
+
+    }
+
+    public synchronized List<Long> getTicks() {
+        return ImmutableList.copyOf(ticks);
+    }
+
+    public synchronized void resetTicks() {
+        ticks.clear();
     }
 }

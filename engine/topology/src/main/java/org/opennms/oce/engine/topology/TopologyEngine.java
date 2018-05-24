@@ -28,6 +28,7 @@
 
 package org.opennms.oce.engine.topology;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -133,12 +134,12 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
-    public void onInventoryAdded(InventoryObject inventoryObject) {
+    public void onInventoryAdded(Collection<InventoryObject> inventory) {
         // TODO
     }
 
     @Override
-    public void onInventoryRemoved(InventoryObject inventoryObject) {
+    public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         // TODO
     }
 

@@ -32,9 +32,9 @@ import java.util.List;
 
 public interface AlarmDatasource {
 
-    List<? extends Alarm> getAlarms();
+    List<Alarm> getAlarms();
 
-    List<? extends Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler);
+    List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler);
 
     void registerHandler(AlarmHandler handler);
 

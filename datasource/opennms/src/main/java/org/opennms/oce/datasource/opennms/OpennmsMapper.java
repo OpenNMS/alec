@@ -30,7 +30,9 @@ package org.opennms.oce.datasource.opennms;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
@@ -54,15 +56,32 @@ public class OpennmsMapper {
     }
 
     protected static List<ResourceKey> getResourceKeys(OpennmsModelProtos.Alarm alarm) {
-        final List<ResourceKey> resourceKeys = new ArrayList<>();
-        if (alarm.hasNodeCriteria()) {
-            final OpennmsModelProtos.NodeCriteria nodeCriteria = alarm.getNodeCriteria();
-            if (nodeCriteria.getForeignSource() != null && nodeCriteria.getForeignId() != null) {
-                resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE + "," + nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId()));
-            }
-            resourceKeys.add(ResourceKey.key(NODE_INVENTORY_TYPE + "," +  Long.valueOf(nodeCriteria.getId()).toString()));
+        if (!alarm.hasNodeCriteria()) {
+            // The alarm is not associated with a node
+            return Collections.emptyList();
         }
-        return resourceKeys;
+
+        final String nodeCriteria = toNodeCriteria(alarm.getNodeCriteria());
+
+        Integer ifIndex = null;
+        // Attempt to determine the associated ifIndex
+        if (alarm.getIfIndex() > 0) {
+            ifIndex = alarm.getIfIndex();
+        } else if (alarm.hasLastEvent()) {
+            for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
+                if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
+                    ifIndex = Integer.parseInt(eventParm.getValue());
+                }
+            }
+        }
+
+        if (ifIndex != null) {
+            // The alarm is associated with an interface
+            return Collections.singletonList(ResourceKey.key(String.format("%s,%s:Card0:%d", SNMP_INTERFACE_INVENTORY_TYPE, nodeCriteria, ifIndex)));
+        } else {
+            // The alarm is associated with a node
+            return Collections.singletonList(ResourceKey.key(String.format("%s,%s", NODE_INVENTORY_TYPE, nodeCriteria)));
+        }
     }
 
     protected static Severity toSeverity(OpennmsModelProtos.Severity severity) {
@@ -127,4 +146,14 @@ public class OpennmsMapper {
             return Long.valueOf(node.getId()).toString();
         }
     }
+
+
+    private static String toNodeCriteria(OpennmsModelProtos.NodeCriteria nodeCriteria) {
+        if (nodeCriteria.getForeignSource() != null && nodeCriteria.getForeignId() != null) {
+            return nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId();
+        } else {
+            return Long.valueOf(nodeCriteria.getId()).toString();
+        }
+    }
+
 }

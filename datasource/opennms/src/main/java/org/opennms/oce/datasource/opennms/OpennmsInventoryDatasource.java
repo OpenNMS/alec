@@ -34,6 +34,7 @@ import org.opennms.oce.datasource.common.StaticInventoryDatasource;
 
 public class OpennmsInventoryDatasource extends StaticInventoryDatasource {
 
+
     public OpennmsInventoryDatasource() {
         super(Collections.emptyList());
     }

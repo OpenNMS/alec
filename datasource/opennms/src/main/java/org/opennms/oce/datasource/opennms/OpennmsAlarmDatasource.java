@@ -136,16 +136,18 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
             throw new RuntimeException(ex);
         }
 
-        LOG.info("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
-        if (alarm == null) {
-            OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
-            if (lastAlarm != null) {
-                //handlers.forEach(h -> h.onAlarmCleared(new AlarmImpl(lastAlarm)));
+        synchronized (handlers) {
+            LOG.info("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
+            if (alarm == null) {
+                OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
+                if (lastAlarm != null) {
+                    handlers.forEach(h -> h.onAlarmCleared(OpennmsMapper.toAlarm(lastAlarm)));
+                } else {
+                    LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
+                }
             } else {
-                LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
+                handlers.forEach(h -> h.onAlarmCreatedOrUpdated(OpennmsMapper.toAlarm(alarm)));
             }
-        } else {
-            //handlers.forEach(h -> h.onAlarmCreatedOrUpdated(new AlarmImpl(alarm)));
         }
         alarmsByReductionKey.put(reductionKey, alarm);
     }
@@ -157,7 +159,7 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
             waitUntilStoreIsQueryable().all().forEachRemaining(entry -> {
                 try {
                     final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
-                    alarms.add(toAlarm(alarm));
+                    alarms.add(OpennmsMapper.toAlarm(alarm));
                 } catch (InvalidProtocolBufferException e) {
                     LOG.error("Failed to parse alarm from bytes.", e);
                 }
@@ -170,9 +172,11 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
 
     @Override
     public List<? extends Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        // TODO: Lock to make sure we don't miss any alarms between the call to register and get
-        registerHandler(handler);
-        return getAlarms();
+        synchronized (handlers) {
+            // Lock to make sure we don't miss any alarms between the call to register and get
+            registerHandler(handler);
+            return getAlarms();
+        }
     }
 
     @Override
@@ -183,10 +187,6 @@ public class OpennmsAlarmDatasource implements AlarmDatasource {
     @Override
     public void unregisterHandler(AlarmHandler handler) {
         handlers.remove(handler);
-    }
-
-    private static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
-        throw new RuntimeException("TODO");
     }
 
     private ReadOnlyKeyValueStore<String, byte[]> waitUntilStoreIsQueryable() throws InterruptedException {

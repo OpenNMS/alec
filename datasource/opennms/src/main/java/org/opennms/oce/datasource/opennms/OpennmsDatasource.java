@@ -147,7 +147,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         }
 
         synchronized (alarmHandlers) {
-            LOG.info("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
+            LOG.info("handleNewOrUpdatedAlarm({})", reductionKey);
+            LOG.trace("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
             if (alarm == null) {
                 final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
                 if (lastAlarm != null) {
@@ -217,7 +218,6 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         alarmHandlers.remove(handler);
     }
 
-
     private void handleNewOrUpdatedNode(String nodeCriteria, byte[] nodeBytes) {
         final OpennmsModelProtos.Node node;
         try {
@@ -231,7 +231,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         }
 
         synchronized (inventoryHandlers) {
-            LOG.info("handleNewOrUpdatedNode({}, {})", nodeCriteria, node);
+            LOG.info("handleNewOrUpdatedNode({})", nodeCriteria);
+            LOG.trace("handleNewOrUpdatedNode({}, {})", nodeCriteria, node);
             if (node == null) {
                 final OpennmsModelProtos.Node lastNode = nodesByCriteria.get(nodeCriteria);
                 if (lastNode != null) {
@@ -347,6 +348,5 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     public void setNodeTopic(String nodeTopic) {
         this.nodeTopic = nodeTopic;
     }
-
 
 }

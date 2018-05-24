@@ -43,8 +43,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
-import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.model.Model;
+import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.graph.EdgeType;
 import org.opennms.oce.engine.topology.model.graph.ModelVisitor;
 import org.opennms.oce.engine.topology.model.graph.ModelWalker;
@@ -56,12 +56,12 @@ public class GenerateGraphML implements Action {
     @Reference
     private InventoryDatasource inventoryDatasource;
 
-    private Map<String, ModelObjectImpl> graphNodes = new LinkedHashMap<>();
+    private Map<String, ModelObject> graphNodes = new LinkedHashMap<>();
     private Set<Edge> graphEdges = new LinkedHashSet<>();
 
     @Override
     public Object execute() throws IOException {
-        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
         final StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +
@@ -76,12 +76,12 @@ public class GenerateGraphML implements Action {
 
         ModelWalker.visit(model, new ModelVisitor() {
             @Override
-            public void visitNode(ModelObjectImpl node) {
+            public void visitNode(ModelObject node) {
                 graphNodes.put(toKey(node), node);
             }
 
             @Override
-            public void visitEdge(ModelObjectImpl nodeA, ModelObjectImpl nodeZ, EdgeType type) {
+            public void visitEdge(ModelObject nodeA, ModelObject nodeZ, EdgeType type) {
                 graphNodes.put(toKey(nodeA), nodeA);
                 graphNodes.put(toKey(nodeZ), nodeZ);
                 Edge edge = new Edge();
@@ -92,7 +92,7 @@ public class GenerateGraphML implements Action {
             }
         });
 
-        for (ModelObjectImpl node : graphNodes.values()) {
+        for (ModelObject node : graphNodes.values()) {
             if (isRoot(node)) {
                 continue;
             }
@@ -114,17 +114,17 @@ public class GenerateGraphML implements Action {
         return null;
     }
 
-    public String toKey(ModelObjectImpl mo) {
+    public String toKey(ModelObject mo) {
         return StringEscapeUtils.escapeXml11(String.format("%s-%s", mo.getType(), mo.getId()));
     }
 
     private static class Edge {
-        private ModelObjectImpl nodeA;
-        private ModelObjectImpl nodeZ;
+        private ModelObject nodeA;
+        private ModelObject nodeZ;
         private EdgeType type;
     }
 
-    public boolean isRoot(ModelObjectImpl mo) {
+    public boolean isRoot(ModelObject mo) {
         return mo.getParent() == null || mo.getParent().equals(mo);
     }
 

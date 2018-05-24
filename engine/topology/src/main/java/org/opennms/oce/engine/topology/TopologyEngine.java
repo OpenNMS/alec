@@ -46,10 +46,10 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
-import org.opennms.oce.engine.topology.model.GroupImpl;
+import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
-import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.model.Model;
+import org.opennms.oce.engine.topology.model.ModelObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +65,11 @@ public class TopologyEngine implements Engine {
 
     private IncidentHandler handler;
 
-    private ModelImpl inventory;
+    private Model inventory;
 
     private final KieSession kieSession;
 
-    private Map<GroupImpl, FactHandle> groupToFactHandles = new HashMap<>();
+    private Map<Group, FactHandle> groupToFactHandles = new HashMap<>();
 
     public TopologyEngine() {
         KieServices ks = KieServices.Factory.get();
@@ -103,7 +103,7 @@ public class TopologyEngine implements Engine {
         }
 
         // Find the associated model object for this alarm, we assume there is a single model object
-        final ModelObjectImpl object = getObjectForAlarm(alarm);
+        final ModelObject object = getObjectForAlarm(alarm);
         if (object == null) {
             LOG.warn("No model object found for alarm: {}. The alarm will not be processed.", alarm);
             return;
@@ -111,8 +111,8 @@ public class TopologyEngine implements Engine {
         // Update the model object with the alarm
         object.onAlarm(alarm);
 
-        final Set<GroupImpl> alarmGroups = object.getAlarmGroups();
-        for (GroupImpl alarmGroup : alarmGroups) {
+        final Set<Group> alarmGroups = object.getAlarmGroups();
+        for (Group alarmGroup : alarmGroups) {
             boolean shouldBeInDroolsContext = alarmGroup.getNumberNonServiceAffecting() > 0
                     || alarmGroup.getNumberServiceAffecting() > 0;
             boolean isInDroolsContext = groupToFactHandles.containsKey(alarmGroup);
@@ -168,7 +168,7 @@ public class TopologyEngine implements Engine {
         }
     }
 
-    private ModelObjectImpl getObjectForAlarm(Alarm alarm) {
+    private ModelObject getObjectForAlarm(Alarm alarm) {
         final ResourceKey resourceKey = Iterables.getFirst(alarm.getResourceKeys(), null);
         if (resourceKey == null) {
             throw new IllegalStateException("Alarms must have at least one resource key.");

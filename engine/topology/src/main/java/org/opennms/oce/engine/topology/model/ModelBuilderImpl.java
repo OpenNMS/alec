@@ -38,20 +38,24 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 
+/**
+ * the class is deprecated now and replaced with stateful InventoryModelManager
+ */
+@Deprecated
 public class ModelBuilderImpl {
 
     public static final String MODEL_ROOT_TYPE = "Model";
     public static final String MODEL_ROOT_ID = "model";
 
-    public static ModelImpl buildModel(List<InventoryObject> inventory) {
+    public static Model buildModel(List<InventoryObject> inventory) {
         // Create the initial model objects and index them by type/id
         // NOTE: This will throw a IllegalStateException if a duplicate key is found
-        final Map<ModelObjectKey, ModelObjectImpl> mosByKey = inventory.stream()
+        final Map<ModelObjectKey, ModelObject> mosByKey = inventory.stream()
                 .collect(Collectors.toMap(moe -> key(moe.getType(), moe.getId()), ModelBuilderImpl::toModelObject));
 
         // Create the root element if missing
         final ModelObjectKey rootKey = key(MODEL_ROOT_TYPE, MODEL_ROOT_ID);
-        final ModelObjectImpl rootMo = mosByKey.computeIfAbsent(rootKey, (key) -> new ModelObjectImpl(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
+        final ModelObject rootMo = mosByKey.computeIfAbsent(rootKey, (key) -> new ModelObject(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
         // Also index the root element at the null key, so that entries without a parent type/id will be assocated with the root
         final ModelObjectKey nullKey = key(null, null);
         mosByKey.put(nullKey, rootMo);
@@ -59,7 +63,7 @@ public class ModelBuilderImpl {
         // Now build out the relationships
         inventory.forEach(io -> {
             final ModelObjectKey key = key(io.getType(), io.getId());
-            final ModelObjectImpl mo = mosByKey.get(key);
+            final ModelObject mo = mosByKey.get(key);
             if (mo == null) {
                 // Should not happen
                 throw new IllegalStateException("Oops. Cannot find an MO with key: " + key);
@@ -72,7 +76,7 @@ public class ModelBuilderImpl {
 
             // Setup the parent
             final ModelObjectKey parentKey = key(io.getParentType(), io.getParentId());
-            final ModelObjectImpl parentMo = mosByKey.get(parentKey);
+            final ModelObject parentMo = mosByKey.get(parentKey);
             if (parentMo == null) {
                 throw new IllegalStateException("Oops. Cannot find parent MO with key: " + parentKey + " on MO with key: " + key);
             }
@@ -82,7 +86,7 @@ public class ModelBuilderImpl {
             // Setup the peers
             for (InventoryObjectPeerRef peerRef : io.getPeers()) {
                 final ModelObjectKey peerKey = key(peerRef.getType(), peerRef.getId());
-                final ModelObjectImpl peerMo = mosByKey.get(peerKey);
+                final ModelObject peerMo = mosByKey.get(peerKey);
                 if (peerMo == null) {
                     throw new IllegalStateException("Oops. Cannot find peer MO with key: " + peerKey + " on MO with key: " + key);
                 }
@@ -93,7 +97,7 @@ public class ModelBuilderImpl {
             // Setup the relatives
             for (InventoryObjectRelativeRef relativeRef : io.getRelatives()) {
                 final ModelObjectKey relativeKey = key(relativeRef.getType(), relativeRef.getId());
-                final ModelObjectImpl relativeMo = mosByKey.get(relativeKey);
+                final ModelObject relativeMo = mosByKey.get(relativeKey);
                 if (relativeMo == null) {
                     throw new IllegalStateException("Oops. Cannot find relative MO with key: " + relativeRef + " on MO with key: " + key);
                 }
@@ -103,11 +107,11 @@ public class ModelBuilderImpl {
         });
 
         // Create a new model instance
-        return new ModelImpl(rootMo);
+        return new Model(rootMo);
     }
 
-    private static ModelObjectImpl toModelObject(InventoryObject io) {
-        final ModelObjectImpl mo = new ModelObjectImpl(io.getType(), io.getId());
+    private static ModelObject toModelObject(InventoryObject io) {
+        final ModelObject mo = new ModelObject(io.getType(), io.getId());
         mo.setFriendlyName(io.getFriendlyName());
         return mo;
     }

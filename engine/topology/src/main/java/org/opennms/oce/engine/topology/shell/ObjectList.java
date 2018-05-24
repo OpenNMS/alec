@@ -38,8 +38,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
-import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.model.Model;
+import org.opennms.oce.engine.topology.model.ModelObject;
 
 @Command(scope = "topology", name = "model-objects-by-type", description="Model Objects Listing by Type")
 @Service
@@ -53,12 +53,12 @@ public class ObjectList implements Action {
     
     @Override
     public Object execute() throws Exception {
-        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
-        final Map<String, ModelObjectImpl> objects = model.getObjectsByIdForType(type);
+        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final Map<String, ModelObject> objects = model.getObjectsByIdForType(type);
         if (objects == null || objects.size() < 1) {
             System.out.println("(No objects for type " + type + ")");
         } else {
-            for (Entry<String, ModelObjectImpl> entry: objects.entrySet()) {
+            for (Entry<String, ModelObject> entry: objects.entrySet()) {
                 System.out.println(entry.getKey() + " : " + entry.getValue());
             }
         }

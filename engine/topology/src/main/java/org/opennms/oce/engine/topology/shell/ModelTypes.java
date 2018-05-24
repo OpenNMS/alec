@@ -36,7 +36,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.Model;
 
 @Command(scope = "topology", name = "model-types", description="Model Types Listing")
 @Service
@@ -47,7 +47,7 @@ public class ModelTypes implements Action {
 
     @Override
     public Object execute() throws Exception {
-        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
         final Set<String> types = model.getTypes();
         if (types == null || types.isEmpty()) {
             System.out.println("No model types");

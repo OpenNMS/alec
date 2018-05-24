@@ -35,8 +35,8 @@ import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.IncidentBean;
-import org.opennms.oce.engine.topology.model.GroupImpl;
-import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.model.Group;
+import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.OperationalState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +50,10 @@ public class ActionManager {
         this.topologyEngine = Objects.requireNonNull(topologyEngine);
     }
 
-    public void createIncidentOnFailure(GroupImpl group) {
+    public void createIncidentOnFailure(Group group) {
         LOG.info("Got failure for: {}", group);
 
-        ModelObjectImpl owner = group.getOwner();
+        ModelObject owner = group.getOwner();
         IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
         incident.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
         group.getMembers().stream()
@@ -63,7 +63,7 @@ public class ActionManager {
     }
 
     // Impact the Group Owner
-    public void synthesizeAlarm(ModelObjectImpl owner, OperationalState operationalStatus) {
+    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus) {
         owner.setOperationalState(operationalStatus);
         AlarmBean alarm = new AlarmBean(UUID.randomUUID().toString());
         alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));

@@ -38,6 +38,12 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
     private String id;
     private InventoryObjectPeerEndpoint endpoint;
 
+    public InventoryObjectPeerRefBean() {}
+    public InventoryObjectPeerRefBean(String type, String id, InventoryObjectPeerEndpoint endpoint) {
+        this.type = Objects.requireNonNull(type);
+        this.id = Objects.requireNonNull(id);
+        this.endpoint = Objects.requireNonNull(endpoint);
+    }
     @Override
     public String getType() {
         return type;

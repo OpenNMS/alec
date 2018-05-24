@@ -36,6 +36,8 @@ public interface InventoryObject {
 
     String getId();
 
+    String getSubtype();
+
     String getParentType();
 
     String getParentId();

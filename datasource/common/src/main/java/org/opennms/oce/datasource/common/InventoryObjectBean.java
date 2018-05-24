@@ -39,10 +39,20 @@ public class InventoryObjectBean implements InventoryObject {
     private String id;
     private String parentType;
     private String parentId;
-
+    private String subtype;
     private String friendlyName;
     private List<InventoryObjectPeerRefBean> peers = new ArrayList<>();
     private List<InventoryObjectRelativeRefBean> relatives = new ArrayList<>();
+
+    public InventoryObjectBean() {}
+
+    public InventoryObjectBean(String type, String id, String subtype, String parentType, String parentId) {
+        this.type = Objects.requireNonNull(type);
+        this.id = Objects.requireNonNull(id);
+        this.subtype = subtype;
+        this.parentType = Objects.requireNonNull(parentType);
+        this.parentId = Objects.requireNonNull(parentId);
+    }
 
     @Override
     public String getType() {
@@ -57,6 +67,11 @@ public class InventoryObjectBean implements InventoryObject {
     public String getId() {
         return id;
     }
+
+    @Override
+    public String getSubtype() { return subtype; }
+
+    public void setSubtype(String value) { this.subtype = value; }
 
     public void setId(String id) {
         this.id = id;
@@ -98,6 +113,13 @@ public class InventoryObjectBean implements InventoryObject {
         this.peers = peers;
     }
 
+    public void addPeer(InventoryObjectPeerRefBean pRef) {
+        if (peers == null) {
+            peers = new ArrayList<>();
+        }
+        peers.add(pRef);
+    }
+
     @Override
     public List<InventoryObjectRelativeRefBean> getRelatives() {
         return relatives;
@@ -105,6 +127,13 @@ public class InventoryObjectBean implements InventoryObject {
 
     public void setRelatives(List<InventoryObjectRelativeRefBean> relatives) {
         this.relatives = relatives;
+    }
+
+    public void addRelative(InventoryObjectRelativeRefBean relRef) {
+        if (relatives == null) {
+            relatives = new ArrayList<>();
+        }
+        relatives.add(relRef);
     }
 
     @Override

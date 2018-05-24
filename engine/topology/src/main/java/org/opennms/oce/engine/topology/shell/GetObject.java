@@ -35,8 +35,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
-import org.opennms.oce.engine.topology.model.ModelObjectImpl;
+import org.opennms.oce.engine.topology.model.Model;
+import org.opennms.oce.engine.topology.model.ModelObject;
 
 @Command(scope = "topology", name = "model-object-by-id", description="Model Object Listing by Id")
 @Service
@@ -53,8 +53,8 @@ public class GetObject implements Action {
 
     @Override
     public Object execute() throws Exception {
-        final ModelImpl model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
-        final ModelObjectImpl modelObject = model.getObjectById(type, id);
+        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final ModelObject modelObject = model.getObjectById(type, id);
         if (modelObject == null) {
             System.out.println("(No modelObject for id: " + id + ")");
         } else {

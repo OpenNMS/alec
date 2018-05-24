@@ -29,22 +29,27 @@
 package org.opennms.oce.engine.topology.model;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opennms.oce.driver.test.MockInventory;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
+import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
+import org.opennms.oce.engine.topology.TopologyInventory;
 
 public class UpdateInventoryTest {
 
-    private TopologyEngineFactory topologyEngineFactory;
-
-    private ModelImpl model;
+    TopologyEngineFactory topologyEngineFactory;
+    InventoryModelManager inventoryManager;
+    Model model;
 
     @Rule
     public ExpectedException exceptionGrabber = ExpectedException.none();
@@ -52,133 +57,137 @@ public class UpdateInventoryTest {
     @Before
     public void setUp() {
         topologyEngineFactory = new TopologyEngineFactory();
-
-        // Build the sample network model
-        model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
-    }
-
-    /**
-     *      <!-- Devices -->
-     *      <model-object-entry type="Device" id="n3" parent-type="Model" parent-id="model"/>
-     *
-     *      <!-- Cards -->
-     *      <model-object-entry type="Card" id="n3-c1" parent-type="Device" parent-id="n3" />
-     *
-     *      <!-- Ports -->
-     *      <model-object-entry type="Port" id="n3-c1-p1" parent-type="Card" parent-id="n3-c1" />
-     *      <model-object-entry type="Port" id="n3-c1-p2" parent-type="Card" parent-id="n3-c1" />
-     *      <model-object-entry type="Port" id="n3-c1-p3" parent-type="Card" parent-id="n3-c1" />
-     *      <model-object-entry type="Port" id="n3-c1-p4" parent-type="Card" parent-id="n3-c1" />
-    */
-    @Test
-    public void canAddModelObject() {
-        /** Case: Add new Network Element (simple case adding new device with one card and four ports)
-         *
-         * Expected Results:
-         * - A new device is added with all its children (card and ports)
-         * - All relationships are established such as:
-         * -- A new device has parent
-         * -- A new device has peers (if applicable)
-         */
-
-        //Assert that inventory and model are constructed properly
-        ModelObjectImpl root = model.getRoot();
-        assertThat(root, notNullValue());
-        assertThat(root.getParent(), nullValue());
-
-        //and have all levels of model object hierarchy (device, card, port)
-        assertThat(model.getTypes(), hasItem("Device"));
-        assertThat(model.getTypes(), hasItem("Card"));
-        assertThat(model.getTypes(), hasItem("Port"));
-
-        //Construct new device with one card and four ports
-        final ModelObjectImpl device = new ModelObjectImpl("Device", "n3");
-
-        final ModelObjectImpl card = new ModelObjectImpl("Card", "n3-c1");
-
-        final ModelObjectImpl port1 = new ModelObjectImpl("Port", "n3-c1-p1");
-        final ModelObjectImpl port2 = new ModelObjectImpl("Port", "n3-c1-p2");
-        final ModelObjectImpl port3 = new ModelObjectImpl("Port", "n3-c1-p3");
-        final ModelObjectImpl port4 = new ModelObjectImpl("Port", "n3-c1-p4");
-
-        card.setParent(device);
-
-        port1.setParent(card);
-        port2.setParent(card);
-        port3.setParent(card);
-        port4.setParent(card);
-
-        /**
-         * Design question: should updating model flow be delegated to ModelBuilder which is responsible for constructing initial model
-         * It can be passed as reference to another build function (updateModel) function which is similar to existing buildModel
-         */
-
-        model.addObject(device);
-
-        //Try to add this device again...
-        final ModelObjectImpl sameDevice = new ModelObjectImpl("Device", "n3");
-
-        // Exception to be thrown just before that method call
-        exceptionGrabber.expect(IllegalStateException.class);
-        model.addObject(sameDevice);
-
-        // Expectation is that no exception happens
-        model.removeObjectById(device.getType(), device.getId());
+        inventoryManager = new InventoryModelManager();
+        TopologyInventory inventory = new TopologyInventory();
+        inventoryManager.loadInventory(inventory);
     }
 
     @Test
-    public void canDeleteModelObject() {
-        /** Case: Delete a new Network Element (simple case deleting previously added device with one card and four ports)
-         *
-         *  Expected Results:
-         *  - Detached from parent
-         *  - Detached from peers (if applicable)
-         *  - Detached from children (will be clean up in the next step)
-         *  - Cleared and removed
-         *  Note: currently we do not consider detachments from uncles and nephews
-         */
+    public void canBeEmptyModelButHaveRoot() {
+        model = inventoryManager.getModel();
+        ModelObject root = model.getRoot();
 
-        ModelObjectImpl root = model.getRoot();
-        assertThat(root, notNullValue());
-        assertThat(root.getParent(), nullValue());
+        assertThat(root.getChildren(), hasSize(0));
+        assertThat(root.getType(), is("MODEL"));
+    }
 
-        //and have all levels of model object hierarchy (device, card, port)
-        assertThat(model.getTypes(), hasItem("Device"));
-        assertThat(model.getTypes(), hasItem("Card"));
-        assertThat(model.getTypes(), hasItem("Port"));
+    @Test
+    public void canCleanModel() {
+        model = inventoryManager.getModel();
+        ModelObject root = model.getRoot();
+        assertThat(root.getChildren(), hasSize(0));
+        assertThat(root.getType(), is("MODEL"));
 
-        //Construct new device with one card and four ports
-        final ModelObjectImpl device = new ModelObjectImpl("Device", "n33");
+        inventoryManager.clean();
+        inventoryManager.loadInventory(new TopologyInventory());
 
-        final ModelObjectImpl card = new ModelObjectImpl("Card", "n33-c1");
+        model = inventoryManager.getModel();
+        root = model.getRoot();
 
-        final ModelObjectImpl port1 = new ModelObjectImpl("Port", "n33-c1-p1");
-        final ModelObjectImpl port2 = new ModelObjectImpl("Port", "n33-c1-p2");
-        final ModelObjectImpl port3 = new ModelObjectImpl("Port", "n33-c1-p3");
-        final ModelObjectImpl port4 = new ModelObjectImpl("Port", "n33-c1-p4");
+        assertThat(root.getChildren(), hasSize(0));
+        assertThat(root.getType(), is("MODEL"));
+    }
 
-        card.setParent(device);
+    @Test
+    public void canLoadSimpleInventory() {
+        inventoryManager.clean();
 
-        port1.setParent(card);
-        port2.setParent(card);
-        port3.setParent(card);
-        port4.setParent(card);
+        TopologyInventory inventory = new TopologyInventory();
+        InventoryObject obj = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        inventory.addObject(obj);
+        inventoryManager.loadInventory(inventory);
 
-        model.printModel();
+        model = inventoryManager.getModel();
+        ModelObject root = model.getRoot();
 
-        model.addObject(device);
+        assertThat(root.getChildren(), hasSize(1));
+        assertThat(root.getType(), is("MODEL"));
+    }
 
-        model.printModel();
+    @Test
+    public void canLoadDefaultInventory() {
+        inventoryManager.clean();
 
-        model.removeObjectById(device.getType(), device.getId());
+        TopologyInventory inventory = new TopologyInventory();
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        inventory.addObject(objDevice);
+        InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
+        inventory.addObject(objCard);
+        InventoryObject objPort1 = new InventoryObjectBean("PORT", "n1-c1-p1", null, "CARD", "n1-c1");
+        inventory.addObject(objPort1);
+        InventoryObject objPort2 = new InventoryObjectBean("PORT", "n1-c1-p2", null, "CARD", "n1-c1");
+        inventory.addObject(objPort2);
+        inventoryManager.loadInventory(inventory);
 
-        model.printModel();
+        model = inventoryManager.getModel();
+        ModelObject root = model.getRoot();
 
-        final ModelObjectImpl nonExistingDevice = new ModelObjectImpl("Device", "n999");
+        assertThat(root.getChildren(), hasSize(1));
+        assertThat(root.getChildren(), hasSize(1));
+        assertThat(root.getType(), is("MODEL"));
+        assertThat(model.getObjectById("DEVICE", "n1"), notNullValue());
+        assertThat(model.getObjectById("CARD", "n1-c1"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p1"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p2"), notNullValue());
+    }
 
-        // Exception to be thrown just before that method call
-        exceptionGrabber.expect(IllegalStateException.class);
-        // No such device in the model
-        model.removeObjectById(nonExistingDevice.getType(), nonExistingDevice.getId());
+    @Test
+    public void canLoadInventoryWithTopology_plus_Link() {
+        inventoryManager.clean();
+
+        TopologyInventory inventory = new TopologyInventory();
+
+        InventoryObject objDevice1 = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        inventory.addObject(objDevice1);
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        inventory.addObject(objDevice2);
+
+        InventoryObject objCard1 = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
+        inventory.addObject(objCard1);
+        InventoryObject objCard2 = new InventoryObjectBean("CARD", "n1-c2", null, "DEVICE", "n1");
+        inventory.addObject(objCard2);
+        InventoryObject objCard3 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
+        inventory.addObject(objCard3);
+
+        InventoryObject objPort1 = new InventoryObjectBean("PORT", "n1-c1-p1", null, "CARD", "n1-c1");
+        inventory.addObject(objPort1);
+        InventoryObject objPort2 = new InventoryObjectBean("PORT", "n1-c1-p2", null, "CARD", "n1-c1");
+        inventory.addObject(objPort2);
+        InventoryObject objPort3 = new InventoryObjectBean("PORT", "n1-c1-p3", null, "CARD", "n1-c1");
+        inventory.addObject(objPort3);
+        InventoryObject objPort4 = new InventoryObjectBean("PORT", "n1-c1-p4", null, "CARD", "n1-c1");
+        inventory.addObject(objPort4);
+
+        InventoryObject objPort11 = new InventoryObjectBean("PORT", "n1-c2-p1", null, "CARD", "n1-c2");
+        inventory.addObject(objPort11);
+        InventoryObject objPort12 = new InventoryObjectBean("PORT", "n1-c2-p2", null, "CARD", "n1-c2");
+        inventory.addObject(objPort12);
+
+        InventoryObject objPort21 = new InventoryObjectBean("PORT", "n2-c1-p1", null, "CARD", "n2-c1");
+        inventory.addObject(objPort21);
+        InventoryObject objPort22 = new InventoryObjectBean("PORT", "n2-c1-p2", null, "CARD", "n2-c1");
+        inventory.addObject(objPort22);
+
+        InventoryObjectBean objLink = new InventoryObjectBean("LINK", "n1-c1-p1 <-> n2-c1-p1", null, "MODEL", "model");
+        objLink.addPeer(new InventoryObjectPeerRefBean("PORT", "n1-c1-p1", InventoryObjectPeerEndpoint.A));
+        objLink.addPeer(new InventoryObjectPeerRefBean("PORT", "n2-c1-p1", InventoryObjectPeerEndpoint.Z));
+        inventory.addObject(objLink);
+
+        inventoryManager.loadInventory(inventory);
+
+        model = inventoryManager.getModel();
+        ModelObject root = model.getRoot();
+
+        assertThat(root.getType(), is("MODEL"));
+
+        assertThat(model.getObjectById("DEVICE", "n1"), notNullValue());
+        assertThat(model.getObjectById("CARD", "n1-c1"), notNullValue());
+        assertThat(model.getObjectById("CARD", "n1-c2"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p1"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p2"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p3"), notNullValue());
+        assertThat(model.getObjectById("PORT", "n1-c1-p4"), notNullValue());
+
+
     }
 }

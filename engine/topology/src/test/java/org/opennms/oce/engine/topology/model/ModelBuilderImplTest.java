@@ -47,7 +47,7 @@ public class ModelBuilderImplTest {
     @Test
     public void canGenerateModel() {
         // Build the sample network model
-        ModelImpl model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
+        Model model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
 
         System.out.println("Types: " + model.getTypes());
 
@@ -55,7 +55,7 @@ public class ModelBuilderImplTest {
         assertThat(model.getTypes(), hasItem("Link"));
         // ... and others
 
-        ModelObjectImpl root = model.getRoot();
+        ModelObject root = model.getRoot();
         assertThat(root, notNullValue());
 
         // Parent of the root should always be null
@@ -64,25 +64,25 @@ public class ModelBuilderImplTest {
         // as defined in the inventory
         assertThat(root.getId(), equalTo(ModelBuilderImpl.MODEL_ROOT_ID));
 
-        Set<ModelObjectImpl> rootChildren = root.getChildren();
+        Set<ModelObject> rootChildren = root.getChildren();
         assertThat(rootChildren, hasSize(greaterThanOrEqualTo(2)));
 
         // TODO: How to get children of a specific type
-        ModelObjectImpl rootLink = rootChildren.stream()
+        ModelObject rootLink = rootChildren.stream()
                 .filter(mo -> mo.getType().equals("Link"))
                 .findFirst()
                 .get();
         assertThat(rootLink, notNullValue());
 
 
-        Set<ModelObjectImpl> rootLinkPeers = rootLink.getPeers();
+        Set<ModelObject> rootLinkPeers = rootLink.getPeers();
         assertThat(rootLinkPeers, hasSize(2));
 
-        ModelObjectImpl rootLinkPeerA = rootLinkPeers.stream()
+        ModelObject rootLinkPeerA = rootLinkPeers.stream()
                 .filter(mo -> mo.getId().equals("n1-c1-p1"))
                 .findFirst()
                 .get();
-        ModelObjectImpl rootLinkPeerZ = rootLinkPeers.stream()
+        ModelObject rootLinkPeerZ = rootLinkPeers.stream()
                 .filter(mo -> mo.getId().equals("n2-c1-p1"))
                 .findFirst()
                 .get();
@@ -91,10 +91,10 @@ public class ModelBuilderImplTest {
         assertThat(rootLinkPeerA.getPeers(), hasSize(1));
         assertThat(rootLinkPeerZ.getPeers(), hasSize(1));
 
-        ModelObjectImpl n1c1 = rootLinkPeerA.getParent();
+        ModelObject n1c1 = rootLinkPeerA.getParent();
         assertThat(n1c1.getId(), equalTo("n1-c1"));
 
-        ModelObjectImpl n1 = n1c1.getParent();
+        ModelObject n1 = n1c1.getParent();
         assertThat(n1.getId(), equalTo("n1"));
 
         // Back at the same root

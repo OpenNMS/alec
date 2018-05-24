@@ -26,14 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.topology.model.graph;
+package org.opennms.oce.datasource.api;
 
-import org.opennms.oce.engine.topology.model.ModelObject;
+import java.util.List;
 
-public interface ModelVisitor {
-
-    void visitNode(ModelObject node);
-
-    void visitEdge(ModelObject nodeA, ModelObject nodeZ, EdgeType type);
-
+public interface Inventory {
+    List<InventoryObject> getInventoryObjectList();
 }

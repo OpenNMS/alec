@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
-import org.opennms.oce.engine.topology.model.ModelImpl;
+import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.OperationalState;
 
 public class GraphTest {
@@ -49,7 +49,7 @@ public class GraphTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private ModelImpl model;
+    private Model model;
 
     @Before
     public void setUp() {

@@ -1,13 +1,13 @@
 package org.opennms.oce.engine.topology;
 
-import org.opennms.oce.engine.topology.model.GroupImpl;
+import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.OperationalState;
 
 global org.opennms.oce.engine.topology.ActionManager actionMgr
 
 rule "CardDown"
   when
-    $group : GroupImpl(owner.type == "Card", numberNormalState == 0)
+    $group : Group(owner.type == "Card", numberNormalState == 0)
   then
     actionMgr.createIncidentOnFailure($group);
     actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA);
@@ -15,14 +15,14 @@ end
 
 rule "LinkDown"
   when
-    $group : GroupImpl(owner.type == "Link", numberServiceAffecting > 0)
+    $group : Group(owner.type == "Link", numberServiceAffecting > 0)
   then
     actionMgr.createIncidentOnFailure($group);
 end
 
 rule "ChassisDown"
   when
-    $group : GroupImpl(owner.type == "Device", numberNormalState == 0)
+    $group : Group(owner.type == "Device", numberNormalState == 0)
   then
     actionMgr.createIncidentOnFailure($group);
     actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA);

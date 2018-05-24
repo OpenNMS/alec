@@ -42,21 +42,21 @@ import org.opennms.oce.datasource.api.Severity;
 
 import com.google.common.collect.Sets;
 
-public class ModelObjectImpl {
+public class ModelObject {
     private final String type;
     private String subType;
     private final String id;
     private String friendlyName;
-    private ModelObjectImpl parent;
-    private Map<String, GroupImpl> children = new HashMap<>(0);
-    private Map<String, GroupImpl> peers = new HashMap<>(0);
-    private Map<String, GroupImpl> nephews = new HashMap<>(0);
-    private Map<String, GroupImpl> uncles = new HashMap<>(0);
+    private ModelObject parent;
+    private Map<String, Group> children = new HashMap<>(0);
+    private Map<String, Group> peers = new HashMap<>(0);
+    private Map<String, Group> nephews = new HashMap<>(0);
+    private Map<String, Group> uncles = new HashMap<>(0);
     private OperationalState operationalState = OperationalState.NORMAL;
     private ServiceState serviceState = ServiceState.IN;
     private final Map<String, Alarm> outstandingAlarmsById = new LinkedHashMap<>();
 
-    public ModelObjectImpl(String type, String id) {
+    public ModelObject(String type, String id) {
         this.type = Objects.requireNonNull(type);
         this.id = Objects.requireNonNull(id);
     }
@@ -104,82 +104,82 @@ public class ModelObjectImpl {
     }
 
     
-    public ModelObjectImpl getParent() {
+    public ModelObject getParent() {
         return parent;
     }
 
-    public void setParent(ModelObjectImpl parent) {
+    public void setParent(ModelObject parent) {
         this.parent = parent;
         if (type != "model") {
             // Parent must be null for the Root of the Model
-            ((ModelObjectImpl) parent).addChild(this);
+            parent.addChild(this);
         }
     }
 
     
-    public Set<ModelObjectImpl> getChildren() {
+    public Set<ModelObject> getChildren() {
         return children.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     
-    public Set<ModelObjectImpl> getPeers() {
+    public Set<ModelObject> getPeers() {
         return peers.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     
-    public Set<ModelObjectImpl> getUncles() {
+    public Set<ModelObject> getUncles() {
         return uncles.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     
-    public Set<ModelObjectImpl> getNephews() {
+    public Set<ModelObject> getNephews() {
         return nephews.values().stream().map(g -> g.getMembers()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
-    public void addChild(ModelObjectImpl child) {
+    public void addChild(ModelObject child) {
         addMember(child, children);
     }
 
-    public void addPeer(ModelObjectImpl child) {
+    public void addPeer(ModelObject child) {
         addMember(child, peers);
     }
 
-    public void addNephew(ModelObjectImpl child) {
+    public void addNephew(ModelObject child) {
         addMember(child, nephews);
     }
 
-    public void addUncle(ModelObjectImpl child) {
+    public void addUncle(ModelObject child) {
         addMember(child, uncles);
     }
 
-    private void addMember(ModelObjectImpl member, Map<String, GroupImpl> map) {
-        ((GroupImpl) getGroup(map, member.getType())).addMember(member);
+    private void addMember(ModelObject member, Map<String, Group> map) {
+        ((Group) getGroup(map, member.getType())).addMember(member);
     }
 
     
-    public GroupImpl getChildGroup(String objectType) {
+    public Group getChildGroup(String objectType) {
         return children.get(objectType);
     }
 
     
-    public GroupImpl getPeerGroup(String objectType) {
+    public Group getPeerGroup(String objectType) {
         return peers.get(objectType);
     }
 
     
-    public GroupImpl getNephewGroup(String objectType) {
+    public Group getNephewGroup(String objectType) {
         return nephews.get(objectType);
     }
 
     
-    public GroupImpl getUncleGroup(String objectType) {
+    public Group getUncleGroup(String objectType) {
         return uncles.get(objectType);
     }
 
-    private GroupImpl getGroup(Map<String, GroupImpl> map, String type) {
-        GroupImpl g = map.get(type);
+    private Group getGroup(Map<String, Group> map, String type) {
+        Group g = map.get(type);
         if (g == null) {
-            g = new GroupImpl(this);
+            g = new Group(this);
             map.put(type, g);
         }
         return g;
@@ -255,7 +255,7 @@ public class ModelObjectImpl {
     }
 
     // Update the Group OpStatus if this ModelObjectImpl has a group of that type
-    private void updateOperationalState(GroupImpl group, OperationalState previous) {
+    private void updateOperationalState(Group group, OperationalState previous) {
         if (group == null) {
             return;
         }
@@ -263,7 +263,7 @@ public class ModelObjectImpl {
     }
 
     // Update the Group SvcStatus if this ModelObjectImpl has a group of that type
-    private void updateServiceState(GroupImpl group, ServiceState previous) {
+    private void updateServiceState(Group group, ServiceState previous) {
         if (group == null) {
             return;
         }
@@ -271,8 +271,8 @@ public class ModelObjectImpl {
     }
 
     
-    public Set<GroupImpl> getAlarmGroups() {
-        Set<GroupImpl> groups = new HashSet<>();
+    public Set<Group> getAlarmGroups() {
+        Set<Group> groups = new HashSet<>();
         // Add the Parent's Child group
         groups.add(parent.getChildGroup(type));
         // Add the Peers' Peer groups
@@ -282,11 +282,11 @@ public class ModelObjectImpl {
         return groups;
     }
 
-    private Set<GroupImpl> getContainingUncleGroups() {
+    private Set<Group> getContainingUncleGroups() {
         return getUncles().stream().map(u -> u.getNephewGroup(type)).collect(Collectors.toSet());
     }
 
-    private Set<GroupImpl> getContainingPeerGroups() {
+    private Set<Group> getContainingPeerGroups() {
         return getPeers().stream().map(u -> u.getPeerGroup(type)).collect(Collectors.toSet());
     }
 

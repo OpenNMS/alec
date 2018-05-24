@@ -42,25 +42,25 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ModelImpl {
+public class Model {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ModelImpl.class);
-    private final Map<String, Map<String, ModelObjectImpl>> mosByTypeAndById = new HashMap<>();
-    private final ModelObjectImpl root;
+    private static final Logger LOG = LoggerFactory.getLogger(Model.class);
+    private final Map<String, Map<String, ModelObject>> mosByTypeAndById = new HashMap<>();
+    private final ModelObject root;
 
-    public ModelImpl(ModelObjectImpl root) {
+    public Model(ModelObject root) {
         this.root = Objects.requireNonNull(root);
         // Index the tree
         index(root);
     }
 
     
-    public ModelObjectImpl getObjectById(String type, String id) {
+    public ModelObject getObjectById(String type, String id) {
         return mosByTypeAndById.getOrDefault(type, Collections.emptyMap()).get(id);
     }
 
     
-    public Map<String, ModelObjectImpl> getObjectsByIdForType(String type) {
+    public Map<String, ModelObject> getObjectsByIdForType(String type) {
         return mosByTypeAndById.get(type);
     }
 
@@ -70,7 +70,7 @@ public class ModelImpl {
     }
 
     
-    public ModelObjectImpl getRoot() {
+    public ModelObject getRoot() {
         return root;
     }
 
@@ -83,7 +83,7 @@ public class ModelImpl {
     
     public void printModel() {
 
-        Queue<ModelObjectImpl> q = new LinkedList<>();
+        Queue<ModelObject> q = new LinkedList<>();
         LOG.info("Model is:");
 
 
@@ -91,11 +91,11 @@ public class ModelImpl {
         while(!q.isEmpty()) {
             int levelSize = q.size();
             for(int i = 0; i < levelSize; i++) {
-                ModelObjectImpl currNode = q.poll();
+                ModelObject currNode = q.poll();
 
                 LOG.info(currNode.toString());
 
-                for(ModelObjectImpl someChild : currNode.getChildren()) {
+                for(ModelObject someChild : currNode.getChildren()) {
                     q.add(someChild);
                 }
             }
@@ -103,13 +103,13 @@ public class ModelImpl {
     }
 
     
-    public void updateObjects(List<ModelObjectImpl> moList){}
+    public void updateObjects(List<ModelObject> moList){}
 
     
-    public void updateObject(ModelObjectImpl mo){}
+    public void updateObject(ModelObject mo){}
 
     
-    public void addObjects(List<ModelObjectImpl> moList) {
+    public void addObjects(List<ModelObject> moList) {
 
         if(moList.isEmpty()) {
             LOG.info("Loaded model objects list is empty.");
@@ -126,7 +126,7 @@ public class ModelImpl {
          * -- can they be combined as single insertion?
          * -- etc
         **/
-        for(ModelObjectImpl mo : moList) {
+        for(ModelObject mo : moList) {
             addObject(mo);
         }
     }
@@ -136,7 +136,7 @@ public class ModelImpl {
      * then it should have cards and ports, but if it is a new card, then there should be parent provided
      * @param mo
      */
-    public void addObject(ModelObjectImpl mo) {
+    public void addObject(ModelObject mo) {
         String type = mo.getType();
         if(getObjectById(type, mo.getId()) != null) {
             throw new IllegalStateException("Object " + mo.getId() + " with type " + type + " already exists '");
@@ -152,17 +152,17 @@ public class ModelImpl {
             mo.setParent(root);
         }
 
-        Map<String, ModelObjectImpl> typeMap = mosByTypeAndById.get(type);
+        Map<String, ModelObject> typeMap = mosByTypeAndById.get(type);
         typeMap.put(mo.getId(), mo);
 
         //handle hierarchy etc
-        Queue<ModelObjectImpl> q = new LinkedList<>();
+        Queue<ModelObject> q = new LinkedList<>();
 
         q.add(mo);
         while(!q.isEmpty()) {
             int levelSize = q.size();
             for(int i = 0; i < levelSize; i++) {
-                ModelObjectImpl currNode = q.poll();
+                ModelObject currNode = q.poll();
 
                 if(mosByTypeAndById.get(currNode.getType()) == null) {
                     mosByTypeAndById.put(currNode.getType(), new HashMap<>());
@@ -170,7 +170,7 @@ public class ModelImpl {
 
                 mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
 
-                for(ModelObjectImpl someChild : currNode.getChildren()) {
+                for(ModelObject someChild : currNode.getChildren()) {
                     q.add(someChild);
                 }
             }
@@ -188,15 +188,15 @@ public class ModelImpl {
         }
 
         //start removing from the bottom up
-        Deque<ModelObjectImpl> stack = new ArrayDeque<ModelObjectImpl>();
-        Queue<ModelObjectImpl> stackToRemove = new LinkedList<>();
+        Deque<ModelObject> stack = new ArrayDeque<ModelObject>();
+        Queue<ModelObject> stackToRemove = new LinkedList<>();
 
-        ModelObjectImpl obj = getObjectById(type, id);
+        ModelObject obj = getObjectById(type, id);
         stack.push(obj);
         while(!stack.isEmpty()) {
             int levelSize = stack.size();
             for(int i = 0; i < levelSize; i++) {
-                ModelObjectImpl currNode = stack.pop();
+                ModelObject currNode = stack.pop();
                 stackToRemove.add(currNode);
 
                 if(mosByTypeAndById.get(currNode.getType()) == null) {
@@ -205,16 +205,16 @@ public class ModelImpl {
 
                 mosByTypeAndById.get(currNode.getType()).put(currNode.getId(), currNode);
 
-                for(ModelObjectImpl someChild : currNode.getChildren()) {
+                for(ModelObject someChild : currNode.getChildren()) {
                     stack.push(someChild);
                 }
             }
         }
 
-        ModelObjectImpl first = ((LinkedList<ModelObjectImpl>) stackToRemove).peekFirst();
-        ModelObjectImpl last = ((LinkedList<ModelObjectImpl>) stackToRemove).peekLast();
+        ModelObject first = ((LinkedList<ModelObject>) stackToRemove).peekFirst();
+        ModelObject last = ((LinkedList<ModelObject>) stackToRemove).peekLast();
 
-        for(ModelObjectImpl objToRemove : stackToRemove) {
+        for(ModelObject objToRemove : stackToRemove) {
             mosByTypeAndById.get(objToRemove.getType()).remove(objToRemove.getId());
         }
 
@@ -222,13 +222,13 @@ public class ModelImpl {
         // Handle cases of non top level objects (cards)
     }
 
-    private void index(ModelObjectImpl mo) {
+    private void index(ModelObject mo) {
         // Index
-        final Map<String, ModelObjectImpl> mosById = mosByTypeAndById.computeIfAbsent(mo.getType(), e -> new HashMap<>());
+        final Map<String, ModelObject> mosById = mosByTypeAndById.computeIfAbsent(mo.getType(), e -> new HashMap<>());
         mosById.put(mo.getId(), mo);
 
         // Recurse
-        for (ModelObjectImpl child : mo.getChildren()) {
+        for (ModelObject child : mo.getChildren()) {
             index(child);
         }
     }

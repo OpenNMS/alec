@@ -32,11 +32,11 @@ import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GroupImpl {
+public class Group {
 
-    private ModelObjectImpl owner;
+    private ModelObject owner;
 
-    private Set<ModelObjectImpl> members = new HashSet<>();
+    private Set<ModelObject> members = new HashSet<>();
 
     private int normalStateCount;
 
@@ -44,12 +44,12 @@ public class GroupImpl {
 
     private int serviceAffectingCount;
 
-    public GroupImpl(ModelObjectImpl owner) {
+    public Group(ModelObject owner) {
         this.owner = owner;
     }
 
     
-    public ModelObjectImpl getOwner() {
+    public ModelObject getOwner() {
         return owner;
     }
 
@@ -74,12 +74,12 @@ public class GroupImpl {
     }
 
     
-    public Set<ModelObjectImpl> getMembers() {
+    public Set<ModelObject> getMembers() {
         return members;
     }
 
     
-    public void updateOperationalState(ModelObjectImpl object, OperationalState previous) {
+    public void updateOperationalState(ModelObject object, OperationalState previous) {
         assertInGroup(object);
         incrementOperationStatus(object.getOperationalState());
         decrementOperationStatus(previous);
@@ -87,13 +87,13 @@ public class GroupImpl {
     }
 
     
-    public void updateServiceState(ModelObjectImpl object, ServiceState previous) {
+    public void updateServiceState(ModelObject object, ServiceState previous) {
         assertInGroup(object);
         // TODO - handle an object moving from IN service to OUT of service as a REMOVE
         // TODO - handle an object moving from OUT of service to IN service as an ADD
     }
 
-    public void addMember(ModelObjectImpl member) {
+    public void addMember(ModelObject member) {
         // TODO - assert NOT in group?
         if (members.add(member)) {
             if (member.getServiceState() == ServiceState.IN) {
@@ -102,7 +102,7 @@ public class GroupImpl {
         }
     }
 
-    public void removeMember(ModelObjectImpl member) {
+    public void removeMember(ModelObject member) {
         assertInGroup(member);
         if (members.remove(member)) {
             // TODO - maybe serviceState needs to be tracked internally in the group.
@@ -147,7 +147,7 @@ public class GroupImpl {
         }
     }
 
-    private void assertInGroup(ModelObjectImpl object) {
+    private void assertInGroup(ModelObject object) {
         if (!members.contains(object)) {
             throw new InvalidParameterException("invalid invocation from a ModelObjectImpl not in the group");
         }

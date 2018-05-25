@@ -32,7 +32,7 @@ import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Group {
+public class Group implements WorkingMemoryObject {
 
     private ModelObject owner;
 
@@ -44,10 +44,11 @@ public class Group {
 
     private int serviceAffectingCount;
 
+    private CountTrend serviceAffectingCountTrend = CountTrend.UNCHANGED;
+
     public Group(ModelObject owner) {
         this.owner = owner;
     }
-
     
     public ModelObject getOwner() {
         return owner;
@@ -80,10 +81,12 @@ public class Group {
 
     
     public void updateOperationalState(ModelObject object, OperationalState previous) {
-        assertInGroup(object);
-        incrementOperationStatus(object.getOperationalState());
-        decrementOperationStatus(previous);
-        validateState();
+        if (object.getOperationalState() != previous) {
+            assertInGroup(object);
+            incrementOperationStatus(object.getOperationalState());
+            decrementOperationStatus(previous);
+            validateState();
+        }
     }
 
     
@@ -95,8 +98,9 @@ public class Group {
 
     public void addMember(ModelObject member) {
         // TODO - assert NOT in group?
+        // TODO - persist member.type in group and assert new members are of same type. 
         if (members.add(member)) {
-            if (member.getServiceState() == ServiceState.IN) {
+            if (member.getServiceState() == ServiceState.IN_SERVICE) {
                 incrementOperationStatus(member.getOperationalState());
             }
         }
@@ -106,8 +110,8 @@ public class Group {
         assertInGroup(member);
         if (members.remove(member)) {
             // TODO - maybe serviceState needs to be tracked internally in the group.
-            // Otherwise, if a ModelObjectImpl fails to report change, the opStatus changes can be corrupted.
-            if (member.getServiceState() == ServiceState.IN) {
+            // Otherwise, if a modelObject fails to report change, the opStatus changes can be corrupted.
+            if (member.getServiceState() == ServiceState.IN_SERVICE) {
                 decrementOperationStatus(member.getOperationalState());
             }
         }
@@ -123,6 +127,7 @@ public class Group {
             break;
         case SA:
             serviceAffectingCount++;
+            serviceAffectingCountTrend = CountTrend.INCREASING;
             break;
         case UNKNOWN:
         default:
@@ -140,6 +145,7 @@ public class Group {
             break;
         case SA:
             serviceAffectingCount--;
+            serviceAffectingCountTrend = CountTrend.DECREASING;
             break;
         case UNKNOWN:
         default:
@@ -162,5 +168,25 @@ public class Group {
     
     public String toString() {
         return "G[" + owner + " : " + members + "]";
+    }
+
+    public CountTrend getServiceAffectingTrend() {
+        return serviceAffectingCountTrend;
+    }
+
+    /**
+    * The Object Type of the Group Members
+    */
+    public String getGroupMemberType() {
+        return (getMembers() == null || getMembers().isEmpty()) ? "UNKNOWN"
+            : getMembers().stream()
+                    .findFirst()
+                    .orElse(getOwner())
+                    .getType();
+    }
+
+    @Override
+    public String getId() {
+        return "G[" + owner.getId() + " : " + getGroupMemberType() + "]";
     }
 }

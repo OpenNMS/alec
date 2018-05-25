@@ -36,10 +36,13 @@ import java.util.Set;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.api.Severity;
 
 public class IncidentBean implements Incident {
     private String id;
     private long creationTime;
+
+    private Severity severity;
     private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Set<Alarm> alarms = new LinkedHashSet<>();
 
@@ -91,5 +94,14 @@ public class IncidentBean implements Incident {
 
     public void addAlarm(Alarm alarm) {
         alarms.add(alarm);
+    }
+
+    @Override
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
     }
 }

@@ -41,4 +41,6 @@ public interface Incident {
 
     Set<Alarm> getAlarms();
 
+    Severity getSeverity();
+
 }

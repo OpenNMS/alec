@@ -28,10 +28,15 @@
 
 package org.opennms.oce.engine.topology.model;
 
-public enum ServiceState {
-    UNDEFINED,
-    IN_MAINTENANCE,
-    COMMISSIONING,
-    IN_SERVICE,
-    OUT_OF_SERVICE,
+public interface ReportObject extends WorkingMemoryObject {
+
+    public void setStatus(ReportStatus status);
+
+    public String getId();
+
+    public Group getGroup();
+
+    ReportStatus getStatus();
+
+    ModelObject getOwner();
 }

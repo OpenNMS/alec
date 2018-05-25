@@ -28,10 +28,50 @@
 
 package org.opennms.oce.engine.topology.model;
 
-public enum ServiceState {
-    UNDEFINED,
-    IN_MAINTENANCE,
-    COMMISSIONING,
-    IN_SERVICE,
-    OUT_OF_SERVICE,
+public class ReportObjectImpl implements ReportObject {
+
+    private String id;
+
+    private Group group;
+
+    private ReportStatus status = ReportStatus.NOT_PRESENT;
+
+    public ReportObjectImpl(Group group, String id) {
+        this.id = id;
+        this.group = group;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public Group getGroup() {
+        return group;
+    }
+
+    @Override
+    public ModelObject getOwner() {
+        return group.getOwner();
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    @Override
+    public ReportStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReportStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "R[" + id + ":" + status + "|" + group + "]";
+    }
+
 }

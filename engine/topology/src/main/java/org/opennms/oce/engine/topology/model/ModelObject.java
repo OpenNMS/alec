@@ -39,10 +39,15 @@ import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-public class ModelObject {
+public class ModelObject implements WorkingMemoryObject {
+
+    private static Logger LOG = LoggerFactory.getLogger(ModelObject.class);
+
     private final String type;
     private String subType;
     private final String id;
@@ -53,8 +58,10 @@ public class ModelObject {
     private Map<String, Group> nephews = new HashMap<>(0);
     private Map<String, Group> uncles = new HashMap<>(0);
     private OperationalState operationalState = OperationalState.NORMAL;
-    private ServiceState serviceState = ServiceState.IN;
+    private ServiceState serviceState = ServiceState.IN_SERVICE;
     private final Map<String, Alarm> outstandingAlarmsById = new LinkedHashMap<>();
+
+    private Optional<ReportObject> report = Optional.empty();
 
     public ModelObject(String type, String id) {
         this.type = Objects.requireNonNull(type);
@@ -187,7 +194,7 @@ public class ModelObject {
 
     
     public String toString() {
-        return "MO[" + type + "," + id + "]";
+        return "MO[" + type + "," + id + "(" + operationalState + ")]";
     }
 
     
@@ -221,8 +228,10 @@ public class ModelObject {
 
     
     public void onAlarm(Alarm alarm) {
+        LOG.info("ALARM {} on {}", alarm, this);
         if (alarm.isClear()) {
             outstandingAlarmsById.remove(alarm.getId());
+            clearReport(alarm);
         } else {
             outstandingAlarmsById.put(alarm.getId(), alarm);
         }
@@ -241,7 +250,13 @@ public class ModelObject {
         setOperationalState(effectiveOperationalState);
     }
 
-    
+    private void clearReport(Alarm alarm) {
+        if (getReport().isPresent()) {
+            ReportObject report = getReport().get();
+            report.setStatus(ReportStatus.CLEARED);
+        }
+    }
+
     public Set<Alarm> getAlarms() {
         return Sets.newHashSet(outstandingAlarmsById.values());
     }
@@ -288,6 +303,14 @@ public class ModelObject {
 
     private Set<Group> getContainingPeerGroups() {
         return getPeers().stream().map(u -> u.getPeerGroup(type)).collect(Collectors.toSet());
+    }
+
+    public Optional<ReportObject> getReport() {
+        return report;
+    }
+
+    public void setReport(ReportObject report) {
+        this.report = Optional.of(report);
     }
 
 }

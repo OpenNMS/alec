@@ -26,12 +26,39 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.topology.model;
+package org.opennms.oce.engine.topology;
 
-public enum ServiceState {
-    UNDEFINED,
-    IN_MAINTENANCE,
-    COMMISSIONING,
-    IN_SERVICE,
-    OUT_OF_SERVICE,
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+// Encapsulate the ID generation for internal Alarms, Reports and Incidents so that they can be ovverridden by test harness.
+public class IdGenerator {
+
+    int index = 0;
+
+    List<String> preparedIds;
+
+    public String next() {
+        if (preparedIds == null) {
+            // Default behaviour.
+            return UUID.randomUUID().toString().substring(0, 8);
+        }
+        return preparedIds.get(index++);
+    }
+
+    // Load a prepared list of IDs from the test harness
+    public void setIds(List<String> ids) {
+        preparedIds = ids;
+    }
+
+    // auto-gen list for tests
+    public List<String> generateIds(int number, int length) {
+        List<String> ids = new ArrayList<>(number);
+        for (int i = 0; i < length; i++) {
+            ids.add(UUID.randomUUID().toString().substring(0, length));
+        }
+        return ids;
+    }
+
 }

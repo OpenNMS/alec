@@ -29,7 +29,6 @@
 package org.opennms.oce.engine.topology;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
@@ -38,6 +37,10 @@ import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.OperationalState;
+import org.opennms.oce.engine.topology.model.ReportObject;
+import org.opennms.oce.engine.topology.model.ReportObjectImpl;
+import org.opennms.oce.engine.topology.model.ReportStatus;
+import org.opennms.oce.engine.topology.model.WorkingMemoryObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,25 +53,45 @@ public class ActionManager {
         this.topologyEngine = Objects.requireNonNull(topologyEngine);
     }
 
-    public void createIncidentOnFailure(Group group) {
-        LOG.info("Got failure for: {}", group);
+    // Create a Report and Inject it into Rules Context
+    public void createReport(Group group) {
+        ReportObjectImpl report = new ReportObjectImpl(group, topologyEngine.nextReportId());
+        LOG.info("Create Report {} for: {}", report.getId(), group);
+        // Set the report on the Group Owner
+        group.getOwner().setReport(report);
+        topologyEngine.addOrUpdateMemoryObject(report);
+    }
 
-        ModelObject owner = group.getOwner();
-        IncidentBean incident = new IncidentBean(UUID.randomUUID().toString());
+    public void createIncident(ReportObject report) {
+        IncidentBean incident = new IncidentBean(report.getId());
+        LOG.info("Create Incident {} for: {}", incident.getId(), report);
+        ModelObject owner = report.getGroup().getOwner();
         incident.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
-        group.getMembers().stream()
-                .flatMap(mo -> mo.getAlarms().stream())
-                .forEach(incident::addAlarm);
+        if (report.getStatus() == ReportStatus.CLEARED || report.getStatus() == ReportStatus.CLEARING) {
+            incident.setSeverity(Severity.CLEARED);
+        } else {
+            incident.setSeverity(owner.getOperationalState().getSeverity());
+        }
+        report.getGroup().getMembers().stream().flatMap(mo -> mo.getAlarms().stream()).forEach(incident::addAlarm);
         topologyEngine.getIncidentHandler().onIncident(incident);
+        topologyEngine.addOrUpdateMemoryObject(report);
+    }
+
+    public void log(String msg) {
+        LOG.info(msg);
     }
 
     // Impact the Group Owner
-    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus) {
-        owner.setOperationalState(operationalStatus);
-        AlarmBean alarm = new AlarmBean(UUID.randomUUID().toString());
+    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus, Severity severity, String alarmId) {
+        LOG.info("Synthesize {}|{} Alarm for: {}", operationalStatus, severity, owner);
+        AlarmBean alarm = new AlarmBean(alarmId);
         alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));
-        alarm.setSeverity(Severity.MAJOR);
+        alarm.setSeverity(severity);
         // Send the synthetic alarm to the engine.
         topologyEngine.onAlarmCreatedOrUpdated(alarm);
+    }
+
+    public void remove(WorkingMemoryObject object) {
+        topologyEngine.delete(object);
     }
 }

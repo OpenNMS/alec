@@ -37,10 +37,13 @@ import java.util.Set;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.api.Severity;
 
 public class IncidentBean implements Incident {
     private String id;
     private long creationTime;
+
+    private Severity severity;
     private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Set<Alarm> alarms = new LinkedHashSet<>();
 
@@ -94,6 +97,14 @@ public class IncidentBean implements Incident {
         alarms.add(alarm);
     }
 
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,12 +113,13 @@ public class IncidentBean implements Incident {
         return creationTime == that.creationTime &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(resourceKeys, that.resourceKeys) &&
-                Objects.equals(alarms, that.alarms);
+                Objects.equals(alarms, that.alarms) &&
+                Objects.equals(severity, that.severity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, creationTime, resourceKeys, alarms);
+        return Objects.hash(id, creationTime, resourceKeys, alarms, severity);
     }
 
     @Override
@@ -117,6 +129,7 @@ public class IncidentBean implements Incident {
                 ", creationTime=" + creationTime +
                 ", resourceKeys=" + resourceKeys +
                 ", alarms=" + alarms +
+                ", severity=" + severity +
                 '}';
     }
 }

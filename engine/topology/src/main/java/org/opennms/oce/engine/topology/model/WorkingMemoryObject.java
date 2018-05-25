@@ -28,10 +28,8 @@
 
 package org.opennms.oce.engine.topology.model;
 
-public enum ServiceState {
-    UNDEFINED,
-    IN_MAINTENANCE,
-    COMMISSIONING,
-    IN_SERVICE,
-    OUT_OF_SERVICE,
+// An Object that will be added to Drools WorkingMemory
+public interface WorkingMemoryObject {
+
+    String getId();
 }

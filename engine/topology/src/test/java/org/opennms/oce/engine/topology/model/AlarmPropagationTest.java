@@ -31,8 +31,8 @@ public class AlarmPropagationTest {
         ModelObject link = testModel.getObjectById("Link", "n1-c1-p1___n2-c1-p1");
 
         // Verify initial State
-        assertThat(port1.getServiceState(), is(ServiceState.IN));
-        // ... all ModelObjects
+        assertThat(port1.getServiceState(), is(ServiceState.IN_SERVICE));
+        // ... all modelObjects
 
         assertEquals(port1.getOperationalState(), OperationalState.NORMAL);
         // ...

@@ -28,10 +28,10 @@
 
 package org.opennms.oce.engine.topology.model;
 
-public enum ServiceState {
-    UNDEFINED,
-    IN_MAINTENANCE,
-    COMMISSIONING,
-    IN_SERVICE,
-    OUT_OF_SERVICE,
+public enum ReportStatus {
+    NOT_PRESENT,
+    CLEARING,
+    CLEARED,
+    PENDING,
+    PRESENT
 }

@@ -28,9 +28,13 @@
 
 package org.opennms.oce.engine.topology;
 
+import java.util.List;
+
 import org.opennms.oce.engine.api.EngineFactory;
 
 public class TopologyEngineFactory implements EngineFactory {
+
+    private List<String> reportIds;
 
     @Override
     public String getName() {
@@ -39,8 +43,17 @@ public class TopologyEngineFactory implements EngineFactory {
 
     @Override
     public TopologyEngine createEngine() {
-        return new TopologyEngine();
+        final TopologyEngine engine = new TopologyEngine();
+        if (reportIds != null) {
+            engine.setReportIds(reportIds);
+        }
+        return engine;
+    }
+
+    public void setReportIds(List<String> ids) {
+        reportIds = ids;
     }
 
 }
+
 

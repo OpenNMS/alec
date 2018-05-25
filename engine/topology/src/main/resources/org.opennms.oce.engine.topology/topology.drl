@@ -1,29 +1,102 @@
 package org.opennms.oce.engine.topology;
 
+import org.opennms.oce.datasource.api.Severity;
+
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.OperationalState;
+import org.opennms.oce.engine.topology.model.CountTrend;
+import org.opennms.oce.engine.topology.model.ModelObject;
+import org.opennms.oce.engine.topology.model.ReportObject;
+import org.opennms.oce.engine.topology.model.ReportObjectImpl; 
+import org.opennms.oce.engine.topology.model.ReportStatus;
 
 global org.opennms.oce.engine.topology.ActionManager actionMgr
 
+// RULE #1
+rule "FirstPortDown"
+  when
+    $group : Group(owner.type == "Card", numberServiceAffecting == 1, serviceAffectingTrend == CountTrend.INCREASING)
+    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.NSA) 
+  then
+    actionMgr.log("RULE #1");
+    actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.NSA, Severity.MINOR, $group.getId());
+end
+
+// RULE #2
 rule "CardDown"
   when
-    $group : Group(owner.type == "Card", numberNormalState == 0)
+    $group : Group(owner.type == "Card", numberServiceAffecting == numberMembers, serviceAffectingTrend == CountTrend.INCREASING)
+    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.SA) 
   then
-    actionMgr.createIncidentOnFailure($group);
-    actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA);
+    actionMgr.log("RULE #2");
+    actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA, Severity.MAJOR, $group.getId());
 end
 
-rule "LinkDown"
+// RULE #3
+rule "CardDownReport"
   when
-    $group : Group(owner.type == "Link", numberServiceAffecting > 0)
+    $group : Group(owner.type == "Card", numberServiceAffecting == numberMembers, serviceAffectingTrend == CountTrend.INCREASING)
+    not ReportObjectImpl(owner.type == "Card", owner.id == $group.getOwner().getId())
   then
-    actionMgr.createIncidentOnFailure($group);
+    actionMgr.log("RULE #3");
+    actionMgr.createReport($group);
 end
 
-rule "ChassisDown"
+// RULE #4
+rule "CreateIncident"
   when
-    $group : Group(owner.type == "Device", numberNormalState == 0)
+    // TODO - this was != PRESENT but that cause Rules #4 and #5 to then spin
+    $report : ReportObjectImpl(status != ReportStatus.PENDING, status == ReportStatus.NOT_PRESENT)
   then
-    actionMgr.createIncidentOnFailure($group);
-    actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA);
+    actionMgr.log("RULE #4");
+    $report.setStatus(ReportStatus.PRESENT);
+    actionMgr.createIncident($report);
+end
+
+// RULE #5
+rule "ClearPort"
+  when
+    $group : Group(owner.type == "Card", numberServiceAffecting < numberMembers, serviceAffectingTrend == CountTrend.DECREASING)
+    $report : ReportObject(group == $group, status == ReportStatus.PRESENT)
+  then
+    actionMgr.log("RULE #5");
+    // Set the Report object's masterAlarmStatus = CLEARING and update in the working memory
+    $report.setStatus(ReportStatus.CLEARING);
+    // Send a 'Card Down' master alarm clear request to OpenNMS, containing the externalEventId of the 'master' alarm
+    actionMgr.createIncident($report);
+end
+
+// RULE #6
+rule "Exit"
+  when
+    $card : ModelObject(type == "Card", operationalState == OperationalState.NORMAL)
+    $report : ReportObject(owner == $card, status == ReportStatus.CLEARED)
+    not Group(groupMemberType == "Port", owner == $card)
+  then
+    actionMgr.log("RULE #6");
+    actionMgr.remove($report);
+    $card.setReport(null);
+    actionMgr.synthesizeAlarm($card, OperationalState.NORMAL, Severity.CLEARED, "noPortGroup");
+end
+
+// RULE #7
+rule "ClearPort2"
+  when
+    $card : ModelObject(type == "Card", operationalState == OperationalState.SA)
+    $group : Group(groupMemberType == "Port", owner == $card)
+    $report : ReportObject(owner == $group.getOwner(), status == ReportStatus.CLEARED)
+  then
+    actionMgr.log("RULE #7");
+    actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.NSA, Severity.MINOR, $group.getId());
+    actionMgr.remove($report);
+end
+
+// RULE #8
+rule "Exit2"
+  when
+    $card : ModelObject(type == "Card", operationalState == OperationalState.NSA)
+    $group : Group(groupMemberType == "Port", owner == $card, numberServiceAffecting == 0)
+   then
+    actionMgr.log("RULE #8");
+    actionMgr.synthesizeAlarm($card, OperationalState.NORMAL, Severity.CLEARED, $group.getId());
 end

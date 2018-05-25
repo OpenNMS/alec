@@ -57,7 +57,7 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.build.directory}/generated-sources</source>
+                                <source>generated-sources</source>
                             </sources>
                         </configuration>
                     </execution>

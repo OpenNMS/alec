@@ -52,7 +52,7 @@ public class ScoringStrategyTest {
     @Parameterized.Parameters(name = "{index}: scorer({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                // { new SetIntersectionScoringStrategy() },
+                { new SetIntersectionScoringStrategy() },
                 { new PeerScoringStrategy() },
                 { new MatrixScoringStrategy() }
         });

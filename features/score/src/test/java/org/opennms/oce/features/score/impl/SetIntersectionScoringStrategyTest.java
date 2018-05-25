@@ -73,7 +73,7 @@ public class SetIntersectionScoringStrategyTest {
         SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
         ScoreReport report = scorer.score(baseline, seventyPercent);
 
-        assertEquals(78.78, report.getScore(), 1e-2);
+        assertEquals(178.78, report.getScore(), 1e-2);
 
         List<? extends ScoreMetric> metrics = report.getMetrics();
 

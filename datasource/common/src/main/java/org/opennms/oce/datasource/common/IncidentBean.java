@@ -43,7 +43,7 @@ public class IncidentBean implements Incident {
     private String id;
     private long creationTime;
 
-    private Severity severity;
+    private Severity severity = Severity.INDETERMINATE;
     private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Set<Alarm> alarms = new LinkedHashSet<>();
 

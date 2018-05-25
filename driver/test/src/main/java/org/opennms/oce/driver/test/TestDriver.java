@@ -60,10 +60,38 @@ public class TestDriver {
         return run(alarms, Collections.emptyList());
     }
 
+    /**
+     * Drives a Correlation Engine and tests service resumption by bifurcating the 
+     *  Alarms into a before and after at <code>timestamp</code>.
+     * 
+     * @param alarms The alarms to replay
+     * @param inventory The inventory to use
+     * @param timestamp the Driver emulates an engine reset at timestamp
+     * @return
+     */
+    public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, long timestamp) {
+        // bifurcate the alarms
+        final List<Alarm> sortedAlarms = alarms.stream()
+                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
+                .collect(Collectors.toList());
+        List<Alarm> previousAlarms = sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList());
+        List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());;
+        // Run the engine 
+        List<Incident> previousIncidents = run(previousAlarms, inventory);
+        List<Incident> allIncidents = new ArrayList<>(previousIncidents);
+        // re-run the engine 
+        allIncidents.addAll(run(afterAlarms, inventory, previousAlarms, previousIncidents));
+        return allIncidents;
+    }
+
     public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory) {
+        return run(alarms, inventory, Collections.emptyList(), Collections.emptyList());
+    }
+
+    private List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms, List<Incident> previousIncidents) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
-        engine.init(Collections.emptyList(), Collections.emptyList(), inventory);
+        engine.init(previousAlarms, previousIncidents, inventory);
         engine.registerIncidentHandler(session);
 
         final List<Alarm> sortedAlarms = alarms.stream()

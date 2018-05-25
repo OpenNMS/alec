@@ -39,8 +39,8 @@ public class TimeSliceEngineFactory implements EngineFactory {
     }
 
     @Override
-    public TimeSliceProcessor createEngine() {
-        final TimeSliceProcessor engine = new TimeSliceProcessor();
+    public TimeSliceEngine createEngine() {
+        final TimeSliceEngine engine = new TimeSliceEngine();
         if (sliceMillis != null) {
             engine.setSliceMillis(sliceMillis);
         }

@@ -37,3 +37,31 @@ In the Karaf shell, add the features repository:
 feature:repo-add mvn:org.opennms.oce/oce-karaf-features/1.0.0-SNAPSHOT/xml
 ```
 
+## Usage
+
+### OpenNMS Integration
+
+From the Karaf shell, point to your Kafka instance:
+```
+config:edit org.opennms.oce.datasource.opennms.kafka.streams
+config:property-set bootstrap.servers 127.0.0.1:9092
+config:property-set commit.interval.ms 5000
+config:update
+```
+
+Now point to your OpenNMS instance:
+```
+config:edit org.opennms.oce.datasource.opennms
+config:property-set url http://127.0.0.1:8980/opennms
+config:property-set username admin
+config:property-set password admin
+config:update
+```
+
+Install the datasource, an engine and the driver:
+```
+feature:install oce-datasource-opennms oce-engine-topology oce-driver-main
+```
+
+Correlate!
+

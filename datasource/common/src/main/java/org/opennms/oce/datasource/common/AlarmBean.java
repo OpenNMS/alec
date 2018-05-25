@@ -30,6 +30,7 @@ package org.opennms.oce.datasource.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.ResourceKey;
@@ -93,5 +94,31 @@ public class AlarmBean implements Alarm {
 
     public void setSeverity(Severity severity) {
         this.severity = severity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AlarmBean alarmBean = (AlarmBean) o;
+        return time == alarmBean.time &&
+                Objects.equals(id, alarmBean.id) &&
+                Objects.equals(resourceKeys, alarmBean.resourceKeys) &&
+                severity == alarmBean.severity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, time, resourceKeys, severity);
+    }
+
+    @Override
+    public String toString() {
+        return "AlarmBean{" +
+                "id='" + id + '\'' +
+                ", time=" + time +
+                ", resourceKeys=" + resourceKeys +
+                ", severity=" + severity +
+                '}';
     }
 }

@@ -15,16 +15,14 @@
     </cm:property-placeholder>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
-    <bean id="alarmDatasource" class="org.opennms.oce.datasource.opennms.OpennmsAlarmDatasource" init-method="init" destroy-method="destroy">
+    <bean id="opennmsDatasource" class="org.opennms.oce.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
         <property name="eventTopic" value="${eventTopic}"/>
         <property name="alarmTopic" value="${alarmTopic}"/>
         <property name="nodeTopic" value="${nodeTopic}"/>
     </bean>
-    <service ref="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
-
-    <bean id="inventoryDatasource" class="org.opennms.oce.datasource.opennms.OpennmsInventoryDatasource"/>
-    <service ref="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
 
     <bean id="restClient" class="org.opennms.oce.datasource.opennms.OpennmsRestClient">
         <argument value="${url}"/>

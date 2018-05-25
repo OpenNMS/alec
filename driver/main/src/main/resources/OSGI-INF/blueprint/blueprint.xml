@@ -1,0 +1,15 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <reference id="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource" />
+    <reference id="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource" />
+    <reference id="incidentDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource" />
+    <reference id="engineFactory" interface="org.opennms.oce.engine.api.EngineFactory" />
+
+    <bean id="driver" class="org.opennms.oce.driver.main.Driver" init-method="init" destroy-method="destroy">
+        <argument ref="alarmDatasource"/>
+        <argument ref="inventoryDatasource"/>
+        <argument ref="incidentDatasource"/>
+        <argument ref="engineFactory"/>
+    </bean>
+
+</blueprint>

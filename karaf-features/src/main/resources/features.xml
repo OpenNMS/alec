@@ -71,6 +71,13 @@
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
+    <!-- Drivers -->
+
+    <feature name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
+        <feature version="${project.version}">oce-engine-api</feature>
+        <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.main/${project.version}</bundle>
+    </feature>
+
     <!-- Other features -->
 
     <feature name="oce-features-score" description="OCE :: Features :: Score" version="${project.version}">

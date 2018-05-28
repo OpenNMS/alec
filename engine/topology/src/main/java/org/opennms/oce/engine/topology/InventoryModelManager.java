@@ -28,6 +28,7 @@
 
 package org.opennms.oce.engine.topology;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,19 @@ public class InventoryModelManager {
         initInventory();
     }
 
+    /**
+     * Initial load of inventory.
+     */
+    public InventoryModelManager(TopologyInventory ti) {
+        this();
+        loadInventory(ti);
+    }
+
+    public InventoryModelManager(List<InventoryObject> inventoryObjectList) {
+        this();
+        loadInventory(mapToTopologyInventory(inventoryObjectList));
+    }
+
     private void initInventory() {
         inventory = new TopologyInventory();
         // Create the root
@@ -62,14 +76,6 @@ public class InventoryModelManager {
         rootEntry.setType(MODEL_ROOT_TYPE);
         rootEntry.setId(MODEL_ROOT_ID);
         inventory.addObject(rootEntry);
-    }
-
-    /**
-     * Initial load of inventory.
-     */
-    public InventoryModelManager(TopologyInventory ti) {
-        this();
-        loadInventory(ti);
     }
 
     public void appendObject(InventoryObject io) {
@@ -286,6 +292,27 @@ public class InventoryModelManager {
 
     private ModelObject findParentInModel(String parentType, String parentId) {
         return model.getObjectById(parentType, parentId);
+    }
+
+    /************************************************* Static methods ******************************************************/
+
+    /**
+     * Mapper that maps given list of inventory objects to TopologyInventory object. It also tries to associate "dangling" objects
+     * @param inventoryObjectList
+     */
+    public static TopologyInventory mapToTopologyInventory(List<InventoryObject> inventoryObjectList) {
+
+        findAndFixDanglingObjects(inventoryObjectList);
+
+        return new TopologyInventory(inventoryObjectList);
+    }
+
+    private static void findAndFixDanglingObjects(List<InventoryObject> inventoryObjectList) {
+
+        inventoryObjectList.stream().filter(obj -> obj.getParentType() == null || obj.getParentId() == null).forEach(obj -> {
+            ((InventoryObjectBean)obj).setParentId(MODEL_ROOT_ID);
+            ((InventoryObjectBean)obj).setParentType(MODEL_ROOT_TYPE);
+        });
     }
 
     private static ModelObject toModelObject(InventoryObject ioe) {

@@ -36,7 +36,8 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.InventoryModelManager;
+import org.opennms.oce.engine.topology.TopologyInventory;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 
@@ -49,7 +50,10 @@ public class DisplayModel implements Action {
 
     @Override
     public Object execute() {
-        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        final InventoryModelManager inventoryManager = new InventoryModelManager();
+        TopologyInventory inventory = InventoryModelManager.mapToTopologyInventory(inventoryDatasource.getInventory());
+        inventoryManager.loadInventory(inventory);
+        final Model model = inventoryManager.getModel();
         for (String type : model.getTypes()) {
             System.out.println("(TYPE :: " + type + ")");
             final Map<String, ModelObject> objects = model.getObjectsByIdForType(type);

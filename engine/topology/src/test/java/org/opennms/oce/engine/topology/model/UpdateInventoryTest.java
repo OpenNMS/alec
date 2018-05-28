@@ -30,9 +30,15 @@ package org.opennms.oce.engine.topology.model;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,6 +48,7 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
+import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
 import org.opennms.oce.engine.topology.TopologyInventory;
@@ -70,6 +77,63 @@ public class UpdateInventoryTest {
 
         assertThat(root.getChildren(), hasSize(0));
         assertThat(root.getType(), is("MODEL"));
+
+
+    }
+
+    @Test
+    public void canGenerateModel() {
+        TopologyInventory inventory = InventoryModelManager.mapToTopologyInventory(MockInventory.SAMPLE_NETWORK);
+        inventoryManager.loadInventory(inventory);
+        model = inventoryManager.getModel();
+        assertThat(model.getTypes(), hasItem("Device"));
+        assertThat(model.getTypes(), hasItem("Link"));
+
+        // ... and others
+        ModelObject root = model.getRoot();
+
+        assertThat(root, notNullValue());
+
+        // Parent of the root should always be null
+        assertThat(root.getParent(), nullValue());
+
+        // as defined in the inventory
+        assertThat(root.getId(), equalTo(InventoryModelManager.MODEL_ROOT_ID));
+
+        Set<ModelObject> rootChildren = root.getChildren();
+
+        assertThat(rootChildren, hasSize(greaterThanOrEqualTo(2)));
+
+        // TODO: How to get children of a specific type
+         ModelObject rootLink = rootChildren.stream()
+                                .filter(mo -> mo.getType().equals("Link"))
+                                .findFirst()
+                                .get();
+        assertThat(rootLink, notNullValue());
+
+        Set<ModelObject> rootLinkPeers = rootLink.getPeers();
+        assertThat(rootLinkPeers, hasSize(2));
+
+        ModelObject rootLinkPeerA = rootLinkPeers.stream()
+                                .filter(mo -> mo.getId().equals("n1-c1-p1"))
+                                .findFirst()
+                                .get();
+        ModelObject rootLinkPeerZ = rootLinkPeers.stream()
+                                .filter(mo -> mo.getId().equals("n2-c1-p1"))
+                                .findFirst()
+                                .get();
+
+        // Get back to the port from the link
+        assertThat(rootLinkPeerA.getPeers(), hasSize(1));
+        assertThat(rootLinkPeerZ.getPeers(), hasSize(1));
+
+        ModelObject n1c1 = rootLinkPeerA.getParent();
+        assertThat(n1c1.getId(), equalTo("n1-c1"));
+
+        ModelObject n1 = n1c1.getParent();
+        assertThat(n1.getId(), equalTo("n1"));
+        // Back at the same root
+         assertThat(n1.getParent(), sameInstance(root));
     }
 
     @Test

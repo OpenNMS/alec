@@ -79,8 +79,8 @@ public class TestDriver {
         final List<Alarm> sortedAlarms = alarms.stream()
                 .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
                 .collect(Collectors.toList());
-        List<Alarm> previousAlarms = sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList());
-        List<Alarm> afterAlarms = reduceAlarms(sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList()));
+        List<Alarm> previousAlarms = reduceAlarms(sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList()));
+        List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());
         // Run the engine 
         List<Incident> previousIncidents = run(previousAlarms, inventory);
         List<Incident> allIncidents = new ArrayList<>(previousIncidents);

@@ -87,8 +87,11 @@ public class TopologyEngine implements Engine {
 
     @Override
     public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
-        // TODO: How to process initial alarms and incidents?
+        // TODO: How to process initial incidents?
         this.inventory = ModelBuilderImpl.buildModel(inventory);
+        for (Alarm a : alarms) {
+            onAlarm(a);
+        }
     }
 
     @Override

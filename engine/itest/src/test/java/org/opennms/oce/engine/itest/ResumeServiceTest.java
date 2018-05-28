@@ -34,10 +34,8 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.hamcrest.BaseMatcher;
@@ -49,12 +47,16 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
+import org.opennms.oce.engine.topology.TopologyEngineFactory;
 
 @RunWith(Parameterized.class)
 public class ResumeServiceTest {
@@ -62,14 +64,15 @@ public class ResumeServiceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] { { new TimeSliceEngineFactory() },
-                        // { new ClusterEngineFactory() },
-                        // { new TopologyEngineFactory() }
+                { new ClusterEngineFactory() },
+                { new TopologyEngineFactory() }
         });
     }
 
+    private List<InventoryObject> inventory = MockInventory.SAMPLE_NETWORK;
+
     private final EngineFactory factory;
     private TestDriver driver;
-    private final AtomicLong alarmIdGenerator = new AtomicLong();
 
     public ResumeServiceTest(EngineFactory factory) {
         this.factory = Objects.requireNonNull(factory);
@@ -98,13 +101,13 @@ public class ResumeServiceTest {
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
                 .build());
         
-        final List<Incident> baseIncidents = driver.run(alarms);
+        final List<Incident> baseIncidents = driver.run(alarms, inventory);
         final List<WrappedIncident> wrappedBaseIncidents = baseIncidents.stream().map(i -> new WrappedIncident(i))
             .collect(Collectors.toList());
 
         // Now Split the run over a new driver
         TestDriver driver2 = TestDriver.builder().withEngineFactory(factory).build();
-        final List<Incident> testIncidents = driver2.run(alarms, Collections.emptyList(), SECONDS.toMillis(15));
+        final List<Incident> testIncidents = driver2.run(alarms, inventory, SECONDS.toMillis(15));
         final List<WrappedIncident> wrappedTestIncidents = testIncidents.stream().map(i -> new WrappedIncident(i))
             .collect(Collectors.toList());
 

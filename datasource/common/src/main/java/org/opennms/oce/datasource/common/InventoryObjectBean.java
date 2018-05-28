@@ -41,6 +41,7 @@ public class InventoryObjectBean implements InventoryObject {
     private String parentId;
     private String subtype;
     private String friendlyName;
+    private boolean isTopLevel;
     private List<InventoryObjectPeerRefBean> peers = new ArrayList<>();
     private List<InventoryObjectRelativeRefBean> relatives = new ArrayList<>();
 
@@ -134,6 +135,14 @@ public class InventoryObjectBean implements InventoryObject {
             relatives = new ArrayList<>();
         }
         relatives.add(relRef);
+    }
+
+    public boolean isTopLevel() {
+        return isTopLevel;
+    }
+
+    public void setTopLevel(boolean isTopLevel) {
+        this.isTopLevel = isTopLevel;
     }
 
     @Override

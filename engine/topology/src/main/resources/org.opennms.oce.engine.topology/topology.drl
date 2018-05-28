@@ -7,7 +7,7 @@ import org.opennms.oce.engine.topology.model.OperationalState;
 import org.opennms.oce.engine.topology.model.CountTrend;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.ReportObject;
-import org.opennms.oce.engine.topology.model.ReportObjectImpl; 
+import org.opennms.oce.engine.topology.model.ReportObjectImpl;
 import org.opennms.oce.engine.topology.model.ReportStatus;
 
 global org.opennms.oce.engine.topology.ActionManager actionMgr
@@ -16,7 +16,7 @@ global org.opennms.oce.engine.topology.ActionManager actionMgr
 rule "FirstPortDown"
   when
     $group : Group(owner.type == "Card", numberServiceAffecting == 1, serviceAffectingTrend == CountTrend.INCREASING)
-    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.NSA) 
+    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.NSA)
   then
     actionMgr.log("RULE #1");
     actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.NSA, Severity.MINOR, $group.getId());
@@ -26,7 +26,7 @@ end
 rule "CardDown"
   when
     $group : Group(owner.type == "Card", numberServiceAffecting == numberMembers, serviceAffectingTrend == CountTrend.INCREASING)
-    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.SA) 
+    not ModelObject(type == "Card", id == $group.getOwner().getId(), operationalState == OperationalState.SA)
   then
     actionMgr.log("RULE #2");
     actionMgr.synthesizeAlarm($group.getOwner(), OperationalState.SA, Severity.MAJOR, $group.getId());

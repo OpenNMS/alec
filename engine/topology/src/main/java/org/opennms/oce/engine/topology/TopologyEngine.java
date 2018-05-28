@@ -48,7 +48,6 @@ import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.Model;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.ReportObject;
 import org.opennms.oce.engine.topology.model.WorkingMemoryObject;
@@ -67,7 +66,9 @@ public class TopologyEngine implements Engine {
 
     private IncidentHandler handler;
 
-    private Model inventory;
+    private InventoryModelManager inventoryManager;
+
+    private Model model;
 
     private final KieSession kieSession;
 
@@ -86,9 +87,10 @@ public class TopologyEngine implements Engine {
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventoryObjectList) {
         // TODO: How to process initial alarms and incidents?
-        this.inventory = ModelBuilderImpl.buildModel(inventory);
+        inventoryManager = new InventoryModelManager(inventoryObjectList);
+        model = inventoryManager.getModel();
     }
 
     @Override
@@ -102,7 +104,7 @@ public class TopologyEngine implements Engine {
     }
 
     private void onAlarm(Alarm alarm) {
-        if (inventory == null) {
+        if (model == null) {
             throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
         }
 
@@ -183,7 +185,7 @@ public class TopologyEngine implements Engine {
         }
         final String type = lastToken.substring(0, idx);
         final String id = lastToken.substring(idx + 1, lastToken.length());
-        return inventory.getObjectById(type, id);
+        return model.getObjectById(type, id);
     }
 
     public IncidentHandler getIncidentHandler() {

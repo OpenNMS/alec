@@ -42,7 +42,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.graph.EdgeType;
@@ -61,7 +61,8 @@ public class GenerateGraphML implements Action {
 
     @Override
     public Object execute() throws IOException {
-        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        InventoryModelManager manager = new InventoryModelManager(inventoryDatasource.getInventory());
+        final Model model = manager.getModel();
         final StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +

@@ -35,7 +35,13 @@ import org.opennms.oce.datasource.api.Inventory;
 import org.opennms.oce.datasource.api.InventoryObject;
 
 public class TopologyInventory implements Inventory {
-    List<InventoryObject>  inventoryList = new ArrayList<>();
+    private List<InventoryObject>  inventoryList = new ArrayList<>();
+
+    public TopologyInventory() {}
+
+    public TopologyInventory(List<InventoryObject>  inventoryList) {
+        this.inventoryList = inventoryList;
+    }
 
     @Override
     public List<InventoryObject> getInventoryObjectList() {

@@ -44,7 +44,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.InventoryDatasource;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.graph.EdgeType;
@@ -90,7 +90,8 @@ public class GenerateGraph implements Action, ModelVisitor {
 
     @Override
     public Object execute() throws Exception {
-        final Model model = ModelBuilderImpl.buildModel(inventoryDatasource.getInventory());
+        InventoryModelManager manager = new InventoryModelManager(inventoryDatasource.getInventory());
+        final Model model = manager.getModel();
         final String graph = generateGraph(model);
 
         final String outputFile = outFile != null ? outFile : "inventory.dot";

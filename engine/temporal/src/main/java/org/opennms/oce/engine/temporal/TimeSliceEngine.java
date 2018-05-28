@@ -71,7 +71,6 @@ public class TimeSliceEngine implements Engine {
 
     @Override
     public void onAlarmCleared(Alarm alarm) {
-        // this engine doesn't differentiate clears
         if (isInCurrentWindow(alarm)) {
             current.addAlarm(alarm);
             current.setSeverity(Severity.CLEARED);

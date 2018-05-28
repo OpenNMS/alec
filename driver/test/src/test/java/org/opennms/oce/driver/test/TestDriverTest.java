@@ -51,18 +51,15 @@ public class TestDriverTest {
     @Test
     public void testReturnsAll() {
         final List<Alarm> alarms = new ArrayList<>();
-        // Fail all ports on all cards of node: n1
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
                 .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
                 .withEvent(SECONDS.toMillis(1), Severity.MAJOR)
-                .withEvent(SECONDS.toMillis(31), Severity.MINOR)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a2")
                 .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
-                .withEvent(SECONDS.toMillis(61), Severity.MINOR)
                 .build());
 
         final List<Alarm> sortedAlarms = alarms.stream()
@@ -76,7 +73,6 @@ public class TestDriverTest {
     @Test
     public void testReturnsLatest() {
         final List<Alarm> alarms = new ArrayList<>();
-        // Fail all ports on all cards of node: n1
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
                 .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
@@ -113,7 +109,6 @@ public class TestDriverTest {
     @Test
     public void testReturnsNoCleared() {
         final List<Alarm> alarms = new ArrayList<>();
-        // Fail all ports on all cards of node: n1
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
                 .withResourceKey(new ResourceKey("Port,n1-c1-p1"))

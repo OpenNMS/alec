@@ -66,7 +66,7 @@ public class TestDriver {
      *  Alarms into a before and after at <code>timestamp</code>.
      *  
      *  Alarms before the timestamp will be reduced so that only the latest Alarm with a given Id will be included.
-     *  Additionally, if that alarm is a clear, it will not be passed to the Engine.
+     *  Additionally, if that alarm is a CLEAR, no Alarm with ahat Id will be passed to the Engine.
      *  This approximates what would be available to an engine on a restart.
      * 
      * @param alarms The alarms to replay
@@ -92,7 +92,7 @@ public class TestDriver {
     /**
      * Assumes a sorted list of alarms.
      * @param in A time sorted List of Alarms
-     * @return The last Alarm of each Id with No Alarm for a given Id if the last Alarm for that Id was a Clear. 
+     * @return The last Alarm of each Id with No Alarm for a given Id if the last Alarm for that Id had a Severity of CLEAR. 
      */
     static List<Alarm> reduceAlarms(List<Alarm> in) {
         Map<String, Alarm> reduced = new HashMap<>();

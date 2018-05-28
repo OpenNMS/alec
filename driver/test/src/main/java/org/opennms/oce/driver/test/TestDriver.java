@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,10 @@ public class TestDriver {
     /**
      * Drives a Correlation Engine and tests service resumption by bifurcating the 
      *  Alarms into a before and after at <code>timestamp</code>.
+     *  
+     *  Alarms before the timestamp will be reduced so that only the latest Alarm with a given Id will be included.
+     *  Additionally, if that alarm is a clear, it will not be passed to the Engine.
+     *  This approximates what would be available to an engine on a restart.
      * 
      * @param alarms The alarms to replay
      * @param inventory The inventory to use
@@ -75,13 +80,26 @@ public class TestDriver {
                 .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
                 .collect(Collectors.toList());
         List<Alarm> previousAlarms = sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList());
-        List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());;
+        List<Alarm> afterAlarms = reduceAlarms(sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList()));
         // Run the engine 
         List<Incident> previousIncidents = run(previousAlarms, inventory);
         List<Incident> allIncidents = new ArrayList<>(previousIncidents);
         // re-run the engine 
         allIncidents.addAll(run(afterAlarms, inventory, previousAlarms, previousIncidents));
         return allIncidents;
+    }
+
+    /**
+     * Assumes a sorted list of alarms.
+     * @param in A time sorted List of Alarms
+     * @return The last Alarm of each Id with No Alarm for a given Id if the last Alarm for that Id was a Clear. 
+     */
+    static List<Alarm> reduceAlarms(List<Alarm> in) {
+        Map<String, Alarm> reduced = new HashMap<>();
+        for (Alarm a : in) {
+            reduced.put(a.getId(), a);
+        }
+        return reduced.values().stream().filter(a -> !a.isClear()).collect(Collectors.toList());
     }
 
     public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory) {

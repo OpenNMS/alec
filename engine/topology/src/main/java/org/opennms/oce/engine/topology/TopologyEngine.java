@@ -61,7 +61,7 @@ import com.google.common.collect.Iterables;
  * A topology driver processor with Rules Engine
  *
  */
-public class TopologyEngine implements Engine {
+public class TopologyEngine implements Engine, IncidentHandler {
 
     private static Logger LOG = LoggerFactory.getLogger(TopologyEngine.class);
 
@@ -74,6 +74,10 @@ public class TopologyEngine implements Engine {
     private final IdGenerator reportIds = new IdGenerator();
 
     private Map<WorkingMemoryObject, FactHandle> objectToFactHandles = new HashMap<>();
+
+    private List<Incident> priorIncidents;
+
+    private boolean initComplete = false;
 
     public TopologyEngine() {
         KieServices ks = KieServices.Factory.get();
@@ -89,9 +93,14 @@ public class TopologyEngine implements Engine {
     public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
         // TODO: How to process initial incidents?
         this.inventory = ModelBuilderImpl.buildModel(inventory);
+        priorIncidents = incidents;
+        long lastAlarmTtime = 0;
         for (Alarm a : alarms) {
             onAlarm(a);
+            lastAlarmTtime = a.getTime();
         }
+        tick(lastAlarmTtime);
+        initComplete = true;
     }
 
     @Override
@@ -190,7 +199,11 @@ public class TopologyEngine implements Engine {
     }
 
     public IncidentHandler getIncidentHandler() {
-        return handler;
+        if (initComplete) {
+            return handler;
+        } else {
+            return this;
+        }
     }
 
     // Add or Update a ModelObject in Rules Working Memory.
@@ -224,6 +237,17 @@ public class TopologyEngine implements Engine {
 
     public String nextReportId() {
         return reportIds.next();
+    }
+
+    @Override
+    public void onIncident(Incident i) {
+        if (priorIncidents.contains(i)) {
+            // During init(), Handle Incidents we have been previously seen by just logging them. 
+            LOG.info("Incident handled during init: {}", i);
+        } else {
+            // If we haven't seen the Incident, generate one.
+            handler.onIncident(i);
+        }
     }
 
 }

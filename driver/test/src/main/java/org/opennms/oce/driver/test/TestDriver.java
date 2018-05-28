@@ -71,37 +71,58 @@ public class TestDriver {
      * 
      * @param alarms The alarms to replay
      * @param inventory The inventory to use
+     * @param previousIncidents
      * @param timestamp the Driver emulates an engine reset at timestamp
      * @return
      */
-    public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, long timestamp) {
+    public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Incident> previousIncidents, long timestamp) {
         // bifurcate the alarms
-        final List<Alarm> sortedAlarms = alarms.stream()
-                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
-                .collect(Collectors.toList());
-        List<Alarm> previousAlarms = reduceAlarms(sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList()));
+        final List<Alarm> sortedAlarms = timeSortAlarms(alarms);
+        final List<Alarm> previousAlarms = getStartupAlarms(sortedAlarms, timestamp);
         List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());
         // Run the engine 
-        List<Incident> previousIncidents = run(previousAlarms, inventory);
-        List<Incident> allIncidents = new ArrayList<>(previousIncidents);
-        // re-run the engine 
-        allIncidents.addAll(run(afterAlarms, inventory, previousAlarms, previousIncidents));
-        return allIncidents;
+        return run(afterAlarms, inventory, previousAlarms, previousIncidents);
+    }
+
+    /**
+     * Given a sorted List of Alarms, return the Sorted List that are used to init() an Engine.
+     * @param sortedAlarms Assumes a sorted List of Alarms.
+     * @param timestamp Startup timestamp
+     * @return
+     */
+    public static List<Alarm> getStartupAlarms(List<Alarm> sortedAlarms, long timestamp) {
+        return reduceAlarms(sortedAlarms.stream().filter(a -> a.getTime() <= timestamp).collect(Collectors.toList()));
     }
 
     /**
      * Assumes a sorted list of alarms.
-     * @param in A time sorted List of Alarms
+     * @param sortedAlarms A time sorted List of Alarms
      * @return The last Alarm of each Id with No Alarm for a given Id if the last Alarm for that Id had a Severity of CLEAR. 
      */
-    static List<Alarm> reduceAlarms(List<Alarm> in) {
+    public static List<Alarm> reduceAlarms(List<Alarm> sortedAlarms) {
         Map<String, Alarm> reduced = new HashMap<>();
-        for (Alarm a : in) {
+        for (Alarm a : sortedAlarms) {
             reduced.put(a.getId(), a);
         }
-        return reduced.values().stream().filter(a -> !a.isClear()).collect(Collectors.toList());
+        return timeSortAlarms(reduced.values().stream().filter(a -> !a.isClear()).collect(Collectors.toList()));
     }
 
+    /**
+     * Sort Alarms in time order.
+     * @param alarms
+     * @return
+     */
+    public static List<Alarm> timeSortAlarms(List<Alarm> alarms) {
+        return alarms.stream().sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId)).collect(Collectors.toList());
+
+    }
+
+    /**
+     * Run an Engine from a clean start.
+     * @param alarms
+     * @param inventory
+     * @return
+     */
     public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory) {
         return run(alarms, inventory, Collections.emptyList(), Collections.emptyList());
     }
@@ -109,8 +130,8 @@ public class TestDriver {
     private List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms, List<Incident> previousIncidents) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
-        engine.init(previousAlarms, previousIncidents, inventory);
         engine.registerIncidentHandler(session);
+        engine.init(previousAlarms, previousIncidents, inventory);
 
         final List<Alarm> sortedAlarms = alarms.stream()
                 .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
@@ -169,7 +190,7 @@ public class TestDriver {
                 System.out.printf("Incident with id %s has %d alarms.\n",
                         incident.getId(), incident.getAlarms().size());
             }
-            incidents.put(incident.getId(), incident);
+            incidents.put(incident.getId() + ":" + incident.getSeverity(), incident);
         }
     }
 

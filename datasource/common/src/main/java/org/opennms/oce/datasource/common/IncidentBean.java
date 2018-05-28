@@ -111,7 +111,6 @@ public class IncidentBean implements Incident {
         if (o == null || getClass() != o.getClass()) return false;
         IncidentBean that = (IncidentBean) o;
         return creationTime == that.creationTime &&
-                Objects.equals(id, that.id) &&
                 Objects.equals(resourceKeys, that.resourceKeys) &&
                 Objects.equals(alarms, that.alarms) &&
                 Objects.equals(severity, that.severity);
@@ -119,7 +118,7 @@ public class IncidentBean implements Incident {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, creationTime, resourceKeys, alarms, severity);
+        return Objects.hash(creationTime, resourceKeys, alarms, severity);
     }
 
     @Override

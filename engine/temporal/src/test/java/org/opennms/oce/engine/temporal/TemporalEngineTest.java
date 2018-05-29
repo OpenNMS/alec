@@ -57,7 +57,7 @@ public class TemporalEngineTest implements IncidentHandler {
 
     @Test
     public void testFiveAlarmsSameTime() {
-        Engine processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceEngine();
         processor.registerIncidentHandler(this);
         List<Alarm> alarms = getAlarms(5, 20);
         alarms.forEach(processor::onAlarmCreatedOrUpdated);
@@ -72,7 +72,7 @@ public class TemporalEngineTest implements IncidentHandler {
 
     @Test
     public void testTwoAlarmsSameIncident() {
-        Engine processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceEngine();
         processor.registerIncidentHandler(this);
         List<Alarm> alarms = getAlarms(2, 20);
         alarms.forEach(processor::onAlarmCreatedOrUpdated);
@@ -86,7 +86,7 @@ public class TemporalEngineTest implements IncidentHandler {
 
     @Test
     public void testTwoIncidents() {
-        Engine processor = new TimeSliceProcessor();
+        Engine processor = new TimeSliceEngine();
         processor.registerIncidentHandler(this);
         // First Incident
         processor.onAlarmCreatedOrUpdated(new AlarmBean("A", 11000));

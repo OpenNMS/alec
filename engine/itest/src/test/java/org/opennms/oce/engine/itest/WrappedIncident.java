@@ -26,28 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.temporal;
+package org.opennms.oce.engine.itest;
 
-import org.opennms.oce.engine.api.EngineFactory;
+import java.util.Objects;
 
-public class TimeSliceEngineFactory implements EngineFactory {
-    private Integer sliceMillis;
+import org.opennms.oce.datasource.api.Incident;
 
-    @Override
-    public String getName() {
-        return "temporal";
+public class WrappedIncident {
+    private Incident i;
+
+    public WrappedIncident(Incident i) {
+        this.i = i;
     }
 
     @Override
-    public TimeSliceEngine createEngine() {
-        final TimeSliceEngine engine = new TimeSliceEngine();
-        if (sliceMillis != null) {
-            engine.setSliceMillis(sliceMillis);
+    public int hashCode() {
+        return Objects.hash(i.getSeverity(), i.getResourceKeys(), i.getAlarms());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        return engine;
-    }
-
-    public void setSliceMillis(int sliceMillis) {
-        this.sliceMillis = sliceMillis;
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        WrappedIncident other = (WrappedIncident) obj;
+        return other.i.getSeverity().equals(i.getSeverity()) && other.i.getResourceKeys().equals(i.getResourceKeys())
+                && other.i.getAlarms().equals(i.getAlarms());
     }
 }

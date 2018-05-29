@@ -57,7 +57,18 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
 
     // Percentage of the Base Tickets correctly found in the SUT
     public double getAccuracy(Set<Incident> baseline, Set<Incident> sut) {
-        return percentOf(baseline.size(), sut.size());
+        return percentOf(baseline.size(), sut.size()) - falsePositivePenalty(baseline, sut);
+    }
+
+    // Calculate an arbitrary penalty for false Positives
+    private double falsePositivePenalty(Set<Incident> baseline, Set<Incident> sut) {
+        Set<Incident> falsePositives = new HashSet<>(sut);
+        falsePositives.removeAll(baseline);
+        if (falsePositives.size() == 0) {
+            // no false positives
+            return 0;
+        }
+        return percentOf(sut.size(), falsePositives.size());
     }
 
     private double percentOf(int baseline, int sut) {
@@ -73,7 +84,7 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
     private ScoreReport generateReport(Set<Incident> baseline, Set<Incident> sut) {
         ScoreReport report = new ScoreReport();
         report.setScore(Math.abs(100d - getAccuracy(baseline, sut)));
-        report.setMaxScore(100d);
+        report.setMaxScore(200d);
         report.setMetrics(getMetrics(baseline, sut));
         return report;
     }

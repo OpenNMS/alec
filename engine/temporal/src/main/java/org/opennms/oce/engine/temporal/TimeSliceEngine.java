@@ -36,6 +36,7 @@ import java.util.UUID;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
@@ -44,7 +45,7 @@ import org.opennms.oce.engine.api.IncidentHandler;
  * A toy processor that simply correlates on time slices
  *
  */
-public class TimeSliceProcessor implements Engine {
+public class TimeSliceEngine implements Engine {
 
     IncidentHandler handler;
 
@@ -61,10 +62,8 @@ public class TimeSliceProcessor implements Engine {
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
-        // There is a presumption that alarms will be presented
-        //      in chronological order for this toy implementation.
         if (isInCurrentWindow(alarm)) {
-            addToCurrrent(alarm);
+            current.addAlarm(alarm);
         } else {
             newWindow(alarm);
         }
@@ -72,11 +71,12 @@ public class TimeSliceProcessor implements Engine {
 
     @Override
     public void onAlarmCleared(Alarm alarm) {
-        // TODO
-    }
-
-    private void addToCurrrent(Alarm alarm) {
-        current.addAlarm(alarm);
+        if (isInCurrentWindow(alarm)) {
+            current.addAlarm(alarm);
+            current.setSeverity(Severity.CLEARED);
+        } else {
+            newWindow(alarm);
+        }
     }
 
     private boolean isInCurrentWindow(Alarm alarm) {
@@ -93,6 +93,7 @@ public class TimeSliceProcessor implements Engine {
         current = new IncidentBean();
         current.setId(UUID.randomUUID().toString());
         current.addAlarm(alarm);
+        current.setSeverity(alarm.getSeverity());
     }
 
     @Override

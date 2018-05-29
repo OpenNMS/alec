@@ -40,7 +40,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.opennms.oce.driver.test.MockInventory;
-import org.opennms.oce.engine.topology.model.ModelBuilderImpl;
+import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.OperationalState;
 
@@ -53,7 +53,9 @@ public class GraphTest {
 
     @Before
     public void setUp() {
-        model = ModelBuilderImpl.buildModel(MockInventory.SAMPLE_NETWORK);
+        InventoryModelManager manager = new InventoryModelManager(MockInventory.SAMPLE_NETWORK);
+        model = manager.getModel();
+
         // another to NSA
         model.getObjectById("Port","n1-c1-p2").setOperationalState(OperationalState.NSA);
         // Set one port to SA
@@ -66,7 +68,7 @@ public class GraphTest {
         String dotGraph = generator.generateGraph(model);
 
         // Verify some known relationships
-        assertThat(dotGraph, containsString("\"model(Model)\" -- \"n1(Device)\";"));
+        assertThat(dotGraph, containsString("\"model(MODEL)\" -- \"n1(Device)\";"));
         assertThat(dotGraph, containsString("\"n1(Device)\" -- \"n1-c2(Card)\";"));
 
         // Verify the impacts

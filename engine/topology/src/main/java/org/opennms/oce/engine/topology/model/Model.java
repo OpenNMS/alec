@@ -51,7 +51,7 @@ public class Model {
     public Model(ModelObject root) {
         this.root = Objects.requireNonNull(root);
         // Index the tree
-        index(root);
+        indexHierarchy(root);
     }
 
     
@@ -73,7 +73,6 @@ public class Model {
     public ModelObject getRoot() {
         return root;
     }
-
     
     public int getSize() {
         //TODO efficiently
@@ -85,7 +84,6 @@ public class Model {
 
         Queue<ModelObject> q = new LinkedList<>();
         LOG.info("Model is:");
-
 
         q.add(root);
         while(!q.isEmpty()) {
@@ -188,7 +186,7 @@ public class Model {
         }
 
         //start removing from the bottom up
-        Deque<ModelObject> stack = new ArrayDeque<ModelObject>();
+        Deque<ModelObject> stack = new ArrayDeque<>();
         Queue<ModelObject> stackToRemove = new LinkedList<>();
 
         ModelObject obj = getObjectById(type, id);
@@ -211,25 +209,68 @@ public class Model {
             }
         }
 
-        ModelObject first = ((LinkedList<ModelObject>) stackToRemove).peekFirst();
-        ModelObject last = ((LinkedList<ModelObject>) stackToRemove).peekLast();
-
         for(ModelObject objToRemove : stackToRemove) {
-            mosByTypeAndById.get(objToRemove.getType()).remove(objToRemove.getId());
+            //TODO - detach from uncle, peers nephews
+            removeObjectFromRootAndMap(root, objToRemove);
         }
 
         //TODO
-        // Handle cases of non top level objects (cards)
+        // Check cases of non top level objects (cards)
     }
 
-    private void index(ModelObject mo) {
+    public boolean removeObjectFromRootAndMap(ModelObject mo, ModelObject objToRemove) {
+
+        if(mo.getChildren().size() == 0)
+            return false;
+
+        for(ModelObject m : mo.getChildren()) {
+            if(m.equals(objToRemove)) {
+                findRemoveAndClean(mo, objToRemove);
+                return true;
+            }
+            boolean isRemoved = removeObjectFromRootAndMap(m, objToRemove);
+
+            if(isRemoved){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * With knowledge that the current branch of the model (groups->members->groups-> etc) has this object,
+     * we find object's place and disassociate it from where it is possible
+     * TODO - Currently a simple scenario is handled. Will need enhancements with more complex cases
+     * @param mo
+     * @param objToRemove
+     */
+    private void findRemoveAndClean(ModelObject mo, ModelObject objToRemove) {
+        Group group = mo.getChildGroup(objToRemove.getType());
+        group.removeMember(objToRemove);
+
+        //remove and clean up all descendants
+        cleanDescendants(objToRemove);
+
+        //finally remove and clean object itself
+        mosByTypeAndById.get(objToRemove.getType()).remove(objToRemove.getId());
+    }
+
+    private void cleanDescendants(ModelObject objToRemove) {
+        for(ModelObject child : objToRemove.getChildren()) {
+            mosByTypeAndById.get(child.getType()).remove(child.getId());
+            cleanDescendants(child);
+        }
+    }
+
+    public void indexHierarchy(ModelObject mo) {
         // Index
         final Map<String, ModelObject> mosById = mosByTypeAndById.computeIfAbsent(mo.getType(), e -> new HashMap<>());
         mosById.put(mo.getId(), mo);
 
         // Recurse
         for (ModelObject child : mo.getChildren()) {
-            index(child);
+            indexHierarchy(child);
         }
     }
 }

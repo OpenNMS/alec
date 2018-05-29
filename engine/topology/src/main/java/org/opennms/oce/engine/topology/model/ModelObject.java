@@ -305,6 +305,12 @@ public class ModelObject implements WorkingMemoryObject {
         return getPeers().stream().map(u -> u.getPeerGroup(type)).collect(Collectors.toSet());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return (this.getId().equals(((ModelObject)obj).getId()) &&
+                this.getType().equals(((ModelObject)obj).getType()));
+    }
+
     public Optional<ReportObject> getReport() {
         return report;
     }
@@ -312,5 +318,4 @@ public class ModelObject implements WorkingMemoryObject {
     public void setReport(ReportObject report) {
         this.report = Optional.of(report);
     }
-
 }

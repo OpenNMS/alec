@@ -73,6 +73,16 @@ public class Driver {
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         engine = engineFactory.createEngine();
+        engine.registerIncidentHandler(incident -> {
+            try {
+                LOG.debug("Creating incident: {}", incident);
+                incidentDatasource.forwardIncident(incident);
+                LOG.debug("Successfully created incident.");
+            } catch (Exception e) {
+                LOG.error("An error occurred while forwarding incident: {}. The incident will be lost.", incident, e);
+            }
+        });
+
         timer = new Timer();
         // The get methods on the datasources may block, so we do this on a separate thread
         initThread = new Thread(() -> {

@@ -30,6 +30,10 @@ package org.opennms.oce.datasource.opennms;
 
 import java.util.concurrent.TimeUnit;
 
+import org.opennms.oce.datasource.opennms.model.Event;
+import org.opennms.oce.datasource.opennms.model.JaxbUtils;
+import org.opennms.oce.datasource.opennms.model.Parameter;
+
 import com.google.gson.Gson;
 
 import okhttp3.Credentials;
@@ -93,25 +97,13 @@ public class OpennmsRestClient {
 
     void sendEvent(OpennmsEvent event) throws Exception {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
-        String xml = "<event>\n" +
-                "   <uei>"+ event.getUei() + "</uei>\n" +
-                "   <source>oce</source> \n" +
-                "   <parms>\n" +
-                "    <parm>\n" +
-                "     <parmName><![CDATA[service]]></parmName>\n" +
-                "     <value type=\"string\" encoding=\"text\"><![CDATA[" + event.getService() + "]]></value>\n" +
-                "    </parm>\n";
-        if (!event.getAssociatedReductionKeys().isEmpty()) {
-            xml = xml + "    <parm>\n" +
-                    "     <parmName><![CDATA[impacts]]></parmName>\n" +
-                    "     <value type=\"string\" encoding=\"text\"><![CDATA[";
-            Gson g = new Gson();
-            xml = xml + g.toJson(event.getAssociatedReductionKeys());
-            xml = xml + "]]></value>\n" + "    </parm>\n";
+        final Event e = new Event();
+        e.setUei(event.getUei());
+        e.getParameters().add(new Parameter("service", event.getService()));
+        for (String reductionKey : event.getAssociatedReductionKeys()) {
+            e.getParameters().add(new Parameter("related-reductionKey", reductionKey));
         }
-        xml  = xml + "   </parms>\n" +
-                "   <severity>Critical</severity>\n" +
-                "  </event>\n";
+        final String xml = JaxbUtils.toXml(e);
         final HttpUrl url = baseUrl.newBuilder()
                 .addPathSegment("rest")
                 .addPathSegment("events")

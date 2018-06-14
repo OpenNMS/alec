@@ -34,77 +34,34 @@ import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="event")
+@XmlRootElement(name="parms")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Event {
+public class Parameters {
 
-    @XmlElement(name="uei")
-    private String uei;
+    @XmlElement(name="parm")
+    private List<Parameter> parameters = new ArrayList<>();
 
-    @XmlElement(name="source")
-    private String source = "oce";
-
-    @XmlElement(name="parms")
-    private Parameters parameters = new Parameters();
-
-    @XmlElement(name="severity")
-    private String severity = "Critical";
-
-    public String getUei() {
-        return uei;
-    }
-
-    public void setUei(String uei) {
-        this.uei = uei;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public Parameters getParameters() {
+    public List<Parameter> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Parameters parameters) {
+    public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
-    }
-
-    public String getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(String severity) {
-        this.severity = severity;
-    }
-
-    public void addParam(String key, String value) {
-        getParameters().getParameters().add(new Parameter(key, value));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Event event = (Event) o;
-        return Objects.equals(uei, event.uei) &&
-                Objects.equals(source, event.source) &&
-                Objects.equals(parameters, event.parameters) &&
-                Objects.equals(severity, event.severity);
+        Parameters that = (Parameters) o;
+        return Objects.equals(parameters, that.parameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uei, source, parameters, severity);
+        return Objects.hash(parameters);
     }
-
-
 }

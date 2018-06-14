@@ -99,9 +99,9 @@ public class OpennmsRestClient {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
         final Event e = new Event();
         e.setUei(event.getUei());
-        e.getParameters().add(new Parameter("service", event.getService()));
+        e.addParam("service", event.getService());
         for (String reductionKey : event.getAssociatedReductionKeys()) {
-            e.getParameters().add(new Parameter("related-reductionKey", reductionKey));
+            e.addParam("related-reductionKey", reductionKey);
         }
         final String xml = JaxbUtils.toXml(e);
         final HttpUrl url = baseUrl.newBuilder()

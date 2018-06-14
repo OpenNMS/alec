@@ -31,7 +31,9 @@ package org.opennms.oce.datasource.opennms;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.IncidentDatasource;
 
@@ -49,7 +51,10 @@ public class OpennmsIncidentDatasource implements IncidentDatasource {
 
     @Override
     public void forwardIncident(Incident incident) throws Exception {
-        OpennmsEvent e = new OpennmsEvent(OpennmsEvent.TRIGGER_UEI, "svc", Collections.emptyList());
+        final List<String> alarmIds = incident.getAlarms().stream()
+                .map(Alarm::getId)
+                .collect(Collectors.toList());
+        OpennmsEvent e = new OpennmsEvent(OpennmsEvent.TRIGGER_UEI, incident.getId(), alarmIds);
         restClient.sendEvent(e);
     }
 

@@ -45,8 +45,8 @@ public class EventMarshalTest {
     public void canMarshal() throws JAXBException {
         Event e = new Event();
         e.setUei("someuei");
-        e.getParameters().add(new Parameter("k1", "v1"));
-        e.getParameters().add(new Parameter("k2", "v2"));
+        e.addParam("k1", "v1");
+        e.addParam("k2", "v2");
         StringWriter sw = new StringWriter();
         JAXBContext context = JAXBContext.newInstance(Event.class);
         Marshaller m = context.createMarshaller();
@@ -58,12 +58,14 @@ public class EventMarshalTest {
                 "    <uei>someuei</uei>\n" +
                 "    <source>oce</source>\n" +
                 "    <parms>\n" +
-                "        <parmName>k1</parmName>\n" +
-                "        <value encoding=\"text\" type=\"string\">v1</value>\n" +
-                "    </parms>\n" +
-                "    <parms>\n" +
-                "        <parmName>k2</parmName>\n" +
-                "        <value encoding=\"text\" type=\"string\">v2</value>\n" +
+                "        <parm>\n" +
+                "            <parmName>k1</parmName>\n" +
+                "            <value encoding=\"text\" type=\"string\">v1</value>\n" +
+                "        </parm>\n" +
+                "        <parm>\n" +
+                "            <parmName>k2</parmName>\n" +
+                "            <value encoding=\"text\" type=\"string\">v2</value>\n" +
+                "        </parm>\n" +
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
                 "</event>"));

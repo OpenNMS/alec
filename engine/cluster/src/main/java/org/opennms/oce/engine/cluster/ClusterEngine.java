@@ -108,7 +108,7 @@ public class ClusterEngine implements Engine {
     private final Map<String, IncidentBean> alarmIdToIncidentMap = new HashMap<>();
     private final Map<String, IncidentBean> incidentsById = new HashMap<>();
 
-    private long tickResolutionMs = TimeUnit.SECONDS.toMillis(5);
+    private long tickResolutionMs = TimeUnit.SECONDS.toMillis(30);
 
     private IncidentHandler incidentHandler;
 
@@ -120,6 +120,7 @@ public class ClusterEngine implements Engine {
     private long clearTimeoutMs = TimeUnit.MINUTES.toMillis(5);
 
     private boolean alarmsChangedSinceLastTick = false;
+    private DijkstraShortestPath<Vertex, Edge> shortestPath;
 
     public ClusterEngine() {
         this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
@@ -179,6 +180,7 @@ public class ClusterEngine implements Engine {
         }
         // Reset
         alarmsChangedSinceLastTick = false;
+        shortestPath = null;
 
         // GC alarms from vertices
         for (Vertex v : g.getVertices()) {
@@ -411,8 +413,9 @@ public class ClusterEngine implements Engine {
                                 throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdB);
                             }
 
-                            // FIXME: We run into problems with reciprocity if we attempt to reuse this when the graph is updated
-                            final DijkstraShortestPath<Vertex, Edge> shortestPath = new DijkstraShortestPath<>(g, false);
+                            if (shortestPath == null) {
+                                shortestPath = new DijkstraShortestPath<>(g, true);
+                            }
                             return shortestPath.getPath(vertexA, vertexB).size();
                         }
                     });

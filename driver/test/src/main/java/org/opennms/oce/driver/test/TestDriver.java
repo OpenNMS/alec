@@ -127,49 +127,53 @@ public class TestDriver {
         return run(alarms, inventory, Collections.emptyList(), Collections.emptyList());
     }
 
+
+    private long roundToTick(long time, long tickResolutionMs) {
+        return Math.floorDiv(time, tickResolutionMs) * tickResolutionMs;
+    }
+
     private List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms, List<Incident> previousIncidents) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
         engine.registerIncidentHandler(session);
         engine.init(previousAlarms, previousIncidents, inventory);
 
-        final List<Alarm> sortedAlarms = alarms.stream()
-                .sorted(Comparator.comparing(Alarm::getTime).thenComparing(Alarm::getId))
-                .collect(Collectors.toList());
-
-        if (sortedAlarms.size() < 1) {
+        long tickResolutionMs = engine.getTickResolutionMs();
+        final Map<Long,List<Alarm>> alarmsByTick = alarms.stream()
+                .collect(Collectors.groupingBy(a -> roundToTick(a.getTime(), tickResolutionMs)));
+        if (alarmsByTick.size() < 1) {
             // No alarms, nothing to do here
             return Collections.emptyList();
         }
 
-        long tickResolutionMs = engine.getTickResolutionMs();
-        final long firstTimestamp = sortedAlarms.get(0).getTime();
-        final long lastTimestamp = sortedAlarms.get(sortedAlarms.size()-1).getTime();
-        final long startTime = System.currentTimeMillis();
+        final long start = Math.max(alarms.stream()
+                .min(Comparator.comparing(Alarm::getTime))
+                .map(e -> roundToTick(e.getTime(), tickResolutionMs))
+                .get() - tickResolutionMs, 0);
+        final long end = alarms.stream()
+                .max(Comparator.comparing(Alarm::getTime))
+                .map(e -> roundToTick(e.getTime(), tickResolutionMs))
+                .get() + tickResolutionMs;
 
-        Long lastTick = null;
-        for (Alarm alarm : sortedAlarms) {
-            final long now = alarm.getTime();
-            if (lastTick == null) {
-                lastTick = now - 1;
-                printTick(lastTick, firstTimestamp, lastTimestamp, startTime);
-                engine.tick(lastTick);
-            } else if (lastTick + tickResolutionMs < now) {
-                for (long t = lastTick; t < now; t+= tickResolutionMs) {
-                    lastTick = t;
-                    printTick(t, firstTimestamp, lastTimestamp, startTime);
-                    engine.tick(t);
+        final long startTime = System.currentTimeMillis();
+        long now;
+        for (now = start; now <= end; now += tickResolutionMs) {
+            // Find the alarms in the current window
+            for (Alarm alarm : alarmsByTick.getOrDefault(now, Collections.emptyList())) {
+                if (!alarm.isClear()) {
+                    engine.onAlarmCreatedOrUpdated(alarm);
+                } else {
+                    engine.onAlarmCleared(alarm);
                 }
             }
-            if (!alarm.isClear()) {
-                engine.onAlarmCreatedOrUpdated(alarm);
-            } else {
-                engine.onAlarmCleared(alarm);
-            }
+            // Tick
+            engine.tick(now);
+            printTick(now, start, end, startTime);
         }
+
         // One last tick
-        lastTick += tickResolutionMs;
-        engine.tick(lastTick);
+        now += tickResolutionMs;
+        engine.tick(now);
 
         // Destroy
         engine.destroy();

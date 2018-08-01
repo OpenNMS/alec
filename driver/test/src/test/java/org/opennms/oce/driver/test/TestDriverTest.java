@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 
 public class TestDriverTest {
@@ -53,12 +52,12 @@ public class TestDriverTest {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
                 .withEvent(SECONDS.toMillis(1), Severity.MAJOR)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a2")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
                 .build());
 
@@ -75,19 +74,19 @@ public class TestDriverTest {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
                 .withEvent(SECONDS.toMillis(1), Severity.MAJOR)
                 .withEvent(SECONDS.toMillis(31), Severity.MINOR)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a2")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
                 .withEvent(SECONDS.toMillis(61), Severity.MINOR)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a3")
-                .withResourceKey(new ResourceKey("Port,n1-c2-p1"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c2-p1")
                 .withEvent(SECONDS.toMillis(31), Severity.MINOR)
                 .withEvent(SECONDS.toMillis(61), Severity.MAJOR)
                 .build());
@@ -111,19 +110,19 @@ public class TestDriverTest {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a1")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
                 .withEvent(SECONDS.toMillis(1), Severity.MAJOR)
                 .withEvent(SECONDS.toMillis(31), Severity.CLEARED)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a2")
-                .withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
                 .withEvent(SECONDS.toMillis(61), Severity.CLEARED)
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("a3")
-                .withResourceKey(new ResourceKey("Port,n1-c2-p1"))
+                .withInventoryObject(MockInventoryType.PORT, "n1-c2-p1")
                 .withEvent(SECONDS.toMillis(31), Severity.MINOR)
                 .withEvent(SECONDS.toMillis(61), Severity.MAJOR)
                 .build());

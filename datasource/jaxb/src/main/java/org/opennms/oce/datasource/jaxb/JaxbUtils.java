@@ -48,7 +48,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.IncidentBean;
@@ -70,9 +69,8 @@ public class JaxbUtils {
         final AlarmBean alarmBean = new AlarmBean();
         alarmBean.setId(alarm.getId());
         alarmBean.setTime(event.getTime());
-        event.getResource().stream()
-                .map(r ->  new ResourceKey((List<String>) gson.fromJson(r, List.class)))
-                .forEach(r -> alarmBean.getResourceKeys().add(r));
+        alarmBean.setInventoryObjectType(alarm.getInventoryObjectType());
+        alarmBean.setInventoryObjectId(alarm.getInventoryObjectId());
         alarmBean.setSeverity(toSeverity(event.getSeverity()));
         return alarmBean;
     }

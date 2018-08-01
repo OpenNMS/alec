@@ -51,5 +51,10 @@
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

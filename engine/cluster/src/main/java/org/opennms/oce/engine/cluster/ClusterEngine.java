@@ -47,7 +47,6 @@ import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
@@ -61,8 +60,6 @@ import com.google.common.cache.LoadingCache;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
-import edu.uci.ics.jung.graph.util.EdgeType;
 
 /**
  * Clustering based correlation
@@ -97,14 +94,10 @@ public class ClusterEngine implements Engine {
      */
     private static final String EMPTY_INCIDENT_ID = "";
 
-    private final AtomicLong vertexIdGenerator = new AtomicLong();
     private final AtomicLong incidentIdGenerator = new AtomicLong();
 
-    private final Graph<Vertex, Edge> g = new SparseMultigraph<>();
     private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
 
-    private final Map<ResourceKey, Vertex> resourceToVertexMap = new HashMap<>();
-    private final Map<Long, Vertex> idtoVertexMap = new HashMap<>();
     private final Map<String, IncidentBean> alarmIdToIncidentMap = new HashMap<>();
     private final Map<String, IncidentBean> incidentsById = new HashMap<>();
 
@@ -122,6 +115,8 @@ public class ClusterEngine implements Engine {
     private boolean alarmsChangedSinceLastTick = false;
     private DijkstraShortestPath<Vertex, Edge> shortestPath;
 
+    private final GraphManager graphManager = new GraphManager();
+
     public ClusterEngine() {
         this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
     }
@@ -129,14 +124,6 @@ public class ClusterEngine implements Engine {
     public ClusterEngine(double epsilon, double alpha, double beta) {
         this.epsilon = epsilon;
         distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
-    }
-
-    private Vertex getVertexForAlarm(Alarm alarm) {
-        return alarm.getResourceKeys().stream().map(this::getVertexForResource)
-                // All the vertices returned should be the same, use the first
-                // TODO: Verify that they are all the same
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No resources on alarm: " + alarm));
     }
 
     @Override
@@ -166,7 +153,9 @@ public class ClusterEngine implements Engine {
 
     @Override
     public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
-        // TODO
+        graphManager.addInventory(inventory);
+        graphManager.addOrUpdateAlarms(alarms);
+        // TODO: What do we do with the initial incidents?
     }
 
     @Override
@@ -182,41 +171,44 @@ public class ClusterEngine implements Engine {
         alarmsChangedSinceLastTick = false;
         shortestPath = null;
 
-        // GC alarms from vertices
-        for (Vertex v : g.getVertices()) {
-            v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
-        }
+        // TODO: Can we move some of this out of the lock?
+        graphManager.withGraph(g -> {
+            // GC alarms from vertices
+            for (Vertex v : g.getVertices()) {
+                v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
+            }
 
-        // FIXME: Inefficient to do this every tick
-        final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
-                .map(v -> v.getAlarms().stream()
+            // FIXME: Inefficient to do this every tick
+            final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
+                    .map(v -> v.getAlarms().stream()
                             .map(a -> new AlarmInSpaceTime(v,a))
                             .collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
-                .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
-                .collect(Collectors.toList());
-        LOG.debug("Tick at {} with {} alarms.", timestampInMillis, alarms.size());
+                    .flatMap(Collection::stream)
+                    // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
+                    .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
+                    .collect(Collectors.toList());
+            LOG.debug("Tick at {} with {} alarms.", timestampInMillis, alarms.size());
 
-        final DBSCANClusterer<AlarmInSpaceTime> clusterer = new DBSCANClusterer<>(epsilon, 1, distanceMeasure);
-        final List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = clusterer.cluster(alarms);
-        LOG.debug("Found {} clusters.", clustersOfAlarms.size());
-        for (Cluster<AlarmInSpaceTime> clusterOfAlarms : clustersOfAlarms) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Got cluster with {} alarms.", clusterOfAlarms.getPoints().size());
-            }
-
-            final Set<IncidentBean> incidents = mapClusterToIncidents(clusterOfAlarms,
-                    alarmIdToIncidentMap, incidentsById, incidentIdGenerator);
-            // Index and notify the incident handler
-            for (IncidentBean incident : incidents) {
-                for (Alarm alarm : incident.getAlarms()) {
-                    alarmIdToIncidentMap.put(alarm.getId(), incident);
+            final DBSCANClusterer<AlarmInSpaceTime> clusterer = new DBSCANClusterer<>(epsilon, 1, distanceMeasure);
+            final List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = clusterer.cluster(alarms);
+            LOG.debug("Found {} clusters.", clustersOfAlarms.size());
+            for (Cluster<AlarmInSpaceTime> clusterOfAlarms : clustersOfAlarms) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Got cluster with {} alarms.", clusterOfAlarms.getPoints().size());
                 }
-                incidentsById.put(incident.getId(), incident);
-                incidentHandler.onIncident(incident);
+
+                final Set<IncidentBean> incidents = mapClusterToIncidents(clusterOfAlarms,
+                        alarmIdToIncidentMap, incidentsById, incidentIdGenerator);
+                // Index and notify the incident handler
+                for (IncidentBean incident : incidents) {
+                    for (Alarm alarm : incident.getAlarms()) {
+                        alarmIdToIncidentMap.put(alarm.getId(), incident);
+                    }
+                    incidentsById.put(incident.getId(), incident);
+                    incidentHandler.onIncident(incident);
+                }
             }
-        }
+        });
     }
 
     @VisibleForTesting
@@ -292,24 +284,24 @@ public class ClusterEngine implements Engine {
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
-        getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
+        graphManager.addOrUpdateAlarm(alarm);
         alarmsChangedSinceLastTick = true;
     }
 
     @Override
     public void onAlarmCleared(Alarm alarm) {
-        getVertexForAlarm(alarm).addOrUpdateAlarm(alarm);
+        graphManager.addOrUpdateAlarm(alarm);
         alarmsChangedSinceLastTick = true;
     }
 
     @Override
     public void onInventoryAdded(Collection<InventoryObject> inventory) {
-        // pass
+        graphManager.addInventory(inventory);
     }
 
     @Override
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
-        // pass
+        graphManager.removeInventory(inventory);
     }
 
     private static class CandidateAlarmWithDistance {
@@ -332,7 +324,8 @@ public class ClusterEngine implements Engine {
     }
 
     private long getVertexIdForAlarm(Alarm alarm) {
-        for (Vertex v : g.getVertices()) {
+        // TODO: Optimize this
+        for (Vertex v : graphManager.getGraph().getVertices()) {
             final Optional<Alarm> match = v.getAlarms().stream()
                     .filter(a -> a.equals(alarm))
                     .findFirst();
@@ -359,35 +352,6 @@ public class ClusterEngine implements Engine {
                 .findFirst().orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
     }
 
-    private Vertex getVertexForResource(ResourceKey resourceKey) {
-        Vertex vertex = resourceToVertexMap.get(resourceKey);
-        if (vertex != null) {
-            // Already created
-            return vertex;
-        } else {
-            // Create it
-            vertex = new Vertex(vertexIdGenerator.getAndIncrement(), resourceKey);
-            // Index it
-            resourceToVertexMap.put(vertex.getResourceKey(), vertex);
-            idtoVertexMap.put(vertex.getId(), vertex);
-            // Invalidate the hop cache, since the graph has changed
-            hops.invalidateAll();
-            // Add it to the graph
-            g.addVertex(vertex);
-        }
-
-        if (resourceKey.length() <= 1) {
-            // This is a root element, no edges to add
-            return vertex;
-        } else {
-            // Retrieve the parent and link the two vertices
-            final Vertex parent = getVertexForResource(resourceKey.getParentKey());
-            g.addEdge(new Edge(), parent, vertex, EdgeType.UNDIRECTED);
-        }
-
-        return vertex;
-    }
-
     public int getNumHopsBetween(long vertexIdA, long vertexIdB) {
         if (vertexIdA == vertexIdB) {
             return 0;
@@ -404,17 +368,17 @@ public class ClusterEngine implements Engine {
             .maximumSize(10000)
             .build(new CacheLoader<EdgeKey, Integer>() {
                         public Integer load(EdgeKey key) {
-                            final Vertex vertexA = idtoVertexMap.get(key.vertexIdA);
+                            final Vertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
                                 throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdA);
                             }
-                            final Vertex vertexB = idtoVertexMap.get(key.vertexIdB);
+                            final Vertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
                             if (vertexB == null) {
                                 throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdB);
                             }
 
                             if (shortestPath == null) {
-                                shortestPath = new DijkstraShortestPath<>(g, true);
+                                shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), true);
                             }
                             return shortestPath.getPath(vertexA, vertexB).size();
                         }
@@ -447,6 +411,6 @@ public class ClusterEngine implements Engine {
 
     @VisibleForTesting
     Graph<Vertex, Edge> getGraph() {
-        return g;
+        return graphManager.getGraph();
     }
 }

@@ -66,7 +66,6 @@ public class OpennmsMapperTest {
         assertThat(alarmBean.getId(), equalTo(alarm.getReductionKey()));
         assertThat(alarmBean.getTime(), equalTo(alarm.getLastEventTime()));
         assertThat(alarmBean.getSeverity(), equalTo(Severity.CRITICAL));
-        assertThat(alarmBean.getResourceKeys(), contains(ResourceKey.key(OpennmsMapper.NODE_INVENTORY_TYPE + ",FS:FID")));
     }
 
     @Test

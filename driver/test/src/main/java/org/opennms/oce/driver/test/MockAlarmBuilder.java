@@ -32,13 +32,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 
 public class MockAlarmBuilder {
     private String id;
-    private ResourceKey resourceKey;
+    private String inventoryObjectId;
+    private String inventoryObjectType;
     private List<MockEvent> events = new ArrayList<>();
 
     public MockAlarmBuilder withId(String id) {
@@ -46,8 +48,13 @@ public class MockAlarmBuilder {
         return this;
     }
 
-    public MockAlarmBuilder withResourceKey(ResourceKey resourceKey) {
-        this.resourceKey = resourceKey;
+    public MockAlarmBuilder withInventoryObject(MockInventoryType type, String id) {
+        return withInventoryObject(type.getType(), id);
+    }
+
+    public MockAlarmBuilder withInventoryObject(String type, String id) {
+        inventoryObjectType = type;
+        inventoryObjectId = id;
         return this;
     }
 
@@ -61,18 +68,20 @@ public class MockAlarmBuilder {
         return this;
     }
 
-    public List<AlarmBean> build() {
+    public List<Alarm> build() {
         events.sort(Comparator.comparing(MockEvent::getTime));
 
-        final List<AlarmBean> alarms = new ArrayList<>();
+        final List<Alarm> alarms = new ArrayList<>();
         for (MockEvent event : events) {
             final AlarmBean alarm = new AlarmBean();
             alarm.setId(id);
-            alarm.getResourceKeys().add(resourceKey);
+            alarm.setInventoryObjectType(inventoryObjectType);
+            alarm.setInventoryObjectId(inventoryObjectId);
             alarm.setTime(event.getTime());
             alarm.setSeverity(event.getSeverity());
             alarms.add(alarm);
         }
+
         return alarms;
     }
 

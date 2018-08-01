@@ -38,25 +38,25 @@ public class MockInventory {
 
     public static List<InventoryObject> SAMPLE_NETWORK = ImmutableList.copyOf(new MockInventoryBuilder()
             // N1
-            .withInventoryObject("Device", "n1")
-            .withInventoryObject("Card", "n1-c1", "Device", "n1")
-            .withInventoryObject("Card", "n1-c2", "Device", "n1")
-            .withInventoryObject("Port", "n1-c1-p1", "Card", "n1-c1")
-            .withInventoryObject("Port", "n1-c1-p2", "Card", "n1-c1")
-            .withInventoryObject("Port", "n1-c2-p1", "Card", "n1-c2")
-            .withInventoryObject("Port", "n1-c2-p2", "Card", "n1-c2")
+            .withInventoryObject(MockInventoryType.DEVICE, "n1")
+            .withInventoryObject(MockInventoryType.CARD, "n1-c1", MockInventoryType.DEVICE, "n1")
+            .withInventoryObject(MockInventoryType.CARD, "n1-c2", MockInventoryType.DEVICE, "n1")
+            .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.CARD, "n1-c1")
+            .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2", MockInventoryType.CARD, "n1-c1")
+            .withInventoryObject(MockInventoryType.PORT, "n1-c2-p1", MockInventoryType.CARD, "n1-c2")
+            .withInventoryObject(MockInventoryType.PORT, "n1-c2-p2", MockInventoryType.CARD, "n1-c2")
             // N2
-            .withInventoryObject("Device", "n2")
-            .withInventoryObject("Card", "n2-c1", "Device", "n2")
-            .withInventoryObject("Port", "n2-c1-p1", "Card", "n2-c1")
-            .withInventoryObject("Port", "n2-c1-p2", "Card", "n2-c1")
+            .withInventoryObject(MockInventoryType.DEVICE, "n2")
+            .withInventoryObject(MockInventoryType.CARD, "n2-c1", MockInventoryType.DEVICE, "n2")
+            .withInventoryObject(MockInventoryType.PORT, "n2-c1-p1", MockInventoryType.CARD, "n2-c1")
+            .withInventoryObject(MockInventoryType.PORT, "n2-c1-p2", MockInventoryType.CARD, "n2-c1")
             // Link
             // Link between the two
-            .withInventoryObject("Link", "n1-c1-p1___n2-c1-p1")
-            .withPeerRelation("Link", "n1-c1-p1___n2-c1-p1", "Port", "n1-c1-p1", "Port", "n2-c1-p1")
+            .withInventoryObject(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1")
+            .withPeerRelation(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1", MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.PORT, "n2-c1-p1")
             // A service over the link
-            .withInventoryObject("BGP", "bgp peer n1-n2")
-            .withRelativeRelation("Link", "n1-c1-p1___n2-c1-p1", "BGP", "bgp peer n1-n2")
+            .withInventoryObject(MockInventoryType.BGP, "bgp peer n1-n2")
+            .withRelativeRelation(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1", MockInventoryType.BGP, "bgp peer n1-n2")
             .getInventory());
 
 }

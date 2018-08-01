@@ -153,29 +153,25 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                 final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
                 if (lastAlarm != null) {
                     final AlarmBean alarmBean = OpennmsMapper.toAlarm(lastAlarm);
-                    if (alarmBean.getResourceKeys().size() >= 1) {
-                        alarmHandlers.forEach(h -> {
-                            try {
-                                h.onAlarmCleared(alarmBean);
-                            } catch (Exception e) {
-                                LOG.error("onAlarmCleared() call failed with alarm: {} on handler: {}", alarmBean, h, e);
-                            }
-                        });
-                    }
+                    alarmHandlers.forEach(h -> {
+                        try {
+                            h.onAlarmCleared(alarmBean);
+                        } catch (Exception e) {
+                            LOG.error("onAlarmCleared() call failed with alarm: {} on handler: {}", alarmBean, h, e);
+                        }
+                    });
                 } else {
                     LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
                 }
             } else {
                 final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
-                if (alarmBean.getResourceKeys().size() >= 1) {
-                    alarmHandlers.forEach(h -> {
-                        try {
-                            h.onAlarmCreatedOrUpdated(alarmBean);
-                        } catch (Exception e) {
-                            LOG.error("onAlarmCreatedOrUpdated() call failed with alarm: {} on handler: {}", alarmBean, h, e);
-                        }
-                    });
-                }
+                alarmHandlers.forEach(h -> {
+                    try {
+                        h.onAlarmCreatedOrUpdated(alarmBean);
+                    } catch (Exception e) {
+                        LOG.error("onAlarmCreatedOrUpdated() call failed with alarm: {} on handler: {}", alarmBean, h, e);
+                    }
+                });
             }
         }
         alarmsByReductionKey.put(reductionKey, alarm);

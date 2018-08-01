@@ -49,6 +49,7 @@ import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
 
@@ -85,14 +86,14 @@ public class Level2EngineComplianceTest {
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919123")
                 .withComment("source: service")
-                .withResourceKey(new ResourceKey("device,n1", "port,eth1/1/1"))
+                .withInventoryObject(MockInventoryType.PORT, "eth1/1/1")
                 .withEvent(1525579974000L, Severity.MAJOR)
                 .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
                 .build());
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919127")
                 .withComment("source: syslog")
-                .withResourceKey(new ResourceKey("device,n1", "port,eth1/1/1"))
+                .withInventoryObject(MockInventoryType.PORT, "eth1/1/1")
                 .withEvent(1525579963000L, Severity.MINOR)
                 .withEvent(1525579967000L, Severity.CLEARED) // 4 seconds since last event
                 .withEvent(1525579970000L, Severity.MINOR) // 3 seconds since last event
@@ -105,7 +106,7 @@ public class Level2EngineComplianceTest {
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919128")
                 .withComment("source: trap")
-                .withResourceKey(new ResourceKey("device,n1", "port,eth1/1/1"))
+                .withInventoryObject(MockInventoryType.PORT, "eth1/1/1")
                 .withEvent(1525579964000L, Severity.MINOR)
                 .withEvent(1525579967000L, Severity.CLEARED) // 3 seconds since last event
                 .withEvent(1525579970000L, Severity.MINOR) // 3 seconds since last event
@@ -133,7 +134,7 @@ public class Level2EngineComplianceTest {
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919134")
                 .withComment("source: service")
-                .withResourceKey(new ResourceKey("device,n1", "port,eth1/1/1"))
+                .withInventoryObject(MockInventoryType.PORT, "eth1/1/1")
                 .withEvent(1525580159000L, Severity.MAJOR)
                 .withEvent(1525580189000L, Severity.CLEARED) // 30 seconds since last event
                 .withEvent(1525582676000L, Severity.MAJOR) // 2487 seconds since last event
@@ -154,7 +155,7 @@ public class Level2EngineComplianceTest {
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919189")
                 .withComment("source: trap")
-                .withResourceKey(new ResourceKey("device,n1", "port,eth1/1/1"))
+                .withInventoryObject(MockInventoryType.PORT, "eth1/1/1")
                 .withEvent(1525583589000L, Severity.MINOR)
                 .withEvent(1525583593000L, Severity.CLEARED) // 4 seconds since last event
                 .withEvent(1525583601000L, Severity.MINOR) // 8 seconds since last event
@@ -311,8 +312,7 @@ public class Level2EngineComplianceTest {
         final List<Alarm> alarms = new ArrayList<>();
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919143")
-                // TODO: Handling of VRFs?
-                .withResourceKey(new ResourceKey("device,n1", "bgp_peer,n1: MpBgp: 10.1.1.1"))
+                .withInventoryObject(MockInventoryType.BGP, "n1: peer: 10.1.1.1")
                 .withComment("source: service")
                 .withEvent(1525580243000L, Severity.MAJOR)// Sun May 06 00:17:23 EDT 2018
                 .withEvent(1525580274000L, Severity.CLEARED) // 31 seconds since last event
@@ -320,14 +320,14 @@ public class Level2EngineComplianceTest {
 
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919144")
-                .withResourceKey(new ResourceKey("device,n1", "bgp_peer,n1: MpBgp: 10.1.1.1"))
+                .withInventoryObject(MockInventoryType.BGP, "n1: peer: 10.1.1.1")
                 .withComment("source: syslog")
                 .withEvent(1525580234000L, Severity.NORMAL)// Sun May 06 00:17:14 EDT 2018
                 .build());
 
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919145")
-                .withResourceKey(new ResourceKey("device,n1", "bgp_peer,n1: MpBgp: 10.1.1.1"))
+                .withInventoryObject(MockInventoryType.BGP, "n1: peer: 10.1.1.1")
                 .withComment("source: trap")
                 .withEvent(1525580235000L, Severity.MAJOR)// Sun May 06 00:17:15 EDT 2018
                 .withEvent(1525580235000L, Severity.NORMAL) // 0 seconds since last event
@@ -339,7 +339,7 @@ public class Level2EngineComplianceTest {
 
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919146")
-                .withResourceKey(new ResourceKey("device,n1", "bgp_peer,n1: MpBgp: 10.1.1.1"))
+                .withInventoryObject(MockInventoryType.BGP, "n1: peer: 10.1.1.1")
                 .withComment("source: trap")
                 .withEvent(1525580234000L, Severity.MAJOR)// Sun May 06 00:17:14 EDT 2018
                 .withEvent(1525580250000L, Severity.CLEARED) // 16 seconds since last event
@@ -347,7 +347,7 @@ public class Level2EngineComplianceTest {
 
         alarms.addAll(new MockAlarmBuilder()
                 .withId("3919147")
-                .withResourceKey(new ResourceKey("device,n1", "bgp_peer,n1: MpBgp: 10.1.1.1"))
+                .withInventoryObject(MockInventoryType.BGP, "n1: peer: 10.1.1.1")
                 .withComment("source: syslog")
                 .withEvent(1525580235000L, Severity.MAJOR)// Sun May 06 00:17:15 EDT 2018
                 .withEvent(1525580250000L, Severity.CLEARED) // 15 seconds since last event

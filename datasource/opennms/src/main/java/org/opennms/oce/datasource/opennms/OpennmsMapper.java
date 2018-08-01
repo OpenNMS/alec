@@ -30,12 +30,9 @@ package org.opennms.oce.datasource.opennms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
@@ -51,10 +48,12 @@ public class OpennmsMapper {
         bean.setId(alarm.getReductionKey());
         bean.setTime(alarm.getLastEventTime());
         bean.setSeverity(toSeverity(alarm.getSeverity()));
-        bean.setResourceKeys(getResourceKeys(alarm));
+        bean.setInventoryObjectType(alarm.getManagedObjectType());
+        bean.setInventoryObjectId(alarm.getManagedObjectInstance());
         return bean;
     }
 
+    /*
     protected static List<ResourceKey> getResourceKeys(OpennmsModelProtos.Alarm alarm) {
         if (!alarm.hasNodeCriteria()) {
             // The alarm is not associated with a node
@@ -83,6 +82,7 @@ public class OpennmsMapper {
             return Collections.singletonList(ResourceKey.key(String.format("%s,%s", NODE_INVENTORY_TYPE, nodeCriteria)));
         }
     }
+    */
 
     protected static Severity toSeverity(OpennmsModelProtos.Severity severity) {
         switch (severity) {

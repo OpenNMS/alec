@@ -85,7 +85,8 @@ public class ActionManager {
     public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus, Severity severity, String alarmId) {
         LOG.info("Synthesize {}|{} Alarm for: {}", operationalStatus, severity, owner);
         AlarmBean alarm = new AlarmBean(alarmId);
-        alarm.getResourceKeys().add(new ResourceKey(owner.getType() + "," + owner.getId()));
+        alarm.setInventoryObjectType(owner.getType());
+        alarm.setInventoryObjectId(owner.getId());
         alarm.setSeverity(severity);
         // Send the synthetic alarm to the engine.
         topologyEngine.onAlarmCreatedOrUpdated(alarm);

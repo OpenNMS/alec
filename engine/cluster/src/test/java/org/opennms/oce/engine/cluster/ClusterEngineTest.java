@@ -36,7 +36,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +51,8 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.driver.test.MockInventoryBuilder;
+import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.engine.api.IncidentHandler;
 
 import com.google.common.collect.ImmutableMap;
@@ -78,10 +79,17 @@ public class ClusterEngineTest implements IncidentHandler {
         assertThat(graph.getVertexCount(), equalTo(0));
         assertThat(graph.getEdgeCount(), equalTo(0));
 
+        engine.onInventoryAdded(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.COMPONENT, "a")
+                .withInventoryObject(MockInventoryType.COMPONENT, "b", MockInventoryType.COMPONENT, "a")
+                .withInventoryObject(MockInventoryType.COMPONENT, "c", MockInventoryType.COMPONENT, "b")
+                .withInventoryObject(MockInventoryType.COMPONENT, "d", MockInventoryType.COMPONENT, "c")
+                .getInventory());
+
         // Trigger some alarm
         Alarm alarm = mock(Alarm.class);
-        ResourceKey key = new ResourceKey("a", "b", "c", "d");
-        when(alarm.getResourceKeys()).thenReturn(Collections.singletonList(key));
+        when(alarm.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm.getInventoryObjectId()).thenReturn("d");
         engine.onAlarmCreatedOrUpdated(alarm);
 
         // The graph should be updated
@@ -96,9 +104,12 @@ public class ClusterEngineTest implements IncidentHandler {
         assertThat(graph.getEdgeCount(), equalTo(3));
 
         // Let's link another vertex on the existing graph
+        engine.onInventoryAdded(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.COMPONENT, "e", MockInventoryType.COMPONENT, "d")
+                .getInventory());
         alarm = mock(Alarm.class);
-        key = new ResourceKey("a", "b", "c", "z");
-        when(alarm.getResourceKeys()).thenReturn(Collections.singletonList(key));
+        when(alarm.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm.getInventoryObjectId()).thenReturn("e");
         engine.onAlarmCreatedOrUpdated(alarm);
 
         // The graph should be updated
@@ -111,18 +122,17 @@ public class ClusterEngineTest implements IncidentHandler {
         long now = System.currentTimeMillis();
         engine.setTickResolutionMs(TimeUnit.SECONDS.toMillis(30));
 
-        // Trigger two alarms on the same resource very close in time
-        ResourceKey key = new ResourceKey("a", "b", "c", "d");
-
         Alarm alarm1 = mock(Alarm.class);
         when(alarm1.getId()).thenReturn("1");
-        when(alarm1.getResourceKeys()).thenReturn(Collections.singletonList(key));
+        when(alarm1.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm1.getInventoryObjectId()).thenReturn("a");
         when(alarm1.getTime()).thenReturn(now);
         engine.onAlarmCreatedOrUpdated(alarm1);
 
         Alarm alarm2 = mock(Alarm.class);
         when(alarm2.getId()).thenReturn("2");
-        when(alarm2.getResourceKeys()).thenReturn(Collections.singletonList(key));
+        when(alarm2.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm2.getInventoryObjectId()).thenReturn("a");
         when(alarm2.getTime()).thenReturn(now+1);
         engine.onAlarmCreatedOrUpdated(alarm2);
 
@@ -150,7 +160,8 @@ public class ClusterEngineTest implements IncidentHandler {
         ResourceKey otherKey = new ResourceKey("w", "x", "y", "z");
         Alarm alarm3 = mock(Alarm.class);
         when(alarm3.getId()).thenReturn("3");
-        when(alarm3.getResourceKeys()).thenReturn(Collections.singletonList(otherKey));
+        when(alarm3.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm3.getInventoryObjectId()).thenReturn("b");
         when(alarm3.getTime()).thenReturn(now+1);
         engine.onAlarmCreatedOrUpdated(alarm3);
 
@@ -158,7 +169,8 @@ public class ClusterEngineTest implements IncidentHandler {
         ResourceKey otherOtherKey = new ResourceKey("w", "x", "y", "z1");
         Alarm alarm4 = mock(Alarm.class);
         when(alarm4.getId()).thenReturn("4");
-        when(alarm4.getResourceKeys()).thenReturn(Collections.singletonList(otherOtherKey));
+        when(alarm4.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm4.getInventoryObjectId()).thenReturn("c");
         when(alarm4.getTime()).thenReturn(now+1);
         engine.onAlarmCreatedOrUpdated(alarm4);
 

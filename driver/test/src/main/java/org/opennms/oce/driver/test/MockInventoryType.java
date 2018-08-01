@@ -26,20 +26,25 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.api;
+package org.opennms.oce.driver.test;
 
-public interface Alarm {
+import java.util.Objects;
 
-    String getId();
+public enum MockInventoryType {
+    DEVICE("Device"),
+    CARD("Card"),
+    PORT("Port"),
+    LINK("Link"),
+    BGP("BGP"),
+    COMPONENT("Component");
 
-    long getTime();
+    private final String type;
 
-    boolean isClear();
+    MockInventoryType(String type) {
+        this.type = Objects.requireNonNull(type);
+    }
 
-    Severity getSeverity();
-
-    String getInventoryObjectId();
-
-    String getInventoryObjectType();
-
+    public String getType() {
+        return type;
+    }
 }

@@ -28,19 +28,17 @@
 
 package org.opennms.oce.datasource.common;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 
 public class AlarmBean implements Alarm {
     private String id;
     private long time;
-    private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Severity severity;
+    private String inventoryObjectId;
+    private String inventoryObjectType;
 
     public AlarmBean() {
         this(null);
@@ -73,23 +71,34 @@ public class AlarmBean implements Alarm {
         this.time = time;
     }
 
-    @Override
-    public List<ResourceKey> getResourceKeys() {
-        return resourceKeys;
-    }
 
     @Override
     public boolean isClear() {
         return Severity.CLEARED.equals(severity);
     }
 
-    public void setResourceKeys(List<ResourceKey> resourceKeys) {
-        this.resourceKeys = resourceKeys;
-    }
 
     @Override
     public Severity getSeverity() {
         return severity;
+    }
+
+    @Override
+    public String getInventoryObjectId() {
+        return inventoryObjectId;
+    }
+
+    @Override
+    public String getInventoryObjectType() {
+        return inventoryObjectType;
+    }
+
+    public void setInventoryObjectId(String inventoryObjectId) {
+        this.inventoryObjectId = inventoryObjectId;
+    }
+
+    public void setInventoryObjectType(String inventoryObjectType) {
+        this.inventoryObjectType = inventoryObjectType;
     }
 
     public void setSeverity(Severity severity) {
@@ -103,13 +112,14 @@ public class AlarmBean implements Alarm {
         AlarmBean alarmBean = (AlarmBean) o;
         return time == alarmBean.time &&
                 Objects.equals(id, alarmBean.id) &&
-                Objects.equals(resourceKeys, alarmBean.resourceKeys) &&
-                severity == alarmBean.severity;
+                severity == alarmBean.severity &&
+                Objects.equals(inventoryObjectId, alarmBean.inventoryObjectId) &&
+                Objects.equals(inventoryObjectType, alarmBean.inventoryObjectType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, resourceKeys, severity);
+        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType);
     }
 
     @Override
@@ -117,8 +127,9 @@ public class AlarmBean implements Alarm {
         return "AlarmBean{" +
                 "id='" + id + '\'' +
                 ", time=" + time +
-                ", resourceKeys=" + resourceKeys +
                 ", severity=" + severity +
+                ", inventoryObjectId='" + inventoryObjectId + '\'' +
+                ", inventoryObjectType='" + inventoryObjectType + '\'' +
                 '}';
     }
 }

@@ -43,7 +43,6 @@ import org.kie.api.runtime.rule.FactHandle;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.engine.topology.model.Group;
@@ -53,8 +52,6 @@ import org.opennms.oce.engine.topology.model.ReportObject;
 import org.opennms.oce.engine.topology.model.WorkingMemoryObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterables;
 
 /**
  * A topology driver processor with Rules Engine
@@ -180,23 +177,7 @@ public class TopologyEngine implements Engine, IncidentHandler {
     }
 
     private ModelObject getObjectForAlarm(Alarm alarm) {
-        final ResourceKey resourceKey = Iterables.getFirst(alarm.getResourceKeys(), null);
-        if (resourceKey == null) {
-            throw new IllegalStateException("Alarms must have at least one resource key.");
-        }
-
-        final String lastToken = Iterables.getLast(resourceKey.getTokens());
-        if (lastToken == null) {
-            throw new IllegalStateException("Tokens must have at least one element");
-        }
-
-        final int idx = lastToken.indexOf(",");
-        if (idx < 1) {
-            throw new IllegalStateException("Improperly formatted token. Type must be defined: " + lastToken);
-        }
-        final String type = lastToken.substring(0, idx);
-        final String id = lastToken.substring(idx + 1, lastToken.length());
-        return model.getObjectById(type, id);
+        return model.getObjectById(alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
     }
 
     public IncidentHandler getIncidentHandler() {

@@ -57,10 +57,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
@@ -110,7 +110,7 @@ public class Level1EngineComplianceTest {
 
     @Test
     public void canCorrelateFiveAlarmsWithSameTimeOnSameResource() {
-        final List<Alarm> alarms = getAlarms(5, 20, new ResourceKey("n1"));
+        final List<Alarm> alarms = getAlarms(5, 20, MockInventoryType.DEVICE, "n1");
         final List<Incident> incidents = driver.run(alarms);
 
         // A single incident should have been created
@@ -140,7 +140,7 @@ public class Level1EngineComplianceTest {
         for (int i = 0; i < 100; i++) {
             MockAlarmBuilder builder = new MockAlarmBuilder()
                     .withId("" + i)
-                    .withResourceKey(new ResourceKey(""+ i % 2, "" + i % 5));
+                    .withInventoryObject(""+ i % 2, "" + i % 5);
             for (int j = 0; j < 100; j++) {
                 builder.withEvent((i+1)*(j+1),  j % 2 == 0 ? Severity.MINOR : Severity.CLEARED);
             }
@@ -192,11 +192,12 @@ public class Level1EngineComplianceTest {
     }
 
     // Get nAlarms all occurring at the same time in seconds
-    private List<Alarm> getAlarms(int nAlarms, long seconds, ResourceKey resourceKey) {
+    private List<Alarm> getAlarms(int nAlarms, long seconds, MockInventoryType inventoryObjectType, String inventoryObjectId) {
         List<Alarm> alarms = new ArrayList<>();
         IntStream.range(0, nAlarms).forEach(index -> {
             AlarmBean alarm = new AlarmBean(Long.valueOf(alarmIdGenerator.getAndIncrement()).toString(), seconds * 1000);
-            alarm.getResourceKeys().add(resourceKey);
+            alarm.setInventoryObjectType(inventoryObjectType.getType());
+            alarm.setInventoryObjectId(inventoryObjectId);
             alarms.add(alarm);
         });
         return alarms;

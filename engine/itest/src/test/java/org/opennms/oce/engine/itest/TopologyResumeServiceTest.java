@@ -42,10 +42,10 @@ import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
+import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.engine.topology.TopologyEngineFactory;
@@ -73,9 +73,9 @@ public class TopologyResumeServiceTest {
     public void resumeServiceBetweenTwoAlarmsTest() {
         final List<Alarm> alarms = new ArrayList<>();
         // Fail all ports on all cards of node: n1
-        alarms.addAll(new MockAlarmBuilder().withId("a1").withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+        alarms.addAll(new MockAlarmBuilder().withId("a1").withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
             .withEvent(SECONDS.toMillis(1), Severity.MAJOR).build());
-        alarms.addAll(new MockAlarmBuilder().withId("a2").withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+        alarms.addAll(new MockAlarmBuilder().withId("a2").withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
             .withEvent(SECONDS.toMillis(31), Severity.MAJOR).build());
 
         List<Alarm> sortedAlarms = TestDriver.timeSortAlarms(alarms);
@@ -99,10 +99,10 @@ public class TopologyResumeServiceTest {
     public void resumeServiceAfterIncidentTest() {
         final List<Alarm> alarms = new ArrayList<>();
         // Fail all ports on all cards of node: n1
-        alarms.addAll(new MockAlarmBuilder().withId("a1").withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+        alarms.addAll(new MockAlarmBuilder().withId("a1").withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
             .withEvent(SECONDS.toMillis(1), Severity.MAJOR).withEvent(SECONDS.toMillis(301), Severity.CLEARED) // 5 minutes later
             .build());
-        alarms.addAll(new MockAlarmBuilder().withId("a2").withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+        alarms.addAll(new MockAlarmBuilder().withId("a2").withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
             .withEvent(SECONDS.toMillis(31), Severity.MAJOR).withEvent(SECONDS.toMillis(331), Severity.CLEARED) // 5 minutes later
             .build());
 
@@ -128,10 +128,10 @@ public class TopologyResumeServiceTest {
     public void resumeServiceIncludeIncidentTest() {
         final List<Alarm> alarms = new ArrayList<>();
         // Fail all ports on all cards of node: n1
-        alarms.addAll(new MockAlarmBuilder().withId("a1").withResourceKey(new ResourceKey("Port,n1-c1-p1"))
+        alarms.addAll(new MockAlarmBuilder().withId("a1").withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
             .withEvent(SECONDS.toMillis(1), Severity.MAJOR).withEvent(SECONDS.toMillis(301), Severity.CLEARED) // 5 minutes later
             .build());
-        alarms.addAll(new MockAlarmBuilder().withId("a2").withResourceKey(new ResourceKey("Port,n1-c1-p2"))
+        alarms.addAll(new MockAlarmBuilder().withId("a2").withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
             .withEvent(SECONDS.toMillis(31), Severity.MAJOR).withEvent(SECONDS.toMillis(331), Severity.CLEARED) // 5 minutes later
             .build());
 

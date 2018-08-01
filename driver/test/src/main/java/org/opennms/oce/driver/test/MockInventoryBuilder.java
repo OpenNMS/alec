@@ -39,10 +39,18 @@ import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
 
 public class MockInventoryBuilder {
 
-    private final List<InventoryObjectBean> inventoryObjects = new ArrayList<>();
+    private final List<InventoryObject> inventoryObjects = new ArrayList<>();
+
+    public MockInventoryBuilder withInventoryObject(MockInventoryType type, String id) {
+        return withInventoryObject(type.getType(), id);
+    }
 
     public MockInventoryBuilder withInventoryObject(String type, String id) {
         return withInventoryObject(type, id, null, null);
+    }
+
+    public MockInventoryBuilder withInventoryObject(MockInventoryType type, String id, MockInventoryType parentType, String parentId) {
+        return withInventoryObject(type.getType(), id, parentType.getType(), parentId);
     }
 
     public MockInventoryBuilder withInventoryObject(String type, String id, String parentType, String parentId) {
@@ -53,6 +61,10 @@ public class MockInventoryBuilder {
         iob.setParentId(parentId);
         inventoryObjects.add(iob);
         return this;
+    }
+
+    public MockInventoryBuilder withPeerRelation(MockInventoryType type, String id, MockInventoryType typeA, String idA, MockInventoryType typeZ, String idZ) {
+        return withPeerRelation(type.getType(), id, typeA.getType(), idA, typeZ.getType(), idZ);
     }
 
     public MockInventoryBuilder withPeerRelation(String type, String id, String typeA, String idA, String typeZ, String idZ) {
@@ -73,6 +85,10 @@ public class MockInventoryBuilder {
         return this;
     }
 
+    public MockInventoryBuilder withRelativeRelation(MockInventoryType type, String id, MockInventoryType relativeType, String relativeId) {
+        return withRelativeRelation(type.getType(), id, relativeType.getType(), relativeId);
+    }
+
     public MockInventoryBuilder withRelativeRelation(String type, String id, String relativeType, String relativeId) {
         final InventoryObjectBean iob = getIoById(type, id);
 
@@ -87,11 +103,12 @@ public class MockInventoryBuilder {
     private InventoryObjectBean getIoById(String type, String id) {
         return inventoryObjects.stream()
                 .filter(io -> type.equals(io.getType()) && id.equals(io.getId()))
+                .map(io -> (InventoryObjectBean)io)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find element with type: %s and id: %s", type, id)));
     }
 
-    public List<? extends InventoryObject> getInventory() {
+    public List<InventoryObject> getInventory() {
         return inventoryObjects;
     }
 

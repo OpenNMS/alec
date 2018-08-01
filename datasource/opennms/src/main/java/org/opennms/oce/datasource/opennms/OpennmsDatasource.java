@@ -74,7 +74,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
 
     private static final String ALARM_STORE_NAME = "alarm_store";
     private static final String NODE_STORE_NAME = "node_store";
-    private static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
+    protected static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
 
     private final ConfigurationAdmin configAdmin;
     private String alarmTopic;

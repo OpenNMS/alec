@@ -26,14 +26,35 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.api;
+package org.opennms.oce.datasource.opennms.inventory;
 
-import java.util.Collection;
 
-public interface InventoryHandler {
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
-    void onInventoryAdded(Collection<InventoryObject> inventoryObjects);
+public enum ManagedObjectType {
+    Node("node"),
+    Fan("fan"),
+    SnmpInterface("snmp-interface"),
+    SnmpInterfaceLink("snmp-interface-link"),
+    BgpPeer("bgp-peer"),
+    VpnTunnel("vpn-tunnel");
 
-    void onInventoryRemoved(Collection<InventoryObject> inventoryObjects);
+    private final String name;
 
+    ManagedObjectType(String name) {
+        this.name = Objects.requireNonNull(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static ManagedObjectType fromName(String name) {
+        return Arrays.stream(ManagedObjectType.values())
+                .filter(mot -> Objects.equals(name, mot.getName()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No type found with name: " + name));
+    }
 }

@@ -29,8 +29,10 @@
 package org.opennms.oce.datasource.opennms;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +44,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -59,6 +60,7 @@ import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -76,6 +78,10 @@ public class OpennmsDatasourceIT {
 
     private OpennmsDatasource datasource;
 
+    MyAlarmHandler alarmHandler = new MyAlarmHandler();
+
+    MyInventoryHandler inventoryHandler = new MyInventoryHandler();
+
     @Before
     public void setUp() throws IOException {
         // Create the producer
@@ -84,10 +90,17 @@ public class OpennmsDatasourceIT {
         senderProps.put("value.serializer", ByteArraySerializer.class.getCanonicalName());
         producer = new KafkaProducer<>(senderProps);
 
-        // Create, but don't initialize the datasource
+        // Create the datasource
         datasource = new OpennmsDatasource(getDatasourceConfig());
         datasource.setAlarmTopic("alarms");
         datasource.setNodeTopic("nodes");
+
+        // Register our handlers
+        datasource.registerHandler(alarmHandler);
+        datasource.registerHandler(inventoryHandler);
+
+        // Init
+        datasource.init();
     }
 
     @After
@@ -96,20 +109,85 @@ public class OpennmsDatasourceIT {
     }
 
     @Test
-    public void canGenerateAlarmsAndInventory() throws ExecutionException, InterruptedException, IOException {
-        // Register our handlers
-        MyAlarmHandler alarmHandler = new MyAlarmHandler();
-        datasource.registerHandler(alarmHandler);
-        MyInventoryHandler inventoryHandler = new MyInventoryHandler();
-        datasource.registerHandler(inventoryHandler);
+    public void canGenerateNodeRelatedAlarmsAndInventory() {
+        // Create a node
+        OpennmsModelProtos.Node node = buildNode1();
+        sendNodeToKafka(node);
 
-        // Init
-        datasource.init();
+        // Send an alarm related to the node
+        OpennmsModelProtos.Alarm alarm = createNodeDownAlarmFor(node);
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
 
-        OpennmsModelProtos.Node node = OpennmsModelProtos.Node.newBuilder()
-                .setForeignSource("FS")
-                .setForeignId("FID")
-                .setId(22)
+        // Validate that the alarm references the the node
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(alarm.getManagedObjectInstance()));
+
+        // The node should exist with the same type/id referenced by the alarm
+        await().atMost(5, TimeUnit.SECONDS).until(() ->
+                inventoryHandler.getIoByKey(ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId())), notNullValue());
+    }
+
+    @Test
+    public void canGenerateSnmpInterfaceRelatedAlarmsAndInventory() {
+        // Create a node
+        OpennmsModelProtos.Node node = buildNode1();
+        sendNodeToKafka(node);
+
+        // Send an alarm related to an SNMP interface on the node
+        OpennmsModelProtos.Alarm alarm = createSnmpInterfaceDownAlarmFor(node, 1);
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
+
+        // Validate that the alarm references the the SNMP interface
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(OpennmsMapper.toNodeCriteria(node) + ":" + alarm.getManagedObjectInstance()));
+
+        // The SNMP interface should exist with the same type/id referenced by the alarm
+        ResourceKey snmpIntfKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(snmpIntfKey), notNullValue());
+
+        // The SNMP interface should have the node as it's parent
+        InventoryObject snmpIntf = inventoryHandler.getIoByKey(snmpIntfKey);
+        assertThat(snmpIntf.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+        assertThat(snmpIntf.getParentId(), equalTo(toNodeCriteria(node)));
+    }
+
+    private static String toNodeCriteria(OpennmsModelProtos.Node node) {
+        return String.format("%s:%s", node.getForeignSource(), node.getForeignId());
+    }
+
+    private void sendNodeToKafka(OpennmsModelProtos.Node node) {
+        try {
+            producer.send(new ProducerRecord<>("nodes", toNodeCriteria(node), node.toByteArray())).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Alarm sendAlarmToKafkaAndWaitForRef(OpennmsModelProtos.Alarm alarm) {
+        // We currently assume that there is no existing alarm with the given reduction key
+        assertThat(alarmHandler.getAlarmById(alarm.getReductionKey()), nullValue());
+
+        // Send the alarm and block until it was sent to Kafka
+        try {
+            producer.send(new ProducerRecord<>("alarms", alarm.getReductionKey(), alarm.toByteArray())).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Wait for the alarm to be published to the handler
+        await().atMost(5, TimeUnit.SECONDS).until(() -> alarmHandler.getAlarmById(alarm.getReductionKey()), notNullValue());
+
+        // Grab a reference to the alarm and return
+        Alarm oceAlarm = alarmHandler.getAlarmById(alarm.getReductionKey());
+        assertThat(oceAlarm, notNullValue());
+        return oceAlarm;
+    }
+
+    private static OpennmsModelProtos.Node buildNode1() {
+        return OpennmsModelProtos.Node.newBuilder()
+                .setForeignSource("NODES")
+                .setForeignId("node1")
+                .setId(1)
                 .setLabel("n1")
                 .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
                         .setIfIndex(1)
@@ -120,25 +198,36 @@ public class OpennmsDatasourceIT {
                         .setIfAlias("eth1")
                         .build())
                 .build();
-        producer.send(new ProducerRecord<>("nodes", Long.toString(node.getId()), node.toByteArray())).get();
+    }
 
-        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
-                .setReductionKey("SNMP_Link_Down::1")
-                .setLastEventTime(2)
+    private static OpennmsModelProtos.Alarm createNodeDownAlarmFor(OpennmsModelProtos.Node node) {
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("nodeDown::%d", node.getId()))
+                .setLastEventTime(1)
                 .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
                 .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
-                        .setForeignSource("FS")
-                        .setForeignId("FID")
-                        .setId(22)
+                        .setForeignSource(node.getForeignSource())
+                        .setForeignId(node.getForeignId())
+                        .setId(node.getId())
                         .build())
+                .setManagedObjectInstance(String.format("%s:%s", node.getForeignSource(), node.getForeignId()))
+                .setManagedObjectType(ManagedObjectType.Node.getName())
                 .build();
-        producer.send(new ProducerRecord<>("alarms", alarm.getReductionKey(), alarm.toByteArray())).get();
+    }
 
-        // Wait for the alarm
-        await().atMost(30, TimeUnit.SECONDS).until(() -> alarmHandler.getAlarmsById().keySet(), hasSize(1));
-
-        // Wait for a node
-        await().atMost(30, TimeUnit.SECONDS).until(() -> inventoryHandler.getIosByKey().keySet(), hasSize(greaterThanOrEqualTo(1)));
+    private static OpennmsModelProtos.Alarm createSnmpInterfaceDownAlarmFor(OpennmsModelProtos.Node node, int ifIndex) {
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("SNMP_Link_Down::%d::%d", node.getId(),ifIndex))
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.MINOR)
+                .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
+                        .setForeignSource(node.getForeignSource())
+                        .setForeignId(node.getForeignId())
+                        .setId(node.getId())
+                        .build())
+                .setManagedObjectInstance(Integer.toString(ifIndex))
+                .setManagedObjectType(ManagedObjectType.SnmpInterface.getName())
+                .build();
     }
 
     private ConfigurationAdmin getDatasourceConfig() throws IOException {
@@ -171,6 +260,10 @@ public class OpennmsDatasourceIT {
         public Map<String, Alarm> getAlarmsById() {
             return alarmsById;
         }
+
+        public Alarm getAlarmById(String id) {
+            return alarmsById.get(id);
+        }
     }
 
     private static class MyInventoryHandler implements InventoryHandler {
@@ -188,6 +281,10 @@ public class OpennmsDatasourceIT {
 
         public Map<ResourceKey, InventoryObject> getIosByKey() {
             return iosByKey;
+        }
+
+        public InventoryObject getIoByKey(ResourceKey key) {
+            return iosByKey.get(key);
         }
     }
 }

@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -62,6 +63,7 @@ import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,10 +163,12 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                         }
                     });
                 } else {
+                    // FIXME: This may be a problem
                     LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
                 }
             } else {
                 final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
+                handleInventoryForAlarm(alarmBean, alarm);
                 alarmHandlers.forEach(h -> {
                     try {
                         h.onAlarmCreatedOrUpdated(alarmBean);
@@ -175,6 +179,46 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             }
         }
         alarmsByReductionKey.put(reductionKey, alarm);
+    }
+
+    private void handleInventoryForAlarm(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+        if (alarm.getInventoryObjectType() == null ||
+                alarm.getInventoryObjectId() == null) {
+            // No type/id, nothing to do here
+            return;
+        }
+
+        final ManagedObjectType type;
+        try  {
+            type = ManagedObjectType.fromName(alarm.getInventoryObjectType());
+        } catch (NoSuchElementException nse) {
+            LOG.warn("Found unsupported type: {} with id: {}. Skipping", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
+            alarm.setInventoryObjectType(null);
+            alarm.setInventoryObjectId(null);
+            return;
+        }
+
+        switch(type) {
+            case SnmpInterface:
+                // Scope the ifIndex to the node
+                final String ifIndex = alarm.getInventoryObjectId();
+                final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+                alarm.setInventoryObjectId(String.format("%s:%s", nodeCriteria, ifIndex));
+                break;
+            case SnmpInterfaceLink:
+                break;
+            case Fan:
+                break;
+            case BgpPeer:
+                break;
+            case VpnTunnel:
+                break;
+            case Node:
+                // Nothing to do here
+                break;
+            default:
+                throw new IllegalStateException("Unsupported type: " + type + " with id: " + alarm.getInventoryObjectId());
+        }
     }
 
     @Override

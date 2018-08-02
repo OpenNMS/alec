@@ -29,7 +29,6 @@
 package org.opennms.oce.datasource.opennms;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -38,9 +37,9 @@ import java.util.Collection;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 
 public class OpennmsMapperTest {
 
@@ -91,24 +90,20 @@ public class OpennmsMapperTest {
                         .build())
                 .build();
         inventory = OpennmsMapper.toInventoryObjects(node);
-        assertThat(inventory, hasSize(4));
-        InventoryObject nodeObj = getObjectWithTypeAndId(inventory, OpennmsMapper.NODE_INVENTORY_TYPE, "FS:FID");
+        assertThat(inventory, hasSize(3));
+        InventoryObject nodeObj = getObjectWithTypeAndId(inventory, ManagedObjectType.Node.getName(), "FS:FID");
         assertThat(nodeObj.getParentType(), nullValue());
         assertThat(nodeObj.getParentId(), nullValue());
         assertThat(nodeObj.getPeers(), hasSize(0));
         assertThat(nodeObj.getRelatives(), hasSize(0));
 
-        InventoryObject cardObj = getObjectWithTypeAndId(inventory, OpennmsMapper.CARD_INVENTORY_TYPE, "FS:FID:Card0");
-        assertThat(cardObj.getParentType(), equalTo(nodeObj.getType()));
-        assertThat(cardObj.getParentId(), equalTo(nodeObj.getId()));
+        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, ManagedObjectType.SnmpInterface.getName(), "FS:FID:1");
+        assertThat(eth0Object.getParentType(), equalTo(nodeObj.getType()));
+        assertThat(eth0Object.getParentId(), equalTo(nodeObj.getId()));
 
-        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:Card0:1");
-        assertThat(eth0Object.getParentType(), equalTo(cardObj.getType()));
-        assertThat(eth0Object.getParentId(), equalTo(cardObj.getId()));
-
-        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, OpennmsMapper.SNMP_INTERFACE_INVENTORY_TYPE, "FS:FID:Card0:2");
-        assertThat(eth1Object.getParentType(), equalTo(cardObj.getType()));
-        assertThat(eth1Object.getParentId(), equalTo(cardObj.getId()));
+        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, ManagedObjectType.SnmpInterface.getName(), "FS:FID:2");
+        assertThat(eth1Object.getParentType(), equalTo(nodeObj.getType()));
+        assertThat(eth1Object.getParentId(), equalTo(nodeObj.getId()));
     }
 
     private static InventoryObject getObjectWithTypeAndId(Collection<InventoryObject> inventory, String type, String id) {

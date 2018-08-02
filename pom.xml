@@ -35,6 +35,7 @@
         <module>engine</module>
         <module>features</module>
         <module>karaf-features</module>
+	<module>test-api</module>
         <module>wrap</module>
     </modules>
 
@@ -158,6 +159,12 @@
                 <groupId>org.opennms.oce.wrap</groupId>
                 <artifactId>org.opennms.oce.wrap.jung</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.oce</groupId>
+                <artifactId>oce-test-api</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

@@ -36,12 +36,9 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 
 public class OpennmsMapper {
-
-    public static String NODE_INVENTORY_TYPE = "Node";
-    public static String CARD_INVENTORY_TYPE = "Card";
-    public static String SNMP_INTERFACE_INVENTORY_TYPE = "Interface";
 
     protected static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
         final AlarmBean bean = new AlarmBean();
@@ -108,30 +105,24 @@ public class OpennmsMapper {
     public static Collection<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node) {
         final List<InventoryObject> inventory = new ArrayList<>();
         final InventoryObjectBean nodeObj = new InventoryObjectBean();
-        nodeObj.setType(NODE_INVENTORY_TYPE);
+        nodeObj.setType(ManagedObjectType.Node.getName());
         nodeObj.setId(toNodeCriteria(node));
         nodeObj.setFriendlyName(node.getLabel());
         inventory.add(nodeObj);
 
-        if (node.getSnmpInterfaceList().size() > 0) {
-            // One or more SNMP interfaces are present, attach these to a card
-            final InventoryObjectBean cardObj = new InventoryObjectBean();
-            cardObj.setType(CARD_INVENTORY_TYPE);
-            cardObj.setId(nodeObj.getId() + ":Card0");
-            cardObj.setParentType(nodeObj.getType());
-            cardObj.setParentId(nodeObj.getId());
-            inventory.add(cardObj);
+        // Attach the SNMP interfaces directly to the node
+        node.getSnmpInterfaceList().stream()
+                .map(iff -> toInventoryObject(iff, nodeObj))
+                .forEach(inventory::add);
 
-            node.getSnmpInterfaceList().stream()
-                    .map(iff -> toInventoryObject(iff, cardObj))
-                    .forEach(inventory::add);
-        }
+        // TODO: Use the hardware inventory data if available
+
         return inventory;
     }
 
     public static InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryObject parent) {
         final InventoryObjectBean snmpInterfaceObj = new InventoryObjectBean();
-        snmpInterfaceObj.setType(SNMP_INTERFACE_INVENTORY_TYPE);
+        snmpInterfaceObj.setType(ManagedObjectType.SnmpInterface.getName());
         snmpInterfaceObj.setId(parent.getId() + ":" + snmpInterface.getIfIndex());
         snmpInterfaceObj.setFriendlyName(snmpInterface.getIfAlias());
         snmpInterfaceObj.setParentType(parent.getType());
@@ -139,7 +130,7 @@ public class OpennmsMapper {
         return snmpInterfaceObj;
     }
 
-    private static String toNodeCriteria(OpennmsModelProtos.Node node) {
+    protected static String toNodeCriteria(OpennmsModelProtos.Node node) {
         if (node.getForeignSource() != null && node.getForeignId() != null) {
             return node.getForeignSource() + ":" + node.getForeignId();
         } else {
@@ -147,8 +138,7 @@ public class OpennmsMapper {
         }
     }
 
-
-    private static String toNodeCriteria(OpennmsModelProtos.NodeCriteria nodeCriteria) {
+    protected static String toNodeCriteria(OpennmsModelProtos.NodeCriteria nodeCriteria) {
         if (nodeCriteria.getForeignSource() != null && nodeCriteria.getForeignId() != null) {
             return nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId();
         } else {

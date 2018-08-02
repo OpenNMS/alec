@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -62,12 +64,18 @@ import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
@@ -78,6 +86,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     private static final String NODE_STORE_NAME = "node_store";
     protected static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
 
+    private static final Gson gson = new Gson();
+
     private final ConfigurationAdmin configAdmin;
     private String alarmTopic;
     private String eventTopic;
@@ -87,6 +97,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     private final Set<InventoryHandler> inventoryHandlers = new HashSet<>();
     private final Map<String, OpennmsModelProtos.Alarm> alarmsByReductionKey = new HashMap<>();
     private final Map<String, OpennmsModelProtos.Node> nodesByCriteria = new HashMap<>();
+    private final Map<ResourceKey, InventoryObject> inventoryObjectsByKey = new HashMap<>();
     private KafkaStreams streams;
 
     public OpennmsDatasource(ConfigurationAdmin configAdmin) {
@@ -206,6 +217,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                 alarm.setInventoryObjectId(String.format("%s:%s", nodeCriteria, ifIndex));
                 break;
             case SnmpInterfaceLink:
+                handleSnmpInterfaceLink(alarm, sourceAlarm);
                 break;
             case Fan:
                 break;
@@ -219,6 +231,46 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             default:
                 throw new IllegalStateException("Unsupported type: " + type + " with id: " + alarm.getInventoryObjectId());
         }
+    }
+
+    private void handleSnmpInterfaceLink(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+        // Retrieve the link details
+        final SnmpInterfaceLinkInstance linkInstance = gson.fromJson(alarm.getInventoryObjectId(), SnmpInterfaceLinkInstance.class);
+        // Build the object id
+        final String ioId = String.format("%s:%d:%s:%d",
+                linkInstance.getANodeCriteria(), linkInstance.getAIfIndex(),
+                linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex());
+        // Update the alarm with the new id
+        alarm.setInventoryObjectId(ioId);
+        // Do we already know about this link?
+        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.SnmpInterfaceLink.getName(), ioId))) {
+            // We already know about it - nothing else to do here
+            return;
+        }
+
+        // We don't know about this link yet, let's create it
+        InventoryObjectBean snmpIntfLink = new InventoryObjectBean();
+        snmpIntfLink.setType(ManagedObjectType.SnmpInterfaceLink.getName());
+        snmpIntfLink.setId(ioId);
+        snmpIntfLink.setFriendlyName(String.format("SNMP Interface Link Between %d on %s and %d on %s", linkInstance.getAIfIndex(),
+                linkInstance.getANodeCriteria(), linkInstance.getZIfIndex(), linkInstance.getZNodeCriteria()));
+
+        InventoryObjectPeerRefBean peerA = new InventoryObjectPeerRefBean();
+        peerA.setEndpoint(InventoryObjectPeerEndpoint.A);
+        peerA.setType(ManagedObjectType.SnmpInterface.getName());
+        peerA.setId(String.format("%s:%d", linkInstance.getANodeCriteria(), linkInstance.getAIfIndex()));
+        snmpIntfLink.addPeer(peerA);
+
+        InventoryObjectPeerRefBean peerZ = new InventoryObjectPeerRefBean();
+        peerZ.setEndpoint(InventoryObjectPeerEndpoint.Z);
+        peerZ.setType(ManagedObjectType.SnmpInterface.getName());
+        peerZ.setId(String.format("%s:%d", linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex()));
+        snmpIntfLink.addPeer(peerZ);
+
+        // Store it for reference
+        inventoryObjectsByKey.put(ResourceKey.key(snmpIntfLink.getType(), snmpIntfLink.getId()), snmpIntfLink);
+        // Notify the handlers
+        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(snmpIntfLink)));
     }
 
     @Override
@@ -282,6 +334,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                 }
             } else {
                 // TODO: Was it added or updated? If it was updated, we may need to call remove first.
+                final Collection<InventoryObject> ios = OpennmsMapper.toInventoryObjects(node);
+                ios.forEach(io -> inventoryObjectsByKey.put(ResourceKey.key(io.getType(), io.getId()), io));
                 inventoryHandlers.forEach(h -> h.onInventoryAdded(OpennmsMapper.toInventoryObjects(node)));
             }
         }

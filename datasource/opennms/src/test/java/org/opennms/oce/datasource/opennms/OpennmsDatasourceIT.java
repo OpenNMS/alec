@@ -31,6 +31,7 @@ package org.opennms.oce.datasource.opennms;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -59,11 +60,16 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+
+import com.google.gson.Gson;
 
 public class OpennmsDatasourceIT {
 
@@ -81,6 +87,8 @@ public class OpennmsDatasourceIT {
     MyAlarmHandler alarmHandler = new MyAlarmHandler();
 
     MyInventoryHandler inventoryHandler = new MyInventoryHandler();
+
+    private static final Gson gson = new Gson();
 
     @Before
     public void setUp() throws IOException {
@@ -151,6 +159,58 @@ public class OpennmsDatasourceIT {
         assertThat(snmpIntf.getParentId(), equalTo(toNodeCriteria(node)));
     }
 
+    @Test
+    public void canGenerateSnmpInterfaceLinkRelatedAlarmsAndInventory() {
+        // Create two nodes
+        OpennmsModelProtos.Node node1 = buildNode1();
+        sendNodeToKafka(node1);
+
+        OpennmsModelProtos.Node node2 = buildNode2();
+        sendNodeToKafka(node2);
+
+        // Send an alarm related to a link between the nodes
+        OpennmsModelProtos.Alarm alarm = createSnmpInterfaceLinkDownAlarmFor(node1, 1, node2, 11);
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
+
+        // Validate that the alarm references the the SNMP interface
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        String expectedId = String.format("%s:%d:%s:%d", OpennmsMapper.toNodeCriteria(node2), 11,
+                OpennmsMapper.toNodeCriteria(node1), 1);
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(expectedId));
+
+        // The SNMP interface link should exist with the same type/id referenced by the alarm
+        ResourceKey snmpIntfLinkKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(snmpIntfLinkKey), notNullValue());
+
+        // Wait for the nodes
+        ResourceKey node1Key = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node1));
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(node1Key), notNullValue());
+        ResourceKey node2Key = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node2));
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(node2Key), notNullValue());
+
+        // The SNMP interface link should have the SNMP interfaces as peers
+        InventoryObject snmpIntfLink = inventoryHandler.getIoByKey(snmpIntfLinkKey);
+        assertThat(snmpIntfLink.getPeers(), hasSize(2));
+        InventoryObject snmpIntfA = getPeer(snmpIntfLink, InventoryObjectPeerEndpoint.A);
+        assertThat(snmpIntfA.getType(), equalTo(ManagedObjectType.SnmpInterface.getName()));
+        assertThat(snmpIntfA.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+        InventoryObject snmpIntfZ = getPeer(snmpIntfLink, InventoryObjectPeerEndpoint.Z);
+        assertThat(snmpIntfZ.getType(), equalTo(ManagedObjectType.SnmpInterface.getName()));
+        assertThat(snmpIntfZ.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+    }
+
+    private InventoryObject getPeer(InventoryObject ioWithPeers, InventoryObjectPeerEndpoint endpoint) {
+        InventoryObjectPeerRef peerRef = ioWithPeers.getPeers().stream()
+                .filter(pr -> endpoint.equals(pr.getEndpoint()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No endpoint " + endpoint));
+        ResourceKey peerKey = ResourceKey.key(peerRef.getType(), peerRef.getId());
+        InventoryObject peer = inventoryHandler.getIoByKey(peerKey);
+        assertThat(String.format("No peer found with key: %s. Available objects include: %s.",
+                peerKey, inventoryHandler.getIosByKey().keySet()) , peer, notNullValue());
+        return peer;
+    }
+
     private static String toNodeCriteria(OpennmsModelProtos.Node node) {
         return String.format("%s:%s", node.getForeignSource(), node.getForeignId());
     }
@@ -200,6 +260,23 @@ public class OpennmsDatasourceIT {
                 .build();
     }
 
+    private static OpennmsModelProtos.Node buildNode2() {
+        return OpennmsModelProtos.Node.newBuilder()
+                .setForeignSource("DEVICES")
+                .setForeignId("node2")
+                .setId(2)
+                .setLabel("n2")
+                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
+                        .setIfIndex(11)
+                        .setIfAlias("eth1/1")
+                        .build())
+                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
+                        .setIfIndex(12)
+                        .setIfAlias("eth1/2")
+                        .build())
+                .build();
+    }
+
     private static OpennmsModelProtos.Alarm createNodeDownAlarmFor(OpennmsModelProtos.Node node) {
         return OpennmsModelProtos.Alarm.newBuilder()
                 .setReductionKey(String.format("nodeDown::%d", node.getId()))
@@ -227,6 +304,18 @@ public class OpennmsDatasourceIT {
                         .build())
                 .setManagedObjectInstance(Integer.toString(ifIndex))
                 .setManagedObjectType(ManagedObjectType.SnmpInterface.getName())
+                .build();
+    }
+
+    private static OpennmsModelProtos.Alarm createSnmpInterfaceLinkDownAlarmFor(OpennmsModelProtos.Node nodeA, int ifIndexA, OpennmsModelProtos.Node nodeZ, int ifIndexZ) {
+        final SnmpInterfaceLinkInstance snmpInterfaceLinkInstance = new SnmpInterfaceLinkInstance(OpennmsMapper.toNodeCriteria(nodeA), ifIndexA,
+                OpennmsMapper.toNodeCriteria(nodeZ), ifIndexZ);
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("SNMP_Link_Down::%d::%d::%d::%d", nodeA.getId(), ifIndexA, nodeZ.getId(), ifIndexZ))
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.MINOR)
+                .setManagedObjectInstance(gson.toJson(snmpInterfaceLinkInstance))
+                .setManagedObjectType(ManagedObjectType.SnmpInterfaceLink.getName())
                 .build();
     }
 

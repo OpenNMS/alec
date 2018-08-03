@@ -28,6 +28,8 @@
 
 package org.opennms.oce.datasource.api;
 
+import java.util.NoSuchElementException;
+
 public enum Severity {
     CRITICAL(7), // This event means numerous devices on the network are affected by the event. Everyone who can should stop what they are doing and focus on fixing the problem.
     MAJOR(6), // A device is completely down or in danger of going down. Attention needs to be paid to this problem immediately.
@@ -45,5 +47,14 @@ public enum Severity {
 
     public int getValue() {
         return value;
+    }
+
+    public static Severity fromValue(int value) {
+        for (Severity s : Severity.values()) {
+            if (s.getValue() == value) {
+                return s;
+            }
+        }
+        throw new NoSuchElementException("No severity found for: " + value);
     }
 }

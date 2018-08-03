@@ -47,39 +47,10 @@ public class OpennmsMapper {
         bean.setSeverity(toSeverity(alarm.getSeverity()));
         bean.setInventoryObjectType(alarm.getManagedObjectType());
         bean.setInventoryObjectId(alarm.getManagedObjectInstance());
+        bean.setSummary(alarm.getLogMessage());
+        bean.setDescription(alarm.getDescription());
         return bean;
     }
-
-    /*
-    protected static List<ResourceKey> getResourceKeys(OpennmsModelProtos.Alarm alarm) {
-        if (!alarm.hasNodeCriteria()) {
-            // The alarm is not associated with a node
-            return Collections.emptyList();
-        }
-
-        final String nodeCriteria = toNodeCriteria(alarm.getNodeCriteria());
-
-        Integer ifIndex = null;
-        // Attempt to determine the associated ifIndex
-        if (alarm.getIfIndex() > 0) {
-            ifIndex = alarm.getIfIndex();
-        } else if (alarm.hasLastEvent()) {
-            for (OpennmsModelProtos.EventParameter eventParm : alarm.getLastEvent().getParameterList()) {
-                if (Objects.equals(".1.3.6.1.2.1.2.2.1.1", eventParm.getName())) {
-                    ifIndex = Integer.parseInt(eventParm.getValue());
-                }
-            }
-        }
-
-        if (ifIndex != null) {
-            // The alarm is associated with an interface
-            return Collections.singletonList(ResourceKey.key(String.format("%s,%s:Card0:%d", SNMP_INTERFACE_INVENTORY_TYPE, nodeCriteria, ifIndex)));
-        } else {
-            // The alarm is associated with a node
-            return Collections.singletonList(ResourceKey.key(String.format("%s,%s", NODE_INVENTORY_TYPE, nodeCriteria)));
-        }
-    }
-    */
 
     protected static Severity toSeverity(OpennmsModelProtos.Severity severity) {
         switch (severity) {

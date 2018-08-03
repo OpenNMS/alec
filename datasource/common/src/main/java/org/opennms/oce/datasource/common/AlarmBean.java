@@ -39,6 +39,8 @@ public class AlarmBean implements Alarm {
     private Severity severity;
     private String inventoryObjectId;
     private String inventoryObjectType;
+    private String summary;
+    private String description;
 
     public AlarmBean() {
         this(null);
@@ -106,6 +108,24 @@ public class AlarmBean implements Alarm {
     }
 
     @Override
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -114,12 +134,14 @@ public class AlarmBean implements Alarm {
                 Objects.equals(id, alarmBean.id) &&
                 severity == alarmBean.severity &&
                 Objects.equals(inventoryObjectId, alarmBean.inventoryObjectId) &&
-                Objects.equals(inventoryObjectType, alarmBean.inventoryObjectType);
+                Objects.equals(inventoryObjectType, alarmBean.inventoryObjectType) &&
+                Objects.equals(summary, alarmBean.summary) &&
+                Objects.equals(description, alarmBean.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType);
+        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description);
     }
 
     @Override
@@ -130,6 +152,8 @@ public class AlarmBean implements Alarm {
                 ", severity=" + severity +
                 ", inventoryObjectId='" + inventoryObjectId + '\'' +
                 ", inventoryObjectType='" + inventoryObjectType + '\'' +
+                ", summary='" + summary + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }

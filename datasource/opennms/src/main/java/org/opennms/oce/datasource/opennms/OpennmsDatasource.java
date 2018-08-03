@@ -75,6 +75,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -193,9 +194,11 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     }
 
     private void handleInventoryForAlarm(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        if (alarm.getInventoryObjectType() == null ||
-                alarm.getInventoryObjectId() == null) {
-            // No type/id, nothing to do here
+        if (Strings.isNullOrEmpty(alarm.getInventoryObjectType()) ||
+                Strings.isNullOrEmpty(alarm.getInventoryObjectId())) {
+            // No specific type and/or id - use the alarm type and id
+            alarm.setInventoryObjectId(alarm.getId());
+            alarm.setInventoryObjectType("alarm");
             return;
         }
 
@@ -203,9 +206,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         try  {
             type = ManagedObjectType.fromName(alarm.getInventoryObjectType());
         } catch (NoSuchElementException nse) {
-            LOG.warn("Found unsupported type: {} with id: {}. Skipping", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
-            alarm.setInventoryObjectType(null);
-            alarm.setInventoryObjectId(null);
+            LOG.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
             return;
         }
 
@@ -229,7 +230,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                 // Nothing to do here
                 break;
             default:
-                throw new IllegalStateException("Unsupported type: " + type + " with id: " + alarm.getInventoryObjectId());
+                LOG.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
         }
     }
 

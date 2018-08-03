@@ -95,14 +95,8 @@ public class OpennmsRestClient {
         return info.version;
     }
 
-    void sendEvent(OpennmsEvent event) throws Exception {
+    void sendEvent(Event e) throws Exception {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
-        final Event e = new Event();
-        e.setUei(event.getUei());
-        e.addParam("service", event.getService());
-        for (String reductionKey : event.getAssociatedReductionKeys()) {
-            e.addParam("related-reductionKey", reductionKey);
-        }
         final String xml = JaxbUtils.toXml(e);
         final HttpUrl url = baseUrl.newBuilder()
                 .addPathSegment("rest")

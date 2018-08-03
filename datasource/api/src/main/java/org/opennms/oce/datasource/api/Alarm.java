@@ -42,4 +42,8 @@ public interface Alarm {
 
     String getInventoryObjectType();
 
+    String getSummary();
+
+    String getDescription();
+
 }

@@ -29,15 +29,21 @@
 package org.opennms.oce.datasource.opennms;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.opennms.model.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OpennmsIncidentDatasource implements IncidentDatasource {
+    private static final Logger LOG = LoggerFactory.getLogger(OpennmsIncidentDatasource.class);
+
     private final OpennmsRestClient restClient;
 
     public OpennmsIncidentDatasource(OpennmsRestClient restClient) {
@@ -51,10 +57,34 @@ public class OpennmsIncidentDatasource implements IncidentDatasource {
 
     @Override
     public void forwardIncident(Incident incident) throws Exception {
-        final List<String> alarmIds = incident.getAlarms().stream()
+        if (incident.getAlarms().size() < 1) {
+            LOG.warn("Got incident with no alarms. Ignoring.");
+        }
+
+        final Event e = new Event();
+        e.setUei("uei.opennms.org/alarms/situation");
+
+        // Use the max severity as the situation severity
+        final Severity maxSeverity = Severity.fromValue(incident.getAlarms().stream()
+                .mapToInt(a -> a.getSeverity().getValue())
+                .max()
+                .getAsInt());
+        e.setSeverity(maxSeverity.name().toLowerCase());
+
+        // Relay the incident id
+        e.addParam("situationId", incident.getId());
+
+        // Use the log message and description from the first (earliest) alarm
+        final Alarm earliestAlarm = incident.getAlarms().stream()
+                .min(Comparator.comparing(Alarm::getTime))
+                .get();
+        e.addParam("situationLogMsg", earliestAlarm.getSummary());
+        e.addParam("situationDescr", earliestAlarm.getDescription());
+
+        // Set the related reduction keys
+        incident.getAlarms().stream()
                 .map(Alarm::getId)
-                .collect(Collectors.toList());
-        OpennmsEvent e = new OpennmsEvent(OpennmsEvent.TRIGGER_UEI, incident.getId(), alarmIds);
+                .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
         restClient.sendEvent(e);
     }
 

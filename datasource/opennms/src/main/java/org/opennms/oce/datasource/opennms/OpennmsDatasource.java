@@ -221,6 +221,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                 handleSnmpInterfaceLink(alarm, sourceAlarm);
                 break;
             case Fan:
+                handleFan(alarm, sourceAlarm);
                 break;
             case BgpPeer:
                 break;
@@ -272,6 +273,32 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         inventoryObjectsByKey.put(ResourceKey.key(snmpIntfLink.getType(), snmpIntfLink.getId()), snmpIntfLink);
         // Notify the handlers
         inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(snmpIntfLink)));
+    }
+
+    private void handleFan(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+        // Scope the entPhysicalIndex to the node
+        final String entPhysicalIndex = alarm.getInventoryObjectId();
+        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+        final String fanId = String.format("%s:%s", nodeCriteria, entPhysicalIndex);
+        alarm.setInventoryObjectId(fanId);
+
+        // Do we already know about this fan?
+        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.Fan.getName(), fanId))) {
+            // We already know about it - nothing else to do here
+            return;
+        }
+
+        // We don't know about this fan yet, let's create it
+        InventoryObjectBean fan = new InventoryObjectBean();
+        fan.setType(ManagedObjectType.Fan.getName());
+        fan.setId(fanId);
+        fan.setParentType(ManagedObjectType.Node.getName());
+        fan.setParentId(nodeCriteria);
+
+        // Store it for reference
+        inventoryObjectsByKey.put(ResourceKey.key(fan.getType(), fan.getId()), fan);
+        // Notify the handlers
+        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(fan)));
     }
 
     @Override

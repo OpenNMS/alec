@@ -126,7 +126,7 @@ public class OpennmsDatasourceIT {
         OpennmsModelProtos.Alarm alarm = createNodeDownAlarmFor(node);
         Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
 
-        // Validate that the alarm references the the node
+        // Validate that the alarm references the node
         assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
         assertThat(oceAlarm.getInventoryObjectId(), equalTo(alarm.getManagedObjectInstance()));
 
@@ -145,7 +145,7 @@ public class OpennmsDatasourceIT {
         OpennmsModelProtos.Alarm alarm = createSnmpInterfaceDownAlarmFor(node, 1);
         Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
 
-        // Validate that the alarm references the the SNMP interface
+        // Validate that the alarm references the SNMP interface
         assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
         assertThat(oceAlarm.getInventoryObjectId(), equalTo(OpennmsMapper.toNodeCriteria(node) + ":" + alarm.getManagedObjectInstance()));
 
@@ -172,7 +172,7 @@ public class OpennmsDatasourceIT {
         OpennmsModelProtos.Alarm alarm = createSnmpInterfaceLinkDownAlarmFor(node1, 1, node2, 11);
         Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
 
-        // Validate that the alarm references the the SNMP interface
+        // Validate that the alarm references the SNMP interface
         assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
         String expectedId = String.format("%s:%d:%s:%d", OpennmsMapper.toNodeCriteria(node2), 11,
                 OpennmsMapper.toNodeCriteria(node1), 1);
@@ -197,6 +197,35 @@ public class OpennmsDatasourceIT {
         InventoryObject snmpIntfZ = getPeer(snmpIntfLink, InventoryObjectPeerEndpoint.Z);
         assertThat(snmpIntfZ.getType(), equalTo(ManagedObjectType.SnmpInterface.getName()));
         assertThat(snmpIntfZ.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+    }
+
+    @Test
+    public void canGenerateFanRelatedAlarmsAndInventory() {
+        // Create a node
+        OpennmsModelProtos.Node node = buildNode1();
+        sendNodeToKafka(node);
+
+        // Send an alarm related to a fan on the node
+        OpennmsModelProtos.Alarm alarm = createFanDownAlarmFor(node, 1);
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
+
+        // Validate that the alarm references the fan
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        String expectedId = String.format("%s:%d", OpennmsMapper.toNodeCriteria(node), 1);
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(expectedId));
+
+        // Wait for the node
+        ResourceKey nodeKey = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node));
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(nodeKey), notNullValue());
+
+        // The fan should exist with the same type/id referenced by the alarm
+        ResourceKey fanKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(fanKey), notNullValue());
+
+        // The fan should have the node as it's parent
+        InventoryObject fan = inventoryHandler.getIoByKey(fanKey);
+        assertThat(fan.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+        assertThat(fan.getParentId(), equalTo(toNodeCriteria(node)));
     }
 
     private InventoryObject getPeer(InventoryObject ioWithPeers, InventoryObjectPeerEndpoint endpoint) {
@@ -316,6 +345,21 @@ public class OpennmsDatasourceIT {
                 .setSeverity(OpennmsModelProtos.Severity.MINOR)
                 .setManagedObjectInstance(gson.toJson(snmpInterfaceLinkInstance))
                 .setManagedObjectType(ManagedObjectType.SnmpInterfaceLink.getName())
+                .build();
+    }
+
+    private static OpennmsModelProtos.Alarm createFanDownAlarmFor(OpennmsModelProtos.Node node, int entPhysicalIndex) {
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("cefcFanTrayStatusChange::%d::%d", node.getId(), entPhysicalIndex))
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.MINOR)
+                .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
+                        .setForeignSource(node.getForeignSource())
+                        .setForeignId(node.getForeignId())
+                        .setId(node.getId())
+                        .build())
+                .setManagedObjectInstance(Integer.toString(entPhysicalIndex))
+                .setManagedObjectType(ManagedObjectType.Fan.getName())
                 .build();
     }
 

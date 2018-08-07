@@ -167,8 +167,8 @@
             <attribute name="summary" type="string" use="required" />
             <attribute name="description" type="string" use="required" />
 
-            <attribute name="inventoryObjectId" type="string" use="optional" />
-            <attribute name="inventoryObjectType" type="string" use="optional" />
+            <attribute name="inventory-object-id" type="string" use="optional" />
+            <attribute name="inventory-object-type" type="string" use="optional" />
         </complexType>
     </element>
 

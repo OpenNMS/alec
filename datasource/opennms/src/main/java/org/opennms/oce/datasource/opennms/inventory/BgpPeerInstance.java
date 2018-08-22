@@ -28,37 +28,31 @@
 
 package org.opennms.oce.datasource.opennms.inventory;
 
+public class BgpPeerInstance {
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+    private String peer;
+    private String vrf;
 
-public enum ManagedObjectType {
-    Node("node"),
-    SnmpInterface("snmp-interface"),
-    SnmpInterfaceLink("snmp-interface-link"),
-    BgpPeer("bgp-peer"),
-    VpnTunnel("vpn-tunnel"),
-    MplsL3Vrf("mpls-l3-vrf"),
-    EntPhysicalEntity("ent-physical-entity"),
-    OspfRouter("ospf-router"),
-    MplsTunnel("mpls-tunnel"),
-    MplsLdpSession("mpls-ldp-session");
-
-    private final String name;
-
-    ManagedObjectType(String name) {
-        this.name = Objects.requireNonNull(name);
+    public BgpPeerInstance(String peer, String vrf) {
+        this.peer = peer;
+        this.vrf = vrf;
     }
 
-    public String getName() {
-        return name;
+    public BgpPeerInstance() { }
+
+    public String getPeer() {
+        return peer;
     }
 
-    public static ManagedObjectType fromName(String name) {
-        return Arrays.stream(ManagedObjectType.values())
-                .filter(mot -> Objects.equals(name, mot.getName()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No type found with name: " + name));
+    public void setPeer(String peer) {
+        this.peer = peer;
+    }
+
+    public String getVrf() {
+        return vrf;
+    }
+
+    public void setVrf(String vrf) {
+        this.vrf = vrf;
     }
 }

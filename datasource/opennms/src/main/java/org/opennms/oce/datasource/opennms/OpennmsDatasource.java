@@ -69,8 +69,10 @@ import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
+import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
+import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,28 +212,27 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             return;
         }
 
+        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+
         switch(type) {
-            case SnmpInterface:
-                // Scope the ifIndex to the node
-                final String ifIndex = alarm.getInventoryObjectId();
-                final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
-                alarm.setInventoryObjectId(String.format("%s:%s", nodeCriteria, ifIndex));
+            case Node:
+                // Nothing to do here
                 break;
             case SnmpInterfaceLink:
                 handleSnmpInterfaceLink(alarm, sourceAlarm);
                 break;
-            case Fan:
-                handleFan(alarm, sourceAlarm);
+            case EntPhysicalEntity:
+                handleEntPhysicalEntity(alarm, sourceAlarm);
                 break;
             case BgpPeer:
+                handleBgpPeer(alarm, sourceAlarm);
                 break;
             case VpnTunnel:
-                break;
-            case Node:
-                // Nothing to do here
+                handleVpnTunnel(alarm, sourceAlarm);
                 break;
             default:
-                LOG.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
+                // Scope the object id by node
+                alarm.setInventoryObjectId(String.format("%s:%s", nodeCriteria, alarm.getInventoryObjectId()));
         }
     }
 
@@ -275,22 +276,22 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(snmpIntfLink)));
     }
 
-    private void handleFan(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+    private void handleEntPhysicalEntity(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
         // Scope the entPhysicalIndex to the node
         final String entPhysicalIndex = alarm.getInventoryObjectId();
         final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
         final String fanId = String.format("%s:%s", nodeCriteria, entPhysicalIndex);
         alarm.setInventoryObjectId(fanId);
 
-        // Do we already know about this fan?
-        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.Fan.getName(), fanId))) {
+        // Do we already know about this entity?
+        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.EntPhysicalEntity.getName(), fanId))) {
             // We already know about it - nothing else to do here
             return;
         }
 
-        // We don't know about this fan yet, let's create it
+        // We don't know about this entity yet, let's create it
         InventoryObjectBean fan = new InventoryObjectBean();
-        fan.setType(ManagedObjectType.Fan.getName());
+        fan.setType(ManagedObjectType.EntPhysicalEntity.getName());
         fan.setId(fanId);
         fan.setParentType(ManagedObjectType.Node.getName());
         fan.setParentId(nodeCriteria);
@@ -299,6 +300,64 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         inventoryObjectsByKey.put(ResourceKey.key(fan.getType(), fan.getId()), fan);
         // Notify the handlers
         inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(fan)));
+    }
+
+    private void handleBgpPeer(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+        // Retrieve the BGP peer details
+        final BgpPeerInstance bgpPeerInstance = gson.fromJson(alarm.getInventoryObjectId(), BgpPeerInstance.class);
+        // Build the object id
+        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+        final String ioId = String.format("%s:%s:%s", nodeCriteria, bgpPeerInstance.getPeer(), bgpPeerInstance.getVrf());
+        // Update the alarm with the new id
+        alarm.setInventoryObjectId(ioId);
+        // Do we already know about this peer?
+        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.BgpPeer.getName(), ioId))) {
+            // We already know about it - nothing else to do here
+            return;
+        }
+
+        // We don't know about this peer yet, let's create it
+        InventoryObjectBean bgpPeer = new InventoryObjectBean();
+        bgpPeer.setType(ManagedObjectType.BgpPeer.getName());
+        bgpPeer.setId(ioId);
+        bgpPeer.setFriendlyName(String.format("BGP Peer %s on %s in VRF: %s",
+                bgpPeerInstance.getPeer(), nodeCriteria, bgpPeerInstance.getVrf()));
+        bgpPeer.setParentType(ManagedObjectType.Node.getName());
+        bgpPeer.setParentId(nodeCriteria);
+
+        // Store it for reference
+        inventoryObjectsByKey.put(ResourceKey.key(bgpPeer.getType(), bgpPeer.getId()), bgpPeer);
+        // Notify the handlers
+        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(bgpPeer)));
+    }
+
+    private void handleVpnTunnel(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
+        // Retrieve the VPN tunnel details
+        final VpnTunnelInstance vpnTunnelInstance = gson.fromJson(alarm.getInventoryObjectId(), VpnTunnelInstance.class);
+        // Build the object id
+        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+        final String ioId = String.format("%s:%s:%s:%s", nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId());
+        // Update the alarm with the new id
+        alarm.setInventoryObjectId(ioId);
+        // Do we already know about this tunnel?
+        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.VpnTunnel.getName(), ioId))) {
+            // We already know about it - nothing else to do here
+            return;
+        }
+
+        // We don't know about this tunnel yet, let's create it
+        InventoryObjectBean vpnTunnel = new InventoryObjectBean();
+        vpnTunnel.setType(ManagedObjectType.VpnTunnel.getName());
+        vpnTunnel.setId(ioId);
+        vpnTunnel.setFriendlyName(String.format("VPN tunnel on %s with local addr: %s, remote addr: %s and tunnel id: %s",
+                nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId()));
+        vpnTunnel.setParentType(ManagedObjectType.Node.getName());
+        vpnTunnel.setParentId(nodeCriteria);
+
+        // Store it for reference
+        inventoryObjectsByKey.put(ResourceKey.key(vpnTunnel.getType(), vpnTunnel.getId()), vpnTunnel);
+        // Notify the handlers
+        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(vpnTunnel)));
     }
 
     @Override

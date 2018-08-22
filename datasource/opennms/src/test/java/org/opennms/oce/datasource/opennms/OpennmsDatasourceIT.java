@@ -63,8 +63,10 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
+import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -200,7 +202,7 @@ public class OpennmsDatasourceIT {
     }
 
     @Test
-    public void canGenerateFanRelatedAlarmsAndInventory() {
+    public void canGenerateEntPhysicalEntityRelatedAlarmsAndInventory() {
         // Create a node
         OpennmsModelProtos.Node node = buildNode1();
         sendNodeToKafka(node);
@@ -226,6 +228,64 @@ public class OpennmsDatasourceIT {
         InventoryObject fan = inventoryHandler.getIoByKey(fanKey);
         assertThat(fan.getParentType(), equalTo(ManagedObjectType.Node.getName()));
         assertThat(fan.getParentId(), equalTo(toNodeCriteria(node)));
+    }
+
+    @Test
+    public void canGenerateBgpPeerRelatedAlarmsAndInventory() {
+        // Create a node
+        OpennmsModelProtos.Node node = buildNode1();
+        sendNodeToKafka(node);
+
+        // Send an alarm related to a peer on the node
+        OpennmsModelProtos.Alarm alarm = createBgpPeerAlarmFor(node, "192.168.1.1", "kanata");
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
+
+        // Validate that the alarm references the peer
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        String expectedId = String.format("%s:%s:%s", OpennmsMapper.toNodeCriteria(node), "192.168.1.1", "kanata");
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(expectedId));
+
+        // Wait for the node
+        ResourceKey nodeKey = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node));
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(nodeKey), notNullValue());
+
+        // The BGP peer should exist with the same type/id referenced by the alarm
+        ResourceKey bgpPeerKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(bgpPeerKey), notNullValue());
+
+        // The BGP peer should have the node as it's parent
+        InventoryObject bgpPeer = inventoryHandler.getIoByKey(bgpPeerKey);
+        assertThat(bgpPeer.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+        assertThat(bgpPeer.getParentId(), equalTo(toNodeCriteria(node)));
+    }
+
+    @Test
+    public void canGenerateVpnTunnelRelatedAlarmsAndInventory() {
+        // Create a node
+        OpennmsModelProtos.Node node = buildNode1();
+        sendNodeToKafka(node);
+
+        // Send an alarm related to a tunnel on the node
+        OpennmsModelProtos.Alarm alarm = createVpnTunnelAlarmFor(node, "192.168.1.1", "192.168.2.1", "99");
+        Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
+
+        // Validate that the alarm references the tunnel
+        assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
+        String expectedId = String.format("%s:%s:%s:%s", OpennmsMapper.toNodeCriteria(node), "192.168.1.1", "192.168.2.1", "99");
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo(expectedId));
+
+        // Wait for the node
+        ResourceKey nodeKey = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node));
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(nodeKey), notNullValue());
+
+        // The tunnel should exist with the same type/id referenced by the alarm
+        ResourceKey vpnTunnelKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(vpnTunnelKey), notNullValue());
+
+        // The tunnel should have the node as it's parent
+        InventoryObject vpnTunnel = inventoryHandler.getIoByKey(vpnTunnelKey);
+        assertThat(vpnTunnel.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+        assertThat(vpnTunnel.getParentId(), equalTo(toNodeCriteria(node)));
     }
 
     private InventoryObject getPeer(InventoryObject ioWithPeers, InventoryObjectPeerEndpoint endpoint) {
@@ -348,6 +408,22 @@ public class OpennmsDatasourceIT {
                 .build();
     }
 
+    private static OpennmsModelProtos.Alarm createBgpPeerAlarmFor(OpennmsModelProtos.Node node, String peer, String vrf) {
+        final BgpPeerInstance bgpPeerInstance = new BgpPeerInstance(peer, vrf);
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("bgpBackwardTransition::%d::%s:5s", node.getId(), peer, vrf))
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.MINOR)
+                .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
+                        .setForeignSource(node.getForeignSource())
+                        .setForeignId(node.getForeignId())
+                        .setId(node.getId())
+                        .build())
+                .setManagedObjectInstance(gson.toJson(bgpPeerInstance))
+                .setManagedObjectType(ManagedObjectType.BgpPeer.getName())
+                .build();
+    }
+
     private static OpennmsModelProtos.Alarm createFanDownAlarmFor(OpennmsModelProtos.Node node, int entPhysicalIndex) {
         return OpennmsModelProtos.Alarm.newBuilder()
                 .setReductionKey(String.format("cefcFanTrayStatusChange::%d::%d", node.getId(), entPhysicalIndex))
@@ -359,7 +435,23 @@ public class OpennmsDatasourceIT {
                         .setId(node.getId())
                         .build())
                 .setManagedObjectInstance(Integer.toString(entPhysicalIndex))
-                .setManagedObjectType(ManagedObjectType.Fan.getName())
+                .setManagedObjectType(ManagedObjectType.EntPhysicalEntity.getName())
+                .build();
+    }
+
+    private static OpennmsModelProtos.Alarm createVpnTunnelAlarmFor(OpennmsModelProtos.Node node, String localAddr, String remoteAddr, String tunnelId) {
+        final VpnTunnelInstance vpnTunnelInstance = new VpnTunnelInstance(localAddr, remoteAddr, tunnelId);
+        return OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("cikeTunnelStop::%d::%s:%s:%s", node.getId(), localAddr, remoteAddr, tunnelId))
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.MINOR)
+                .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
+                        .setForeignSource(node.getForeignSource())
+                        .setForeignId(node.getForeignId())
+                        .setId(node.getId())
+                        .build())
+                .setManagedObjectInstance(gson.toJson(vpnTunnelInstance))
+                .setManagedObjectType(ManagedObjectType.VpnTunnel.getName())
                 .build();
     }
 

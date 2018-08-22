@@ -32,11 +32,10 @@ import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
-
-import jdk.nashorn.internal.ir.annotations.Reference;
 
 @Command(scope = "oce", name = "alarms", description="Alarms!")
 @Service

@@ -54,6 +54,60 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>verify</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <javase>1.8</javase>
+                            <descriptors>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                                <descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
+                            </descriptors>
+                            <distribution>org.apache.karaf.features:framework</distribution>
+                            <framework>
+                                <feature>framework</feature>
+                            </framework>
+                            <features>
+                                <feature>oce-datasource-api</feature>
+                                <feature>oce-datasource-jaxb</feature>
+                                <feature>oce-datasource-opennms</feature>
+                                <feature>oce-datasource-shell</feature>
+                                <feature>oce-engine</feature>
+                                <feature>oce-engine-cluster</feature>
+                                <feature>oce-engine-temporal</feature>
+                                <feature>oce-engine-topology</feature>
+                                <!-- Depends on a reference to a datasource impl.
+                                <feature>oce-driver-main</feature>
+                                -->
+                                <feature>oce-features-score</feature>
+                                <feature>oce-features-shell</feature>
+                            </features>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <!-- Framework distribution -->
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

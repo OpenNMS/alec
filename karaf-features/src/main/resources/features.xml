@@ -8,6 +8,7 @@
     <feature name="oce-datasource-api" description="OCE :: Datasource :: API" version="${project.version}">
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.api/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.common/${project.version}</bundle>
+        <feature>aries-blueprint</feature>
     </feature>
 
     <feature name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
@@ -24,6 +25,7 @@
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms/${project.version}</bundle>
         <feature version="1.1.0">kafka-streams</feature>
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -33,6 +35,7 @@
 
     <feature name="oce-datasource-shell" description="OCE :: Datasource :: Shell" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
+        <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.shell/${project.version}</bundle>
     </feature>
 
@@ -67,6 +70,7 @@
         <feature version="${drools.version}">kie</feature>
         <feature version="${drools.version}">drools-module</feature>
         <feature version="${commons.text.version}">commons-text</feature>
+        <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.topology/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
@@ -91,6 +95,7 @@
         <feature version="${project.version}">oce-engine-api</feature>
         <feature version="${project.version}">oce-features-score</feature>
         <feature version="${project.version}">oce-datasource-jaxb</feature>
+        <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.test/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.features/org.opennms.oce.features.shell/${project.version}</bundle>
     </feature>

@@ -79,20 +79,37 @@ public class GraphManager {
             final ResourceKey parentResourceKey = getResourceKeyForParent(io);
             if (parentResourceKey != null) {
                 final Vertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
+                if (parentVertex == null) {
+                    LOG.warn("No existing vertex found for parent with resource key '{}'. Skipping edge association.", parentResourceKey);
+                    // TODO: Can we defer the edge creation until the parent does show up?
+                    continue;
+                }
                 final Edge edge = createEdge();
                 g.addEdge(edge, parentVertex, vertex);
             }
 
             // Peer relationships
             for (InventoryObjectPeerRef peerRef : io.getPeers()) {
-                final Vertex peerVertex = resourceKeyVertexMap.get(getResourceKeyForPeer(peerRef));
+                final ResourceKey peerResourceKey = getResourceKeyForPeer(peerRef);
+                final Vertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
+                if (peerVertex == null) {
+                    LOG.warn("No existing vertex found for peer with resource key '{}'. Skipping edge association.", peerResourceKey);
+                    // TODO: Can we defer the edge creation until the peer does show up?
+                    continue;
+                }
                 final Edge edge = createEdge();
                 g.addEdge(edge, peerVertex, vertex);
             }
 
             // Relative relationships
             for (InventoryObjectRelativeRef relativeRef : io.getRelatives()) {
-                final Vertex relativeVertex = resourceKeyVertexMap.get(getResourceKeyForPeer(relativeRef));
+                final ResourceKey relativeResourceKey = getResourceKeyForPeer(relativeRef);
+                final Vertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
+                if (relativeVertex == null) {
+                    LOG.warn("No existing vertex found for relative with resource key '{}'. Skipping edge association.", relativeResourceKey);
+                    // TODO: Can we defer the edge creation until the relative does show up?
+                    continue;
+                }
                 final Edge edge = createEdge();
                 g.addEdge(edge, relativeVertex, vertex);
             }

@@ -290,16 +290,16 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         }
 
         // We don't know about this entity yet, let's create it
-        InventoryObjectBean fan = new InventoryObjectBean();
-        fan.setType(ManagedObjectType.EntPhysicalEntity.getName());
-        fan.setId(fanId);
-        fan.setParentType(ManagedObjectType.Node.getName());
-        fan.setParentId(nodeCriteria);
+        InventoryObjectBean physicalEntity = new InventoryObjectBean();
+        physicalEntity.setType(ManagedObjectType.EntPhysicalEntity.getName());
+        physicalEntity.setId(fanId);
+        physicalEntity.setParentType(ManagedObjectType.Node.getName());
+        physicalEntity.setParentId(nodeCriteria);
 
         // Store it for reference
-        inventoryObjectsByKey.put(ResourceKey.key(fan.getType(), fan.getId()), fan);
+        inventoryObjectsByKey.put(ResourceKey.key(physicalEntity.getType(), physicalEntity.getId()), physicalEntity);
         // Notify the handlers
-        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(fan)));
+        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(physicalEntity)));
     }
 
     private void handleBgpPeer(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {

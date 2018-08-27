@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            mvn test integration-test
+            mvn install test integration-test
 
       - run:
           name: Save test results

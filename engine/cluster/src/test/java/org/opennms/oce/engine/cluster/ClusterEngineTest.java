@@ -192,7 +192,7 @@ public class ClusterEngineTest implements IncidentHandler {
 
         // An empty cluster should return no incidents
         Cluster<AlarmInSpaceTime> emptyCluster = new Cluster<>();
-        Set<IncidentBean> incidents = engine.mapClusterToIncidents(emptyCluster, Maps.newHashMap(), Maps.newHashMap(), incidentIdGenerator);
+        Set<IncidentBean> incidents = engine.mapClusterToIncidents(emptyCluster, Maps.newHashMap(), Maps.newHashMap());
         assertThat(incidents, hasSize(0));
 
         AlarmInSpaceTime alarm1InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
@@ -207,13 +207,13 @@ public class ClusterEngineTest implements IncidentHandler {
         // A cluster with a single alarm that was not previously mapped to an incident should be in a new incident
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap(), incidentIdGenerator);
+        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap());
         assertThat(incidents, hasSize(1));
         assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(1));
 
         // A cluster with two alarms that were not previously mapped to an incident should be in a new incident
         cluster.addPoint(alarm2InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap(), incidentIdGenerator);
+        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap());
         assertThat(incidents, hasSize(1));
         assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
 
@@ -229,7 +229,7 @@ public class ClusterEngineTest implements IncidentHandler {
                 .put(existingIncident.getId(), existingIncident)
                 .build();
 
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById, incidentIdGenerator);
+        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
         assertThat(incidents, hasSize(1));
         assertThat(Iterables.getFirst(incidents, null), sameInstance(existingIncident));
         assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
@@ -247,7 +247,7 @@ public class ClusterEngineTest implements IncidentHandler {
                 .put(existingIncident2.getId(), existingIncident)
                 .build();
 
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById, incidentIdGenerator);
+        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
         assertThat(incidents, hasSize(0));
 
         // If a cluster contains alarms in different incidents and one or more alarms that are not
@@ -271,7 +271,7 @@ public class ClusterEngineTest implements IncidentHandler {
                 .build();
 
         cluster.addPoint(alarm3InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById, incidentIdGenerator);
+        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
         assertThat(incidents, hasSize(1));
         assertThat(Iterables.getFirst(incidents, null), sameInstance(existingIncident));
         assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));

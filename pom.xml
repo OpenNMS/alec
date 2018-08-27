@@ -35,7 +35,6 @@
         <module>engine</module>
         <module>features</module>
         <module>karaf-features</module>
-        <module>karaf-kar</module>
         <module>test-api</module>
         <module>wrap</module>
     </modules>

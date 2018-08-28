@@ -31,6 +31,7 @@ package org.opennms.oce.engine.cluster;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -169,20 +170,21 @@ public class ClusterEngine implements Engine {
         alarmsChangedSinceLastTick = false;
         shortestPath = null;
 
-        // TODO: Can we move some of this out of the lock?
+        // Perform the clustering with the graph locked
+        final Set<IncidentBean> incidents = new HashSet<>();
         graphManager.withGraph(g -> {
             // GC alarms from vertices
             for (Vertex v : g.getVertices()) {
                 v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
             }
 
-            // FIXME: Inefficient to do this every tick
+            // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
+            // OPTIMIZATION: Can we avoid doing this every tick?
             final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
                     .map(v -> v.getAlarms().stream()
                             .map(a -> new AlarmInSpaceTime(v,a))
                             .collect(Collectors.toList()))
                     .flatMap(Collection::stream)
-                    // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
                     .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
                     .collect(Collectors.toList());
             LOG.debug("Tick at {} with {} alarms.", timestampInMillis, alarms.size());
@@ -194,21 +196,29 @@ public class ClusterEngine implements Engine {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Got cluster with {} alarms.", clusterOfAlarms.getPoints().size());
                 }
-
-                final Set<IncidentBean> incidents = mapClusterToIncidents(clusterOfAlarms,
-                        alarmIdToIncidentMap, incidentsById);
-                // Index and notify the incident handler
-                for (IncidentBean incident : incidents) {
-                    for (Alarm alarm : incident.getAlarms()) {
-                        alarmIdToIncidentMap.put(alarm.getId(), incident);
-                    }
-                    incidentsById.put(incident.getId(), incident);
-                    incidentHandler.onIncident(incident);
-                }
+                incidents.addAll(mapClusterToIncidents(clusterOfAlarms, alarmIdToIncidentMap, incidentsById));
             }
         });
+
+        // Index and notify the incident handler
+        for (IncidentBean incident : incidents) {
+            for (Alarm alarm : incident.getAlarms()) {
+                alarmIdToIncidentMap.put(alarm.getId(), incident);
+            }
+            incidentsById.put(incident.getId(), incident);
+            incidentHandler.onIncident(incident);
+        }
     }
 
+    /**
+     * Maps the clusters to incidents and returns a set of updated incident
+     * which should be forwarded to the incident handler.
+     *
+     * @param clusterOfAlarms clusters to group into incidents
+     * @param alarmIdToIncidentMap map of existing alarm ids to incident ids
+     * @param incidentsById map of existing incidents ids to incidents
+     * @return set of updated incidents
+     */
     @VisibleForTesting
     protected Set<IncidentBean> mapClusterToIncidents(Cluster<AlarmInSpaceTime> clusterOfAlarms,
                                                     Map<String, IncidentBean> alarmIdToIncidentMap,
@@ -226,20 +236,22 @@ public class ClusterEngine implements Engine {
 
         final Set<IncidentBean> incidents = new LinkedHashSet<>();
         final boolean existsAlarmWithoutIncident = alarmsByIncidentId.containsKey(EMPTY_INCIDENT_ID);
-        if (alarmsByIncidentId.size() == 1) {
-            if (existsAlarmWithoutIncident) {
-                // All of the alarms in the cluster are not associated with an incident yet
-                // Create a new incident with all of the alarms
-                final IncidentBean incident = new IncidentBean();
-                incident.setId(UUID.randomUUID().toString());
-                for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
-                    incident.addAlarm(alarm.getAlarm());
+        if (!existsAlarmWithoutIncident) {
+            // All of the alarms are already in incidents, nothing to do here
+            return incidents;
+        }
 
-                }
-                incidents.add(incident);
+        if (alarmsByIncidentId.size() == 1) {
+            // All of the alarms in the cluster are not associated with an incident yet
+            // Create a new incident with all of the alarms
+            final IncidentBean incident = new IncidentBean();
+            incident.setId(UUID.randomUUID().toString());
+            for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
+                incident.addAlarm(alarm.getAlarm());
+
             }
-            // else, All of the alarms already belong to the same incident, nothing to do
-        } else if (alarmsByIncidentId.size() == 2 && existsAlarmWithoutIncident) {
+            incidents.add(incident);
+        } else if (alarmsByIncidentId.size() == 2) {
             // Some of the alarms in the cluster already belong to an incident whereas other don't
             // Add them all to the same incident
             final String incidentId = alarmsByIncidentId.keySet().stream().filter(k -> !EMPTY_INCIDENT_ID.equals(k))
@@ -251,7 +263,7 @@ public class ClusterEngine implements Engine {
 
             alarmsByIncidentId.get(EMPTY_INCIDENT_ID).forEach(incident::addAlarm);
             incidents.add(incident);
-        } else if (alarmsByIncidentId.size() > 2 && existsAlarmWithoutIncident) {
+        } else {
             // The alarms in this cluster already belong to different incidents
             // Let's locate the ones that aren't part of any incident
             final List<Alarm> alarmsWithoutIncidents = alarmsByIncidentId.get(EMPTY_INCIDENT_ID);
@@ -306,7 +318,7 @@ public class ClusterEngine implements Engine {
         private final Alarm alarm;
         private final double distance;
 
-        public CandidateAlarmWithDistance(Alarm alarm, double distance) {
+        private CandidateAlarmWithDistance(Alarm alarm, double distance) {
             this.alarm = alarm;
             this.distance = distance;
         }
@@ -333,7 +345,7 @@ public class ClusterEngine implements Engine {
         throw new IllegalStateException("No vertex found for alarm: " + alarm);
     }
 
-    protected Alarm getClosestNeighborInIncident(Alarm alarm, List<Alarm> candidates) {
+    private Alarm getClosestNeighborInIncident(Alarm alarm, List<Alarm> candidates) {
         final double timeA = alarm.getTime();
         final long vertexIdA = getVertexIdForAlarm(alarm);
 
@@ -345,11 +357,12 @@ public class ClusterEngine implements Engine {
                     final double distance = distanceMeasure.compute(timeA, timeB, numHops);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
-                .sorted(Comparator.comparingDouble(CandidateAlarmWithDistance::getDistance).thenComparing(c -> c.getAlarm().getId()))
-                .findFirst().orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
+                .min(Comparator.comparingDouble(CandidateAlarmWithDistance::getDistance)
+                        .thenComparing(c -> c.getAlarm().getId()))
+                .orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
     }
 
-    public int getNumHopsBetween(long vertexIdA, long vertexIdB) {
+    protected int getNumHopsBetween(long vertexIdA, long vertexIdB) {
         if (vertexIdA == vertexIdB) {
             return 0;
         }
@@ -367,11 +380,11 @@ public class ClusterEngine implements Engine {
                         public Integer load(EdgeKey key) {
                             final Vertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
-                                throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdA);
+                                throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);
                             }
                             final Vertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
                             if (vertexB == null) {
-                                throw new IllegalStateException("Cound not find vertex with id: " + key.vertexIdB);
+                                throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
                             }
 
                             if (shortestPath == null) {
@@ -385,7 +398,7 @@ public class ClusterEngine implements Engine {
         private long vertexIdA;
         private long vertexIdB;
 
-        public EdgeKey(long vertexIdA, long vertexIdB) {
+        private EdgeKey(long vertexIdA, long vertexIdB) {
             this.vertexIdA = vertexIdA;
             this.vertexIdB = vertexIdB;
         }

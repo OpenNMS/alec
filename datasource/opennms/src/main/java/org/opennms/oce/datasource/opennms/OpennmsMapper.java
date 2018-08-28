@@ -35,6 +35,7 @@ import java.util.List;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 
@@ -49,6 +50,20 @@ public class OpennmsMapper {
         bean.setInventoryObjectId(alarm.getManagedObjectInstance());
         bean.setSummary(alarm.getLogMessage());
         bean.setDescription(alarm.getDescription());
+        return bean;
+    }
+
+    protected static IncidentBean toIncident(OpennmsModelProtos.Alarm alarm) {
+        final IncidentBean bean = new IncidentBean();
+        bean.setCreationTime(alarm.getFirstEventTime());
+        final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
+        if (lastEvent != null) {
+            lastEvent.getParameterList().stream()
+                    .filter( p -> "situationId".equals(p.getName()))
+                    .findFirst()
+                    .ifPresent(p -> bean.setId(p.getValue()));
+        }
+        bean.setSeverity(toSeverity(alarm.getSeverity()));
         return bean;
     }
 

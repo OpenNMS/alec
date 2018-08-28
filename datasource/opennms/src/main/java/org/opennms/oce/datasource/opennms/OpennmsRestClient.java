@@ -97,7 +97,7 @@ public class OpennmsRestClient {
 
     void sendEvent(Event e) throws Exception {
         final MediaType XML = MediaType.parse("application/xml; charset=utf-8");
-        final String xml = JaxbUtils.toXml(e);
+        final String xml = JaxbUtils.toXml(e, Event.class);
         final HttpUrl url = baseUrl.newBuilder()
                 .addPathSegment("rest")
                 .addPathSegment("events")

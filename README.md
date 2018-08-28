@@ -49,18 +49,15 @@ config:property-set commit.interval.ms 5000
 config:update
 ```
 
-Now point to your OpenNMS instance:
 ```
-config:edit org.opennms.oce.datasource.opennms
-config:property-set url http://127.0.0.1:8980/opennms
-config:property-set username admin
-config:property-set password admin
+config:edit org.opennms.oce.datasource.opennms.kafka.producer
+config:property-set bootstrap.servers 127.0.0.1:9092
 config:update
 ```
 
 Install the datasource, an engine and the driver:
 ```
-feature:install oce-datasource-opennms oce-engine-topology oce-driver-main
+feature:install oce-datasource-opennms oce-engine-cluster oce-driver-main
 ```
 
 Correlate!

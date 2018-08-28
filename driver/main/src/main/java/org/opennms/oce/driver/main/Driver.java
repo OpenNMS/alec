@@ -87,9 +87,9 @@ public class Driver {
         // The get methods on the datasources may block, so we do this on a separate thread
         initThread = new Thread(() -> {
             try {
+                final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
                 final List<Alarm> alarms = alarmDatasource.getAlarmsAndRegisterHandler(engine);
                 final List<Incident> incidents = incidentDatasource.getIncidents();
-                final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
                 engine.init(alarms, incidents, inventory);
             } catch (Exception e) {
                 if (e.getCause() != null && e.getCause() instanceof InterruptedException) {

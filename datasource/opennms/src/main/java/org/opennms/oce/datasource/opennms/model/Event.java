@@ -28,19 +28,27 @@
 
 package org.opennms.oce.datasource.opennms.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name="event")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Event {
+
+    private static final ThreadLocal<DateFormat> FORMATTER_LONG = new ThreadLocal<DateFormat>() {
+        @Override
+        protected synchronized DateFormat initialValue() {
+            final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.LONG);
+            formatter.setLenient(true);
+            return formatter;
+        }
+    };
 
     @XmlElement(name="uei")
     private String uei;
@@ -53,6 +61,9 @@ public class Event {
 
     @XmlElement(name="severity")
     private String severity = "Critical";
+
+    @XmlElement(name = "time")
+    private String time = FORMATTER_LONG.get().format(new Date());
 
     public String getUei() {
         return uei;
@@ -90,6 +101,14 @@ public class Event {
         getParameters().getParameters().add(new Parameter(key, value));
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -98,13 +117,12 @@ public class Event {
         return Objects.equals(uei, event.uei) &&
                 Objects.equals(source, event.source) &&
                 Objects.equals(parameters, event.parameters) &&
-                Objects.equals(severity, event.severity);
+                Objects.equals(severity, event.severity) &&
+                Objects.equals(time, event.time);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uei, source, parameters, severity);
+        return Objects.hash(uei, source, parameters, severity, time);
     }
-
-
 }

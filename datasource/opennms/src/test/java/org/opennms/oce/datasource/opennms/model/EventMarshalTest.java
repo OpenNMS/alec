@@ -31,30 +31,19 @@ package org.opennms.oce.datasource.opennms.model;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
-import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.junit.Test;
 
 public class EventMarshalTest {
 
     @Test
-    public void canMarshal() throws JAXBException {
+    public void canMarshal() {
         Event e = new Event();
+        e.setTime(null);
         e.setUei("someuei");
         e.addParam("k1", "v1");
         e.addParam("k2", "v2");
-        StringWriter sw = new StringWriter();
-        JAXBContext context = JAXBContext.newInstance(Event.class);
-        Marshaller m = context.createMarshaller();
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        m.marshal(e, sw);
-
-        assertThat(JaxbUtils.toXml(e), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-                "<event>\n" +
+        assertThat(JaxbUtils.toXml(e, Event.class), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<event xmlns=\"http://xmlns.opennms.org/xsd/event\">\n" +
                 "    <uei>someuei</uei>\n" +
                 "    <source>oce</source>\n" +
                 "    <parms>\n" +
@@ -69,5 +58,29 @@ public class EventMarshalTest {
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
                 "</event>"));
+
+        Log log = new Log(e);
+        assertThat(JaxbUtils.toXml(log, Log.class), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<log xmlns=\"http://xmlns.opennms.org/xsd/event\">\n" +
+                "    <events>\n" +
+                "        <event>\n" +
+                "            <uei>someuei</uei>\n" +
+                "            <source>oce</source>\n" +
+                "            <parms>\n" +
+                "                <parm>\n" +
+                "                    <parmName>k1</parmName>\n" +
+                "                    <value encoding=\"text\" type=\"string\">v1</value>\n" +
+                "                </parm>\n" +
+                "                <parm>\n" +
+                "                    <parmName>k2</parmName>\n" +
+                "                    <value encoding=\"text\" type=\"string\">v2</value>\n" +
+                "                </parm>\n" +
+                "            </parms>\n" +
+                "            <severity>Critical</severity>\n" +
+                "        </event>\n" +
+                "    </events>\n" +
+                "</log>"));
+
+
     }
 }

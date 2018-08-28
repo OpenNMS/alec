@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -48,7 +49,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.Consumed;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -63,11 +68,14 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.AlarmHandler;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
@@ -75,6 +83,9 @@ import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
 import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
+import org.opennms.oce.datasource.opennms.model.Event;
+import org.opennms.oce.datasource.opennms.model.JaxbUtils;
+import org.opennms.oce.datasource.opennms.model.Log;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,13 +94,15 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.protobuf.InvalidProtocolBufferException;
 
-public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
+public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, IncidentDatasource {
 
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
     private static final String ALARM_STORE_NAME = "alarm_store";
     private static final String NODE_STORE_NAME = "node_store";
     protected static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
+    protected static final String KAFKA_PRODUCER_PID = "org.opennms.oce.datasource.opennms.kafka.producer";
+    protected static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
 
     private static final Gson gson = new Gson();
 
@@ -106,11 +119,16 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     private final Map<ResourceKey, InventoryObject> inventoryObjectsByKey = new HashMap<>();
     private KafkaStreams streams;
 
+    private KafkaProducer<String, String> producer;
+
     public OpennmsDatasource(ConfigurationAdmin configAdmin) {
         this.configAdmin = Objects.requireNonNull(configAdmin);
     }
 
     public void init() throws IOException {
+        final Properties producerProperties = loadProducerProperties();
+        producer = new KafkaProducer<>(producerProperties);
+
         final Properties streamProperties = loadStreamsProperties();
 
         final StreamsBuilder builder = new StreamsBuilder();
@@ -154,6 +172,10 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     }
 
     private void handleNewOrUpdatedAlarm(String reductionKey, byte[] alarmBytes) {
+        if (isIncident(reductionKey)) {
+            return;
+        }
+
         final OpennmsModelProtos.Alarm alarm;
         try {
             if (alarmBytes == null) {
@@ -372,7 +394,12 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         try {
             waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
                 try {
+                    if (isIncident(entry.key)) {
+                        return;
+                    }
                     final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
+                    final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
+                    handleInventoryForAlarm(alarmBean, alarm);
                     alarms.add(OpennmsMapper.toAlarm(alarm));
                 } catch (InvalidProtocolBufferException e) {
                     LOG.error("Failed to parse alarm from bytes.", e);
@@ -485,7 +512,85 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
         inventoryHandlers.remove(handler);
     }
 
+    @Override
+    public List<Incident> getIncidents() {
+        final List<Incident> incidents = new ArrayList<>();
+        try {
+            waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
+                try {
+                    if (!isIncident(entry.key)) {
+                        return;
+                    }
+                    final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
+                    incidents.add(OpennmsMapper.toIncident(alarm));
+                } catch (InvalidProtocolBufferException e) {
+                    LOG.error("Failed to parse alarm from bytes.", e);
+                }
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return incidents;
+    }
+
+    @Override
+    public void forwardIncident(Incident incident) {
+        if (incident.getAlarms().size() < 1) {
+            LOG.warn("Got incident with no alarms. Ignoring.");
+        }
+
+        final Event e = new Event();
+        e.setUei("uei.opennms.org/alarms/situation");
+
+        // Use the max severity as the situation severity
+        final Severity maxSeverity = Severity.fromValue(incident.getAlarms().stream()
+                .mapToInt(a -> a.getSeverity().getValue())
+                .max()
+                .getAsInt());
+        e.setSeverity(maxSeverity.name().toLowerCase());
+
+        // Relay the incident id
+        e.addParam("situationId", incident.getId());
+
+        // Use the log message and description from the first (earliest) alarm
+        final Alarm earliestAlarm = incident.getAlarms().stream()
+                .min(Comparator.comparing(Alarm::getTime))
+                .get();
+        e.addParam("situationLogMsg", earliestAlarm.getSummary());
+
+        String description = earliestAlarm.getDescription();
+        if (incident.getDiagnosticText() != null) {
+            description += "\n<p>OCE Diagnostic: " + incident.getDiagnosticText() + "</p>";
+        }
+        e.addParam("situationDescr", description);
+
+        // Set the related reduction keys
+        incident.getAlarms().stream()
+                .map(Alarm::getId)
+                .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
+
+        final String incidentXml = JaxbUtils.toXml(new Log(e), Log.class);
+        LOG.debug("Sending event to create incident with id '{}'. XML: {}", incident.getId(), incidentXml);
+        producer.send(new ProducerRecord<>(eventTopic, incidentXml), (metadata, ex) -> {
+            if (ex != null) {
+                LOG.warn("An error occured while sending event for incident with id '{}'.", incident.getId(), ex);
+            } else {
+                LOG.debug("Successfully sent event for incident with id '{}'.", incident.getId());
+            }
+        });
+    }
+
+    private static boolean isIncident(String reductionKey) {
+        if (reductionKey == null) {
+            return false;
+        }
+        return reductionKey.startsWith(SITUATION_UEI);
+    }
+
     private ReadOnlyKeyValueStore<String, byte[]> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
+        if (streams == null) {
+            throw new IllegalStateException("Datasource must be started first.");
+        }
         while (true) {
             try {
                 return streams.store(ALARM_STORE_NAME, QueryableStoreTypes.keyValueStore());
@@ -496,6 +601,9 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     }
 
     private ReadOnlyKeyValueStore<String, byte[]> waitUntilNodeStoreIsQueryable() throws InterruptedException {
+        if (streams == null) {
+            throw new IllegalStateException("Datasource must be started first.");
+        }
         while (true) {
             try {
                 return streams.store(NODE_STORE_NAME, QueryableStoreTypes.keyValueStore());
@@ -523,6 +631,21 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             streamsProperties.put(StreamsConfig.STATE_DIR_CONFIG, kafkaDir.toString());
         }
         return streamsProperties;
+    }
+
+    private Properties loadProducerProperties() throws IOException {
+        final Properties producerProperties = new Properties();
+        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_PRODUCER_PID).getProperties();
+        if (properties != null) {
+            final Enumeration<String> keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                final String key = keys.nextElement();
+                producerProperties.put(key, properties.get(key));
+            }
+        }
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return producerProperties;
     }
 
     public String getAlarmTopic() {

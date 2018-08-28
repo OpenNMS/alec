@@ -149,7 +149,7 @@ public class GraphManager {
     public synchronized void addOrUpdateAlarm(Alarm alarm) {
         final ResourceKey resourceKey = getResourceKeyFor(alarm);
         final Vertex vertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
-            LOG.info("No existing vertex was found with resource key: {}. Creating a new vertex.", resourceKey);
+            LOG.info("No existing vertex was found with resource key: {} for alarm with id: {}. Creating a new vertex.", resourceKey, alarm.getId());
             final Vertex v = new Vertex(vertexIdGenerator.getAndIncrement(), resourceKey);
             g.addVertex(v);
             didGraphChange.set(true);

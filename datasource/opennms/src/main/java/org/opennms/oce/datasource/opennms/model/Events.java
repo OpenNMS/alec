@@ -28,23 +28,26 @@
 
 package org.opennms.oce.datasource.opennms.model;
 
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class JaxbUtils {
+@XmlRootElement(name="events")
+@XmlAccessorType(XmlAccessType.NONE)
+public class Events {
 
-    public static String toXml(Object o, Class<?> clazz) {
-        try {
-            final StringWriter sw = new StringWriter();
-            final JAXBContext context = JAXBContext.newInstance(clazz);
-            final Marshaller m = context.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(o, sw);
-            return sw.toString();
-        } catch(Exception ex) {
-            throw new RuntimeException(ex);
-        }
+    @XmlElement(name="event")
+    private List<Event> events = new ArrayList<>();
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 }

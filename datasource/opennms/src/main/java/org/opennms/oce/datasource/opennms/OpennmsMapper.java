@@ -39,6 +39,8 @@ import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 
+import com.google.common.base.Strings;
+
 public class OpennmsMapper {
 
     protected static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
@@ -117,7 +119,8 @@ public class OpennmsMapper {
     }
 
     protected static String toNodeCriteria(OpennmsModelProtos.Node node) {
-        if (node.getForeignSource() != null && node.getForeignId() != null) {
+        if (!Strings.isNullOrEmpty(node.getForeignSource()) &&
+                !Strings.isNullOrEmpty(node.getForeignId())) {
             return node.getForeignSource() + ":" + node.getForeignId();
         } else {
             return Long.valueOf(node.getId()).toString();
@@ -125,7 +128,8 @@ public class OpennmsMapper {
     }
 
     protected static String toNodeCriteria(OpennmsModelProtos.NodeCriteria nodeCriteria) {
-        if (nodeCriteria.getForeignSource() != null && nodeCriteria.getForeignId() != null) {
+        if (!Strings.isNullOrEmpty(nodeCriteria.getForeignSource()) &&
+                !Strings.isNullOrEmpty(nodeCriteria.getForeignId())) {
             return nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId();
         } else {
             return Long.valueOf(nodeCriteria.getId()).toString();

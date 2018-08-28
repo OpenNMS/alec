@@ -330,15 +330,19 @@ public class ClusterEngine implements Engine {
             vertexIds.add(getVertexIdForAlarm(alarm));
         }
 
-        if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
-            maxNumHops = 0L;
-            for (Long vertexIdA : vertexIds) {
-                for (Long vertexIdB : vertexIds) {
-                    if (!vertexIdA.equals(vertexIdB)) {
-                        maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
+        try {
+            if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
+                maxNumHops = 0L;
+                for (Long vertexIdA : vertexIds) {
+                    for (Long vertexIdB : vertexIds) {
+                        if (!vertexIdA.equals(vertexIdB)) {
+                            maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
+                        }
                     }
                 }
             }
+        } catch (Exception e)  {
+            LOG.warn("Error calculating number of hops for diagnostic text.", e);
         }
 
         String diagText = String.format("The alarms happened within %.2f seconds across %d vertices",

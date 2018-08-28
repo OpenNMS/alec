@@ -45,6 +45,8 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.Consumed;
@@ -96,6 +98,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
     private String eventTopic;
     private String nodeTopic;
 
+    private final ReadWriteLock alarmHandlerLock = new ReentrantReadWriteLock();
     private final Set<AlarmHandler> alarmHandlers = new HashSet<>();
     private final Set<InventoryHandler> inventoryHandlers = new HashSet<>();
     private final Map<String, OpennmsModelProtos.Alarm> alarmsByReductionKey = new HashMap<>();
@@ -162,8 +165,9 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
             throw new RuntimeException(ex);
         }
 
-        synchronized (alarmHandlers) {
-            LOG.info("handleNewOrUpdatedAlarm({})", reductionKey);
+        alarmHandlerLock.readLock().lock();
+        try {
+            LOG.debug("handleNewOrUpdatedAlarm({})", reductionKey);
             LOG.trace("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
             if (alarm == null) {
                 final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
@@ -177,8 +181,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                         }
                     });
                 } else {
-                    // FIXME: This may be a problem
-                    LOG.warn("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
+                    // We got a delete for an alarm which we haven't seen yet. Ignore it.
+                    LOG.debug("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
                 }
             } else {
                 final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
@@ -191,6 +195,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
                     }
                 });
             }
+        } finally {
+            alarmHandlerLock.readLock().unlock();
         }
         alarmsByReductionKey.put(reductionKey, alarm);
     }
@@ -380,21 +386,34 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource {
 
     @Override
     public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        synchronized (alarmHandlers) {
+        alarmHandlerLock.writeLock().lock();
+        try {
             // Lock to make sure we don't miss any alarms between the call to register and get
             registerHandler(handler);
             return getAlarms();
+        } finally {
+            alarmHandlerLock.writeLock().unlock();
         }
     }
 
     @Override
     public void registerHandler(AlarmHandler handler) {
-        alarmHandlers.add(handler);
+        alarmHandlerLock.writeLock().lock();
+        try {
+            alarmHandlers.add(handler);
+        } finally {
+            alarmHandlerLock.writeLock().unlock();
+        }
     }
 
     @Override
     public void unregisterHandler(AlarmHandler handler) {
-        alarmHandlers.remove(handler);
+        alarmHandlerLock.writeLock().lock();
+        try {
+            alarmHandlers.remove(handler);
+        } finally {
+            alarmHandlerLock.writeLock().unlock();
+        }
     }
 
     private void handleNewOrUpdatedNode(String nodeCriteria, byte[] nodeBytes) {

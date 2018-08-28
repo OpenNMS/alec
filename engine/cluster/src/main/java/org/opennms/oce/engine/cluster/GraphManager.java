@@ -72,6 +72,7 @@ public class GraphManager {
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
+                LOG.debug("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
                 final Vertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
                 didGraphChange.set(true);
@@ -95,6 +96,7 @@ public class GraphManager {
                     // TODO: Can we defer the edge creation until the parent does show up?
                     continue;
                 }
+                LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
                 final Edge edge = createEdge();
                 g.addEdge(edge, parentVertex, vertex);
                 newDisconnectedVertices.remove(vertex.getId());
@@ -111,6 +113,7 @@ public class GraphManager {
                     // TODO: Can we defer the edge creation until the peer does show up?
                     continue;
                 }
+                LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
                 final Edge edge = createEdge();
                 g.addEdge(edge, peerVertex, vertex);
                 newDisconnectedVertices.remove(vertex.getId());
@@ -127,6 +130,7 @@ public class GraphManager {
                     // TODO: Can we defer the edge creation until the relative does show up?
                     continue;
                 }
+                LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
                 final Edge edge = createEdge();
                 g.addEdge(edge, relativeVertex, vertex);
                 newDisconnectedVertices.remove(vertex.getId());

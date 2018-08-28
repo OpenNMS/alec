@@ -110,7 +110,7 @@ public class OpennmsMapper {
         final InventoryObjectBean snmpInterfaceObj = new InventoryObjectBean();
         snmpInterfaceObj.setType(ManagedObjectType.SnmpInterface.getName());
         snmpInterfaceObj.setId(parent.getId() + ":" + snmpInterface.getIfIndex());
-        snmpInterfaceObj.setFriendlyName(snmpInterface.getIfAlias());
+        snmpInterfaceObj.setFriendlyName(snmpInterface.getIfDescr());
         snmpInterfaceObj.setParentType(parent.getType());
         snmpInterfaceObj.setParentId(parent.getId());
         return snmpInterfaceObj;

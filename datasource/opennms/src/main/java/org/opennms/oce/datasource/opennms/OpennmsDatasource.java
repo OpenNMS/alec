@@ -226,9 +226,15 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
     private void handleInventoryForAlarm(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
         if (Strings.isNullOrEmpty(alarm.getInventoryObjectType()) ||
                 Strings.isNullOrEmpty(alarm.getInventoryObjectId())) {
-            // No specific type and/or id - use the alarm type and id
-            alarm.setInventoryObjectId(alarm.getId());
-            alarm.setInventoryObjectType("alarm");
+            if (sourceAlarm.hasNodeCriteria()) {
+                final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+                alarm.setInventoryObjectType(ManagedObjectType.Node.getName());
+                alarm.setInventoryObjectId(nodeCriteria);
+            } else {
+                // No specific type and/or id - use the alarm type and id
+                alarm.setInventoryObjectId(alarm.getId());
+                alarm.setInventoryObjectType("alarm");
+            }
             return;
         }
 
@@ -400,7 +406,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
                     final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
                     final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
                     handleInventoryForAlarm(alarmBean, alarm);
-                    alarms.add(OpennmsMapper.toAlarm(alarm));
+                    alarms.add(alarmBean);
                 } catch (InvalidProtocolBufferException e) {
                     LOG.error("Failed to parse alarm from bytes.", e);
                 }

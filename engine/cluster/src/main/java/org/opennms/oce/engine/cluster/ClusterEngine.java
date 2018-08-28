@@ -159,6 +159,10 @@ public class ClusterEngine implements Engine {
 
     @Override
     public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+        LOG.debug("Initialized with {} alarms, {} incidents and {} inventory objects.", alarms.size(), incidents.size(), inventory.size());
+        LOG.debug("Alarms on init: {}", alarms);
+        LOG.debug("Incidents on init: {}", incidents);
+        LOG.debug("Inventory objects on init: {}", inventory);
         graphManager.addInventory(inventory);
         graphManager.addOrUpdateAlarms(alarms);
         // TODO: What do we do with the initial incidents?

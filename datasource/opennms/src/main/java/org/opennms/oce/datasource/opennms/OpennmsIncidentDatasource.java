@@ -79,7 +79,12 @@ public class OpennmsIncidentDatasource implements IncidentDatasource {
                 .min(Comparator.comparing(Alarm::getTime))
                 .get();
         e.addParam("situationLogMsg", earliestAlarm.getSummary());
-        e.addParam("situationDescr", earliestAlarm.getDescription());
+
+        String description = earliestAlarm.getDescription();
+        if (incident.getDiagnosticText() != null) {
+            description += "\n<p>OCE Diagnostic: " + incident.getDiagnosticText() + "</p>";
+        }
+        e.addParam("situationDescr", description);
 
         // Set the related reduction keys
         incident.getAlarms().stream()

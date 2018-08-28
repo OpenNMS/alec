@@ -59,7 +59,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import edu.uci.ics.jung.algorithms.cluster.WeakComponentClusterer;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -114,7 +113,6 @@ public class ClusterEngine implements Engine {
 
     private boolean alarmsChangedSinceLastTick = false;
     private DijkstraShortestPath<Vertex, Edge> shortestPath;
-    private final WeakComponentClusterer<Vertex,Edge> weakComponentClusterer = new WeakComponentClusterer<>();
     private Set<Long> disconnectedVertices = new HashSet<>();
 
     private final GraphManager graphManager = new GraphManager();
@@ -304,7 +302,39 @@ public class ClusterEngine implements Engine {
                 incidents.add(incident);
             }
         }
+
+        LOG.debug("Generating diagnostic texts...");
+        for (IncidentBean incident : incidents) {
+            incident.setDiagnosticText(getDiagnosticTextForIncident(incident));
+        }
+        LOG.debug("Done generating diagnostic texts.");
+
         return incidents;
+    }
+
+    private String getDiagnosticTextForIncident(IncidentBean incident) {
+        long minTime = Long.MAX_VALUE;
+        long maxTime = Long.MIN_VALUE;
+        long maxNumHops = 0;
+
+        final Set<Long> vertexIds = new HashSet<>();
+        for (Alarm alarm : incident.getAlarms()) {
+            minTime = Math.min(minTime, alarm.getTime());
+            maxTime = Math.max(maxTime, alarm.getTime());
+            vertexIds.add(getVertexIdForAlarm(alarm));
+        }
+
+        // FIXME: Not very efficient... add flag to enable/disable?
+        for (Long vertexIdA : vertexIds) {
+            for (Long vertexIdB : vertexIds) {
+                if (!vertexIdA.equals(vertexIdB)) {
+                    maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
+                }
+            }
+        }
+
+        return String.format("The alarms happened within %d milliseconds on components within %d hops.",
+                Math.abs(maxTime - minTime), maxNumHops);
     }
 
     @Override
@@ -415,8 +445,13 @@ public class ClusterEngine implements Engine {
         private long vertexIdB;
 
         private EdgeKey(long vertexIdA, long vertexIdB) {
-            this.vertexIdA = vertexIdA;
-            this.vertexIdB = vertexIdB;
+            if (vertexIdA <= vertexIdB) {
+                this.vertexIdA = vertexIdA;
+                this.vertexIdB = vertexIdB;
+            } else {
+                this.vertexIdA = vertexIdB;
+                this.vertexIdB = vertexIdA;
+            }
         }
 
         @Override
@@ -430,7 +465,6 @@ public class ClusterEngine implements Engine {
 
         @Override
         public int hashCode() {
-
             return Objects.hash(vertexIdA, vertexIdB);
         }
     }

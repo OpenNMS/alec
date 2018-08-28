@@ -46,6 +46,7 @@ public class IncidentBean implements Incident {
     private Severity severity = Severity.INDETERMINATE;
     private List<ResourceKey> resourceKeys = new ArrayList<>();
     private Set<Alarm> alarms = new LinkedHashSet<>();
+    private String diagnosticText;
 
     public IncidentBean() { }
 
@@ -101,6 +102,15 @@ public class IncidentBean implements Incident {
         return severity;
     }
 
+    @Override
+    public String getDiagnosticText() {
+        return diagnosticText;
+    }
+
+    public void setDiagnosticText(String diagnosticText) {
+        this.diagnosticText = diagnosticText;
+    }
+
     public void setSeverity(Severity severity) {
         this.severity = severity;
     }
@@ -113,12 +123,13 @@ public class IncidentBean implements Incident {
         return creationTime == that.creationTime &&
                 Objects.equals(resourceKeys, that.resourceKeys) &&
                 Objects.equals(alarms, that.alarms) &&
-                Objects.equals(severity, that.severity);
+                Objects.equals(severity, that.severity) &&
+                Objects.equals(diagnosticText, that.diagnosticText);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(creationTime, resourceKeys, alarms, severity);
+        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText);
     }
 
     @Override
@@ -129,6 +140,7 @@ public class IncidentBean implements Incident {
                 ", resourceKeys=" + resourceKeys +
                 ", alarms=" + alarms +
                 ", severity=" + severity +
+                ", diagnosticText=" + diagnosticText +
                 '}';
     }
 }

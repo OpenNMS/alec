@@ -43,4 +43,10 @@ public interface Incident {
 
     Severity getSeverity();
 
+    /**
+     * A human readable string that helps explain while
+     * the alarms are grouped together.
+     */
+    String getDiagnosticText();
+
 }

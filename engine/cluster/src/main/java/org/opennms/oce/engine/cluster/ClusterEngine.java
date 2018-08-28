@@ -327,22 +327,19 @@ public class ClusterEngine implements Engine {
         for (Alarm alarm : incident.getAlarms()) {
             minTime = Math.min(minTime, alarm.getTime());
             maxTime = Math.max(maxTime, alarm.getTime());
-            vertexIds.add(getVertexIdForAlarm(alarm));
+            // The alarm may no longer be in this graph
+            getOptionalVertexIdForAlarm(alarm).ifPresent(vertexIds::add);
         }
 
-        try {
-            if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
-                maxNumHops = 0L;
-                for (Long vertexIdA : vertexIds) {
-                    for (Long vertexIdB : vertexIds) {
-                        if (!vertexIdA.equals(vertexIdB)) {
-                            maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
-                        }
+        if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
+            maxNumHops = 0L;
+            for (Long vertexIdA : vertexIds) {
+                for (Long vertexIdB : vertexIds) {
+                    if (!vertexIdA.equals(vertexIdB)) {
+                        maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
                     }
                 }
             }
-        } catch (Exception e)  {
-            LOG.warn("Error calculating number of hops for diagnostic text.", e);
         }
 
         String diagText = String.format("The alarms happened within %.2f seconds across %d vertices",
@@ -395,15 +392,23 @@ public class ClusterEngine implements Engine {
         }
     }
 
-    private long getVertexIdForAlarm(Alarm alarm) {
+    private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
         // TODO: Optimize this
         for (Vertex v : graphManager.getGraph().getVertices()) {
             final Optional<Alarm> match = v.getAlarms().stream()
                     .filter(a -> a.equals(alarm))
                     .findFirst();
             if (match.isPresent()) {
-                return v.getId();
+                return Optional.of(v.getId());
             }
+        }
+        return Optional.empty();
+    }
+
+    private long getVertexIdForAlarm(Alarm alarm) {
+        final Optional<Long> vertexId = getOptionalVertexIdForAlarm(alarm);
+        if (vertexId.isPresent()) {
+            return vertexId.get();
         }
         throw new IllegalStateException("No vertex found for alarm: " + alarm);
     }

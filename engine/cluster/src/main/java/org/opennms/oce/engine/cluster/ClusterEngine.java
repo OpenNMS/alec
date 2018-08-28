@@ -59,6 +59,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import edu.uci.ics.jung.algorithms.cluster.WeakComponentClusterer;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -113,6 +114,8 @@ public class ClusterEngine implements Engine {
 
     private boolean alarmsChangedSinceLastTick = false;
     private DijkstraShortestPath<Vertex, Edge> shortestPath;
+    private final WeakComponentClusterer<Vertex,Edge> weakComponentClusterer = new WeakComponentClusterer<>();
+    private Set<Long> disconnectedVertices = new HashSet<>();
 
     private final GraphManager graphManager = new GraphManager();
 
@@ -144,10 +147,14 @@ public class ClusterEngine implements Engine {
 
     @Override
     public void tick(long timestampInMillis) {
+        LOG.debug("Starting tick for {}", timestampInMillis);
         if (timestampInMillis - lastRun >= tickResolutionMs) {
             onTick(timestampInMillis);
             lastRun = timestampInMillis;
+        } else {
+            LOG.debug("Less than {} milliseconds elapsed since last tick. Ignoring.", tickResolutionMs);
         }
+        LOG.debug("Done tick for {}", timestampInMillis);
     }
 
     @Override
@@ -164,15 +171,23 @@ public class ClusterEngine implements Engine {
 
     public void onTick(long timestampInMillis) {
         if (!alarmsChangedSinceLastTick) {
+            LOG.debug("No alarm changes since last tick. Nothing to do.");
             return;
         }
         // Reset
         alarmsChangedSinceLastTick = false;
-        shortestPath = null;
 
         // Perform the clustering with the graph locked
         final Set<IncidentBean> incidents = new HashSet<>();
         graphManager.withGraph(g -> {
+            if (graphManager.getDidGraphChangeAndReset()) {
+                // If the graph has changed, then reset the cache
+                LOG.debug("Graph has changed. Resetting hop cache.");
+                hops.invalidateAll();
+                shortestPath = null;
+                disconnectedVertices = graphManager.getDisconnectedVertices();
+            }
+
             // GC alarms from vertices
             for (Vertex v : g.getVertices()) {
                 v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
@@ -201,6 +216,7 @@ public class ClusterEngine implements Engine {
         });
 
         // Index and notify the incident handler
+        LOG.debug("Creating/updating {} incidents.", incidents.size());
         for (IncidentBean incident : incidents) {
             for (Alarm alarm : incident.getAlarms()) {
                 alarmIdToIncidentMap.put(alarm.getId(), incident);
@@ -353,7 +369,7 @@ public class ClusterEngine implements Engine {
                 .map(candidate -> {
                     final double timeB = candidate.getTime();
                     final long vertexIdB = getVertexIdForAlarm(candidate);
-                    final int numHops = getNumHopsBetween(vertexIdA, vertexIdB);
+                    final int numHops = vertexIdA == vertexIdB ? 0 : getNumHopsBetween(vertexIdA, vertexIdB);
                     final double distance = distanceMeasure.compute(timeA, timeB, numHops);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
@@ -363,9 +379,6 @@ public class ClusterEngine implements Engine {
     }
 
     protected int getNumHopsBetween(long vertexIdA, long vertexIdB) {
-        if (vertexIdA == vertexIdB) {
-            return 0;
-        }
         final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
         try {
             return hops.get(key);
@@ -378,6 +391,9 @@ public class ClusterEngine implements Engine {
             .maximumSize(10000)
             .build(new CacheLoader<EdgeKey, Integer>() {
                         public Integer load(EdgeKey key) {
+                            if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
+                                return 0;
+                            }
                             final Vertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
                                 throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);

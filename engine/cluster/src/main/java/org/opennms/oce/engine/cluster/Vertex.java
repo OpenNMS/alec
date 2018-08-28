@@ -82,4 +82,5 @@ public class Vertex {
     public String toString() {
         return String.format("Vertex[id=%s, resourceKey=%s]", id, resourceKey);
     }
+
 }

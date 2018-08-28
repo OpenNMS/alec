@@ -30,8 +30,11 @@ package org.opennms.oce.engine.cluster;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -58,14 +61,22 @@ public class GraphManager {
 
     private final Graph<Vertex, Edge> g = new SparseMultigraph<>();
 
+    private final AtomicBoolean didGraphChange = new AtomicBoolean();
+
+    private final Set<Long> disconnectedVertices = new HashSet<>();
+
     public synchronized void addInventory(Collection<InventoryObject> inventory) {
+        final Set<Long> newDisconnectedVertices = new HashSet<>();
+
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
                 final Vertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
+                didGraphChange.set(true);
                 idtoVertexMap.put(vertex.getId(), vertex);
+                newDisconnectedVertices.add(vertex.getId());
                 return vertex;
             });
         }
@@ -86,6 +97,9 @@ public class GraphManager {
                 }
                 final Edge edge = createEdge();
                 g.addEdge(edge, parentVertex, vertex);
+                newDisconnectedVertices.remove(vertex.getId());
+                newDisconnectedVertices.remove(parentVertex.getId());
+                didGraphChange.set(true);
             }
 
             // Peer relationships
@@ -99,6 +113,9 @@ public class GraphManager {
                 }
                 final Edge edge = createEdge();
                 g.addEdge(edge, peerVertex, vertex);
+                newDisconnectedVertices.remove(vertex.getId());
+                newDisconnectedVertices.remove(peerVertex.getId());
+                didGraphChange.set(true);
             }
 
             // Relative relationships
@@ -112,8 +129,12 @@ public class GraphManager {
                 }
                 final Edge edge = createEdge();
                 g.addEdge(edge, relativeVertex, vertex);
+                newDisconnectedVertices.remove(vertex.getId());
+                newDisconnectedVertices.remove(relativeVertex.getId());
+                didGraphChange.set(true);
             }
         }
+        disconnectedVertices.addAll(newDisconnectedVertices);
     }
 
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
@@ -131,6 +152,7 @@ public class GraphManager {
             LOG.info("No existing vertex was found with resource key: {}. Creating a new vertex.", resourceKey);
             final Vertex v = new Vertex(vertexIdGenerator.getAndIncrement(), resourceKey);
             g.addVertex(v);
+            didGraphChange.set(true);
             idtoVertexMap.put(v.getId(), v);
             return v;
         });
@@ -186,4 +208,11 @@ public class GraphManager {
         return ResourceKey.key(relativeRef.getType(), relativeRef.getId());
     }
 
+    public boolean getDidGraphChangeAndReset() {
+        return didGraphChange.getAndSet(false);
+    }
+
+    public Set<Long> getDisconnectedVertices() {
+        return disconnectedVertices;
+    }
 }

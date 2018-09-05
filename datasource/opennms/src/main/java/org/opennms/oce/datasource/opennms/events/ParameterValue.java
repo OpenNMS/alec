@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.events;
 
 import java.util.Objects;
 
@@ -85,7 +85,15 @@ public class ParameterValue {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(type, encoding, value);
+    }
+
+    @Override
+    public String toString() {
+        return "ParameterValue{" +
+                "type='" + type + '\'' +
+                ", encoding='" + encoding + '\'' +
+                ", value='" + value + '\'' +
+                '}';
     }
 }

@@ -1,6 +1,6 @@
-<!-- Lists of instances of the types defined in the meta-model -->
+<!-- Lists of instances of the types defined in the meta-events -->
 <inventory xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
-    <!-- The model -->
+    <!-- The events -->
     <model-object-entry type="Model" id="model" friendly-name="Test Model" parent-type="Model" parent-id="model"/>
 
     <!-- Devices -->

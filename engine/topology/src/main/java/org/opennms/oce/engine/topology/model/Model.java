@@ -110,7 +110,7 @@ public class Model {
     public void addObjects(List<ModelObject> moList) {
 
         if(moList.isEmpty()) {
-            LOG.info("Loaded model objects list is empty.");
+            LOG.info("Loaded events objects list is empty.");
             return;
         }
         else {
@@ -119,7 +119,7 @@ public class Model {
 
         /** simple iteration for a while
          * THINGS TO CONSIDER:
-         * - If model objects in the list are somehow related to each other, eg parent child (device and card)
+         * - If events objects in the list are somehow related to each other, eg parent child (device and card)
          * -- define order of insertion/orchestration?
          * -- can they be combined as single insertion?
          * -- etc
@@ -130,7 +130,7 @@ public class Model {
     }
 
     /**
-     * The assumption is that model object contains all its hierarchy, for example if it is device,
+     * The assumption is that events object contains all its hierarchy, for example if it is device,
      * then it should have cards and ports, but if it is a new card, then there should be parent provided
      * @param mo
      */
@@ -239,7 +239,7 @@ public class Model {
     }
 
     /**
-     * With knowledge that the current branch of the model (groups->members->groups-> etc) has this object,
+     * With knowledge that the current branch of the events (groups->members->groups-> etc) has this object,
      * we find object's place and disassociate it from where it is possible
      * TODO - Currently a simple scenario is handled. Will need enhancements with more complex cases
      * @param mo

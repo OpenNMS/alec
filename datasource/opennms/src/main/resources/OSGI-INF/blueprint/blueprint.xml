@@ -5,38 +5,27 @@
     <!-- Configuration properties -->
     <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="eventTopic" value="OpenNMS.Sink.Events"/>
             <cm:property name="alarmTopic" value="alarms"/>
             <cm:property name="nodeTopic" value="nodes"/>
-            <!--
-            <cm:property name="url" value="http://127.0.0.1:8980/opennms"/>
-            <cm:property name="username" value="admin"/>
-            <cm:property name="password" value="admin"/>
-            -->
+            <cm:property name="eventSinkTopic" value="OpenNMS.Sink.Events"/>
+            <cm:property name="inventoryTopic" value="oce-inventory"/>
+            <cm:property name="inventoryTtlMs" value="86400000"/> <!-- 24 hours -->
+            <cm:property name="inventoryGcIntervalMs" value="300000"/> <!-- 5 minutes -->
         </cm:default-properties>
     </cm:property-placeholder>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
     <bean id="opennmsDatasource" class="org.opennms.oce.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
-        <property name="eventTopic" value="${eventTopic}"/>
         <property name="alarmTopic" value="${alarmTopic}"/>
         <property name="nodeTopic" value="${nodeTopic}"/>
+        <property name="eventSinkTopic" value="${eventSinkTopic}"/>
+        <property name="inventoryTopic" value="${inventoryTopic}"/>
+        <property name="inventoryTtlMs" value="${inventoryTtlMs}"/>
+        <property name="inventoryGcIntervalMs" value="${inventoryGcIntervalMs}"/>
     </bean>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
-
-    <!--
-    <bean id="restClient" class="org.opennms.oce.datasource.opennms.OpennmsRestClient">
-        <argument value="${url}"/>
-        <argument value="${username}"/>
-        <argument value="${password}"/>
-    </bean>
-
-    <bean id="incidentDatasource" class="org.opennms.oce.datasource.opennms.OpennmsIncidentDatasource">
-        <argument ref="restClient"/>
-    </bean>
-    -->
 
 </blueprint>

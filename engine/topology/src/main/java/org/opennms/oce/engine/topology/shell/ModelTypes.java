@@ -39,7 +39,7 @@ import org.opennms.oce.engine.topology.InventoryModelManager;
 import org.opennms.oce.engine.topology.TopologyInventory;
 import org.opennms.oce.engine.topology.model.Model;
 
-@Command(scope = "topology", name = "model-types", description="Model Types Listing")
+@Command(scope = "topology", name = "events-types", description="Model Types Listing")
 @Service
 public class ModelTypes implements Action {
 
@@ -54,7 +54,7 @@ public class ModelTypes implements Action {
         final Model model = inventoryManager.getModel();
         final Set<String> types = model.getTypes();
         if (types == null || types.isEmpty()) {
-            System.out.println("No model types");
+            System.out.println("No events types");
         }
         for (String type : types) {
             System.out.println("ModelType: " + type);

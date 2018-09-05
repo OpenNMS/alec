@@ -40,6 +40,7 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 public class OpennmsMapperTest {
 
@@ -67,50 +68,6 @@ public class OpennmsMapperTest {
         assertThat(alarmBean.getSeverity(), equalTo(Severity.CRITICAL));
     }
 
-    @Test
-    public void canMapNodes() {
-        // Map an empty alarm and make sure no exceptions are thrown
-        OpennmsModelProtos.Node node = OpennmsModelProtos.Node.newBuilder()
-                .build();
-        Collection<InventoryObject> inventory = OpennmsMapper.toInventoryObjects(node);
-        assertThat(inventory, hasSize(1));
-        // Now map a complete node and verify all of the properties
-        node = OpennmsModelProtos.Node.newBuilder()
-                .setForeignSource("FS")
-                .setForeignId("FID")
-                .setId(22)
-                .setLabel("n1")
-                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
-                        .setIfIndex(1)
-                        .setIfAlias("eth0")
-                        .build())
-                .addSnmpInterface(OpennmsModelProtos.SnmpInterface.newBuilder()
-                        .setIfIndex(2)
-                        .setIfAlias("eth1")
-                        .build())
-                .build();
-        inventory = OpennmsMapper.toInventoryObjects(node);
-        assertThat(inventory, hasSize(3));
-        InventoryObject nodeObj = getObjectWithTypeAndId(inventory, ManagedObjectType.Node.getName(), "FS:FID");
-        assertThat(nodeObj.getParentType(), nullValue());
-        assertThat(nodeObj.getParentId(), nullValue());
-        assertThat(nodeObj.getPeers(), hasSize(0));
-        assertThat(nodeObj.getRelatives(), hasSize(0));
 
-        InventoryObject eth0Object = getObjectWithTypeAndId(inventory, ManagedObjectType.SnmpInterface.getName(), "FS:FID:1");
-        assertThat(eth0Object.getParentType(), equalTo(nodeObj.getType()));
-        assertThat(eth0Object.getParentId(), equalTo(nodeObj.getId()));
-
-        InventoryObject eth1Object = getObjectWithTypeAndId(inventory, ManagedObjectType.SnmpInterface.getName(), "FS:FID:2");
-        assertThat(eth1Object.getParentType(), equalTo(nodeObj.getType()));
-        assertThat(eth1Object.getParentId(), equalTo(nodeObj.getId()));
-    }
-
-    private static InventoryObject getObjectWithTypeAndId(Collection<InventoryObject> inventory, String type, String id) {
-        return inventory.stream()
-                .filter(obj -> type.equals(obj.getType()) && id.equals(obj.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("No object found with type: %s and id: %s", type, id)));
-    }
 
 }

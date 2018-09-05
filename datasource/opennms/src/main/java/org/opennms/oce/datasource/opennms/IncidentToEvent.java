@@ -28,51 +28,34 @@
 
 package org.opennms.oce.datasource.opennms;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.opennms.model.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opennms.oce.datasource.opennms.events.Event;
 
-public class OpennmsIncidentDatasource implements IncidentDatasource {
-    private static final Logger LOG = LoggerFactory.getLogger(OpennmsIncidentDatasource.class);
+/**
+ * Contains the logic used to convert and incident to an event.
+ *
+ */
+public class IncidentToEvent {
+    public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
+    public static final String SITUATION_ID_PARM_NAME = "situationId";
 
-    private final OpennmsRestClient restClient;
-
-    public OpennmsIncidentDatasource(OpennmsRestClient restClient) {
-        this.restClient = Objects.requireNonNull(restClient);
-    }
-
-    @Override
-    public List<Incident> getIncidents() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void forwardIncident(Incident incident) throws Exception {
-        if (incident.getAlarms().size() < 1) {
-            LOG.warn("Got incident with no alarms. Ignoring.");
-        }
-
+    public static Event toEvent(Incident incident) {
         final Event e = new Event();
-        e.setUei("uei.opennms.org/alarms/situation");
+        e.setUei(SITUATION_UEI);
 
         // Use the max severity as the situation severity
         final Severity maxSeverity = Severity.fromValue(incident.getAlarms().stream()
-                .mapToInt(a -> a.getSeverity().getValue())
+                .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
                 .max()
                 .getAsInt());
         e.setSeverity(maxSeverity.name().toLowerCase());
 
         // Relay the incident id
-        e.addParam("situationId", incident.getId());
+        e.addParam(SITUATION_ID_PARM_NAME, incident.getId());
 
         // Use the log message and description from the first (earliest) alarm
         final Alarm earliestAlarm = incident.getAlarms().stream()
@@ -90,7 +73,7 @@ public class OpennmsIncidentDatasource implements IncidentDatasource {
         incident.getAlarms().stream()
                 .map(Alarm::getId)
                 .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
-        restClient.sendEvent(e);
-    }
 
+        return e;
+    }
 }

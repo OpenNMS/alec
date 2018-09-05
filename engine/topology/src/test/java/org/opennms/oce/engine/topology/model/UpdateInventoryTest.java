@@ -158,7 +158,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject obj = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject obj = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(obj);
         inventoryManager.loadInventory(inventory);
 
@@ -174,7 +174,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -202,9 +202,9 @@ public class UpdateInventoryTest {
 
         TopologyInventory inventory = new TopologyInventory();
 
-        InventoryObject objDevice1 = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice1 = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice1);
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         inventory.addObject(objDevice2);
 
         InventoryObject objCard1 = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
@@ -233,7 +233,7 @@ public class UpdateInventoryTest {
         InventoryObject objPort22 = new InventoryObjectBean("PORT", "n2-c1-p2", null, "CARD", "n2-c1");
         inventory.addObject(objPort22);
 
-        InventoryObjectBean objLink = new InventoryObjectBean("LINK", "n1-c1-p1 <-> n2-c1-p1", null, "MODEL", "model");
+        InventoryObjectBean objLink = new InventoryObjectBean("LINK", "n1-c1-p1 <-> n2-c1-p1", null, "MODEL", "events");
         objLink.addPeer(new InventoryObjectPeerRefBean("PORT", "n1-c1-p1", InventoryObjectPeerEndpoint.A));
         objLink.addPeer(new InventoryObjectPeerRefBean("PORT", "n2-c1-p1", InventoryObjectPeerEndpoint.Z));
         inventory.addObject(objLink);
@@ -259,7 +259,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -280,7 +280,7 @@ public class UpdateInventoryTest {
         assertThat(model.getObjectById("PORT", "n1-c1-p2"), notNullValue());
 
         TopologyInventory newInventory = new TopologyInventory();
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         newInventory.addObject(objDevice2);
         InventoryObject objCard2 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
         newInventory.addObject(objCard2);
@@ -311,7 +311,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -332,7 +332,7 @@ public class UpdateInventoryTest {
         assertThat(model.getObjectById("PORT", "n1-c1-p2"), notNullValue());
 
         TopologyInventory newInventory = new TopologyInventory();
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         newInventory.addObject(objDevice2);
         InventoryObject objCard2 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
         newInventory.addObject(objCard2);
@@ -362,7 +362,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -384,7 +384,7 @@ public class UpdateInventoryTest {
 
         TopologyInventory newInventory = new TopologyInventory();
         //First device (1-1-2)
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         newInventory.addObject(objDevice2);
         InventoryObject objCard2 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
         newInventory.addObject(objCard2);
@@ -394,7 +394,7 @@ public class UpdateInventoryTest {
         newInventory.addObject(objPort22);
 
         //Second device (1-1-2)
-        InventoryObject objDevice3 = new InventoryObjectBean("DEVICE", "n3", null, "MODEL", "model");
+        InventoryObject objDevice3 = new InventoryObjectBean("DEVICE", "n3", null, "MODEL", "events");
         newInventory.addObject(objDevice3);
         InventoryObject objCard3 = new InventoryObjectBean("CARD", "n3-c1", null, "DEVICE", "n3");
         newInventory.addObject(objCard3);
@@ -430,7 +430,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -452,7 +452,7 @@ public class UpdateInventoryTest {
 
         TopologyInventory newInventory = new TopologyInventory();
         //First device (1-1-2)
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         newInventory.addObject(objDevice2);
         InventoryObject objCard2 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
         newInventory.addObject(objCard2);
@@ -494,7 +494,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -533,7 +533,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -554,7 +554,7 @@ public class UpdateInventoryTest {
         assertThat(model.getObjectById("PORT", "n1-c1-p2"), notNullValue());
 
         inventory = new TopologyInventory();
-        InventoryObject onlyOneObj = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject onlyOneObj = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(onlyOneObj);
 
         inventoryManager.removeInventory(inventory);
@@ -575,7 +575,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);
@@ -583,7 +583,7 @@ public class UpdateInventoryTest {
         inventory.addObject(objPort1);
         InventoryObject objPort2 = new InventoryObjectBean("PORT", "n1-c1-p2", null, "CARD", "n1-c1");
         inventory.addObject(objPort2);
-        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "model");
+        InventoryObject objDevice2 = new InventoryObjectBean("DEVICE", "n2", null, "MODEL", "events");
         inventory.addObject(objDevice2);
         InventoryObject objCard2 = new InventoryObjectBean("CARD", "n2-c1", null, "DEVICE", "n2");
         inventory.addObject(objCard2);
@@ -606,7 +606,7 @@ public class UpdateInventoryTest {
         assertThat(model.getObjectById("PORT", "n2-c1-p2"), notNullValue());
 
         inventory = new TopologyInventory();
-        InventoryObject objDeviceToRemove = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDeviceToRemove = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDeviceToRemove);
 
 
@@ -627,7 +627,7 @@ public class UpdateInventoryTest {
         inventoryManager.clean();
 
         TopologyInventory inventory = new TopologyInventory();
-        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "model");
+        InventoryObject objDevice = new InventoryObjectBean("DEVICE", "n1", null, "MODEL", "events");
         inventory.addObject(objDevice);
         InventoryObject objCard = new InventoryObjectBean("CARD", "n1-c1", null, "DEVICE", "n1");
         inventory.addObject(objCard);

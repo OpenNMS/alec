@@ -68,7 +68,7 @@ public class GraphTest {
         String dotGraph = generator.generateGraph(model);
 
         // Verify some known relationships
-        assertThat(dotGraph, containsString("\"model(MODEL)\" -- \"n1(Device)\";"));
+        assertThat(dotGraph, containsString("\"events(MODEL)\" -- \"n1(Device)\";"));
         assertThat(dotGraph, containsString("\"n1(Device)\" -- \"n1-c2(Card)\";"));
 
         // Verify the impacts

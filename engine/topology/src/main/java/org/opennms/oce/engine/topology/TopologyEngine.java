@@ -116,13 +116,13 @@ public class TopologyEngine implements Engine, IncidentHandler {
             throw new IllegalStateException("Inventory is required for the topology engine before processing any alarms.");
         }
 
-        // Find the associated model object for this alarm, we assume there is a single model object
+        // Find the associated events object for this alarm, we assume there is a single events object
         final ModelObject object = getObjectForAlarm(alarm);
         if (object == null) {
-            LOG.warn("No model object found for alarm: {}. The alarm will not be processed.", alarm);
+            LOG.warn("No events object found for alarm: {}. The alarm will not be processed.", alarm);
             return;
         }
-        // Update the model object with the alarm
+        // Update the events object with the alarm
         LOG.info("ENGINE onAlarm<<< {}", object);
         object.onAlarm(alarm);
         LOG.info("ENGINE onAlarm>>> {}", object);

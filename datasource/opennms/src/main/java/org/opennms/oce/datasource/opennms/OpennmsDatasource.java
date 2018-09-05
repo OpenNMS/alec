@@ -32,39 +32,31 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.Consumed;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.AlarmHandler;
@@ -73,51 +65,59 @@ import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
-import org.opennms.oce.datasource.api.ResourceKey;
-import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
-import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
-import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
-import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
-import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
-import org.opennms.oce.datasource.opennms.model.Event;
-import org.opennms.oce.datasource.opennms.model.JaxbUtils;
-import org.opennms.oce.datasource.opennms.model.Log;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
+import org.opennms.oce.datasource.opennms.events.Event;
+import org.opennms.oce.datasource.opennms.events.JaxbUtils;
+import org.opennms.oce.datasource.opennms.events.Log;
+import org.opennms.oce.datasource.opennms.processors.AlarmTableProcessor;
+import org.opennms.oce.datasource.opennms.processors.InventoryTableProcessor;
+import org.opennms.oce.datasource.opennms.processors.SituationTableProcessor;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+import org.opennms.oce.datasource.opennms.serialization.AlarmDeserializer;
+import org.opennms.oce.datasource.opennms.serialization.NodeDeserializer;
+import org.opennms.oce.datasource.opennms.serialization.OpennmsSerdes;
+import org.opennms.oce.datasource.opennms.serialization.ProtobufDeserializer;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.protobuf.InvalidProtocolBufferException;
-
-public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, IncidentDatasource {
-
+public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, InventoryDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
-    private static final String ALARM_STORE_NAME = "alarm_store";
-    private static final String NODE_STORE_NAME = "node_store";
-    protected static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
-    protected static final String KAFKA_PRODUCER_PID = "org.opennms.oce.datasource.opennms.kafka.producer";
-    protected static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
+    public static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
+    public static final String KAFKA_PRODUCER_PID = "org.opennms.oce.datasource.opennms.kafka.producer";
 
-    private static final Gson gson = new Gson();
+    public static final String DEFAULT_APPLICATION_ID = "oce-datasource";
+    public static final String DEFAULT_ALARM_TOPIC = "alarms";
+    public static final String DEFAULT_NODE_TOPIC = "nodes";
+    public static final String DEFAULT_EVENT_SINK_TOPIC = "OpenNMS.Sink.Events";
+    public static final String DEFAULT_INVENTORY_TOPIC = "oce-inventory";
+
+
+    public static final long DEFAULT_INVENTORY_GC_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);
+    public static final long DEFAULT_INVENTORY_TTL_MS = TimeUnit.DAYS.toMillis(1);
+
+    private static final String INVENTORY_STORE_NODE_PREFIX = "node:";
+    private static final String INVENTORY_STORE_ALARM_PREFIX = "alarm:";
+
+    public static final String INVENTORY_STORE = "inventoryStore";
+    public static final String ALARM_STORE = "alarmStore";
+    public static final String INCIDENT_STORE = "incidentStore";
+
+    private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
+    private final HandlerRegistry<InventoryHandler> inventoryHandlers = new HandlerRegistry<>();
 
     private final ConfigurationAdmin configAdmin;
-    private String alarmTopic;
-    private String eventTopic;
-    private String nodeTopic;
 
-    private final ReadWriteLock alarmHandlerLock = new ReentrantReadWriteLock();
-    private final Set<AlarmHandler> alarmHandlers = new HashSet<>();
-    private final Set<InventoryHandler> inventoryHandlers = new HashSet<>();
-    private final Map<String, OpennmsModelProtos.Alarm> alarmsByReductionKey = new HashMap<>();
-    private final Map<String, OpennmsModelProtos.Node> nodesByCriteria = new HashMap<>();
-    private final Map<ResourceKey, InventoryObject> inventoryObjectsByKey = new HashMap<>();
     private KafkaStreams streams;
+
+    private String alarmTopic = DEFAULT_ALARM_TOPIC;
+    private String nodeTopic = DEFAULT_NODE_TOPIC;
+    private String eventSinkTopic = DEFAULT_EVENT_SINK_TOPIC;
+    private String inventoryTopic = DEFAULT_INVENTORY_TOPIC;
+
+    private long inventoryGcIntervalMs = DEFAULT_INVENTORY_GC_INTERVAL_MS;
+    private long inventoryTtlMs = DEFAULT_INVENTORY_TTL_MS;
 
     private KafkaProducer<String, String> producer;
 
@@ -130,32 +130,18 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         producer = new KafkaProducer<>(producerProperties);
 
         final Properties streamProperties = loadStreamsProperties();
-
-        final StreamsBuilder builder = new StreamsBuilder();
-        // Build a view of the alarms for lookup
-        builder.table(alarmTopic, Consumed.with(Serdes.String(), Serdes.ByteArray()),
-                Materialized.as(ALARM_STORE_NAME))
-                // Process alarms as they come in
-                .toStream().foreach(this::handleNewOrUpdatedAlarm);
-        // Build a view of the nodes for lookup
-        builder.table(nodeTopic, Consumed.with(Serdes.String(), Serdes.ByteArray()),
-                Materialized.as(NODE_STORE_NAME))
-                // Process alarms as they come in
-                .toStream().foreach(this::handleNewOrUpdatedNode);
-        final Topology topology = builder.build();
-
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             // Use the class-loader for the KStream class, since the kafka-client bundle
             // does not import the required classes from the kafka-streams bundle
             Thread.currentThread().setContextClassLoader(KStream.class.getClassLoader());
-            streams = new KafkaStreams(topology, streamProperties);
+            streams = new KafkaStreams(getKTopology(), streamProperties);
         } finally {
             Thread.currentThread().setContextClassLoader(currentClassLoader);
         }
 
         streams.setUncaughtExceptionHandler((t, e) ->
-                LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
+                LOG.error(String.format("Stream errtaspmosbxpm102:3000or on thread: %s", t.getName()), e));
         try {
             streams.start();
         } catch (StreamsException | IllegalStateException e) {
@@ -171,227 +157,112 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         }
     }
 
-    private void handleNewOrUpdatedAlarm(String reductionKey, byte[] alarmBytes) {
-        if (isIncident(reductionKey)) {
-            return;
-        }
-
-        final OpennmsModelProtos.Alarm alarm;
-        try {
-            if (alarmBytes == null) {
-                alarm = null;
-            } else {
-                alarm = OpennmsModelProtos.Alarm.parseFrom(alarmBytes);
+    protected Properties loadProducerProperties() throws IOException {
+        final Properties producerProperties = new Properties();
+        // User
+        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_PRODUCER_PID).getProperties();
+        if (properties != null) {
+            final Enumeration<String> keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                final String key = keys.nextElement();
+                producerProperties.put(key, properties.get(key));
             }
-        } catch (InvalidProtocolBufferException ex) {
-            throw new RuntimeException(ex);
         }
+        // Overrides
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return producerProperties;
+    }
 
-        alarmHandlerLock.readLock().lock();
-        try {
-            LOG.debug("handleNewOrUpdatedAlarm({})", reductionKey);
-            LOG.trace("handleNewOrUpdatedAlarm({}, {})", reductionKey, alarm);
-            if (alarm == null) {
-                final OpennmsModelProtos.Alarm lastAlarm = alarmsByReductionKey.get(reductionKey);
-                if (lastAlarm != null) {
-                    final AlarmBean alarmBean = OpennmsMapper.toAlarm(lastAlarm);
-                    alarmHandlers.forEach(h -> {
-                        try {
-                            h.onAlarmCleared(alarmBean);
-                        } catch (Exception e) {
-                            LOG.error("onAlarmCleared() call failed with alarm: {} on handler: {}", alarmBean, h, e);
-                        }
-                    });
-                } else {
-                    // We got a delete for an alarm which we haven't seen yet. Ignore it.
-                    LOG.debug("No existing alarm found for reduction key {}. Skipping callbacks.", reductionKey);
-                }
-            } else {
-                final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
-                handleInventoryForAlarm(alarmBean, alarm);
-                alarmHandlers.forEach(h -> {
-                    try {
-                        h.onAlarmCreatedOrUpdated(alarmBean);
-                    } catch (Exception e) {
-                        LOG.error("onAlarmCreatedOrUpdated() call failed with alarm: {} on handler: {}", alarmBean, h, e);
-                    }
-                });
+    protected Properties loadStreamsProperties() throws IOException {
+        final Properties streamsProperties = new Properties();
+        // Defaults
+        streamsProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, DEFAULT_APPLICATION_ID);
+        final Path kafkaDir = Paths.get(System.getProperty("karaf.data"), "kafka");
+        streamsProperties.put(StreamsConfig.STATE_DIR_CONFIG, kafkaDir.toString());
+        // User
+        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties();
+        if (properties != null) {
+            final Enumeration<String> keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                final String key = keys.nextElement();
+                streamsProperties.put(key, properties.get(key));
             }
-        } finally {
-            alarmHandlerLock.readLock().unlock();
         }
-        alarmsByReductionKey.put(reductionKey, alarm);
+        // Overrides
+        streamsProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        streamsProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
+        return streamsProperties;
     }
 
-    private void handleInventoryForAlarm(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        if (Strings.isNullOrEmpty(alarm.getInventoryObjectType()) ||
-                Strings.isNullOrEmpty(alarm.getInventoryObjectId())) {
-            if (sourceAlarm.hasNodeCriteria()) {
-                final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
-                alarm.setInventoryObjectType(ManagedObjectType.Node.getName());
-                alarm.setInventoryObjectId(nodeCriteria);
-            } else {
-                // No specific type and/or id - use the alarm type and id
-                alarm.setInventoryObjectId(alarm.getId());
-                alarm.setInventoryObjectType("alarm");
+    protected Topology getKTopology() {
+        final StoreBuilder<KeyValueStore<String, InventoryModelProtos.InventoryObjects>> inventoryStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(INVENTORY_STORE),
+                Serdes.String(),
+                OpennmsSerdes.InventoryObjects());
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> alarmStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(ALARM_STORE),
+                Serdes.String(),
+                OpennmsSerdes.Alarm());
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> incidentStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(INCIDENT_STORE),
+                Serdes.String(),
+                OpennmsSerdes.Alarm());
+
+        final StreamsBuilder builder = new StreamsBuilder();
+        builder.addStateStore(inventoryStore);
+        builder.addStateStore(alarmStore);
+        builder.addStateStore(incidentStore);
+
+        final AlarmDeserializer alarmDeserializer = new AlarmDeserializer();
+        KStream<String, byte[]> alarmBytesStream = builder.stream(getAlarmTopic());
+        KStream<String, OpennmsModelProtos.Alarm> allAlarmStream = alarmBytesStream.mapValues(alarmBytes -> alarmDeserializer.deserialize(null, alarmBytes));
+        KStream<String, OpennmsModelProtos.Alarm> alarmStream = allAlarmStream.filter((k,v) -> !isSituation(k));
+        KStream<String, EnrichedAlarm> enrichedAlarmStream = alarmStream.mapValues(AlarmToInventory::enrichAlarm);
+
+        KStream<String, InventoryModelProtos.InventoryObjects> alarmInventoryStream = enrichedAlarmStream.map((reductionKey, enrichedAlarm) -> {
+            final String key = INVENTORY_STORE_ALARM_PREFIX + reductionKey;
+            if (enrichedAlarm == null) {
+                return KeyValue.pair(key, null);
             }
-            return;
-        }
+            return KeyValue.pair(key, enrichedAlarm.getInventory());
+        });
+        alarmInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
 
-        final ManagedObjectType type;
-        try  {
-            type = ManagedObjectType.fromName(alarm.getInventoryObjectType());
-        } catch (NoSuchElementException nse) {
-            LOG.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
-            return;
-        }
+        // Override the MO type and id with the ones set in the enriched alarm, since these will
+        // were update to be properly scoped and reference the inventory
+        enrichedAlarmStream.mapValues(enrichedAlarm -> enrichedAlarm == null ? null : OpennmsModelProtos.Alarm.newBuilder(enrichedAlarm.getAlarm())
+                .setManagedObjectInstance(enrichedAlarm.getManagedObjectInstance())
+                .setManagedObjectType(enrichedAlarm.getManagedObjectType())
+                .build())
+                .process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
 
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
+        KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k,v) -> isSituation(k));
+        situationStream.process(SituationTableProcessor::new, INCIDENT_STORE);
 
-        switch(type) {
-            case Node:
-                // Nothing to do here
-                break;
-            case SnmpInterfaceLink:
-                handleSnmpInterfaceLink(alarm, sourceAlarm);
-                break;
-            case EntPhysicalEntity:
-                handleEntPhysicalEntity(alarm, sourceAlarm);
-                break;
-            case BgpPeer:
-                handleBgpPeer(alarm, sourceAlarm);
-                break;
-            case VpnTunnel:
-                handleVpnTunnel(alarm, sourceAlarm);
-                break;
-            default:
-                // Scope the object id by node
-                alarm.setInventoryObjectId(String.format("%s:%s", nodeCriteria, alarm.getInventoryObjectId()));
-        }
-    }
+        final NodeDeserializer nodeDeserializer = new NodeDeserializer();
+        KStream<String, byte[]> nodeBytesStream = builder.stream(getNodeTopic());
+        KStream<String, OpennmsModelProtos.Node> nodeStream = nodeBytesStream.mapValues(nodeBytes -> nodeDeserializer.deserialize(null, nodeBytes));
+        KStream<String, InventoryModelProtos.InventoryObjects> nodeInventoryStream = nodeStream.map((nodeCriteria,node) -> {
+            final String key = INVENTORY_STORE_NODE_PREFIX + nodeCriteria;
+            if (node == null) {
+                return KeyValue.pair(key, null);
+            }
+            final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects
+                    .newBuilder();
+            for (InventoryModelProtos.InventoryObject io : NodeToInventory.toInventoryObjects(node)) {
+                iosBuilder.addInventoryObject(io);
+            }
+            return KeyValue.pair(key, iosBuilder.build());
+        });
+        nodeInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
 
-    private void handleSnmpInterfaceLink(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        // Retrieve the link details
-        final SnmpInterfaceLinkInstance linkInstance = gson.fromJson(alarm.getInventoryObjectId(), SnmpInterfaceLinkInstance.class);
-        // Build the object id
-        final String ioId = String.format("%s:%d:%s:%d",
-                linkInstance.getANodeCriteria(), linkInstance.getAIfIndex(),
-                linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex());
-        // Update the alarm with the new id
-        alarm.setInventoryObjectId(ioId);
-        // Do we already know about this link?
-        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.SnmpInterfaceLink.getName(), ioId))) {
-            // We already know about it - nothing else to do here
-            return;
-        }
+        final ProtobufDeserializer<InventoryModelProtos.InventoryObjects> inventoryObjectsDeserializer = new ProtobufDeserializer<>(InventoryModelProtos.InventoryObjects.class);
+        KStream<String, byte[]> inventoryByteStream = builder.stream(getInventoryTopic());
+        KStream<String, InventoryModelProtos.InventoryObjects> inventoryStream = inventoryByteStream.mapValues(iosBytes -> inventoryObjectsDeserializer.deserialize(null, iosBytes));
+        inventoryStream.process(() -> new InventoryTableProcessor(inventoryHandlers, inventoryGcIntervalMs, inventoryTtlMs), INVENTORY_STORE);
 
-        // We don't know about this link yet, let's create it
-        InventoryObjectBean snmpIntfLink = new InventoryObjectBean();
-        snmpIntfLink.setType(ManagedObjectType.SnmpInterfaceLink.getName());
-        snmpIntfLink.setId(ioId);
-        snmpIntfLink.setFriendlyName(String.format("SNMP Interface Link Between %d on %s and %d on %s", linkInstance.getAIfIndex(),
-                linkInstance.getANodeCriteria(), linkInstance.getZIfIndex(), linkInstance.getZNodeCriteria()));
-
-        InventoryObjectPeerRefBean peerA = new InventoryObjectPeerRefBean();
-        peerA.setEndpoint(InventoryObjectPeerEndpoint.A);
-        peerA.setType(ManagedObjectType.SnmpInterface.getName());
-        peerA.setId(String.format("%s:%d", linkInstance.getANodeCriteria(), linkInstance.getAIfIndex()));
-        snmpIntfLink.addPeer(peerA);
-
-        InventoryObjectPeerRefBean peerZ = new InventoryObjectPeerRefBean();
-        peerZ.setEndpoint(InventoryObjectPeerEndpoint.Z);
-        peerZ.setType(ManagedObjectType.SnmpInterface.getName());
-        peerZ.setId(String.format("%s:%d", linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex()));
-        snmpIntfLink.addPeer(peerZ);
-
-        // Store it for reference
-        inventoryObjectsByKey.put(ResourceKey.key(snmpIntfLink.getType(), snmpIntfLink.getId()), snmpIntfLink);
-        // Notify the handlers
-        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(snmpIntfLink)));
-    }
-
-    private void handleEntPhysicalEntity(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        // Scope the entPhysicalIndex to the node
-        final String entPhysicalIndex = alarm.getInventoryObjectId();
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
-        final String fanId = String.format("%s:%s", nodeCriteria, entPhysicalIndex);
-        alarm.setInventoryObjectId(fanId);
-
-        // Do we already know about this entity?
-        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.EntPhysicalEntity.getName(), fanId))) {
-            // We already know about it - nothing else to do here
-            return;
-        }
-
-        // We don't know about this entity yet, let's create it
-        InventoryObjectBean physicalEntity = new InventoryObjectBean();
-        physicalEntity.setType(ManagedObjectType.EntPhysicalEntity.getName());
-        physicalEntity.setId(fanId);
-        physicalEntity.setParentType(ManagedObjectType.Node.getName());
-        physicalEntity.setParentId(nodeCriteria);
-
-        // Store it for reference
-        inventoryObjectsByKey.put(ResourceKey.key(physicalEntity.getType(), physicalEntity.getId()), physicalEntity);
-        // Notify the handlers
-        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(physicalEntity)));
-    }
-
-    private void handleBgpPeer(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        // Retrieve the BGP peer details
-        final BgpPeerInstance bgpPeerInstance = gson.fromJson(alarm.getInventoryObjectId(), BgpPeerInstance.class);
-        // Build the object id
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
-        final String ioId = String.format("%s:%s:%s", nodeCriteria, bgpPeerInstance.getPeer(), bgpPeerInstance.getVrf());
-        // Update the alarm with the new id
-        alarm.setInventoryObjectId(ioId);
-        // Do we already know about this peer?
-        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.BgpPeer.getName(), ioId))) {
-            // We already know about it - nothing else to do here
-            return;
-        }
-
-        // We don't know about this peer yet, let's create it
-        InventoryObjectBean bgpPeer = new InventoryObjectBean();
-        bgpPeer.setType(ManagedObjectType.BgpPeer.getName());
-        bgpPeer.setId(ioId);
-        bgpPeer.setFriendlyName(String.format("BGP Peer %s on %s in VRF: %s",
-                bgpPeerInstance.getPeer(), nodeCriteria, bgpPeerInstance.getVrf()));
-        bgpPeer.setParentType(ManagedObjectType.Node.getName());
-        bgpPeer.setParentId(nodeCriteria);
-
-        // Store it for reference
-        inventoryObjectsByKey.put(ResourceKey.key(bgpPeer.getType(), bgpPeer.getId()), bgpPeer);
-        // Notify the handlers
-        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(bgpPeer)));
-    }
-
-    private void handleVpnTunnel(AlarmBean alarm, OpennmsModelProtos.Alarm sourceAlarm) {
-        // Retrieve the VPN tunnel details
-        final VpnTunnelInstance vpnTunnelInstance = gson.fromJson(alarm.getInventoryObjectId(), VpnTunnelInstance.class);
-        // Build the object id
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(sourceAlarm.getNodeCriteria());
-        final String ioId = String.format("%s:%s:%s:%s", nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId());
-        // Update the alarm with the new id
-        alarm.setInventoryObjectId(ioId);
-        // Do we already know about this tunnel?
-        if (inventoryObjectsByKey.containsKey(ResourceKey.key(ManagedObjectType.VpnTunnel.getName(), ioId))) {
-            // We already know about it - nothing else to do here
-            return;
-        }
-
-        // We don't know about this tunnel yet, let's create it
-        InventoryObjectBean vpnTunnel = new InventoryObjectBean();
-        vpnTunnel.setType(ManagedObjectType.VpnTunnel.getName());
-        vpnTunnel.setId(ioId);
-        vpnTunnel.setFriendlyName(String.format("VPN tunnel on %s with local addr: %s, remote addr: %s and tunnel id: %s",
-                nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId()));
-        vpnTunnel.setParentType(ManagedObjectType.Node.getName());
-        vpnTunnel.setParentId(nodeCriteria);
-
-        // Store it for reference
-        inventoryObjectsByKey.put(ResourceKey.key(vpnTunnel.getType(), vpnTunnel.getId()), vpnTunnel);
-        // Notify the handlers
-        inventoryHandlers.forEach(h -> h.onInventoryAdded(Collections.singleton(vpnTunnel)));
+        return builder.build();
     }
 
     @Override
@@ -399,17 +270,7 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         final List<Alarm> alarms = new ArrayList<>();
         try {
             waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
-                try {
-                    if (isIncident(entry.key)) {
-                        return;
-                    }
-                    final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
-                    final AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
-                    handleInventoryForAlarm(alarmBean, alarm);
-                    alarms.add(alarmBean);
-                } catch (InvalidProtocolBufferException e) {
-                    LOG.error("Failed to parse alarm from bytes.", e);
-                }
+                alarms.add(OpennmsMapper.toAlarm(entry.value));
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -419,119 +280,57 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
 
     @Override
     public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        alarmHandlerLock.writeLock().lock();
-        try {
-            // Lock to make sure we don't miss any alarms between the call to register and get
-            registerHandler(handler);
-            return getAlarms();
-        } finally {
-            alarmHandlerLock.writeLock().unlock();
-        }
+        final List<Alarm> alarms = new ArrayList<>();
+        alarmHandlers.register(handler, (h) -> alarms.addAll(getAlarms()));
+        return alarms;
     }
 
     @Override
     public void registerHandler(AlarmHandler handler) {
-        alarmHandlerLock.writeLock().lock();
-        try {
-            alarmHandlers.add(handler);
-        } finally {
-            alarmHandlerLock.writeLock().unlock();
-        }
+        alarmHandlers.register(handler);
     }
 
     @Override
     public void unregisterHandler(AlarmHandler handler) {
-        alarmHandlerLock.writeLock().lock();
-        try {
-            alarmHandlers.remove(handler);
-        } finally {
-            alarmHandlerLock.writeLock().unlock();
-        }
-    }
-
-    private void handleNewOrUpdatedNode(String nodeCriteria, byte[] nodeBytes) {
-        final OpennmsModelProtos.Node node;
-        try {
-            if (nodeBytes == null) {
-                node = null;
-            } else {
-                node = OpennmsModelProtos.Node.parseFrom(nodeBytes);
-            }
-        } catch (InvalidProtocolBufferException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        synchronized (inventoryHandlers) {
-            LOG.info("handleNewOrUpdatedNode({})", nodeCriteria);
-            LOG.trace("handleNewOrUpdatedNode({}, {})", nodeCriteria, node);
-            if (node == null) {
-                final OpennmsModelProtos.Node lastNode = nodesByCriteria.get(nodeCriteria);
-                if (lastNode != null) {
-                    inventoryHandlers.forEach(h -> h.onInventoryRemoved(OpennmsMapper.toInventoryObjects(lastNode)));
-                } else {
-                    LOG.warn("No existing node found with criteria {}. Skipping callbacks.", nodeCriteria);
-                }
-            } else {
-                // TODO: Was it added or updated? If it was updated, we may need to call remove first.
-                final Collection<InventoryObject> ios = OpennmsMapper.toInventoryObjects(node);
-                ios.forEach(io -> inventoryObjectsByKey.put(ResourceKey.key(io.getType(), io.getId()), io));
-                inventoryHandlers.forEach(h -> h.onInventoryAdded(OpennmsMapper.toInventoryObjects(node)));
-            }
-        }
-        nodesByCriteria.put(nodeCriteria, node);
+        alarmHandlers.unregister(handler);
     }
 
     @Override
     public List<InventoryObject> getInventory() {
-        final List<InventoryObject> inventory = new ArrayList<>();
+        final List<InventoryModelProtos.InventoryObjects> inventory = new ArrayList<>();
         try {
-            waitUntilNodeStoreIsQueryable().all().forEachRemaining(entry -> {
-                try {
-                    final OpennmsModelProtos.Node node = OpennmsModelProtos.Node.parseFrom(entry.value);
-                    inventory.addAll(OpennmsMapper.toInventoryObjects(node));
-                } catch (InvalidProtocolBufferException e) {
-                    LOG.error("Failed to parse node from bytes.", e);
-                }
+            waitUntilInventoryStoreIsQueryable().all().forEachRemaining(entry -> {
+                inventory.add(entry.value);
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return inventory;
+        return InventoryTableProcessor.toInventory(inventory);
     }
 
     @Override
     public List<InventoryObject> getInventoryAndRegisterHandler(InventoryHandler handler) {
-        synchronized (inventoryHandlers) {
-            // Lock to make sure we don't miss any alarms between the call to register and get
-            registerHandler(handler);
-            return getInventory();
-        }
+        final List<InventoryObject> inventory = new ArrayList<>();
+        inventoryHandlers.register(handler, (h) -> inventory.addAll(getInventory()));
+        return inventory;
     }
 
     @Override
     public void registerHandler(InventoryHandler handler) {
-        inventoryHandlers.add(handler);
+        inventoryHandlers.register(handler);
     }
 
     @Override
     public void unregisterHandler(InventoryHandler handler) {
-        inventoryHandlers.remove(handler);
+        inventoryHandlers.unregister(handler);
     }
 
     @Override
     public List<Incident> getIncidents() {
         final List<Incident> incidents = new ArrayList<>();
         try {
-            waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> {
-                try {
-                    if (!isIncident(entry.key)) {
-                        return;
-                    }
-                    final OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.parseFrom(entry.value);
-                    incidents.add(OpennmsMapper.toIncident(alarm));
-                } catch (InvalidProtocolBufferException e) {
-                    LOG.error("Failed to parse alarm from bytes.", e);
-                }
+            waitUntilIncidentStoreIsQueryable().all().forEachRemaining(entry -> {
+                incidents.add(OpennmsMapper.toIncident(entry.value));
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -539,45 +338,42 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         return incidents;
     }
 
+    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilIncidentStoreIsQueryable() throws InterruptedException {
+        return waitUntilStoreIsQueryable(INCIDENT_STORE);
+    }
+
+    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
+        return waitUntilStoreIsQueryable(ALARM_STORE);
+    }
+
+    private ReadOnlyKeyValueStore<String, InventoryModelProtos.InventoryObjects> waitUntilInventoryStoreIsQueryable() throws InterruptedException {
+        return waitUntilStoreIsQueryable(INVENTORY_STORE);
+    }
+
+    private <K,V> ReadOnlyKeyValueStore<K, V> waitUntilStoreIsQueryable(String storeName) throws InterruptedException {
+        if (streams == null) {
+            throw new IllegalStateException("Datasource must be started first.");
+        }
+        while (true) {
+            try {
+                return streams.store(storeName, QueryableStoreTypes.keyValueStore());
+            } catch (InvalidStateStoreException ignored) {
+                Thread.sleep(100);
+            }
+        }
+    }
+
     @Override
     public void forwardIncident(Incident incident) {
         if (incident.getAlarms().size() < 1) {
             LOG.warn("Got incident with no alarms. Ignoring.");
+            return;
         }
 
-        final Event e = new Event();
-        e.setUei("uei.opennms.org/alarms/situation");
-
-        // Use the max severity as the situation severity
-        final Severity maxSeverity = Severity.fromValue(incident.getAlarms().stream()
-                .mapToInt(a -> a.getSeverity().getValue())
-                .max()
-                .getAsInt());
-        e.setSeverity(maxSeverity.name().toLowerCase());
-
-        // Relay the incident id
-        e.addParam("situationId", incident.getId());
-
-        // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = incident.getAlarms().stream()
-                .min(Comparator.comparing(Alarm::getTime))
-                .get();
-        e.addParam("situationLogMsg", earliestAlarm.getSummary());
-
-        String description = earliestAlarm.getDescription();
-        if (incident.getDiagnosticText() != null) {
-            description += "\n<p>OCE Diagnostic: " + incident.getDiagnosticText() + "</p>";
-        }
-        e.addParam("situationDescr", description);
-
-        // Set the related reduction keys
-        incident.getAlarms().stream()
-                .map(Alarm::getId)
-                .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
-
+        final Event e = IncidentToEvent.toEvent(incident);
         final String incidentXml = JaxbUtils.toXml(new Log(e), Log.class);
         LOG.debug("Sending event to create incident with id '{}'. XML: {}", incident.getId(), incidentXml);
-        producer.send(new ProducerRecord<>(eventTopic, incidentXml), (metadata, ex) -> {
+        producer.send(new ProducerRecord<>(getEventSinkTopic(), incidentXml), (metadata, ex) -> {
             if (ex != null) {
                 LOG.warn("An error occured while sending event for incident with id '{}'.", incident.getId(), ex);
             } else {
@@ -586,72 +382,8 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         });
     }
 
-    private static boolean isIncident(String reductionKey) {
-        if (reductionKey == null) {
-            return false;
-        }
-        return reductionKey.startsWith(SITUATION_UEI);
-    }
-
-    private ReadOnlyKeyValueStore<String, byte[]> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
-        if (streams == null) {
-            throw new IllegalStateException("Datasource must be started first.");
-        }
-        while (true) {
-            try {
-                return streams.store(ALARM_STORE_NAME, QueryableStoreTypes.keyValueStore());
-            } catch (InvalidStateStoreException ignored) {
-                Thread.sleep(100);
-            }
-        }
-    }
-
-    private ReadOnlyKeyValueStore<String, byte[]> waitUntilNodeStoreIsQueryable() throws InterruptedException {
-        if (streams == null) {
-            throw new IllegalStateException("Datasource must be started first.");
-        }
-        while (true) {
-            try {
-                return streams.store(NODE_STORE_NAME, QueryableStoreTypes.keyValueStore());
-            } catch (InvalidStateStoreException ignored) {
-                Thread.sleep(100);
-            }
-        }
-    }
-
-    private Properties loadStreamsProperties() throws IOException {
-        final Properties streamsProperties = new Properties();
-        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties();
-        if (properties != null) {
-            final Enumeration<String> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                final String key = keys.nextElement();
-                streamsProperties.put(key, properties.get(key));
-            }
-        }
-        streamsProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        streamsProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
-        streamsProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, "oce-datasource");
-        if (streamsProperties.get(StreamsConfig.STATE_DIR_CONFIG) == null) {
-            Path kafkaDir = Paths.get(System.getProperty("karaf.data"), "kafka");
-            streamsProperties.put(StreamsConfig.STATE_DIR_CONFIG, kafkaDir.toString());
-        }
-        return streamsProperties;
-    }
-
-    private Properties loadProducerProperties() throws IOException {
-        final Properties producerProperties = new Properties();
-        final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_PRODUCER_PID).getProperties();
-        if (properties != null) {
-            final Enumeration<String> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                final String key = keys.nextElement();
-                producerProperties.put(key, properties.get(key));
-            }
-        }
-        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return producerProperties;
+    private static boolean isSituation(String reductionKey) {
+        return reductionKey.startsWith(IncidentToEvent.SITUATION_UEI);
     }
 
     public String getAlarmTopic() {
@@ -662,14 +394,6 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         this.alarmTopic = alarmTopic;
     }
 
-    public String getEventTopic() {
-        return eventTopic;
-    }
-
-    public void setEventTopic(String eventTopic) {
-        this.eventTopic = eventTopic;
-    }
-
     public String getNodeTopic() {
         return nodeTopic;
     }
@@ -678,4 +402,35 @@ public class OpennmsDatasource implements AlarmDatasource, InventoryDatasource, 
         this.nodeTopic = nodeTopic;
     }
 
+    public String getEventSinkTopic() {
+        return eventSinkTopic;
+    }
+
+    public void setEventSinkTopic(String eventSinkTopic) {
+        this.eventSinkTopic = eventSinkTopic;
+    }
+
+    public String getInventoryTopic() {
+        return inventoryTopic;
+    }
+
+    public void setInventoryTopic(String inventoryTopic) {
+        this.inventoryTopic = inventoryTopic;
+    }
+
+    public long getInventoryGcIntervalMs() {
+        return inventoryGcIntervalMs;
+    }
+
+    public void setInventoryGcIntervalMs(long inventoryGcIntervalMs) {
+        this.inventoryGcIntervalMs = inventoryGcIntervalMs;
+    }
+
+    public long getInventoryTtlMs() {
+        return inventoryTtlMs;
+    }
+
+    public void setInventoryTtlMs(long inventoryTtlMs) {
+        this.inventoryTtlMs = inventoryTtlMs;
+    }
 }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2018 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,14 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-@XmlSchema(
-    namespace = "http://xmlns.opennms.org/xsd/event",
-    elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED,
-    xmlns={
-        @XmlNs(prefix="", namespaceURI="http://xmlns.opennms.org/xsd/event")
-    }
-)
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.serialization;
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
+import java.util.Map;
+
+import org.apache.kafka.common.serialization.Serializer;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+
+public class AlarmSerializer implements Serializer<OpennmsModelProtos.Alarm> {
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+        // pass
+    }
+
+    @Override
+    public byte[] serialize(String topic, OpennmsModelProtos.Alarm alarm) {
+        if (alarm == null) {
+            return null;
+        }
+        return alarm.toByteArray();
+    }
+
+    @Override
+    public void close() {
+        // pass
+    }
+}

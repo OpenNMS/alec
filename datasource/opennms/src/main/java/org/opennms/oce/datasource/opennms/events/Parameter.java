@@ -26,34 +26,69 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.events;
 
-import java.util.Arrays;
+import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="log")
+@XmlRootElement(name="param")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Log {
+public class Parameter {
 
-    @XmlElement(name="events", required=true)
-    private Events events;
+    @XmlElement(name="parmName")
+    private String name;
 
-    public Log() { }
+    @XmlElement(name="value")
+    private ParameterValue value;
 
-    public Log(Event... events) {
-        this.events = new Events();
-        this.events.getEvents().addAll(Arrays.asList(events));
+    public Parameter() {}
+
+    public Parameter(String name, String value) {
+        this.name = name;
+        final ParameterValue pv = new ParameterValue();
+        pv.setValue(value);
+        this.value = pv;
     }
 
-    public Events getEvents() {
-        return events;
+    public String getName() {
+        return name;
     }
 
-    public void setEvents(Events events) {
-        this.events = events;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ParameterValue getValue() {
+        return value;
+    }
+
+    public void setValue(ParameterValue value) {
+        this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Parameter parameter = (Parameter) o;
+        return Objects.equals(name, parameter.name) &&
+                Objects.equals(value, parameter.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
+    }
+
+    @Override
+    public String toString() {
+        return "Parameter{" +
+                "name='" + name + '\'' +
+                ", value=" + value +
+                '}';
     }
 }

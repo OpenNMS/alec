@@ -41,7 +41,7 @@ import org.opennms.oce.engine.topology.TopologyInventory;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 
-@Command(scope = "topology", name = "display-model", description="Build and display the model using the latest available inventory.")
+@Command(scope = "topology", name = "display-events", description="Build and display the events using the latest available inventory.")
 @Service
 public class DisplayModel implements Action {
 

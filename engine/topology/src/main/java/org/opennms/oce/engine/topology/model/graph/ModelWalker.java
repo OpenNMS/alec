@@ -41,7 +41,7 @@ import org.opennms.oce.engine.topology.model.ModelObject;
 public class ModelWalker {
 
     public static void visit(Model model, ModelVisitor visitor) {
-        // Walk the entire model
+        // Walk the entire events
         walkChildren(model.getRoot(), model.getRoot().getChildren(), visitor);
     }
 
@@ -73,7 +73,7 @@ public class ModelWalker {
     }
 
     /**
-     * Walk model objects that have not yet been collected and reduce scope each iteration
+     * Walk events objects that have not yet been collected and reduce scope each iteration
      */
     private static void walkNeighbors(Set<ModelObject> last, Integer szl, ModelVisitor visitor, Set<ModelObject> collected) {
         if (szl <= 0) {

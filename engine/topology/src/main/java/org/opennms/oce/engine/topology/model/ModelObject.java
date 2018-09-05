@@ -117,7 +117,7 @@ public class ModelObject implements WorkingMemoryObject {
 
     public void setParent(ModelObject parent) {
         this.parent = parent;
-        if (type != "model") {
+        if (type != "events") {
             // Parent must be null for the Root of the Model
             parent.addChild(this);
         }

@@ -26,9 +26,10 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.events;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import org.junit.Test;
@@ -36,7 +37,7 @@ import org.junit.Test;
 public class EventMarshalTest {
 
     @Test
-    public void canMarshal() {
+    public void canMarshalAndUnmarshal() {
         Event e = new Event();
         e.setTime(null);
         e.setUei("someuei");
@@ -58,6 +59,7 @@ public class EventMarshalTest {
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
                 "</event>"));
+        assertThat(JaxbUtils.fromXml(JaxbUtils.toXml(e, Event.class), Event.class), equalTo(e));
 
         Log log = new Log(e);
         assertThat(JaxbUtils.toXml(log, Log.class), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
@@ -80,7 +82,6 @@ public class EventMarshalTest {
                 "        </event>\n" +
                 "    </events>\n" +
                 "</log>"));
-
-
+        assertThat(JaxbUtils.fromXml(JaxbUtils.toXml(log, Log.class), Log.class), equalTo(log));
     }
 }

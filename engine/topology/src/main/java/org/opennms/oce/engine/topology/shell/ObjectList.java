@@ -42,7 +42,7 @@ import org.opennms.oce.engine.topology.TopologyInventory;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 
-@Command(scope = "topology", name = "model-objects-by-type", description="Model Objects Listing by Type")
+@Command(scope = "topology", name = "events-objects-by-type", description="Model Objects Listing by Type")
 @Service
 public class ObjectList implements Action {
 

@@ -71,7 +71,7 @@ public class AlarmPropagationTest {
         assertEquals(card1.getChildGroup("Port").getNumberNonServiceAffecting(), 0);
         assertEquals(card1.getChildGroup("Port").getNumberServiceAffecting(), 1);
 
-        // TODO - update the model and add tests for multiple groups - ie. uncles and peers
+        // TODO - update the events and add tests for multiple groups - ie. uncles and peers
         // e.g. uncle - BGPSession over a link
 
         // We need to track that the Status Count change direction

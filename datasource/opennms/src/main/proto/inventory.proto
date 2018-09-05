@@ -1,0 +1,36 @@
+syntax = "proto3";
+option java_package = "org.opennms.oce.datasource.opennms.proto";
+option java_outer_classname = "InventoryModelProtos";
+
+enum InventoryObjectPeerEndpoint {
+  A = 0;
+  Z = 1;
+}
+
+message InventoryObjectPeerRef {
+  string type = 1;
+  string id = 2;
+  InventoryObjectPeerEndpoint endpoint = 3;
+}
+
+message InventoryObjectRelativeRef {
+  string type = 1;
+  string id = 2;
+}
+
+message InventoryObject {
+  string type = 1;
+  string id = 2;
+  string subtype = 3;
+  string parent_type = 4;
+  string parent_id = 5;
+  string friendly_name = 6;
+
+  repeated InventoryObjectPeerRef peer = 10;
+  repeated InventoryObjectRelativeRef relative = 11;
+}
+
+message InventoryObjects {
+  repeated InventoryObject inventory_object = 1;
+  uint64 expires_at = 12;
+}

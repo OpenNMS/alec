@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.events;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -50,6 +50,8 @@ public class Event {
         }
     };
 
+    private final String createdAt = FORMATTER_LONG.get().format(new Date());
+
     @XmlElement(name="uei")
     private String uei;
 
@@ -63,7 +65,7 @@ public class Event {
     private String severity = "Critical";
 
     @XmlElement(name = "time")
-    private String time = FORMATTER_LONG.get().format(new Date());
+    private String time;
 
     public String getUei() {
         return uei;
@@ -102,6 +104,9 @@ public class Event {
     }
 
     public String getTime() {
+        if (time == null) {
+            return createdAt;
+        }
         return time;
     }
 
@@ -124,5 +129,16 @@ public class Event {
     @Override
     public int hashCode() {
         return Objects.hash(uei, source, parameters, severity, time);
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "uei='" + uei + '\'' +
+                ", source='" + source + '\'' +
+                ", parameters=" + parameters +
+                ", severity='" + severity + '\'' +
+                ", time='" + time + '\'' +
+                '}';
     }
 }

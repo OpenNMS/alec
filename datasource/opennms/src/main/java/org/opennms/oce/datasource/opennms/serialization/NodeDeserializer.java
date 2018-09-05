@@ -26,28 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.serialization;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
-@XmlRootElement(name="events")
-@XmlAccessorType(XmlAccessType.NONE)
-public class Events {
+import com.google.protobuf.InvalidProtocolBufferException;
 
-    @XmlElement(name="event")
-    private List<Event> events = new ArrayList<>();
-
-    public List<Event> getEvents() {
-        return events;
+public class NodeDeserializer implements Deserializer<OpennmsModelProtos.Node> {
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+        // pass
     }
 
-    public void setEvents(List<Event> events) {
-        this.events = events;
+    @Override
+    public OpennmsModelProtos.Node deserialize(String topic, byte[] data) {
+        if (data == null) {
+            return null;
+        }
+
+        try {
+            return OpennmsModelProtos.Node.parseFrom(data);
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        // pass
     }
 }

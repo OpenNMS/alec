@@ -49,7 +49,7 @@ public class InventoryModelManager {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryModelManager.class);
 
     public static final String MODEL_ROOT_TYPE = "MODEL";
-    public static final String MODEL_ROOT_ID = "model";
+    public static final String MODEL_ROOT_ID = "events";
 
     public InventoryModelManager() {
 
@@ -113,7 +113,7 @@ public class InventoryModelManager {
             // Setup the parent
             if (ioe.getParentType() == null || ioe.getParentId() == null) {
                 throw new IllegalStateException("Parent for MO id '" + ioe.getId() + "' is not provided. " +
-                        "If you try appending inventory to existing model you must define a parent of the top level element.");
+                        "If you try appending inventory to existing events you must define a parent of the top level element.");
             }
 
             final ModelObjectKey parentKey = ModelObjectKey.key(ioe.getParentType(), ioe.getParentId());
@@ -121,12 +121,12 @@ public class InventoryModelManager {
 
 
             /** if a parent is provided but it is not in current inventory, it means this is top level element and the parent must live
-             * in model. If not, an exception will throw
+             * in events. If not, an exception will throw
              */
             if (parentMo == null) {
                 parentMo = findParentInModel(ioe.getParentType(), ioe.getParentId());
 
-                //if parent from model found mark the object as top level, else it's bad
+                //if parent from events found mark the object as top level, else it's bad
                 if (parentMo != null) {
                     ((InventoryObjectBean) ioe).setTopLevel(true);
                 }
@@ -158,7 +158,7 @@ public class InventoryModelManager {
         this.inventory.appendInventory(ti);
 
         if(model != null) {
-            //If model exists but there is no root:
+            //If events exists but there is no root:
             if (model.getRoot() == null) {
                 throw new IllegalStateException("Inventory must contain a single object of type '"
                         + MODEL_ROOT_TYPE + "' with id '" + MODEL_ROOT_ID + "'");
@@ -168,7 +168,7 @@ public class InventoryModelManager {
             //return;
         }
 
-        // Create the initial model objects and index them by type/id
+        // Create the initial events objects and index them by type/id
         // NOTE: This will throw a IllegalStateException if a duplicate key is found
         final Map<ModelObjectKey, ModelObject> mosByKey = inventory.getInventoryObjectList().stream()
                 .collect(Collectors.toMap(ioe -> ModelObjectKey.key(ioe.getType(), ioe.getId()), InventoryModelManager::toModelObject));
@@ -178,7 +178,7 @@ public class InventoryModelManager {
 
         // Create the root
         final ModelObject rootMo = mosByKey.get(ModelObjectKey.key(MODEL_ROOT_TYPE, MODEL_ROOT_ID));
-        // Create a new model instance
+        // Create a new events instance
         model = new Model(rootMo);
     }
 
@@ -190,7 +190,7 @@ public class InventoryModelManager {
      */
     public void appendInventory(TopologyInventory ti) {
 
-        //Construct a new inventory model hierarchy to process
+        //Construct a new inventory events hierarchy to process
         final Map<ModelObjectKey, ModelObject> mosByKey = ti.getInventoryObjectList().stream()
                 .collect(Collectors.toMap(ioe -> ModelObjectKey.key(ioe.getType(), ioe.getId()), InventoryModelManager::toModelObject));
 
@@ -239,14 +239,14 @@ public class InventoryModelManager {
             // Setup the parent
             if (ioe.getParentType() == null || ioe.getParentId() == null) {
                 throw new IllegalStateException("Parent for MO id '" + ioe.getId() + "' is not provided. " +
-                        "If you try appending inventory to existing model you must define a parent of the top level element.");
+                        "If you try appending inventory to existing events you must define a parent of the top level element.");
             }
 
             final ModelObjectKey parentKey = ModelObjectKey.key(ioe.getParentType(), ioe.getParentId());
             ModelObject parentMo = mosByKey.get(parentKey);
 
             /** if a parent is provided but it is not in current inventory, it means this is top level element and the parent must live
-             * in model. If not, an exception will throw
+             * in events. If not, an exception will throw
              */
 
             if (isAppend && parentMo == null) {

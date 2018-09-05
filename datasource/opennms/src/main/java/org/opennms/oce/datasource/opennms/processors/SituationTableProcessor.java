@@ -26,42 +26,40 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.model;
+package org.opennms.oce.datasource.opennms.processors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.apache.kafka.streams.processor.Processor;
+import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.state.KeyValueStore;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+public class SituationTableProcessor implements Processor<String, OpennmsModelProtos.Alarm> {
+    private KeyValueStore<String, OpennmsModelProtos.Alarm> kvStore;
 
-@XmlRootElement(name="parms")
-@XmlAccessorType(XmlAccessType.NONE)
-public class Parameters {
-
-    @XmlElement(name="parm")
-    private List<Parameter> parameters = new ArrayList<>();
-
-    public List<Parameter> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+    @Override
+    @SuppressWarnings("unchecked")
+    public void init(ProcessorContext context) {
+        // retrieve the key-value store
+        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.INCIDENT_STORE);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Parameters that = (Parameters) o;
-        return Objects.equals(parameters, that.parameters);
+    public void process(String reductionKey, OpennmsModelProtos.Alarm alarm) {
+        if (alarm != null) {
+            kvStore.put(reductionKey, alarm);
+        } else {
+            kvStore.delete(reductionKey);
+        }
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(parameters);
+    public void punctuate(long timestamp) {
+        // this method is deprecated and should not be used anymore
+    }
+
+    @Override
+    public void close() {
+        // pass, no external resources managed by this processor
     }
 }

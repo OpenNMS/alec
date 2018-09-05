@@ -121,7 +121,7 @@ public class Level2EngineComplianceTest {
         // 3919127 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:39 EDT 2018
         // 3919128 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:38 EDT 2018
 
-        final List<Incident> incidents = Collections.emptyList(); // driver.run(model, alarms);
+        final List<Incident> incidents = Collections.emptyList(); // driver.run(events, alarms);
         // A single incident should have been created
         assertThat(incidents, hasSize(1));
         // It should contain all of the given alarms
@@ -370,7 +370,7 @@ public class Level2EngineComplianceTest {
     @Test
     @Ignore("Utility code")
     public void generateMockAlarmFromIncident() throws JAXBException, IOException {
-        List<org.opennms.oce.model.v1.schema.Alarm> alarms = EngineUtils.getRawAlarms(Paths.get("/tmp/cpn.alarms.xml"));
+        List<org.opennms.oce.events.v1.schema.Alarm> alarms = EngineUtils.getRawAlarms(Paths.get("/tmp/cpn.alarms.xml"));
         printAlarm(alarms, "3919143");
         printAlarm(alarms, "3919144");
         printAlarm(alarms, "3919145");
@@ -379,8 +379,8 @@ public class Level2EngineComplianceTest {
     }
 
 
-    private static void printAlarm(List<org.opennms.oce.model.v1.schema.Alarm> alarms, String alarmId) {
-        org.opennms.oce.model.v1.schema.Alarm alarm = alarms.stream().filter(a -> a.getId().equals(alarmId)).findFirst().get();
+    private static void printAlarm(List<org.opennms.oce.events.v1.schema.Alarm> alarms, String alarmId) {
+        org.opennms.oce.events.v1.schema.Alarm alarm = alarms.stream().filter(a -> a.getId().equals(alarmId)).findFirst().get();
         StringBuilder sb = new StringBuilder();
         String firstSource = alarm.getEvent().get(0).getSource();
         sb.append("alarms.addAll(new MockAlarmBuilder()\n");

@@ -39,7 +39,7 @@ import org.opennms.oce.engine.topology.TopologyInventory;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 
-@Command(scope = "topology", name = "model-object-by-id", description="Model Object Listing by Id")
+@Command(scope = "topology", name = "events-object-by-id", description="Model Object Listing by Id")
 @Service
 public class GetObject implements Action {
 

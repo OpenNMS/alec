@@ -148,7 +148,7 @@ public class ClusterEngine implements Engine {
     @Override
     public void tick(long timestampInMillis) {
         LOG.debug("Starting tick for {}", timestampInMillis);
-        if (timestampInMillis - lastRun >= tickResolutionMs) {
+        if (timestampInMillis - lastRun >= tickResolutionMs - 1) {
             onTick(timestampInMillis);
             lastRun = timestampInMillis;
         } else {

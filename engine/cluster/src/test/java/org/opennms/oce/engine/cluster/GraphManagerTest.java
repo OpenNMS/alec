@@ -34,12 +34,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
+import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 
 /**
@@ -82,5 +84,66 @@ public class GraphManagerTest {
             // Validate that the alarm gets associated with the vertex
             assertThat(v.getAlarms(), hasSize(1));
         });
+    }
+
+    @Test
+    public void canHandleSameInventory() {
+        // Create a new graph manager and add some inventory
+        final GraphManager graphManager = new GraphManager();
+        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+
+        AtomicInteger numEdges = new AtomicInteger();
+        // Validate the graph
+        graphManager.withGraph(g -> {
+            // The number of vertices should match the number of elements in the inventory
+            assertThat(g.getVertices(), hasSize(MockInventory.SAMPLE_NETWORK.size()));
+            // Capture the number of edges
+            numEdges.set(g.getEdgeCount());
+        });
+        // Now add the same inventory again
+        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        // Validate the graph
+        graphManager.withGraph(g -> {
+            // The number of vertices should match the number of elements in the inventory
+            assertThat(g.getVertices(), hasSize(MockInventory.SAMPLE_NETWORK.size()));
+            // The number of edges should match the number from the last count
+            assertThat(g.getEdgeCount(), equalTo(numEdges.get()));
+        });
+    }
+
+    /**
+     * Verifies that edges will be associated with vertices once they are created,
+     * for cases in which we learn about the relationship before the objects
+     */
+    @Test
+    public void canHandleDeferredVertices() {
+        final GraphManager graphManager = new GraphManager();
+        // Add a link that references two non-existent peers
+        graphManager.addInventory(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1")
+                .withPeerRelation(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1", MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.PORT, "n2-c1-p1")
+                .getInventory());
+
+        // The graph should contain a single vertex with no edges
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertices(), hasSize(1));
+            assertThat(g.getEdges(), hasSize(0));
+        });
+
+        assertThat(graphManager.getNumDeferredObjects(), equalTo(1));
+
+        // Now, let's add the objects that the link refers to
+        graphManager.addInventory(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
+                .withInventoryObject(MockInventoryType.PORT, "n2-c1-p1")
+                .getInventory());
+
+        // The graph should contain 3 vertices and 2 edges
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertices(), hasSize(3));
+            assertThat(g.getEdges(), hasSize(2));
+        });
+
+        assertThat(graphManager.getNumDeferredObjects(), equalTo(0));
     }
 }

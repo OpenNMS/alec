@@ -165,7 +165,20 @@ public class ClusterEngine implements Engine {
         LOG.debug("Inventory objects on init: {}", inventory);
         graphManager.addInventory(inventory);
         graphManager.addOrUpdateAlarms(alarms);
-        // TODO: What do we do with the initial incidents?
+
+        // Index the given incidents and the alarms they contain, so that we can cluster alarms in existing
+        // incidents when applicable
+        for (Incident incident : incidents) {
+            final IncidentBean incidentBean = new IncidentBean(incident);
+            incidentsById.put(incidentBean.getId(), incidentBean);
+            for (Alarm alarmInIncident : incidentBean.getAlarms()) {
+                alarmIdToIncidentMap.put(alarmInIncident.getId(), incidentBean);
+            }
+        }
+
+        if (alarms.size()>0) {
+            alarmsChangedSinceLastTick = true;
+        }
     }
 
     @Override
@@ -309,7 +322,7 @@ public class ClusterEngine implements Engine {
             }
         }
 
-        LOG.debug("Generating diagnostic texts...");
+        LOG.debug("Generating diagnostic texts for {} incidents...", incidents.size());
         for (IncidentBean incident : incidents) {
             incident.setDiagnosticText(getDiagnosticTextForIncident(incident));
         }

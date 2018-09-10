@@ -54,6 +54,15 @@ public class IncidentBean implements Incident {
         this.id = id;
     }
 
+    public IncidentBean(Incident incident) {
+        this.id = incident.getId();
+        this.creationTime = incident.getCreationTime();
+        this.severity = incident.getSeverity();
+        this.resourceKeys.addAll(incident.getResourceKeys());
+        this.alarms.addAll(incident.getAlarms());
+        this.diagnosticText = incident.getDiagnosticText();
+    }
+
     @Override
     public String getId() {
         return id;

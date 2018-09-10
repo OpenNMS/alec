@@ -31,6 +31,7 @@ package org.opennms.oce.engine.cluster;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -65,9 +67,13 @@ public class GraphManager {
 
     private final Set<Long> disconnectedVertices = new HashSet<>();
 
-    public synchronized void addInventory(Collection<InventoryObject> inventory) {
-        final Set<Long> newDisconnectedVertices = new HashSet<>();
+    private Set<InventoryObject> deferredIos = new HashSet<>();
 
+    public synchronized void addInventory(Collection<InventoryObject> inventory) {
+        addInventory(inventory, false);
+    }
+
+    private synchronized void addInventory(Collection<InventoryObject> inventory, boolean isDeferred) {
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
@@ -77,12 +83,12 @@ public class GraphManager {
                 g.addVertex(vertex);
                 didGraphChange.set(true);
                 idtoVertexMap.put(vertex.getId(), vertex);
-                newDisconnectedVertices.add(vertex.getId());
                 return vertex;
             });
         }
 
         // Now handle the relationships
+        boolean didMatchAllRelations = true;
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             final Vertex vertex = resourceKeyVertexMap.get(resourceKey);
@@ -92,16 +98,16 @@ public class GraphManager {
             if (parentResourceKey != null) {
                 final Vertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
                 if (parentVertex == null) {
-                    LOG.warn("No existing vertex found for parent with resource key '{}'. Skipping edge association.", parentResourceKey);
-                    // TODO: Can we defer the edge creation until the parent does show up?
+                    LOG.info("No existing vertex found for parent with resource key '{}'. Deferring edge association.", parentResourceKey);
+                    didMatchAllRelations = false;
                     continue;
                 }
-                LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
-                final Edge edge = createEdge();
-                g.addEdge(edge, parentVertex, vertex);
-                newDisconnectedVertices.remove(vertex.getId());
-                newDisconnectedVertices.remove(parentVertex.getId());
-                didGraphChange.set(true);
+                if (!g.isNeighbor(parentVertex, vertex)) {
+                    LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
+                    final Edge edge = createEdge();
+                    g.addEdge(edge, parentVertex, vertex);
+                    didGraphChange.set(true);
+                }
             }
 
             // Peer relationships
@@ -109,16 +115,16 @@ public class GraphManager {
                 final ResourceKey peerResourceKey = getResourceKeyForPeer(peerRef);
                 final Vertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
                 if (peerVertex == null) {
-                    LOG.warn("No existing vertex found for peer with resource key '{}'. Skipping edge association.", peerResourceKey);
-                    // TODO: Can we defer the edge creation until the peer does show up?
+                    LOG.info("No existing vertex found for peer with resource key '{}'. Deferring edge association.", peerResourceKey);
+                    didMatchAllRelations = false;
                     continue;
                 }
-                LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
-                final Edge edge = createEdge();
-                g.addEdge(edge, peerVertex, vertex);
-                newDisconnectedVertices.remove(vertex.getId());
-                newDisconnectedVertices.remove(peerVertex.getId());
-                didGraphChange.set(true);
+                if (!g.isNeighbor(peerVertex, vertex)) {
+                    LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
+                    final Edge edge = createEdge();
+                    g.addEdge(edge, peerVertex, vertex);
+                    didGraphChange.set(true);
+                }
             }
 
             // Relative relationships
@@ -126,19 +132,41 @@ public class GraphManager {
                 final ResourceKey relativeResourceKey = getResourceKeyForPeer(relativeRef);
                 final Vertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
                 if (relativeVertex == null) {
-                    LOG.warn("No existing vertex found for relative with resource key '{}'. Skipping edge association.", relativeResourceKey);
-                    // TODO: Can we defer the edge creation until the relative does show up?
+                    LOG.info("No existing vertex found for relative with resource key '{}'. Deferring edge association.", relativeResourceKey);
+                    didMatchAllRelations = false;
                     continue;
                 }
-                LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
-                final Edge edge = createEdge();
-                g.addEdge(edge, relativeVertex, vertex);
-                newDisconnectedVertices.remove(vertex.getId());
-                newDisconnectedVertices.remove(relativeVertex.getId());
-                didGraphChange.set(true);
+                if (!g.isNeighbor(relativeVertex, vertex)) {
+                    LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
+                    final Edge edge = createEdge();
+                    g.addEdge(edge, relativeVertex, vertex);
+                    didGraphChange.set(true);
+                }
+            }
+
+            if (!didMatchAllRelations && !isDeferred) {
+                deferredIos.add(io);
+            } else if (isDeferred && didMatchAllRelations) {
+                deferredIos.remove(io);
             }
         }
-        disconnectedVertices.addAll(newDisconnectedVertices);
+
+        if (!isDeferred) {
+            handleDeferredIos();
+        }
+
+        disconnectedVertices.clear();
+        disconnectedVertices.addAll(g.getVertices().stream()
+                .filter(v -> g.getNeighborCount(v) == 0)
+                .map(Vertex::getId)
+                .collect(Collectors.toList()));
+    }
+
+    private void handleDeferredIos() {
+        if (deferredIos.size() < 1) {
+            return;
+        }
+        addInventory(new LinkedList<>(deferredIos), true);
     }
 
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
@@ -158,6 +186,7 @@ public class GraphManager {
             g.addVertex(v);
             didGraphChange.set(true);
             idtoVertexMap.put(v.getId(), v);
+            handleDeferredIos();
             return v;
         });
         vertex.addOrUpdateAlarm(alarm);
@@ -192,7 +221,6 @@ public class GraphManager {
         return ResourceKey.key(io.getType(), io.getId());
     }
 
-
     private static ResourceKey getResourceKeyFor(Alarm alarm) {
         return ResourceKey.key(alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
     }
@@ -218,5 +246,9 @@ public class GraphManager {
 
     public Set<Long> getDisconnectedVertices() {
         return disconnectedVertices;
+    }
+
+    public int getNumDeferredObjects() {
+        return deferredIos.size();
     }
 }

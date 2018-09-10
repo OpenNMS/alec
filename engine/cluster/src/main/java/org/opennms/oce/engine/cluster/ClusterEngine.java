@@ -188,7 +188,7 @@ public class ClusterEngine implements Engine {
 
     public void onTick(long timestampInMillis) {
         if (!alarmsChangedSinceLastTick) {
-            LOG.debug("No alarm changes since last tick. Nothing to do.");
+            LOG.debug("{}: No alarm changes since last tick. Nothing to do.", timestampInMillis);
             return;
         }
         // Reset
@@ -199,16 +199,18 @@ public class ClusterEngine implements Engine {
         graphManager.withGraph(g -> {
             if (graphManager.getDidGraphChangeAndReset()) {
                 // If the graph has changed, then reset the cache
-                LOG.debug("Graph has changed. Resetting hop cache.");
+                LOG.debug("{}: Graph has changed. Resetting hop cache.", timestampInMillis);
                 hops.invalidateAll();
                 shortestPath = null;
                 disconnectedVertices = graphManager.getDisconnectedVertices();
             }
 
             // GC alarms from vertices
+            int numGarbageCollectedAlarms = 0;
             for (Vertex v : g.getVertices()) {
-                v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
+                numGarbageCollectedAlarms += v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
             }
+            LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
             // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
             // OPTIMIZATION: Can we avoid doing this every tick?
@@ -219,21 +221,25 @@ public class ClusterEngine implements Engine {
                     .flatMap(Collection::stream)
                     .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
                     .collect(Collectors.toList());
-            LOG.debug("Tick at {} with {} alarms.", timestampInMillis, alarms.size());
+            if (alarms.size() < 1) {
+                // Nothing to do
+                return;
+            }
 
+            LOG.debug("{}: Clustering {} alarms.", timestampInMillis, alarms.size());
             final DBSCANClusterer<AlarmInSpaceTime> clusterer = new DBSCANClusterer<>(epsilon, 1, distanceMeasure);
             final List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = clusterer.cluster(alarms);
-            LOG.debug("Found {} clusters.", clustersOfAlarms.size());
+            LOG.debug("{}: Found {} clusters of alarms.", timestampInMillis, clustersOfAlarms.size());
             for (Cluster<AlarmInSpaceTime> clusterOfAlarms : clustersOfAlarms) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Got cluster with {} alarms.", clusterOfAlarms.getPoints().size());
+                    LOG.debug("{}: Processing cluster containing {} alarms.", timestampInMillis, clusterOfAlarms.getPoints().size());
                 }
                 incidents.addAll(mapClusterToIncidents(clusterOfAlarms, alarmIdToIncidentMap, incidentsById));
             }
         });
 
         // Index and notify the incident handler
-        LOG.debug("Creating/updating {} incidents.", incidents.size());
+        LOG.debug("{}: Creating/updating {} incidents.", timestampInMillis, incidents.size());
         for (IncidentBean incident : incidents) {
             for (Alarm alarm : incident.getAlarms()) {
                 alarmIdToIncidentMap.put(alarm.getId(), incident);
@@ -406,16 +412,17 @@ public class ClusterEngine implements Engine {
     }
 
     private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
-        // TODO: Optimize this
-        for (Vertex v : graphManager.getGraph().getVertices()) {
-            final Optional<Alarm> match = v.getAlarms().stream()
-                    .filter(a -> a.equals(alarm))
-                    .findFirst();
-            if (match.isPresent()) {
-                return Optional.of(v.getId());
+        return graphManager.withGraph(g -> {
+            for (Vertex v : graphManager.getGraph().getVertices()) {
+                final Optional<Alarm> match = v.getAlarms().stream()
+                        .filter(a -> a.equals(alarm))
+                        .findFirst();
+                if (match.isPresent()) {
+                    return Optional.of(v.getId());
+                }
             }
-        }
-        return Optional.empty();
+            return Optional.empty();
+        });
     }
 
     private long getVertexIdForAlarm(Alarm alarm) {

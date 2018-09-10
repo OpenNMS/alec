@@ -62,10 +62,11 @@ public class Vertex {
         return id;
     }
 
-    public void garbageCollectAlarms(long timestampInMillis, long problemTimeoutMs, long clearTimeoutMs) {
+    public int garbageCollectAlarms(long timestampInMillis, long problemTimeoutMs, long clearTimeoutMs) {
         final long problemCutoffMs = timestampInMillis - problemTimeoutMs;
         final long clearCutoffMs = timestampInMillis - clearTimeoutMs;
 
+        int numAlarmsBefore = alarmsById.size();
         alarmsById.entrySet().removeIf(entry -> {
             final Alarm alarm = entry.getValue();
             if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
@@ -76,6 +77,7 @@ public class Vertex {
                 return false;
             }
         });
+        return numAlarmsBefore - alarmsById.size();
     }
 
     @Override

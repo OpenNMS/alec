@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
@@ -199,6 +200,10 @@ public class GraphManager {
             return v;
         });
         vertex.addOrUpdateAlarm(alarm);
+    }
+
+    public synchronized <V> V withGraph(Function<Graph<Vertex, Edge>, V> consumer) {
+        return consumer.apply(g);
     }
 
     public synchronized void withGraph(Consumer<Graph<Vertex, Edge>> consumer) {

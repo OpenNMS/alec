@@ -65,15 +65,13 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         }
 
         final double distance = compute(timeA, timeB, numHops);
-        ///System.err.printf("a: %d, b: %d, timeDelta: %.0f, hops: %d, distance: %.4f\n", vertexIdA, vertexIdB, Math.abs(timeA - timeB), numHops, distance);
-        //if (LOG.isTraceEnabled()) {
-        //    LOG.trace("d({},{},{}): {}", timeA,timeB, numHops, distance);
-        //}
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("v1: {}, v2: {}, d({},{},{}) = {}", vertexIdA, vertexIdB, timeA, timeB, numHops, distance);
+        }
         return distance;
     }
 
     public double compute(double timeA, double timeB, int numHops) {
-        //return alpha * ( beta * (Math.abs(timeA - timeB) / 1000) + (1-beta) * (Math.exp(numHops) - 1));
         return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * numHops);
     }
 

@@ -31,6 +31,7 @@ package org.opennms.oce.engine.cluster;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
@@ -44,12 +45,6 @@ import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 
-/**
- * Things to add tests for:
- *  * A new vertex gets created with we get an alarm for a unknown IO
- *  * Remove of inventory objects
- *  * Updating alarms
- */
 public class GraphManagerTest {
 
     @Test
@@ -145,5 +140,24 @@ public class GraphManagerTest {
         });
 
         assertThat(graphManager.getNumDeferredObjects(), equalTo(0));
+    }
+
+    @Test
+    public void canDeleteInventory() {
+        // Create a new graph manager and add some inventory
+        final GraphManager graphManager = new GraphManager();
+        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        // The graph should contain some vertices and edges
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertexCount(), greaterThanOrEqualTo(1));
+            assertThat(g.getEdgeCount(), greaterThanOrEqualTo(1));
+        });
+        // Now delete that same inventory
+        graphManager.removeInventory(MockInventory.SAMPLE_NETWORK);
+        // The graph should be empty
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertexCount(), equalTo(0));
+            assertThat(g.getEdgeCount(),  equalTo(0));
+        });
     }
 }

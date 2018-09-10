@@ -170,6 +170,15 @@ public class GraphManager {
     }
 
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
+        for (InventoryObject io : inventory) {
+            final ResourceKey resourceKey = getResourceKeyFor(io);
+            final Vertex vertex = resourceKeyVertexMap.remove(resourceKey);
+            if (vertex != null) {
+                g.removeVertex(vertex);
+                didGraphChange.set(true);
+            }
+            deferredIos.remove(io);
+        }
     }
 
     public synchronized void addOrUpdateAlarms(List<Alarm> alarms) {

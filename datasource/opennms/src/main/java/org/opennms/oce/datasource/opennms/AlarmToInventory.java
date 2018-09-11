@@ -81,16 +81,10 @@ public class AlarmToInventory {
             ios = iosBuilder.build();
         }
 
-        if (managedObjectInstance == null  || managedObjectType == null) {
-            if (alarm.hasNodeCriteria()) {
-                final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
-                managedObjectType = ManagedObjectType.Node.getName();
-                managedObjectInstance = nodeCriteria;
-            } else {
-                // No specific type and/or id - use the alarm type and id
-                managedObjectType = "alarm";
-                managedObjectInstance = "" + alarm.getId();
-            }
+        if ((managedObjectInstance == null  || managedObjectType == null) && alarm.hasNodeCriteria()) {
+            final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
+            managedObjectType = ManagedObjectType.Node.getName();
+            managedObjectInstance = nodeCriteria;
         }
 
         return new EnrichedAlarm(alarm, ios, managedObjectType, managedObjectInstance);

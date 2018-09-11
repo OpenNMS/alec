@@ -30,6 +30,7 @@ package org.opennms.oce.engine.cluster;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
@@ -158,6 +160,25 @@ public class GraphManagerTest {
         graphManager.withGraph(g -> {
             assertThat(g.getVertexCount(), equalTo(0));
             assertThat(g.getEdgeCount(),  equalTo(0));
+        });
+    }
+
+    @Test
+    public void canIgnoreAlarmsWithoutInventoryObjects() {
+        // Create a new graph manager
+        final GraphManager graphManager = new GraphManager();
+
+        // Add an alarm to the graph
+        AlarmBean a1 = new AlarmBean();
+        a1.setTime(1);
+        a1.setId("a1");
+        a1.setInventoryObjectType(null);
+        a1.setInventoryObjectId(null);
+        graphManager.addOrUpdateAlarm(a1);
+
+        // The graph should remain empty
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertexCount(), equalTo(0));
         });
     }
 }

@@ -78,6 +78,7 @@
 
     <feature name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
+        <feature version="${project.version}">oce-processor-api</feature>
         <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.main/${project.version}</bundle>
     </feature>
 
@@ -101,6 +102,24 @@
         <feature dependency="true" version="${project.version}">oce-features-graph-graphml</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.shell/${project.version}</bundle>
+    </feature>
+    
+    <!-- Situation Processors -->
+
+    <feature name="oce-processor-api" description="OCE :: Processor :: API" version="${project.version}">
+        <feature version="${project.version}">oce-datasource-api</feature>
+        <bundle>mvn:org.opennms.oce/processor-api/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-processor-standalone" description="OCE :: Processor :: Standalone" version="${project.version}">
+        <feature version="${project.version}">oce-processor-api</feature>
+        <bundle>mvn:org.opennms.oce/processor-standalone/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-processor-redundant" description="OCE :: Processor :: Redundant" version="${project.version}">
+        <feature version="${project.version}">oce-processor-api</feature>
+        <bundle>mvn:org.opennms.oce/processor-redundant/${project.version}</bundle>
+        <feature dependency="true">shell</feature>                
     </feature>
 
     <!-- Other features -->

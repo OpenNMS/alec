@@ -65,6 +65,7 @@ import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.events.Event;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
@@ -106,6 +107,7 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<InventoryHandler> inventoryHandlers = new HandlerRegistry<>();
+    private final HandlerRegistry<SituationHandler> situationHandlers = new HandlerRegistry<>();
 
     private final ConfigurationAdmin configAdmin;
 
@@ -238,7 +240,7 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
                 .process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
 
         KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k,v) -> isSituation(k));
-        situationStream.process(SituationTableProcessor::new, INCIDENT_STORE);
+        situationStream.process(() -> new SituationTableProcessor(situationHandlers), INCIDENT_STORE);
 
         final NodeDeserializer nodeDeserializer = new NodeDeserializer();
         KStream<String, byte[]> nodeBytesStream = builder.stream(getNodeTopic());
@@ -293,6 +295,16 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
     @Override
     public void unregisterHandler(AlarmHandler handler) {
         alarmHandlers.unregister(handler);
+    }
+
+    @Override
+    public void registerHandler(SituationHandler handler) {
+        situationHandlers.register(handler);
+    }
+
+    @Override
+    public void unregisterHandler(SituationHandler handler) {
+        situationHandlers.unregister(handler);
     }
 
     @Override

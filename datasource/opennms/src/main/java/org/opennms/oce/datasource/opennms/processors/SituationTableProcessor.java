@@ -28,15 +28,29 @@
 
 package org.opennms.oce.datasource.opennms.processors;
 
+import java.util.Objects;
+
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.datasource.opennms.HandlerRegistry;
+import org.opennms.oce.datasource.opennms.OpennmsMapper;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.opennms.oce.datasource.opennms.OpennmsDatasource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SituationTableProcessor implements Processor<String, OpennmsModelProtos.Alarm> {
+    private final Logger LOG = LoggerFactory.getLogger(SituationTableProcessor.class);
     private KeyValueStore<String, OpennmsModelProtos.Alarm> kvStore;
+    private final HandlerRegistry<SituationHandler> situationHandlers;
 
+    public SituationTableProcessor(HandlerRegistry<SituationHandler> situationHandlers) {
+        this.situationHandlers = Objects.requireNonNull(situationHandlers);
+    }
+    
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
@@ -48,6 +62,14 @@ public class SituationTableProcessor implements Processor<String, OpennmsModelPr
     public void process(String reductionKey, OpennmsModelProtos.Alarm alarm) {
         if (alarm != null) {
             kvStore.put(reductionKey, alarm);
+            Incident incident = OpennmsMapper.toIncident(alarm);
+            situationHandlers.forEach(h -> {
+                try {
+                    h.onSituation(incident);
+                } catch (Exception e) {
+                    LOG.error("onSituation() call failed with situation: {} on handler: {}", incident, h, e);
+                }
+            });
         } else {
             kvStore.delete(reductionKey);
         }

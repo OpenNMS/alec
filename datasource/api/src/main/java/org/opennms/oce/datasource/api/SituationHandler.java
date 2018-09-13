@@ -26,37 +26,16 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.datasource.api;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
-import org.opennms.oce.datasource.api.SituationHandler;
-
-public class StaticIncidentDatasource implements IncidentDatasource {
-    private final List<Incident> incidents;
-
-    public StaticIncidentDatasource(List<Incident> incidents) {
-        this.incidents = Objects.requireNonNull(incidents);
-    }
-
-    @Override
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
-
-    @Override
-    public void forwardIncident(Incident incident) {
-        // pass
-    }
-
-    @Override
-    public void registerHandler(SituationHandler handler) {
-    }
-
-    @Override
-    public void unregisterHandler(SituationHandler handler) {
-    }
+/**
+ * A handler that deals with situations.
+ */
+public interface SituationHandler {
+    /**
+     * Handle a situation.
+     *
+     * @param incident the situation
+     */
+    void onSituation(Incident incident);
 }

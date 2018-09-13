@@ -37,6 +37,7 @@
         <module>karaf-features</module>
         <module>test-api</module>
         <module>wrap</module>
+        <module>processor</module>
     </modules>
 
     <properties>

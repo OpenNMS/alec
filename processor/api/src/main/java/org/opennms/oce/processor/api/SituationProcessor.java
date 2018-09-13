@@ -26,37 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.processor.api;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
-import org.opennms.oce.datasource.api.SituationHandler;
 
-public class StaticIncidentDatasource implements IncidentDatasource {
-    private final List<Incident> incidents;
+/**
+ * A situation processor accepts situations and does something with them such as forwarding them as an event.
+ */
+public interface SituationProcessor {
+    /**
+     * Accept an {@link Incident} to process.
+     *
+     * @param incident the incident to process
+     */
+    void accept(Incident incident);
 
-    public StaticIncidentDatasource(List<Incident> incidents) {
-        this.incidents = Objects.requireNonNull(incidents);
-    }
-
-    @Override
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
-
-    @Override
-    public void forwardIncident(Incident incident) {
-        // pass
-    }
-
-    @Override
-    public void registerHandler(SituationHandler handler) {
-    }
-
-    @Override
-    public void unregisterHandler(SituationHandler handler) {
+    /**
+     * Confirm that a situation alarm was received for the generated incident. Implementing this method is optional and
+     * defaults to a no-op.
+     *
+     * @param reductionKeysInAlarm the reduction keys contained in the individual alarms in the situation
+     */
+    default void confirm(Set<String> reductionKeysInAlarm) {
     }
 }

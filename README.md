@@ -55,9 +55,9 @@ config:property-set bootstrap.servers 127.0.0.1:9092
 config:update
 ```
 
-Install the datasource, an engine and the driver:
+Install the datasource, an engine, a situation processor and the driver:
 ```
-feature:install oce-datasource-opennms oce-engine-cluster oce-driver-main
+feature:install oce-datasource-opennms oce-engine-cluster oce-processor-standalone oce-driver-main
 ```
 
 Correlate!

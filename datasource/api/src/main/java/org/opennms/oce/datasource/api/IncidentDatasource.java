@@ -36,4 +36,8 @@ public interface IncidentDatasource {
 
     void forwardIncident(Incident incident) throws Exception;
 
+    void registerHandler(SituationHandler handler);
+
+    void unregisterHandler(SituationHandler handler);
+
 }

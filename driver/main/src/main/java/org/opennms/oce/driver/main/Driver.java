@@ -43,9 +43,13 @@ import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.processor.api.SituationConfirmer;
+import org.opennms.oce.processor.api.SituationProcessor;
+import org.opennms.oce.processor.api.SituationProcessorFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -60,17 +64,24 @@ public class Driver {
     private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
+    private final SituationProcessor situationProcessor;
+    private final SituationHandler situationHandler;
 
     private Thread initThread;
     private Engine engine;
     private Timer timer;
 
-    public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource, IncidentDatasource incidentDatasource, EngineFactory engineFactory) {
+    public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource,
+                  IncidentDatasource incidentDatasource, EngineFactory engineFactory,
+                  SituationProcessorFactory situationProcessorFactory) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.inventoryDatasource = Objects.requireNonNull(inventoryDatasource);
         this.incidentDatasource = Objects.requireNonNull(incidentDatasource);
         this.engineFactory = Objects.requireNonNull(engineFactory);
+        this.situationProcessor =
+                Objects.requireNonNull(situationProcessorFactory).getInstance();
+        situationHandler = SituationConfirmer.newInstance(situationProcessor);
     }
 
     public void init() {
@@ -81,15 +92,11 @@ public class Driver {
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         engine = engineFactory.createEngine();
-        engine.registerIncidentHandler(incident -> {
-            try {
-                LOG.debug("Creating incident: {}", incident);
-                incidentDatasource.forwardIncident(incident);
-                LOG.debug("Successfully created incident.");
-            } catch (Exception e) {
-                LOG.error("An error occurred while forwarding incident: {}. The incident will be lost.", incident, e);
-            }
-        });
+        // Register the handler that confirms situations that have come round trip back to this driver
+        incidentDatasource.registerHandler(situationHandler);
+        // Register the situation processor responsible for accepting and processing all situations generated via the
+        // engine
+        engine.registerIncidentHandler(situationProcessor::accept);
 
         timer = new Timer();
         // The get methods on the datasources may block, so we do this on a separate thread
@@ -133,6 +140,8 @@ public class Driver {
     }
 
     public void destroy() {
+        incidentDatasource.unregisterHandler(situationHandler);
+        
         if (initThread != null && initThread.isAlive()) {
             initThread.interrupt();
             try {

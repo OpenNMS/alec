@@ -26,37 +26,41 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.processor.redundant;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.features.distributed.coordination.api.DomainManagerFactory;
 import org.opennms.oce.datasource.api.IncidentDatasource;
-import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.processor.api.SituationProcessor;
+import org.opennms.oce.processor.api.SituationProcessorFactory;
 
-public class StaticIncidentDatasource implements IncidentDatasource {
-    private final List<Incident> incidents;
+/**
+ * A factory that supplies a singleton {@link ActiveStandbySituationProcessor}.
+ */
+public class ActiveStandbySituationProcessorFactory implements SituationProcessorFactory {
+    /**
+     * The singleton instance.
+     */
+    private final ActiveStandbySituationProcessor INSTANCE;
 
-    public StaticIncidentDatasource(List<Incident> incidents) {
-        this.incidents = Objects.requireNonNull(incidents);
+    /**
+     * Constructor.
+     *
+     * @param domainManagerFactory the domain manager factory
+     */
+    public ActiveStandbySituationProcessorFactory(IncidentDatasource incidentDatasource,
+                                                  DomainManagerFactory domainManagerFactory) {
+        INSTANCE = ActiveStandbySituationProcessor.newInstance(incidentDatasource, domainManagerFactory);
+    }
+
+    /**
+     * Destroy the instance.
+     */
+    public void destroy() {
+        INSTANCE.destroy();
     }
 
     @Override
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
-
-    @Override
-    public void forwardIncident(Incident incident) {
-        // pass
-    }
-
-    @Override
-    public void registerHandler(SituationHandler handler) {
-    }
-
-    @Override
-    public void unregisterHandler(SituationHandler handler) {
+    public SituationProcessor getInstance() {
+        return INSTANCE;
     }
 }

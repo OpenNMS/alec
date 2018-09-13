@@ -26,37 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.processor.redundant;
 
-import java.util.List;
-import java.util.Objects;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.processor.api.SituationProcessor;
+import org.opennms.oce.processor.api.SituationProcessorFactory;
 
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
-import org.opennms.oce.datasource.api.SituationHandler;
-
-public class StaticIncidentDatasource implements IncidentDatasource {
-    private final List<Incident> incidents;
-
-    public StaticIncidentDatasource(List<Incident> incidents) {
-        this.incidents = Objects.requireNonNull(incidents);
-    }
-
-    @Override
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
+/**
+ * A command to display the current role for a redundant situation processor.
+ */
+@Command(scope = "processor", name = "current-role", description = "Displays the current role")
+@Service
+public class CurrentRole implements Action {
+    @Reference
+    private SituationProcessorFactory situationProcessorFactory;
 
     @Override
-    public void forwardIncident(Incident incident) {
-        // pass
-    }
+    public Object execute() {
+        SituationProcessor situationProcessor = situationProcessorFactory.getInstance();
 
-    @Override
-    public void registerHandler(SituationHandler handler) {
-    }
+        try {
+            System.out.println(((ActiveStandbySituationProcessor) situationProcessor).getCurrentRole());
+        } catch (ClassCastException ignored) {
+            System.out.println("No role available for processor: " + situationProcessor);
+        }
 
-    @Override
-    public void unregisterHandler(SituationHandler handler) {
+        return null;
     }
 }

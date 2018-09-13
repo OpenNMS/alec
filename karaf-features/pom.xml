@@ -95,6 +95,13 @@
                                 <feature>oce-features-graph-api</feature>
                                 <feature>oce-features-graph-graphml</feature>
                                 <feature>oce-features-graph-shell</feature>
+                                <feature>oce-processor-api</feature>
+                                <!-- Depends on a reference to a IncidentDatasource impl.
+                                <feature>oce-processor-standalone</feature>
+                                -->
+                                <!-- Depends on a reference to a DomainManagerFactory impl.
+                                <feature>oce-processor-redundant</feature>
+                                -->
                             </features>
                         </configuration>
                     </execution>

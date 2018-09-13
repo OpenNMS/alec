@@ -1,0 +1,12 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="incidentDataSource"
+               interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
+    <reference id="domainManagerFactory"
+               interface="org.opennms.features.distributed.coordination.api.DomainManagerFactory"/>
+    <bean id="activeStandbySituationProcessor"
+          class="org.opennms.oce.processor.redundant.ActiveStandbySituationProcessorFactory" destroy-method="destroy">
+        <argument ref="incidentDataSource"/>
+        <argument ref="domainManagerFactory"/>
+    </bean>
+    <service ref="activeStandbySituationProcessor" interface="org.opennms.oce.processor.api.SituationProcessorFactory"/>
+</blueprint>

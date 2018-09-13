@@ -8,12 +8,16 @@
     <!-- Engine -->
     <reference id="engineFactory" interface="org.opennms.oce.engine.api.EngineFactory" />
 
+    <!-- Situation Processor -->
+    <reference id="situationProcessorFactory" interface="org.opennms.oce.processor.api.SituationProcessorFactory"/>
+
     <bean id="driver" class="org.opennms.oce.driver.main.Driver" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
         <argument ref="inventoryDatasource"/>
         <argument ref="incidentDatasource"/>
         <argument ref="engineFactory"/>
+        <argument ref="situationProcessorFactory"/>
     </bean>
 
 </blueprint>

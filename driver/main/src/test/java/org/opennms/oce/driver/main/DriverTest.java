@@ -41,6 +41,8 @@ import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.processor.api.SituationProcessor;
+import org.opennms.oce.processor.api.SituationProcessorFactory;
 import org.osgi.framework.BundleContext;
 
 public class DriverTest {
@@ -53,11 +55,14 @@ public class DriverTest {
         InventoryDatasource inventoryDatasource = mock(InventoryDatasource.class);
         IncidentDatasource incidentDatasource = mock(IncidentDatasource.class);
         EngineFactory engineFactory = mock(EngineFactory.class);
+        SituationProcessorFactory situationProcessorFactory = mock(SituationProcessorFactory.class);
+        when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
         TickLoggingEngine tickLoggingEngine = new TickLoggingEngine();
         when(engineFactory.createEngine()).thenReturn(tickLoggingEngine);
 
         // Create and initialize the driver
-        Driver driver = new Driver(bundleContext, alarmDatasource, inventoryDatasource, incidentDatasource, engineFactory);
+        Driver driver = new Driver(bundleContext, alarmDatasource, inventoryDatasource, incidentDatasource,
+                engineFactory, situationProcessorFactory);
         driver.initAsync().get();
 
         // Tick tock

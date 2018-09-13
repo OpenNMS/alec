@@ -35,6 +35,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.eclipse.persistence.jaxb.JAXBContextFactory;
+
 public class JaxbUtils {
     public static <V> V unmarshal(Class<V> clazz, InputStream input) {
         try {
@@ -47,6 +49,8 @@ public class JaxbUtils {
     }
 
     public static <V> void marshal(V object, File file) {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(JAXBContextFactory.class.getClassLoader());
         try {
             final JAXBContext context = JAXBContext.newInstance(object.getClass());
             final Marshaller m = context.createMarshaller();
@@ -54,6 +58,8 @@ public class JaxbUtils {
             m.marshal(object, file);
         } catch(Exception ex) {
             throw new RuntimeException(ex);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
         }
     }
 

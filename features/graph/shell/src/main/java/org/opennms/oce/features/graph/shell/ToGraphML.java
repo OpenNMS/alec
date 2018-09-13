@@ -58,6 +58,12 @@ public class ToGraphML implements Action {
 
     @Override
     public Object execute() throws InvalidSyntaxException, InvalidGraphException {
+        if ("empty".equalsIgnoreCase(graphProviderName)) {
+            final GraphML graphML = new GraphML();
+            GraphMLWriter.write(graphML, new File(outputFileName));
+            return null;
+        }
+
         ServiceReference<?> actualgraphProviderRef = null;
         GraphProvider graphProvider = null;
 

@@ -104,7 +104,7 @@ public class GraphManager implements GraphProvider {
             if (parentResourceKey != null) {
                 final CEVertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
                 if (parentVertex == null) {
-                    LOG.info("No existing vertex found for parent with resource key '{}'. Deferring edge association.", parentResourceKey);
+                    LOG.info("No existing vertex found for parent with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", parentResourceKey, resourceKey);
                     didMatchAllRelations = false;
                     continue;
                 }
@@ -121,7 +121,7 @@ public class GraphManager implements GraphProvider {
                 final ResourceKey peerResourceKey = getResourceKeyForPeer(peerRef);
                 final CEVertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
                 if (peerVertex == null) {
-                    LOG.info("No existing vertex found for peer with resource key '{}'. Deferring edge association.", peerResourceKey);
+                    LOG.info("No existing vertex found for peer with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", peerResourceKey, resourceKey);
                     didMatchAllRelations = false;
                     continue;
                 }
@@ -138,7 +138,7 @@ public class GraphManager implements GraphProvider {
                 final ResourceKey relativeResourceKey = getResourceKeyForPeer(relativeRef);
                 final CEVertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
                 if (relativeVertex == null) {
-                    LOG.info("No existing vertex found for relative with resource key '{}'. Deferring edge association.", relativeResourceKey);
+                    LOG.info("No existing vertex found for relative with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", relativeResourceKey, resourceKey);
                     didMatchAllRelations = false;
                     continue;
                 }

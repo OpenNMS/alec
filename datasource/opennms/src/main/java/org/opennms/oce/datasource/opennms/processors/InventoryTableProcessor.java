@@ -53,6 +53,8 @@ import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+
 public class InventoryTableProcessor implements Processor<String, InventoryModelProtos.InventoryObjects> {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryTableProcessor.class);
 
@@ -162,9 +164,17 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
         final InventoryObjectBean ioBean = new InventoryObjectBean();
         ioBean.setId(io.getId());
         ioBean.setType(io.getType());
-        ioBean.setParentId(io.getParentId());
-        ioBean.setParentType(io.getParentType());
-        ioBean.setFriendlyName(io.getFriendlyName());
+
+        // Optional fields
+        if (!Strings.isNullOrEmpty(io.getParentId())) {
+            ioBean.setParentId(io.getParentId());
+        }
+        if (!Strings.isNullOrEmpty(io.getParentType())) {
+            ioBean.setParentType(io.getParentType());
+        }
+        if (!Strings.isNullOrEmpty(io.getFriendlyName())) {
+            ioBean.setFriendlyName(io.getFriendlyName());
+        }
 
         for (InventoryModelProtos.InventoryObjectPeerRef peerRef : io.getPeerList()) {
             final InventoryObjectPeerRefBean ioPeerRefBean = new InventoryObjectPeerRefBean();

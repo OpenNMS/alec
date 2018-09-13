@@ -53,10 +53,9 @@
     </feature>
 
     <feature name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
+        <feature dependency="true" version="${project.version}">oce-engine-api</feature>
+        <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
-        <bundle>mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.jung/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.cluster/${project.version}</bundle>
     </feature>
 
@@ -80,6 +79,22 @@
     <feature name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.main/${project.version}</bundle>
+    </feature>
+
+    <!-- Graph -->
+
+    <feature name="oce-features-graph-api" description="OCE :: Features :: Graph :: API" version="${project.version}">
+        <feature version="${project.version}">oce-datasource-api</feature>
+        <bundle>mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.jung/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.api/${project.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+    </feature>
+
+    <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
+        <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
+        <feature dependency="true">shell</feature>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.shell/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.graphml/${project.version}</bundle>
     </feature>
 
     <!-- Other features -->

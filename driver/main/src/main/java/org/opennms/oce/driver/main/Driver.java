@@ -28,12 +28,14 @@
 
 package org.opennms.oce.driver.main;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
@@ -43,6 +45,9 @@ import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.features.graph.api.GraphProvider;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +58,15 @@ public class Driver {
     private final InventoryDatasource inventoryDatasource;
     private final IncidentDatasource incidentDatasource;
     private final EngineFactory engineFactory;
+    private final BundleContext bundleContext;
+    private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
 
     private Thread initThread;
     private Engine engine;
     private Timer timer;
 
-    public Driver(AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource, IncidentDatasource incidentDatasource, EngineFactory engineFactory) {
+    public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource, IncidentDatasource incidentDatasource, EngineFactory engineFactory) {
+        this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.inventoryDatasource = Objects.requireNonNull(inventoryDatasource);
         this.incidentDatasource = Objects.requireNonNull(incidentDatasource);
@@ -91,6 +99,12 @@ public class Driver {
                 final List<Alarm> alarms = alarmDatasource.getAlarmsAndRegisterHandler(engine);
                 final List<Incident> incidents = incidentDatasource.getIncidents();
                 engine.init(alarms, incidents, inventory);
+
+                if (engine instanceof GraphProvider) {
+                    final Hashtable<String,Object> props = new Hashtable<>();
+                    props.put("name", engineFactory.getName());
+                    graphProviderServiceRegistrationRef.set(bundleContext.registerService(GraphProvider.class.getCanonicalName(), engine, props));
+                }
             } catch (Exception e) {
                 if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
                     LOG.warn("Initialization was interrupted.");
@@ -131,6 +145,10 @@ public class Driver {
             }
         }
 
+        final ServiceRegistration<?> serviceRegistration = graphProviderServiceRegistrationRef.getAndSet(null);
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+        }
         if (timer != null) {
             timer.cancel();
             timer = null;

@@ -16,16 +16,16 @@
             <artifactId>org.opennms.oce.engine.api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.oce.datasource</groupId>
             <artifactId>org.opennms.oce.datasource.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.wrap</groupId>
-            <artifactId>org.opennms.oce.wrap.jung</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

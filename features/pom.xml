@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>graph</module>
         <module>score</module>
         <module>shell</module>
     </modules>

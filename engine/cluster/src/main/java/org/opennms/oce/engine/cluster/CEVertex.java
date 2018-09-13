@@ -32,18 +32,27 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.features.graph.api.Vertex;
 
-public class Vertex {
+public class CEVertex implements Vertex {
     private final long id;
+    private final InventoryObject inventoryObject;
     private final ResourceKey resourceKey;
     private final Map<String, Alarm> alarmsById = new LinkedHashMap<>();
 
-    public Vertex(long id, ResourceKey resourceKey) {
+    public CEVertex(long id, ResourceKey resourceKey) {
+        this(id, resourceKey, null);
+    }
+
+    public CEVertex(long id, ResourceKey resourceKey, InventoryObject inventoryObject) {
         this.id = id;
         this.resourceKey = Objects.requireNonNull(resourceKey);
+        this.inventoryObject = inventoryObject;
     }
 
     public ResourceKey getResourceKey() {
@@ -54,11 +63,22 @@ public class Vertex {
         alarmsById.put(alarm.getId(), alarm);
     }
 
+    @Override
     public Collection<Alarm> getAlarms() {
         return alarmsById.values();
     }
 
-    public long getId() {
+    @Override
+    public Optional<InventoryObject> getInventoryObject() {
+        return Optional.ofNullable(inventoryObject);
+    }
+
+    @Override
+    public String getId() {
+        return Long.toString(id);
+    }
+
+    public long getNumericId() {
         return id;
     }
 
@@ -82,7 +102,7 @@ public class Vertex {
 
     @Override
     public String toString() {
-        return String.format("Vertex[id=%s, resourceKey=%s]", id, resourceKey);
+        return String.format("CEVertex[id=%s, resourceKey=%s]", id, resourceKey);
     }
 
 }

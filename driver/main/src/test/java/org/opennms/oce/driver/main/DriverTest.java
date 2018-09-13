@@ -41,12 +41,14 @@ import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.osgi.framework.BundleContext;
 
 public class DriverTest {
 
     @Test
     public void canGenerateTicks() throws InterruptedException, ExecutionException {
         // Mocks
+        BundleContext bundleContext = mock(BundleContext.class);
         AlarmDatasource alarmDatasource = mock(AlarmDatasource.class);
         InventoryDatasource inventoryDatasource = mock(InventoryDatasource.class);
         IncidentDatasource incidentDatasource = mock(IncidentDatasource.class);
@@ -55,7 +57,7 @@ public class DriverTest {
         when(engineFactory.createEngine()).thenReturn(tickLoggingEngine);
 
         // Create and initialize the driver
-        Driver driver = new Driver(alarmDatasource, inventoryDatasource, incidentDatasource, engineFactory);
+        Driver driver = new Driver(bundleContext, alarmDatasource, inventoryDatasource, incidentDatasource, engineFactory);
         driver.initAsync().get();
 
         // Tick tock

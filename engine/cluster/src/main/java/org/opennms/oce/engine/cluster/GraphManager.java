@@ -47,22 +47,27 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.features.graph.api.Edge;
+import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
+import edu.uci.ics.jung.graph.util.Graphs;
 
-public class GraphManager {
+public class GraphManager implements GraphProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GraphManager.class);
 
     private final AtomicLong vertexIdGenerator = new AtomicLong();
+    private final AtomicLong edgeIdGenerator = new AtomicLong();
 
-    private final Map<Long, Vertex> idtoVertexMap = new HashMap<>();
-    private final Map<ResourceKey, Vertex> resourceKeyVertexMap = new HashMap<>();
+    private final Map<Long, CEVertex> idtoVertexMap = new HashMap<>();
+    private final Map<ResourceKey, CEVertex> resourceKeyVertexMap = new HashMap<>();
 
-    private final Graph<Vertex, Edge> g = new SparseMultigraph<>();
+    private final Graph<CEVertex, CEEdge> g = new SparseMultigraph<>();
 
     private final AtomicBoolean didGraphChange = new AtomicBoolean();
 
@@ -80,10 +85,10 @@ public class GraphManager {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
                 LOG.debug("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
-                final Vertex vertex = createVertexFor(io);
+                final CEVertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
                 didGraphChange.set(true);
-                idtoVertexMap.put(vertex.getId(), vertex);
+                idtoVertexMap.put(vertex.getNumericId(), vertex);
                 return vertex;
             });
         }
@@ -92,12 +97,12 @@ public class GraphManager {
         boolean didMatchAllRelations = true;
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
-            final Vertex vertex = resourceKeyVertexMap.get(resourceKey);
+            final CEVertex vertex = resourceKeyVertexMap.get(resourceKey);
 
             // Parent relationships
             final ResourceKey parentResourceKey = getResourceKeyForParent(io);
             if (parentResourceKey != null) {
-                final Vertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
+                final CEVertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
                 if (parentVertex == null) {
                     LOG.info("No existing vertex found for parent with resource key '{}'. Deferring edge association.", parentResourceKey);
                     didMatchAllRelations = false;
@@ -105,7 +110,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(parentVertex, vertex)) {
                     LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
-                    final Edge edge = createEdge();
+                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement());
                     g.addEdge(edge, parentVertex, vertex);
                     didGraphChange.set(true);
                 }
@@ -114,7 +119,7 @@ public class GraphManager {
             // Peer relationships
             for (InventoryObjectPeerRef peerRef : io.getPeers()) {
                 final ResourceKey peerResourceKey = getResourceKeyForPeer(peerRef);
-                final Vertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
+                final CEVertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
                 if (peerVertex == null) {
                     LOG.info("No existing vertex found for peer with resource key '{}'. Deferring edge association.", peerResourceKey);
                     didMatchAllRelations = false;
@@ -122,7 +127,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(peerVertex, vertex)) {
                     LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
-                    final Edge edge = createEdge();
+                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement(), peerRef);
                     g.addEdge(edge, peerVertex, vertex);
                     didGraphChange.set(true);
                 }
@@ -131,7 +136,7 @@ public class GraphManager {
             // Relative relationships
             for (InventoryObjectRelativeRef relativeRef : io.getRelatives()) {
                 final ResourceKey relativeResourceKey = getResourceKeyForPeer(relativeRef);
-                final Vertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
+                final CEVertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
                 if (relativeVertex == null) {
                     LOG.info("No existing vertex found for relative with resource key '{}'. Deferring edge association.", relativeResourceKey);
                     didMatchAllRelations = false;
@@ -139,7 +144,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(relativeVertex, vertex)) {
                     LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
-                    final Edge edge = createEdge();
+                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
                     g.addEdge(edge, relativeVertex, vertex);
                     didGraphChange.set(true);
                 }
@@ -159,7 +164,7 @@ public class GraphManager {
         disconnectedVertices.clear();
         disconnectedVertices.addAll(g.getVertices().stream()
                 .filter(v -> g.getNeighborCount(v) == 0)
-                .map(Vertex::getId)
+                .map(CEVertex::getNumericId)
                 .collect(Collectors.toList()));
     }
 
@@ -173,7 +178,7 @@ public class GraphManager {
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
-            final Vertex vertex = resourceKeyVertexMap.remove(resourceKey);
+            final CEVertex vertex = resourceKeyVertexMap.remove(resourceKey);
             if (vertex != null) {
                 g.removeVertex(vertex);
                 didGraphChange.set(true);
@@ -194,45 +199,53 @@ public class GraphManager {
             return;
         }
         final ResourceKey resourceKey = getResourceKeyFor(alarm);
-        final Vertex vertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
+        final CEVertex vertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
             LOG.info("No existing vertex was found with resource key: {} for alarm with id: {}. Creating a new vertex.", resourceKey, alarm.getId());
-            final Vertex v = new Vertex(vertexIdGenerator.getAndIncrement(), resourceKey);
+            final CEVertex v = new CEVertex(vertexIdGenerator.getAndIncrement(), resourceKey);
             g.addVertex(v);
             didGraphChange.set(true);
-            idtoVertexMap.put(v.getId(), v);
+            idtoVertexMap.put(v.getNumericId(), v);
             handleDeferredIos();
             return v;
         });
         vertex.addOrUpdateAlarm(alarm);
     }
 
-    public synchronized <V> V withGraph(Function<Graph<Vertex, Edge>, V> consumer) {
+    @Override
+    public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
+        final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
+        return consumer.apply(readOnlyGraph);
+    }
+
+    @Override
+    public void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer) {
+        final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
+        consumer.accept(readOnlyGraph);
+    }
+
+    public synchronized <V> V withGraph(Function<Graph<CEVertex, CEEdge>, V> consumer) {
         return consumer.apply(g);
     }
 
-    public synchronized void withGraph(Consumer<Graph<Vertex, Edge>> consumer) {
+    public synchronized void withGraph(Consumer<Graph<CEVertex, CEEdge>> consumer) {
         consumer.accept(g);
     }
 
-    public synchronized void withVertex(String type, String id, BiConsumer<Graph<Vertex, Edge>, Vertex> consumer) {
+    public synchronized void withVertex(String type, String id, BiConsumer<Graph<CEVertex, CEEdge>, CEVertex> consumer) {
         consumer.accept(g, resourceKeyVertexMap.get(ResourceKey.key(type, id)));
     }
 
-    protected Graph<Vertex, Edge> getGraph() {
+    protected Graph<CEVertex, CEEdge> getGraph() {
         return g;
     }
 
-    protected Vertex getVertexWithId(Long id) {
+    protected CEVertex getVertexWithId(Long id) {
         return idtoVertexMap.get(id);
     }
 
-    private Vertex createVertexFor(InventoryObject io) {
+    private CEVertex createVertexFor(InventoryObject io) {
         final ResourceKey resourceKey = getResourceKeyFor(io);
-        return new Vertex(vertexIdGenerator.getAndIncrement(), resourceKey);
-    }
-
-    private Edge createEdge() {
-        return new Edge();
+        return new CEVertex(vertexIdGenerator.getAndIncrement(), resourceKey, io);
     }
 
     private static ResourceKey getResourceKeyFor(InventoryObject io) {
@@ -269,4 +282,5 @@ public class GraphManager {
     public int getNumDeferredObjects() {
         return deferredIos.size();
     }
+
 }

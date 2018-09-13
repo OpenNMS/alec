@@ -9,6 +9,7 @@
     <reference id="engineFactory" interface="org.opennms.oce.engine.api.EngineFactory" />
 
     <bean id="driver" class="org.opennms.oce.driver.main.Driver" init-method="init" destroy-method="destroy">
+        <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
         <argument ref="inventoryDatasource"/>
         <argument ref="incidentDatasource"/>

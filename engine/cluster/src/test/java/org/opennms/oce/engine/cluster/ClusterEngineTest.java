@@ -75,7 +75,7 @@ public class ClusterEngineTest implements IncidentHandler {
     @Test
     public void canCreateGraph() {
         // Initial graph should be empty
-        Graph<Vertex, Edge> graph = engine.getGraph();
+        Graph<CEVertex, CEEdge> graph = engine.getGraph();
         assertThat(graph.getVertexCount(), equalTo(0));
         assertThat(graph.getEdgeCount(), equalTo(0));
 

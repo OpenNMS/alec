@@ -41,6 +41,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
@@ -51,6 +53,9 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.features.graph.api.Edge;
+import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +86,7 @@ import edu.uci.ics.jung.graph.Graph;
  * where dg(a_i,a_k) is the number of hops in the shortest path of the network graph
  * where A and B are some constants (need to be tweaked based on how important we want to make space vs time)
  */
-public class ClusterEngine implements Engine {
+public class ClusterEngine implements Engine, GraphProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterEngine.class);
 
@@ -114,7 +119,7 @@ public class ClusterEngine implements Engine {
     private long clearTimeoutMs = TimeUnit.MINUTES.toMillis(5);
 
     private boolean alarmsChangedSinceLastTick = false;
-    private DijkstraShortestPath<Vertex, Edge> shortestPath;
+    private DijkstraShortestPath<CEVertex, CEEdge> shortestPath;
     private Set<Long> disconnectedVertices = new HashSet<>();
 
     private final GraphManager graphManager = new GraphManager();
@@ -207,7 +212,7 @@ public class ClusterEngine implements Engine {
 
             // GC alarms from vertices
             int numGarbageCollectedAlarms = 0;
-            for (Vertex v : g.getVertices()) {
+            for (CEVertex v : g.getVertices()) {
                 numGarbageCollectedAlarms += v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
             }
             LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
@@ -392,6 +397,16 @@ public class ClusterEngine implements Engine {
         graphManager.removeInventory(inventory);
     }
 
+    @Override
+    public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
+        return graphManager.withReadOnlyGraph(consumer);
+    }
+
+    @Override
+    public void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer) {
+        graphManager.withReadOnlyGraph(consumer);
+    }
+
     private static class CandidateAlarmWithDistance {
 
         private final Alarm alarm;
@@ -413,12 +428,12 @@ public class ClusterEngine implements Engine {
 
     private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
         return graphManager.withGraph(g -> {
-            for (Vertex v : graphManager.getGraph().getVertices()) {
+            for (CEVertex v : graphManager.getGraph().getVertices()) {
                 final Optional<Alarm> match = v.getAlarms().stream()
                         .filter(a -> a.equals(alarm))
                         .findFirst();
                 if (match.isPresent()) {
-                    return Optional.of(v.getId());
+                    return Optional.of(v.getNumericId());
                 }
             }
             return Optional.empty();
@@ -466,11 +481,11 @@ public class ClusterEngine implements Engine {
                             if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
                                 return 0;
                             }
-                            final Vertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
+                            final CEVertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
                                 throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);
                             }
-                            final Vertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
+                            final CEVertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
                             if (vertexB == null) {
                                 throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
                             }
@@ -512,7 +527,7 @@ public class ClusterEngine implements Engine {
     }
 
     @VisibleForTesting
-    Graph<Vertex, Edge> getGraph() {
+    Graph<CEVertex, CEEdge> getGraph() {
         return graphManager.getGraph();
     }
 }

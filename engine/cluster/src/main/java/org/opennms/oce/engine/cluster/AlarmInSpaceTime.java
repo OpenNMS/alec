@@ -37,10 +37,10 @@ public class AlarmInSpaceTime implements Clusterable {
     private final Alarm alarm;
     private final double[] point;
 
-    public AlarmInSpaceTime(Vertex vertex, Alarm alarm) {
+    public AlarmInSpaceTime(CEVertex vertex, Alarm alarm) {
         Objects.requireNonNull(vertex);
         this.alarm = Objects.requireNonNull(alarm);
-        point = new double[]{alarm.getTime(), vertex.getId()};
+        point = new double[]{alarm.getTime(), vertex.getNumericId()};
     }
 
     @Override

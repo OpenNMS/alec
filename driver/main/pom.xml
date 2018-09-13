@@ -20,12 +20,20 @@
             <artifactId>org.opennms.oce.engine.api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
         </dependency>
 
         <dependency>
@@ -48,6 +56,7 @@
             <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
 </project>

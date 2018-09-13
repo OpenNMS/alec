@@ -22,8 +22,8 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
             <Import-Package>
-              org.eclipse.persistence.internal.jaxb;resolution:=optional,
-              org.eclipse.persistence.internal.jaxb.many;resolution:=optional,
+              org.eclipse.persistence.internal.jaxb,
+              org.eclipse.persistence.internal.jaxb.many,
               *
             </Import-Package>
           </instructions>
@@ -40,6 +40,10 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.moxy</artifactId>
     </dependency>
   </dependencies>
 

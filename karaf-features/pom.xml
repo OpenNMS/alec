@@ -93,6 +93,7 @@
                                 <feature>oce-features-score</feature>
                                 <feature>oce-features-shell</feature>
                                 <feature>oce-features-graph-api</feature>
+                                <feature>oce-features-graph-graphml</feature>
                                 <feature>oce-features-graph-shell</feature>
                             </features>
                         </configuration>

@@ -90,11 +90,17 @@
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
+    <feature name="oce-features-graph-graphml" description="OCE :: Features :: Graph :: GraphML" version="${project.version}">
+        <feature version="${moxy.version}" dependency="true">moxy</feature>
+        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.graphml/${project.version}</bundle>
+    </feature>
+
     <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
+        <feature dependency="true" version="${project.version}">oce-features-graph-graphml</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.shell/${project.version}</bundle>
-        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.graphml/${project.version}</bundle>
     </feature>
 
     <!-- Other features -->
@@ -133,6 +139,18 @@
     <feature name="commons-text" description="commons-text" version="${commons.text.version}">
         <bundle>mvn:org.apache.commons/commons-text/${commons.text.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.7</bundle>
+    </feature>
+
+    <feature name="javax.mail" description="javax.mail" version="1.4.5">
+        <bundle>mvn:javax.mail/mail/1.4.5</bundle>
+    </feature>
+
+    <feature name="moxy" description="EclipseLink :: MOXy" version="${moxy.version}">
+        <feature>javax.mail</feature>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${moxy.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${moxy.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${moxy.version}</bundle>
+        <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${moxy.version}</bundle>
     </feature>
 
 </features>

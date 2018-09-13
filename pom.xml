@@ -54,6 +54,7 @@
         <karaf.version>4.1.5</karaf.version>
         <log4j.version>2.8.2</log4j.version>
         <mockito.version>2.18.0</mockito.version>
+        <moxy.version>2.7.3</moxy.version>
         <okhttp.version>3.10.0</okhttp.version>
         <okio.bundle.version>1.14.0_1</okio.bundle.version>
         <okhttp.bundle.version>3.10.0_2</okhttp.bundle.version>
@@ -267,6 +268,11 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.moxy</artifactId>
+                <version>${moxy.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

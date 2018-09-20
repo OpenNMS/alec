@@ -182,6 +182,7 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
         streamsProperties.put(StreamsConfig.APPLICATION_ID_CONFIG, DEFAULT_APPLICATION_ID);
         final Path kafkaDir = Paths.get(System.getProperty("karaf.data"), "kafka");
         streamsProperties.put(StreamsConfig.STATE_DIR_CONFIG, kafkaDir.toString());
+        streamsProperties.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, Math.max(Runtime.getRuntime().availableProcessors()-2, 1));
         // User
         final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties();
         if (properties != null) {

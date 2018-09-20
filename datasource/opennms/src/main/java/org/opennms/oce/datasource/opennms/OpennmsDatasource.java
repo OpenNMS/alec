@@ -66,13 +66,13 @@ import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.SituationHandler;
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.events.Event;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
 import org.opennms.oce.datasource.opennms.events.Log;
 import org.opennms.oce.datasource.opennms.processors.AlarmTableProcessor;
 import org.opennms.oce.datasource.opennms.processors.InventoryTableProcessor;
 import org.opennms.oce.datasource.opennms.processors.SituationTableProcessor;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.opennms.oce.datasource.opennms.serialization.AlarmDeserializer;
 import org.opennms.oce.datasource.opennms.serialization.NodeDeserializer;
@@ -233,11 +233,19 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
 
         // Override the MO type and id with the ones set in the enriched alarm, since these will
         // were update to be properly scoped and reference the inventory
-        enrichedAlarmStream.mapValues(enrichedAlarm -> enrichedAlarm == null ? null : OpennmsModelProtos.Alarm.newBuilder(enrichedAlarm.getAlarm())
-                .setManagedObjectInstance(enrichedAlarm.getManagedObjectInstance())
-                .setManagedObjectType(enrichedAlarm.getManagedObjectType())
-                .build())
-                .process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
+        enrichedAlarmStream.mapValues(enrichedAlarm -> {
+            if (enrichedAlarm == null) {
+                return null;
+            }
+            final OpennmsModelProtos.Alarm.Builder alarmBuilder = OpennmsModelProtos.Alarm.newBuilder(enrichedAlarm.getAlarm());
+            if (enrichedAlarm.getManagedObjectInstance() != null) {
+                alarmBuilder.setManagedObjectInstance(enrichedAlarm.getManagedObjectInstance());
+            }
+            if (enrichedAlarm.getManagedObjectType() != null) {
+                alarmBuilder.setManagedObjectType(enrichedAlarm.getManagedObjectType());
+            }
+            return alarmBuilder.build();
+        }).process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
 
         KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k,v) -> isSituation(k));
         situationStream.process(() -> new SituationTableProcessor(situationHandlers), INCIDENT_STORE);

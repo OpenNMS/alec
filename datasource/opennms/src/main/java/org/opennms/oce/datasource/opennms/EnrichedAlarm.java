@@ -61,8 +61,8 @@ public class EnrichedAlarm {
                          String managedObjectInstance) {
         this.alarm = Objects.requireNonNull(alarm);
         this.inventory = Objects.requireNonNull(inventory);
-        this.managedObjectType = Objects.requireNonNull(managedObjectType);
-        this.managedObjectInstance = Objects.requireNonNull(managedObjectInstance);
+        this.managedObjectType = managedObjectType;
+        this.managedObjectInstance = managedObjectInstance;
     }
 
     public OpennmsModelProtos.Alarm getAlarm() {

@@ -29,6 +29,7 @@
 package org.opennms.oce.engine.cluster;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -95,10 +96,16 @@ public class CEVertex implements Vertex {
         alarmsById.entrySet().removeIf(entry -> {
             final Alarm alarm = entry.getValue();
             if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
-                LOG.debug("GCing cleared alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}", alarm.getId(), alarm.getTime(), clearCutoffMs);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("GCing cleared alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}",
+                            alarm.getId(), new Date(alarm.getTime()), new Date(clearCutoffMs));
+                }
                 return true;
             } else if (!alarm.isClear() && alarm.getTime() < problemCutoffMs) {
-                LOG.debug("GCing problem alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}", alarm.getId(), alarm.getTime(), problemCutoffMs);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("GCing problem alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}",
+                            alarm.getId(), new Date(alarm.getTime()), new Date(problemCutoffMs));
+                }
                 return true;
             } else {
                 return false;

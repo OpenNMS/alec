@@ -227,7 +227,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                     .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
                     .collect(Collectors.toList());
             if (alarms.size() < 1) {
-                // Nothing to do
+                LOG.debug("{}: The graph contains no alarms. No clustering will be performed.", timestampInMillis);
                 return;
             }
 

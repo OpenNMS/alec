@@ -38,8 +38,13 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.features.graph.api.Vertex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CEVertex implements Vertex {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClusterEngine.class);
+
     private final long id;
     private final InventoryObject inventoryObject;
     private final ResourceKey resourceKey;
@@ -90,8 +95,10 @@ public class CEVertex implements Vertex {
         alarmsById.entrySet().removeIf(entry -> {
             final Alarm alarm = entry.getValue();
             if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
+                LOG.debug("GCing cleared alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}", alarm.getId(), alarm.getTime(), clearCutoffMs);
                 return true;
             } else if (!alarm.isClear() && alarm.getTime() < problemCutoffMs) {
+                LOG.debug("GCing problem alarm with id: {}, alarm time is: {} which is before the cutoff time of: {}", alarm.getId(), alarm.getTime(), problemCutoffMs);
                 return true;
             } else {
                 return false;

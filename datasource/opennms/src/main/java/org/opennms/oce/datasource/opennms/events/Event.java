@@ -65,7 +65,7 @@ public class Event {
     private String severity = "Critical";
 
     @XmlElement(name = "time")
-    private String time;
+    private String time = createdAt;
 
     public String getUei() {
         return uei;
@@ -104,9 +104,6 @@ public class Event {
     }
 
     public String getTime() {
-        if (time == null) {
-            return createdAt;
-        }
         return time;
     }
 

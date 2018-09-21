@@ -39,7 +39,7 @@ public class EventMarshalTest {
     @Test
     public void canMarshalAndUnmarshal() {
         Event e = new Event();
-        e.setTime(null);
+        e.setTime("Friday, September 21, 2018 2:55:07 CEST PM");
         e.setUei("someuei");
         e.addParam("k1", "v1");
         e.addParam("k2", "v2");
@@ -58,6 +58,7 @@ public class EventMarshalTest {
                 "        </parm>\n" +
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
+                "    <time>Friday, September 21, 2018 2:55:07 CEST PM</time>\n" +
                 "</event>"));
         assertThat(JaxbUtils.fromXml(JaxbUtils.toXml(e, Event.class), Event.class), equalTo(e));
 
@@ -79,6 +80,7 @@ public class EventMarshalTest {
                 "                </parm>\n" +
                 "            </parms>\n" +
                 "            <severity>Critical</severity>\n" +
+                "            <time>Friday, September 21, 2018 2:55:07 CEST PM</time>\n" +
                 "        </event>\n" +
                 "    </events>\n" +
                 "</log>"));

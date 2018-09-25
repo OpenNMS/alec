@@ -31,6 +31,7 @@ package org.opennms.oce.features.graph.shell;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Date;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.features.graph.api.Edge;
@@ -47,8 +48,19 @@ public class GraphMLConverter {
     final GraphML doc = new GraphML();
     final GraphMLGraph graph = new GraphMLGraph();
 
+    private Vertex vertexWithMostAlarms = null;
+
     private static final String ONMS_GRAPHML_GRAPH_NAMESPACE = "namespace";
     private static final String ONMS_GRAPHML_LABEL = "label";
+    private static final String ONMS_GRAPHML_TOOLTIP_TEXT = "tooltipText";
+    private static final String ONMS_GRAPHML_ICON_KEY = "iconKey";
+    private static final String ONMS_GRAPHML_FOCUS_IDS = "focus-ids";
+    private static final String ONMS_GRAPHML_FOCUS_STRATEGY = "focus-strategy";
+
+    private static final String ONMS_FOCUS_STRATEGY_SPECIFIC = "SPECIFIC";
+
+    private static final String ONMS_ICON_SWITCH = "switch";
+    private static final String ONMS_ICON_REDUCTION_KEY = "reduction_key";
 
     private GraphMLConverter(Graph<Vertex, Edge> g) {
         this.g = Objects.requireNonNull(g);
@@ -69,6 +81,11 @@ public class GraphMLConverter {
         for (Edge e : g.getEdges()) {
             handleEdge(e);
         }
+
+        if (vertexWithMostAlarms != null) {
+            graph.setProperty(ONMS_GRAPHML_FOCUS_STRATEGY, ONMS_FOCUS_STRATEGY_SPECIFIC);
+            graph.setProperty(ONMS_GRAPHML_FOCUS_IDS, vertexWithMostAlarms.getId());
+        }
     }
 
     private void handleVertex(Vertex v) {
@@ -76,6 +93,20 @@ public class GraphMLConverter {
         node.setId(v.getId());
         v.getInventoryObject().ifPresent(io -> {
             node.setProperty(ONMS_GRAPHML_LABEL, io.getFriendlyName());
+            node.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_SWITCH);
+
+            final StringBuilder sb = new StringBuilder();
+            sb.append("IO of type: ");
+            sb.append(io.getType());
+            sb.append(" with id: ");
+            sb.append(io.getId());
+            if (io.getParentType() != null) {
+                sb.append(" with parent type: ");
+                sb.append(io.getParentType());
+                sb.append(" with parent id: ");
+                sb.append(io.getParentId());
+            }
+            node.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, sb.toString());
         });
         graph.addNode(node);
 
@@ -83,7 +114,16 @@ public class GraphMLConverter {
             for (Alarm alarm : v.getAlarms()) {
                 final GraphMLNode nodeForAlarm = new GraphMLNode();
                 nodeForAlarm.setId(v.getId() + "-" + alarm.getId());
+                nodeForAlarm.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_REDUCTION_KEY);
                 nodeForAlarm.setProperty(ONMS_GRAPHML_LABEL, alarm.getId());
+
+                final String tooltip = "Alarm with key: " +
+                        alarm.getId() +
+                        " and severity: " +
+                        alarm.getSeverity() +
+                        " and time: " +
+                        new Date(alarm.getTime());
+                node.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
                 graph.addNode(nodeForAlarm);
 
                 GraphMLEdge edge = new GraphMLEdge();
@@ -91,6 +131,13 @@ public class GraphMLConverter {
                 edge.setSource(node);
                 edge.setTarget(nodeForAlarm);
                 graph.addEdge(edge);
+            }
+
+            // Track the vertex with the most alarms
+            if (vertexWithMostAlarms == null) {
+                vertexWithMostAlarms = v;
+            } else if (v.getAlarms().size() > vertexWithMostAlarms.getAlarms().size()) {
+                vertexWithMostAlarms = v;
             }
         }
     }

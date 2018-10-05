@@ -26,17 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.common;
+package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.features.graph.api.Vertex;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
 
-import org.opennms.oce.features.graph.api.GraphProvider;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface GraphProviderLocator {
+public class AlarmSummary {
+    private final String vertexId;
 
-   boolean withGraphProviders(BiConsumer<String, GraphProvider> consumer);
+    public AlarmSummary(Vertex vertex, Alarm alarm) {
+        this.vertexId = GraphMLConverter.getVertexIdFor(vertex, alarm);
+    }
 
-   <V> V withGraphProvider(String graphProviderName, Function<GraphProvider, V> function);
-
+    @JsonProperty("vertex-id")
+    public String getVertexId() {
+        return vertexId;
+    }
 }

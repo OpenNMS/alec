@@ -42,8 +42,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
@@ -56,6 +56,7 @@ import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.api.OceGraph;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -398,17 +399,46 @@ public class ClusterEngine implements Engine, GraphProvider {
         graphManager.removeInventory(inventory);
     }
 
+
     @Override
-    public <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer) {
+    public <V> V withReadOnlyGraph(Function<OceGraph, V> consumer) {
+        final List<Incident> situations = new ArrayList<>(incidentsById.values());
         return graphManager.withReadOnlyGraph(g -> {
-            return consumer.apply(g, new ArrayList<>(incidentsById.values()));
+            final OceGraph oceGraph = new OceGraph() {
+                @Override
+                public Graph<? extends Vertex, ? extends Edge> getGraph() {
+                    return g;
+                }
+
+                @Override
+                public List<Incident> getSituations() {
+                    return situations;
+                }
+
+                @Override
+                public Vertex getVertexById(String id) {
+                    final Long idAsLong;
+                    if (id == null) {
+                        idAsLong = null;
+                    } else {
+                        try {
+                            idAsLong = Long.valueOf(id);
+                        } catch (NumberFormatException nfe) {
+                            return null;
+                        }
+                    }
+                    return graphManager.getVertexWithId(idAsLong);
+                }
+            };
+            return consumer.apply(oceGraph);
         });
     }
 
     @Override
-    public void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer) {
-        graphManager.withReadOnlyGraph(g -> {
-            consumer.accept(g, new ArrayList<>(incidentsById.values()));
+    public void withReadOnlyGraph(Consumer<OceGraph> consumer) {
+        withReadOnlyGraph(g -> {
+            consumer.accept(g);
+            return null;
         });
     }
 

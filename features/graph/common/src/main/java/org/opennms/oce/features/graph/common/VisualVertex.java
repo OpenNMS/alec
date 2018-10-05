@@ -26,45 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.feature.graph.rest.model;
+package org.opennms.oce.features.graph.common;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.opennms.oce.features.graph.graphml.GraphMLGraph;
-
-public class Graph {
-    private final String id;
-    private final List<Vertex> vertices;
-    private final List<Edge> edges;
-    private final Map<String,String> properties = new LinkedHashMap<>();
-
-    public Graph(GraphMLGraph graph) {
-        this.id = graph.getId();
-        this.vertices = graph.getNodes().stream()
-                .map(Vertex::new).collect(Collectors.toList());
-        this.edges = graph.getEdges().stream()
-                .map(Edge::new).collect(Collectors.toList());
-        graph.getProperties().forEach((k,v) -> {
-            properties.put(k,v != null ? v.toString() : null);
-        });
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public List<Vertex> getVertices() {
-        return vertices;
-    }
-
-    public List<Edge> getEdges() {
-        return edges;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
+public class VisualVertex {
 }

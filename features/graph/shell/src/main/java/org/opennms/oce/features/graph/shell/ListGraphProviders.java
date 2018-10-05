@@ -36,6 +36,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.features.graph.common.GraphProviderLocator;
+import org.opennms.oce.features.graph.common.OsgiGraphProviderLocator;
 import org.osgi.framework.BundleContext;
 
 @Command(scope = "graph", name = "list", description = "Lists the available graph providers.")
@@ -47,15 +48,15 @@ public class ListGraphProviders  implements Action {
 
     @Override
     public Object execute() {
-        final GraphProviderLocator graphProviderLocator = new GraphProviderLocator(bundleContext);
+        final GraphProviderLocator graphProviderLocator = new OsgiGraphProviderLocator(bundleContext);
         boolean didFindGraphProvider = graphProviderLocator.withGraphProviders((name,graphProvider) -> {
             final AtomicInteger numVertices = new AtomicInteger();
             final AtomicInteger numEdges = new AtomicInteger();
             final AtomicInteger numSituations = new AtomicInteger();
-            graphProvider.withReadOnlyGraph((g,s) -> {
-                numVertices.set(g.getVertexCount());
-                numEdges.set(g.getEdgeCount());
-                numSituations.set(s.size());
+            graphProvider.withReadOnlyGraph(g -> {
+                numVertices.set(g.getGraph().getVertexCount());
+                numEdges.set(g.getGraph().getEdgeCount());
+                numSituations.set(g.getSituations().size());
             });
             System.out.printf("%s: %d situations on %d vertices and %d edges.\n", name,
                     numSituations.get(), numVertices.get(), numEdges.get());

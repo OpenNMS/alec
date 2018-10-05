@@ -28,28 +28,21 @@
 
 package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.features.graph.api.Vertex;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
 
-import org.opennms.oce.features.graph.graphml.GraphMLNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Vertex {
+public class InventoryObjectSummary {
+    private final String vertexId;
 
-    private final String id;
-    private final Map<String,String> properties = new LinkedHashMap<>();
-
-    public Vertex(GraphMLNode node) {
-        this.id = node.getId();
-        node.getProperties().forEach((k,v) -> {
-            properties.put(k,v != null ? v.toString() : null);
-        });
+    public InventoryObjectSummary(Vertex vertex, InventoryObject io) {
+        this.vertexId = GraphMLConverter.getVertexIdFor(vertex);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
+    @JsonProperty("vertex-id")
+    public String getVertexId() {
+        return vertexId;
     }
 }

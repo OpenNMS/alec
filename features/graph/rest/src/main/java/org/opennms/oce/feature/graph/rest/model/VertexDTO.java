@@ -26,17 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.common;
+package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.graphml.GraphMLNode;
 
-public interface GraphProviderLocator {
+public class VertexDTO {
 
-   boolean withGraphProviders(BiConsumer<String, GraphProvider> consumer);
+    private final String id;
+    private final Map<String,String> properties = new LinkedHashMap<>();
 
-   <V> V withGraphProvider(String graphProviderName, Function<GraphProvider, V> function);
+    public VertexDTO(GraphMLNode node) {
+        this.id = node.getId();
+        node.getProperties().forEach((k,v) -> {
+            properties.put(k,v != null ? v.toString() : null);
+        });
+    }
 
+    public String getId() {
+        return id;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 }

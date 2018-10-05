@@ -26,17 +26,45 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.common;
+package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.graphml.GraphMLGraph;
 
-public interface GraphProviderLocator {
+public class GraphDTO {
+    private final String id;
+    private final List<VertexDTO> vertices;
+    private final List<EdgeDTO> edges;
+    private final Map<String,String> properties = new LinkedHashMap<>();
 
-   boolean withGraphProviders(BiConsumer<String, GraphProvider> consumer);
+    public GraphDTO(GraphMLGraph graph) {
+        this.id = graph.getId();
+        this.vertices = graph.getNodes().stream()
+                .map(VertexDTO::new).collect(Collectors.toList());
+        this.edges = graph.getEdges().stream()
+                .map(EdgeDTO::new).collect(Collectors.toList());
+        graph.getProperties().forEach((k,v) -> {
+            properties.put(k,v != null ? v.toString() : null);
+        });
+    }
 
-   <V> V withGraphProvider(String graphProviderName, Function<GraphProvider, V> function);
+    public String getId() {
+        return id;
+    }
 
+    public List<VertexDTO> getVertices() {
+        return vertices;
+    }
+
+    public List<EdgeDTO> getEdges() {
+        return edges;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 }

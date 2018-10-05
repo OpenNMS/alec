@@ -54,7 +54,6 @@ import org.slf4j.LoggerFactory;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
-import edu.uci.ics.jung.graph.util.Graphs;
 
 public class GraphManager {
 
@@ -211,13 +210,11 @@ public class GraphManager {
     }
 
     public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
-        final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
-        return consumer.apply(readOnlyGraph);
+        return consumer.apply(g);
     }
 
     public void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer) {
-        final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
-        consumer.accept(readOnlyGraph);
+        consumer.accept(g);
     }
 
     public synchronized <V> V withGraph(Function<Graph<CEVertex, CEEdge>, V> consumer) {

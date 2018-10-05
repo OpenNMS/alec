@@ -28,18 +28,13 @@
 
 package org.opennms.oce.features.graph.api;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-
-import org.opennms.oce.datasource.api.Incident;
-
-import edu.uci.ics.jung.graph.Graph;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface GraphProvider {
 
-    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
+    <V> V withReadOnlyGraph(Function<OceGraph, V> consumer);
 
-    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
+    void withReadOnlyGraph(Consumer<OceGraph> consumer);
 
 }

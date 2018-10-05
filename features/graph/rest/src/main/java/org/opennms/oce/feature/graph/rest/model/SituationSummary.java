@@ -28,53 +28,33 @@
 
 package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.opennms.oce.features.graph.graphml.GraphMLEdge;
+import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Edge {
-
+public class SituationSummary {
     private final String id;
-    private final String sourceId;
-    private final String targetId;
-    private final Map<String,String> properties = new LinkedHashMap<>();
+    private final String vertexId;
+    private final long creationTime;
 
-    public Edge(GraphMLEdge edge) {
-        this.id = edge.getId();
-        if (edge.getSource() != null) {
-            this.sourceId = edge.getSource().getId();
-        } else {
-            this.sourceId = null;
-        }
-        if (edge.getTarget() != null) {
-            this.targetId = edge.getTarget().getId();
-        } else {
-            this.targetId = null;
-        }
-
-        edge.getProperties().forEach((k,v) -> {
-            properties.put(k,v != null ? v.toString() : null);
-        });
+    public SituationSummary(Incident situation) {
+        this.id = situation.getId();
+        this.vertexId = GraphMLConverter.getVertexIdFor(situation);
+        this.creationTime = situation.getCreationTime();
     }
 
     public String getId() {
         return id;
     }
 
-    @JsonProperty("source-id")
-    public String getSourceId() {
-        return sourceId;
+    @JsonProperty("vertex-id")
+    public String getVertexId() {
+        return vertexId;
     }
 
-    @JsonProperty("target-id")
-    public String getTargetId() {
-        return targetId;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
+    @JsonProperty("creation-time")
+    public long getCreationTime() {
+        return creationTime;
     }
 }

@@ -29,14 +29,19 @@
 package org.opennms.oce.feature.graph.rest.api;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import org.opennms.oce.feature.graph.rest.model.Graph;
+import org.graphdrawing.graphml.GraphmlType;
+import org.opennms.oce.feature.graph.rest.model.AlarmSummary;
+import org.opennms.oce.feature.graph.rest.model.GraphDTO;
 import org.opennms.oce.feature.graph.rest.model.GraphSummary;
+import org.opennms.oce.feature.graph.rest.model.InventoryObjectSummary;
+import org.opennms.oce.feature.graph.rest.model.SituationSummary;
 
 @Path("/")
 public interface GraphEndpoint {
@@ -49,6 +54,36 @@ public interface GraphEndpoint {
     @GET
     @Path("{name}")
     @Produces("application/json")
-    List<Graph> getGraph(@PathParam("name") String name) throws Exception;
+    List<GraphDTO> getGraph(@PathParam("name") String name) throws Exception;
+
+    @GET
+    @Path("{name}/graphml")
+    @Produces("application/xml")
+    GraphmlType getGraphAsGraphML(@PathParam("name") String name) throws Exception;
+
+    @GET
+    @Path("{name}/situations")
+    @Produces("application/json")
+    List<SituationSummary> getSituationsOnGraph(@PathParam("name") String name) throws Exception;
+
+    @GET
+    @Path("{name}/alarms")
+    @Produces("application/json")
+    List<AlarmSummary> getAlarmsOnGraph(@PathParam("name") String name) throws Exception;
+
+    @GET
+    @Path("{name}/inventory/{type}")
+    @Produces("application/json")
+    List<InventoryObjectSummary> getInventoryObjectsWithTypeOnGraph(@PathParam("name") String name, @PathParam("type") String type) throws Exception;
+
+    @GET
+    @Path("{name}/inventory-types")
+    @Produces("application/json")
+    Set<String> getInventoryObjectTypesOnGraph(@PathParam("name") String name) throws Exception;
+
+    @GET
+    @Path("{name}/neighborhood/{vertexId}")
+    @Produces("application/json")
+    List<GraphDTO> getNeighborhoodOfVertex(@PathParam("name") String name, @PathParam("vertexId") String vertexId, int hops) throws Exception;
 
 }

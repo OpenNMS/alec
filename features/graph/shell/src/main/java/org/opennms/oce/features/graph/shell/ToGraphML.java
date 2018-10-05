@@ -37,6 +37,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.features.graph.common.GraphMLConverter;
 import org.opennms.oce.features.graph.common.GraphProviderLocator;
+import org.opennms.oce.features.graph.common.OsgiGraphProviderLocator;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLWriter;
 import org.opennms.oce.features.graph.graphml.InvalidGraphException;
@@ -63,7 +64,7 @@ public class ToGraphML implements Action {
             return null;
         }
 
-        final GraphProviderLocator graphProviderLocator = new GraphProviderLocator(bundleContext);
+        final GraphProviderLocator graphProviderLocator = new OsgiGraphProviderLocator(bundleContext);
         final GraphML graphML = graphProviderLocator.withGraphProvider(graphProviderName,
                 graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
         if (graphML == null) {

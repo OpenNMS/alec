@@ -26,17 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.common;
+package org.opennms.oce.features.graph.api;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.List;
 
-import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.datasource.api.Incident;
 
-public interface GraphProviderLocator {
+import edu.uci.ics.jung.graph.Graph;
 
-   boolean withGraphProviders(BiConsumer<String, GraphProvider> consumer);
+public interface OceGraph {
 
-   <V> V withGraphProvider(String graphProviderName, Function<GraphProvider, V> function);
+    Graph<? extends Vertex, ? extends Edge> getGraph();
+
+    List<Incident> getSituations();
+
+    Vertex getVertexById(String id);
 
 }

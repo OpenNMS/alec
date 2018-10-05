@@ -48,7 +48,6 @@ import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLGraph;
-import org.opennms.oce.features.graph.common.GraphMLConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -75,7 +74,7 @@ public class GraphMLConversionTest {
         graph.addEdge(e1, v1, v2);
         graph.addEdge(e2, v2, v3);
 
-        GraphML graphML = GraphMLConverter.toGraphML(graph, Collections.emptyList());
+        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Collections.emptyList());
 
         assertThat(graphML.getGraphs(), hasSize(1));
         GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);
@@ -97,7 +96,7 @@ public class GraphMLConversionTest {
         a2.setId("a2");
         v1.getAlarms().add(a2);
 
-        GraphML graphML = GraphMLConverter.toGraphML(graph, Collections.emptyList());
+        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Collections.emptyList());
 
         assertThat(graphML.getGraphs(), hasSize(1));
         GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);
@@ -141,7 +140,7 @@ public class GraphMLConversionTest {
         s1.setId("s1");
         s1.setAlarms(Sets.newHashSet(a1, a2));
 
-        GraphML graphML = GraphMLConverter.toGraphML(graph, Lists.newArrayList(s1));
+        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Lists.newArrayList(s1));
 
         assertThat(graphML.getGraphs(), hasSize(1));
         GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);

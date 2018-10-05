@@ -28,15 +28,5 @@
 
 package org.opennms.oce.features.graph.common;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
-import org.opennms.oce.features.graph.api.GraphProvider;
-
-public interface GraphProviderLocator {
-
-   boolean withGraphProviders(BiConsumer<String, GraphProvider> consumer);
-
-   <V> V withGraphProvider(String graphProviderName, Function<GraphProvider, V> function);
-
+public class VisualEdge {
 }

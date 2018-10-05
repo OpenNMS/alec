@@ -28,6 +28,7 @@
 
 package org.opennms.oce.engine.cluster;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -41,8 +42,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
@@ -398,13 +399,17 @@ public class ClusterEngine implements Engine, GraphProvider {
     }
 
     @Override
-    public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
-        return graphManager.withReadOnlyGraph(consumer);
+    public <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer) {
+        return graphManager.withReadOnlyGraph(g -> {
+            return consumer.apply(g, new ArrayList<>(incidentsById.values()));
+        });
     }
 
     @Override
-    public void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer) {
-        graphManager.withReadOnlyGraph(consumer);
+    public void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer) {
+        graphManager.withReadOnlyGraph(g -> {
+            consumer.accept(g, new ArrayList<>(incidentsById.values()));
+        });
     }
 
     private static class CandidateAlarmWithDistance {

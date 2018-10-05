@@ -58,11 +58,14 @@ public class ListGraphProviders  implements Action {
                     GraphProvider graphProvider = bundleContext.getService((ServiceReference<GraphProvider>)graphProviderRef);
                     final AtomicInteger numVertices = new AtomicInteger();
                     final AtomicInteger numEdges = new AtomicInteger();
-                    graphProvider.withReadOnlyGraph(g -> {
+                    final AtomicInteger numSituations = new AtomicInteger();
+                    graphProvider.withReadOnlyGraph((g,s) -> {
                         numVertices.set(g.getVertexCount());
                         numEdges.set(g.getEdgeCount());
+                        numSituations.set(s.size());
                     });
-                    System.out.printf("%s: %d vertices and %d edges.\n", name, numVertices.get(), numEdges.get());
+                    System.out.printf("%s: %d situations on %d vertices and %d edges.\n", name,
+                            numSituations.get(), numVertices.get(), numEdges.get());
                     bundleContext.ungetService(graphProviderRef);
                     didFindGraphProvider = true;
                 }

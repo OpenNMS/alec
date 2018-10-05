@@ -84,9 +84,7 @@ public class ToGraphML implements Action {
         }
 
         try {
-            final GraphML graphML = graphProvider.withReadOnlyGraph(g -> {
-                return GraphMLConverter.toGraphML(g);
-            });
+            final GraphML graphML = graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML);
             GraphMLWriter.write(graphML, new File(outputFileName));
         } finally {
             bundleContext.ungetService(actualgraphProviderRef);

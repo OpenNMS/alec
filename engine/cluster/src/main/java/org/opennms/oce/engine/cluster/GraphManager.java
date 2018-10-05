@@ -48,7 +48,6 @@ import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.features.graph.api.Edge;
-import org.opennms.oce.features.graph.api.GraphProvider;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +56,7 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Graphs;
 
-public class GraphManager implements GraphProvider {
+public class GraphManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(GraphManager.class);
 
@@ -211,13 +210,11 @@ public class GraphManager implements GraphProvider {
         vertex.addOrUpdateAlarm(alarm);
     }
 
-    @Override
     public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
         final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
         return consumer.apply(readOnlyGraph);
     }
 
-    @Override
     public void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer) {
         final Graph<CEVertex, CEEdge> readOnlyGraph = Graphs.unmodifiableGraph(g);
         consumer.accept(readOnlyGraph);

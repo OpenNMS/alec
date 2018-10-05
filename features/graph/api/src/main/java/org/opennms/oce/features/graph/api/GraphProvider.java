@@ -28,15 +28,20 @@
 
 package org.opennms.oce.features.graph.api;
 
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import org.opennms.oce.datasource.api.Incident;
 
 import edu.uci.ics.jung.graph.Graph;
 
 public interface GraphProvider {
 
-    <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer);
+    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
 
-    void withReadOnlyGraph(Consumer<Graph<? extends Vertex, ? extends Edge>> consumer);
+    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
 
 }

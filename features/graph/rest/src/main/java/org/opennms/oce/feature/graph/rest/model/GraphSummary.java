@@ -26,20 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.api;
+package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.Objects;
 
-import org.opennms.oce.datasource.api.Incident;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import edu.uci.ics.jung.graph.Graph;
+public class GraphSummary {
 
-public interface GraphProvider {
+    private final String name;
+    private final Integer numVertices;
+    private final Integer numEdges;
+    private final Integer numSituations;
 
-    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
+    public GraphSummary(String name) {
+        this(name, null, null, null);
+    }
 
-    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
+    public GraphSummary(String name, Integer numVertices, Integer numEdges, Integer numSituations) {
+        this.name = Objects.requireNonNull(name);
+        this.numVertices = numVertices;
+        this.numEdges = numEdges;
+        this.numSituations = numSituations;
+    }
 
+    public String getName() {
+        return name;
+    }
+
+    @JsonProperty("vertices")
+    public Integer getNumVertices() {
+        return numVertices;
+    }
+
+    @JsonProperty("edges")
+    public Integer getNumEdges() {
+        return numEdges;
+    }
+
+    @JsonProperty("situations")
+    public Integer getNumSituations() {
+        return numSituations;
+    }
 }

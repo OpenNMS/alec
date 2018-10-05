@@ -94,7 +94,11 @@
                                 <feature>oce-features-shell</feature>
                                 <feature>oce-features-graph-api</feature>
                                 <feature>oce-features-graph-graphml</feature>
+                                <feature>oce-features-graph-common</feature>
                                 <feature>oce-features-graph-shell</feature>
+				<!-- Depends on blueprint common
+                                <feature>oce-features-graph-rest</feature>
+				-->
                                 <feature>oce-processor-api</feature>
                                 <!-- Depends on a reference to a IncidentDatasource impl.
                                 <feature>oce-processor-standalone</feature>
@@ -102,6 +106,13 @@
                                 <!-- Depends on a reference to a DomainManagerFactory impl.
                                 <feature>oce-processor-redundant</feature>
                                 -->
+
+                                <!-- 3rd party -->
+                                <feature>kafka-streams</feature>
+                                <feature>commons-text</feature>
+                                <feature>javax.mail</feature>
+                                <feature>moxy</feature>
+                                <feature>jackson-jaxrs</feature>
                             </features>
                         </configuration>
                     </execution>

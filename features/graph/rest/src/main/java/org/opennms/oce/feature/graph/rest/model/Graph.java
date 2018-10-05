@@ -26,20 +26,45 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.api;
+package org.opennms.oce.feature.graph.rest.model;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.features.graph.graphml.GraphMLGraph;
 
-import edu.uci.ics.jung.graph.Graph;
+public class Graph {
+    private final String id;
+    private final List<Vertex> vertices;
+    private final List<Edge> edges;
+    private final Map<String,String> properties = new LinkedHashMap<>();
 
-public interface GraphProvider {
+    public Graph(GraphMLGraph graph) {
+        this.id = graph.getId();
+        this.vertices = graph.getNodes().stream()
+                .map(Vertex::new).collect(Collectors.toList());
+        this.edges = graph.getEdges().stream()
+                .map(Edge::new).collect(Collectors.toList());
+        graph.getProperties().forEach((k,v) -> {
+            properties.put(k,v != null ? v.toString() : null);
+        });
+    }
 
-    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
+    public String getId() {
+        return id;
+    }
 
-    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
+    public List<Vertex> getVertices() {
+        return vertices;
+    }
 
+    public List<Edge> getEdges() {
+        return edges;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 }

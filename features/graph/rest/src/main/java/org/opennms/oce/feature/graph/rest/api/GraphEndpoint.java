@@ -26,20 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.api;
+package org.opennms.oce.feature.graph.rest.api;
 
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
-import org.opennms.oce.datasource.api.Incident;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
-import edu.uci.ics.jung.graph.Graph;
+import org.opennms.oce.feature.graph.rest.model.Graph;
+import org.opennms.oce.feature.graph.rest.model.GraphSummary;
 
-public interface GraphProvider {
+@Path("/")
+public interface GraphEndpoint {
 
-    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
+    @GET
+    @Path("")
+    @Produces("application/json")
+    List<GraphSummary> getAvailableGraphs() throws Exception;
 
-    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
+    @GET
+    @Path("{name}")
+    @Produces("application/json")
+    List<Graph> getGraph(@PathParam("name") String name) throws Exception;
 
 }

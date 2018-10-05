@@ -2,6 +2,7 @@
 <features name="oce-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.kie/kie-karaf-features/${drools.version}/xml/features</repository>
+    <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
     <!-- Datasources -->
 
@@ -97,13 +98,25 @@
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.graphml/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
+    <feature name="oce-features-graph-common" description="OCE :: Features :: Graph :: Service" version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
         <feature dependency="true" version="${project.version}">oce-features-graph-graphml</feature>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.common/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
+        <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.shell/${project.version}</bundle>
     </feature>
-    
+
+    <feature name="oce-features-graph-rest" description="OCE :: Features :: Graph :: REST" version="${project.version}">
+        <feature version="${cxf.version}">cxf</feature>
+        <feature version="${cxf.version}">cxf-jackson</feature>
+        <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.rest/${project.version}</bundle>
+    </feature>
+
     <!-- Situation Processors -->
 
     <feature name="oce-processor-api" description="OCE :: Processor :: API" version="${project.version}">
@@ -170,6 +183,15 @@
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${moxy.version}</bundle>
+    </feature>
+
+    <feature name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
+        <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle >mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
     </feature>
 
 </features>

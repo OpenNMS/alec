@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.shell;
+package org.opennms.oce.features.graph.common;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -48,6 +48,7 @@ import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLGraph;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

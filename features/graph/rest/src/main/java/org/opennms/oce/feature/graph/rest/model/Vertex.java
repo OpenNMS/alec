@@ -26,20 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.api;
+package org.opennms.oce.feature.graph.rest.model;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.features.graph.graphml.GraphMLNode;
 
-import edu.uci.ics.jung.graph.Graph;
+public class Vertex {
 
-public interface GraphProvider {
+    private final String id;
+    private final Map<String,String> properties = new LinkedHashMap<>();
 
-    <V> V withReadOnlyGraph(BiFunction<Graph<? extends Vertex, ? extends Edge>, List<Incident>, V> consumer);
+    public Vertex(GraphMLNode node) {
+        this.id = node.getId();
+        node.getProperties().forEach((k,v) -> {
+            properties.put(k,v != null ? v.toString() : null);
+        });
+    }
 
-    void withReadOnlyGraph(BiConsumer<Graph<? extends Vertex, ? extends Edge>, List<Incident>> consumer);
+    public String getId() {
+        return id;
+    }
 
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 }

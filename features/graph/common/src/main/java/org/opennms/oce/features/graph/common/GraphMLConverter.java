@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.shell;
+package org.opennms.oce.features.graph.common;
 
 import java.util.Collection;
 import java.util.HashMap;

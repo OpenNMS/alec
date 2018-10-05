@@ -35,13 +35,12 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
+import org.opennms.oce.features.graph.common.GraphProviderLocator;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLWriter;
 import org.opennms.oce.features.graph.graphml.InvalidGraphException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 @Command(scope = "graph", name = "write-graphml", description = "Render the graph as GraphML")
 @Service
@@ -57,38 +56,23 @@ public class ToGraphML implements Action {
     private String outputFileName;
 
     @Override
-    public Object execute() throws InvalidSyntaxException, InvalidGraphException {
+    public Object execute() throws InvalidGraphException {
         if ("empty".equalsIgnoreCase(graphProviderName)) {
             final GraphML graphML = new GraphML();
             GraphMLWriter.write(graphML, new File(outputFileName));
             return null;
         }
 
-        ServiceReference<?> actualgraphProviderRef = null;
-        GraphProvider graphProvider = null;
-
-        final ServiceReference<?>[] graphProviderRefs = bundleContext.getAllServiceReferences(GraphProvider.class.getCanonicalName(), null);
-        if (graphProviderRefs != null) {
-            for (ServiceReference<?> graphProviderRef : graphProviderRefs) {
-                final String name = (String)graphProviderRef.getProperty("name");
-                if (graphProviderName.equalsIgnoreCase(name)) {
-                    graphProvider = bundleContext.getService((ServiceReference<GraphProvider>)graphProviderRef);
-                    actualgraphProviderRef = graphProviderRef;
-                }
-            }
-        }
-
-        if (graphProvider == null) {
+        final GraphProviderLocator graphProviderLocator = new GraphProviderLocator(bundleContext);
+        final GraphML graphML = graphProviderLocator.withGraphProvider(graphProviderName,
+                graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
+        if (graphML == null) {
             System.out.printf("No graph provider named '%s' was found.\n", graphProviderName);
             return null;
+        } else {
+            GraphMLWriter.write(graphML, new File(outputFileName));
         }
 
-        try {
-            final GraphML graphML = graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML);
-            GraphMLWriter.write(graphML, new File(outputFileName));
-        } finally {
-            bundleContext.ungetService(actualgraphProviderRef);
-        }
         return null;
     }
 

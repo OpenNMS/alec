@@ -26,29 +26,35 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.features.graph.shell;
+package org.opennms.oce.feature.graph.rest.impl;
 
-
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-import org.apache.karaf.shell.api.action.Action;
-import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.lifecycle.Reference;
-import org.apache.karaf.shell.api.action.lifecycle.Service;
+import javax.ws.rs.NotFoundException;
+
+import org.opennms.oce.feature.graph.rest.api.GraphEndpoint;
+import org.opennms.oce.feature.graph.rest.model.Graph;
+import org.opennms.oce.feature.graph.rest.model.GraphSummary;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
 import org.opennms.oce.features.graph.common.GraphProviderLocator;
+import org.opennms.oce.features.graph.graphml.GraphML;
 import org.osgi.framework.BundleContext;
 
-@Command(scope = "graph", name = "list", description = "Lists the available graph providers.")
-@Service
-public class ListGraphProviders  implements Action {
+public class GraphEndpointImpl implements GraphEndpoint {
 
-    @Reference
-    private BundleContext bundleContext;
+    private final GraphProviderLocator graphProviderLocator;
+
+    public GraphEndpointImpl(BundleContext bundleContext) {
+        this.graphProviderLocator = new GraphProviderLocator(bundleContext);
+    }
 
     @Override
-    public Object execute() {
-        final GraphProviderLocator graphProviderLocator = new GraphProviderLocator(bundleContext);
-        boolean didFindGraphProvider = graphProviderLocator.withGraphProviders((name,graphProvider) -> {
+    public List<GraphSummary> getAvailableGraphs() {
+        final List<GraphSummary> graphSummaries = new LinkedList<>();
+        graphProviderLocator.withGraphProviders((name,graphProvider) -> {
             final AtomicInteger numVertices = new AtomicInteger();
             final AtomicInteger numEdges = new AtomicInteger();
             final AtomicInteger numSituations = new AtomicInteger();
@@ -57,14 +63,20 @@ public class ListGraphProviders  implements Action {
                 numEdges.set(g.getEdgeCount());
                 numSituations.set(s.size());
             });
-            System.out.printf("%s: %d situations on %d vertices and %d edges.\n", name,
-                    numSituations.get(), numVertices.get(), numEdges.get());
+            graphSummaries.add(new GraphSummary(name, numVertices.get(), numEdges.get(), numSituations.get()));
         });
-
-        if (!didFindGraphProvider) {
-            System.out.println("(No graph providers found)");
-        }
-        return null;
+        return graphSummaries;
     }
 
+    @Override
+    public List<Graph> getGraph(String graphProviderName) throws NotFoundException {
+        final GraphML graphML = graphProviderLocator.withGraphProvider(graphProviderName,
+                graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
+        if (graphML == null) {
+            throw new NotFoundException("No graph found with name: " + graphProviderName);
+        }
+        return graphML.getGraphs().stream()
+                .map(Graph::new)
+                .collect(Collectors.toList());
+    }
 }

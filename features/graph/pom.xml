@@ -12,9 +12,9 @@
 
     <modules>
         <module>api</module>
-	<module>shell</module>
+	<module>common</module>
 	<module>graphml</module>
-	<!--
-	<module>rest</module>-->
+	<module>rest</module>
+	<module>shell</module>
     </modules>
 </project>

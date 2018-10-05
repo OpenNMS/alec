@@ -6,8 +6,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.features.graph</groupId>
-    <artifactId>org.opennms.oce.features.graph.shell</artifactId>
-    <name>OCE :: Features :: Graph :: Shell</name>
+    <artifactId>org.opennms.oce.features.graph.common</artifactId>
+    <name>OCE :: Features :: Graph :: Common</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -21,7 +21,6 @@
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Karaf-Commands>*</Karaf-Commands>
                     </instructions>
                 </configuration>
             </plugin>
@@ -31,13 +30,11 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>org.opennms.oce.features.graph.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
-            <version>${karaf.version}</version>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.graphml</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>

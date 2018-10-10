@@ -35,14 +35,48 @@ import org.opennms.oce.features.graph.common.GraphMLConverter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AlarmSummary {
+    private final String id;
     private final String vertexId;
+    private final String inventoryObjectId;
+    private final String inventoryObjectType;
+    private final String summary;
+
+    public AlarmSummary(Alarm alarm) {
+        this(null, alarm);
+    }
 
     public AlarmSummary(Vertex vertex, Alarm alarm) {
-        this.vertexId = GraphMLConverter.getVertexIdFor(vertex, alarm);
+        if (vertex != null) {
+            this.vertexId = GraphMLConverter.getVertexIdFor(vertex, alarm);
+        } else {
+            this.vertexId = null;
+        }
+        this.id = alarm.getId();
+        this.inventoryObjectId = alarm.getInventoryObjectId();
+        this.inventoryObjectType = alarm.getInventoryObjectType();
+        this.summary = alarm.getSummary();
+    }
+
+    public String getId() {
+        return id;
     }
 
     @JsonProperty("vertex-id")
     public String getVertexId() {
         return vertexId;
+    }
+
+    @JsonProperty("inventory-object-id")
+    public String getInventoryObjectId() {
+        return inventoryObjectId;
+    }
+
+    @JsonProperty("inventory-object-type")
+    public String getInventoryObjectType() {
+        return inventoryObjectType;
+    }
+
+    public String getSummary() {
+        return summary;
     }
 }

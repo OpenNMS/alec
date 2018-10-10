@@ -28,6 +28,11 @@
 
 package org.opennms.oce.feature.graph.rest.model;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.features.graph.common.GraphMLConverter;
 
@@ -37,11 +42,16 @@ public class SituationSummary {
     private final String id;
     private final String vertexId;
     private final long creationTime;
+    private final List<AlarmSummary> alarms;
 
     public SituationSummary(Incident situation) {
         this.id = situation.getId();
         this.vertexId = GraphMLConverter.getVertexIdFor(situation);
         this.creationTime = situation.getCreationTime();
+        alarms = situation.getAlarms().stream()
+                .sorted(Comparator.comparing(Alarm::getId))
+                .map(AlarmSummary::new)
+                .collect(Collectors.toList());
     }
 
     public String getId() {
@@ -56,5 +66,10 @@ public class SituationSummary {
     @JsonProperty("creation-time")
     public long getCreationTime() {
         return creationTime;
+    }
+
+    @JsonProperty("alarms")
+    public List<AlarmSummary> getAlarms() {
+        return alarms;
     }
 }

@@ -47,7 +47,8 @@
                         <Import-Package>com.google.common.base,com.google.common.collect</Import-Package>
                         <Export-Package>edu.uci.ics.jung.graph;version="${jung.version}",
                                         edu.uci.ics.jung.algorithms.shortestpath;version="${jung.version}",
-                                        edu.uci.ics.jung.graph.util;version="${jung.version}"</Export-Package>
+                                        edu.uci.ics.jung.algorithms.filters;version="${jung.version}",
+                                        edu.uci.ics.jung.graph.util;version="${jung.version}",</Export-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

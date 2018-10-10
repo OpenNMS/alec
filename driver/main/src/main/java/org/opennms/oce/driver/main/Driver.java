@@ -102,12 +102,17 @@ public class Driver {
         // The get methods on the datasources may block, so we do this on a separate thread
         initThread = new Thread(() -> {
             try {
+                LOG.info("Retrieving inventory...");
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
+                LOG.info("Retrieving alarms...");
                 final List<Alarm> alarms = alarmDatasource.getAlarmsAndRegisterHandler(engine);
+                LOG.info("Retrieving incidents...");
                 final List<Incident> incidents = incidentDatasource.getIncidents();
+                LOG.info("Initializing engine...");
                 engine.init(alarms, incidents, inventory);
 
                 if (engine instanceof GraphProvider) {
+                    LOG.info("Registering graph provider...");
                     final Hashtable<String,Object> props = new Hashtable<>();
                     props.put("name", engineFactory.getName());
                     graphProviderServiceRegistrationRef.set(bundleContext.registerService(GraphProvider.class.getCanonicalName(), engine, props));
@@ -121,6 +126,7 @@ public class Driver {
                 future.completeExceptionally(e);
                 return;
             }
+            LOG.info("Initialization successful. Scheduling tickets every {}ms", engine.getTickResolutionMs());
 
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override

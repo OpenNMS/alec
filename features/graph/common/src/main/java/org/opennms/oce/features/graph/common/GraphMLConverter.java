@@ -76,6 +76,8 @@ public class GraphMLConverter {
     private static final String ONMS_ICON_REDUCTION_KEY = "reduction_key";
     private static final String ONMS_ICON_IP_SERVICE = "IP_service";
 
+    private static final String TIMESTAMP_KEY="timestamp";
+
     private GraphMLConverter(Graph<Vertex,Edge> g, List<Incident> incidents) {
         this.g = Objects.requireNonNull(g);
         this.incidents = Objects.requireNonNull(incidents);
@@ -125,6 +127,7 @@ public class GraphMLConverter {
     private void handleVertex(Vertex v) {
         final GraphMLNode node = new GraphMLNode();
         node.setId(getVertexIdFor(v));
+        node.setProperty(TIMESTAMP_KEY, v.getTimestamp());
         v.getInventoryObject().ifPresent(io -> {
             if (io.getFriendlyName() != null) {
                 node.setProperty(ONMS_GRAPHML_LABEL, io.getFriendlyName());
@@ -182,6 +185,7 @@ public class GraphMLConverter {
     private void handleEdge(Edge e) {
         GraphMLEdge edge = new GraphMLEdge();
         edge.setId(e.getId());
+        edge.setProperty(TIMESTAMP_KEY, e.getTimestamp());
         e.getInventoryObjectPeerRef().ifPresent(peerRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "peer reference"));
         e.getInventoryObjectRelativeRef().ifPresent(relativeRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "relative reference"));
 

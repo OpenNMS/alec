@@ -38,18 +38,20 @@ public class CEEdge implements Edge {
     private final long id;
     private InventoryObjectPeerRef peerRef;
     private InventoryObjectRelativeRef relativeRef;
+    private final long timestamp;
 
     public CEEdge(long id) {
         this.id = id;
+        timestamp = System.currentTimeMillis();
     }
 
     public CEEdge(long id, InventoryObjectPeerRef peerRef) {
-        this.id = id;
+        this(id);
         this.peerRef = peerRef;
     }
 
     public CEEdge(long id, InventoryObjectRelativeRef relativeRef) {
-        this.id = id;
+        this(id);
         this.relativeRef = relativeRef;
     }
 
@@ -66,5 +68,10 @@ public class CEEdge implements Edge {
     @Override
     public Optional<InventoryObjectRelativeRef> getInventoryObjectRelativeRef() {
         return Optional.ofNullable(relativeRef);
+    }
+
+    @Override
+    public long getTimestamp() {
+        return timestamp;
     }
 }

@@ -42,7 +42,7 @@
             <!--
             TODO: This is now tying us to a specific version of OpenNMS. We need a better solution that doesn't do that
             -->
-            <version>23.0.0-SNAPSHOT</version>
+            <version>24.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.datasource</groupId>

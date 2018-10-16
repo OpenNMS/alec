@@ -29,7 +29,6 @@
 package org.opennms.oce.features.graph.common;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,7 +38,6 @@ import java.util.Objects;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.OceGraph;
 import org.opennms.oce.features.graph.api.Vertex;
@@ -76,7 +74,8 @@ public class GraphMLConverter {
     private static final String ONMS_ICON_REDUCTION_KEY = "reduction_key";
     private static final String ONMS_ICON_IP_SERVICE = "IP_service";
 
-    private static final String TIMESTAMP_KEY="timestamp";
+    private static final String CREATED_TIMESTAMP_KEY = "createdTimestamp";
+    private static final String UPDATED_TIMESTAMP_KEY = "updatedTimestamp";
 
     private GraphMLConverter(Graph<Vertex,Edge> g, List<Incident> incidents) {
         this.g = Objects.requireNonNull(g);
@@ -127,7 +126,8 @@ public class GraphMLConverter {
     private void handleVertex(Vertex v) {
         final GraphMLNode node = new GraphMLNode();
         node.setId(getVertexIdFor(v));
-        node.setProperty(TIMESTAMP_KEY, v.getTimestamp());
+        node.setProperty(CREATED_TIMESTAMP_KEY, v.getCreatedTimestamp());
+        node.setProperty(UPDATED_TIMESTAMP_KEY, v.getUpdatedTimestamp());
         v.getInventoryObject().ifPresent(io -> {
             if (io.getFriendlyName() != null) {
                 node.setProperty(ONMS_GRAPHML_LABEL, io.getFriendlyName());
@@ -185,7 +185,7 @@ public class GraphMLConverter {
     private void handleEdge(Edge e) {
         GraphMLEdge edge = new GraphMLEdge();
         edge.setId(e.getId());
-        edge.setProperty(TIMESTAMP_KEY, e.getTimestamp());
+        edge.setProperty(CREATED_TIMESTAMP_KEY, e.getCreatedTimestamp());
         e.getInventoryObjectPeerRef().ifPresent(peerRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "peer reference"));
         e.getInventoryObjectRelativeRef().ifPresent(relativeRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "relative reference"));
 

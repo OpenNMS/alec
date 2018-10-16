@@ -43,10 +43,17 @@ public interface Vertex {
     Optional<InventoryObject> getInventoryObject();
 
     /**
-     * Gets the timestamp of when this vertex was created or last updated.
+     * Gets the timestamp of when this vertex was created.
      * 
      * @return the timestamp
      */
-    long getTimestamp();
+    long getCreatedTimestamp();
+
+    /**
+     * Gets the timestamp of when this vertex was last updated.
+     *
+     * @return the timestamp
+     */
+    long getUpdatedTimestamp();
 
 }

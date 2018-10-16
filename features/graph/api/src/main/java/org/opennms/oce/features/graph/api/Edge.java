@@ -46,6 +46,6 @@ public interface Edge {
      * 
      * @return the timestamp
      */
-    long getTimestamp();
+    long getCreatedTimestamp();
 
 }

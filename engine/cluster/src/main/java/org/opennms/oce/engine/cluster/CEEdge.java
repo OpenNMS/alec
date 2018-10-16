@@ -38,11 +38,11 @@ public class CEEdge implements Edge {
     private final long id;
     private InventoryObjectPeerRef peerRef;
     private InventoryObjectRelativeRef relativeRef;
-    private final long timestamp;
+    private final long createdTimestamp;
 
     public CEEdge(long id) {
         this.id = id;
-        timestamp = System.currentTimeMillis();
+        createdTimestamp = System.currentTimeMillis();
     }
 
     public CEEdge(long id, InventoryObjectPeerRef peerRef) {
@@ -71,7 +71,7 @@ public class CEEdge implements Edge {
     }
 
     @Override
-    public long getTimestamp() {
-        return timestamp;
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
     }
 }

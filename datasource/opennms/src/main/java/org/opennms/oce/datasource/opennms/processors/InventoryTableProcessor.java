@@ -176,11 +176,16 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
             ioBean.setFriendlyName(io.getFriendlyName());
         }
 
+        // TODO: Uncomment when we are setting weights
+//        ioBean.setWeightToParent(io.getWeightToParent());
+
         for (InventoryModelProtos.InventoryObjectPeerRef peerRef : io.getPeerList()) {
             final InventoryObjectPeerRefBean ioPeerRefBean = new InventoryObjectPeerRefBean();
             ioPeerRefBean.setType(peerRef.getType());
             ioPeerRefBean.setId(peerRef.getId());
             ioPeerRefBean.setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A.equals(peerRef.getEndpoint()) ? InventoryObjectPeerEndpoint.A : InventoryObjectPeerEndpoint.Z);
+            // TODO: Uncomment when we are setting weights
+//            ioPeerRefBean.setWeight(peerRef.getWeight());
             ioBean.getPeers().add(ioPeerRefBean);
         }
 
@@ -188,6 +193,8 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
             final InventoryObjectRelativeRefBean ioRelativeRefBean = new InventoryObjectRelativeRefBean();
             ioRelativeRefBean.setId(relativeRef.getId());
             ioRelativeRefBean.setType(relativeRef.getType());
+            // TODO: Uncomment when we are setting weights
+//            ioRelativeRefBean.setWeight(relativeRef.getWeight());
             ioBean.getRelatives().add(ioRelativeRefBean);
         }
 

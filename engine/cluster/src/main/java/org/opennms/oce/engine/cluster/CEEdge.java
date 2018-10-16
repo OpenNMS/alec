@@ -39,22 +39,32 @@ public class CEEdge implements Edge {
     private InventoryObjectPeerRef peerRef;
     private InventoryObjectRelativeRef relativeRef;
     private final long createdTimestamp;
+    private final long weight;
 
-    public CEEdge(long id) {
+    private CEEdge(long id, long weight) {
         this.id = id;
+        this.weight = weight;
         createdTimestamp = System.currentTimeMillis();
     }
 
-    public CEEdge(long id, InventoryObjectPeerRef peerRef) {
-        this(id);
-        this.peerRef = peerRef;
+    public static CEEdge newParentEdge(long id, long weight) {
+        return new CEEdge(id, weight);
     }
 
-    public CEEdge(long id, InventoryObjectRelativeRef relativeRef) {
-        this(id);
-        this.relativeRef = relativeRef;
+    public static CEEdge newPeerEdge(long id, InventoryObjectPeerRef peerRef) {
+        CEEdge peerEdge = new CEEdge(id, peerRef.getWeight());
+        peerEdge.peerRef = peerRef;
+
+        return peerEdge;
     }
 
+    public static CEEdge newRelativeEdge(long id, InventoryObjectRelativeRef relativeRef) {
+        CEEdge relativeEdge = new CEEdge(id, relativeRef.getWeight());
+        relativeEdge.relativeRef = relativeRef;
+
+        return relativeEdge;
+    }
+    
     @Override
     public String getId() {
         return Long.toString(id);
@@ -73,5 +83,10 @@ public class CEEdge implements Edge {
     @Override
     public long getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    @Override
+    public long getWeight() {
+        return weight;
     }
 }

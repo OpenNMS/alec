@@ -219,6 +219,11 @@ public class GraphMLConversionTest {
         public long getCreatedTimestamp() {
             return createdTimestamp;
         }
+
+        @Override
+        public long getWeight() {
+            return 1;
+        }
     }
 
 }

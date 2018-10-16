@@ -42,6 +42,13 @@ public interface Edge {
     Optional<InventoryObjectRelativeRef> getInventoryObjectRelativeRef();
 
     /**
+     * Get the weight associated with this edge.
+     * 
+     * @return the weight for this edge
+     */
+    long getWeight();
+
+    /**
      * Gets the timestamp of when this edge was created.
      * 
      * @return the timestamp

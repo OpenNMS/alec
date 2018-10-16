@@ -78,14 +78,15 @@ import edu.uci.ics.jung.graph.Graph;
  * giving distances which are order of magnitudes smaller for events that are close in time.
  *
  * For measuring distances in space between alarms, we can map the alarms onto a network topology graph and
- * use a standard graph metric which measures the number of hops in the shortest path between the two vertices.
+ * use a standard graph metric which measures the distance in the shortest path between the two vertices.
  *
  * Assume a_i and a_k are some alarms we can define:
  *
  *   d(a_i,a_k) = A(e^|a_i_t - a_k_t| - 1) + B(dg(a_i,a_k) ^2)
  *
  * where a_i_t is the time at which a_i was last observed
- * where dg(a_i,a_k) is the number of hops in the shortest path of the network graph
+ * where dg(a_i,a_k) is the distance of the shortest path of the network graph (the sum of the relative weights of all
+ * edges, based on edge relationship type, composing the shortest path)
  * where A and B are some constants (need to be tweaked based on how important we want to make space vs time)
  */
 public class ClusterEngine implements Engine, GraphProvider {
@@ -207,7 +208,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             if (graphManager.getDidGraphChangeAndReset()) {
                 // If the graph has changed, then reset the cache
                 LOG.debug("{}: Graph has changed. Resetting hop cache.", timestampInMillis);
-                hops.invalidateAll();
+                spatialDistances.invalidateAll();
                 shortestPath = null;
                 disconnectedVertices = graphManager.getDisconnectedVertices();
             }
@@ -347,7 +348,7 @@ public class ClusterEngine implements Engine, GraphProvider {
     private String getDiagnosticTextForIncident(IncidentBean incident) {
         long minTime = Long.MAX_VALUE;
         long maxTime = Long.MIN_VALUE;
-        Long maxNumHops = null;
+        Long maxSpatialDistance = null;
 
         final Set<Long> vertexIds = new HashSet<>();
         for (Alarm alarm : incident.getAlarms()) {
@@ -358,11 +359,12 @@ public class ClusterEngine implements Engine, GraphProvider {
         }
 
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
-            maxNumHops = 0L;
+            maxSpatialDistance = 0L;
             for (Long vertexIdA : vertexIds) {
                 for (Long vertexIdB : vertexIds) {
                     if (!vertexIdA.equals(vertexIdB)) {
-                        maxNumHops = Math.max(maxNumHops, getNumHopsBetween(vertexIdA, vertexIdB));
+                        maxSpatialDistance = Math.max(maxSpatialDistance, getSpatialDistanceBetween(vertexIdA,
+                                vertexIdB));
                     }
                 }
             }
@@ -370,8 +372,8 @@ public class ClusterEngine implements Engine, GraphProvider {
 
         String diagText = String.format("The alarms happened within %.2f seconds across %d vertices",
                 Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
-        if (maxNumHops != null && maxNumHops > 0) {
-            diagText += String.format(" separated by %d hops", maxNumHops);
+        if (maxSpatialDistance != null && maxSpatialDistance > 0) {
+            diagText += String.format(" %d distance apart", maxSpatialDistance);
         }
         diagText += ".";
         return diagText;
@@ -491,8 +493,9 @@ public class ClusterEngine implements Engine, GraphProvider {
                 .map(candidate -> {
                     final double timeB = candidate.getTime();
                     final long vertexIdB = getVertexIdForAlarm(candidate);
-                    final int numHops = vertexIdA == vertexIdB ? 0 : getNumHopsBetween(vertexIdA, vertexIdB);
-                    final double distance = distanceMeasure.compute(timeA, timeB, numHops);
+                    final int spatialDistance = vertexIdA == vertexIdB ? 0 : getSpatialDistanceBetween(vertexIdA,
+                            vertexIdB);
+                    final double distance = distanceMeasure.compute(timeA, timeB, spatialDistance);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
                 .min(Comparator.comparingDouble(CandidateAlarmWithDistance::getDistance)
@@ -500,16 +503,16 @@ public class ClusterEngine implements Engine, GraphProvider {
                 .orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
     }
 
-    protected int getNumHopsBetween(long vertexIdA, long vertexIdB) {
+    protected int getSpatialDistanceBetween(long vertexIdA, long vertexIdB) {
         final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
         try {
-            return hops.get(key);
+            return spatialDistances.get(key);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private final LoadingCache<EdgeKey, Integer> hops = CacheBuilder.newBuilder()
+    private final LoadingCache<EdgeKey, Integer> spatialDistances = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .build(new CacheLoader<EdgeKey, Integer>() {
                         public Integer load(EdgeKey key) {
@@ -526,9 +529,17 @@ public class ClusterEngine implements Engine, GraphProvider {
                             }
 
                             if (shortestPath == null) {
-                                shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), true);
+                                shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight,true);
                             }
-                            return shortestPath.getPath(vertexA, vertexB).size();
+
+                            Number distance = shortestPath.getDistance(vertexA, vertexB);
+
+                            if (distance == null) {
+                                // No path exists
+                                return Integer.MAX_VALUE;
+                            } else {
+                                return distance.intValue();
+                            }
                         }
                     });
 

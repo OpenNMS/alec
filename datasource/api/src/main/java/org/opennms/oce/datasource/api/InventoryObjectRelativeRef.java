@@ -34,4 +34,6 @@ public interface InventoryObjectRelativeRef {
 
     String getId();
 
+    long getWeight();
+
 }

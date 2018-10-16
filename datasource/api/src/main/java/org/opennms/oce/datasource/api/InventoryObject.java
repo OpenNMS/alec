@@ -47,5 +47,7 @@ public interface InventoryObject {
     List<? extends InventoryObjectPeerRef> getPeers();
 
     List<? extends InventoryObjectRelativeRef> getRelatives();
+    
+    long getWeightToParent();
 
 }

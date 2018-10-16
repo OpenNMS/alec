@@ -44,6 +44,7 @@ public class InventoryObjectBean implements InventoryObject {
     private boolean isTopLevel;
     private List<InventoryObjectPeerRefBean> peers = new ArrayList<>();
     private List<InventoryObjectRelativeRefBean> relatives = new ArrayList<>();
+    private long weightToParent = 1;
 
     public InventoryObjectBean() {}
 
@@ -135,6 +136,15 @@ public class InventoryObjectBean implements InventoryObject {
             relatives = new ArrayList<>();
         }
         relatives.add(relRef);
+    }
+
+    @Override
+    public long getWeightToParent() {
+        return weightToParent;
+    }
+
+    public void setWeightToParent(long weightToParent) {
+        this.weightToParent = weightToParent;
     }
 
     public boolean isTopLevel() {

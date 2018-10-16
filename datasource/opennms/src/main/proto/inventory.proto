@@ -11,11 +11,13 @@ message InventoryObjectPeerRef {
   string type = 1;
   string id = 2;
   InventoryObjectPeerEndpoint endpoint = 3;
+  uint64 weight = 4;
 }
 
 message InventoryObjectRelativeRef {
   string type = 1;
   string id = 2;
+  uint64 weight = 3;
 }
 
 message InventoryObject {
@@ -25,6 +27,7 @@ message InventoryObject {
   string parent_type = 4;
   string parent_id = 5;
   string friendly_name = 6;
+  uint64 weight_to_parent = 7;
 
   repeated InventoryObjectPeerRef peer = 10;
   repeated InventoryObjectRelativeRef relative = 11;

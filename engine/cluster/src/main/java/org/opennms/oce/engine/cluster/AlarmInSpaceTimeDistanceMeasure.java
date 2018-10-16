@@ -55,24 +55,24 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         final long vertexIdA = (long)a[1];
         final long vertexIdB = (long)b[1];
 
-        int numHops = 0;
+        int spatialDistance = 0;
         if (vertexIdA != vertexIdB) {
-            numHops = clusterEngine.getNumHopsBetween(vertexIdA, vertexIdB);
-            if (numHops == 0) {
+            spatialDistance = clusterEngine.getSpatialDistanceBetween(vertexIdA, vertexIdB);
+            if (spatialDistance == 0) {
                 // No path
-                numHops = Integer.MAX_VALUE;
+                spatialDistance = Integer.MAX_VALUE;
             }
         }
 
-        final double distance = compute(timeA, timeB, numHops);
+        final double distance = compute(timeA, timeB, spatialDistance);
         if (LOG.isTraceEnabled()) {
-            LOG.trace("v1: {}, v2: {}, d({},{},{}) = {}", vertexIdA, vertexIdB, timeA, timeB, numHops, distance);
+            LOG.trace("v1: {}, v2: {}, d({},{},{}) = {}", vertexIdA, vertexIdB, timeA, timeB, spatialDistance, distance);
         }
         return distance;
     }
 
-    public double compute(double timeA, double timeB, int numHops) {
-        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * numHops);
+    public double compute(double timeA, double timeB, int spatialDistance) {
+        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * spatialDistance);
     }
 
 }

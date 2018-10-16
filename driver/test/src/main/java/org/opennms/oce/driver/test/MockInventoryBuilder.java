@@ -40,6 +40,9 @@ import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
 public class MockInventoryBuilder {
 
     private final List<InventoryObject> inventoryObjects = new ArrayList<>();
+    public static final long PARENT_WEIGHT = 1;
+    public static final long PEER_WEIGHT = 3;
+    public static final long RELATIVE_WEIGHT = 2;
 
     public MockInventoryBuilder withInventoryObject(MockInventoryType type, String id) {
         return withInventoryObject(type.getType(), id);
@@ -59,6 +62,7 @@ public class MockInventoryBuilder {
         iob.setId(id);
         iob.setParentType(parentType);
         iob.setParentId(parentId);
+        iob.setWeightToParent(PARENT_WEIGHT);
         inventoryObjects.add(iob);
         return this;
     }
@@ -74,12 +78,14 @@ public class MockInventoryBuilder {
         peerRefA.setType(typeA);
         peerRefA.setId(idA);
         peerRefA.setEndpoint(InventoryObjectPeerEndpoint.A);
+        peerRefA.setWeight(PEER_WEIGHT);
         iob.getPeers().add(peerRefA);
 
         InventoryObjectPeerRefBean peerRefZ = new InventoryObjectPeerRefBean();
         peerRefZ.setType(typeZ);
         peerRefZ.setId(idZ);
         peerRefZ.setEndpoint(InventoryObjectPeerEndpoint.Z);
+        peerRefZ.setWeight(PEER_WEIGHT);
         iob.getPeers().add(peerRefZ);
 
         return this;
@@ -95,6 +101,7 @@ public class MockInventoryBuilder {
         InventoryObjectRelativeRefBean relativeRef = new InventoryObjectRelativeRefBean();
         relativeRef.setType(relativeType);
         relativeRef.setId(relativeId);
+        relativeRef.setWeight(RELATIVE_WEIGHT);
         iob.getRelatives().add(relativeRef);
 
         return this;

@@ -41,4 +41,11 @@ public interface Edge {
 
     Optional<InventoryObjectRelativeRef> getInventoryObjectRelativeRef();
 
+    /**
+     * Gets the timestamp of when this edge was created.
+     * 
+     * @return the timestamp
+     */
+    long getCreatedTimestamp();
+
 }

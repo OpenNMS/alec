@@ -151,9 +151,13 @@ public class GraphMLConversionTest {
     private static class MyVertex implements Vertex {
         private final String id;
         private List<Alarm> alarms = new ArrayList<>();
+        private final long createdTimestamp;
+        private long updatedTimestamp;
 
         MyVertex(String id) {
             this.id = Objects.requireNonNull(id);
+            createdTimestamp = System.currentTimeMillis();
+            updatedTimestamp = createdTimestamp;
         }
 
         @Override
@@ -168,19 +172,32 @@ public class GraphMLConversionTest {
 
         public void setAlarms(List<Alarm> alarms) {
             this.alarms = alarms;
+            updatedTimestamp = System.currentTimeMillis();
         }
 
         @Override
         public Optional<InventoryObject> getInventoryObject() {
             return Optional.empty();
         }
+
+        @Override
+        public long getCreatedTimestamp() {
+            return createdTimestamp;
+        }
+
+        @Override
+        public long getUpdatedTimestamp() {
+            return updatedTimestamp;
+        }
     }
 
     private static class MyEdge implements Edge {
         private final String id;
+        private final long createdTimestamp;
 
         MyEdge(String id) {
             this.id = Objects.requireNonNull(id);
+            createdTimestamp = System.currentTimeMillis();
         }
 
         @Override
@@ -196,6 +213,11 @@ public class GraphMLConversionTest {
         @Override
         public Optional<InventoryObjectRelativeRef> getInventoryObjectRelativeRef() {
             return Optional.empty();
+        }
+
+        @Override
+        public long getCreatedTimestamp() {
+            return createdTimestamp;
         }
     }
 

@@ -50,6 +50,8 @@ public class CEVertex implements Vertex {
     private final InventoryObject inventoryObject;
     private final ResourceKey resourceKey;
     private final Map<String, Alarm> alarmsById = new LinkedHashMap<>();
+    private final long createdTimestamp;
+    private long updatedTimestamp;
 
     public CEVertex(long id, ResourceKey resourceKey) {
         this(id, resourceKey, null);
@@ -59,6 +61,8 @@ public class CEVertex implements Vertex {
         this.id = id;
         this.resourceKey = Objects.requireNonNull(resourceKey);
         this.inventoryObject = inventoryObject;
+        createdTimestamp = System.currentTimeMillis();
+        updatedTimestamp = createdTimestamp;
     }
 
     public ResourceKey getResourceKey() {
@@ -67,6 +71,7 @@ public class CEVertex implements Vertex {
 
     public void addOrUpdateAlarm(Alarm alarm) {
         alarmsById.put(alarm.getId(), alarm);
+        updatedTimestamp = System.currentTimeMillis();
     }
 
     @Override
@@ -82,6 +87,16 @@ public class CEVertex implements Vertex {
     @Override
     public String getId() {
         return Long.toString(id);
+    }
+
+    @Override
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    @Override
+    public long getUpdatedTimestamp() {
+        return updatedTimestamp;
     }
 
     public long getNumericId() {

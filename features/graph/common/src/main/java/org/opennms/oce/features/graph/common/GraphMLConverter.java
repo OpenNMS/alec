@@ -74,6 +74,7 @@ public class GraphMLConverter {
     private static final String ONMS_ICON_REDUCTION_KEY = "reduction_key";
     private static final String ONMS_ICON_IP_SERVICE = "IP_service";
 
+    private static final String EDGE_WEIGHT_KEY = "edgeWeight";
     private static final String CREATED_TIMESTAMP_KEY = "createdTimestamp";
     private static final String UPDATED_TIMESTAMP_KEY = "updatedTimestamp";
 
@@ -186,6 +187,7 @@ public class GraphMLConverter {
         GraphMLEdge edge = new GraphMLEdge();
         edge.setId(e.getId());
         edge.setProperty(CREATED_TIMESTAMP_KEY, e.getCreatedTimestamp());
+        edge.setProperty(EDGE_WEIGHT_KEY, e.getWeight());
         e.getInventoryObjectPeerRef().ifPresent(peerRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "peer reference"));
         e.getInventoryObjectRelativeRef().ifPresent(relativeRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "relative reference"));
 

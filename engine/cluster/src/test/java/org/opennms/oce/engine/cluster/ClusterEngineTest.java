@@ -36,8 +36,10 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -275,6 +277,52 @@ public class ClusterEngineTest implements IncidentHandler {
         assertThat(incidents, hasSize(1));
         assertThat(Iterables.getFirst(incidents, null), sameInstance(existingIncident));
         assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
+    }
+
+    @Test
+    public void testWeights() {
+        // Initial graph should be empty
+        Graph<CEVertex, CEEdge> graph = engine.getGraph();
+        assertThat(graph.getVertexCount(), equalTo(0));
+        assertThat(graph.getEdgeCount(), equalTo(0));
+
+        // Add vertices and edges to the graph
+        engine.onInventoryAdded(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.COMPONENT, "a")
+                .withInventoryObject(MockInventoryType.COMPONENT, "b", MockInventoryType.COMPONENT, "a")
+                .withInventoryObject(MockInventoryType.COMPONENT, "c")
+                .withInventoryObject(MockInventoryType.COMPONENT, "d")
+                .withInventoryObject(MockInventoryType.COMPONENT, "e")
+                .withPeerRelation(MockInventoryType.COMPONENT, "c", MockInventoryType.COMPONENT, "b",
+                        MockInventoryType.COMPONENT, "d")
+                .withRelativeRelation(MockInventoryType.COMPONENT, "e", MockInventoryType.COMPONENT, "d")
+                .getInventory());
+
+        // A-B is a parent relationship
+        assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("a"), getVertexIdForComponentId("b")),
+                equalTo((int) MockInventoryBuilder.PARENT_WEIGHT));
+
+        // B-C-D is a peer relationship
+        assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("b"), getVertexIdForComponentId("c")),
+                equalTo((int) MockInventoryBuilder.PEER_WEIGHT));
+        assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("b"), getVertexIdForComponentId("d")),
+                equalTo(2 * (int) MockInventoryBuilder.PEER_WEIGHT));
+
+        // D-E is a relative relationship
+        assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("d"), getVertexIdForComponentId("e")),
+                equalTo((int) MockInventoryBuilder.RELATIVE_WEIGHT));
+    }
+
+    private int getVertexIdForComponentId(String componentId) {
+        Optional<CEVertex> vertex = engine.getGraph().getVertices().stream()
+                .filter(vert -> vert.getResourceKey().getTokens().contains(componentId))
+                .findFirst();
+
+        if (vertex.isPresent()) {
+            return Integer.parseInt(vertex.get().getId());
+        }
+
+        throw new RuntimeException("Vertex could not be found for component id: " + componentId);
     }
 
     @Override

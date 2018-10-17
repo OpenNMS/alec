@@ -144,6 +144,11 @@ public final class InventoryModelProtos {
      * <code>.InventoryObjectPeerEndpoint endpoint = 3;</code>
      */
     InventoryModelProtos.InventoryObjectPeerEndpoint getEndpoint();
+
+    /**
+     * <code>uint64 weight = 4;</code>
+     */
+    long getWeight();
   }
   /**
    * Protobuf type {@code InventoryObjectPeerRef}
@@ -161,6 +166,7 @@ public final class InventoryModelProtos {
       type_ = "";
       id_ = "";
       endpoint_ = 0;
+      weight_ = 0L;
     }
 
     @java.lang.Override
@@ -210,6 +216,11 @@ public final class InventoryModelProtos {
               int rawValue = input.readEnum();
 
               endpoint_ = rawValue;
+              break;
+            }
+            case 32: {
+
+              weight_ = input.readUInt64();
               break;
             }
           }
@@ -320,6 +331,15 @@ public final class InventoryModelProtos {
       return result == null ? InventoryModelProtos.InventoryObjectPeerEndpoint.UNRECOGNIZED : result;
     }
 
+    public static final int WEIGHT_FIELD_NUMBER = 4;
+    private long weight_;
+    /**
+     * <code>uint64 weight = 4;</code>
+     */
+    public long getWeight() {
+      return weight_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -341,6 +361,9 @@ public final class InventoryModelProtos {
       if (endpoint_ != InventoryModelProtos.InventoryObjectPeerEndpoint.A.getNumber()) {
         output.writeEnum(3, endpoint_);
       }
+      if (weight_ != 0L) {
+        output.writeUInt64(4, weight_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -358,6 +381,10 @@ public final class InventoryModelProtos {
       if (endpoint_ != InventoryModelProtos.InventoryObjectPeerEndpoint.A.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, endpoint_);
+      }
+      if (weight_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(4, weight_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -380,6 +407,8 @@ public final class InventoryModelProtos {
       result = result && getId()
           .equals(other.getId());
       result = result && endpoint_ == other.endpoint_;
+      result = result && (getWeight()
+          == other.getWeight());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -397,6 +426,9 @@ public final class InventoryModelProtos {
       hash = (53 * hash) + getId().hashCode();
       hash = (37 * hash) + ENDPOINT_FIELD_NUMBER;
       hash = (53 * hash) + endpoint_;
+      hash = (37 * hash) + WEIGHT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getWeight());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -509,7 +541,7 @@ public final class InventoryModelProtos {
                 InventoryModelProtos.InventoryObjectPeerRef.class, InventoryModelProtos.InventoryObjectPeerRef.Builder.class);
       }
 
-      // Construct using org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+      // Construct using InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -531,6 +563,8 @@ public final class InventoryModelProtos {
         id_ = "";
 
         endpoint_ = 0;
+
+        weight_ = 0L;
 
         return this;
       }
@@ -557,6 +591,7 @@ public final class InventoryModelProtos {
         result.type_ = type_;
         result.id_ = id_;
         result.endpoint_ = endpoint_;
+        result.weight_ = weight_;
         onBuilt();
         return result;
       }
@@ -608,6 +643,9 @@ public final class InventoryModelProtos {
         }
         if (other.endpoint_ != 0) {
           setEndpointValue(other.getEndpointValue());
+        }
+        if (other.getWeight() != 0L) {
+          setWeight(other.getWeight());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -817,6 +855,32 @@ public final class InventoryModelProtos {
         onChanged();
         return this;
       }
+
+      private long weight_ ;
+      /**
+       * <code>uint64 weight = 4;</code>
+       */
+      public long getWeight() {
+        return weight_;
+      }
+      /**
+       * <code>uint64 weight = 4;</code>
+       */
+      public Builder setWeight(long value) {
+        
+        weight_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 weight = 4;</code>
+       */
+      public Builder clearWeight() {
+        
+        weight_ = 0L;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFieldsProto3(unknownFields);
@@ -889,6 +953,11 @@ public final class InventoryModelProtos {
      */
     com.google.protobuf.ByteString
         getIdBytes();
+
+    /**
+     * <code>uint64 weight = 3;</code>
+     */
+    long getWeight();
   }
   /**
    * Protobuf type {@code InventoryObjectRelativeRef}
@@ -905,6 +974,7 @@ public final class InventoryModelProtos {
     private InventoryObjectRelativeRef() {
       type_ = "";
       id_ = "";
+      weight_ = 0L;
     }
 
     @java.lang.Override
@@ -948,6 +1018,11 @@ public final class InventoryModelProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               id_ = s;
+              break;
+            }
+            case 24: {
+
+              weight_ = input.readUInt64();
               break;
             }
           }
@@ -1042,6 +1117,15 @@ public final class InventoryModelProtos {
       }
     }
 
+    public static final int WEIGHT_FIELD_NUMBER = 3;
+    private long weight_;
+    /**
+     * <code>uint64 weight = 3;</code>
+     */
+    public long getWeight() {
+      return weight_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1060,6 +1144,9 @@ public final class InventoryModelProtos {
       if (!getIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, id_);
       }
+      if (weight_ != 0L) {
+        output.writeUInt64(3, weight_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1073,6 +1160,10 @@ public final class InventoryModelProtos {
       }
       if (!getIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, id_);
+      }
+      if (weight_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(3, weight_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1094,6 +1185,8 @@ public final class InventoryModelProtos {
           .equals(other.getType());
       result = result && getId()
           .equals(other.getId());
+      result = result && (getWeight()
+          == other.getWeight());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -1109,6 +1202,9 @@ public final class InventoryModelProtos {
       hash = (53 * hash) + getType().hashCode();
       hash = (37 * hash) + ID_FIELD_NUMBER;
       hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + WEIGHT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getWeight());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1221,7 +1317,7 @@ public final class InventoryModelProtos {
                 InventoryModelProtos.InventoryObjectRelativeRef.class, InventoryModelProtos.InventoryObjectRelativeRef.Builder.class);
       }
 
-      // Construct using org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjectRelativeRef.newBuilder()
+      // Construct using InventoryModelProtos.InventoryObjectRelativeRef.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1241,6 +1337,8 @@ public final class InventoryModelProtos {
         type_ = "";
 
         id_ = "";
+
+        weight_ = 0L;
 
         return this;
       }
@@ -1266,6 +1364,7 @@ public final class InventoryModelProtos {
         InventoryModelProtos.InventoryObjectRelativeRef result = new InventoryModelProtos.InventoryObjectRelativeRef(this);
         result.type_ = type_;
         result.id_ = id_;
+        result.weight_ = weight_;
         onBuilt();
         return result;
       }
@@ -1314,6 +1413,9 @@ public final class InventoryModelProtos {
         if (!other.getId().isEmpty()) {
           id_ = other.id_;
           onChanged();
+        }
+        if (other.getWeight() != 0L) {
+          setWeight(other.getWeight());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1479,6 +1581,32 @@ public final class InventoryModelProtos {
         onChanged();
         return this;
       }
+
+      private long weight_ ;
+      /**
+       * <code>uint64 weight = 3;</code>
+       */
+      public long getWeight() {
+        return weight_;
+      }
+      /**
+       * <code>uint64 weight = 3;</code>
+       */
+      public Builder setWeight(long value) {
+        
+        weight_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 weight = 3;</code>
+       */
+      public Builder clearWeight() {
+        
+        weight_ = 0L;
+        onChanged();
+        return this;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFieldsProto3(unknownFields);
@@ -1593,6 +1721,11 @@ public final class InventoryModelProtos {
         getFriendlyNameBytes();
 
     /**
+     * <code>uint64 weight_to_parent = 7;</code>
+     */
+    long getWeightToParent();
+
+    /**
      * <code>repeated .InventoryObjectPeerRef peer = 10;</code>
      */
     java.util.List<InventoryModelProtos.InventoryObjectPeerRef>
@@ -1659,6 +1792,7 @@ public final class InventoryModelProtos {
       parentType_ = "";
       parentId_ = "";
       friendlyName_ = "";
+      weightToParent_ = 0L;
       peer_ = java.util.Collections.emptyList();
       relative_ = java.util.Collections.emptyList();
     }
@@ -1730,19 +1864,24 @@ public final class InventoryModelProtos {
               friendlyName_ = s;
               break;
             }
+            case 56: {
+
+              weightToParent_ = input.readUInt64();
+              break;
+            }
             case 82: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
                 peer_ = new java.util.ArrayList<InventoryModelProtos.InventoryObjectPeerRef>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000080;
               }
               peer_.add(
                   input.readMessage(InventoryModelProtos.InventoryObjectPeerRef.parser(), extensionRegistry));
               break;
             }
             case 90: {
-              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
                 relative_ = new java.util.ArrayList<InventoryModelProtos.InventoryObjectRelativeRef>();
-                mutable_bitField0_ |= 0x00000080;
+                mutable_bitField0_ |= 0x00000100;
               }
               relative_.add(
                   input.readMessage(InventoryModelProtos.InventoryObjectRelativeRef.parser(), extensionRegistry));
@@ -1756,10 +1895,10 @@ public final class InventoryModelProtos {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           peer_ = java.util.Collections.unmodifiableList(peer_);
         }
-        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
           relative_ = java.util.Collections.unmodifiableList(relative_);
         }
         this.unknownFields = unknownFields.build();
@@ -1983,6 +2122,15 @@ public final class InventoryModelProtos {
       }
     }
 
+    public static final int WEIGHT_TO_PARENT_FIELD_NUMBER = 7;
+    private long weightToParent_;
+    /**
+     * <code>uint64 weight_to_parent = 7;</code>
+     */
+    public long getWeightToParent() {
+      return weightToParent_;
+    }
+
     public static final int PEER_FIELD_NUMBER = 10;
     private java.util.List<InventoryModelProtos.InventoryObjectPeerRef> peer_;
     /**
@@ -2083,6 +2231,9 @@ public final class InventoryModelProtos {
       if (!getFriendlyNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, friendlyName_);
       }
+      if (weightToParent_ != 0L) {
+        output.writeUInt64(7, weightToParent_);
+      }
       for (int i = 0; i < peer_.size(); i++) {
         output.writeMessage(10, peer_.get(i));
       }
@@ -2114,6 +2265,10 @@ public final class InventoryModelProtos {
       }
       if (!getFriendlyNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, friendlyName_);
+      }
+      if (weightToParent_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(7, weightToParent_);
       }
       for (int i = 0; i < peer_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -2151,6 +2306,8 @@ public final class InventoryModelProtos {
           .equals(other.getParentId());
       result = result && getFriendlyName()
           .equals(other.getFriendlyName());
+      result = result && (getWeightToParent()
+          == other.getWeightToParent());
       result = result && getPeerList()
           .equals(other.getPeerList());
       result = result && getRelativeList()
@@ -2178,6 +2335,9 @@ public final class InventoryModelProtos {
       hash = (53 * hash) + getParentId().hashCode();
       hash = (37 * hash) + FRIENDLY_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getFriendlyName().hashCode();
+      hash = (37 * hash) + WEIGHT_TO_PARENT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getWeightToParent());
       if (getPeerCount() > 0) {
         hash = (37 * hash) + PEER_FIELD_NUMBER;
         hash = (53 * hash) + getPeerList().hashCode();
@@ -2329,15 +2489,17 @@ public final class InventoryModelProtos {
 
         friendlyName_ = "";
 
+        weightToParent_ = 0L;
+
         if (peerBuilder_ == null) {
           peer_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
         } else {
           peerBuilder_.clear();
         }
         if (relativeBuilder_ == null) {
           relative_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000100);
         } else {
           relativeBuilder_.clear();
         }
@@ -2371,19 +2533,20 @@ public final class InventoryModelProtos {
         result.parentType_ = parentType_;
         result.parentId_ = parentId_;
         result.friendlyName_ = friendlyName_;
+        result.weightToParent_ = weightToParent_;
         if (peerBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          if (((bitField0_ & 0x00000080) == 0x00000080)) {
             peer_ = java.util.Collections.unmodifiableList(peer_);
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000080);
           }
           result.peer_ = peer_;
         } else {
           result.peer_ = peerBuilder_.build();
         }
         if (relativeBuilder_ == null) {
-          if (((bitField0_ & 0x00000080) == 0x00000080)) {
+          if (((bitField0_ & 0x00000100) == 0x00000100)) {
             relative_ = java.util.Collections.unmodifiableList(relative_);
-            bitField0_ = (bitField0_ & ~0x00000080);
+            bitField0_ = (bitField0_ & ~0x00000100);
           }
           result.relative_ = relative_;
         } else {
@@ -2455,11 +2618,14 @@ public final class InventoryModelProtos {
           friendlyName_ = other.friendlyName_;
           onChanged();
         }
+        if (other.getWeightToParent() != 0L) {
+          setWeightToParent(other.getWeightToParent());
+        }
         if (peerBuilder_ == null) {
           if (!other.peer_.isEmpty()) {
             if (peer_.isEmpty()) {
               peer_ = other.peer_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
             } else {
               ensurePeerIsMutable();
               peer_.addAll(other.peer_);
@@ -2472,7 +2638,7 @@ public final class InventoryModelProtos {
               peerBuilder_.dispose();
               peerBuilder_ = null;
               peer_ = other.peer_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
               peerBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getPeerFieldBuilder() : null;
@@ -2485,7 +2651,7 @@ public final class InventoryModelProtos {
           if (!other.relative_.isEmpty()) {
             if (relative_.isEmpty()) {
               relative_ = other.relative_;
-              bitField0_ = (bitField0_ & ~0x00000080);
+              bitField0_ = (bitField0_ & ~0x00000100);
             } else {
               ensureRelativeIsMutable();
               relative_.addAll(other.relative_);
@@ -2498,7 +2664,7 @@ public final class InventoryModelProtos {
               relativeBuilder_.dispose();
               relativeBuilder_ = null;
               relative_ = other.relative_;
-              bitField0_ = (bitField0_ & ~0x00000080);
+              bitField0_ = (bitField0_ & ~0x00000100);
               relativeBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getRelativeFieldBuilder() : null;
@@ -2949,12 +3115,38 @@ public final class InventoryModelProtos {
         return this;
       }
 
+      private long weightToParent_ ;
+      /**
+       * <code>uint64 weight_to_parent = 7;</code>
+       */
+      public long getWeightToParent() {
+        return weightToParent_;
+      }
+      /**
+       * <code>uint64 weight_to_parent = 7;</code>
+       */
+      public Builder setWeightToParent(long value) {
+        
+        weightToParent_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 weight_to_parent = 7;</code>
+       */
+      public Builder clearWeightToParent() {
+        
+        weightToParent_ = 0L;
+        onChanged();
+        return this;
+      }
+
       private java.util.List<InventoryModelProtos.InventoryObjectPeerRef> peer_ =
         java.util.Collections.emptyList();
       private void ensurePeerIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
           peer_ = new java.util.ArrayList<InventoryModelProtos.InventoryObjectPeerRef>(peer_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000080;
          }
       }
 
@@ -3104,7 +3296,7 @@ public final class InventoryModelProtos {
       public Builder clearPeer() {
         if (peerBuilder_ == null) {
           peer_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
           onChanged();
         } else {
           peerBuilder_.clear();
@@ -3181,7 +3373,7 @@ public final class InventoryModelProtos {
           peerBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               InventoryModelProtos.InventoryObjectPeerRef, InventoryModelProtos.InventoryObjectPeerRef.Builder, InventoryModelProtos.InventoryObjectPeerRefOrBuilder>(
                   peer_,
-                  ((bitField0_ & 0x00000040) == 0x00000040),
+                  ((bitField0_ & 0x00000080) == 0x00000080),
                   getParentForChildren(),
                   isClean());
           peer_ = null;
@@ -3192,9 +3384,9 @@ public final class InventoryModelProtos {
       private java.util.List<InventoryModelProtos.InventoryObjectRelativeRef> relative_ =
         java.util.Collections.emptyList();
       private void ensureRelativeIsMutable() {
-        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
           relative_ = new java.util.ArrayList<InventoryModelProtos.InventoryObjectRelativeRef>(relative_);
-          bitField0_ |= 0x00000080;
+          bitField0_ |= 0x00000100;
          }
       }
 
@@ -3344,7 +3536,7 @@ public final class InventoryModelProtos {
       public Builder clearRelative() {
         if (relativeBuilder_ == null) {
           relative_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000100);
           onChanged();
         } else {
           relativeBuilder_.clear();
@@ -3421,7 +3613,7 @@ public final class InventoryModelProtos {
           relativeBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               InventoryModelProtos.InventoryObjectRelativeRef, InventoryModelProtos.InventoryObjectRelativeRef.Builder, InventoryModelProtos.InventoryObjectRelativeRefOrBuilder>(
                   relative_,
-                  ((bitField0_ & 0x00000080) == 0x00000080),
+                  ((bitField0_ & 0x00000100) == 0x00000100),
                   getParentForChildren(),
                   isClean());
           relative_ = null;
@@ -4330,21 +4522,23 @@ public final class InventoryModelProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\017inventory.proto\"b\n\026InventoryObjectPeer" +
+      "\n\017inventory.proto\"r\n\026InventoryObjectPeer" +
       "Ref\022\014\n\004type\030\001 \001(\t\022\n\n\002id\030\002 \001(\t\022.\n\010endpoin" +
-      "t\030\003 \001(\0162\034.InventoryObjectPeerEndpoint\"6\n" +
-      "\032InventoryObjectRelativeRef\022\014\n\004type\030\001 \001(" +
-      "\t\022\n\n\002id\030\002 \001(\t\"\321\001\n\017InventoryObject\022\014\n\004typ" +
-      "e\030\001 \001(\t\022\n\n\002id\030\002 \001(\t\022\017\n\007subtype\030\003 \001(\t\022\023\n\013" +
-      "parent_type\030\004 \001(\t\022\021\n\tparent_id\030\005 \001(\t\022\025\n\r" +
-      "friendly_name\030\006 \001(\t\022%\n\004peer\030\n \003(\0132\027.Inve" +
-      "ntoryObjectPeerRef\022-\n\010relative\030\013 \003(\0132\033.I" +
-      "nventoryObjectRelativeRef\"R\n\020InventoryOb" +
-      "jects\022*\n\020inventory_object\030\001 \003(\0132\020.Invent" +
-      "oryObject\022\022\n\nexpires_at\030\014 \001(\004*+\n\033Invento" +
-      "ryObjectPeerEndpoint\022\005\n\001A\020\000\022\005\n\001Z\020\001BJ\n2or" +
-      "g.opennms.oce.datasource.opennms.invento" +
-      "ry.modelB\024InventoryModelProtosb\006proto3"
+      "t\030\003 \001(\0162\034.InventoryObjectPeerEndpoint\022\016\n" +
+      "\006weight\030\004 \001(\004\"F\n\032InventoryObjectRelative" +
+      "Ref\022\014\n\004type\030\001 \001(\t\022\n\n\002id\030\002 \001(\t\022\016\n\006weight\030" +
+      "\003 \001(\004\"\353\001\n\017InventoryObject\022\014\n\004type\030\001 \001(\t\022" +
+      "\n\n\002id\030\002 \001(\t\022\017\n\007subtype\030\003 \001(\t\022\023\n\013parent_t" +
+      "ype\030\004 \001(\t\022\021\n\tparent_id\030\005 \001(\t\022\025\n\rfriendly" +
+      "_name\030\006 \001(\t\022\030\n\020weight_to_parent\030\007 \001(\004\022%\n" +
+      "\004peer\030\n \003(\0132\027.InventoryObjectPeerRef\022-\n\010" +
+      "relative\030\013 \003(\0132\033.InventoryObjectRelative" +
+      "Ref\"R\n\020InventoryObjects\022*\n\020inventory_obj" +
+      "ect\030\001 \003(\0132\020.InventoryObject\022\022\n\nexpires_a" +
+      "t\030\014 \001(\004*+\n\033InventoryObjectPeerEndpoint\022\005" +
+      "\n\001A\020\000\022\005\n\001Z\020\001B@\n(org.opennms.oce.datasour" +
+      "ce.opennms.protoB\024InventoryModelProtosb\006" +
+      "proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4363,19 +4557,19 @@ public final class InventoryModelProtos {
     internal_static_InventoryObjectPeerRef_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_InventoryObjectPeerRef_descriptor,
-        new java.lang.String[] { "Type", "Id", "Endpoint", });
+        new java.lang.String[] { "Type", "Id", "Endpoint", "Weight", });
     internal_static_InventoryObjectRelativeRef_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_InventoryObjectRelativeRef_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_InventoryObjectRelativeRef_descriptor,
-        new java.lang.String[] { "Type", "Id", });
+        new java.lang.String[] { "Type", "Id", "Weight", });
     internal_static_InventoryObject_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_InventoryObject_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_InventoryObject_descriptor,
-        new java.lang.String[] { "Type", "Id", "Subtype", "ParentType", "ParentId", "FriendlyName", "Peer", "Relative", });
+        new java.lang.String[] { "Type", "Id", "Subtype", "ParentType", "ParentId", "FriendlyName", "WeightToParent", "Peer", "Relative", });
     internal_static_InventoryObjects_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_InventoryObjects_fieldAccessorTable = new

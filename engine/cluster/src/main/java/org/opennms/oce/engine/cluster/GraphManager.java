@@ -108,7 +108,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(parentVertex, vertex)) {
                     LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
-                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement());
+                    final CEEdge edge = CEEdge.newParentEdge(edgeIdGenerator.getAndIncrement(), io.getWeightToParent());
                     g.addEdge(edge, parentVertex, vertex);
                     didGraphChange.set(true);
                 }
@@ -125,7 +125,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(peerVertex, vertex)) {
                     LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
-                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement(), peerRef);
+                    final CEEdge edge = CEEdge.newPeerEdge(edgeIdGenerator.getAndIncrement(), peerRef);
                     g.addEdge(edge, peerVertex, vertex);
                     didGraphChange.set(true);
                 }
@@ -142,7 +142,7 @@ public class GraphManager {
                 }
                 if (!g.isNeighbor(relativeVertex, vertex)) {
                     LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
-                    final CEEdge edge = new CEEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
+                    final CEEdge edge = CEEdge.newRelativeEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
                     g.addEdge(edge, relativeVertex, vertex);
                     didGraphChange.set(true);
                 }

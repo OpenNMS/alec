@@ -37,6 +37,7 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
     private String type;
     private String id;
     private InventoryObjectPeerEndpoint endpoint;
+    private long weight = 1;
 
     public InventoryObjectPeerRefBean() {}
     public InventoryObjectPeerRefBean(String type, String id, InventoryObjectPeerEndpoint endpoint) {
@@ -69,6 +70,15 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
 
     public void setEndpoint(InventoryObjectPeerEndpoint endpoint) {
         this.endpoint = endpoint;
+    }
+
+    @Override
+    public long getWeight() {
+        return weight;
+    }
+
+    public void setWeight(long weight) {
+        this.weight = weight;
     }
 
     @Override

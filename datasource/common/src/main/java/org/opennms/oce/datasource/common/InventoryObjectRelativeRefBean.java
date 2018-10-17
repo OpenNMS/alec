@@ -35,6 +35,7 @@ import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 public class InventoryObjectRelativeRefBean implements InventoryObjectRelativeRef {
     private String type;
     private String id;
+    private long weight = 1;
 
     @Override
     public String getType() {
@@ -52,6 +53,15 @@ public class InventoryObjectRelativeRefBean implements InventoryObjectRelativeRe
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public long getWeight() {
+        return weight;
+    }
+
+    public void setWeight(long weight) {
+        this.weight = weight;
     }
 
     @Override

@@ -35,5 +35,7 @@ public interface InventoryObjectPeerRef {
     String getId();
 
     InventoryObjectPeerEndpoint getEndpoint();
+    
+    long getWeight();
 
 }

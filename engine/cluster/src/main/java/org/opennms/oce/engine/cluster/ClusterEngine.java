@@ -30,6 +30,7 @@ package org.opennms.oce.engine.cluster;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,25 +121,38 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     private final double epsilon;
 
-    private long problemTimeoutMs = TimeUnit.HOURS.toMillis(2);
-    private long clearTimeoutMs = TimeUnit.MINUTES.toMillis(5);
+    @VisibleForTesting
+    public final long problemTimeoutMs = TimeUnit.HOURS.toMillis(2);
+
+    @VisibleForTesting
+    public final long clearTimeoutMs = TimeUnit.MINUTES.toMillis(5);
 
     private boolean alarmsChangedSinceLastTick = false;
     private DijkstraShortestPath<CEVertex, CEEdge> shortestPath;
     private Set<Long> disconnectedVertices = new HashSet<>();
 
-    private final GraphManager graphManager = new GraphManager();
+    private final ManagedCEGraph ceGraph = new ManagedCEGraph();
+    private final GraphManager graphManager;
     
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
 
     public ClusterEngine() {
-        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
+        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA, null);
     }
 
-    public ClusterEngine(double epsilon, double alpha, double beta) {
+    public ClusterEngine(double epsilon, double alpha, double beta, GraphManager graphManager) {
         this.epsilon = epsilon;
         distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
+
+        if (graphManager != null) {
+            this.graphManager = graphManager;
+            this.graphManager.addGraph(ceGraph);
+        } else {
+            // If we didn't get passed a GraphManager then we are likely in a test context so we can instantiate one
+            // directly
+            this.graphManager = GraphManager.newGraphManagerWithGraphs(Collections.singleton(ceGraph));
+        }
     }
 
     @Override
@@ -200,7 +214,7 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     @Override
     public void destroy() {
-        // no-op
+        graphManager.close();
     }
 
     @Override
@@ -232,21 +246,16 @@ public class ClusterEngine implements Engine, GraphProvider {
 
         // Perform the clustering with the graph locked
         final Set<SituationBean> situations = new HashSet<>();
-        graphManager.withGraph(g -> {
-            if (graphManager.getDidGraphChangeAndReset()) {
+        ceGraph.withGraph(g -> {
+            if (ceGraph.getDidGraphChangeAndReset()) {
                 // If the graph has changed, then reset the cache
                 LOG.debug("{}: Graph has changed. Resetting hop cache.", timestampInMillis);
                 spatialDistances.invalidateAll();
                 shortestPath = null;
-                disconnectedVertices = graphManager.getDisconnectedVertices();
+                disconnectedVertices = ceGraph.getDisconnectedVertices();
             }
 
-            // GC alarms from vertices
-            int numGarbageCollectedAlarms = 0;
-            for (CEVertex v : g.getVertices()) {
-                numGarbageCollectedAlarms += v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
-            }
-            LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
+            graphManager.garbageCollectAlarms(timestampInMillis, problemTimeoutMs, clearTimeoutMs);
 
             // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
             // OPTIMIZATION: Can we avoid doing this every tick?
@@ -257,7 +266,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                     .flatMap(Collection::stream)
                     .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
                     .collect(Collectors.toList());
-            if (alarms.size() < 1) {
+            if (alarms.isEmpty()) {
                 LOG.debug("{}: The graph contains no alarms. No clustering will be performed.", timestampInMillis);
                 return;
             }
@@ -457,7 +466,7 @@ public class ClusterEngine implements Engine, GraphProvider {
     @Override
     public <V> V withReadOnlyGraph(Function<OceGraph, V> consumer) {
         final List<Situation> situations = new ArrayList<>(situationsById.values());
-        return graphManager.withReadOnlyGraph(g -> {
+        return ceGraph.withReadOnlyGraph(g -> {
             final OceGraph oceGraph = new OceGraph() {
                 @Override
                 public Graph<? extends Vertex, ? extends Edge> getGraph() {
@@ -481,7 +490,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                             return null;
                         }
                     }
-                    return graphManager.getVertexWithId(idAsLong);
+                    return ceGraph.getVertexWithId(idAsLong);
                 }
             };
             return consumer.apply(oceGraph);
@@ -516,8 +525,8 @@ public class ClusterEngine implements Engine, GraphProvider {
     }
 
     private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
-        return graphManager.withGraph(g -> {
-            for (CEVertex v : graphManager.getGraph().getVertices()) {
+        return ceGraph.withGraph(g -> {
+            for (CEVertex v : ceGraph.getGraph().getVertices()) {
                 final Optional<Alarm> match = v.getAlarms().stream()
                         .filter(a -> a.equals(alarm))
                         .findFirst();
@@ -571,17 +580,17 @@ public class ClusterEngine implements Engine, GraphProvider {
                             if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
                                 return 0;
                             }
-                            final CEVertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
+                            final CEVertex vertexA = ceGraph.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
                                 throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);
                             }
-                            final CEVertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
+                            final CEVertex vertexB = ceGraph.getVertexWithId(key.vertexIdB);
                             if (vertexB == null) {
                                 throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
                             }
 
                             if (shortestPath == null) {
-                                shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight,true);
+                                shortestPath = new DijkstraShortestPath<>(ceGraph.getGraph(), CEEdge::getWeight,true);
                             }
 
                             Number distance = shortestPath.getDistance(vertexA, vertexB);
@@ -626,7 +635,12 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     @VisibleForTesting
     Graph<CEVertex, CEEdge> getGraph() {
-        return graphManager.getGraph();
+        return ceGraph.getGraph();
+    }
+    
+    @VisibleForTesting
+    public GraphManager getGraphManager() {
+        return graphManager;
     }
 
     @VisibleForTesting

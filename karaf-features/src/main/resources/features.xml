@@ -129,6 +129,14 @@
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.rest/${project.version}</bundle>
     </feature>
 
+    <feature name="oce-features-graph-janusgraph" description="OCE :: Features :: Graph :: JanusGraph" version="${project.version}">
+        <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
+        <!-- TODO: The following bundle gives me an error that it does not contain a manifest when I attempt to install
+         this feature -->
+        <bundle dependency="true">mvn:org.janusgraph/janusgraph-core/0.3.1</bundle>
+        <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.janusgraph/${project.version}</bundle>
+    </feature>
+
     <!-- Situation Processors -->
 
     <feature name="oce-processor-api" description="OCE :: Processor :: API" version="${project.version}">

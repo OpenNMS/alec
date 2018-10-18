@@ -35,6 +35,7 @@ public class ClusterEngineFactory implements EngineFactory {
     private double epsilon = ClusterEngine.DEFAULT_EPSILON;
     private double alpha = ClusterEngine.DEFAULT_ALPHA;
     private double beta = ClusterEngine.DEFAULT_BETA;
+    private GraphManager graphManager;
 
     @Override
     public String getName() {
@@ -48,7 +49,7 @@ public class ClusterEngineFactory implements EngineFactory {
 
     @Override
     public ClusterEngine createEngine() {
-        return new ClusterEngine(epsilon, alpha, beta);
+        return new ClusterEngine(epsilon, alpha, beta, graphManager);
     }
 
     public double getEpsilon() {
@@ -73,5 +74,13 @@ public class ClusterEngineFactory implements EngineFactory {
 
     public void setBeta(double beta) {
         this.beta = beta;
+    }
+
+    public GraphManager getGraphManager() {
+        return graphManager;
+    }
+
+    public void setGraphManager(GraphManager graphManager) {
+        this.graphManager = graphManager;
     }
 }

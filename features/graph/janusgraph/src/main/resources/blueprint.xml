@@ -1,0 +1,15 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="janusGraphProperties" persistent-id="org.opennms.oce.features.graph.janusgraph"
+                             update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="storageBackend" value="inmemory"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+    <bean id="managedJanusGraph" class="org.opennms.oce.features.graph.janusgraph.ManagedJanusGraph">
+        <argument value="${storageBackend}"/>
+    </bean>
+    <service ref="managedJanusGraph" interface="org.opennms.oce.features.graph.api.ManagedGraph"/>
+</blueprint>

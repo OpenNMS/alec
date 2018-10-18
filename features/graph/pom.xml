@@ -12,9 +12,10 @@
 
     <modules>
         <module>api</module>
-	<module>common</module>
-	<module>graphml</module>
-	<module>rest</module>
-	<module>shell</module>
+        <module>common</module>
+        <module>graphml</module>
+        <module>rest</module>
+        <module>shell</module>
+        <module>janusgraph</module>
     </modules>
 </project>

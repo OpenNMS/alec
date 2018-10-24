@@ -32,8 +32,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.processor.Processor;
@@ -44,6 +49,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
 import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
 import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
@@ -65,6 +71,10 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
     private ProcessorContext context;
     private KeyValueStore<String, InventoryModelProtos.InventoryObjects> kvStore;
 
+    private final Map<ResourceKey, AtomicInteger> inventoryReferences =
+            new ConcurrentHashMap<>();
+    private final CountDownLatch initLock = new CountDownLatch(1);
+
     public InventoryTableProcessor(HandlerRegistry<InventoryHandler> inventoryHandlers, long inventoryGcIntervalMs, long inventoryTtlMs) {
         this.inventoryHandlers = Objects.requireNonNull(inventoryHandlers);
         this.inventoryGcIntervalMs = inventoryGcIntervalMs;
@@ -77,48 +87,106 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
         // keep the processor context locally because we need it in punctuate() and commit()
         this.context = context;
 
-        // retrieve the key-value store
-        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.INVENTORY_STORE);
+        try {
+            // retrieve the key-value store
+            kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.INVENTORY_STORE);
+            kvStore.all().forEachRemaining(this::initReferences);
+        } finally {
+            initLock.countDown();
+        }
 
         // schedule a punctuate() method based on clock time
-        this.context.schedule(inventoryGcIntervalMs, PunctuationType.WALL_CLOCK_TIME, (timestamp) -> {
-            LOG.debug("onPunctuate({})", timestamp);
-            final Set<String> keysToDelete = new HashSet<>();
-            try (KeyValueIterator<String, InventoryModelProtos.InventoryObjects> iter = this.kvStore.all()) {
-                while (iter.hasNext()) {
-                    KeyValue<String, InventoryModelProtos.InventoryObjects> entry = iter.next();
-                    if (entry.value.getExpiresAt() > 0 && entry.value.getExpiresAt() <= timestamp) {
-                        LOG.debug("Deleting expired inventory for key: {} with expiry: {} at: {}", entry.key, entry.value.getExpiresAt(), timestamp);
-                        keysToDelete.add(entry.key);
-                    }
+        this.context.schedule(inventoryGcIntervalMs, PunctuationType.WALL_CLOCK_TIME, this::onPunctuate);
+    }
+    
+    private void initReferences(KeyValue<String, InventoryModelProtos.InventoryObjects> keyValue) {
+        keyValue.value.getInventoryObjectList().forEach(io -> recordReference(toInventory(io)));
+    }
+    
+    private void onPunctuate(long timestamp) {
+        LOG.debug("onPunctuate({})", timestamp);
+        final Set<String> keysToDelete = new HashSet<>();
+        try (KeyValueIterator<String, InventoryModelProtos.InventoryObjects> iter = this.kvStore.all()) {
+            while (iter.hasNext()) {
+                KeyValue<String, InventoryModelProtos.InventoryObjects> entry = iter.next();
+                if (entry.value.getExpiresAt() > 0 && entry.value.getExpiresAt() <= timestamp) {
+                    LOG.debug("Deleting expired inventory for key: {} with expiry: {} at: {}", entry.key, entry.value.getExpiresAt(), timestamp);
+                    keysToDelete.add(entry.key);
                 }
             }
+        }
 
-            final List<InventoryModelProtos.InventoryObjects> inventoryObjects = new ArrayList<>();
-            keysToDelete.forEach(key -> {
-                final InventoryModelProtos.InventoryObjects deletedIos = this.kvStore.delete(key);
-                if (deletedIos != null) {
-                    inventoryObjects.add(deletedIos);
-                }
-            });
+        final List<InventoryModelProtos.InventoryObjects> inventoryObjects = new ArrayList<>();
+        keysToDelete.forEach(key -> {
+            final InventoryModelProtos.InventoryObjects deletedIos = this.kvStore.delete(key);
+            if (deletedIos != null) {
+                inventoryObjects.add(deletedIos);
+            }
+        });
 
-            if (inventoryObjects.size() > 0) {
+        if (inventoryObjects.size() > 0) {
+            // Only notify handlers of a removal for inventory that is no longer referenced
+            List<InventoryObject> inventoryToDelete = toInventory(inventoryObjects).stream()
+                    .filter(io -> {
+                        ResourceKey id = new ResourceKey(io.getId(), io.getType());
+                        AtomicInteger references = inventoryReferences.get(id);
+
+                        if (references.decrementAndGet() > 0) {
+                            LOG.trace("Inventory object {} references decreased to {}", io, references);
+
+                            return false;
+                        }
+
+                        LOG.debug("Inventory object {} is no longer referenced and will be removed", io);
+                        inventoryReferences.remove(id);
+
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+
+            if (!inventoryToDelete.isEmpty()) {
                 inventoryHandlers.forEach(h -> {
                     try {
-                        h.onInventoryRemoved(toInventory(inventoryObjects));
+                        h.onInventoryRemoved(inventoryToDelete);
                     } catch (Exception e) {
-                        LOG.error("onInventoryRemoved() call failed with inventory: {} on handler: {}", inventoryObjects, h, e);
+                        LOG.error("onInventoryRemoved() call failed with inventory: {} on handler: {}",
+                                inventoryObjects, h, e);
                     }
                 });
             }
+        }
 
-            // commit the current processing progress
-            context.commit();
-        });
+        // commit the current processing progress
+        context.commit();
+    }
+    
+    private boolean recordReference(InventoryObject inventoryObject) {
+        ResourceKey id = new ResourceKey(inventoryObject.getId(), inventoryObject.getType());
+        AtomicInteger references = inventoryReferences.putIfAbsent(id, new AtomicInteger(1));
+
+        if (references == null) {
+            LOG.debug("Inventory object {} is new and will be added", id);
+
+            return true;
+        }
+
+        references.incrementAndGet();
+        LOG.trace("Inventory object {} references increased to {}", inventoryObject, references);
+
+        return false;
     }
 
     @Override
     public void process(String key, InventoryModelProtos.InventoryObjects inventory) {
+        try {
+            initLock.await();
+        } catch (InterruptedException e) {
+            LOG.debug("Interrupted while waiting for init lock to unlock, skipping processing");
+            Thread.currentThread().interrupt();
+
+            return;
+        }
+
         if (inventory == null) {
             final InventoryModelProtos.InventoryObjects ios = this.kvStore.get(key);
             if (ios == null) {
@@ -130,13 +198,21 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
             }
         } else {
             this.kvStore.put(key, inventory);
-            inventoryHandlers.forEach(h -> {
-                try {
-                    h.onInventoryAdded(toInventory(Collections.singletonList(inventory)));
-                } catch (Exception e) {
-                    LOG.error("onInventoryAdded() call failed with inventory: {} on handler: {}", inventory, h, e);
-                }
-            });
+
+            // Only handle inventory that has not been referenced before
+            List<InventoryObject> newInventory = toInventory(Collections.singletonList(inventory)).stream()
+                    .filter(this::recordReference)
+                    .collect(Collectors.toList());
+
+            if (!newInventory.isEmpty()) {
+                inventoryHandlers.forEach(h -> {
+                    try {
+                        h.onInventoryAdded(newInventory);
+                    } catch (Exception e) {
+                        LOG.error("onInventoryAdded() call failed with inventory: {} on handler: {}", inventory, h, e);
+                    }
+                });
+            }
         }
     }
 

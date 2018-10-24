@@ -34,10 +34,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -65,6 +68,7 @@ import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.opennms.events.Event;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
@@ -326,7 +330,23 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return InventoryTableProcessor.toInventory(inventory);
+
+        Set<ResourceKey> uniqueIds = new HashSet<>();
+
+        // Discard any duplicate inventory objects
+        return InventoryTableProcessor.toInventory(inventory).stream()
+                .filter(io -> {
+                    ResourceKey id = new ResourceKey(io.getId(), io.getType());
+
+                    if (uniqueIds.contains(id)) {
+                        return false;
+                    }
+
+                    uniqueIds.add(id);
+
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

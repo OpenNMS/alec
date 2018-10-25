@@ -33,12 +33,12 @@ import java.util.Objects;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.opennms.HandlerRegistry;
+import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 import org.opennms.oce.datasource.opennms.OpennmsMapper;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
-import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,19 +55,19 @@ public class SituationTableProcessor implements Processor<String, OpennmsModelPr
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         // retrieve the key-value store
-        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.INCIDENT_STORE);
+        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.SITUATION_STORE);
     }
 
     @Override
     public void process(String reductionKey, OpennmsModelProtos.Alarm alarm) {
         if (alarm != null) {
             kvStore.put(reductionKey, alarm);
-            Incident incident = OpennmsMapper.toIncident(alarm);
+            Situation situation = OpennmsMapper.toSituation(alarm);
             situationHandlers.forEach(h -> {
                 try {
-                    h.onSituation(incident);
+                    h.onSituation(situation);
                 } catch (Exception e) {
-                    LOG.error("onSituation() call failed with situation: {} on handler: {}", incident, h, e);
+                    LOG.error("onSituation() call failed with situation: {} on handler: {}", situation, h, e);
                 }
             });
         } else {

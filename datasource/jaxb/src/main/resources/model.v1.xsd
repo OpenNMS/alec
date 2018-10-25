@@ -184,22 +184,22 @@
         </restriction>
     </simpleType>
 
-    <element name="incidents">
+    <element name="situations">
         <annotation>
-            <documentation>Top-level element for a list of incidents</documentation>
+            <documentation>Top-level element for a list of situations</documentation>
         </annotation>
 
         <complexType>
             <sequence>
-                <!-- Incident definitions -->
-                <element ref="this:incident" minOccurs="0" maxOccurs="unbounded" />
+                <!-- Situation definitions -->
+                <element ref="this:situation" minOccurs="0" maxOccurs="unbounded" />
             </sequence>
         </complexType>
     </element>
 
-    <element name="incident">
+    <element name="situation">
         <annotation>
-            <documentation>Definition for an instance of an incident</documentation>
+            <documentation>Definition for an instance of an situation</documentation>
         </annotation>
         <complexType>
             <sequence>

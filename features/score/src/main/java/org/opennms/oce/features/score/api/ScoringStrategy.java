@@ -30,17 +30,17 @@ package org.opennms.oce.features.score.api;
 
 import java.util.Set;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 
 public interface ScoringStrategy {
 
     /**
-     * Issue a ScoreReport for a Set of Incitdents against a baseline.
-     * @param baseline The baseline set of Incidents
+     * Issue a ScoreReport for a Set of Situations against a baseline.
+     * @param baseline The baseline set of Situations
      * @param sut The Set Under Test
      * @return ScroreReport
      */
-    ScoreReport score(Set<Incident> baseline, Set<Incident> sut);
+    ScoreReport score(Set<Situation> baseline, Set<Situation> sut);
 
     /**
      * The Name of the Strategy

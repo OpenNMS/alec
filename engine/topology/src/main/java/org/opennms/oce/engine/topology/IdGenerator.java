@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// Encapsulate the ID generation for internal Alarms, Reports and Incidents so that they can be ovverridden by test harness.
+// Encapsulate the ID generation for internal Alarms, Reports and Situations so that they can be ovverridden by test harness.
 public class IdGenerator {
 
     int index = 0;

@@ -33,11 +33,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
 import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.features.graph.api.GraphProvider;
 import org.opennms.oce.features.graph.api.OceGraph;
@@ -65,10 +65,10 @@ public class MockGraphProvider implements GraphProvider {
         a1.setInventoryObjectId("io1");
         final List<Alarm> alarms = Lists.newArrayList(a1);
 
-        final IncidentBean s1 = new IncidentBean();
+        final SituationBean s1 = new SituationBean();
         s1.setId("s1");
         s1.addAlarm(a1);
-        final List<Incident> situations = Lists.newArrayList(s1);
+        final List<Situation> situations = Lists.newArrayList(s1);
         clusterEngine.init(alarms, situations, inventory);
     }
 

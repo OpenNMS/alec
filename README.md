@@ -7,10 +7,10 @@ Alarms, alarms, alarms, alarms.
 * Alarm
    * A problem triggered by one or more events
 
-* Incident
+* Situation
    * Used to represent a synthetic "master" alarm which is created by the correlation engine
-   * An incident is the root of the alarm causality tree, whereby the incident is caused by one or more "child" alarms which may in turn be caused by other child alarms and so on
-   * Incidents should only be created if there are two or more alarms in the tree (otherwise there is a single alarm and there is no point in creating the incident)
+   * An situation is the root of the alarm causality tree, whereby the situation is caused by one or more "child" alarms which may in turn be caused by other child alarms and so on
+   * Situations should only be created if there are two or more alarms in the tree (otherwise there is a single alarm and there is no point in creating the situation)
 
 ## Building
 

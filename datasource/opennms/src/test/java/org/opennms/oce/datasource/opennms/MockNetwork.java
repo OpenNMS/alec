@@ -186,11 +186,11 @@ public class MockNetwork {
 
     public static OpennmsModelProtos.Alarm createAlarmForSituation(String id, OpennmsModelProtos.Alarm... alarms) {
         final OpennmsModelProtos.Alarm.Builder builder = OpennmsModelProtos.Alarm.newBuilder()
-                .setReductionKey(String.format("%s:%s", IncidentToEvent.SITUATION_UEI, id))
+                .setReductionKey(String.format("%s:%s", SituationToEvent.SITUATION_UEI, id))
                 .setSeverity(OpennmsModelProtos.Severity.MINOR);
 
         OpennmsModelProtos.Event.Builder eventBuilder = OpennmsModelProtos.Event.newBuilder()
-                .setUei(IncidentToEvent.SITUATION_UEI);
+                .setUei(SituationToEvent.SITUATION_UEI);
         for (int i = 0; i < alarms.length; i++) {
             for (OpennmsModelProtos.Alarm alarm : alarms) {
                 eventBuilder.addParameter(OpennmsModelProtos.EventParameter.newBuilder()

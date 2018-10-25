@@ -43,7 +43,7 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.opennms.oce.features.graph.graphml.GraphML;
@@ -136,7 +136,7 @@ public class GraphMLConversionTest {
         a2.setId("a2");
         v3.getAlarms().add(a2);
 
-        IncidentBean s1 = new IncidentBean();
+        SituationBean s1 = new SituationBean();
         s1.setId("s1");
         s1.setAlarms(Sets.newHashSet(a1, a2));
 

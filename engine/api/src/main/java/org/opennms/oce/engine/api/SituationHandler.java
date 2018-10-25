@@ -29,15 +29,15 @@
 package org.opennms.oce.engine.api;
 
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 
-public interface IncidentHandler {
+public interface SituationHandler {
 
     /**
-     * Callback to receive new and updated Incidents.
+     * Callback to receive new and updated Situations.
      * 
-     * @param i the incident.
+     * @param i the situation.
      */
-    void onIncident(Incident i);
+    void onSituation(Situation i);
 
 }

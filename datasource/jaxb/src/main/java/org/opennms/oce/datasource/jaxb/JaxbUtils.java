@@ -47,14 +47,14 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.datasource.v1.schema.AlarmRef;
 import org.opennms.oce.datasource.v1.schema.Alarms;
 import org.opennms.oce.datasource.v1.schema.Event;
-import org.opennms.oce.datasource.v1.schema.Incidents;
+import org.opennms.oce.datasource.v1.schema.Situations;
 
 import com.google.gson.Gson;
 
@@ -93,46 +93,46 @@ public class JaxbUtils {
         return Severity.INDETERMINATE;
     }
 
-    public static org.opennms.oce.datasource.v1.schema.Incident toModelIncident(Incident incident) {
-        org.opennms.oce.datasource.v1.schema.Incident modelIncident = new org.opennms.oce.datasource.v1.schema.Incident();
-        modelIncident.setId(incident.getId());
-        for (Alarm a : incident.getAlarms()) {
+    public static org.opennms.oce.datasource.v1.schema.Situation toModelSituation(Situation situation) {
+        org.opennms.oce.datasource.v1.schema.Situation modelSituation = new org.opennms.oce.datasource.v1.schema.Situation();
+        modelSituation.setId(situation.getId());
+        for (Alarm a : situation.getAlarms()) {
             AlarmRef alarmRef = new AlarmRef();
             alarmRef.setId(a.getId());
-            modelIncident.getAlarmRef().add(alarmRef);
+            modelSituation.getAlarmRef().add(alarmRef);
         }
-        return modelIncident;
+        return modelSituation;
     }
 
 
-    public static Incident toEngineIncident(org.opennms.oce.datasource.v1.schema.Incident incident) {
-        IncidentBean engineIncident = new IncidentBean(incident.getId());
-        engineIncident.setCreationTime(incident.getCreationTime());
-        for (AlarmRef a : incident.getAlarmRef()) {
+    public static Situation toEngineSituation(org.opennms.oce.datasource.v1.schema.Situation situation) {
+        SituationBean engineSituation = new SituationBean(situation.getId());
+        engineSituation.setCreationTime(situation.getCreationTime());
+        for (AlarmRef a : situation.getAlarmRef()) {
             Alarm alarm = new AlarmBean(a.getId());
-            engineIncident.addAlarm(alarm);
+            engineSituation.addAlarm(alarm);
         }
-        return engineIncident;
+        return engineSituation;
     }
 
-    public static Set<Incident> getIncidents(Path path) throws JAXBException, IOException {
+    public static Set<Situation> getSituations(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Situations.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            List<org.opennms.oce.datasource.v1.schema.Incident> xmlIncidents = ((Incidents) unmarshaller.unmarshal(is)).getIncident();
-            return new HashSet<>(xmlIncidents.stream().map(JaxbUtils::toEngineIncident).collect(Collectors.toSet()));
+            List<org.opennms.oce.datasource.v1.schema.Situation> xmlSituations = ((Situations) unmarshaller.unmarshal(is)).getSituation();
+            return new HashSet<>(xmlSituations.stream().map(JaxbUtils::toEngineSituation).collect(Collectors.toSet()));
         } catch (Exception e) {
             throw e;
         }
     }
 
-    public static void writeIncidents(Map<String, Incident> incidents, String outFile) throws JAXBException, IOException {
-        String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
+    public static void writeSituations(Map<String, Situation> situations, String outFile) throws JAXBException, IOException {
+        String filepath = outFile == null || outFile.isEmpty() ? "situations.xml" : outFile;
         try (OutputStream os = Files.newOutputStream(Paths.get(filepath))) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Situations.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
-            Incidents list = new Incidents();
-            list.getIncident().addAll(incidents.values().stream().map(JaxbUtils::toModelIncident).collect(Collectors.toList()));
+            Situations list = new Situations();
+            list.getSituation().addAll(situations.values().stream().map(JaxbUtils::toModelSituation).collect(Collectors.toList()));
             marshaller.marshal(list, os);
         }
     }
@@ -172,14 +172,13 @@ public class JaxbUtils {
         }
     }
 
-    public static void writeIncidents(List<Incident> incidents, Path path) throws IOException, JAXBException {
+    public static void writeSituations(List<Situation> situations, Path path) throws IOException, JAXBException {
         try (OutputStream os = Files.newOutputStream(path)) {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Incidents.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Situations.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            Incidents list = new Incidents();
-            list.getIncident().addAll(incidents.stream()
-                    .map(JaxbUtils::toModelIncident)
+            Situations list = new Situations();
+            list.getSituation().addAll(situations.stream().map(JaxbUtils::toModelSituation)
                     .collect(Collectors.toList()));
             marshaller.marshal(list, os);
         }

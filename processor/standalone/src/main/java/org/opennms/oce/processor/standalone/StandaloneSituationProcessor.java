@@ -30,14 +30,14 @@ package org.opennms.oce.processor.standalone;
 
 import java.util.Objects;
 
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.processor.api.SituationProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A situation processor that immediately forwards all incidents.
+ * A situation processor that immediately forwards all situations.
  */
 public class StandaloneSituationProcessor implements SituationProcessor {
     /**
@@ -46,30 +46,30 @@ public class StandaloneSituationProcessor implements SituationProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(StandaloneSituationProcessor.class);
 
     /**
-     * The incident data source.
+     * The situation data source.
      */
-    private final IncidentDatasource incidentDatasource;
+    private final SituationDatasource situationDatasource;
 
     /**
      * Constructor.
      *
-     * @param incidentDatasource the incident data source
+     * @param situationDatasource the situation data source
      */
-    StandaloneSituationProcessor(IncidentDatasource incidentDatasource) {
-        this.incidentDatasource = Objects.requireNonNull(incidentDatasource);
+    StandaloneSituationProcessor(SituationDatasource situationDatasource) {
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
     }
 
     @Override
     @SuppressWarnings("Duplicates")
-    public void accept(Incident incident) {
-        Objects.requireNonNull(incident);
+    public void accept(Situation situation) {
+        Objects.requireNonNull(situation);
 
         try {
-            LOG.debug("Forwarding situation: {}", incident);
-            incidentDatasource.forwardIncident(incident);
+            LOG.debug("Forwarding situation: {}", situation);
+            situationDatasource.forwardSituation(situation);
             LOG.debug("Successfully forwarded situation.");
         } catch (Exception e) {
-            LOG.error("An error occurred while forwarding situation: {}. The situation will be lost.", incident, e);
+            LOG.error("An error occurred while forwarding situation: {}. The situation will be lost.", situation, e);
         }
     }
 }

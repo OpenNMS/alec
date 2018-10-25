@@ -49,8 +49,8 @@ import org.opennms.features.distributed.coordination.api.DomainManager;
 import org.opennms.features.distributed.coordination.api.DomainManagerFactory;
 import org.opennms.features.distributed.coordination.api.Role;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 
 /**
  * Tests for {@link ActiveStandbySituationProcessor}.
@@ -59,10 +59,12 @@ public class ActiveStandbySituationProcessorTest {
     private static final String id = "test.id";
     private static final String mockAlarm1Id = "/mock/alarm/1";
     private static final String mockAlarm2Id = "/mock/alarm/2";
-    private final IncidentDatasource mockIncidentDataSource = mock(IncidentDatasource.class);
+
+    private final SituationDatasource mockSituationDataSource = mock(SituationDatasource.class);
     private final DomainManagerFactory mockDomainManagerFactory = mock(DomainManagerFactory.class);
     private final DomainManager mockDomainManager = mock(DomainManager.class);
-    private final Incident mockIncident = mock(Incident.class);
+
+    private final Situation mockSituation = mock(Situation.class);
     private final Alarm mockAlarm1 = mock(Alarm.class);
     private final Alarm mockAlarm2 = mock(Alarm.class);
     private final Set<Alarm> mockAlarmSet = new HashSet<>(Arrays.asList(mockAlarm1, mockAlarm2));
@@ -72,10 +74,10 @@ public class ActiveStandbySituationProcessorTest {
     @Before
     public void setUp() {
         when(mockDomainManagerFactory.getManagerForDomain(anyString())).thenReturn(mockDomainManager);
-        situationProcessor = ActiveStandbySituationProcessor.newInstance(mockIncidentDataSource,
+        situationProcessor = ActiveStandbySituationProcessor.newInstance(mockSituationDataSource,
                 mockDomainManagerFactory);
-        when(mockIncident.getId()).thenReturn(id);
-        when(mockIncident.getAlarms()).thenReturn(mockAlarmSet);
+        when(mockSituation.getId()).thenReturn(id);
+        when(mockSituation.getAlarms()).thenReturn(mockAlarmSet);
         when(mockAlarm1.getId()).thenReturn(mockAlarm1Id);
         when(mockAlarm2.getId()).thenReturn(mockAlarm2Id);
         mockAlarmIds = new HashSet<>(Arrays.asList(mockAlarm1.getId(), mockAlarm2.getId()));
@@ -86,13 +88,13 @@ public class ActiveStandbySituationProcessorTest {
      */
     @Test
     public void testAcceptWhileActive() throws Exception {
-        ArgumentCaptor<Incident> argumentCaptor = ArgumentCaptor.forClass(Incident.class);
-        doNothing().when(mockIncidentDataSource).forwardIncident(argumentCaptor.capture());
+        ArgumentCaptor<Situation> argumentCaptor = ArgumentCaptor.forClass(Situation.class);
+        doNothing().when(mockSituationDataSource).forwardSituation(argumentCaptor.capture());
 
         situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.OCE_DOMAIN);
 
-        situationProcessor.accept(mockIncident);
-        verify(mockIncidentDataSource, times(1)).forwardIncident(mockIncident);
+        situationProcessor.accept(mockSituation);
+        verify(mockSituationDataSource, times(1)).forwardSituation(mockSituation);
         assertEquals(id, argumentCaptor.getValue().getId());
     }
 
@@ -103,7 +105,7 @@ public class ActiveStandbySituationProcessorTest {
     public void testAcceptWhileStandby() throws Exception {
         assertEquals(0, situationProcessor.getUnconfirmedSituations().size());
 
-        acceptAndVerifyMockIncidentQueued();
+        acceptAndVerifyMockSituationQueued();
 
         Set<String> key = situationProcessor.getUnconfirmedSituations().keySet().iterator().next();
         assertEquals(mockAlarmIds, key);
@@ -114,17 +116,17 @@ public class ActiveStandbySituationProcessorTest {
      */
     @Test
     public void testFlushOnSwitchover() throws Exception {
-        acceptAndVerifyMockIncidentQueued();
+        acceptAndVerifyMockSituationQueued();
 
-        ArgumentCaptor<Incident> argumentCaptor = ArgumentCaptor.forClass(Incident.class);
-        doNothing().when(mockIncidentDataSource).forwardIncident(argumentCaptor.capture());
+        ArgumentCaptor<Situation> argumentCaptor = ArgumentCaptor.forClass(Situation.class);
+        doNothing().when(mockSituationDataSource).forwardSituation(argumentCaptor.capture());
 
         situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.OCE_DOMAIN);
 
         await().atMost(10, TimeUnit.SECONDS).until(() ->
                 situationProcessor.getUnconfirmedSituations().isEmpty());
 
-        verify(mockIncidentDataSource, times(1)).forwardIncident(mockIncident);
+        verify(mockSituationDataSource, times(1)).forwardSituation(mockSituation);
         assertEquals(id, argumentCaptor.getValue().getId());
     }
 
@@ -133,14 +135,14 @@ public class ActiveStandbySituationProcessorTest {
      */
     @Test
     public void testConfirm() throws Exception {
-        acceptAndVerifyMockIncidentQueued();
+        acceptAndVerifyMockSituationQueued();
         situationProcessor.confirm(mockAlarmIds);
         assertEquals(0, situationProcessor.getUnconfirmedSituations().size());
     }
 
-    private void acceptAndVerifyMockIncidentQueued() throws Exception {
-        situationProcessor.accept(mockIncident);
-        verify(mockIncidentDataSource, times(0)).forwardIncident(mockIncident);
+    private void acceptAndVerifyMockSituationQueued() throws Exception {
+        situationProcessor.accept(mockSituation);
+        verify(mockSituationDataSource, times(0)).forwardSituation(mockSituation);
         assertEquals(1, situationProcessor.getUnconfirmedSituations().size());
     }
 }

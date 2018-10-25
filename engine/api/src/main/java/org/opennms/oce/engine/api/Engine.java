@@ -32,13 +32,14 @@ import java.util.List;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmHandler;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
 
 public interface Engine extends AlarmHandler, InventoryHandler {
 
-    void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory);
+    void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory);
 
     long getTickResolutionMs();
 
@@ -47,10 +48,10 @@ public interface Engine extends AlarmHandler, InventoryHandler {
     void destroy();
 
     /**
-     * Passes the reference to the IncidentHandler.
-     * The IncidentHandler exposes <code>onIncident()</code> callback for creating and updating Incidents.
+     * Passes the reference to the SituationHandler.
+     * The SituationHandler exposes <code>onSituation()</code> callback for creating and updating Situations.
      * @param handler
      */
-    void registerIncidentHandler(IncidentHandler handler);
+    void registerSituationHandler(SituationHandler handler);
 
 }

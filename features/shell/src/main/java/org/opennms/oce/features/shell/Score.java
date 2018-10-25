@@ -43,14 +43,14 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
 
-// Derive a score comparing a Set of Incidents to a Base Sample
-@Command(scope = "oce", name = "score-incidents", description = "Score Correlated Incidents against a baseline.")
+// Derive a score comparing a Set of Situations to a Base Sample
+@Command(scope = "oce", name = "score-situations", description = "Score Correlated Situations against a baseline.")
 @Service
 public class Score implements Action {
 
@@ -61,10 +61,10 @@ public class Score implements Action {
     @Completion(ScoreNameCompleter.class)
     private String scoringStrategyName;
 
-    @Argument(index = 0, name = "baseline", description = "This is the path for the baseline incidents.xml file.", required = true, multiValued = false)
+    @Argument(index = 0, name = "baseline", description = "This is the path for the baseline situations.xml file.", required = true, multiValued = false)
     private String baselineFile;
 
-    @Argument(index = 1, name = "score", description = "This is the path for the incidents.xml to be scored.", required = true, multiValued = false)
+    @Argument(index = 1, name = "score", description = "This is the path for the situations.xml to be scored.", required = true, multiValued = false)
     private String scoreFile;
 
     @Override
@@ -74,7 +74,7 @@ public class Score implements Action {
     }
 
     private void evaluateAndPrint(ScoringStrategy strategy, Path basepath, Path sutPath) throws JAXBException, IOException {
-        ScoreReport report = strategy.score(getIncidents(basepath), getIncidents(sutPath));
+        ScoreReport report = strategy.score(getSituations(basepath), getSituations(sutPath));
         System.out.printf("Score: %.4f", report.getScore());
         if (Double.isFinite(report.getMaxScore())) {
             System.out.printf(" (%.2f%%)", ((report.getMaxScore() - report.getScore()) / report.getMaxScore()) * 100);
@@ -87,9 +87,9 @@ public class Score implements Action {
         System.out.println(m.getName() + " : " + m.getValue());
     }
 
-    // Read Incidents from XML file and filter out any w/o Alarms
-    private Set<Incident> getIncidents(Path pathspec) throws JAXBException, IOException {
-        return JaxbUtils.getIncidents(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
+    // Read Situations from XML file and filter out any w/o Alarms
+    private Set<Situation> getSituations(Path pathspec) throws JAXBException, IOException {
+        return JaxbUtils.getSituations(pathspec).stream().filter(i -> i.getAlarms().size() > 0).collect(Collectors.toSet());
     }
 
     private ScoringStrategy getScoringStrategy() {

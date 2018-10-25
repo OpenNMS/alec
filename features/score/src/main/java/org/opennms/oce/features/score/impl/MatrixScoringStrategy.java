@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.linear.OpenMapRealMatrix;
 import org.apache.commons.math3.linear.SparseRealMatrix;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
 
@@ -51,7 +51,7 @@ public class MatrixScoringStrategy implements ScoringStrategy {
     }
 
     @Override
-    public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
+    public ScoreReport score(Set<Situation> baseline, Set<Situation> sut) {
         final ScoreReport report = new ScoreReport();
 
         // Gather the complete set of unique alarm ids
@@ -86,29 +86,29 @@ public class MatrixScoringStrategy implements ScoringStrategy {
         return report;
     }
 
-    private static SparseRealMatrix getMatrix(Set<Incident> incidents, Map<String, Integer> alarmIdToIndexMap) {
-        // Generate the incident id basis
-        final List<String> incidentIdBasis = new ArrayList<>();
-        incidents.stream()
-                .sorted(Comparator.comparing(Incident::getCreationTime))
-                .map(Incident::getId)
-                .forEach(incidentIdBasis::add);
+    private static SparseRealMatrix getMatrix(Set<Situation> situations, Map<String, Integer> alarmIdToIndexMap) {
+        // Generate the situation id basis
+        final List<String> situationIdBasis = new ArrayList<>();
+        situations.stream()
+                .sorted(Comparator.comparing(Situation::getCreationTime))
+                .map(Situation::getId)
+            .forEach(situationIdBasis::add);
 
-        // Index the incidents by id
-        final Map<String, Incident> incidentsById = incidents.stream()
-                .collect(Collectors.toMap(Incident::getId, i -> i));
+        // Index the situations by id
+        final Map<String, Situation> situationsById = situations.stream()
+                .collect(Collectors.toMap(Situation::getId, i -> i));
 
         final int N = alarmIdToIndexMap.size();
-        final int M = incidentIdBasis.size();
+        final int M = situationIdBasis.size();
         if (M > N) {
-            throw new IllegalStateException("Cannot have more incidents then alarms!");
+            throw new IllegalStateException("Cannot have more situations then alarms!");
         }
 
         final OpenMapRealMatrix m = new OpenMapRealMatrix(N,N);
         for (int i = 0; i < M; i++) {
-            final String incidentId = incidentIdBasis.get(i);
-            final Incident incident = incidentsById.get(incidentId);
-            for (Alarm alarm : incident.getAlarms()) {
+            final String situationId = situationIdBasis.get(i);
+            final Situation situation = situationsById.get(situationId);
+            for (Alarm alarm : situation.getAlarms()) {
                 int j = alarmIdToIndexMap.get(alarm.getId());
                 m.setEntry(i,j,1);
             }

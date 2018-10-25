@@ -39,73 +39,73 @@ import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.engine.api.Engine;
-import org.opennms.oce.engine.api.IncidentHandler;
 
-public class TemporalEngineTest implements IncidentHandler {
+public class TemporalEngineTest implements SituationHandler {
 
-    List<Incident> incidents;
+    List<Situation> situations;
 
     Random r = new Random();
 
     @Before
-    public void setIncidents() {
-        incidents = new ArrayList<>();
+    public void setSituations() {
+        situations = new ArrayList<>();
     }
 
     @Test
     public void testFiveAlarmsSameTime() {
         Engine processor = new TimeSliceEngine();
-        processor.registerIncidentHandler(this);
+        processor.registerSituationHandler(this);
         List<Alarm> alarms = getAlarms(5, 20);
         alarms.forEach(processor::onAlarmCreatedOrUpdated);
         // Terminate the test
         sendterminalAlarm(processor, 100);
-        // All five alarms should be in a single incident
-        assertEquals(1, incidents.size());
+        // All five alarms should be in a single situation
+        assertEquals(1, situations.size());
         // All 5 Alarms should be there
         assertEquals(5,
-                incidents.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
+                     situations.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
     }
 
     @Test
-    public void testTwoAlarmsSameIncident() {
+    public void testTwoAlarmsSameSituation() {
         Engine processor = new TimeSliceEngine();
-        processor.registerIncidentHandler(this);
+        processor.registerSituationHandler(this);
         List<Alarm> alarms = getAlarms(2, 20);
         alarms.forEach(processor::onAlarmCreatedOrUpdated);
         // Terminate the test
         sendterminalAlarm(processor, 100);
-        // 1 incident
-        assertEquals(1, incidents.size());
+        // 1 situation
+        assertEquals(1, situations.size());
         // 2 Alarms
-        assertEquals(2, incidents.get(0).getAlarms().size());
+        assertEquals(2, situations.get(0).getAlarms().size());
     }
 
     @Test
-    public void testTwoIncidents() {
+    public void testTwoSituations() {
         Engine processor = new TimeSliceEngine();
-        processor.registerIncidentHandler(this);
-        // First Incident
+        processor.registerSituationHandler(this);
+        // First Situation
         processor.onAlarmCreatedOrUpdated(new AlarmBean("A", 11000));
         processor.onAlarmCreatedOrUpdated(new AlarmBean("B", 12000));
         processor.onAlarmCreatedOrUpdated(new AlarmBean("C", 13000));
-        // Second Incident
+        // Second Situation
         processor.onAlarmCreatedOrUpdated(new AlarmBean("X", 31000));
         processor.onAlarmCreatedOrUpdated(new AlarmBean("Y", 32000));
 
         // Terminate the test
         sendterminalAlarm(processor, 100);
-        // 2 Incidents
-        assertEquals(2, incidents.size());
+        // 2 Situations
+        assertEquals(2, situations.size());
         // All 5 Alarms
-        assertEquals(5, incidents.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
-        // 3 Alarms in the first Incident
-        assertEquals(3, incidents.get(0).getAlarms().size());
-        // 2 Alarms in the second Incident
-        assertEquals(2, incidents.get(1).getAlarms().size());
+        assertEquals(5, situations.stream().map(i -> i.getAlarms()).flatMap(a -> a.stream()).collect(Collectors.toSet()).size());
+        // 3 Alarms in the first Situation
+        assertEquals(3, situations.get(0).getAlarms().size());
+        // 2 Alarms in the second Situation
+        assertEquals(2, situations.get(1).getAlarms().size());
     }
 
     // Get nAlarms all occurring at the same time in seconds
@@ -126,8 +126,8 @@ public class TemporalEngineTest implements IncidentHandler {
     }
 
     @Override
-    public void onIncident(Incident i) {
-        incidents.add(i);
+    public void onSituation(Situation i) {
+        situations.add(i);
     }
 
 }

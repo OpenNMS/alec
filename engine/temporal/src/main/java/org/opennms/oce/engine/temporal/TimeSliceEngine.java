@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.engine.api.Engine;
-import org.opennms.oce.engine.api.IncidentHandler;
 
 /**
  * A toy processor that simply correlates on time slices
@@ -47,9 +47,9 @@ import org.opennms.oce.engine.api.IncidentHandler;
  */
 public class TimeSliceEngine implements Engine {
 
-    IncidentHandler handler;
+    SituationHandler handler;
 
-    List<Incident> incidents = new ArrayList<>();
+    List<Situation> situations = new ArrayList<>();
 
     // Initial hard-coded default of 10 seconds.
     int sliceMillis = 10000; // time slice size in millis
@@ -58,7 +58,7 @@ public class TimeSliceEngine implements Engine {
 
     long windowStop = 0;
 
-    IncidentBean current;
+    SituationBean current;
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
@@ -83,21 +83,21 @@ public class TimeSliceEngine implements Engine {
         return alarm.getTime() >= windowStart && alarm.getTime() < windowStop;
     }
 
-    // Send the last Incident, start a new one and a new Window
+    // Send the last Situation, start a new one and a new Window
     private void newWindow(Alarm alarm) {
         if (current != null) {
-            handler.onIncident(current);
+            handler.onSituation(current);
         }
         windowStart = alarm.getTime();
         windowStop = windowStart + sliceMillis;
-        current = new IncidentBean();
+        current = new SituationBean();
         current.setId(UUID.randomUUID().toString());
         current.addAlarm(alarm);
         current.setSeverity(alarm.getSeverity());
     }
 
     @Override
-    public void registerIncidentHandler(IncidentHandler handler) {
+    public void registerSituationHandler(SituationHandler handler) {
         this.handler = handler;
     }
 
@@ -106,7 +106,7 @@ public class TimeSliceEngine implements Engine {
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory) {
         // TODO
     }
 
@@ -118,7 +118,7 @@ public class TimeSliceEngine implements Engine {
     @Override
     public void tick(long timestampInMillis) {
         if (current != null) {
-            handler.onIncident(current);
+            handler.onSituation(current);
         }
     }
 

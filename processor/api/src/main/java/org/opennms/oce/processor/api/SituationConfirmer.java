@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
 
 /**
@@ -66,10 +66,10 @@ public class SituationConfirmer implements SituationHandler {
     }
 
     @Override
-    public void onSituation(Incident incident) {
+    public void onSituation(Situation situation) {
         // Collect each of the reduction keys (Ids) contained in the related alarms so we can use these to
         // uniquely identify the situation to confirm it via the situation processor
-        Set<String> reductionKeysInAlarm = Objects.requireNonNull(incident).getAlarms().stream()
+        Set<String> reductionKeysInAlarm = Objects.requireNonNull(situation).getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toSet());
 

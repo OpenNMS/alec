@@ -100,7 +100,7 @@
                                 <feature>oce-features-graph-rest</feature>
 				-->
                                 <feature>oce-processor-api</feature>
-                                <!-- Depends on a reference to a IncidentDatasource impl.
+                                <!-- Depends on a reference to a SituationDatasource impl.
                                 <feature>oce-processor-standalone</feature>
                                 -->
                                 <!-- Depends on a reference to a DomainManagerFactory impl.

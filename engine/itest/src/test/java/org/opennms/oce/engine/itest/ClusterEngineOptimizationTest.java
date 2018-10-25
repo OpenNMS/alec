@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -56,7 +55,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.cluster.ClusterEngine;
@@ -138,15 +137,16 @@ public class ClusterEngineOptimizationTest {
 
     private static class EngineAsFunction implements MultivariateFunction {
         private final List<Alarm> alarms;
-        private Set<Incident> baseIncidents;
+
+        private Set<Situation> baseSituations;
 
         public EngineAsFunction() throws JAXBException, IOException {
             System.out.println("Loading data...");
             alarms = ImmutableList.copyOf(JaxbUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
             System.out.printf("Read %d alarms.\n", alarms.size());
-            Set<Incident> incidents = JaxbUtils.getIncidents(Paths.get("/tmp/cpn.incidents.xml"));
-            System.out.printf("Read %d incidents.\n", incidents.size());
-            baseIncidents = ImmutableSet.copyOf(getIncidentsWithOneOrMoreAlarms(incidents));
+            Set<Situation> situations = JaxbUtils.getSituations(Paths.get("/tmp/cpn.situations.xml"));
+            System.out.printf("Read %d situations.\n", situations.size());
+            baseSituations = ImmutableSet.copyOf(getSituationsWithOneOrMoreAlarms(situations));
         }
 
         @Override
@@ -160,15 +160,15 @@ public class ClusterEngineOptimizationTest {
                     .build();
 
             System.out.printf("Running simulation at point %s...\n", Arrays.toString(point));
-            final List<Incident> generatedIncidents = driver.run(alarms);
-            System.out.printf("Generated: %d incidents.\n", generatedIncidents.size());
-            Set<Incident> generatedIncidentsInSet = Sets.newHashSet(generatedIncidents);
-            assertThat(generatedIncidentsInSet.size(), equalTo(generatedIncidents.size()));
-            generatedIncidentsInSet = getIncidentsWithOneOrMoreAlarms(generatedIncidentsInSet);
+            final List<Situation> generatedSituations = driver.run(alarms);
+            System.out.printf("Generated: %d situations.\n", generatedSituations.size());
+            Set<Situation> generatedSituationsInSet = Sets.newHashSet(generatedSituations);
+            assertThat(generatedSituationsInSet.size(), equalTo(generatedSituations.size()));
+            generatedSituationsInSet = getSituationsWithOneOrMoreAlarms(generatedSituationsInSet);
 
             System.out.println("Scoring...");
             final ScoringStrategy scoringStrategy = new SetIntersectionScoringStrategy();
-            final ScoreReport report = scoringStrategy.score(baseIncidents, generatedIncidentsInSet);
+            final ScoreReport report = scoringStrategy.score(baseSituations, generatedSituationsInSet);
             System.out.printf("Score: %.2f\n", report.getScore());
             for (ScoreMetric metric : report.getMetrics()) {
                 System.out.printf("\tMetric - Name: %s, Value: %.2f\n", metric.getName(), metric.getValue());
@@ -177,13 +177,13 @@ public class ClusterEngineOptimizationTest {
         }
     }
 
-    public static Set<Incident> getIncidentsWithOneOrMoreAlarms(Collection<Incident> incidents) {
-        System.out.printf("Initial incident count: %d\n", incidents.size());
-        Set<Incident> incidentsWithManyAlarms = incidents.stream()
+    public static Set<Situation> getSituationsWithOneOrMoreAlarms(Collection<Situation> situations) {
+        System.out.printf("Initial situation count: %d\n", situations.size());
+        Set<Situation> situationsWithManyAlarms = situations.stream()
                 .filter(i -> i.getAlarms().size() > 1)
                 .collect(Collectors.toSet());
-        System.out.printf("Incident count after removing singles: %d\n", incidentsWithManyAlarms.size());
-        return incidentsWithManyAlarms;
+        System.out.printf("Situation count after removing singles: %d\n", situationsWithManyAlarms.size());
+        return situationsWithManyAlarms;
     }
 
     @Test
@@ -210,9 +210,9 @@ public class ClusterEngineOptimizationTest {
     public void canReproduce() throws JAXBException, IOException {
         /*
         Running simulation at point [437.70467462237895, 42.27697777946783, 0.16868898831888357]...
-        Generated: 203 incidents.
-        Initial incident count: 203
-        Incident count after removing singles: 203
+        Generated: 203 situations.
+        Initial situation count: 203
+        Situation count after removing singles: 203
         Scoring...
         Score: 19.18
             Metric - Name: AlarmAccuracy, Value: 79.00

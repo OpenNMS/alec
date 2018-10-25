@@ -41,20 +41,20 @@ import java.util.List;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
-import org.opennms.oce.engine.api.IncidentHandler;
+import org.opennms.oce.datasource.common.SituationBean;
 
-public class ClusterEngineIncidentTest implements IncidentHandler {
+public class ClusterEngineSituationTest implements SituationHandler {
 
-    private List<Incident> triggeredIncidents = new ArrayList<>();
+    private List<Situation> triggeredSituations = new ArrayList<>();
 
     /**
-     * Verifies that alarms are added to existing incidents when given.
+     * Verifies that alarms are added to existing situations when given.
      */
     @Test
-    public void canHandleExistingIncidents() {
+    public void canHandleExistingSituations() {
         // Define 3 alarms which should be clustered together
         AlarmBean a1 = new AlarmBean();
         a1.setId("a1");
@@ -70,42 +70,42 @@ public class ClusterEngineIncidentTest implements IncidentHandler {
             ab.setTime(0);
         }
 
-        // No incidents should have been triggered yet
-        assertThat(triggeredIncidents, hasSize(0));
+        // No situations should have been triggered yet
+        assertThat(triggeredSituations, hasSize(0));
 
         ClusterEngine clusterEngine = new ClusterEngine();
         clusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList());
-        clusterEngine.registerIncidentHandler(this);
+        clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());
 
-        // There should now be a single incident
-        assertThat(triggeredIncidents, hasSize(1));
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
 
-        // The incident should contain a1,a2 and a3
-        assertThat(triggeredIncidents.get(0).getAlarms(), containsInAnyOrder(a1,a2,a3));
+        // The situation should contain a1,a2 and a3
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
 
-        // Now we know that the 3 alarms are clustered together, let's provide an initial incident with the first two alarms
-        triggeredIncidents.clear();
+        // Now we know that the 3 alarms are clustered together, let's provide an initial situation with the first two alarms
+        triggeredSituations.clear();
 
-        IncidentBean initialIncident = new IncidentBean();
-        initialIncident.setId("i1");
-        initialIncident.setAlarms(new HashSet<>(Arrays.asList(a1,a2)));
+        SituationBean initialSituation = new SituationBean();
+        initialSituation.setId("i1");
+        initialSituation.setAlarms(new HashSet<>(Arrays.asList(a1, a2)));
 
         clusterEngine = new ClusterEngine();
-        clusterEngine.init(alarms, Collections.singletonList(initialIncident), Collections.emptyList());
-        clusterEngine.registerIncidentHandler(this);
+        clusterEngine.init(alarms, Collections.singletonList(initialSituation), Collections.emptyList());
+        clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());
 
-        // There should now be a single incident
-        assertThat(triggeredIncidents, hasSize(1));
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
 
-        // The incident should have the same id as the initial incident
-        assertThat(triggeredIncidents.get(0).getId(), equalTo(initialIncident.getId()));
-        assertThat(triggeredIncidents.get(0).getAlarms(), containsInAnyOrder(a1,a2,a3));
+        // The situation should have the same id as the initial situation
+        assertThat(triggeredSituations.get(0).getId(), equalTo(initialSituation.getId()));
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
     }
 
     @Override
-    public void onIncident(Incident i) {
-        triggeredIncidents.add(i);
+    public void onSituation(Situation i) {
+        triggeredSituations.add(i);
     }
 }

@@ -26,42 +26,27 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.common;
+package org.opennms.oce.datasource.api;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
-import org.opennms.oce.datasource.api.SituationHandler;
+public interface Situation {
 
-public class StaticIncidentDatasource implements IncidentDatasource {
-    private final List<Incident> incidents;
+    String getId();
 
-    public StaticIncidentDatasource(List<Incident> incidents) {
-        this.incidents = Objects.requireNonNull(incidents);
-    }
+    long getCreationTime();
 
-    @Override
-    public List<Incident> getIncidents() {
-        return incidents;
-    }
+    List<ResourceKey> getResourceKeys();
 
-    @Override
-    public void forwardIncident(Incident incident) {
-        // pass
-    }
+    Set<Alarm> getAlarms();
 
-    @Override
-    public void registerHandler(SituationHandler handler) {
-    }
+    Severity getSeverity();
 
-    @Override
-    public void unregisterHandler(SituationHandler handler) {
-    }
+    /**
+     * A human readable string that helps explain why
+     * the alarms are grouped together.
+     */
+    String getDiagnosticText();
 
-    @Override
-    public void waitUntilReady() {
-        // pass
-    }
 }

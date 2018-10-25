@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
@@ -47,11 +47,11 @@ public class SetIntersectionScoringStrategyTest {
     public void testIntersectionStrategySameAccuracy100() throws Exception {
         Path baselineResource = Paths.get("src", "test", "resources", "Baseline.xml");
 
-        Set<Incident> baseline  = JaxbUtils.getIncidents(baselineResource);
+        Set<Situation> baseline = JaxbUtils.getSituations(baselineResource);
         SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
         ScoreReport report = scorer.score(baseline, baseline);
 
-        // Test for Incidents
+        // Test for Situations
         assertEquals(0.0, report.getScore(), 0);
 
         List<ScoreMetric> metrics = report.getMetrics();
@@ -67,8 +67,8 @@ public class SetIntersectionScoringStrategyTest {
         Path baselineResource = Paths.get("src", "test", "resources", "Baseline.xml");
         Path seventyPercentResource = Paths.get("src", "test", "resources", "TwentyPercent.xml");
 
-        Set<Incident> baseline  = JaxbUtils.getIncidents(baselineResource);
-        Set<Incident> seventyPercent  = JaxbUtils.getIncidents(seventyPercentResource);
+        Set<Situation> baseline = JaxbUtils.getSituations(baselineResource);
+        Set<Situation> seventyPercent = JaxbUtils.getSituations(seventyPercentResource);
 
         SetIntersectionScoringStrategy scorer = new SetIntersectionScoringStrategy();
         ScoreReport report = scorer.score(baseline, seventyPercent);

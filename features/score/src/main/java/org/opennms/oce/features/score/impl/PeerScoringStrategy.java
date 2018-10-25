@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
@@ -49,7 +49,7 @@ public class PeerScoringStrategy implements ScoringStrategy {
     }
 
     @Override
-    public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
+    public ScoreReport score(Set<Situation> baseline, Set<Situation> sut) {
         final Map<String, Set<String>> baselinePeersById = indexPeers(baseline);
         final Map<String, Set<String>> sutPeersById = indexPeers(sut);
 
@@ -70,7 +70,7 @@ public class PeerScoringStrategy implements ScoringStrategy {
 
             double partialScore = 0d;
             if (baselinePeers.size() == 0) {
-                // There is no other alarms in the incident, only match if there are no peers in the SUT
+                // There is no other alarms in the situation, only match if there are no peers in the SUT
                 if (sutPeers.size() == 0) {
                     partialScore = 1.0;
                 }
@@ -108,14 +108,14 @@ public class PeerScoringStrategy implements ScoringStrategy {
         return scoreReport;
     }
 
-    private static Map<String, Set<String>> indexPeers(Set<Incident> incidents) {
+    private static Map<String, Set<String>> indexPeers(Set<Situation> situations) {
         final Map<String, Set<String>> alarmIdToPeers = Maps.newHashMap();
-        for (Incident incident : incidents) {
-            for (Alarm alarm : incident.getAlarms()) {
-                if (incident.getAlarms().size() == 1) {
+        for (Situation situation : situations) {
+            for (Alarm alarm : situation.getAlarms()) {
+                if (situation.getAlarms().size() == 1) {
                     alarmIdToPeers.put(alarm.getId(), Collections.emptySet());
                 } else {
-                    for (Alarm otherAlarm : incident.getAlarms()) {
+                    for (Alarm otherAlarm : situation.getAlarms()) {
                         if (alarm == otherAlarm) {
                             continue;
                         }

@@ -31,46 +31,46 @@ package org.opennms.oce.datasource.opennms;
 import java.util.Comparator;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.opennms.events.Event;
 
 /**
- * Contains the logic used to convert and incident to an event.
+ * Contains the logic used to convert and situation to an event.
  *
  */
-public class IncidentToEvent {
+public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
 
-    public static Event toEvent(Incident incident) {
+    public static Event toEvent(Situation situation) {
         final Event e = new Event();
         e.setUei(SITUATION_UEI);
 
         // Use the max severity as the situation severity
-        final Severity maxSeverity = Severity.fromValue(incident.getAlarms().stream()
+        final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
                 .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
                 .max()
                 .getAsInt());
         e.setSeverity(maxSeverity.name().toLowerCase());
 
-        // Relay the incident id
-        e.addParam(SITUATION_ID_PARM_NAME, incident.getId());
+        // Relay the situation id
+        e.addParam(SITUATION_ID_PARM_NAME, situation.getId());
 
         // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = incident.getAlarms().stream()
+        final Alarm earliestAlarm = situation.getAlarms().stream()
                 .min(Comparator.comparing(Alarm::getTime))
                 .get();
         e.addParam("situationLogMsg", earliestAlarm.getSummary());
 
         String description = earliestAlarm.getDescription();
-        if (incident.getDiagnosticText() != null) {
-            description += "\n<p>OCE Diagnostic: " + incident.getDiagnosticText() + "</p>";
+        if (situation.getDiagnosticText() != null) {
+            description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
         }
         e.addParam("situationDescr", description);
 
         // Set the related reduction keys
-        incident.getAlarms().stream()
+        situation.getAlarms().stream()
                 .map(Alarm::getId)
                 .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
 

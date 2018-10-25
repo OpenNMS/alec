@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
@@ -51,18 +51,18 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
     }
 
     @Override
-    public ScoreReport score(Set<Incident> baseline, Set<Incident> sut) {
+    public ScoreReport score(Set<Situation> baseline, Set<Situation> sut) {
         return generateReport(baseline, sut);
     }
 
     // Percentage of the Base Tickets correctly found in the SUT
-    public double getAccuracy(Set<Incident> baseline, Set<Incident> sut) {
+    public double getAccuracy(Set<Situation> baseline, Set<Situation> sut) {
         return percentOf(baseline.size(), sut.size()) - falsePositivePenalty(baseline, sut);
     }
 
     // Calculate an arbitrary penalty for false Positives
-    private double falsePositivePenalty(Set<Incident> baseline, Set<Incident> sut) {
-        Set<Incident> falsePositives = new HashSet<>(sut);
+    private double falsePositivePenalty(Set<Situation> baseline, Set<Situation> sut) {
+        Set<Situation> falsePositives = new HashSet<>(sut);
         falsePositives.removeAll(baseline);
         if (falsePositives.size() == 0) {
             // no false positives
@@ -81,7 +81,7 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
         return (double) sut * 100 / (double) baseline;
     }
 
-    private ScoreReport generateReport(Set<Incident> baseline, Set<Incident> sut) {
+    private ScoreReport generateReport(Set<Situation> baseline, Set<Situation> sut) {
         ScoreReport report = new ScoreReport();
         report.setScore(Math.abs(100d - getAccuracy(baseline, sut)));
         report.setMaxScore(200d);
@@ -89,7 +89,7 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
         return report;
     }
 
-    private List<ScoreMetric> getMetrics(Set<Incident> baseline, Set<Incident> sut) {
+    private List<ScoreMetric> getMetrics(Set<Situation> baseline, Set<Situation> sut) {
         int intersectionSize = getIntersectionSize(baseline, sut);
         List<ScoreMetric> metrics = new ArrayList<>();
         metrics.add(getAlarmAccuracy(getAlarms(baseline), getAlarms(sut)));
@@ -98,8 +98,8 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
         return metrics;
     }
 
-    private Set<Alarm> getAlarms(Set<Incident> incidents) {
-        return incidents.stream().map(i -> i.getAlarms()).flatMap(Set::stream).collect(Collectors.toSet());
+    private Set<Alarm> getAlarms(Set<Situation> situations) {
+        return situations.stream().map(i -> i.getAlarms()).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     // Percentage of the Alarms correctly found in the SUT
@@ -109,27 +109,27 @@ public class SetIntersectionScoringStrategy implements ScoringStrategy {
         return metric;
     }
 
-    private ScoreMetric getFalsePositives(Set<Incident> sut, int intersectionSize) {
-        ScoreMetric metric = new ScoreMetric("FalsePositives", "Number of Incidents in the SUT not found in the Baseline.");
+    private ScoreMetric getFalsePositives(Set<Situation> sut, int intersectionSize) {
+        ScoreMetric metric = new ScoreMetric("FalsePositives", "Number of Situations in the SUT not found in the Baseline.");
         metric.setValue(sut.size() - intersectionSize);
         return metric;
     }
 
-    private ScoreMetric getFalseNegatives(Set<Incident> baseline, int intersectionSize) {
-        ScoreMetric metric = new ScoreMetric("FalseNegatives", "Number of Incidents in the Baseline not included in the SUT.");
+    private ScoreMetric getFalseNegatives(Set<Situation> baseline, int intersectionSize) {
+        ScoreMetric metric = new ScoreMetric("FalseNegatives", "Number of Situations in the Baseline not included in the SUT.");
         metric.setValue(baseline.size() - intersectionSize);
         return metric;
     }
 
     // Calculate intersection size using modified hash
-    private int getIntersectionSize(Set<Incident> baseline, Set<Incident> sut) {
-        Set<String> signatures = new HashSet<>(baseline.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet()));
-        signatures.retainAll(new HashSet<>(sut.stream().map(i -> getIncidentSignature(i)).collect(Collectors.toSet())));
+    private int getIntersectionSize(Set<Situation> baseline, Set<Situation> sut) {
+        Set<String> signatures = new HashSet<>(baseline.stream().map(i -> getSituationSignature(i)).collect(Collectors.toSet()));
+        signatures.retainAll(new HashSet<>(sut.stream().map(i -> getSituationSignature(i)).collect(Collectors.toSet())));
         return signatures.size();
     }
 
-    // Cannot include ID or TIME in  the Incident signature
-    private String getIncidentSignature(Incident i) {
+    // Cannot include ID or TIME in  the Situation signature
+    private String getSituationSignature(Situation i) {
         return getAlarmSignature(i.getAlarms());
     }
 

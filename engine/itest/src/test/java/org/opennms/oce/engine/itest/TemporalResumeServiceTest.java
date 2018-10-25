@@ -41,9 +41,9 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
@@ -85,23 +85,23 @@ public class TemporalResumeServiceTest {
         
         List<Alarm> sortedAlarms = TestDriver.timeSortAlarms(alarms);
 
-        final List<Incident> baseIncidents = baseDriver.run(sortedAlarms, inventory);
+        final List<Situation> baseSituations = baseDriver.run(sortedAlarms, inventory);
 
         // Now Split the run over a new driver
         // Resumption Time after First Alarm, Before Second
         long startUpTime = SECONDS.toMillis(15);
-        List<Incident> priorIncidents = aprioriDriver.run(TestDriver.getStartupAlarms(sortedAlarms, startUpTime), inventory);
+        List<Situation> priorSituations = aprioriDriver.run(TestDriver.getStartupAlarms(sortedAlarms, startUpTime), inventory);
 
-        final List<Incident> testIncidents = testDriver.run(sortedAlarms, inventory, priorIncidents, startUpTime);
+        final List<Situation> testSituations = testDriver.run(sortedAlarms, inventory, priorSituations, startUpTime);
 
-        // The test is useless if the baseline doesn't have Incidents
-        assertThat(baseIncidents.size(), greaterThan(0));
-        // Expect 1 incident after resumption
-        assertThat(testIncidents.size(), equalTo(1));
+        // The test is useless if the baseline doesn't have Situations
+        assertThat(baseSituations.size(), greaterThan(0));
+        // Expect 1 situation after resumption
+        assertThat(testSituations.size(), equalTo(1));
     }
 
     @Test
-    public void resumeServiceAfterIncidentTest() {
+    public void resumeServiceAfterSituationTest() {
         final List<Alarm> alarms = new ArrayList<>();
         // Fail all ports on all cards of node: n1
         alarms.addAll(new MockAlarmBuilder()
@@ -119,22 +119,22 @@ public class TemporalResumeServiceTest {
         
         List<Alarm> sortedAlarms = TestDriver.timeSortAlarms(alarms);
 
-        final List<Incident> baseIncidents = baseDriver.run(sortedAlarms, inventory);
-        final List<WrappedIncident> wrappedBaseIncidents = baseIncidents.stream().map(i -> new WrappedIncident(i))
+        final List<Situation> baseSituations = baseDriver.run(sortedAlarms, inventory);
+        final List<WrappedSituation> wrappedBaseSituations = baseSituations.stream().map(i -> new WrappedSituation(i))
             .collect(Collectors.toList());
 
         // Resume Time is now after both alarms  
         long startUpTime = SECONDS.toMillis(120);
-        List<Incident> priorIncidents = aprioriDriver.run(TestDriver.getStartupAlarms(sortedAlarms, startUpTime), inventory);
+        List<Situation> priorSituations = aprioriDriver.run(TestDriver.getStartupAlarms(sortedAlarms, startUpTime), inventory);
 
-        final List<Incident> testIncidents = testDriver.run(sortedAlarms, inventory, priorIncidents, startUpTime);
+        final List<Situation> testSituations = testDriver.run(sortedAlarms, inventory, priorSituations, startUpTime);
 
-        // The test is useless if the baseline doesn't have Incidents
-        assertThat(baseIncidents.size(), greaterThan(0));
-        // 2 Cleared Incidents after restart
-        assertThat(testIncidents.size(), equalTo(2));
-        assertThat(testIncidents.get(0).getSeverity(), equalTo(Severity.CLEARED));
-        assertThat(testIncidents.get(0).getSeverity(), equalTo(Severity.CLEARED));
+        // The test is useless if the baseline doesn't have Situations
+        assertThat(baseSituations.size(), greaterThan(0));
+        // 2 Cleared Situations after restart
+        assertThat(testSituations.size(), equalTo(2));
+        assertThat(testSituations.get(0).getSeverity(), equalTo(Severity.CLEARED));
+        assertThat(testSituations.get(0).getSeverity(), equalTo(Severity.CLEARED));
     }
     
 }

@@ -1,9 +1,9 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
-    <reference id="incidentDataSource"
-               interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
+    <reference id="situationDataSource"
+               interface="org.opennms.oce.datasource.api.SituationDatasource"/>
     <service interface="org.opennms.oce.processor.api.SituationProcessorFactory">
         <bean class="org.opennms.oce.processor.standalone.StandaloneSituationProcessorFactory">
-            <argument ref="incidentDataSource"/>
+            <argument ref="situationDataSource"/>
         </bean>
     </service>
 </blueprint>

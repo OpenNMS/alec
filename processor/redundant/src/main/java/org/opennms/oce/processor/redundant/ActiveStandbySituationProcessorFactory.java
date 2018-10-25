@@ -29,7 +29,7 @@
 package org.opennms.oce.processor.redundant;
 
 import org.opennms.features.distributed.coordination.api.DomainManagerFactory;
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.processor.api.SituationProcessor;
 import org.opennms.oce.processor.api.SituationProcessorFactory;
 
@@ -47,9 +47,9 @@ public class ActiveStandbySituationProcessorFactory implements SituationProcesso
      *
      * @param domainManagerFactory the domain manager factory
      */
-    public ActiveStandbySituationProcessorFactory(IncidentDatasource incidentDatasource,
+    public ActiveStandbySituationProcessorFactory(SituationDatasource situationDatasource,
                                                   DomainManagerFactory domainManagerFactory) {
-        INSTANCE = ActiveStandbySituationProcessor.newInstance(incidentDatasource, domainManagerFactory);
+        INSTANCE = ActiveStandbySituationProcessor.newInstance(situationDatasource, domainManagerFactory);
     }
 
     /**

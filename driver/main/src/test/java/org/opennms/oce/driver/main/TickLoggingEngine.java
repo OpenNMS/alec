@@ -33,10 +33,10 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
-import org.opennms.oce.engine.api.IncidentHandler;
 
 import com.google.common.collect.ImmutableList;
 
@@ -44,7 +44,7 @@ public class TickLoggingEngine implements Engine {
     private final List<Long> ticks = new ArrayList<>();
 
     @Override
-    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
+    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory) {
 
     }
 
@@ -64,7 +64,7 @@ public class TickLoggingEngine implements Engine {
     }
 
     @Override
-    public void registerIncidentHandler(IncidentHandler handler) {
+    public void registerSituationHandler(SituationHandler handler) {
 
     }
 

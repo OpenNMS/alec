@@ -97,8 +97,8 @@ public class OpennmsDatasourceStoreTest {
         final KeyValueStore<String, OpennmsModelProtos.Alarm> alarmStore = testDriver.getKeyValueStore(OpennmsDatasource.ALARM_STORE);
         assertThat(alarmStore, notNullValue());
 
-        final KeyValueStore<String, OpennmsModelProtos.Alarm> incidentStore = testDriver.getKeyValueStore(OpennmsDatasource.INCIDENT_STORE);
-        assertThat(alarmStore, notNullValue());
+        final KeyValueStore<String, OpennmsModelProtos.Alarm> situationStore = testDriver.getKeyValueStore(OpennmsDatasource.SITUATION_STORE);
+        assertThat(situationStore, notNullValue());
 
         // t=1 - Create an alarm and a node
         long t = step;
@@ -119,7 +119,7 @@ public class OpennmsDatasourceStoreTest {
 
         assertThat(getInventoryObjects(), hasSize(3));
         assertThat(Iterators.size(alarmStore.all()), equalTo(1));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(0));
+        assertThat(Iterators.size(situationStore.all()), equalTo(0));
 
         // t=2 - Create an alarm and a node
         t = 2*step;
@@ -136,7 +136,7 @@ public class OpennmsDatasourceStoreTest {
         // verify
         assertThat(getInventoryObjects(), hasSize(6));
         assertThat(Iterators.size(alarmStore.all()), equalTo(2));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(0));
+        assertThat(Iterators.size(situationStore.all()), equalTo(0));
 
         // t=3 - Create a situation and a link down alarm
         t = 3*step;
@@ -153,7 +153,7 @@ public class OpennmsDatasourceStoreTest {
         // verify
         assertThat(getInventoryObjects(), hasSize(7));
         assertThat(Iterators.size(alarmStore.all()), equalTo(3));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(1));
+        assertThat(Iterators.size(situationStore.all()), equalTo(1));
 
         // t=4 - Update a situation
         t = 4*step;
@@ -167,7 +167,7 @@ public class OpennmsDatasourceStoreTest {
         // verify
         assertThat(getInventoryObjects(), hasSize(7));
         assertThat(Iterators.size(alarmStore.all()), equalTo(3));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(1));
+        assertThat(Iterators.size(situationStore.all()), equalTo(1));
 
         // t=5 - Delete a node and clear two alarms
         t = 5*step;
@@ -182,7 +182,7 @@ public class OpennmsDatasourceStoreTest {
         // verify
         assertThat(getInventoryObjects(), hasSize(7));
         assertThat(Iterators.size(alarmStore.all()), equalTo(1));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(1));
+        assertThat(Iterators.size(situationStore.all()), equalTo(1));
 
         // t=6 - Delete the remaining node, alarm, and situation
         t = 6*step;
@@ -197,7 +197,7 @@ public class OpennmsDatasourceStoreTest {
         // verify
         assertThat(getInventoryObjects(), hasSize(3));
         assertThat(Iterators.size(alarmStore.all()), equalTo(0));
-        assertThat(Iterators.size(incidentStore.all()), equalTo(0));
+        assertThat(Iterators.size(situationStore.all()), equalTo(0));
 
         testDriver.close();
     }

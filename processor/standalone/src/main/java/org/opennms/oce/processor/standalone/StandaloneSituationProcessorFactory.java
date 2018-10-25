@@ -28,7 +28,7 @@
 
 package org.opennms.oce.processor.standalone;
 
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.processor.api.SituationProcessor;
 import org.opennms.oce.processor.api.SituationProcessorFactory;
 
@@ -44,10 +44,10 @@ public class StandaloneSituationProcessorFactory implements SituationProcessorFa
     /**
      * Constructor.
      * 
-     * @param incidentDatasource the incident data source
+     * @param situationDatasource the situation data source
      */
-    public StandaloneSituationProcessorFactory(IncidentDatasource incidentDatasource) {
-        INSTANCE = new StandaloneSituationProcessor(incidentDatasource);
+    public StandaloneSituationProcessorFactory(SituationDatasource situationDatasource) {
+        INSTANCE = new StandaloneSituationProcessor(situationDatasource);
     }
 
     @Override

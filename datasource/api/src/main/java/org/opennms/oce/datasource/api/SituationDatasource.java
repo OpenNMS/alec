@@ -29,24 +29,17 @@
 package org.opennms.oce.datasource.api;
 
 import java.util.List;
-import java.util.Set;
 
-public interface Incident {
+public interface SituationDatasource {
 
-    String getId();
+    List<Situation> getSituations();
 
-    long getCreationTime();
+    void forwardSituation(Situation situation) throws Exception;
 
-    List<ResourceKey> getResourceKeys();
+    void registerHandler(SituationHandler handler);
 
-    Set<Alarm> getAlarms();
+    void unregisterHandler(SituationHandler handler);
 
-    Severity getSeverity();
-
-    /**
-     * A human readable string that helps explain while
-     * the alarms are grouped together.
-     */
-    String getDiagnosticText();
+    void waitUntilReady() throws InterruptedException;
 
 }

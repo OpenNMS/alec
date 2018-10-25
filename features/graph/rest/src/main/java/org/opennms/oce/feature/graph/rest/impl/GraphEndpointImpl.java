@@ -41,8 +41,8 @@ import javax.ws.rs.NotFoundException;
 
 import org.graphdrawing.graphml.GraphmlType;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.feature.graph.rest.api.GraphEndpoint;
 import org.opennms.oce.feature.graph.rest.model.AlarmSummary;
 import org.opennms.oce.feature.graph.rest.model.GraphDTO;
@@ -206,7 +206,7 @@ public class GraphEndpointImpl implements GraphEndpoint {
                     filteredGraph.addVertex(v);
 
                     // Now filter for situations on the graph
-                    final List<Incident> situationsWithAlarmOnGraph;
+            final List<Situation> situationsWithAlarmOnGraph;
                     if (hops >= 2) {
                         final Set<Alarm> alarmsOnFilteredGraph = filteredGraph.getVertices().stream()
                                 .flatMap(vv -> vv.getAlarms().stream())

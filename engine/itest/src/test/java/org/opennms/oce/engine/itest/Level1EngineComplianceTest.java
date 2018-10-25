@@ -56,8 +56,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
@@ -111,31 +111,31 @@ public class Level1EngineComplianceTest {
     @Test
     public void canCorrelateFiveAlarmsWithSameTimeOnSameResource() {
         final List<Alarm> alarms = getAlarms(5, 20, MockInventoryType.DEVICE, "n1");
-        final List<Incident> incidents = driver.run(alarms);
+        final List<Situation> situations = driver.run(alarms);
 
-        // A single incident should have been created
-        assertThat(incidents, hasSize(1));
+        // A single situation should have been created
+        assertThat(situations, hasSize(1));
 
-        // All five alarms should be in the same incident
-        assertThat(incidents.get(0).getAlarms(), containsInAnyOrder(alarms.toArray()));
+        // All five alarms should be in the same situation
+        assertThat(situations.get(0).getAlarms(), containsInAnyOrder(alarms.toArray()));
 
-        // The incident should have been created some time after the first alarm
+        // The situation should have been created some time after the first alarm
         final long minTimestamp = alarms.stream().mapToLong(Alarm::getTime).sorted().findFirst().getAsLong();
         // TODO: Not currently implemented
-        //assertThat(incidents.get(0).getCreationTime(), greaterThanOrEqualTo(minTimestamp));
+        //assertThat(situations.get(0).getCreationTime(), greaterThanOrEqualTo(minTimestamp));
     }
 
     /**
      * Given some noisy data verify that the results from multiple runs.
      * Also run these in parallel to also make sure that different instances of the engine are properly isolated.
      *
-     * TODO: Ensure that 2+ incidents are created instead of 1
+     * TODO: Ensure that 2+ situations are created instead of 1
      */
     @Test
     public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)
-        // * They will generate 1 or more incidents
+        // * They will generate 1 or more situations
         final List<Alarm> alarms = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             MockAlarmBuilder builder = new MockAlarmBuilder()
@@ -147,46 +147,46 @@ public class Level1EngineComplianceTest {
             alarms.addAll(builder.build());
         }
 
-        final List<Incident> initialIncidents = driver.run(alarms);
-        // Expect 1+ incidents
-        assertThat(initialIncidents, hasSize(greaterThanOrEqualTo(1)));
+        final List<Situation> initialSituations = driver.run(alarms);
+        // Expect 1+ situations
+        assertThat(initialSituations, hasSize(greaterThanOrEqualTo(1)));
 
         // Now rerun the driver several times in series, and expect the same results
         final int K = 20;
         for (int k = 0; k < K; k++) {
-            final List<Incident> subsequentIncidents = driver.run(alarms);
-            compareIncidents(initialIncidents, subsequentIncidents);
+            final List<Situation> subsequentSituations = driver.run(alarms);
+            compareSituations(initialSituations, subsequentSituations);
 
-            Set<Incident> initialIncidentsInSet = Sets.newHashSet(initialIncidents);
-            Set<Incident> generatedIncidentsInSet = Sets.newHashSet(subsequentIncidents);
+            Set<Situation> initialSituationsInSet = Sets.newHashSet(initialSituations);
+            Set<Situation> generatedSituationsInSet = Sets.newHashSet(subsequentSituations);
         }
 
         // Rerun the driver again over serveral threads and expect the same results
         final ExecutorService executor = Executors.newFixedThreadPool(10);
-        final List<CompletableFuture<List<Incident>>> incidentFutures = new ArrayList<>();
+        final List<CompletableFuture<List<Situation>>> situationFutures = new ArrayList<>();
         for (int k = 0; k < K; k++) {
-            incidentFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
+            situationFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
         }
-        CompletableFuture.allOf(incidentFutures.toArray(new CompletableFuture[0])).get();
-        for (CompletableFuture<List<Incident>> incidentFuture : incidentFutures) {
-            compareIncidents(initialIncidents, incidentFuture.get());
+        CompletableFuture.allOf(situationFutures.toArray(new CompletableFuture[0])).get();
+        for (CompletableFuture<List<Situation>> situationFuture : situationFutures) {
+            compareSituations(initialSituations, situationFuture.get());
         }
     }
 
-    private static void compareIncidents(List<Incident> base, List<Incident> sut) {
-        // Incident IDs may vary, so we take a closer look
+    private static void compareSituations(List<Situation> base, List<Situation> sut) {
+        // Situation IDs may vary, so we take a closer look
         assertThat(sut, hasSize(base.size()));
 
         // Extract the alarmIds and compare both their contents and orders
         for (int l = 0; l < base.size(); l++) {
-            final List<String> initialAlarmIds = getAlarmIdsFromIncident(base.get(l));
-            final List<String> subsequentAlarmIds = getAlarmIdsFromIncident(sut.get(l));
+            final List<String> initialAlarmIds = getAlarmIdsFromSituation(base.get(l));
+            final List<String> subsequentAlarmIds = getAlarmIdsFromSituation(sut.get(l));
             assertThat(subsequentAlarmIds, equalTo(initialAlarmIds));
         }
     }
 
-    private static List<String> getAlarmIdsFromIncident(Incident incident) {
-        return incident.getAlarms().stream()
+    private static List<String> getAlarmIdsFromSituation(Situation situation) {
+        return situation.getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toList());
     }

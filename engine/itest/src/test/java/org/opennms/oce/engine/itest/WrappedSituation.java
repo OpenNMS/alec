@@ -26,20 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.api;
+package org.opennms.oce.engine.itest;
 
-import java.util.List;
+import java.util.Objects;
 
-public interface IncidentDatasource {
+import org.opennms.oce.datasource.api.Situation;
 
-    List<Incident> getIncidents();
+public class WrappedSituation {
+    private Situation i;
 
-    void forwardIncident(Incident incident) throws Exception;
+    public WrappedSituation(Situation i) {
+        this.i = i;
+    }
 
-    void registerHandler(SituationHandler handler);
+    @Override
+    public int hashCode() {
+        return Objects.hash(i.getSeverity(), i.getResourceKeys(), i.getAlarms());
+    }
 
-    void unregisterHandler(SituationHandler handler);
-
-    void waitUntilReady() throws InterruptedException;
-
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        WrappedSituation other = (WrappedSituation) obj;
+        return other.i.getSeverity().equals(i.getSeverity()) && other.i.getResourceKeys().equals(i.getResourceKeys())
+                && other.i.getAlarms().equals(i.getAlarms());
+    }
 }

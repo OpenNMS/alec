@@ -63,12 +63,12 @@ import org.apache.kafka.streams.state.Stores;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
 import org.opennms.oce.datasource.api.AlarmHandler;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.opennms.events.Event;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
@@ -86,7 +86,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, InventoryDatasource {
+public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, InventoryDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
     public static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
@@ -107,7 +107,8 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
 
     public static final String INVENTORY_STORE = "inventoryStore";
     public static final String ALARM_STORE = "alarmStore";
-    public static final String INCIDENT_STORE = "incidentStore";
+
+    public static final String SITUATION_STORE = "situationStore";
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<InventoryHandler> inventoryHandlers = new HandlerRegistry<>();
@@ -211,15 +212,15 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
                 Stores.persistentKeyValueStore(ALARM_STORE),
                 Serdes.String(),
                 OpennmsSerdes.Alarm());
-        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> incidentStore = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(INCIDENT_STORE),
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> situationStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(SITUATION_STORE),
                 Serdes.String(),
                 OpennmsSerdes.Alarm());
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.addStateStore(inventoryStore);
         builder.addStateStore(alarmStore);
-        builder.addStateStore(incidentStore);
+        builder.addStateStore(situationStore);
 
         final AlarmDeserializer alarmDeserializer = new AlarmDeserializer();
         KStream<String, byte[]> alarmBytesStream = builder.stream(getAlarmTopic());
@@ -253,7 +254,7 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
         }).process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
 
         KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k,v) -> isSituation(k));
-        situationStream.process(() -> new SituationTableProcessor(situationHandlers), INCIDENT_STORE);
+        situationStream.process(() -> new SituationTableProcessor(situationHandlers), SITUATION_STORE);
 
         final NodeDeserializer nodeDeserializer = new NodeDeserializer();
         KStream<String, byte[]> nodeBytesStream = builder.stream(getNodeTopic());
@@ -367,20 +368,20 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
     }
 
     @Override
-    public List<Incident> getIncidents() {
-        final List<Incident> incidents = new ArrayList<>();
+    public List<Situation> getSituations() {
+        final List<Situation> situations = new ArrayList<>();
         try {
-            waitUntilIncidentStoreIsQueryable().all().forEachRemaining(entry -> {
-                incidents.add(OpennmsMapper.toIncident(entry.value));
+            waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
+                situations.add(OpennmsMapper.toSituation(entry.value));
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return incidents;
+        return situations;
     }
 
-    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilIncidentStoreIsQueryable() throws InterruptedException {
-        return waitUntilStoreIsQueryable(INCIDENT_STORE);
+    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable() throws InterruptedException {
+        return waitUntilStoreIsQueryable(SITUATION_STORE);
     }
 
     private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
@@ -405,26 +406,26 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
     }
 
     @Override
-    public void forwardIncident(Incident incident) {
-        if (incident.getAlarms().size() < 1) {
-            LOG.warn("Got incident with no alarms. Ignoring.");
+    public void forwardSituation(Situation situation) {
+        if (situation.getAlarms().size() < 1) {
+            LOG.warn("Got situation with no alarms. Ignoring.");
             return;
         }
 
-        final Event e = IncidentToEvent.toEvent(incident);
-        final String incidentXml = JaxbUtils.toXml(new Log(e), Log.class);
-        LOG.debug("Sending event to create incident with id '{}'. XML: {}", incident.getId(), incidentXml);
-        producer.send(new ProducerRecord<>(getEventSinkTopic(), incidentXml), (metadata, ex) -> {
+        final Event e = SituationToEvent.toEvent(situation);
+        final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
+        LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
+        producer.send(new ProducerRecord<>(getEventSinkTopic(), situationXml), (metadata, ex) -> {
             if (ex != null) {
-                LOG.warn("An error occured while sending event for incident with id '{}'.", incident.getId(), ex);
+                LOG.warn("An error occured while sending event for situation with id '{}'.", situation.getId(), ex);
             } else {
-                LOG.debug("Successfully sent event for incident with id '{}'.", incident.getId());
+                LOG.debug("Successfully sent event for situation with id '{}'.", situation.getId());
             }
         });
     }
 
     private static boolean isSituation(String reductionKey) {
-        return reductionKey.startsWith(IncidentToEvent.SITUATION_UEI);
+        return reductionKey.startsWith(SituationToEvent.SITUATION_UEI);
     }
 
     public String getAlarmTopic() {
@@ -479,6 +480,6 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
     public void waitUntilReady() throws InterruptedException {
         waitUntilInventoryStoreIsQueryable();
         waitUntilAlarmStoreIsQueryable();
-        waitUntilIncidentStoreIsQueryable();
+        waitUntilSituationStoreIsQueryable();
     }
 }

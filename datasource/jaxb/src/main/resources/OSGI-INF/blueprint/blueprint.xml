@@ -17,7 +17,7 @@
 
     <!-- Load the resources -->
     <bean id="alarms" factory-ref="resourceLoader" factory-method="getAlarms"/>
-    <bean id="incidents" factory-ref="resourceLoader" factory-method="getIncidents"/>
+    <bean id="situations" factory-ref="resourceLoader" factory-method="getSituations"/>
     <bean id="inventory" factory-ref="resourceLoader" factory-method="getInventory"/>
 
     <!-- Create and expose the static data sources -->
@@ -26,10 +26,10 @@
     </bean>
     <service ref="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
 
-    <bean id="incidentDatasource" class="org.opennms.oce.datasource.common.StaticIncidentDatasource">
-        <argument ref="incidents"/>
+    <bean id="situationDatasource" class="org.opennms.oce.datasource.common.StaticSituationDatasource">
+        <argument ref="situations"/>
     </bean>
-    <service ref="incidentDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
+    <service ref="situationDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
 
     <bean id="inventoryDatasource" class="org.opennms.oce.datasource.common.StaticInventoryDatasource">
         <argument ref="inventory"/>

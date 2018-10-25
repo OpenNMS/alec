@@ -45,9 +45,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
@@ -121,11 +120,11 @@ public class Level2EngineComplianceTest {
         // 3919127 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:39 EDT 2018
         // 3919128 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:38 EDT 2018
 
-        final List<Incident> incidents = Collections.emptyList(); // driver.run(events, alarms);
-        // A single incident should have been created
-        assertThat(incidents, hasSize(1));
+        final List<Situation> situations = Collections.emptyList(); // driver.run(events, alarms);
+        // A single situation should have been created
+        assertThat(situations, hasSize(1));
         // It should contain all of the given alarms
-        assertThat(getAlarmIdsInIncident(incidents.get(0)), containsInAnyOrder("3919123", "3919127", "3919128"));
+        assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("3919123", "3919127", "3919128"));
     }
 
     @Test
@@ -300,11 +299,11 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525594919000L, Severity.NORMAL) // 4 seconds since last event
                 .build());
 
-        final List<Incident> incidents = driver.run(alarms);
-        // A single incident should have been created
-        assertThat(incidents, hasSize(1));
+        final List<Situation> situations = driver.run(alarms);
+        // A single situation should have been created
+        assertThat(situations, hasSize(1));
         // It should contain all of the given alarms
-        assertThat(getAlarmIdsInIncident(incidents.get(0)), containsInAnyOrder("3919134", "3919189"));
+        assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("3919134", "3919189"));
     }
 
     @Test
@@ -353,15 +352,15 @@ public class Level2EngineComplianceTest {
                 .withEvent(1525580250000L, Severity.CLEARED) // 15 seconds since last event
                 .build());
 
-        final List<Incident> incidents = driver.run(alarms);
-        // A single incident should have been created
-        assertThat(incidents, hasSize(1));
+        final List<Situation> situations = driver.run(alarms);
+        // A single situation should have been created
+        assertThat(situations, hasSize(1));
         // It should contain all of the given alarms
-        assertThat(getAlarmIdsInIncident(incidents.get(0)), containsInAnyOrder("3919143", "3919144", "3919145", "3919146", "3919147"));
+        assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("3919143", "3919144", "3919145", "3919146", "3919147"));
     }
 
-    public static Set<String> getAlarmIdsInIncident(Incident incident) {
-        return incident.getAlarms().stream()
+    public static Set<String> getAlarmIdsInSituation(Situation situation) {
+        return situation.getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toSet());
     }
@@ -369,7 +368,7 @@ public class Level2EngineComplianceTest {
     /*
     @Test
     @Ignore("Utility code")
-    public void generateMockAlarmFromIncident() throws JAXBException, IOException {
+    public void generateMockAlarmFromSituation() throws JAXBException, IOException {
         List<org.opennms.oce.events.v1.schema.Alarm> alarms = EngineUtils.getRawAlarms(Paths.get("/tmp/cpn.alarms.xml"));
         printAlarm(alarms, "3919143");
         printAlarm(alarms, "3919144");
@@ -377,8 +376,8 @@ public class Level2EngineComplianceTest {
         printAlarm(alarms, "3919146");
         printAlarm(alarms, "3919147");
     }
-
-
+    
+    
     private static void printAlarm(List<org.opennms.oce.events.v1.schema.Alarm> alarms, String alarmId) {
         org.opennms.oce.events.v1.schema.Alarm alarm = alarms.stream().filter(a -> a.getId().equals(alarmId)).findFirst().get();
         StringBuilder sb = new StringBuilder();

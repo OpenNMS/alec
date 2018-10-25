@@ -1,69 +1,69 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<incidents xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
-    <incident severity="cleared" id="3289007" time="1502804010000" summary="Port up" description="Port up">
+<situations xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+    <situation severity="cleared" id="3289007" time="1502804010000" summary="Port up" description="Port up">
         <alarm-ref id="12000138626106_1524046392644"/>
-    </incident>
-    <incident severity="cleared" id="3289003" time="1502804010000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3289003" time="1502804010000" summary="Port up" description="Port up">
         <alarm-ref id="11940009083962_1524031857596"/>
-    </incident>
-    <incident severity="cleared" id="3289084" time="1502804020000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3289084" time="1502804020000" summary="Port up" description="Port up">
         <alarm-ref id="12025908429882_1524050820806"/>
-    </incident>
-    <incident severity="major" id="3361850" time="1504806091000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3361850" time="1504806091000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12481174963260_1524247073119"/>
-    </incident>
-    <incident severity="major" id="3361866" time="1504806101000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3361866" time="1504806101000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12584254178364_1524277673570"/>
-    </incident>
-    <incident severity="cleared" id="3387470" time="1505741199000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3387470" time="1505741199000" summary="Port up" description="Port up">
         <alarm-ref id="12687333393468_1524502383608"/>
-    </incident>
-    <incident severity="cleared" id="3388225" time="1505746590000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3388225" time="1505746590000" summary="Port up" description="Port up">
         <alarm-ref id="12567074309180_1524270018293"/>
-    </incident>
-    <incident severity="major" id="3474097" time="1508426070000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3474097" time="1508426070000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12700218295356_1524502388476"/>
-    </incident>
-    <incident severity="cleared" id="3490474" time="1508953301000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3490474" time="1508953301000" summary="Port up" description="Port up">
         <alarm-ref id="12081743004732_1524073834429"/>
         <alarm-ref id="12322261173308_1524149584932"/>
-    </incident>
-    <incident severity="cleared" id="3490478" time="1508953311000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3490478" time="1508953311000" summary="Port up" description="Port up">
         <alarm-ref id="12532714570812_1524258657423"/>
         <alarm-ref id="12738873001020_1524503281411"/>
-    </incident>
-    <incident severity="major" id="3512160" time="1509635499000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3512160" time="1509635499000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12167642350652_1524105981157"/>
-    </incident>
-    <incident severity="cleared" id="3597917" time="1512421757000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3597917" time="1512421757000" summary="Port up" description="Port up">
         <alarm-ref id="12730283066428_1524502406583"/>
-    </incident>
-    <incident severity="cleared" id="3597922" time="1512421977000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3597922" time="1512421977000" summary="Port up" description="Port up">
         <alarm-ref id="12455405159484_1524235129581"/>
-    </incident>
-    <incident severity="cleared" id="3598795" time="1512473824000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3598795" time="1512473824000" summary="Port up" description="Port up">
         <alarm-ref id="12670153524284_1524496623163"/>
-    </incident>
-    <incident severity="cleared" id="3598934" time="1512476964000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3598934" time="1512476964000" summary="Port up" description="Port up">
         <alarm-ref id="12515534701628_1524253556645"/>
-    </incident>
-    <incident severity="cleared" id="3613414" time="1513042280000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3613414" time="1513042280000" summary="Port up" description="Port up">
         <alarm-ref id="11566346929212_1523903292774"/>
         <alarm-ref id="12098922873916_1524076092781"/>
-    </incident>
-    <incident severity="cleared" id="3613427" time="1513042880000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3613427" time="1513042880000" summary="Port up" description="Port up">
         <alarm-ref id="11583526798396_1523904673572"/>
         <alarm-ref id="12506944767036_1524250273575"/>
-    </incident>
-    <incident severity="cleared" id="3628520" time="1513698926000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3628520" time="1513698926000" summary="Port up" description="Port up">
         <alarm-ref id="12047383266364_1524061904117"/>
         <alarm-ref id="12275016533052_1524148304119"/>
-    </incident>
-    <incident severity="cleared" id="3670063" time="1515247265000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3670063" time="1515247265000" summary="Port up" description="Port up">
         <alarm-ref id="11776800326716_1524002320300"/>
         <alarm-ref id="12116102743100_1524088720298"/>
-    </incident>
-    <incident severity="cleared" id="3681186" time="1515597671000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3681186" time="1515597671000" summary="Port up" description="Port up">
         <alarm-ref id="19241453488902_1524505823927"/>
         <alarm-ref id="20259360738054_1524505983417"/>
         <alarm-ref id="20564303416070_1524506013425"/>
@@ -71,255 +71,255 @@
         <alarm-ref id="22827751181062_1524506458296"/>
         <alarm-ref id="28909424872198_1524508045565"/>
         <alarm-ref id="29201482648326_1524508075571"/>
-    </incident>
-    <incident severity="cleared" id="3701138" time="1516201362000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3701138" time="1516201362000" summary="Port up" description="Port up">
         <alarm-ref id="12038793331772_1524058551327"/>
         <alarm-ref id="12262131631164_1524144951327"/>
-    </incident>
-    <incident severity="major" id="3762664" time="1518146622000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3762664" time="1518146622000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12408160519228_1524176041778"/>
-    </incident>
-    <incident severity="major" id="3809641" time="1520485872000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3809641" time="1520485872000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12678743458876_1524502366762"/>
-    </incident>
-    <incident severity="major" id="3811721" time="1520550989000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3811721" time="1520550989000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="11768210392124_1524001858048"/>
-    </incident>
-    <incident severity="major" id="3812677" time="1520630768000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3812677" time="1520630768000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12627203851324_1524313692435"/>
-    </incident>
-    <incident severity="major" id="3813261" time="1520674503000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3813261" time="1520674503000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="11931419149370_1524031575734"/>
-    </incident>
-    <incident severity="major" id="3826675" time="1521185753000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3826675" time="1521185753000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12197707121724_1524128536328"/>
-    </incident>
-    <incident severity="major" id="3834829" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3834829" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12575664243772_1524274404823"/>
-    </incident>
-    <incident severity="cleared" id="3836687" time="1521724946000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3836687" time="1521724946000" summary="Port up" description="Port up">
         <alarm-ref id="11965778887740_1524042555992"/>
         <alarm-ref id="12206297056316_1524128955993"/>
-    </incident>
-    <incident severity="cleared" id="3844559" time="1522159676000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3844559" time="1522159676000" summary="Port up" description="Port up">
         <alarm-ref id="11630771438652_1523921436655"/>
-    </incident>
-    <incident severity="cleared" id="3854593" time="1522706329000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3854593" time="1522706329000" summary="Port up" description="Port up">
         <alarm-ref id="11574936863804_1523904055071"/>
-    </incident>
-    <incident severity="cleared" id="3855782" time="1522762495000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3855782" time="1522762495000" summary="Port up" description="Port up">
         <alarm-ref id="12073153070140_1524069570964"/>
-    </incident>
-    <incident severity="cleared" id="3863999" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3863999" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="12618613916732_1524310650689"/>
-    </incident>
-    <incident severity="cleared" id="3864000" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864000" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="12343736009788_1524149594913"/>
-    </incident>
-    <incident severity="cleared" id="3864001" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864001" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="12330851107900_1524149586617"/>
-    </incident>
-    <incident severity="cleared" id="3864006" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864006" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="11897059411004_1524030207391"/>
-    </incident>
-    <incident severity="cleared" id="3864007" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864007" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="11875584574524_1524022064126"/>
-    </incident>
-    <incident severity="cleared" id="3864005" time="1523041726000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864005" time="1523041726000" summary="Port up" description="Port up">
         <alarm-ref id="11716670784572_1523976982041"/>
-    </incident>
-    <incident severity="cleared" id="3864008" time="1523041736000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864008" time="1523041736000" summary="Port up" description="Port up">
         <alarm-ref id="12541304505404_1524260286381"/>
-    </incident>
-    <incident severity="cleared" id="3864011" time="1523041736000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864011" time="1523041736000" summary="Port up" description="Port up">
         <alarm-ref id="12017318495292_1524050341461"/>
-    </incident>
-    <incident severity="cleared" id="3864016" time="1523041736000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864016" time="1523041736000" summary="Port up" description="Port up">
         <alarm-ref id="11978663789628_1524044897577"/>
-    </incident>
-    <incident severity="cleared" id="3864031" time="1523041746000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864031" time="1523041746000" summary="Port up" description="Port up">
         <alarm-ref id="12610023982140_1524303982740"/>
-    </incident>
-    <incident severity="cleared" id="3864020" time="1523041746000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864020" time="1523041746000" summary="Port up" description="Port up">
         <alarm-ref id="12601434047548_1524286580075"/>
-    </incident>
-    <incident severity="cleared" id="3864027" time="1523041746000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864027" time="1523041746000" summary="Port up" description="Port up">
         <alarm-ref id="12524124636220_1524256062440"/>
-    </incident>
-    <incident severity="cleared" id="3864021" time="1523041746000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864021" time="1523041746000" summary="Port up" description="Port up">
         <alarm-ref id="11905649345596_1524030357104"/>
-    </incident>
-    <incident severity="cleared" id="3864024" time="1523041746000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3864024" time="1523041746000" summary="Port up" description="Port up">
         <alarm-ref id="11802570130492_1524006348785"/>
-    </incident>
-    <incident severity="cleared" id="3867691" time="1523314719000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3867691" time="1523314719000" summary="Port up" description="Port up">
         <alarm-ref id="11828339934266_1524009496609"/>
-    </incident>
-    <incident severity="cleared" id="3867710" time="1523316199000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3867710" time="1523316199000" summary="Port up" description="Port up">
         <alarm-ref id="12150462481466_1524097370316"/>
-    </incident>
-    <incident severity="cleared" id="3868059" time="1523331881000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3868059" time="1523331881000" summary="Port up" description="Port up">
         <alarm-ref id="12592844112956_1524285859669"/>
-    </incident>
-    <incident severity="cleared" id="3868588" time="1523350135000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3868588" time="1523350135000" summary="Port up" description="Port up">
         <alarm-ref id="12214886990906_1524131313642"/>
-    </incident>
-    <incident severity="cleared" id="3868732" time="1523361466000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3868732" time="1523361466000" summary="Port up" description="Port up">
         <alarm-ref id="12253541696570_1524142641149"/>
-    </incident>
-    <incident severity="cleared" id="3871591" time="1523464731000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3871591" time="1523464731000" summary="Port up" description="Port up">
         <alarm-ref id="12240656794684_1524138206940"/>
-    </incident>
-    <incident severity="cleared" id="3874368" time="1523554432000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3874368" time="1523554432000" summary="Port up" description="Port up">
         <alarm-ref id="11733850653754_1523990008490"/>
-    </incident>
-    <incident severity="cleared" id="3874688" time="1523560317000" summary="sensor value crossed threshold in entSensorThresholdTable - Cleared due to ForceClear" description="sensor value crossed threshold in entSensorThresholdTable - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3875000" time="1523572504000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3874688" time="1523560317000" summary="sensor value crossed threshold in entSensorThresholdTable - Cleared due to ForceClear" description="sensor value crossed threshold in entSensorThresholdTable - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3875000" time="1523572504000" summary="Port up" description="Port up">
         <alarm-ref id="11819749999674_1524008076636"/>
-    </incident>
-    <incident severity="cleared" id="3875016" time="1523574455000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3875016" time="1523574455000" summary="Port up" description="Port up">
         <alarm-ref id="11836929868858_1524010033893"/>
-    </incident>
-    <incident severity="cleared" id="3875036" time="1523575195000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3875036" time="1523575195000" summary="Port up" description="Port up">
         <alarm-ref id="11639361373244_1523924366914"/>
-    </incident>
-    <incident severity="cleared" id="3875055" time="1523575775000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3875055" time="1523575775000" summary="Port up" description="Port up">
         <alarm-ref id="11845519803450_1524011353088"/>
-    </incident>
-    <incident severity="cleared" id="3875059" time="1523576125000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3875059" time="1523576125000" summary="Port up" description="Port up">
         <alarm-ref id="11854109738044_1524011703729"/>
-    </incident>
-    <incident severity="cleared" id="3875087" time="1523577825000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3875087" time="1523577825000" summary="Port up" description="Port up">
         <alarm-ref id="11862699672636_1524013398501"/>
-    </incident>
-    <incident severity="cleared" id="3876215" time="1523612129000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3876215" time="1523612129000" summary="Port up" description="Port up">
         <alarm-ref id="12008728560698_1524047701846"/>
-    </incident>
-    <incident severity="cleared" id="3877019" time="1523644843000" summary="OS Dumper Core filename syslog - Cleared due to ForceClear" description="OS Dumper Core filename syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3877054" time="1523646482000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3877019" time="1523644843000" summary="OS Dumper Core filename syslog - Cleared due to ForceClear" description="OS Dumper Core filename syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3877054" time="1523646482000" summary="Port up" description="Port up">
         <alarm-ref id="11751030522940_1523995660235"/>
-    </incident>
-    <incident severity="cleared" id="3877062" time="1523646998000" summary="OS Dumper Core filename syslog - Cleared due to ForceClear" description="OS Dumper Core filename syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3877117" time="1523649373000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3877062" time="1523646998000" summary="OS Dumper Core filename syslog - Cleared due to ForceClear" description="OS Dumper Core filename syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3877117" time="1523649373000" summary="Port up" description="Port up">
         <alarm-ref id="12399570584634_1524171350416"/>
-    </incident>
-    <incident severity="cleared" id="3877517" time="1523668855000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3877517" time="1523668855000" summary="Port up" description="Port up">
         <alarm-ref id="12159052416058_1524104434324"/>
-    </incident>
-    <incident severity="cleared" id="3878077" time="1523697108000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3878077" time="1523697108000" summary="Port up" description="Port up">
         <alarm-ref id="11673721111612_1523959882491"/>
-    </incident>
-    <incident severity="cleared" id="3878539" time="1523724082000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3878539" time="1523724082000" summary="Port up" description="Port up">
         <alarm-ref id="12352325944378_1524159659780"/>
-    </incident>
-    <incident severity="cleared" id="3879743" time="1523800021000" summary="Port down flapping - Cleared due to ForceClear" description="Port down flapping - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3879743" time="1523800021000" summary="Port down flapping - Cleared due to ForceClear" description="Port down flapping - Cleared due to ForceClear">
         <alarm-ref id="27118423506945_1523916478161"/>
-    </incident>
-    <incident severity="cleared" id="3880735" time="1523861046000" summary="Port down flapping - Cleared due to ForceClear" description="Port down flapping - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3880735" time="1523861046000" summary="Port down flapping - Cleared due to ForceClear" description="Port down flapping - Cleared due to ForceClear">
         <alarm-ref id="127128888772923288_1523864621581"/>
         <alarm-ref id="127129421348867992_1523864652758"/>
         <alarm-ref id="127130349061803928_1523864745778"/>
         <alarm-ref id="27101243637761_1523916459777"/>
-    </incident>
-    <incident severity="normal" id="3881094" time="1523875903000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
-    <incident severity="normal" id="3881109" time="1523876409000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
-    <incident severity="normal" id="3881115" time="1523876820000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
-    <incident severity="cleared" id="3881281" time="1523883258000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="normal" id="3881094" time="1523875903000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
+    <situation severity="normal" id="3881109" time="1523876409000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
+    <situation severity="normal" id="3881115" time="1523876820000" summary="SNMP Link down flapping update" description="SNMP Link down flapping update"/>
+    <situation severity="cleared" id="3881281" time="1523883258000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21431886807203_1523886897777">
             <alarm-ref id="16389595206890_1523886858061"/>
         </alarm-ref>
         <alarm-ref id="25920127631361_1523916411541"/>
         <alarm-ref id="25924422598657_1523916411541"/>
-    </incident>
-    <incident severity="cleared" id="3881282" time="1523883298000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881282" time="1523883298000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
         <alarm-ref id="16411070043370_1523886897919"/>
         <alarm-ref id="25928717565953_1523916411541"/>
-    </incident>
-    <incident severity="cleared" id="3881283" time="1523883300000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881283" time="1523883300000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
         <alarm-ref id="21436181774499_1523886899894"/>
         <alarm-ref id="25933012533249_1523916411541"/>
-    </incident>
-    <incident severity="cleared" id="3881284" time="1523883330000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881284" time="1523883330000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
         <alarm-ref id="16531329127658_1523886929620"/>
         <alarm-ref id="25988847108097_1523916411542"/>
-    </incident>
-    <incident severity="cleared" id="3881285" time="1523883333000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881285" time="1523883333000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21577915695267_1523886973887">
             <alarm-ref id="16535624094954_1523886933154"/>
         </alarm-ref>
         <alarm-ref id="26014616911873_1523916411542"/>
         <alarm-ref id="26010321944577_1523916411542"/>
-    </incident>
-    <incident severity="cleared" id="3881294" time="1523883417000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881294" time="1523883417000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21663815041187_1523887047114">
             <alarm-ref id="16608638538985_1523887016961"/>
         </alarm-ref>
         <alarm-ref id="26040386715649_1523916411542"/>
         <alarm-ref id="26018911879169_1523916411542"/>
-    </incident>
-    <incident severity="cleared" id="3881296" time="1523883443000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881297" time="1523883443000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881302" time="1523883450000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881303" time="1523883450000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881313" time="1523883457000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881296" time="1523883443000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881297" time="1523883443000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881302" time="1523883450000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881303" time="1523883450000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881313" time="1523883457000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
         <alarm-ref id="16741782525161_1523887056598"/>
         <alarm-ref id="26061861552129_1523916411543"/>
-    </incident>
-    <incident severity="cleared" id="3881314" time="1523883458000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881314" time="1523883458000" summary="Medium priority member down - Cleared due to ForceClear" description="Medium priority member down - Cleared due to ForceClear">
         <alarm-ref id="21784074125475_1523887057955"/>
         <alarm-ref id="26066156519425_1523916411543"/>
-    </incident>
-    <incident severity="cleared" id="3881315" time="1523883463000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881315" time="1523883463000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21801253994659_1523887092368">
             <alarm-ref id="16746077492457_1523887063116"/>
         </alarm-ref>
         <alarm-ref id="26074746454017_1523916411543"/>
         <alarm-ref id="26070451486721_1523916411543"/>
-    </incident>
-    <incident severity="cleared" id="3881316" time="1523883473000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881316" time="1523883473000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
         <alarm-ref id="16763257361641_1523887072962"/>
         <alarm-ref id="26147760898049_1523916411544"/>
-    </incident>
-    <incident severity="cleared" id="3881325" time="1523883573000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881326" time="1523883573000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881332" time="1523883580000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881334" time="1523883580000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881343" time="1523883592000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881325" time="1523883573000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881326" time="1523883573000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881332" time="1523883580000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881334" time="1523883580000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881343" time="1523883592000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21204253540514_1523887227211">
             <alarm-ref id="16831976838378_1523887191400"/>
         </alarm-ref>
         <alarm-ref id="26173530701825_1523916411544"/>
         <alarm-ref id="26169235734529_1523916411544"/>
-    </incident>
-    <incident severity="cleared" id="3881347" time="1523883624000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881347" time="1523883624000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21199958573218_1523887227211">
             <alarm-ref id="16969415791850_1523887223445"/>
         </alarm-ref>
         <alarm-ref id="26216480374785_1523916411545"/>
         <alarm-ref id="26212185407489_1523916411545"/>
-    </incident>
-    <incident severity="cleared" id="3881348" time="1523883624000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881348" time="1523883624000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
         <alarm-ref id="16978005726442_1523887223641"/>
         <alarm-ref id="26220775342081_1523916411545"/>
-    </incident>
-    <incident severity="cleared" id="3881349" time="1523883639000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881349" time="1523883639000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21423296872610_1523887266328">
             <alarm-ref id="17046725203177_1523887238764"/>
         </alarm-ref>
         <alarm-ref id="26298084753409_1523916411546"/>
         <alarm-ref id="26293789786113_1523916411546"/>
-    </incident>
-    <incident severity="cleared" id="3881350" time="1523883660000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881350" time="1523883660000" summary="LAG Link down due to admin down - Cleared due to ForceClear" description="LAG Link down due to admin down - Cleared due to ForceClear">
         <alarm-ref id="17179869189353_1523887259431"/>
         <alarm-ref id="26353919328257_1523916411547"/>
-    </incident>
-    <incident severity="cleared" id="3881351" time="1523883663000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
+    </situation>
+    <situation severity="cleared" id="3881351" time="1523883663000" summary="Link down due to oper down - Cleared due to ForceClear" description="Link down due to oper down - Cleared due to ForceClear">
         <alarm-ref id="21427591839906_1523887266328">
             <alarm-ref id="17188459123945_1523887262670"/>
         </alarm-ref>
         <alarm-ref id="26379689132033_1523916411547"/>
         <alarm-ref id="26358214295553_1523916411547"/>
-    </incident>
-    <incident severity="cleared" id="3881360" time="1523883727000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
-    <incident severity="cleared" id="3881359" time="1523883727000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
-</incidents>
+    </situation>
+    <situation severity="cleared" id="3881360" time="1523883727000" summary="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear" description="FabricPath ISIS Adjacency Changed : Adjacency Down - Cleared due to ForceClear"/>
+    <situation severity="cleared" id="3881359" time="1523883727000" summary="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear" description="FabricPath Topology Interface Down Syslog - Cleared due to ForceClear"/>
+</situations>

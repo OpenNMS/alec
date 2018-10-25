@@ -41,13 +41,13 @@ import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.api.IncidentHandler;
 
 public class TestDriver {
     private final EngineFactory engineFactory;
@@ -57,7 +57,7 @@ public class TestDriver {
         this.engineFactory = Objects.requireNonNull(engineFactory);
     }
 
-    public List<Incident> run(List<Alarm> alarms) {
+    public List<Situation> run(List<Alarm> alarms) {
         return run(alarms, Collections.emptyList());
     }
 
@@ -71,17 +71,17 @@ public class TestDriver {
      * 
      * @param alarms The alarms to replay
      * @param inventory The inventory to use
-     * @param previousIncidents
+     * @param previousSituations
      * @param timestamp the Driver emulates an engine reset at timestamp
      * @return
      */
-    public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Incident> previousIncidents, long timestamp) {
+    public List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Situation> previousSituations, long timestamp) {
         // bifurcate the alarms
         final List<Alarm> sortedAlarms = timeSortAlarms(alarms);
         final List<Alarm> previousAlarms = getStartupAlarms(sortedAlarms, timestamp);
         List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());
         // Run the engine 
-        return run(afterAlarms, inventory, previousAlarms, previousIncidents);
+        return run(afterAlarms, inventory, previousAlarms, previousSituations);
     }
 
     /**
@@ -123,7 +123,7 @@ public class TestDriver {
      * @param inventory
      * @return
      */
-    public List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory) {
+    public List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory) {
         return run(alarms, inventory, Collections.emptyList(), Collections.emptyList());
     }
 
@@ -132,11 +132,12 @@ public class TestDriver {
         return Math.floorDiv(time, tickResolutionMs) * tickResolutionMs;
     }
 
-    private List<Incident> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms, List<Incident> previousIncidents) {
+    private List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms,
+            List<Situation> previousSituations) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
-        engine.registerIncidentHandler(session);
-        engine.init(previousAlarms, previousIncidents, inventory);
+        engine.registerSituationHandler(session);
+        engine.init(previousAlarms, previousSituations, inventory);
 
         long tickResolutionMs = engine.getTickResolutionMs();
         final Map<Long,List<Alarm>> alarmsByTick = alarms.stream()
@@ -178,23 +179,23 @@ public class TestDriver {
         // Destroy
         engine.destroy();
 
-        return new ArrayList<>(session.incidents.values());
+        return new ArrayList<>(session.situations.values());
     }
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
 
-    private class DriverSession implements IncidentHandler {
-        final Map<String, Incident> incidents = new LinkedHashMap<>();
+    private class DriverSession implements SituationHandler {
+        final Map<String, Situation> situations = new LinkedHashMap<>();
 
         @Override
-        public void onIncident(Incident incident) {
+        public void onSituation(Situation situation) {
             if (verbose) {
-                System.out.printf("Incident with id %s has %d alarms.\n",
-                        incident.getId(), incident.getAlarms().size());
+                System.out.printf("Situation with id %s has %d alarms.\n",
+                                  situation.getId(), situation.getAlarms().size());
             }
-            incidents.put(incident.getId() + ":" + incident.getSeverity(), incident);
+            situations.put(situation.getId() + ":" + situation.getSeverity(), situation);
         }
     }
 
@@ -238,7 +239,8 @@ public class TestDriver {
     public static class DriverBuilder {
         private AlarmDatasource alarmDatasource;
         private InventoryDatasource inventoryDatasource;
-        private IncidentDatasource incidentDatasource;
+
+        private SituationDatasource situationDatasource;
         private EngineFactory engineFactory;
         private Boolean verbose;
 
@@ -252,8 +254,8 @@ public class TestDriver {
             return this;
         }
 
-        public DriverBuilder withIncidentDatasource(IncidentDatasource incidentDatasource) {
-            this.incidentDatasource = incidentDatasource;
+        public DriverBuilder withSituationDatasource(SituationDatasource situationDatasource) {
+            this.situationDatasource = situationDatasource;
             return this;
         }
 

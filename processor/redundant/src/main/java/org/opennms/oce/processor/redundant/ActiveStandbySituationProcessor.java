@@ -43,8 +43,8 @@ import org.opennms.features.distributed.coordination.api.DomainManagerFactory;
 import org.opennms.features.distributed.coordination.api.Role;
 import org.opennms.features.distributed.coordination.api.RoleChangeHandler;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.processor.api.SituationProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +77,9 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
     private final DomainManager domainManager;
 
     /**
-     * The incident data source.
+     * The situation data source.
      */
-    private final IncidentDatasource incidentDatasource;
+    private final SituationDatasource situationDatasource;
 
     /**
      * The current role.
@@ -93,7 +93,7 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
      * Entries in this map will age out after one minute. Therefore if a situation takes greater than this time to
      * complete a round trip then it can potentially be dropped in the case of a switchover.
      */
-    private final Map<Set<String>, Incident> unconfirmedSituations = SynchronizedExpiringLinkedHashMap.newInstance(1,
+    private final Map<Set<String>, Situation> unconfirmedSituations = SynchronizedExpiringLinkedHashMap.newInstance(1,
             TimeUnit.MINUTES);
 
     /**
@@ -102,25 +102,25 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
      * Factory methods must perform the registration with the {@link #domainManager} or this instance will never become
      * active.
      *
-     * @param incidentDatasource   the incident data source
+     * @param situationDatasource   the situation data source
      * @param domainManagerFactory the domain manager factory
      */
-    private ActiveStandbySituationProcessor(IncidentDatasource incidentDatasource,
+    private ActiveStandbySituationProcessor(SituationDatasource situationDatasource,
                                             DomainManagerFactory domainManagerFactory) {
-        this.incidentDatasource = Objects.requireNonNull(incidentDatasource);
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
         domainManager = Objects.requireNonNull(domainManagerFactory).getManagerForDomain(OCE_DOMAIN);
     }
 
     /**
      * Default factory method.
      *
-     * @param incidentDatasource   the incident data source
+     * @param situationDatasource   the situation data source
      * @param domainManagerFactory the domain manager factory
      * @return a new {@link ActiveStandbySituationProcessor} instance
      */
-    static ActiveStandbySituationProcessor newInstance(IncidentDatasource incidentDatasource,
+    static ActiveStandbySituationProcessor newInstance(SituationDatasource situationDatasource,
                                                        DomainManagerFactory domainManagerFactory) {
-        ActiveStandbySituationProcessor instance = new ActiveStandbySituationProcessor(incidentDatasource,
+        ActiveStandbySituationProcessor instance = new ActiveStandbySituationProcessor(situationDatasource,
                 domainManagerFactory);
         LOG.debug("Registering service {} for domain {}", OCE_SERVICE_ID, OCE_DOMAIN);
         // The domain registration has to happen after the instance has been created to prevent leaking a 'this'
@@ -142,28 +142,28 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
     /**
      * Store a situation for later processing if we become active.
      *
-     * @param incident the incident to store
+     * @param situation the situation to store
      */
-    private void storeSituation(Incident incident) {
-        LOG.debug("Storing situation {}", incident);
-        Set<String> reductionKeys = incident.getAlarms().stream()
+    private void storeSituation(Situation situation) {
+        LOG.debug("Storing situation {}", situation);
+        Set<String> reductionKeys = situation.getAlarms().stream()
                 .map(Alarm::getId)
                 .collect(Collectors.toSet());
-        unconfirmedSituations.put(Collections.unmodifiableSet(reductionKeys), incident);
+        unconfirmedSituations.put(Collections.unmodifiableSet(reductionKeys), situation);
     }
 
     /**
      * Forwards all situations that were queued while standby.
      */
-    private void catchupIncidents() {
+    private void catchupSituations() {
         synchronized (unconfirmedSituations) {
             LOG.debug("Catching up stored situations");
 
-            for (Iterator<Map.Entry<Set<String>, Incident>> iter = unconfirmedSituations.entrySet().iterator();
+            for (Iterator<Map.Entry<Set<String>, Situation>> iter = unconfirmedSituations.entrySet().iterator();
                  iter.hasNext() && isActive(); ) {
-                Incident incident = iter.next().getValue();
-                LOG.debug("Catching up situation {}", incident);
-                forwardSituation(incident);
+                Situation situation = iter.next().getValue();
+                LOG.debug("Catching up situation {}", situation);
+                forwardSituation(situation);
                 iter.remove();
             }
         }
@@ -172,16 +172,16 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
     /**
      * Forward the situation.
      *
-     * @param incident the incident to forward
+     * @param situation the situation to forward
      */
     @SuppressWarnings("Duplicates")
-    private void forwardSituation(Incident incident) {
+    private void forwardSituation(Situation situation) {
         try {
-            LOG.debug("Forwarding situation: {}", incident);
-            incidentDatasource.forwardIncident(incident);
+            LOG.debug("Forwarding situation: {}", situation);
+            situationDatasource.forwardSituation(situation);
             LOG.debug("Successfully forwarded situation.");
         } catch (Exception e) {
-            LOG.error("An error occurred while forwarding situation: {}. The situation will be lost.", incident, e);
+            LOG.error("An error occurred while forwarding situation: {}. The situation will be lost.", situation, e);
         }
     }
 
@@ -207,18 +207,18 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
      *
      * @return a copy of the current unconfirmed situations map
      */
-    Map<Set<String>, Incident> getUnconfirmedSituations() {
+    Map<Set<String>, Situation> getUnconfirmedSituations() {
         return Collections.unmodifiableMap(new LinkedHashMap<>(unconfirmedSituations));
     }
 
     @Override
-    public void accept(Incident incident) {
-        Objects.requireNonNull(incident);
+    public void accept(Situation situation) {
+        Objects.requireNonNull(situation);
 
         if (isActive()) {
-            forwardSituation(incident);
+            forwardSituation(situation);
         } else {
-            storeSituation(incident);
+            storeSituation(situation);
         }
     }
 
@@ -234,7 +234,7 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
         currentRole = role;
 
         if (isActive()) {
-            CompletableFuture.runAsync(this::catchupIncidents);
+            CompletableFuture.runAsync(this::catchupSituations);
         }
     }
 }

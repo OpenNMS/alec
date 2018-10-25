@@ -50,29 +50,29 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.Test;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
 import org.opennms.oce.datasource.opennms.events.Log;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 /**
- * Verifies the basic functions of an incident datasource.
+ * Verifies the basic functions of an situation datasource.
  */
-public class OpennmsIncidentDatasourceIT extends OpennmsDatasourceIT {
+public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
 
     @Test(timeout=60000)
-    public void canForwardIncident() throws IOException {
+    public void canForwardSituation() throws IOException {
         datasource.init();
 
-        IncidentBean incident = new IncidentBean();
+        SituationBean situation = new SituationBean();
 
         AlarmBean alarm = new AlarmBean();
         alarm.setId("a1");
-        incident.getAlarms().add(alarm);
-        datasource.forwardIncident(incident);
+        situation.getAlarms().add(alarm);
+        datasource.forwardSituation(situation);
 
-        // Verify the incident was forwarded to Kafka
+        // Verify the situation was forwarded to Kafka
         Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafka);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -88,18 +88,18 @@ public class OpennmsIncidentDatasourceIT extends OpennmsDatasourceIT {
     }
 
     @Test(timeout=60000)
-    public void canRetrieveIncidents() throws IOException {
+    public void canRetrieveSituations() throws IOException {
         datasource.init();
-        assertThat(datasource.getIncidents(), hasSize(0));
+        assertThat(datasource.getSituations(), hasSize(0));
 
         OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
-                .setReductionKey(String.format("%s::%d", IncidentToEvent.SITUATION_UEI, 1))
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
                 .setLastEventTime(1)
                 .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
                 .build();
         producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
 
-        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getIncidents(), hasSize(1));
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituations(), hasSize(1));
     }
 
     public class KafkaConsumerRunner implements Runnable {

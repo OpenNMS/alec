@@ -42,10 +42,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryType;
@@ -64,8 +64,8 @@ public class TopologyEngineTest {
 
     @Test
     public void canRunEngineWithNoAlarms() {
-        List<Incident> incidents = run(Collections.emptyList());
-        assertThat(incidents, hasSize(0));
+        List<Situation> situations = run(Collections.emptyList());
+        assertThat(situations, hasSize(0));
     }
 
     @Test
@@ -83,14 +83,14 @@ public class TopologyEngineTest {
                 .withEvent(SECONDS.toMillis(31), Severity.MAJOR)
                 .build());
 
-        List<Incident> incidents = run(alarms);
+        List<Situation> situations = run(alarms);
 
-        assertThat(incidents, hasSize(1));
-        // Incident is created and contains both causing alarms.
-        Incident incident = incidents.get(0);
-        assertThat(incident.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
-        assertThat(incident.getSeverity(), equalTo(Severity.CRITICAL));
-        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(incident), containsInAnyOrder("a1", "a2"));
+        assertThat(situations, hasSize(1));
+        // Situation is created and contains both causing alarms.
+        Situation situation = situations.get(0);
+        assertThat(situation.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
+        assertThat(situation.getSeverity(), equalTo(Severity.CRITICAL));
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInSituation(situation), containsInAnyOrder("a1", "a2"));
     }
 
     @Test
@@ -122,20 +122,20 @@ public class TopologyEngineTest {
                 .withEvent(SECONDS.toMillis(305), Severity.CLEARED)
                       .build());
 
-        List<Incident> incidents = run(alarms);
+        List<Situation> situations = run(alarms);
 
-        assertThat(incidents, hasSize(2));
-        // Incident is created and contains both causing alarms.
-        Incident criticalIncident = incidents.get(0);
-        assertThat(criticalIncident.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
-        assertThat(criticalIncident.getSeverity(), equalTo(Severity.CRITICAL));
-        Incident clearedIncident = incidents.get(1);
-        assertThat(clearedIncident.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
-        assertThat(clearedIncident.getSeverity(), equalTo(Severity.CLEARED));        // TODO - Incident should be to Clear but only contains remaining Port Alarm 'a2'
-        assertThat(Level2EngineComplianceTest.getAlarmIdsInIncident(clearedIncident), contains("a2"));
+        assertThat(situations, hasSize(2));
+        // Situation is created and contains both causing alarms.
+        Situation criticalSituation = situations.get(0);
+        assertThat(criticalSituation.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
+        assertThat(criticalSituation.getSeverity(), equalTo(Severity.CRITICAL));
+        Situation clearedSituation = situations.get(1);
+        assertThat(clearedSituation.getResourceKeys().get(0), equalTo(ResourceKey.key("Card", "n1-c1")));
+        assertThat(clearedSituation.getSeverity(), equalTo(Severity.CLEARED));        // TODO - Situation should be to Clear but only contains remaining Port Alarm 'a2'
+        assertThat(Level2EngineComplianceTest.getAlarmIdsInSituation(clearedSituation), contains("a2"));
     }
 
-    private List<Incident> run(List<Alarm> alarms) {
+    private List<Situation> run(List<Alarm> alarms) {
         final TestDriver driver = TestDriver.builder()
                 .withEngineFactory(topologyEngineFactory)
                 .build();

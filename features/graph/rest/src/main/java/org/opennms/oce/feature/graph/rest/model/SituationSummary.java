@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.graph.common.GraphMLConverter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +44,7 @@ public class SituationSummary {
     private final long creationTime;
     private final List<AlarmSummary> alarms;
 
-    public SituationSummary(Incident situation) {
+    public SituationSummary(Situation situation) {
         this.id = situation.getId();
         this.vertexId = GraphMLConverter.getVertexIdFor(situation);
         this.creationTime = situation.getCreationTime();

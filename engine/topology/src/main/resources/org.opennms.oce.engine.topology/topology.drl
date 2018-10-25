@@ -43,14 +43,14 @@ rule "CardDownReport"
 end
 
 // RULE #4
-rule "CreateIncident"
+rule "CreateSituation"
   when
     // TODO - this was != PRESENT but that cause Rules #4 and #5 to then spin
     $report : ReportObjectImpl(status != ReportStatus.PENDING, status == ReportStatus.NOT_PRESENT)
   then
     actionMgr.log("RULE #4");
     $report.setStatus(ReportStatus.PRESENT);
-    actionMgr.createIncident($report);
+    actionMgr.createSituation($report);
 end
 
 // RULE #5
@@ -63,7 +63,7 @@ rule "ClearPort"
     // Set the Report object's masterAlarmStatus = CLEARING and update in the working memory
     $report.setStatus(ReportStatus.CLEARING);
     // Send a 'Card Down' master alarm clear request to OpenNMS, containing the externalEventId of the 'master' alarm
-    actionMgr.createIncident($report);
+    actionMgr.createSituation($report);
 end
 
 // RULE #6

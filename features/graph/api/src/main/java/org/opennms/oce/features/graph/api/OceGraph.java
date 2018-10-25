@@ -30,7 +30,7 @@ package org.opennms.oce.features.graph.api;
 
 import java.util.List;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -38,7 +38,7 @@ public interface OceGraph {
 
     Graph<? extends Vertex, ? extends Edge> getGraph();
 
-    List<Incident> getSituations();
+    List<Situation> getSituations();
 
     Vertex getVertexById(String id);
 

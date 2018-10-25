@@ -51,12 +51,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
-import org.opennms.oce.engine.api.IncidentHandler;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -64,16 +64,16 @@ import com.google.common.collect.Maps;
 
 import edu.uci.ics.jung.graph.Graph;
 
-public class ClusterEngineTest implements IncidentHandler {
+public class ClusterEngineTest implements SituationHandler {
 
     private ClusterEngine engine = new ClusterEngine();
 
-    private Map<String, Incident> incidentsById = new LinkedHashMap<>();
+    private Map<String, Situation> situationsById = new LinkedHashMap<>();
 
     @Before
     public void setUp() {
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-        engine.registerIncidentHandler(this);        
+        engine.registerSituationHandler(this);
     }
 
     @Test
@@ -140,25 +140,25 @@ public class ClusterEngineTest implements IncidentHandler {
         when(alarm2.getTime()).thenReturn(now+1);
         engine.onAlarmCreatedOrUpdated(alarm2);
 
-        // No incidents should be created yet
-        assertThat(incidentsById.keySet(), hasSize(0));
+        // No situations should be created yet
+        assertThat(situationsById.keySet(), hasSize(0));
 
         // Tick
         engine.tick(now+2);
 
-        // We should now have a single incident with both alarms
-        assertThat(incidentsById.keySet(), hasSize(1));
-        Incident incident = incidentsById.values().iterator().next();
-        assertThat(incident.getAlarms(), containsInAnyOrder(alarm1, alarm2));
+        // We should now have a single situation with both alarms
+        assertThat(situationsById.keySet(), hasSize(1));
+        Situation situation = situationsById.values().iterator().next();
+        assertThat(situation.getAlarms(), containsInAnyOrder(alarm1, alarm2));
 
         // Tick again
         now = now + engine.getTickResolutionMs()*2;
         engine.tick(now);
 
-        // Incidents should remain unchanged
-        assertThat(incidentsById.keySet(), hasSize(1));
-        incident = incidentsById.values().iterator().next();
-        assertThat(incident.getAlarms(), hasSize(2));
+        // Situations should remain unchanged
+        assertThat(situationsById.keySet(), hasSize(1));
+        situation = situationsById.values().iterator().next();
+        assertThat(situation.getAlarms(), hasSize(2));
 
         // Now add a 3rd (unrelated) alarm on another resource
         ResourceKey otherKey = new ResourceKey("w", "x", "y", "z");
@@ -182,22 +182,22 @@ public class ClusterEngineTest implements IncidentHandler {
         now = now + engine.getTickResolutionMs()*2;
         engine.tick(now);
 
-        // We should get a new incident with #3 and #4
+        // We should get a new situation with #3 and #4
         // TODO: FIXME: Doesn't work with current default settings, maybe consider changing params in another test?
-        //assertThat(incidentsById.keySet(), hasSize(2));
-        //incident = incidentsById.get("1");
-        //assertThat(incident.getAlarms(), containsInAnyOrder(alarm3, alarm4));
+        //assertThat(situationsById.keySet(), hasSize(2));
+        //situation = situationsById.get("1");
+        //assertThat(situation.getAlarms(), containsInAnyOrder(alarm3, alarm4));
     }
 
     @Test
     @Ignore("Needs rework now that the functions are no longer static")
     public void canHandleAlarmsInClusters() {
-        final AtomicLong incidentIdGenerator = new AtomicLong();
+        final AtomicLong situationIdGenerator = new AtomicLong();
 
-        // An empty cluster should return no incidents
+        // An empty cluster should return no situations
         Cluster<AlarmInSpaceTime> emptyCluster = new Cluster<>();
-        Set<IncidentBean> incidents = engine.mapClusterToIncidents(emptyCluster, Maps.newHashMap(), Maps.newHashMap());
-        assertThat(incidents, hasSize(0));
+        Set<SituationBean> situations = engine.mapClusterToSituations(emptyCluster, Maps.newHashMap(), Maps.newHashMap());
+        assertThat(situations, hasSize(0));
 
         AlarmInSpaceTime alarm1InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
         when(alarm1InSpaceTime.getAlarm().getId()).thenReturn("1");
@@ -208,77 +208,70 @@ public class ClusterEngineTest implements IncidentHandler {
         AlarmInSpaceTime alarm3InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
         when(alarm3InSpaceTime.getAlarm().getId()).thenReturn("3");
 
-        // A cluster with a single alarm that was not previously mapped to an incident should be in a new incident
+        // A cluster with a single alarm that was not previously mapped to an situation should be in a new situation
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap());
-        assertThat(incidents, hasSize(1));
-        assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(1));
+        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap());
+        assertThat(situations, hasSize(1));
+        assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(1));
 
-        // A cluster with two alarms that were not previously mapped to an incident should be in a new incident
+        // A cluster with two alarms that were not previously mapped to an situation should be in a new situation
         cluster.addPoint(alarm2InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, Maps.newHashMap(), Maps.newHashMap());
-        assertThat(incidents, hasSize(1));
-        assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
+        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap());
+        assertThat(situations, hasSize(1));
+        assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
 
-        // A cluster with an alarm that was previously mapped to an incident, and another alarm that was not previously mapped
-        // should be mapped to the same incident
-        IncidentBean existingIncident = new IncidentBean();
-        existingIncident.setId(Long.valueOf(incidentIdGenerator.incrementAndGet()).toString());
-        existingIncident.addAlarm(alarm1InSpaceTime.getAlarm());
-        Map<String, IncidentBean> alarmIdToIncidentMap = new ImmutableMap.Builder<String, IncidentBean>()
-                .put("1", existingIncident)
+        // A cluster with an alarm that was previously mapped to an situation, and another alarm that was not previously mapped
+        // should be mapped to the same situation
+        SituationBean existingSituation = new SituationBean();
+        existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
+        existingSituation.addAlarm(alarm1InSpaceTime.getAlarm());
+        Map<String, SituationBean> alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation)
                 .build();
-        Map<String, IncidentBean> incidentsById = new ImmutableMap.Builder<String, IncidentBean>()
-                .put(existingIncident.getId(), existingIncident)
-                .build();
-
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
-        assertThat(incidents, hasSize(1));
-        assertThat(Iterables.getFirst(incidents, null), sameInstance(existingIncident));
-        assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
-
-        // A cluster with alarms that are already mapped to separate incidents should not updated/create any incidents
-        IncidentBean existingIncident2 = new IncidentBean();
-        existingIncident2.setId(Long.valueOf(incidentIdGenerator.incrementAndGet()).toString());
-        existingIncident2.addAlarm(alarm2InSpaceTime.getAlarm());
-        alarmIdToIncidentMap = new ImmutableMap.Builder<String, IncidentBean>()
-                .put("1", existingIncident)
-                .put("2", existingIncident2)
-                .build();
-        incidentsById = new ImmutableMap.Builder<String, IncidentBean>()
-                .put(existingIncident.getId(), existingIncident)
-                .put(existingIncident2.getId(), existingIncident)
+        Map<String, SituationBean> situationsById = new ImmutableMap.Builder<String, SituationBean>()
+            .put(existingSituation.getId(), existingSituation)
                 .build();
 
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
-        assertThat(incidents, hasSize(0));
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        assertThat(situations, hasSize(1));
+        assertThat(Iterables.getFirst(situations, null), sameInstance(existingSituation));
+        assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
 
-        // If a cluster contains alarms in different incidents and one or more alarms that are not
-        // yet associated to an incident, then we chose to add the alarms without incidents to their the same incident
+        // A cluster with alarms that are already mapped to separate situations should not updated/create any situations
+        SituationBean existingSituation2 = new SituationBean();
+        existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
+        existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
+        alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation).put("2", existingSituation2)
+                .build();
+        situationsById = new ImmutableMap.Builder<String, SituationBean>().put(existingSituation.getId(), existingSituation)
+            .put(existingSituation2.getId(), existingSituation)
+                .build();
+
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        assertThat(situations, hasSize(0));
+
+        // If a cluster contains alarms in different situations and one or more alarms that are not
+        // yet associated to an situation, then we chose to add the alarms without situations to their the same situation
         // as their closest neighbor
-        existingIncident = new IncidentBean();
-        existingIncident.setId(Long.valueOf(incidentIdGenerator.incrementAndGet()).toString());
-        existingIncident.addAlarm(alarm1InSpaceTime.getAlarm());
+        existingSituation = new SituationBean();
+        existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
+        existingSituation.addAlarm(alarm1InSpaceTime.getAlarm());
 
-        existingIncident2 = new IncidentBean();
-        existingIncident2.setId(Long.valueOf(incidentIdGenerator.incrementAndGet()).toString());
-        existingIncident2.addAlarm(alarm2InSpaceTime.getAlarm());
+        existingSituation2 = new SituationBean();
+        existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
+        existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
 
-        alarmIdToIncidentMap = new ImmutableMap.Builder<String, IncidentBean>()
-                .put("1", existingIncident)
-                .put("2", existingIncident2)
+        alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation).put("2", existingSituation2)
                 .build();
-        incidentsById = new ImmutableMap.Builder<String, IncidentBean>()
-                .put(existingIncident.getId(), existingIncident)
-                .put(existingIncident2.getId(), existingIncident)
+        situationsById = new ImmutableMap.Builder<String, SituationBean>().put(existingSituation.getId(), existingSituation)
+            .put(existingSituation2.getId(), existingSituation)
                 .build();
 
         cluster.addPoint(alarm3InSpaceTime);
-        incidents = engine.mapClusterToIncidents(cluster, alarmIdToIncidentMap, incidentsById);
-        assertThat(incidents, hasSize(1));
-        assertThat(Iterables.getFirst(incidents, null), sameInstance(existingIncident));
-        assertThat(Iterables.getFirst(incidents, null).getAlarms(), hasSize(2));
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        assertThat(situations, hasSize(1));
+        assertThat(Iterables.getFirst(situations, null), sameInstance(existingSituation));
+        assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
     }
 
     @Test
@@ -328,7 +321,7 @@ public class ClusterEngineTest implements IncidentHandler {
     }
 
     @Override
-    public void onIncident(Incident incident) {
-        incidentsById.put(incident.getId(), incident);
+    public void onSituation(Situation situation) {
+        situationsById.put(situation.getId(), situation);
     }
 }

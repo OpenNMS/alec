@@ -39,10 +39,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
@@ -60,7 +60,8 @@ public class Driver {
 
     private final AlarmDatasource alarmDatasource;
     private final InventoryDatasource inventoryDatasource;
-    private final IncidentDatasource incidentDatasource;
+
+    private final SituationDatasource situationDatasource;
     private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
@@ -72,12 +73,12 @@ public class Driver {
     private Timer timer;
 
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource,
-                  IncidentDatasource incidentDatasource, EngineFactory engineFactory,
+            SituationDatasource situationDatasource, EngineFactory engineFactory,
                   SituationProcessorFactory situationProcessorFactory) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.inventoryDatasource = Objects.requireNonNull(inventoryDatasource);
-        this.incidentDatasource = Objects.requireNonNull(incidentDatasource);
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.engineFactory = Objects.requireNonNull(engineFactory);
         this.situationProcessor =
                 Objects.requireNonNull(situationProcessorFactory).getInstance();
@@ -93,10 +94,10 @@ public class Driver {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         engine = engineFactory.createEngine();
         // Register the handler that confirms situations that have come round trip back to this driver
-        incidentDatasource.registerHandler(situationHandler);
+        situationDatasource.registerHandler(situationHandler);
         // Register the situation processor responsible for accepting and processing all situations generated via the
         // engine
-        engine.registerIncidentHandler(situationProcessor::accept);
+        engine.registerSituationHandler(situationProcessor::accept);
 
         timer = new Timer();
         // The get methods on the datasources may block, so we do this on a separate thread
@@ -109,16 +110,16 @@ public class Driver {
                 LOG.info("Waiting for alarm datasource...");
                 alarmDatasource.waitUntilReady();
                 LOG.info("Waiting for situation datasource...");
-                incidentDatasource.waitUntilReady();
+                situationDatasource.waitUntilReady();
 
                 LOG.info("Retrieving inventory...");
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
                 LOG.info("Retrieving alarms...");
                 final List<Alarm> alarms = alarmDatasource.getAlarmsAndRegisterHandler(engine);
-                LOG.info("Retrieving incidents...");
-                final List<Incident> incidents = incidentDatasource.getIncidents();
+                LOG.info("Retrieving situations...");
+                final List<Situation> situations = situationDatasource.getSituations();
                 LOG.info("Initializing engine...");
-                engine.init(alarms, incidents, inventory);
+                engine.init(alarms, situations, inventory);
 
                 if (engine instanceof GraphProvider) {
                     LOG.info("Registering graph provider...");
@@ -155,7 +156,7 @@ public class Driver {
     }
 
     public void destroy() {
-        incidentDatasource.unregisterHandler(situationHandler);
+        situationDatasource.unregisterHandler(situationHandler);
         
         if (initThread != null && initThread.isAlive()) {
             initThread.interrupt();

@@ -41,10 +41,10 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
-import org.opennms.oce.engine.api.IncidentHandler;
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
@@ -57,11 +57,11 @@ import org.slf4j.LoggerFactory;
  * A topology driver processor with Rules Engine
  *
  */
-public class TopologyEngine implements Engine, IncidentHandler {
+public class TopologyEngine implements Engine, SituationHandler {
 
     private static Logger LOG = LoggerFactory.getLogger(TopologyEngine.class);
 
-    private IncidentHandler handler;
+    private SituationHandler handler;
 
     private InventoryModelManager inventoryManager;
 
@@ -73,7 +73,7 @@ public class TopologyEngine implements Engine, IncidentHandler {
 
     private Map<WorkingMemoryObject, FactHandle> objectToFactHandles = new HashMap<>();
 
-    private List<Incident> priorIncidents;
+    private List<Situation> priorSituations;
 
     private boolean initComplete = false;
 
@@ -88,10 +88,10 @@ public class TopologyEngine implements Engine, IncidentHandler {
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventoryObjectList) {
+    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventoryObjectList) {
         inventoryManager = new InventoryModelManager(inventoryObjectList);
         model = inventoryManager.getModel();
-        priorIncidents = incidents;
+        priorSituations = situations;
         long lastAlarmTtime = 0;
         for (Alarm a : alarms) {
             onAlarm(a);
@@ -151,7 +151,7 @@ public class TopologyEngine implements Engine, IncidentHandler {
     }
 
     @Override
-    public void registerIncidentHandler(IncidentHandler handler) {
+    public void registerSituationHandler(SituationHandler handler) {
         this.handler = handler;
     }
 
@@ -180,7 +180,7 @@ public class TopologyEngine implements Engine, IncidentHandler {
         return model.getObjectById(alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
     }
 
-    public IncidentHandler getIncidentHandler() {
+    public SituationHandler getSituationHandler() {
         if (initComplete) {
             return handler;
         } else {
@@ -222,13 +222,13 @@ public class TopologyEngine implements Engine, IncidentHandler {
     }
 
     @Override
-    public void onIncident(Incident i) {
-        if (priorIncidents.contains(i)) {
-            // During init(), Handle Incidents we have been previously seen by just logging them. 
-            LOG.info("Incident handled during init: {}", i);
+    public void onSituation(Situation i) {
+        if (priorSituations.contains(i)) {
+            // During init(), Handle Situations we have been previously seen by just logging them. 
+            LOG.info("Situation handled during init: {}", i);
         } else {
-            // If we haven't seen the Incident, generate one.
-            handler.onIncident(i);
+            // If we haven't seen the Situation, generate one.
+            handler.onSituation(i);
         }
     }
 

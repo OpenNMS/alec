@@ -30,7 +30,7 @@ package org.opennms.oce.datasource.opennms;
 
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 import com.google.common.base.Strings;
@@ -49,13 +49,13 @@ public class OpennmsMapper {
         return bean;
     }
 
-    public static IncidentBean toIncident(OpennmsModelProtos.Alarm alarm) {
-        final IncidentBean bean = new IncidentBean();
+    public static SituationBean toSituation(OpennmsModelProtos.Alarm alarm) {
+        final SituationBean bean = new SituationBean();
         bean.setCreationTime(alarm.getFirstEventTime());
         final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
         if (lastEvent != null) {
             lastEvent.getParameterList().stream()
-                    .filter( p -> IncidentToEvent.SITUATION_ID_PARM_NAME.equals(p.getName()))
+                    .filter( p -> SituationToEvent.SITUATION_ID_PARM_NAME.equals(p.getName()))
                     .findFirst()
                     .ifPresent(p -> bean.setId(p.getValue()));
         }

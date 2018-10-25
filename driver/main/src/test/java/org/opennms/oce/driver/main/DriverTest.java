@@ -38,8 +38,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.AlarmDatasource;
-import org.opennms.oce.datasource.api.IncidentDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.processor.api.SituationProcessor;
 import org.opennms.oce.processor.api.SituationProcessorFactory;
@@ -53,7 +53,7 @@ public class DriverTest {
         BundleContext bundleContext = mock(BundleContext.class);
         AlarmDatasource alarmDatasource = mock(AlarmDatasource.class);
         InventoryDatasource inventoryDatasource = mock(InventoryDatasource.class);
-        IncidentDatasource incidentDatasource = mock(IncidentDatasource.class);
+        SituationDatasource situationDatasource = mock(SituationDatasource.class);
         EngineFactory engineFactory = mock(EngineFactory.class);
         SituationProcessorFactory situationProcessorFactory = mock(SituationProcessorFactory.class);
         when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
@@ -61,7 +61,7 @@ public class DriverTest {
         when(engineFactory.createEngine()).thenReturn(tickLoggingEngine);
 
         // Create and initialize the driver
-        Driver driver = new Driver(bundleContext, alarmDatasource, inventoryDatasource, incidentDatasource,
+        Driver driver = new Driver(bundleContext, alarmDatasource, inventoryDatasource, situationDatasource,
                 engineFactory, situationProcessorFactory);
         driver.initAsync().get();
 

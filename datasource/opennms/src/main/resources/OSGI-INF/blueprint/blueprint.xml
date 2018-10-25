@@ -26,6 +26,6 @@
     </bean>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
-    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
 
 </blueprint>

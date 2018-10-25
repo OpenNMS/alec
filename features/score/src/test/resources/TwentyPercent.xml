@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<incidents xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
-    <incident severity="cleared" id="3289007" time="1502804010000" summary="Port up" description="Port up">
+<situations xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+    <situation severity="cleared" id="3289007" time="1502804010000" summary="Port up" description="Port up">
         <alarm-ref id="12000138626106_1524046392644"/>
-    </incident>
-    <incident severity="cleared" id="3289003" time="1502804010000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3289003" time="1502804010000" summary="Port up" description="Port up">
         <alarm-ref id="11940009083962_1524031857596"/>
-    </incident>
-    <incident severity="cleared" id="3289084" time="1502804020000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3289084" time="1502804020000" summary="Port up" description="Port up">
         <alarm-ref id="12025908429882_1524050820806"/>
-    </incident>
-    <incident severity="major" id="3361850" time="1504806091000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3361850" time="1504806091000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12481174963260_1524247073119"/>
-    </incident>
-    <incident severity="major" id="3361866" time="1504806101000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3361866" time="1504806101000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12584254178364_1524277673570"/>
-    </incident>
-    <incident severity="cleared" id="3387470" time="1505741199000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3387470" time="1505741199000" summary="Port up" description="Port up">
         <alarm-ref id="12687333393468_1524502383608"/>
-    </incident>
-    <incident severity="cleared" id="3388225" time="1505746590000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3388225" time="1505746590000" summary="Port up" description="Port up">
         <alarm-ref id="12567074309180_1524270018293"/>
-    </incident>
-    <incident severity="major" id="3474097" time="1508426070000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3474097" time="1508426070000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12700218295356_1524502388476"/>
-    </incident>
-    <incident severity="cleared" id="3490474" time="1508953301000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3490474" time="1508953301000" summary="Port up" description="Port up">
         <alarm-ref id="12081743004732_1524073834429"/>
         <alarm-ref id="12322261173308_1524149584932"/>
-    </incident>
-    <incident severity="cleared" id="3490478" time="1508953311000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3490478" time="1508953311000" summary="Port up" description="Port up">
         <alarm-ref id="12532714570812_1524258657423"/>
         <alarm-ref id="12738873001020_1524503281411"/>
-    </incident>
-    <incident severity="cleared" id="3613414" time="1513042280000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3613414" time="1513042280000" summary="Port up" description="Port up">
         <alarm-ref id="11566346929212_1523903292774"/>
         <alarm-ref id="12098922873916_1524076092781"/>
-    </incident>
-    <incident severity="cleared" id="3613427" time="1513042880000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3613427" time="1513042880000" summary="Port up" description="Port up">
         <alarm-ref id="11583526798396_1523904673572"/>
         <alarm-ref id="12506944767036_1524250273575"/>
-    </incident>
-    <incident severity="cleared" id="3628520" time="1513698926000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3628520" time="1513698926000" summary="Port up" description="Port up">
         <alarm-ref id="12047383266364_1524061904117"/>
         <alarm-ref id="12275016533052_1524148304119"/>
-    </incident>
-    <incident severity="cleared" id="3670063" time="1515247265000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3670063" time="1515247265000" summary="Port up" description="Port up">
         <alarm-ref id="11776800326716_1524002320300"/>
         <alarm-ref id="12116102743100_1524088720298"/>
-    </incident>
-    <incident severity="cleared" id="3681186" time="1515597671000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3681186" time="1515597671000" summary="Port up" description="Port up">
         <alarm-ref id="19241453488902_1524505823927"/>
         <alarm-ref id="20259360738054_1524505983417"/>
         <alarm-ref id="20564303416070_1524506013425"/>
@@ -56,25 +56,25 @@
         <alarm-ref id="22827751181062_1524506458296"/>
         <alarm-ref id="28909424872198_1524508045565"/>
         <alarm-ref id="29201482648326_1524508075571"/>
-    </incident>
-    <incident severity="cleared" id="3701138" time="1516201362000" summary="Port up" description="Port up">
+    </situation>
+    <situation severity="cleared" id="3701138" time="1516201362000" summary="Port up" description="Port up">
         <alarm-ref id="12038793331772_1524058551327"/>
         <alarm-ref id="12262131631164_1524144951327"/>
-    </incident>
-    <incident severity="major" id="3762664" time="1518146622000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3762664" time="1518146622000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12408160519228_1524176041778"/>
-    </incident>
-    <incident severity="major" id="3813261" time="1520674503000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3813261" time="1520674503000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="11931419149370_1524031575734"/>
-    </incident>
-    <incident severity="major" id="3826675" time="1521185753000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3826675" time="1521185753000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12197707121724_1524128536328"/>
-    </incident>
-    <incident severity="major" id="3834829" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3834829" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12575664243772_1524274404823"/>
-    </incident>
-    <incident severity="major" id="3834829a" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
+    </situation>
+    <situation severity="major" id="3834829a" time="1521618044000" summary="Port down due to oper" description="Port down due to oper">
         <alarm-ref id="12575664243772_1524274404823"/>
-    </incident>
-</incidents>
+    </situation>
+</situations>
 

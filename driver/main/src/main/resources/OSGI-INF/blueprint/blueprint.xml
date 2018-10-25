@@ -3,7 +3,7 @@
     <!-- Datasource -->
     <reference id="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource" />
     <reference id="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource" />
-    <reference id="incidentDatasource" interface="org.opennms.oce.datasource.api.IncidentDatasource" />
+    <reference id="situationDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource" />
 
     <!-- Engine -->
     <reference id="engineFactory" interface="org.opennms.oce.engine.api.EngineFactory" />
@@ -15,7 +15,7 @@
         <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
         <argument ref="inventoryDatasource"/>
-        <argument ref="incidentDatasource"/>
+        <argument ref="situationDatasource"/>
         <argument ref="engineFactory"/>
         <argument ref="situationProcessorFactory"/>
     </bean>

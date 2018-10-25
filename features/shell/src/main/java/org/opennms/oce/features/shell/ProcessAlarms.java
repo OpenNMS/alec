@@ -42,14 +42,14 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
 
 /**
- * Input an XML Document of Alarms and Output an XML document of Incidents.
- * Utilize an AlarmProcessor to create the incidents.
+ * Input an XML Document of Alarms and Output an XML document of Situations.
+ * Utilize an AlarmProcessor to create the situations.
  * Alarms are simply serialized to the Processor.
  */
 @Command(scope = "oce", name = "process-alarms", description = "Alarm Processing Runner")
@@ -63,7 +63,7 @@ public class ProcessAlarms implements Action {
     private String inFile;
 
     @Option(name = "-o", description = "Output file", required = false)
-    private String outFile; // Default to "incidents.xml"
+    private String outFile; // Default to "situations.xml"
 
     @Option(name = "-e", description = "Engine Name", required = true)
     @Completion(EngineNameCompleter.class)
@@ -77,15 +77,15 @@ public class ProcessAlarms implements Action {
                 .withEngineFactory(engineFactory)
                 .withVerboseOutput()
                 .build();
-        final List<Incident> incidents = driver.run(alarms);
-        write(incidents);
-        return incidents;
+        final List<Situation> situations = driver.run(alarms);
+        write(situations);
+        return situations;
     }
 
-    private void write(List<Incident> incidents) throws IOException, JAXBException {
-        String filepath = outFile == null || outFile.isEmpty() ? "incidents.xml" : outFile;
-        System.out.printf("Writing %d incidents to %s.\n", incidents.size(), filepath);
-        JaxbUtils.writeIncidents(incidents, Paths.get(filepath));
+    private void write(List<Situation> situations) throws IOException, JAXBException {
+        String filepath = outFile == null || outFile.isEmpty() ? "situations.xml" : outFile;
+        System.out.printf("Writing %d situations to %s.\n", situations.size(), filepath);
+        JaxbUtils.writeSituations(situations, Paths.get(filepath));
     }
 
     private EngineFactory getEngineFactory() {

@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
 
@@ -70,16 +70,16 @@ public class ScoringStrategyTest {
         ScoreReport report = scorer.score(Sets.newHashSet(), Sets.newHashSet());
         assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
 
-        // Comparing two empty incidents should generate a score of 0
-        IncidentBean emtpyIncident = new IncidentBean();
-        report = scorer.score(Sets.newHashSet(emtpyIncident), Sets.newHashSet(emtpyIncident));
+        // Comparing two empty situations should generate a score of 0
+        SituationBean emtpySituation = new SituationBean();
+        report = scorer.score(Sets.newHashSet(emtpySituation), Sets.newHashSet(emtpySituation));
         assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
 
-        // Comparing an incident with a single alarm to an empty incident should generate a score greater than 0
-        IncidentBean incident = new IncidentBean();
+        // Comparing an situation with a single alarm to an empty situation should generate a score greater than 0
+        SituationBean situation = new SituationBean();
         AlarmBean alarm = new AlarmBean();
-        incident.addAlarm(alarm);
-        report = scorer.score(Sets.newHashSet(incident), Sets.newHashSet(emtpyIncident));
+        situation.addAlarm(alarm);
+        report = scorer.score(Sets.newHashSet(situation), Sets.newHashSet(emtpySituation));
         assertThat(report.getScore(), Matchers.greaterThan(0.0d));
     }
 

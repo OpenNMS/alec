@@ -35,7 +35,7 @@ public interface SituationHandler {
     /**
      * Handle a situation.
      *
-     * @param incident the situation
+     * @param situation the situation
      */
-    void onSituation(Incident incident);
+    void onSituation(Situation situation);
 }

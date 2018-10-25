@@ -26,34 +26,42 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.itest;
+package org.opennms.oce.datasource.common;
 
+import java.util.List;
 import java.util.Objects;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
+import org.opennms.oce.datasource.api.SituationHandler;
 
-public class WrappedIncident {
-    private Incident i;
+public class StaticSituationDatasource implements SituationDatasource {
+    private final List<Situation> situations;
 
-    public WrappedIncident(Incident i) {
-        this.i = i;
+    public StaticSituationDatasource(List<Situation> situations) {
+        this.situations = Objects.requireNonNull(situations);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(i.getSeverity(), i.getResourceKeys(), i.getAlarms());
+    public List<Situation> getSituations() {
+        return situations;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        WrappedIncident other = (WrappedIncident) obj;
-        return other.i.getSeverity().equals(i.getSeverity()) && other.i.getResourceKeys().equals(i.getResourceKeys())
-                && other.i.getAlarms().equals(i.getAlarms());
+    public void forwardSituation(Situation situation) {
+        // pass
+    }
+
+    @Override
+    public void registerHandler(SituationHandler handler) {
+    }
+
+    @Override
+    public void unregisterHandler(SituationHandler handler) {
+    }
+
+    @Override
+    public void waitUntilReady() {
+        // pass
     }
 }

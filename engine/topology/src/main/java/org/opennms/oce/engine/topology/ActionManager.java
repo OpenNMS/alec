@@ -33,7 +33,7 @@ import java.util.Objects;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.IncidentBean;
+import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.OperationalState;
@@ -62,18 +62,18 @@ public class ActionManager {
         topologyEngine.addOrUpdateMemoryObject(report);
     }
 
-    public void createIncident(ReportObject report) {
-        IncidentBean incident = new IncidentBean(report.getId());
-        LOG.info("Create Incident {} for: {}", incident.getId(), report);
+    public void createSituation(ReportObject report) {
+        SituationBean situation = new SituationBean(report.getId());
+        LOG.info("Create Situation {} for: {}", situation.getId(), report);
         ModelObject owner = report.getGroup().getOwner();
-        incident.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
+        situation.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
         if (report.getStatus() == ReportStatus.CLEARED || report.getStatus() == ReportStatus.CLEARING) {
-            incident.setSeverity(Severity.CLEARED);
+            situation.setSeverity(Severity.CLEARED);
         } else {
-            incident.setSeverity(owner.getOperationalState().getSeverity());
+            situation.setSeverity(owner.getOperationalState().getSeverity());
         }
-        report.getGroup().getMembers().stream().flatMap(mo -> mo.getAlarms().stream()).forEach(incident::addAlarm);
-        topologyEngine.getIncidentHandler().onIncident(incident);
+        report.getGroup().getMembers().stream().flatMap(mo -> mo.getAlarms().stream()).forEach(situation::addAlarm);
+        topologyEngine.getSituationHandler().onSituation(situation);
         topologyEngine.addOrUpdateMemoryObject(report);
     }
 

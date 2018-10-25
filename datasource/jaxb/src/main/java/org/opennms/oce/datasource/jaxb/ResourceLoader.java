@@ -44,8 +44,8 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.v1.schema.Inventory;
 import org.opennms.oce.datasource.v1.schema.MetaModel;
 import org.osgi.framework.BundleContext;
@@ -85,7 +85,7 @@ public class ResourceLoader {
         return Collections.emptyList();
     }
 
-    public List<Incident> getIncidents() {
+    public List<Situation> getSituations() {
         return Collections.emptyList();
     }
 

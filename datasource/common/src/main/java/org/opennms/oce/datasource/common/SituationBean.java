@@ -35,11 +35,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Incident;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 
-public class IncidentBean implements Incident {
+public class SituationBean implements Situation {
     private String id;
     private long creationTime;
 
@@ -48,19 +48,20 @@ public class IncidentBean implements Incident {
     private Set<Alarm> alarms = new LinkedHashSet<>();
     private String diagnosticText;
 
-    public IncidentBean() { }
+    public SituationBean() {
+    }
 
-    public IncidentBean(String id) {
+    public SituationBean(String id) {
         this.id = id;
     }
 
-    public IncidentBean(Incident incident) {
-        this.id = incident.getId();
-        this.creationTime = incident.getCreationTime();
-        this.severity = incident.getSeverity();
-        this.resourceKeys.addAll(incident.getResourceKeys());
-        this.alarms.addAll(incident.getAlarms());
-        this.diagnosticText = incident.getDiagnosticText();
+    public SituationBean(Situation situation) {
+        this.id = situation.getId();
+        this.creationTime = situation.getCreationTime();
+        this.severity = situation.getSeverity();
+        this.resourceKeys.addAll(situation.getResourceKeys());
+        this.alarms.addAll(situation.getAlarms());
+        this.diagnosticText = situation.getDiagnosticText();
     }
 
     @Override
@@ -128,7 +129,7 @@ public class IncidentBean implements Incident {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        IncidentBean that = (IncidentBean) o;
+        SituationBean that = (SituationBean) o;
         return creationTime == that.creationTime &&
                 Objects.equals(resourceKeys, that.resourceKeys) &&
                 Objects.equals(alarms, that.alarms) &&
@@ -143,7 +144,7 @@ public class IncidentBean implements Incident {
 
     @Override
     public String toString() {
-        return "IncidentBean{" +
+        return "SituationBean{" +
                 "id='" + id + '\'' +
                 ", creationTime=" + creationTime +
                 ", resourceKeys=" + resourceKeys +

@@ -38,8 +38,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.opennms.oce.datasource.api.Incident;
-import org.opennms.oce.datasource.api.IncidentDatasource;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.processor.api.SituationProcessor;
 
 /**
@@ -47,22 +47,22 @@ import org.opennms.oce.processor.api.SituationProcessor;
  */
 public class StandaloneSituationProcessorTest {
     /**
-     * Tests that an incident accepted by the processor is forwarded via the incident data source.
+     * Tests that an situation accepted by the processor is forwarded via the situation data source.
      */
     @Test
     public void testAccept() throws Exception {
-        IncidentDatasource mockIncidentDataSource = mock(IncidentDatasource.class);
-        SituationProcessor situationProcessor = new StandaloneSituationProcessor(mockIncidentDataSource);
+        SituationDatasource mockSituationDataSource = mock(SituationDatasource.class);
+        SituationProcessor situationProcessor = new StandaloneSituationProcessor(mockSituationDataSource);
 
-        Incident mockIncident = mock(Incident.class);
+        Situation mockSituation = mock(Situation.class);
         String id = "test.id";
-        when(mockIncident.getId()).thenReturn(id);
+        when(mockSituation.getId()).thenReturn(id);
 
-        ArgumentCaptor<Incident> argumentCaptor = ArgumentCaptor.forClass(Incident.class);
-        doNothing().when(mockIncidentDataSource).forwardIncident(argumentCaptor.capture());
+        ArgumentCaptor<Situation> argumentCaptor = ArgumentCaptor.forClass(Situation.class);
+        doNothing().when(mockSituationDataSource).forwardSituation(argumentCaptor.capture());
 
-        situationProcessor.accept(mockIncident);
-        verify(mockIncidentDataSource, times(1)).forwardIncident(any(Incident.class));
+        situationProcessor.accept(mockSituation);
+        verify(mockSituationDataSource, times(1)).forwardSituation(any(Situation.class));
         assertEquals(id, argumentCaptor.getValue().getId());
     }
 }

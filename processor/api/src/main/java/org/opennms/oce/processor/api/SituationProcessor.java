@@ -30,21 +30,21 @@ package org.opennms.oce.processor.api;
 
 import java.util.Set;
 
-import org.opennms.oce.datasource.api.Incident;
+import org.opennms.oce.datasource.api.Situation;
 
 /**
  * A situation processor accepts situations and does something with them such as forwarding them as an event.
  */
 public interface SituationProcessor {
     /**
-     * Accept an {@link Incident} to process.
+     * Accept an {@link Situation} to process.
      *
-     * @param incident the incident to process
+     * @param situation the situation to process
      */
-    void accept(Incident incident);
+    void accept(Situation situation);
 
     /**
-     * Confirm that a situation alarm was received for the generated incident. Implementing this method is optional and
+     * Confirm that a situation alarm was received for the generated situation. Implementing this method is optional and
      * defaults to a no-op.
      *
      * @param reductionKeysInAlarm the reduction keys contained in the individual alarms in the situation

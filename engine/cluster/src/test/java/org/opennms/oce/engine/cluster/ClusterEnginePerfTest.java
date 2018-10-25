@@ -45,6 +45,7 @@ public class ClusterEnginePerfTest {
     @Test
     public void canRunDBScanOnLargeGraphs() {
         final ClusterEngine clusterEngine = new ClusterEngine();
+        clusterEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         final int K = 500;
         for (int k = 0; k < K; k++) {
             final InventoryObjectBean node = new InventoryObjectBean();

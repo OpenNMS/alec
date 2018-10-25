@@ -37,6 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -71,7 +72,8 @@ public class ClusterEngineTest implements IncidentHandler {
 
     @Before
     public void setUp() {
-        engine.registerIncidentHandler(this);
+        engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        engine.registerIncidentHandler(this);        
     }
 
     @Test

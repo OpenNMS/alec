@@ -102,6 +102,15 @@ public class Driver {
         // The get methods on the datasources may block, so we do this on a separate thread
         initThread = new Thread(() -> {
             try {
+                // Wait for all the data sources to be ready to minimize the time between when we register handlers and
+                // the engine inits
+                LOG.info("Waiting for inventory datasource...");
+                inventoryDatasource.waitUntilReady();
+                LOG.info("Waiting for alarm datasource...");
+                alarmDatasource.waitUntilReady();
+                LOG.info("Waiting for situation datasource...");
+                incidentDatasource.waitUntilReady();
+
                 LOG.info("Retrieving inventory...");
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
                 LOG.info("Retrieving alarms...");

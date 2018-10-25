@@ -62,4 +62,9 @@ public class StaticInventoryDatasource implements InventoryDatasource {
     public void unregisterHandler(InventoryHandler handler) {
         // pass
     }
+
+    @Override
+    public void waitUntilReady() {
+        // pass
+    }
 }

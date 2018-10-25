@@ -40,4 +40,6 @@ public interface IncidentDatasource {
 
     void unregisterHandler(SituationHandler handler);
 
+    void waitUntilReady() throws InterruptedException;
+
 }

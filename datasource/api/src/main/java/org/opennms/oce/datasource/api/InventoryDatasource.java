@@ -39,5 +39,7 @@ public interface InventoryDatasource {
     void registerHandler(InventoryHandler handler);
 
     void unregisterHandler(InventoryHandler handler);
+    
+    void waitUntilReady() throws InterruptedException;
 
 }

@@ -61,4 +61,9 @@ public class StaticAlarmDatasource implements AlarmDatasource {
     public void unregisterHandler(AlarmHandler handler) {
         // pass
     }
+
+    @Override
+    public void waitUntilReady() {
+        // pass
+    }
 }

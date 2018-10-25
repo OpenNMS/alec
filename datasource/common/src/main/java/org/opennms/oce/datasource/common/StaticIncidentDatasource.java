@@ -59,4 +59,9 @@ public class StaticIncidentDatasource implements IncidentDatasource {
     @Override
     public void unregisterHandler(SituationHandler handler) {
     }
+
+    @Override
+    public void waitUntilReady() {
+        // pass
+    }
 }

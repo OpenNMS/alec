@@ -40,4 +40,6 @@ public interface AlarmDatasource {
 
     void unregisterHandler(AlarmHandler handler);
 
+    void waitUntilReady() throws InterruptedException;
+
 }

@@ -40,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -126,6 +127,9 @@ public class ClusterEngine implements Engine, GraphProvider {
     private Set<Long> disconnectedVertices = new HashSet<>();
 
     private final GraphManager graphManager = new GraphManager();
+    
+    // Used to prevent processing callbacks before the init has completed
+    private final CountDownLatch initLock = new CountDownLatch(1);
 
     public ClusterEngine() {
         this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
@@ -167,25 +171,29 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     @Override
     public void init(List<Alarm> alarms, List<Incident> incidents, List<InventoryObject> inventory) {
-        LOG.debug("Initialized with {} alarms, {} incidents and {} inventory objects.", alarms.size(), incidents.size(), inventory.size());
-        LOG.debug("Alarms on init: {}", alarms);
-        LOG.debug("Incidents on init: {}", incidents);
-        LOG.debug("Inventory objects on init: {}", inventory);
-        graphManager.addInventory(inventory);
-        graphManager.addOrUpdateAlarms(alarms);
+        try {
+            LOG.debug("Initialized with {} alarms, {} incidents and {} inventory objects.", alarms.size(), incidents.size(), inventory.size());
+            LOG.debug("Alarms on init: {}", alarms);
+            LOG.debug("Incidents on init: {}", incidents);
+            LOG.debug("Inventory objects on init: {}", inventory);
+            graphManager.addInventory(inventory);
+            graphManager.addOrUpdateAlarms(alarms);
 
-        // Index the given incidents and the alarms they contain, so that we can cluster alarms in existing
-        // incidents when applicable
-        for (Incident incident : incidents) {
-            final IncidentBean incidentBean = new IncidentBean(incident);
-            incidentsById.put(incidentBean.getId(), incidentBean);
-            for (Alarm alarmInIncident : incidentBean.getAlarms()) {
-                alarmIdToIncidentMap.put(alarmInIncident.getId(), incidentBean);
+            // Index the given incidents and the alarms they contain, so that we can cluster alarms in existing
+            // incidents when applicable
+            for (Incident incident : incidents) {
+                final IncidentBean incidentBean = new IncidentBean(incident);
+                incidentsById.put(incidentBean.getId(), incidentBean);
+                for (Alarm alarmInIncident : incidentBean.getAlarms()) {
+                    alarmIdToIncidentMap.put(alarmInIncident.getId(), incidentBean);
+                }
             }
-        }
 
-        if (alarms.size()>0) {
-            alarmsChangedSinceLastTick = true;
+            if (alarms.size() > 0) {
+                alarmsChangedSinceLastTick = true;
+            }
+        } finally {
+            initLock.countDown();
         }
     }
 
@@ -381,24 +389,48 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
-        graphManager.addOrUpdateAlarm(alarm);
-        alarmsChangedSinceLastTick = true;
+        try {
+            initLock.await();
+            graphManager.addOrUpdateAlarm(alarm);
+            alarmsChangedSinceLastTick = true;
+        } catch (InterruptedException ignore) {
+            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCreatedOrUpdated");
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
     public void onAlarmCleared(Alarm alarm) {
-        graphManager.addOrUpdateAlarm(alarm);
-        alarmsChangedSinceLastTick = true;
+        try {
+            initLock.await();
+            graphManager.addOrUpdateAlarm(alarm);
+            alarmsChangedSinceLastTick = true;
+        } catch (InterruptedException ignore) {
+            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCleared");
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
     public void onInventoryAdded(Collection<InventoryObject> inventory) {
-        graphManager.addInventory(inventory);
+        try {
+            initLock.await();
+            graphManager.addInventory(inventory);
+        } catch (InterruptedException ignore) {
+            LOG.debug("Interrupted while handling callback, skipping processing onInventoryAdded");
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
-        graphManager.removeInventory(inventory);
+        try {
+            initLock.await();
+            graphManager.removeInventory(inventory);
+        } catch (InterruptedException ignore) {
+            LOG.debug("Interrupted while handling callback, skipping processing onInventoryRemoved");
+            Thread.currentThread().interrupt();
+        }
     }
 
 

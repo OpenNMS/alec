@@ -474,4 +474,11 @@ public class OpennmsDatasource implements IncidentDatasource, AlarmDatasource, I
     public void setInventoryTtlMs(long inventoryTtlMs) {
         this.inventoryTtlMs = inventoryTtlMs;
     }
+
+    @Override
+    public void waitUntilReady() throws InterruptedException {
+        waitUntilInventoryStoreIsQueryable();
+        waitUntilAlarmStoreIsQueryable();
+        waitUntilIncidentStoreIsQueryable();
+    }
 }

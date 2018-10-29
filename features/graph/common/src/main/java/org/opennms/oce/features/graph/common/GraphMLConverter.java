@@ -63,6 +63,8 @@ public class GraphMLConverter {
     private Situation situationWithMostAlarms = null;
     private boolean includeAlarms = true;
 
+    private boolean filterEmptyNodes = true;
+
     private static final String ONMS_GRAPHML_GRAPH_NAMESPACE = "namespace";
     private static final String ONMS_GRAPHML_LABEL = "label";
     private static final String ONMS_GRAPHML_TOOLTIP_TEXT = "tooltipText";
@@ -99,6 +101,15 @@ public class GraphMLConverter {
         return converter.doc;
     }
 
+    public static GraphML toGraphMLWithSituations(Graph<? extends Vertex, ? extends Edge> graph, List<Situation> situations,
+            boolean includeAlarms, boolean filterEmptyNodes) {
+        final GraphMLConverter converter = new GraphMLConverter((Graph<Vertex, Edge>) graph, situations);
+        converter.setIncludeAlarms(includeAlarms);
+        converter.setFilterEmptyNodes(filterEmptyNodes);
+        converter.processGraph();
+        return converter.doc;
+    }
+
     public static GraphML toGraphML(OceGraph oceGraph) {
         final GraphMLConverter converter = new GraphMLConverter((Graph<Vertex,Edge>)oceGraph.getGraph(), oceGraph.getSituations());
         converter.processGraph();
@@ -128,6 +139,10 @@ public class GraphMLConverter {
     }
 
     private void handleVertex(Vertex v) {
+        // Prune InventoryObjectes nodes with no Alarms and only one neighbor
+        if (filterEmptyNodes && g.getIncidentEdges(v).size() < 2 && v.getAlarms().isEmpty()) {
+            return;
+        }
         final GraphMLNode node = new GraphMLNode();
         node.setId(getVertexIdFor(v));
         node.setProperty(CREATED_TIMESTAMP_KEY, v.getCreatedTimestamp());
@@ -195,22 +210,20 @@ public class GraphMLConverter {
         e.getInventoryObjectRelativeRef().ifPresent(relativeRef ->  edge.setProperty(ONMS_GRAPHML_LABEL, "relative reference"));
 
         Collection<Vertex> incidentVertices = g.getIncidentVertices(e);
-        if (incidentVertices.size() == 1) {
-            Vertex v = incidentVertices.iterator().next();
-            GraphMLNode node = graph.getNodeById(getVertexIdFor(v));
-            edge.setSource(node);
-            edge.setTarget(node);
-        } else if (incidentVertices.size() == 2) {
+        if (incidentVertices.size() == 2) {
             Iterator<Vertex> it = incidentVertices.iterator();
             Vertex v1 = it.next();
             Vertex v2 = it.next();
             GraphMLNode node1 = graph.getNodeById(getVertexIdFor(v1));
             GraphMLNode node2 = graph.getNodeById((getVertexIdFor(v2)));
+            // A node will be null if it was filtered. Don't add the edge.
+            if (node1 == null || node2 == null) {
+                return;
+            }
             edge.setSource(node1);
             edge.setTarget(node2);
         } else {
-            throw new IllegalStateException(String.format("Edge with id: '%s' has %d situation vertices.", e.getId(),
-                                                          incidentVertices.size()));
+            throw new IllegalStateException(String.format("Edge with id: '%s' has %d vertices.", e.getId(), incidentVertices.size()));
         }
         graph.addEdge(edge);
     }
@@ -252,6 +265,10 @@ public class GraphMLConverter {
 
     public void setIncludeAlarms(boolean includeAlarms) {
         this.includeAlarms = includeAlarms;
+    }
+
+    public void setFilterEmptyNodes(boolean filterEmptyNodes) {
+        this.filterEmptyNodes = filterEmptyNodes;
     }
 
     public static String getVertexIdFor(Situation situation) {

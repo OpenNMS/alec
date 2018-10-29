@@ -74,7 +74,7 @@ public class GraphMLConversionTest {
         graph.addEdge(e1, v1, v2);
         graph.addEdge(e2, v2, v3);
 
-        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Collections.emptyList());
+        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Collections.emptyList(), true, false);
 
         assertThat(graphML.getGraphs(), hasSize(1));
         GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);
@@ -144,8 +144,58 @@ public class GraphMLConversionTest {
 
         assertThat(graphML.getGraphs(), hasSize(1));
         GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);
-        assertThat(graphMLGraph.getNodes(), hasSize(7));
-        assertThat(graphMLGraph.getEdges(), hasSize(7));
+        // Node V4 is omitted
+        assertThat(graphMLGraph.getNodes(), hasSize(6));
+        // Edge E3 is omitted
+        assertThat(graphMLGraph.getEdges(), hasSize(6));
+    }
+
+    @Test
+    public void canFilterUnInterstingInvetoryObjects() {
+        // Build a graph:
+        // v1[a1] <--(e1)--> v2 <--(e2)--> v3
+        //    |  \             \
+        //    -   \----[a2]     \---(e3)--> v4
+        //    |         |
+        //    --------- s1
+        Graph<MyVertex, MyEdge> graph = new SparseMultigraph<>();
+        MyVertex v1 = new MyVertex("v1");
+        MyVertex v2 = new MyVertex("v2");
+        MyVertex v3 = new MyVertex("v3");
+        MyVertex v4 = new MyVertex("v4");
+        graph.addVertex(v1);
+        graph.addVertex(v2);
+        graph.addVertex(v3);
+        graph.addVertex(v4);
+
+        MyEdge e1 = new MyEdge("e1");
+        MyEdge e2 = new MyEdge("e2");
+        MyEdge e3 = new MyEdge("e3");
+
+        graph.addEdge(e1, v1, v2);
+        graph.addEdge(e2, v2, v3);
+        graph.addEdge(e3, v2, v4);
+
+        AlarmBean a1 = new AlarmBean();
+        a1.setId("a1");
+        v1.getAlarms().add(a1);
+
+        AlarmBean a2 = new AlarmBean();
+        a2.setId("a2");
+        v1.getAlarms().add(a2);
+
+        SituationBean s1 = new SituationBean();
+        s1.setId("s1");
+        s1.setAlarms(Sets.newHashSet(a1, a2));
+
+        GraphML graphML = GraphMLConverter.toGraphMLWithSituations(graph, Lists.newArrayList(s1));
+
+        assertThat(graphML.getGraphs(), hasSize(1));
+        GraphMLGraph graphMLGraph = graphML.getGraphs().get(0);
+        // Nodes V3 and V4 are omitted
+        assertThat(graphMLGraph.getNodes(), hasSize(5));
+        // Edges E2 and E3 are omitted
+        assertThat(graphMLGraph.getEdges(), hasSize(5));
     }
 
     private static class MyVertex implements Vertex {

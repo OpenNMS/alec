@@ -60,6 +60,9 @@
                 <artifactId>karaf-maven-plugin</artifactId>
                 <version>${karaf.version}</version>
                 <extensions>true</extensions>
+                <configuration>
+                  <skip>${skipTests}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>verify</id>

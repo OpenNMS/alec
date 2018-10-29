@@ -39,5 +39,29 @@
             <type>xml</type>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce</groupId>
+            <artifactId>processor-standalone</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce</groupId>
+            <artifactId>processor-redundant</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <artifactId>extension</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <artifactId>config</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

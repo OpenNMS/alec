@@ -26,41 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.processor.redundant;
+package org.opennms.oce.integrations.opennms.config;
 
-import org.opennms.integration.api.v1.coordination.DomainManagerFactory;
-import org.opennms.oce.datasource.api.SituationDatasource;
-import org.opennms.oce.processor.api.SituationProcessor;
-import org.opennms.oce.processor.api.SituationProcessorFactory;
+import java.util.List;
 
-/**
- * A factory that supplies a singleton {@link ActiveStandbySituationProcessor}.
- */
-public class ActiveStandbySituationProcessorFactory implements SituationProcessorFactory {
-    /**
-     * The singleton instance.
-     */
-    private final ActiveStandbySituationProcessor INSTANCE;
+import org.opennms.integration.api.v1.config.syslog.SyslogMatch;
+import org.opennms.integration.api.v1.config.syslog.SyslogMatchExtension;
+import org.opennms.integration.api.xml.ClasspathSyslogMatchLoader;
 
-    /**
-     * Constructor.
-     *
-     * @param domainManagerFactory the domain manager factory
-     */
-    public ActiveStandbySituationProcessorFactory(SituationDatasource situationDatasource,
-                                                  DomainManagerFactory domainManagerFactory) {
-        INSTANCE = ActiveStandbySituationProcessor.newInstance(situationDatasource, domainManagerFactory);
-    }
+public class CiscoSyslogMatchExtension implements SyslogMatchExtension {
 
-    /**
-     * Destroy the instance.
-     */
-    public void destroy() {
-        INSTANCE.destroy();
-    }
+    private final ClasspathSyslogMatchLoader classpathSyslogMatchLoader = new ClasspathSyslogMatchLoader(
+            CiscoSyslogMatchExtension.class,
+            "Cisco.ext.syslog.xml");
 
     @Override
-    public SituationProcessor getInstance() {
-        return INSTANCE;
+    public List<SyslogMatch> getSyslogMatches() {
+        return classpathSyslogMatchLoader.getSyslogMatches();
     }
+
 }

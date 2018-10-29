@@ -1,0 +1,624 @@
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.2.1.10.166.11</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>1</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfUp</uei>
+      <event-label>MPLS-L3VPN-STD-MIB defined trap event: mplsL3VpnVrfUp</event-label>
+      <descr>&lt;p>This notification is generated when:
+a. No interface is associated with this VRF, and the first
+   (and only first) interface associated with it has its
+   ifOperStatus change to up(1).
+
+b. One interface is associated with this VRF, and
+   the ifOperStatus of this interface changes to up(1).
+
+c. Multiple interfaces are associated with this VRF, and the
+   ifOperStatus of all interfaces is down(2), and the first
+   of those interfaces has its ifOperStatus change to up(1).&lt;/p>&lt;table>
+	&lt;tr>&lt;td>&lt;b>
+
+	mplsL3VpnIfConfRowStatus&lt;/b>&lt;/td>&lt;td>
+	%parm[#1]%;&lt;/td>&lt;td>&lt;p>
+		active(1)
+		notInService(2)
+		notReady(3)
+		createAndGo(4)
+		createAndWait(5)
+		destroy(6)
+	&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	mplsL3VpnVrfOperStatus&lt;/b>&lt;/td>&lt;td>
+	%parm[#2]%;&lt;/td>&lt;td>&lt;p>
+		up(1)
+		down(2)
+	&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+
+          %parm[name-#2]% %parm[vrfNameOid]%
+      </descr>
+      <logmsg dest="logndisplay">mplsL3VpnVrfUp trap received mplsL3VpnIfConfRowStatus=%parm[#1]% mplsL3VpnVrfOperStatus=%parm[#2]%</logmsg>
+      <severity>Normal</severity>
+      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[vrfNameOid]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfDown:%dpname%:%nodeid%:%interface%:%parm[vrfNameOid]%">
+          <managed-object type="mpls-l3-vrf"/>
+      </alarm-data>
+       <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+       <parameter name="vrfNameOid" value="%parm[name-#2.16:]%" expand="true"/>
+   </event>
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.2.1.10.166.11</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>2</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfDown</uei>
+      <event-label>MPLS-L3VPN-STD-MIB defined trap event: mplsL3VpnVrfDown</event-label>
+      <descr>&lt;p>This notification is generated when:
+a. One interface is associated with this VRF, and
+   the ifOperStatus of this interface changes from up(1)
+   to down(2).
+
+b. Multiple interfaces are associated with this VRF, and
+   the ifOperStatus of all except one of these interfaces is
+   equal to up(1), and the ifOperStatus of that interface
+   changes from up(1) to down(2).
+
+c. The last interface with ifOperStatus equal to up(1)
+   is disassociated from a VRF.&lt;/p>&lt;table>
+	&lt;tr>&lt;td>&lt;b>
+
+	mplsL3VpnIfConfRowStatus&lt;/b>&lt;/td>&lt;td>
+	%parm[#1]%;&lt;/td>&lt;td>&lt;p>
+		active(1)
+		notInService(2)
+		notReady(3)
+		createAndGo(4)
+		createAndWait(5)
+		destroy(6)
+	&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	mplsL3VpnVrfOperStatus&lt;/b>&lt;/td>&lt;td>
+	%parm[#2]%;&lt;/td>&lt;td>&lt;p>
+		up(1)
+		down(2)
+	&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+
+          %parm[name-#2]% %parm[vrfNameOid]%
+      </descr>
+      <logmsg dest="logndisplay">mplsL3VpnVrfDown trap received mplsL3VpnIfConfRowStatus=%parm[#1]% mplsL3VpnVrfOperStatus=%parm[#2]%</logmsg>
+      <severity>Minor</severity>
+      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[vrfNameOid]%" alarm-type="1">
+          <managed-object type="mpls-l3-vrf"/>
+      </alarm-data>
+      <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+      <parameter name="vrfNameOid" value="%parm[name-#2.16:]%" expand="true"/>
+   </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelUp</uei>
+        <event-label>MPLS-TE-STD-MIB defined trap event: mplsTunnelUp</event-label>
+        <descr>&lt;p>This notification is generated when a
+            mplsTunnelOperStatus object for one of the
+            configured tunnels is about to leave the down state
+            and transition into some other state (but not into
+            the notPresent state).  This other state is
+            indicated by the included value of
+            mplsTunnelOperStatus.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelAdminStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelOperStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            unknown(4)
+            dormant(5)
+            notPresent(6)
+            lowerLayerDown(7)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">mplsTunnelUp trap received mplsTunnelAdminStatus=%parm[#1]% mplsTunnelOperStatus=%parm[#2]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelDown:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" auto-clean="true">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the mplsTunnelAdminStatus varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-4]%" expand="true"/>
+        <parameter name="mplsTunnelEntry" value="%parm[name-#1.-4:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+            <decode varbindvalue="4" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="5" varbinddecodedstring="dormant"/>
+            <decode varbindvalue="6" varbinddecodedstring="notPresent"/>
+            <decode varbindvalue="7" varbinddecodedstring="lowerLayerDown"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelDown</uei>
+        <event-label>MPLS-TE-STD-MIB defined trap event: mplsTunnelDown</event-label>
+        <descr>&lt;p>This notification is generated when a
+            mplsTunnelOperStatus object for one of the
+            configured tunnels is about to enter the down state
+            from some other state (but not from the notPresent
+            state).  This other state is indicated by the
+            included value of mplsTunnelOperStatus.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelAdminStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelOperStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            unknown(4)
+            dormant(5)
+            notPresent(6)
+            lowerLayerDown(7)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">mplsTunnelDown trap received mplsTunnelAdminStatus=%parm[#1]% mplsTunnelOperStatus=%parm[#2]%</logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" alarm-type="1">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the mplsTunnelAdminStatus varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-4]%" expand="true"/>
+        <parameter name="mplsTunnelEntry" value="%parm[name-#1.-4:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+            <decode varbindvalue="4" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="5" varbinddecodedstring="dormant"/>
+            <decode varbindvalue="6" varbinddecodedstring="notPresent"/>
+            <decode varbindvalue="7" varbinddecodedstring="lowerLayerDown"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelRerouted</uei>
+        <event-label>MPLS-TE-STD-MIB defined trap event: mplsTunnelRerouted</event-label>
+        <descr>&lt;p>This notification is generated when a tunnel is
+            rerouted. If the mplsTunnelARHopTable is used, then
+            this tunnel instance's entry in the
+            mplsTunnelARHopTable MAY contain the new path for
+            this tunnel some time after this trap is issued by
+            the agent.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelAdminStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelOperStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            unknown(4)
+            dormant(5)
+            notPresent(6)
+            lowerLayerDown(7)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">mplsTunnelRerouted trap received mplsTunnelAdminStatus=%parm[#1]% mplsTunnelOperStatus=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" alarm-type="3">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the mplsTunnelAdminStatus varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-4]%" expand="true"/>
+        <parameter name="mplsTunnelEntry" value="%parm[name-#1.-4:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+            <decode varbindvalue="4" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="5" varbinddecodedstring="dormant"/>
+            <decode varbindvalue="6" varbinddecodedstring="notPresent"/>
+            <decode varbindvalue="7" varbinddecodedstring="lowerLayerDown"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelReoptimized</uei>
+        <event-label>MPLS-TE-STD-MIB defined trap event: mplsTunnelReoptimized</event-label>
+        <descr>&lt;p>This notification is generated when a tunnel is
+            reoptimized. If the mplsTunnelARHopTable is used,
+            then this tunnel instance's entry in the
+            mplsTunnelARHopTable MAY contain the new path for
+            this tunnel some time after this trap is issued by
+            the agent.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelAdminStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsTunnelOperStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            up(1)
+            down(2)
+            testing(3)
+            unknown(4)
+            dormant(5)
+            notPresent(6)
+            lowerLayerDown(7)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">mplsTunnelReoptimized trap received mplsTunnelAdminStatus=%parm[#1]% mplsTunnelOperStatus=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" alarm-type="3">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the mplsTunnelAdminStatus varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-4]%" expand="true"/>
+        <parameter name="mplsTunnelEntry" value="%parm[name-#1.-4:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="up"/>
+            <decode varbindvalue="2" varbinddecodedstring="down"/>
+            <decode varbindvalue="3" varbinddecodedstring="testing"/>
+            <decode varbindvalue="4" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="5" varbinddecodedstring="dormant"/>
+            <decode varbindvalue="6" varbinddecodedstring="notPresent"/>
+            <decode varbindvalue="7" varbinddecodedstring="lowerLayerDown"/>
+        </varbindsdecode>
+    </event>
+
+    <!-- MPLS-LDP-STD-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.4</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsLdpStdMib/traps/mplsLdpSessionUp</uei>
+        <event-label>MPLS-LDP-STD-MIB defined trap event: mplsLdpSessionUp</event-label>
+        <descr>
+            &lt;p>If this notification is sent when the
+            value of 'mplsLdpSessionState' enters
+            the 'operational(5)' state.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionState&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            nonexistent(1)
+            initialized(2)
+            openrec(3)
+            opensent(4)
+            operational(5)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionDiscontinuityTime&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionStatsUnknownMesTypeErrors&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionStatsUnknownTlvErrors&lt;/b>&lt;/td>&lt;td>
+            %parm[#4]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">mplsLdpSessionUp trap received mplsLdpSessionState=%parm[#1]% mplsLdpSessionDiscontinuityTime=%parm[#2]% mplsLdpSessionStatsUnknownMesTypeErrors=%parm[#3]% mplsLdpSessionStatsUnknownTlvErrors=%parm[#4]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsLdpStdMib/traps/mplsLdpSessionDown:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" auto-clean="true">
+            <managed-object type="mpls-ldp-session"/>
+        </alarm-data>
+        <!-- Extract the ldp entity id from the mplsLdpSessionState varbind -->
+        <parameter name="mplsLdpEntityID" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="mplsLdpSessionEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="nonexistent"/>
+            <decode varbindvalue="2" varbinddecodedstring="initialized"/>
+            <decode varbindvalue="3" varbinddecodedstring="openrec"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="operational"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.166.4</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsLdpStdMib/traps/mplsLdpSessionDown</uei>
+        <event-label>MPLS-LDP-STD-MIB defined trap event: mplsLdpSessionDown</event-label>
+        <descr>
+            &lt;p>This notification is sent when the
+            value of 'mplsLdpSessionState' leaves
+            the 'operational(5)' state.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionState&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            nonexistent(1)
+            initialized(2)
+            openrec(3)
+            opensent(4)
+            operational(5)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionDiscontinuityTime&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionStatsUnknownMesTypeErrors&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionStatsUnknownTlvErrors&lt;/b>&lt;/td>&lt;td>
+            %parm[#4]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">mplsLdpSessionDown trap received mplsLdpSessionState=%parm[#1]% mplsLdpSessionDiscontinuityTime=%parm[#2]% mplsLdpSessionStatsUnknownMesTypeErrors=%parm[#3]% mplsLdpSessionStatsUnknownTlvErrors=%parm[#4]%</logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="1">
+            <managed-object type="mpls-ldp-session"/>
+        </alarm-data>
+        <!-- Extract the ldp entity id from the mplsLdpSessionState varbind -->
+        <parameter name="mplsLdpEntityID" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="mplsLdpSessionEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="nonexistent"/>
+            <decode varbindvalue="2" varbinddecodedstring="initialized"/>
+            <decode varbindvalue="3" varbinddecodedstring="openrec"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="operational"/>
+        </varbindsdecode>
+    </event>
+
+
+    <!-- MPLS-LDP-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.65.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsLdpMib/traps/mplsLdpSessionUp</uei>
+        <event-label>MPLS-LDP-MIB defined trap event: mplsLdpSessionUp</event-label>
+        <descr>
+            &lt;p>Generation of this trap occurs when the
+            'mplsLdpSessionUpDownTrapEnable' object is 'enabled(1)'
+            and the value of 'mplsLdpSessionState' changes from
+            any state except 'nonexistent(1)' to 'operational(5)'.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionState&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            nonexistent(1)
+            initialized(2)
+            openrec(3)
+            opensent(4)
+            operational(5)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">&lt;p>
+            mplsLdpSessionUp trap received
+            mplsLdpSessionState=%parm[#1]%&lt;/p>
+        </logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsLdpMib/traps/mplsLdpSessionDown:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" auto-clean="true">
+            <managed-object type="mpls-ldp-session"/>
+        </alarm-data>
+        <!-- Extract the ldp entity id from the mplsLdpSessionState varbind -->
+        <parameter name="mplsLdpEntityID" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="mplsLdpSessionEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="nonexistent"/>
+            <decode varbindvalue="2" varbinddecodedstring="initialized"/>
+            <decode varbindvalue="3" varbinddecodedstring="openrec"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="operational"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.65.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/ietf/mplsLdpMib/traps/mplsLdpSessionDown</uei>
+        <event-label>MPLS-LDP-MIB defined trap event: mplsLdpSessionDown</event-label>
+        <descr>
+            &lt;p>Generation of this trap occurs when the
+            'mplsLdpSessionUpDownTrapEnable' object is
+            'enabled(1)' and the value of
+            'mplsLdpSessionState' changes from
+            'operational(5)' to any other state.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            mplsLdpSessionState&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            nonexistent(1)
+            initialized(2)
+            openrec(3)
+            opensent(4)
+            operational(5)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">&lt;p>
+            mplsLdpSessionDown trap received
+            mplsLdpSessionState=%parm[#1]%&lt;/p>
+        </logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="1">
+            <managed-object type="mpls-ldp-session"/>
+        </alarm-data>
+        <!-- Extract the ldp entity id from the mplsLdpSessionState varbind -->
+        <parameter name="mplsLdpEntityID" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="mplsLdpSessionEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="nonexistent"/>
+            <decode varbindvalue="2" varbinddecodedstring="initialized"/>
+            <decode varbindvalue="3" varbinddecodedstring="openrec"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="operational"/>
+        </varbindsdecode>
+    </event>
+</events>

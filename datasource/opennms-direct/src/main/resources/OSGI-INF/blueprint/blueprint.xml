@@ -1,0 +1,19 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="alarmDao" interface="org.opennms.integration.api.v1.dao.AlarmDao" />
+    <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao" />
+    <reference id="eventForwarder" interface="org.opennms.integration.api.v1.events.EventForwarder" />
+
+    <bean id="directAlarmDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectAlarmDatasource" init-method="init" >
+        <argument ref="alarmDao"/>
+        <argument ref="eventForwarder"/>
+    </bean>
+    <service ref="directAlarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
+    <service ref="directAlarmDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
+    <service ref="directAlarmDatasource" interface="org.opennms.integration.api.v1.alarms.AlarmLifecycleListener"/>
+
+    <bean id="directInventoryDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectInventoryDatasource" init-method="init" >
+        <argument ref="nodeDao"/>
+    </bean>
+    <service ref="directInventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
+
+</blueprint>

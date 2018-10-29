@@ -1,0 +1,305 @@
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.30.15</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/IETF/DS3/traps/dsx3LineStatusChange</uei>
+        <event-label>DS3-MIB defined trap event: dsx3LineStatusChange</event-label>
+        <descr>&lt;p>A dsx3LineStatusChange trap is sent when the
+            value of an instance of dsx3LineStatus changes. It
+            can be utilized by an NMS to trigger polls. When
+            the line status change results in a lower level
+            line status change (i.e. ds1), then no traps for
+            the lower level are sent.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            dsx3LineStatus&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            dsx3LineStatusLastChange&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">DS3 Event: Line Status Change</logmsg>
+        <severity>Warning</severity>
+        <!-- Extract the ifIndex from the dsx3LineStatus varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.2.1.17</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>2</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/IETF/Bridge/traps/topologyChange</uei>
+      <event-label>BRIDGE-MIB defined trap event: topologyChange</event-label>
+      <descr>&lt;p>A topologyChange trap is sent by a bridge when
+            any of its configured ports transitions from the
+            Learning state to the Forwarding state, or from
+            the Forwarding state to the Blocking state. The
+            trap is not sent if a newRoot trap is sent for the
+            same transition. Implementation of this trap is
+            optional.&lt;/p>&lt;table>
+            &lt;/table></descr>
+      <logmsg dest="logndisplay">Bridge MIB: Topology Change</logmsg>
+      <severity>Warning</severity>
+      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+   </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.47.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/IETF/ENTITY/traps/entConfigChange</uei>
+        <event-label>ENTITY-MIB defined trap event: entConfigChange</event-label>
+        <descr>&lt;p>An entConfigChange notification is generated when the value
+            of entLastChangeTime changes. It can be utilized by an NMS
+            to trigger logical/physical entity table maintenance polls.
+            &lt;/p>&lt;p>
+            An agent should not generate more than one entConfigChange
+            'notification-event' in a given time interval (five seconds
+            is the suggested default). A 'notification-event' is the
+            transmission of a single trap or inform PDU to a list of
+            notification destinations.
+            &lt;/p>&lt;p>
+            If additional configuration changes occur within the
+            throttling period, then notification-events for these
+            changes should be suppressed by the agent until the current
+            throttling period expires. At the end of a throttling
+            period, one notification-event should be generated if any
+            configuration changes occurred since the start of the
+            throttling period. In such a case, another throttling period
+            is started right away.
+            &lt;/p>&lt;p>
+            An NMS should periodically check the value of
+            entLastChangeTime to detect any missed entConfigChange
+            notification-events, e.g., due to throttling or transmission
+            loss.&lt;/p>&lt;table>
+            &lt;/table></descr>
+        <logmsg dest="logndisplay">ENTITY Configuration Change Notification</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.17</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/IETF/Bridge/traps/newRoot</uei>
+        <event-label>BRIDGE-MIB defined trap event: newRoot</event-label>
+        <descr>&lt;p>The newRoot trap indicates that the sending agent
+            has become the new root of the Spanning Tree; the
+            trap is sent by a bridge soon after its election
+            as the new root, e.g., upon expiration of the
+            Topology Change Timer immediately subsequent to
+            its election. Implementation of this trap is
+            optional.&lt;/p>&lt;table>
+            &lt;/table></descr>
+        <logmsg dest="logndisplay">Bridge MIB: New Spanning Tree Root</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.10.32</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/IETF/RFC1315/traps/frDLCIStatusChange</uei>
+        <event-label>RFC1315-MIB defined trap event: frDLCIStatusChange</event-label>
+        <descr>&lt;p>This trap indicates that the indicated Virtual
+            Circuit has changed state. It has either been
+            created or invalidated, or has toggled between
+            the active and inactive states.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            frCircuitIfIndex&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            frCircuitDlci&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            frCircuitState&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>
+            invalid(1) active(2) inactive(3)
+            &lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">RFC1315 Event: Frame Relay DLCI Status Change</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%:%parm[#2]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <parameter name="ifIndex" value="%parm[#1]%" expand="true"/>
+    </event>
+
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.131</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/traps/ENTITY-STATE-MIB/entStateOperEnabled</uei>
+        <event-label>ENTITY-STATE-MIB defined trap event: entStateOperEnabled</event-label>
+        <descr>
+            &lt;p>An entStateOperEnabled notification signifies that the
+            SNMP entity, acting in an agent role, has detected that
+            the entStateOper object for one of its entities has
+            transitioned into the 'enabled' state.
+
+            The entity this notification refers can be identified by
+            extracting the entPhysicalIndex from one of the
+            variable bindings.  The entStateAdmin and entStateAlarm
+            varbinds may be examined to find out additional
+            information on the administrative state at the time of
+            the operation state change as well as to find out whether
+            there were any known alarms against the entity at that
+            time that may explain why the physical entity has become
+            operationally disabled.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            entStateAdmin&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            unknown(1)
+            locked(2)
+            shuttingDown(3)
+            unlocked(4)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            entStateAlarm&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">&lt;p>
+            entStateOperEnabled trap received
+            entStateAdmin=%parm[#1]%
+            entStateAlarm=%parm[#2]%&lt;/p>
+        </logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="2" clear-key="uei.opennms.org/traps/ENTITY-STATE-MIB/entStateOperDisabled:%dpname%:%nodeid%:%parm[entPhysicalIndex]%">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the entStateAdmin varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="2" varbinddecodedstring="locked"/>
+            <decode varbindvalue="3" varbinddecodedstring="shuttingDown"/>
+            <decode varbindvalue="4" varbinddecodedstring="unlocked"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.2.1.131</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/traps/ENTITY-STATE-MIB/entStateOperDisabled</uei>
+        <event-label>ENTITY-STATE-MIB defined trap event: entStateOperDisabled</event-label>
+        <descr>
+            &lt;p>An entStateOperDisabled notification signifies that the
+            SNMP entity, acting in an agent role, has detected that
+            the entStateOper object for one of its entities has
+            transitioned into the 'disabled' state.
+
+            The entity this notification refers can be identified by
+            extracting the entPhysicalIndex from one of the
+            variable bindings.  The entStateAdmin and entStateAlarm
+            varbinds may be examined to find out additional
+            information on the administrative state at the time of
+            the operation state change as well as to find out whether
+            there were any known alarms against the entity at that
+            time that may affect the physical entity's
+            ability to stay operationally enabled.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            entStateAdmin&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            unknown(1)
+            locked(2)
+            shuttingDown(3)
+            unlocked(4)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            entStateAlarm&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">entStateOperDisabled trap received entStateAdmin=%parm[#1]% entStateAlarm=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="1">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the entStateAdmin varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="2" varbinddecodedstring="locked"/>
+            <decode varbindvalue="3" varbinddecodedstring="shuttingDown"/>
+            <decode varbindvalue="4" varbinddecodedstring="unlocked"/>
+        </varbindsdecode>
+    </event>
+</events>

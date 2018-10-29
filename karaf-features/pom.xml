@@ -81,7 +81,7 @@
                             <features>
                                 <feature>oce-datasource-api</feature>
                                 <feature>oce-datasource-jaxb</feature>
-                                <feature>oce-datasource-opennms</feature>
+                                <feature>oce-datasource-opennms-kafka</feature>
                                 <feature>oce-datasource-shell</feature>
                                 <feature>oce-engine</feature>
                                 <feature>oce-engine-cluster</feature>
@@ -107,6 +107,9 @@
                                 <feature>oce-processor-redundant</feature>
                                 -->
 
+				                <!-- OpenNMS plugin
+                                <feature>opennms-oce-plugin</feature>-->
+
                                 <!-- 3rd party -->
                                 <feature>kafka-streams</feature>
                                 <feature>commons-text</feature>
@@ -128,6 +131,13 @@
             <artifactId>framework</artifactId>
             <version>${karaf.version}</version>
             <type>kar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.integration.api</groupId>
+            <artifactId>karaf-features</artifactId>
+            <version>${opennms.api.version}</version>
+            <type>xml</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>

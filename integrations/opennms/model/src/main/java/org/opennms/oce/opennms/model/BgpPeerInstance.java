@@ -26,41 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.processor.redundant;
+package org.opennms.oce.opennms.model;
 
-import org.opennms.integration.api.v1.coordination.DomainManagerFactory;
-import org.opennms.oce.datasource.api.SituationDatasource;
-import org.opennms.oce.processor.api.SituationProcessor;
-import org.opennms.oce.processor.api.SituationProcessorFactory;
+public class BgpPeerInstance {
 
-/**
- * A factory that supplies a singleton {@link ActiveStandbySituationProcessor}.
- */
-public class ActiveStandbySituationProcessorFactory implements SituationProcessorFactory {
-    /**
-     * The singleton instance.
-     */
-    private final ActiveStandbySituationProcessor INSTANCE;
+    private String peer;
+    private String vrf;
 
-    /**
-     * Constructor.
-     *
-     * @param domainManagerFactory the domain manager factory
-     */
-    public ActiveStandbySituationProcessorFactory(SituationDatasource situationDatasource,
-                                                  DomainManagerFactory domainManagerFactory) {
-        INSTANCE = ActiveStandbySituationProcessor.newInstance(situationDatasource, domainManagerFactory);
+    public BgpPeerInstance(String peer, String vrf) {
+        this.peer = peer;
+        this.vrf = vrf;
     }
 
-    /**
-     * Destroy the instance.
-     */
-    public void destroy() {
-        INSTANCE.destroy();
+    public BgpPeerInstance() { }
+
+    public String getPeer() {
+        return peer;
     }
 
-    @Override
-    public SituationProcessor getInstance() {
-        return INSTANCE;
+    public void setPeer(String peer) {
+        this.peer = peer;
+    }
+
+    public String getVrf() {
+        return vrf;
+    }
+
+    public void setVrf(String vrf) {
+        this.vrf = vrf;
     }
 }

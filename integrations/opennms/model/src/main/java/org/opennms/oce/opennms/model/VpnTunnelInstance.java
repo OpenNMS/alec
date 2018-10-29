@@ -26,41 +26,42 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.processor.redundant;
+package org.opennms.oce.opennms.model;
 
-import org.opennms.integration.api.v1.coordination.DomainManagerFactory;
-import org.opennms.oce.datasource.api.SituationDatasource;
-import org.opennms.oce.processor.api.SituationProcessor;
-import org.opennms.oce.processor.api.SituationProcessorFactory;
+public class VpnTunnelInstance {
+    private String peerLocalAddr;
+    private String peerRemoteAddr;
+    private String tunnelId;
 
-/**
- * A factory that supplies a singleton {@link ActiveStandbySituationProcessor}.
- */
-public class ActiveStandbySituationProcessorFactory implements SituationProcessorFactory {
-    /**
-     * The singleton instance.
-     */
-    private final ActiveStandbySituationProcessor INSTANCE;
-
-    /**
-     * Constructor.
-     *
-     * @param domainManagerFactory the domain manager factory
-     */
-    public ActiveStandbySituationProcessorFactory(SituationDatasource situationDatasource,
-                                                  DomainManagerFactory domainManagerFactory) {
-        INSTANCE = ActiveStandbySituationProcessor.newInstance(situationDatasource, domainManagerFactory);
+    public VpnTunnelInstance(String peerLocalAddr, String peerRemoteAddr, String tunnelId) {
+        this.peerLocalAddr = peerLocalAddr;
+        this.peerRemoteAddr = peerRemoteAddr;
+        this.tunnelId = tunnelId;
     }
 
-    /**
-     * Destroy the instance.
-     */
-    public void destroy() {
-        INSTANCE.destroy();
+    public VpnTunnelInstance() { }
+
+    public String getPeerLocalAddr() {
+        return peerLocalAddr;
     }
 
-    @Override
-    public SituationProcessor getInstance() {
-        return INSTANCE;
+    public void setPeerLocalAddr(String peerLocalAddr) {
+        this.peerLocalAddr = peerLocalAddr;
+    }
+
+    public String getPeerRemoteAddr() {
+        return peerRemoteAddr;
+    }
+
+    public void setPeerRemoteAddr(String peerRemoteAddr) {
+        this.peerRemoteAddr = peerRemoteAddr;
+    }
+
+    public String getTunnelId() {
+        return tunnelId;
+    }
+
+    public void setTunnelId(String tunnelId) {
+        this.tunnelId = tunnelId;
     }
 }

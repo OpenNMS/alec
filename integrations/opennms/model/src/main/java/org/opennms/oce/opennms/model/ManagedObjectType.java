@@ -26,41 +26,38 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.processor.redundant;
+package org.opennms.oce.opennms.model;
 
-import org.opennms.integration.api.v1.coordination.DomainManagerFactory;
-import org.opennms.oce.datasource.api.SituationDatasource;
-import org.opennms.oce.processor.api.SituationProcessor;
-import org.opennms.oce.processor.api.SituationProcessorFactory;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
-/**
- * A factory that supplies a singleton {@link ActiveStandbySituationProcessor}.
- */
-public class ActiveStandbySituationProcessorFactory implements SituationProcessorFactory {
-    /**
-     * The singleton instance.
-     */
-    private final ActiveStandbySituationProcessor INSTANCE;
+public enum ManagedObjectType {
+    Node("node"),
+    SnmpInterface("snmp-interface"),
+    SnmpInterfaceLink("snmp-interface-link"),
+    BgpPeer("bgp-peer"),
+    VpnTunnel("vpn-tunnel"),
+    MplsL3Vrf("mpls-l3-vrf"),
+    EntPhysicalEntity("ent-physical-entity"),
+    OspfRouter("ospf-router"),
+    MplsTunnel("mpls-tunnel"),
+    MplsLdpSession("mpls-ldp-session");
 
-    /**
-     * Constructor.
-     *
-     * @param domainManagerFactory the domain manager factory
-     */
-    public ActiveStandbySituationProcessorFactory(SituationDatasource situationDatasource,
-                                                  DomainManagerFactory domainManagerFactory) {
-        INSTANCE = ActiveStandbySituationProcessor.newInstance(situationDatasource, domainManagerFactory);
+    private final String name;
+
+    ManagedObjectType(String name) {
+        this.name = Objects.requireNonNull(name);
     }
 
-    /**
-     * Destroy the instance.
-     */
-    public void destroy() {
-        INSTANCE.destroy();
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public SituationProcessor getInstance() {
-        return INSTANCE;
+    public static ManagedObjectType fromName(String name) {
+        return Arrays.stream(ManagedObjectType.values())
+                .filter(mot -> Objects.equals(name, mot.getName()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No type found with name: " + name));
     }
 }

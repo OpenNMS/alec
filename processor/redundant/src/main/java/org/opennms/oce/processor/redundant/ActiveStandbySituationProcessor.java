@@ -38,10 +38,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.opennms.features.distributed.coordination.api.DomainManager;
-import org.opennms.features.distributed.coordination.api.DomainManagerFactory;
-import org.opennms.features.distributed.coordination.api.Role;
-import org.opennms.features.distributed.coordination.api.RoleChangeHandler;
+import org.opennms.integration.api.v1.coordination.DomainManager;
+import org.opennms.integration.api.v1.coordination.DomainManagerFactory;
+import org.opennms.integration.api.v1.coordination.Role;
+import org.opennms.integration.api.v1.coordination.RoleChangeHandler;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationDatasource;

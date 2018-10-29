@@ -1,0 +1,1655 @@
+<events xmlns="http://xmlns.opennms.org/xsd/eventconf">
+    <!-- CISCO-ENTITY-FRU-CONTROL-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.117.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>6</mevalue>cefcFanTrayStatusChange
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cefcFanTrayStatusChange</uei>
+        <event-label>CISCO-ENTITY-FRU-CONTROL-MIB defined trap event: cefcFanTrayStatusChange</event-label>
+        <descr>&lt;p>This notification is generated when the value of
+            cefcFanTrayOperStatus changes. &lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cefcFanTrayOperStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p;>
+            unknown(1)
+            up(2)
+            down(3)
+            warning(4)
+            &lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">The fan tray status has changed on %parm[entPhysicalIndex]% to %parm[#1]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="3">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the cefcFanTrayOperStatus varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="2" varbinddecodedstring="up"/>
+            <decode varbindvalue="3" varbinddecodedstring="down"/>
+            <decode varbindvalue="4" varbinddecodedstring="warning"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.117.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cefcModuleStatusChange</uei>
+        <event-label>CISCO-ENTITY-FRU-CONTROL-MIB defined trap event: cefcModuleStatusChange</event-label>
+        <descr>&lt;p>This notification is generated when the value of
+            cefcModuleOperStatus changes. It can be utilized by
+            an NMS to update the status of the module it is
+            managing.
+            &lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cefcModuleOperStatus&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>
+            unknown(1) ok(2) disabled(3) okButDiagFailed(4) boot(5) selfTest(6) failed(7) missing(8)
+            mismatchWithParent(9) mismatchConfig(10) diagFailed(11) dormant(12) outOfServiceAdmin(13)
+            outOfServiceEnvTemp(14)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cefcModuleStatusLastChangeTime&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: FRU Module Status Change.</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="3">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the cefcModuleOperStatus varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.117.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cefcPowerStatusChange</uei>
+        <event-label>CISCO-ENTITY-FRU-CONTROL-MIB defined trap event: cefcPowerStatusChange</event-label>
+        <descr>&lt;p>The cefcFRUPowerStatusChange notification indicates that
+            the power status of a FRU has changed.  The varbind for this
+            notification indicates the entPhysicalIndex of the FRU,
+            and the new operational-status of the FRU.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cefcFRUPowerOperStatus&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>
+            offEnvOther(1) on(2) offAdmin(3) offDenied(4) offEnvPower(5) offEnvTemp(6) offEnvFan(7)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cefcFRUPowerAdminStatus&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>
+            on(1) off(2) inlineAuto(3) inlineOn(4)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: FRU Power Status Change</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="3">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the cefcFRUPowerOperStatus varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.117.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cefcFRUInserted</uei>
+        <event-label>CISCO-ENTITY-FRU-CONTROL-MIB defined trap event: cefcFRUInserted</event-label>
+        <descr>&lt;p>The cecfFRUInserted notification indicates that a FRU was
+            inserted.  The varbind for this notification indicates the
+            entPhysicalIndex of the inserted FRU, and the entPhysicalIndex
+            of the FRU's container.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            entPhysicalContainedIn&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: FRU Inserted</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" clear-key="uei.opennms.org/vendor/Cisco/traps/cefcFRURemoved:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="2">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the entPhysicalContainedIn varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.117.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cefcFRURemoved</uei>
+        <event-label>CISCO-ENTITY-FRU-CONTROL-MIB defined trap event: cefcFRURemoved</event-label>
+        <descr>&lt;p>The cefcFRURemoved notification indicates that a FRU was
+            removed.  The varbind for this notification indicates the
+            entPhysicalIndex of the removed FRU, and the entPhysicalIndex
+            of the FRU's container.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            entPhysicalContainedIn&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: FRU Removed</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="1">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the entPhysicalContainedIn varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+
+    <!-- CISCO-BGP4-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.187</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cbgpFsmStateChange</uei>
+        <event-label>CISCO-BGP4-MIB defined trap event: cbgpFsmStateChange</event-label>
+        <descr>
+            &lt;p>The BGP cbgpFsmStateChange notification is generated
+            for every BGP FSM state change. The bgpPeerRemoteAddr
+            value is attached to the notification object ID.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            bgpPeerLastError&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            bgpPeerState&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            idle(1)
+            connect(2)
+            active(3)
+            opensent(4)
+            openconfirm(5)
+            established(6)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerLastErrorTxt&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrevState&lt;/b>&lt;/td>&lt;td>
+            %parm[#4]%;&lt;/td>&lt;td>&lt;p>
+            none(0)
+            idle(1)
+            connect(2)
+            active(3)
+            opensent(4)
+            openconfirm(5)
+            established(6)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">BGP FSM State change on peer %parm[bgpPeer]% from %parm[#4]% to %parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[bgpPeer]%" alarm-type="3" auto-clean="false">
+            <managed-object type="bgp-peer"/>
+        </alarm-data>
+        <parameter name="bgpPeer" value="%parm[name-#1.-4]%.%parm[name-#1.-3]%.%parm[name-#1.-2]%.%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="idle"/>
+            <decode varbindvalue="2" varbinddecodedstring="connect"/>
+            <decode varbindvalue="3" varbinddecodedstring="active"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="openconfirm"/>
+            <decode varbindvalue="6" varbinddecodedstring="established"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#4]</parmid>
+            <decode varbindvalue="0" varbinddecodedstring="none"/>
+            <decode varbindvalue="1" varbinddecodedstring="idle"/>
+            <decode varbindvalue="2" varbinddecodedstring="connect"/>
+            <decode varbindvalue="3" varbinddecodedstring="active"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="openconfirm"/>
+            <decode varbindvalue="6" varbinddecodedstring="established"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.187</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cbgpBackwardTransition</uei>
+        <event-label>CISCO-BGP4-MIB defined trap event: cbgpBackwardTransition</event-label>
+        <descr>
+            &lt;p>The cbgpBackwardTransition Event is generated when the
+            BGP FSM moves from a higher numbered state to a lower
+            numbered state. The bgpPeerRemoteAddr value is attached
+            to the notification object ID.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            bgpPeerLastError&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            bgpPeerState&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>
+            idle(1)
+            connect(2)
+            active(3)
+            opensent(4)
+            openconfirm(5)
+            established(6)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerLastErrorTxt&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrevState&lt;/b>&lt;/td>&lt;td>
+            %parm[#4]%;&lt;/td>&lt;td>&lt;p>
+            none(0)
+            idle(1)
+            connect(2)
+            active(3)
+            opensent(4)
+            openconfirm(5)
+            established(6)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">BGP backward transition on peer %parm[bgpPeer]% from %parm[#4]% to %parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[bgpPeer]%" alarm-type="3">
+            <managed-object type="bgp-peer"/>
+        </alarm-data>
+        <parameter name="bgpPeer" value="%parm[name-#1.-4]%.%parm[name-#1.-3]%.%parm[name-#1.-2]%.%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#2]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="idle"/>
+            <decode varbindvalue="2" varbinddecodedstring="connect"/>
+            <decode varbindvalue="3" varbinddecodedstring="active"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="openconfirm"/>
+            <decode varbindvalue="6" varbinddecodedstring="established"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#4]</parmid>
+            <decode varbindvalue="0" varbinddecodedstring="none"/>
+            <decode varbindvalue="1" varbinddecodedstring="idle"/>
+            <decode varbindvalue="2" varbinddecodedstring="connect"/>
+            <decode varbindvalue="3" varbinddecodedstring="active"/>
+            <decode varbindvalue="4" varbinddecodedstring="opensent"/>
+            <decode varbindvalue="5" varbinddecodedstring="openconfirm"/>
+            <decode varbindvalue="6" varbinddecodedstring="established"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.187</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cbgpPrefixThresholdExceeded</uei>
+        <event-label>CISCO-BGP4-MIB defined trap event: cbgpPrefixThresholdExceeded</event-label>
+        <descr>
+            &lt;p>The cbgpPrefixThresholdExceeded notification is
+            generated when prefix count exceeds the configured
+            warning threshold on a session for an address
+            family. The bgpPeerRemoteAddr, cbgpPeerAddrFamilyAfi
+            and cbgpPeerAddrFamilySafi values are attached to the
+            notification object ID.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrefixAdminLimit&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrefixThreshold&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">cbgpPrefixThresholdExceeded trap received cbgpPeerPrefixAdminLimit=%parm[#1]% cbgpPeerPrefixThreshold=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="1" auto-clean="false"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.187</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/traps/CISCO-BGP4-MIB/cbgpPrefixThresholdClear</uei>
+        <event-label>CISCO-BGP4-MIB defined trap event: cbgpPrefixThresholdClear</event-label>
+        <descr>
+            &lt;p>The cbgpPrefixThresholdClear notification is
+            generated when prefix count drops below the configured
+            clear threshold on a session for an address family once
+            cbgpPrefixThresholdExceeded is generated. This won't
+            be generated if the peer session goes down after the
+            generation of cbgpPrefixThresholdExceeded.
+            The bgpPeerRemoteAddr, cbgpPeerAddrFamilyAfi and
+            cbgpPeerAddrFamilySafi values are attached to the
+            notification object ID.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrefixAdminLimit&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cbgpPeerPrefixClearThreshold&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">cbgpPrefixThresholdClear trap received cbgpPeerPrefixAdminLimit=%parm[#1]% cbgpPeerPrefixClearThreshold=%parm[#2]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/cbgpPrefixThresholdExceeded:%dpname%:%nodeid%:%interface%"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.171.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cikeTunnelStart</uei>
+        <event-label>CISCO-IPSEC-FLOW-MONITOR-MIB defined trap event: cikeTunnelStart</event-label>
+        <descr>&lt;p>This notification is generated when an IPsec Phase-1
+            IKE Tunnel becomes active.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cikePeerLocalAddr&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cikePeerRemoteAddr&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cikeTunLifeTime&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: IPSEC Phase-1 IKE Tunnel active for peer %parm[peerRemoteAddr]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[peerLocalAddr]%:%parm[peerRemoteAddr]%:%parm[tunnelId]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/cikeTunnelStop:%dpname%:%nodeid%:%parm[peerLocalAddr]%:%parm[peerRemoteAddr]%:%parm[tunnelId]%">
+            <managed-object type="vpn-tunnel"/>
+        </alarm-data>
+        <parameter name="peerLocalAddr" value="%parm[#1]%" expand="true"/>
+        <parameter name="peerRemoteAddr" value="%parm[#2]%" expand="true"/>
+        <parameter name="tunnelId" value="%parm[name-#3.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.171.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cikeTunnelStop</uei>
+        <event-label>CISCO-IPSEC-FLOW-MONITOR-MIB defined trap event: cikeTunnelStop</event-label>
+        <descr>&lt;p>This notification is generated when an IPsec Phase-1
+            IKE Tunnel becomes inactive.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cikePeerLocalAddr&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cikePeerRemoteAddr&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cikeTunActiveTime&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: IPSEC Phase-1 IKE Tunnel inactive for peer %parm[peerRemoteAddr]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[peerLocalAddr]%:%parm[peerRemoteAddr]%:%parm[tunnelId]%" alarm-type="1">
+            <managed-object type="vpn-tunnel"/>
+        </alarm-data>
+        <parameter name="peerLocalAddr" value="%parm[#1]%" expand="true"/>
+        <parameter name="peerRemoteAddr" value="%parm[#2]%" expand="true"/>
+        <parameter name="tunnelId" value="%parm[name-#3.-1]%" expand="true"/>
+    </event>
+
+   <!-- CISCO-IETF-BFD-MIB -->
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.4.1.9.10.137</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>1</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/vendor/Cisco/traps/ciscoBfdSessUp</uei>
+      <event-label>CISCO-IETF-BFD-MIB defined trap event: ciscoBfdSessUp</event-label>
+      <descr>
+&lt;p>This notification is generated when the
+        ciscoBfdSessState object for one or more contiguous 
+        entries in ciscoBfdSessTable are about to enter the up(4) 
+        state from some other state. The included values of 
+        ciscoBfdSessDiag MUST both be set equal to this 
+        new state (i.e: up(4)).  The two instances of  
+        ciscoBfdSessDiag in this notification indicate the range  
+        of indexes that are affected.  Note that all the indexes  
+        of the two ends of the range can be derived from the 
+        instance identifiers of these two objects.  For the 
+        cases where a contiguous range of sessions 
+        have transitioned into the up(4) state at roughly 
+        the same time, the device SHOULD issue a single 
+        notification for each range of contiguous indexes in 
+        an effort to minimize the emission of a large number 
+        of notifications.  If a notification has to be 
+        issued for just a single ciscoBfdSessEntry, then 
+        the instance identifier (and values) of the two 
+        ciscoBfdSessDiag objects MUST be the identical.&lt;/p>&lt;table>
+	&lt;tr>&lt;td>&lt;b>
+
+	ciscoBfdSessDiag&lt;/b>&lt;/td>&lt;td>
+	%parm[#1]%;&lt;/td>&lt;td>&lt;p>
+		noDiagnostic(0)
+		controlDetectionTimeExpired(1)
+		echoFunctionFailed(2)
+		neighborSignaledSessionDown(3)
+		forwardingPlaneReset(4)
+		pathDown(5)
+		concatenatedPathDown(6)
+		administrativelyDown(7)
+		reverseConcatenatedPathDown(8)
+	&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	ciscoBfdSessDiag&lt;/b>&lt;/td>&lt;td>
+	%parm[#2]%;&lt;/td>&lt;td>&lt;p>
+		noDiagnostic(0)
+		controlDetectionTimeExpired(1)
+		echoFunctionFailed(2)
+		neighborSignaledSessionDown(3)
+		forwardingPlaneReset(4)
+		pathDown(5)
+		concatenatedPathDown(6)
+		administrativelyDown(7)
+		reverseConcatenatedPathDown(8)
+	&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+	</descr>
+      <logmsg dest="logndisplay">ciscoBfdSessUp trap received ciscoBfdSessDiag=%parm[#1]% ciscoBfdSessDiag=%parm[#2]%</logmsg>
+      <severity>Normal</severity>
+      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[sessionId]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoBfdSessDown:%dpname%:%nodeid%:%parm[sessionId]%"/>
+      <parameter name="sessionId" value="%parm[name-#1.-1]%" expand="true"/>
+       <varbindsdecode>
+         <parmid>parm[#1]</parmid>
+         <decode varbindvalue="0" varbinddecodedstring="noDiagnostic"/>
+         <decode varbindvalue="1" varbinddecodedstring="controlDetectionTimeExpired"/>
+         <decode varbindvalue="2" varbinddecodedstring="echoFunctionFailed"/>
+         <decode varbindvalue="3" varbinddecodedstring="neighborSignaledSessionDown"/>
+         <decode varbindvalue="4" varbinddecodedstring="forwardingPlaneReset"/>
+         <decode varbindvalue="5" varbinddecodedstring="pathDown"/>
+         <decode varbindvalue="6" varbinddecodedstring="concatenatedPathDown"/>
+         <decode varbindvalue="7" varbinddecodedstring="administrativelyDown"/>
+         <decode varbindvalue="8" varbinddecodedstring="reverseConcatenatedPathDown"/>
+      </varbindsdecode>
+      <varbindsdecode>
+         <parmid>parm[#2]</parmid>
+         <decode varbindvalue="0" varbinddecodedstring="noDiagnostic"/>
+         <decode varbindvalue="1" varbinddecodedstring="controlDetectionTimeExpired"/>
+         <decode varbindvalue="2" varbinddecodedstring="echoFunctionFailed"/>
+         <decode varbindvalue="3" varbinddecodedstring="neighborSignaledSessionDown"/>
+         <decode varbindvalue="4" varbinddecodedstring="forwardingPlaneReset"/>
+         <decode varbindvalue="5" varbinddecodedstring="pathDown"/>
+         <decode varbindvalue="6" varbinddecodedstring="concatenatedPathDown"/>
+         <decode varbindvalue="7" varbinddecodedstring="administrativelyDown"/>
+         <decode varbindvalue="8" varbinddecodedstring="reverseConcatenatedPathDown"/>
+      </varbindsdecode>
+   </event>
+   <event>
+      <mask>
+         <maskelement>
+            <mename>id</mename>
+            <mevalue>.1.3.6.1.4.1.9.10.137</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>generic</mename>
+            <mevalue>6</mevalue>
+         </maskelement>
+         <maskelement>
+            <mename>specific</mename>
+            <mevalue>2</mevalue>
+         </maskelement>
+      </mask>
+      <uei>uei.opennms.org/vendor/Cisco/traps/ciscoBfdSessDown</uei>
+      <event-label>CISCO-IETF-BFD-MIB defined trap event: ciscoBfdSessDown</event-label>
+      <descr>
+&lt;p>This notification is generated when the
+        ciscoBfdSessState object for one or more contiguous 
+        entries in ciscoBfdSessTable are about to enter the down(2) 
+        or adminDown(1) states from some other state. The included  
+        values of ciscoBfdSessDiag MUST both be set equal to this 
+        new state (i.e: down(2) or adminDown(1)).  The two instances  
+        of ciscoBfdSessDiag in this notification indicate the range  
+        of indexes that are affected.  Note that all the indexes  
+        of the two ends of the range can be derived from the 
+        instance identifiers of these two objects.  For 
+        cases where a contiguous range of sessions 
+        have transitioned into the down(2) or adminDown(1) states  
+        at roughly the same time, the device SHOULD issue a single 
+        notification for each range of contiguous indexes in 
+        an effort to minimize the emission of a large number 
+        of notifications.  If a notification has to be 
+        issued for just a single ciscoBfdSessEntry, then 
+        the instance identifier (and values) of the two 
+        ciscoBfdSessDiag objects MUST be the identical.&lt;/p>&lt;table>
+	&lt;tr>&lt;td>&lt;b>
+
+	ciscoBfdSessDiag&lt;/b>&lt;/td>&lt;td>
+	%parm[#1]%;&lt;/td>&lt;td>&lt;p>
+		noDiagnostic(0)
+		controlDetectionTimeExpired(1)
+		echoFunctionFailed(2)
+		neighborSignaledSessionDown(3)
+		forwardingPlaneReset(4)
+		pathDown(5)
+		concatenatedPathDown(6)
+		administrativelyDown(7)
+		reverseConcatenatedPathDown(8)
+	&lt;/p>&lt;/td>&lt;/tr>
+	&lt;tr>&lt;td>&lt;b>
+
+	ciscoBfdSessDiag&lt;/b>&lt;/td>&lt;td>
+	%parm[#2]%;&lt;/td>&lt;td>&lt;p>
+		noDiagnostic(0)
+		controlDetectionTimeExpired(1)
+		echoFunctionFailed(2)
+		neighborSignaledSessionDown(3)
+		forwardingPlaneReset(4)
+		pathDown(5)
+		concatenatedPathDown(6)
+		administrativelyDown(7)
+		reverseConcatenatedPathDown(8)
+	&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+	</descr>
+      <logmsg dest="logndisplay">&lt;p>
+	ciscoBfdSessDown trap received
+	ciscoBfdSessDiag=%parm[#1]%
+	ciscoBfdSessDiag=%parm[#2]%&lt;/p>
+	</logmsg>
+      <severity>Warning</severity>
+      <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[sessionId]%" alarm-type="1"/>
+      <parameter name="sessionId" value="%parm[name-#1.-1]%" expand="true"/>
+      <varbindsdecode>
+         <parmid>parm[#1]</parmid>
+         <decode varbindvalue="0" varbinddecodedstring="noDiagnostic"/>
+         <decode varbindvalue="1" varbinddecodedstring="controlDetectionTimeExpired"/>
+         <decode varbindvalue="2" varbinddecodedstring="echoFunctionFailed"/>
+         <decode varbindvalue="3" varbinddecodedstring="neighborSignaledSessionDown"/>
+         <decode varbindvalue="4" varbinddecodedstring="forwardingPlaneReset"/>
+         <decode varbindvalue="5" varbinddecodedstring="pathDown"/>
+         <decode varbindvalue="6" varbinddecodedstring="concatenatedPathDown"/>
+         <decode varbindvalue="7" varbinddecodedstring="administrativelyDown"/>
+         <decode varbindvalue="8" varbinddecodedstring="reverseConcatenatedPathDown"/>
+      </varbindsdecode>
+      <varbindsdecode>
+         <parmid>parm[#2]</parmid>
+         <decode varbindvalue="0" varbinddecodedstring="noDiagnostic"/>
+         <decode varbindvalue="1" varbinddecodedstring="controlDetectionTimeExpired"/>
+         <decode varbindvalue="2" varbinddecodedstring="echoFunctionFailed"/>
+         <decode varbindvalue="3" varbinddecodedstring="neighborSignaledSessionDown"/>
+         <decode varbindvalue="4" varbinddecodedstring="forwardingPlaneReset"/>
+         <decode varbindvalue="5" varbinddecodedstring="pathDown"/>
+         <decode varbindvalue="6" varbinddecodedstring="concatenatedPathDown"/>
+         <decode varbindvalue="7" varbinddecodedstring="administrativelyDown"/>
+         <decode varbindvalue="8" varbinddecodedstring="reverseConcatenatedPathDown"/>
+      </varbindsdecode>
+   </event>
+
+    <!-- CISCO-SONET-MIB events -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.126</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoSonetSectionStatusChange</uei>
+        <event-label>CISCO-SONET-MIB defined trap event: ciscoSonetSectionStatusChange</event-label>
+        <descr>&lt;p>This notification is generated whenever the value of
+            sonetSectionCurrentStatus changes.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            sonetSectionCurrentStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ifDescr&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: ciscoSonetSectionStatusChange trap received sonetSectionCurrentStatus=%parm[#1]% ifDescr=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <!-- Extract the ifIndex from the sonetSectionCurrentStatus varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.126</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoSonetLineStatusChange</uei>
+        <event-label>CISCO-SONET-MIB defined trap event: ciscoSonetLineStatusChange</event-label>
+        <descr>&lt;p>This notification is generated whenever the value of
+            sonetLineCurrentStatus changes.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            sonetLineCurrentStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ifDescr&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: ciscoSonetLineStatusChange trap received sonetLineCurrentStatus=%parm[#1]% ifDescr=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <!-- Extract the ifIndex from the sonetSectionCurrentStatus varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.126</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoSonetPathStatusChange</uei>
+        <event-label>CISCO-SONET-MIB defined trap event: ciscoSonetPathStatusChange</event-label>
+        <descr>&lt;p>This notification is generated whenever the value of
+            sonetPathCurrentStatus changes.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            sonetPathCurrentStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ifDescr&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: ciscoSonetPathStatusChange trap received sonetPathCurrentStatus=%parm[#1]% ifDescr=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <!-- Extract the ifIndex from the sonetSectionCurrentStatus varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+
+    <!-- CISCO-ENTITY-SENSOR-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.91.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/entSensorThresholdNotification</uei>
+        <event-label>CISCO-ENTITY-SENSOR-MIB defined trap event: entSensorThresholdNotification</event-label>
+        <descr>&lt;p>The sensor value crossed the threshold
+            listed in entSensorThresholdTable.
+            &lt;/p>&lt;p>
+            This notification is generated once each time
+            the sensor value crosses the threshold.
+            &lt;/p>&lt;p>
+            The agent implementation guarantees prompt, timely
+            evaluation of threshold and generation of this
+            notification.
+            &lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            entSensorThresholdValue&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            entSensorValue&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: Sensor has reached Threshold</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="3">
+            <managed-object type="ent-physical-entity"/>
+        </alarm-data>
+        <!-- Extract the entPhysicalIndex from the entSensorValue varbind -->
+        <parameter name="entPhysicalIndex" value="%parm[name-#2.-1]%" expand="true"/>
+    </event>
+
+    <!-- CISCO-IETF-FRR-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.98</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cmplsFrrProtected</uei>
+        <event-label>CISCO-IETF-FRR-MIB defined trap event: cmplsFrrProtected</event-label>
+        <descr>
+            &lt;p>This notification is generated when a tunnel running over an
+            interface as specified in the mplsFrrConstTable is initially
+            protected by the backup tunnel also specified in the
+            cmplsFrrConstTable. This notification should not be generated
+            for each subsequent tunnel that is backed up by the FRR feature
+            on this LSR, as this may result in potential scaling issues
+            with regard to LSR performance and network loading. Note also
+            that notifications MUST be generated in accordance with the
+            cmplsFrrNotifMaxRate.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstNumProtectingTunOnIf&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstNumProtectedTunOnIf&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstBandwidth&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">&lt;p>
+            cmplsFrrProtected trap received
+            cmplsFrrConstNumProtectingTunOnIf=%parm[#1]%
+            cmplsFrrConstNumProtectedTunOnIf=%parm[#2]%
+            cmplsFrrConstBandwidth=%parm[#3]%&lt;/p>
+        </logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[cmplsFrrConstEntry]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/cmplsFrrUnProtected:%dpname%:%nodeid%:%interface%:%parm[cmplsFrrConstEntry]%" auto-clean="true">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the cmplsFrrConstNumProtectingTunOnIf varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="cmplsFrrConstEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.98</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cmplsFrrUnProtected</uei>
+        <event-label>CISCO-IETF-FRR-MIB defined trap event: cmplsFrrUnProtected</event-label>
+        <descr>
+            &lt;p>This notification is generated when the final tunnel that is
+            being protected by a backup tunnel as specified in the
+            cmplsFrrConstTable is restored to normal operation. This
+            notification should not be generated for each restored tunnel,
+            as this may result in potential scaling issues with regard to
+            LSR performance and network loading. Note also that
+            notifications MUST be generated in accordance with the
+            cmplsFrrNotifMaxRate.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstNumProtectingTunOnIf&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstNumProtectedTunOnIf&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            cmplsFrrConstBandwidth&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">&lt;p>
+            cmplsFrrUnProtected trap received
+            cmplsFrrConstNumProtectingTunOnIf=%parm[#1]%
+            cmplsFrrConstNumProtectedTunOnIf=%parm[#2]%
+            cmplsFrrConstBandwidth=%parm[#3]%&lt;/p>
+        </logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[cmplsFrrConstEntry]%" alarm-type="1">
+            <managed-object type="mpls-tunnel"/>
+        </alarm-data>
+        <!-- Extract the tunnel id from the cmplsFrrConstNumProtectingTunOnIf varbind -->
+        <parameter name="mplsTunnelId" value="%parm[name-#1.-3]%" expand="true"/>
+        <parameter name="cmplsFrrConstEntry" value="%parm[name-#1.-3:]%" expand="true"/>
+    </event>
+
+    <!-- CISCO-IETF-PIM-EXT-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.120</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoIetfPimExtInterfaceUp</uei>
+        <event-label>CISCO-IETF-PIM-EXT-MIB defined trap event: ciscoIetfPimExtInterfaceUp</event-label>
+        <descr>
+            &lt;p>A ciscoIetfPimExtInterfaceUp notification signifies the
+            restoration of a PIM interface. This notification
+            should be generated whenever cPimIfStatus
+            transitions into the 'active' state.
+            cPimIfStatus identifies the interface which
+            was involved in the generation of this notification.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cPimIfStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            active(1)
+            notInService(2)
+            notReady(3)
+            createAndGo(4)
+            createAndWait(5)
+            destroy(6)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoIetfPimExtInterfaceUp trap received cPimIfStatus=%parm[#1]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoIetfPimExtInterfaceDown:%dpname%:%nodeid%:%parm[ifIndex]%">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="active"/>
+            <decode varbindvalue="2" varbinddecodedstring="notInService"/>
+            <decode varbindvalue="3" varbinddecodedstring="notReady"/>
+            <decode varbindvalue="4" varbinddecodedstring="createAndGo"/>
+            <decode varbindvalue="5" varbinddecodedstring="createAndWait"/>
+            <decode varbindvalue="6" varbinddecodedstring="destroy"/>
+        </varbindsdecode>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.120</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoIetfPimExtInterfaceDown</uei>
+        <event-label>CISCO-IETF-PIM-EXT-MIB defined trap event: ciscoIetfPimExtInterfaceDown</event-label>
+        <descr>
+            &lt;p>A ciscoIetfPimExtInterfaceDown notification signifies the
+            loss of a PIM interface. This notification should be
+            generated whenever an entry is about to be deleted from
+            the
+            cPimIfTable.
+            cPimIfStatus identifies the interface which
+            was involved in the generation of this notification.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cPimIfStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            active(1)
+            notInService(2)
+            notReady(3)
+            createAndGo(4)
+            createAndWait(5)
+            destroy(6)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoIetfPimExtInterfaceDown trap received cPimIfStatus=%parm[#1]%</logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="1">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="active"/>
+            <decode varbindvalue="2" varbinddecodedstring="notInService"/>
+            <decode varbindvalue="3" varbinddecodedstring="notReady"/>
+            <decode varbindvalue="4" varbinddecodedstring="createAndGo"/>
+            <decode varbindvalue="5" varbinddecodedstring="createAndWait"/>
+            <decode varbindvalue="6" varbinddecodedstring="destroy"/>
+        </varbindsdecode>
+    </event>
+
+
+    <!-- CISCO-RF-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.176.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoRFSwactNotif</uei>
+        <event-label>CISCO-RF-MIB defined trap event: ciscoRFSwactNotif</event-label>
+        <descr>&lt;p>A SWACT notification is sent by the newly active redundant
+            unit whenever a switch of activity occurs. In the case where a
+            SWACT event may be indistinguishable from a reset event, a
+            network management station should use this notification to
+            differentiate the activity.
+            &lt;/p>&lt;p>
+            sysUpTime is the same sysUpTime defined in the RFC-1213 MIB.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cRFStatusUnitId&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            sysUpTime&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cRFStatusLastSwactReasonCode&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>
+            unsupported(1) none(2) notKnown(3) userInitiated(4) userForced(5) activeUnitFailed(6)
+            activeUnitRemoved(7)&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: RF Switch Activity Occurred</logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.176.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoRFProgressionNotif</uei>
+        <event-label>CISCO-RF-MIB defined trap event: ciscoRFProgressionNotif</event-label>
+        <descr>&lt;p>A progression notification is sent by the active redundant
+            unit whenever its RF state changes or the RF state of the peer
+            unit changes.
+            &lt;/p>&lt;p>
+            To avoid a flurry of notifications for all state transitions,
+            notifications will only be sent for transitions to the
+            following RF states:
+            standbyCold
+            standbyHot
+            active
+            activeExtraload&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cRFStatusUnitId&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cRFStatusUnitState&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>
+            notKnown(1) disabled(2) initialization(3) negotiation(4) standbyCold(5) standbyColdConfig(6)
+            standbyColdFileSys(7) standbyColdBulk(8) standbyHot(9) activeFast(10) activeDrain(11)
+            activePreconfig(12) activePostconfig(13) active(14) activeExtraload(15) activeHandback(16)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cRFStatusPeerUnitId&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            cRFStatusPeerUnitState&lt;/b>&lt;/td>&lt;td>%parm[#4]%
+            &lt;/td>&lt;td>&lt;p;>
+            notKnown(1) disabled(2) initialization(3) negotiation(4) standbyCold(5) standbyColdConfig(6)
+            standbyColdFileSys(7) standbyColdBulk(8) standbyHot(9) activeFast(10) activeDrain(11) activePreconfig(12)
+            activePostconfig(13) active(14) activeExtraload(15) activeHandback(16)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: RF Peer Status Change Notification</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="3"/>
+    </event>
+
+    <!-- CISCO-FLASH-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.10.1.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>4</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoFlashDeviceChangeTrap</uei>
+        <event-label>CISCO-FLASH-MIB defined trap event: ciscoFlashDeviceChangeTrap</event-label>
+        <descr>
+            &lt;p>A ciscoFlashDeviceChangeTrap is sent whenever a
+            removable Flash device is inserted or removed.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoFlashDeviceMinPartitionSize&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoFlashDeviceName&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoFlashDeviceChangeTrap trap received ciscoFlashDeviceMinPartitionSize=%parm[#1]% ciscoFlashDeviceName=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[flashDeviceIndex]%" alarm-type="3"/>
+        <parameter name="flashDeviceIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.10.1.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>5</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoFlashDeviceInsertedNotif</uei>
+        <event-label>CISCO-FLASH-MIB defined trap event: ciscoFlashDeviceInsertedNotif</event-label>
+        <descr>
+            &lt;p>A ciscoFlashDeviceInsertedNotif notification is sent
+            whenever a removable Flash device is inserted.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoFlashDeviceMinPartitionSize&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoFlashDeviceName&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoFlashDeviceInsertedNotif trap received ciscoFlashDeviceMinPartitionSize=%parm[#1]% ciscoFlashDeviceName=%parm[#2]%</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#2]%" alarm-type="2" clear-key="uei.opennms.org/vendor/Cisco/traps/ciscoFlashDeviceRemovedNotif:%dpname%:%nodeid%:%parm[#2]%"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.10.1.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoFlashDeviceRemovedNotif</uei>
+        <event-label>CISCO-FLASH-MIB defined trap event: ciscoFlashDeviceRemovedNotif</event-label>
+        <descr>
+            &lt;p>A ciscoFlashDeviceRemovedNotif notification is sent
+            whenever a removable Flash device is removed.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoFlashDeviceName&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoFlashDeviceRemovedNotif trap received ciscoFlashDeviceName=%parm[#1]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[#1]%" alarm-type="1"/>
+    </event>
+
+    <!-- CISCO-OTN-IF-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.639</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/coiOtnIfOTUStatusChange</uei>
+        <event-label>CISCO-OTN-IF-MIB defined trap event: coiOtnIfOTUStatusChange</event-label>
+        <descr>
+            &lt;p>This notification is generated whenever the defect status of
+            OTU layer on an interface changes.
+
+            Varbind 'ifName' indicates the interface whose defect status of
+            the OTU layer has just changed. Varbind 'coiOtnIfOTUStatus'
+            indicates the current defect status of the OTU layer on the
+            interface.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ifName&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            coiOtnIfOTUStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">coiOtnIfOTUStatusChange trap received ifName=%parm[#1]% coiOtnIfOTUStatus=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <!-- Extract the ifIndex from the ifName varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.639</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>2</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/coiOtnIfODUStatusChange</uei>
+        <event-label>CISCO-OTN-IF-MIB defined trap event: coiOtnIfODUStatusChange</event-label>
+        <descr>
+            &lt;p>This notification is generated whenever the defect status of
+            ODU layer on an interface changes.
+
+            Varbind 'ifName' indicates the interface whose defect status of
+            the ODU layer has just changed. Varbind 'coiOtnIfODUStatus'
+            indicates the current defect status of the ODU layer on the
+            interface.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ifName&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            coiOtnIfODUStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">coiOtnIfODUStatusChange trap received ifName=%parm[#1]% coiOtnIfODUStatus=%parm[#2]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <!-- Extract the ifIndex from the ifName varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+
+    <!-- CISCO-AAA-SERVER-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.10.56.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/casServerStateChange</uei>
+        <event-label>CISCO-AAA-SERVER-MIB defined trap event: casServerStateChange</event-label>
+        <descr>&lt;p>An AAA server state change notification is generated
+            whenever casState changes value.
+            &lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            casState&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>
+            up(1) dead(2)&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            casPreviousStateDuration&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            casTotalDeadTime&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: AAA server casStatus change</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+    </event>
+
+    <!-- CISCO-NTP-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.168</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoNtpSrvStatusChange</uei>
+        <event-label>CISCO-NTP-MIB defined trap event: ciscoNtpSrvStatusChange</event-label>
+        <descr>
+            &lt;p>This notification is generated whenever the value of
+            cntpSysSrvStatus changes.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            cntpSysSrvStatus&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>
+            unknown(1)
+            notRunning(2)
+            notSynchronized(3)
+            syncToLocal(4)
+            syncToRefclock(5)
+            syncToRemoteServer(6)
+            &lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">ciscoNtpSrvStatusChange trap received cntpSysSrvStatus=%parm[#1]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%" alarm-type="3" auto-clean="false"/>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="unknown"/>
+            <decode varbindvalue="2" varbinddecodedstring="notRunning"/>
+            <decode varbindvalue="3" varbinddecodedstring="notSynchronized"/>
+            <decode varbindvalue="4" varbinddecodedstring="syncToLocal"/>
+            <decode varbindvalue="5" varbinddecodedstring="syncToRefclock"/>
+            <decode varbindvalue="6" varbinddecodedstring="syncToRemoteServer"/>
+        </varbindsdecode>
+    </event>
+
+    <!-- CISCO-VTP-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.46.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>7</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/vlanTrunkPortDynamicStatusChange</uei>
+        <event-label>CISCO-VTP-MIB defined trap event: vlanTrunkPortDynamicStatusChange</event-label>
+        <descr>&lt;p>A vlanTrunkPortDynamicStatusChange notification is
+            generated by a device when the value of
+            vlanTrunkPortDynamicStatus object has been changed.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            vlanTrunkPortDynamicStatus&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>
+            trunking(1) notTrunking(2)&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">Cisco Event: VTP VLAN Trunk Port Status Change</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="3" auto-clean="false"/>
+        <!-- Extract the ifIndex from the vlanTrunkPortDynamicStatus varbind -->
+        <parameter name="ifIndex" value="%parm[name-#1.-1]%" expand="true"/>
+    </event>
+
+    <!-- CISCO-ENVMON-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.13.3</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>7</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/ciscoEnvMonTempStatusChangeNotif</uei>
+        <event-label>CISCO-ENVMON-MIB defined trap event: ciscoEnvMonTempStatusChangeNotif</event-label>
+        <descr>&lt;p>A ciscoEnvMonTempStatusChangeNotif is sent if there
+            is change in the state of a device being monitored
+            by ciscoEnvMonTemperatureState.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoEnvMonTemperatureStatusDescr&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoEnvMonTemperatureStatusValue&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            ciscoEnvMonTemperatureState&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p;>
+            normal(1)
+            warning(2)
+            critical(3)
+            shutdown(4)
+            notPresent(5)
+            notFunctioning(6)
+            &lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">&lt;p>
+            Cisco Event: ciscoEnvMonTempStatusChangeNotif trap received
+            ciscoEnvMonTemperatureStatusDescr=%parm[#1]%
+            ciscoEnvMonTemperatureStatusValue=%parm[#2]%
+            ciscoEnvMonTemperatureState=%parm[#3]%&lt;/p>
+        </logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3"/>
+    </event>
+
+    <!-- CISCO-RTTMON-MIB -->
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.42.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>5</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/rttMonNotification</uei>
+        <event-label>CISCO-RTTMON-MIB defined trap event: rttMonNotification</event-label>
+        <descr>
+            &lt;p>A rttMonNotification indicates the occurrence of a
+            threshold violation, and it indicates the previous
+            violation has subsided for a subsequent operation.
+
+            When the RttMonRttType is 'pathEcho', this
+            notification will only be sent when the threshold
+            violation occurs during an operation to the target and
+            not to a hop along the path to the target. This also
+            applies to the subsiding of a threshold condition.
+
+            If History is not being collected, the instance values
+            for the rttMonHistoryCollectionAddress object will not
+            be valid. When RttMonRttType is not 'echo' or 'pathEcho'
+            the rttMonHistoryCollectionAddress object will be null.
+
+            rttMonReactVar defines the type of reaction that is
+            configured for the probe ( e.g jitterAvg, rtt etc ).
+            In the rttMonReactTable there are trap definitions
+            for the probes and each probe may have more than
+            one trap definitions for various types ( e.g rtt,
+            jitterAvg, packetLoossSD etc ). So the object rttMonReactVar
+            indicates the type ( e.g. rtt, packetLossSD, timeout etc )
+            for which threshold violation traps has been generated.
+
+            The object rttMonEchoAdminLSPSelector will be valid only
+            for the probes based on 'mplsLspPingAppl' RttMonProtocol. For
+            all other probes it will be null.
+
+            rttMonNotification object is superseded by
+            rttMonNotificationV2.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonCtrlAdminTag&lt;/b>&lt;/td>&lt;td>
+            %parm[#1]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonHistoryCollectionAddress&lt;/b>&lt;/td>&lt;td>
+            %parm[#2]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonReactVar&lt;/b>&lt;/td>&lt;td>
+            %parm[#3]%;&lt;/td>&lt;td>&lt;p>
+            rtt(1)
+            jitterSDAvg(2)
+            jitterDSAvg(3)
+            packetLossSD(4)
+            packetLossDS(5)
+            mos(6)
+            timeout(7)
+            connectionLoss(8)
+            verifyError(9)
+            jitterAvg(10)
+            icpif(11)
+            packetMIA(12)
+            packetLateArrival(13)
+            packetOutOfSequence(14)
+            maxOfPositiveSD(15)
+            maxOfNegativeSD(16)
+            maxOfPositiveDS(17)
+            maxOfNegativeDS(18)
+            iaJitterDS(19)
+            frameLossDS(20)
+            mosLQDS(21)
+            mosCQDS(22)
+            rFactorDS(23)
+            successivePacketLoss(24)
+            maxOfLatencyDS(25)
+            maxOfLatencySD(26)
+            latencyDSAvg(27)
+            latencySDAvg(28)
+            packetLoss(29)
+            iaJitterSD(30)
+            mosCQSD(31)
+            rFactorSD(32)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonReactOccurred&lt;/b>&lt;/td>&lt;td>
+            %parm[#4]%;&lt;/td>&lt;td>&lt;p>
+            true(1)
+            false(2)
+            &lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonReactValue&lt;/b>&lt;/td>&lt;td>
+            %parm[#5]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonReactThresholdRising&lt;/b>&lt;/td>&lt;td>
+            %parm[#6]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonReactThresholdFalling&lt;/b>&lt;/td>&lt;td>
+            %parm[#7]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>
+            &lt;tr>&lt;td>&lt;b>
+
+            rttMonEchoAdminLSPSelector&lt;/b>&lt;/td>&lt;td>
+            %parm[#8]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
+        </descr>
+        <logmsg dest="logndisplay">rttMonNotification trap received rttMonCtrlAdminTag=%parm[#1]% rttMonHistoryCollectionAddress=%parm[#2]% rttMonReactVar=%parm[#3]% rttMonReactOccurred=%parm[#4]% rttMonReactValue=%parm[#5]% rttMonReactThresholdRising=%parm[#6]% rttMonReactThresholdFalling=%parm[#7]% rttMonEchoAdminLSPSelector=%parm[#8]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[#1]%" alarm-type="3" auto-clean="false"/>
+        <varbindsdecode>
+            <parmid>parm[#3]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="rtt"/>
+            <decode varbindvalue="2" varbinddecodedstring="jitterSDAvg"/>
+            <decode varbindvalue="3" varbinddecodedstring="jitterDSAvg"/>
+            <decode varbindvalue="4" varbinddecodedstring="packetLossSD"/>
+            <decode varbindvalue="5" varbinddecodedstring="packetLossDS"/>
+            <decode varbindvalue="6" varbinddecodedstring="mos"/>
+            <decode varbindvalue="7" varbinddecodedstring="timeout"/>
+            <decode varbindvalue="8" varbinddecodedstring="connectionLoss"/>
+            <decode varbindvalue="9" varbinddecodedstring="verifyError"/>
+            <decode varbindvalue="10" varbinddecodedstring="jitterAvg"/>
+            <decode varbindvalue="11" varbinddecodedstring="icpif"/>
+            <decode varbindvalue="12" varbinddecodedstring="packetMIA"/>
+            <decode varbindvalue="13" varbinddecodedstring="packetLateArrival"/>
+            <decode varbindvalue="14" varbinddecodedstring="packetOutOfSequence"/>
+            <decode varbindvalue="15" varbinddecodedstring="maxOfPositiveSD"/>
+            <decode varbindvalue="16" varbinddecodedstring="maxOfNegativeSD"/>
+            <decode varbindvalue="17" varbinddecodedstring="maxOfPositiveDS"/>
+            <decode varbindvalue="18" varbinddecodedstring="maxOfNegativeDS"/>
+            <decode varbindvalue="19" varbinddecodedstring="iaJitterDS"/>
+            <decode varbindvalue="20" varbinddecodedstring="frameLossDS"/>
+            <decode varbindvalue="21" varbinddecodedstring="mosLQDS"/>
+            <decode varbindvalue="22" varbinddecodedstring="mosCQDS"/>
+            <decode varbindvalue="23" varbinddecodedstring="rFactorDS"/>
+            <decode varbindvalue="24" varbinddecodedstring="successivePacketLoss"/>
+            <decode varbindvalue="25" varbinddecodedstring="maxOfLatencyDS"/>
+            <decode varbindvalue="26" varbinddecodedstring="maxOfLatencySD"/>
+            <decode varbindvalue="27" varbinddecodedstring="latencyDSAvg"/>
+            <decode varbindvalue="28" varbinddecodedstring="latencySDAvg"/>
+            <decode varbindvalue="29" varbinddecodedstring="packetLoss"/>
+            <decode varbindvalue="30" varbinddecodedstring="iaJitterSD"/>
+            <decode varbindvalue="31" varbinddecodedstring="mosCQSD"/>
+            <decode varbindvalue="32" varbinddecodedstring="rFactorSD"/>
+        </varbindsdecode>
+        <varbindsdecode>
+            <parmid>parm[#4]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="true"/>
+            <decode varbindvalue="2" varbinddecodedstring="false"/>
+        </varbindsdecode>
+    </event>
+</events>

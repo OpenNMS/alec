@@ -39,7 +39,7 @@ feature:repo-add mvn:org.opennms.oce/oce-karaf-features/1.0.0-SNAPSHOT/xml
 
 ## Usage
 
-### OpenNMS Integration
+### OpenNMS Integration (using Kafka)
 
 From the Karaf shell, point to your Kafka instance:
 ```
@@ -57,7 +57,7 @@ config:update
 
 Install the datasource, an engine, a situation processor and the driver:
 ```
-feature:install oce-datasource-opennms oce-engine-cluster oce-processor-standalone oce-driver-main
+feature:install oce-datasource-opennms-kafka oce-engine-cluster oce-processor-standalone oce-driver-main
 ```
 
 Correlate!

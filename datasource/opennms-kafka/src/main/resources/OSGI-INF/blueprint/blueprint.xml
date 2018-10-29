@@ -3,7 +3,7 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <!-- Configuration properties -->
-    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms" update-strategy="reload">
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms.kafka" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="alarmTopic" value="alarms"/>
             <cm:property name="nodeTopic" value="nodes"/>

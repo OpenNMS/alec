@@ -50,8 +50,16 @@ public interface Engine extends AlarmHandler, InventoryHandler {
     /**
      * Passes the reference to the SituationHandler.
      * The SituationHandler exposes <code>onSituation()</code> callback for creating and updating Situations.
+     *
      * @param handler
      */
     void registerSituationHandler(SituationHandler handler);
 
+    /**
+     * Delete the situation with the given situation Id.
+     *
+     * @param situationId the situation Id
+     * @throws InterruptedException if the thread is interrupted while waiting for the engine to init
+     */
+    void deleteSituation(String situationId) throws InterruptedException;
 }

@@ -136,4 +136,9 @@ public class TimeSliceEngine implements Engine {
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         // pass
     }
+
+    @Override
+    public void deleteSituation(String situationId) {
+
+    }
 }

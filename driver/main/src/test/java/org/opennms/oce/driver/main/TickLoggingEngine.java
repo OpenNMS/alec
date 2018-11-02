@@ -88,6 +88,11 @@ public class TickLoggingEngine implements Engine {
 
     }
 
+    @Override
+    public void deleteSituation(String situationId) {
+
+    }
+
     public synchronized List<Long> getTicks() {
         return ImmutableList.copyOf(ticks);
     }

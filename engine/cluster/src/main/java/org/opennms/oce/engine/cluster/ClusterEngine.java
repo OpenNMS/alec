@@ -203,7 +203,26 @@ public class ClusterEngine implements Engine, GraphProvider {
         // no-op
     }
 
-    public void onTick(long timestampInMillis) {
+    @Override
+    public synchronized void deleteSituation(String situationId) throws InterruptedException {
+        // Make sure the engine has init'd before we attempt to delete anything since situations can be provided on init
+        initLock.await();
+
+        LOG.trace("Deleting situation references for situation Id {}", situationId);
+        Situation situationBeingRemoved = situationsById.remove(situationId);
+
+        if (situationBeingRemoved == null) {
+            LOG.warn("Situation Id {} was not found when attempting to delete", situationId);
+
+            return;
+        }
+
+        situationBeingRemoved.getAlarms().stream()
+                .map(Alarm::getId)
+                .forEach(alarmIdToSituationMap::remove);
+    }
+
+    public synchronized void onTick(long timestampInMillis) {
         if (!alarmsChangedSinceLastTick) {
             LOG.debug("{}: No alarm changes since last tick. Nothing to do.", timestampInMillis);
             return;
@@ -607,5 +626,10 @@ public class ClusterEngine implements Engine, GraphProvider {
     @VisibleForTesting
     Graph<CEVertex, CEEdge> getGraph() {
         return graphManager.getGraph();
+    }
+
+    @VisibleForTesting
+    Map<String, SituationBean> getSituationsById() {
+        return situationsById;
     }
 }

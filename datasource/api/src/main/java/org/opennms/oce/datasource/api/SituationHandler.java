@@ -37,5 +37,14 @@ public interface SituationHandler {
      *
      * @param situation the situation
      */
-    void onSituation(Situation situation);
+    default void onSituation(Situation situation) {
+    }
+
+    /**
+     * Handle a situation being deleted.
+     *
+     * @param situationId the situation id that was deleted
+     */
+    default void onSituationDeleted(String situationId) {
+    }
 }

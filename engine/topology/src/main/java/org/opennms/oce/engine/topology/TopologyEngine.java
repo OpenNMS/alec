@@ -232,4 +232,11 @@ public class TopologyEngine implements Engine, SituationHandler {
         }
     }
 
+    @Override
+    public void deleteSituation(String situationId) {
+        priorSituations.stream()
+                .filter(situation -> situation.getId().equals(situationId))
+                .findFirst()
+                .ifPresent(situation -> priorSituations.remove(situation));
+    }
 }

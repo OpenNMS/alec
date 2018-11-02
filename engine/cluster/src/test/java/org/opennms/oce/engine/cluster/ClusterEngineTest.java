@@ -58,6 +58,7 @@ import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -122,7 +123,7 @@ public class ClusterEngineTest implements SituationHandler {
     }
 
     @Test
-    public void canClusterAlarms() {
+    public void canClusterAlarmsAndDeleteSituations() {
         long now = System.currentTimeMillis();
         engine.setTickResolutionMs(TimeUnit.SECONDS.toMillis(30));
 
@@ -187,6 +188,16 @@ public class ClusterEngineTest implements SituationHandler {
         //assertThat(situationsById.keySet(), hasSize(2));
         //situation = situationsById.get("1");
         //assertThat(situation.getAlarms(), containsInAnyOrder(alarm3, alarm4));
+        
+        // Verify that situations can be deleted
+        Set<String> situations = situationsById.keySet();
+        situations.forEach(situationId -> {
+            try {
+                engine.deleteSituation(situationId);
+            } catch (InterruptedException ignore) {
+            }
+        });
+        assertThat(engine.getSituationsById().size(), equalTo(0));
     }
 
     @Test

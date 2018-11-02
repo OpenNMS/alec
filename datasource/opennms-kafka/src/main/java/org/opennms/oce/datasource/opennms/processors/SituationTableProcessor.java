@@ -29,6 +29,7 @@
 package org.opennms.oce.datasource.opennms.processors;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
@@ -38,6 +39,7 @@ import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.common.HandlerRegistry;
 import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 import org.opennms.oce.datasource.opennms.OpennmsMapper;
+import org.opennms.oce.datasource.opennms.SituationToEvent;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,32 @@ public class SituationTableProcessor implements Processor<String, OpennmsModelPr
                 }
             });
         } else {
-            kvStore.delete(reductionKey);
+            OpennmsModelProtos.Alarm deletedSituation = kvStore.delete(reductionKey);
+
+            if (deletedSituation == null) {
+                LOG.warn("No situation was found in the kv store for reduction key {}", reductionKey);
+
+                return;
+            }
+
+            situationHandlers.forEach(h -> {
+                try {
+                    //noinspection ConstantConditions
+                    Optional<String> deletedSituationId = deletedSituation.getLastEvent().getParameterList().stream()
+                            .filter(parm -> parm.getName().equals(SituationToEvent.SITUATION_ID_PARM_NAME))
+                            .map(OpennmsModelProtos.EventParameter::getValue)
+                            .findFirst();
+
+                    if (deletedSituationId.isPresent()) {
+                        h.onSituationDeleted(deletedSituationId.get());
+                    } else {
+                        LOG.warn("Could not find situation Id for situation {}", deletedSituation);
+                    }
+                } catch (Exception e) {
+                    LOG.error("onSituationDeleted() call failed with situation: {} on handler: {}", deletedSituation,
+                            h, e);
+                }
+            });
         }
     }
 

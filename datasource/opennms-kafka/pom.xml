@@ -141,5 +141,10 @@
             <version>${kafka.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.main</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

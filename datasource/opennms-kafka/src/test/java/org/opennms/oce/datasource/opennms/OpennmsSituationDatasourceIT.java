@@ -31,6 +31,9 @@ package org.opennms.oce.datasource.opennms;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +57,8 @@ import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
 import org.opennms.oce.datasource.opennms.events.Log;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+import org.opennms.oce.driver.main.DeletingSituationHandler;
+import org.opennms.oce.engine.api.Engine;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 /**
@@ -100,6 +105,43 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
         producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
 
         await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituations(), hasSize(1));
+    }
+
+    @Test
+    public void testDeleteIsCalled() throws IOException {
+        datasource.init();
+        Engine mockEngine = mock(Engine.class);
+        datasource.registerHandler(DeletingSituationHandler.newInstance(mockEngine));
+
+        assertThat(datasource.getSituations(), hasSize(0));
+
+        String situationId = "test.id";
+        OpennmsModelProtos.Event event = OpennmsModelProtos.Event.newBuilder().addParameter(
+                OpennmsModelProtos.EventParameter.newBuilder()
+                        .setName(SituationToEvent.SITUATION_ID_PARM_NAME)
+                        .setValue(situationId)
+                        .build())
+                .build();
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEventTime(1)
+                .setLastEvent(event)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituations(), hasSize(1));
+
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), null));
+
+        await()
+                .atMost(10, TimeUnit.SECONDS)
+                .ignoreExceptions()
+                .until(() -> {
+                    verify(mockEngine, times(1)).deleteSituation(situationId);
+                    return true;
+                });
     }
 
     public class KafkaConsumerRunner implements Runnable {

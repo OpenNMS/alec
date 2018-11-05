@@ -51,12 +51,11 @@ Groups alarms based on how close they occured in time.
 
 Groups alarms using Drools rules.
 
-## Building & developing OCE
-
-See the [development guide](DEVEL.md) for details.
-
 ## Installing OCE
 
 See the [installation guide](INSTALL.md) for details.
 
+## Building & developing OCE
+
+See the [development guide](DEVEL.md) for details.
 

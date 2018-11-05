@@ -42,7 +42,11 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       - run:
-          name: Run the tests
+          name: Install RPM
+          command: sudo apt-get update; sudo apt-get install rpm
+
+      - run:
+          name: Compile and run the tests
           command: |
             mvn install test integration-test
 
@@ -56,6 +60,14 @@ jobs:
 
       - store_test_results:
           path: ~/junit
+
+      - store_artifacts:
+          path: assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch
+          destination: rpms
+
+      - store_artifacts:
+          path: assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch
+          destination: rpms
 
       - persist_to_workspace:
           root: /home/circleci

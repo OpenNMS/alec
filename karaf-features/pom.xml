@@ -143,5 +143,101 @@
             <type>xml</type>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.opennms-direct</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.opennms-kafka</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.shell</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.main</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+	<dependency>
+	    <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.cluster</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.temporal</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.opennms.oce.engine</groupId>
+            <artifactId>org.opennms.oce.engine.topology</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
+
+        <dependency>
+            <groupId>org.opennms.oce</groupId>
+            <artifactId>processor-standalone</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce</groupId>
+            <artifactId>processor-redundant</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <artifactId>extension</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <artifactId>config</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+	<dependency>
+	    <groupId>org.opennms.oce.features</groupId>
+	    <artifactId>org.opennms.oce.features.shell</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.opennms.oce.features.graph</groupId>
+	    <artifactId>org.opennms.oce.features.graph.rest</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.opennms.oce.features.graph</groupId>
+	    <artifactId>org.opennms.oce.features.graph.shell</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+	</dependency>
     </dependencies>
 </project>

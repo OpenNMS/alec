@@ -13,7 +13,7 @@
         <feature dependency="true">aries-blueprint</feature>
     </feature>
 
-    <feature install="manual" name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
+    <feature name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.jaxb/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
@@ -23,7 +23,7 @@
         <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-core/2.3.0</bundle>
     </feature>
 
-    <feature install="manual" name="oce-datasource-opennms-kafka" description="OCE :: Datasource :: OpenNMS Kafka" version="${project.version}">
+    <feature name="oce-datasource-opennms-kafka" description="OCE :: Datasource :: OpenNMS Kafka" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms-kafka/${project.version}</bundle>
         <feature version="1.1.0">kafka-streams</feature>
@@ -35,7 +35,7 @@
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-datasource-opennms-direct" description="OCE :: Datasource :: OpenNMS Direct" version="${project.version}">
+    <feature name="oce-datasource-opennms-direct" description="OCE :: Datasource :: OpenNMS Direct" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
@@ -46,7 +46,7 @@
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms-direct/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-datasource-shell" description="OCE :: Datasource :: Shell" version="${project.version}">
+    <feature name="oce-datasource-shell" description="OCE :: Datasource :: Shell" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.shell/${project.version}</bundle>
@@ -54,7 +54,7 @@
 
     <!-- Engines -->
 
-    <feature install="manual" name="oce-engine" description="OCE :: Engine" version="${project.version}">
+    <feature name="oce-engine" description="OCE :: Engine" version="${project.version}">
         <feature version="${project.version}">oce-engine-cluster</feature>
         <feature version="${project.version}">oce-engine-temporal</feature>
         <feature version="${project.version}">oce-engine-topology</feature>
@@ -65,19 +65,19 @@
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.api/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
+    <feature name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-engine-api</feature>
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.cluster/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
+    <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
+    <feature name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <feature version="${drools.version}">kie</feature>
         <feature version="${drools.version}">drools-module</feature>
@@ -89,7 +89,7 @@
 
     <!-- Drivers -->
 
-    <feature install="manual" name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
+    <feature name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <feature version="${project.version}">oce-processor-api</feature>
         <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.main/${project.version}</bundle>
@@ -104,25 +104,25 @@
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-features-graph-graphml" description="OCE :: Features :: Graph :: GraphML" version="${project.version}">
+    <feature name="oce-features-graph-graphml" description="OCE :: Features :: Graph :: GraphML" version="${project.version}">
         <feature version="${moxy.version}" dependency="true">moxy</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.graphml/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-features-graph-common" description="OCE :: Features :: Graph :: Service" version="${project.version}">
+    <feature name="oce-features-graph-common" description="OCE :: Features :: Graph :: Service" version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
         <feature dependency="true" version="${project.version}">oce-features-graph-graphml</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.common/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
+    <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.shell/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-features-graph-rest" description="OCE :: Features :: Graph :: REST" version="${project.version}">
+    <feature name="oce-features-graph-rest" description="OCE :: Features :: Graph :: REST" version="${project.version}">
         <feature version="${cxf.version}">cxf</feature>
         <feature version="${cxf.version}">cxf-jackson</feature>
         <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
@@ -136,12 +136,12 @@
         <bundle>mvn:org.opennms.oce/processor-api/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-processor-standalone" description="OCE :: Processor :: Standalone" version="${project.version}">
+    <feature name="oce-processor-standalone" description="OCE :: Processor :: Standalone" version="${project.version}">
         <feature version="${project.version}">oce-processor-api</feature>
         <bundle>mvn:org.opennms.oce/processor-standalone/${project.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-processor-redundant" description="OCE :: Processor :: Redundant" version="${project.version}">
+    <feature name="oce-processor-redundant" description="OCE :: Processor :: Redundant" version="${project.version}">
         <feature version="${project.version}">oce-processor-api</feature>
         <bundle>mvn:org.opennms.oce/processor-redundant/${project.version}</bundle>
 
@@ -151,14 +151,14 @@
 
     <!-- Other features -->
 
-    <feature install="manual" name="oce-features-score" description="OCE :: Features :: Score" version="${project.version}">
+    <feature name="oce-features-score" description="OCE :: Features :: Score" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.features/org.opennms.oce.features.score/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
-    <feature install="manual" name="oce-features-shell" description="OCE :: Features :: Shell" version="${project.version}">
+    <feature name="oce-features-shell" description="OCE :: Features :: Shell" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <feature version="${project.version}">oce-features-score</feature>
         <feature version="${project.version}">oce-datasource-jaxb</feature>
@@ -169,7 +169,7 @@
 
     <!-- OpenNMS Integration -->
 
-    <feature install="manual" name="opennms-oce-plugin" description="OpenNMS :: OCE :: Plugin" version="${project.version}">
+    <feature name="opennms-oce-plugin" description="OpenNMS :: OCE :: Plugin" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
@@ -182,7 +182,7 @@
 
     <!-- Generic dependencies -->
 
-    <feature install="manual" name="kafka-streams" description="Kafka Streams" version="1.1.0">
+    <feature name="kafka-streams" description="Kafka Streams" version="1.1.0">
         <bundle dependency="true">wrap:mvn:org.apache.kafka/kafka-streams/1.1.0$Bundle-Version=1.1.0&amp;Export-Package=*;-noimport:=true:version="1.1.0"</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/1.1.0_1</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/1.4</bundle>
@@ -195,16 +195,16 @@
         <bundle dependency="true">wrap:mvn:org.rocksdb/rocksdbjni/5.7.3</bundle>
     </feature>
 
-    <feature install="manual" name="commons-text" description="commons-text" version="${commons.text.version}">
+    <feature name="commons-text" description="commons-text" version="${commons.text.version}">
         <bundle>mvn:org.apache.commons/commons-text/${commons.text.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.7</bundle>
     </feature>
 
-    <feature install="manual" name="javax.mail" description="javax.mail" version="1.4.5">
+    <feature name="javax.mail" description="javax.mail" version="1.4.5">
         <bundle>mvn:javax.mail/mail/1.4.5</bundle>
     </feature>
 
-    <feature install="manual" name="moxy" description="EclipseLink :: MOXy" version="${moxy.version}">
+    <feature name="moxy" description="EclipseLink :: MOXy" version="${moxy.version}">
         <feature>javax.mail</feature>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${moxy.version}</bundle>
@@ -212,7 +212,7 @@
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${moxy.version}</bundle>
     </feature>
 
-    <feature install="manual" name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
+    <feature name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
         <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle >mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>

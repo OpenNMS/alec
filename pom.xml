@@ -30,12 +30,12 @@
     </developers>
 
     <modules>
+        <module>assembly</module>
         <module>datasource</module>
         <module>driver</module>
         <module>engine</module>
         <module>features</module>
         <module>karaf-features</module>
-        <module>karaf-kar</module>
         <module>integrations</module>
         <module>test-api</module>
         <module>wrap</module>

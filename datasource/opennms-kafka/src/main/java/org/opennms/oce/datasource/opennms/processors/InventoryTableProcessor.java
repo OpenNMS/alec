@@ -165,7 +165,7 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
         AtomicInteger references = inventoryReferences.putIfAbsent(id, new AtomicInteger(1));
 
         if (references == null) {
-            LOG.debug("Inventory object {} is new and will be added", id);
+            LOG.trace("Inventory object {} is new and will be added", id);
 
             return true;
         }

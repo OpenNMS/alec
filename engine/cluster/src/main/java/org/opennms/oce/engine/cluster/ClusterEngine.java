@@ -174,9 +174,9 @@ public class ClusterEngine implements Engine, GraphProvider {
     public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory) {
         try {
             LOG.debug("Initialized with {} alarms, {} situations and {} inventory objects.", alarms.size(), situations.size(), inventory.size());
-            LOG.debug("Alarms on init: {}", alarms);
-            LOG.debug("Situations on init: {}", situations);
-            LOG.debug("Inventory objects on init: {}", inventory);
+            LOG.trace("Alarms on init: {}", alarms);
+            LOG.trace("Situations on init: {}", situations);
+            LOG.trace("Inventory objects on init: {}", inventory);
             graphManager.addInventory(inventory);
             graphManager.addOrUpdateAlarms(alarms);
 

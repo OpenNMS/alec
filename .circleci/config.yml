@@ -63,11 +63,15 @@ jobs:
 
       - store_artifacts:
           path: assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch
-          destination: rpms
+          destination: dist
 
       - store_artifacts:
           path: assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch
-          destination: rpms
+          destination: dist
+
+      - store_artifacts:
+          path: assembly/kar/target/opennms-oce-plugin.kar
+          destination: dist
 
       - persist_to_workspace:
           root: /home/circleci

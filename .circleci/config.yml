@@ -71,7 +71,7 @@ jobs:
           when: always
 
       - store_artifacts:
-          path: dist
+          path: ~/dist
           destination: dist
 
       - persist_to_workspace:

@@ -82,7 +82,7 @@ public class GraphManager {
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
-                LOG.debug("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
+                LOG.trace("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
                 final CEVertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
                 didGraphChange.set(true);
@@ -107,7 +107,7 @@ public class GraphManager {
                     continue;
                 }
                 if (!g.isNeighbor(parentVertex, vertex)) {
-                    LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex);
+                    LOG.trace("Adding edge between child: {} and parent: {}", vertex, parentVertex);
                     final CEEdge edge = CEEdge.newParentEdge(edgeIdGenerator.getAndIncrement(), io.getWeightToParent());
                     g.addEdge(edge, parentVertex, vertex);
                     didGraphChange.set(true);

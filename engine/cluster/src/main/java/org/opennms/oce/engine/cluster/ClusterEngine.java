@@ -397,8 +397,8 @@ public class ClusterEngine implements Engine, GraphProvider {
             }
         }
 
-        String diagText = String.format("The alarms happened within %.2f seconds across %d vertices",
-                Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
+        String diagText = String.format("The %d alarms happened within %.2f seconds across %d vertices",
+                situation.getAlarms().size(), Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
         if (maxSpatialDistance != null && maxSpatialDistance > 0) {
             diagText += String.format(" %d distance apart", maxSpatialDistance);
         }

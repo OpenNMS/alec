@@ -61,17 +61,18 @@ jobs:
       - store_test_results:
           path: ~/junit
 
-      - store_artifacts:
-          path: assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch
-          destination: dist
+      - run:
+          name: Gather artifacts
+          command: |
+            mkdir -p ~/dist/
+            cp assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/* ~/dist/
+            cp assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/* ~/dist/
+            cp assembly/kar/target/opennms-oce-plugin.kar ~/dist/
+          when: always
 
       - store_artifacts:
-          path: assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch
+          path: dist
           destination: dist
-
-      - store_artifacts:
-          path: assembly/kar/target/opennms-oce-plugin.kar
-          destination: dist/
 
       - persist_to_workspace:
           root: /home/circleci

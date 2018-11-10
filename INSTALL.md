@@ -10,7 +10,7 @@ We'll focus on getting OCE deployed in a Sentinel container using the OpenNMS Ka
 
 * RHEL/CentOS 7.x or greater
 * Java 8
-* An instance OpenNMS Horizon 24.0.0
+* An instance OpenNMS Horizon 24.0.0 from the `features/sextant` branch
 * A Kafka broker (or cluster) running Kafka 0.11.x or greater
 * A copy of the latest OCE plugin RPMs
    * Download these artifacts from the latest build on https://circleci.com/gh/OpenNMS/oce/tree/master
@@ -67,39 +67,13 @@ From the OpenNMS Karaf shell:
 ```
 feature:install opennms-oce-plugin
 ```
-In order to make the feature install persistent edit "$OPENNMS_HOME/etc/org.apache.karaf.features.cfg":
-* Add `mvn:org.opennms.oce/oce-karaf-features/1.0.0-SNAPSHOT/xml/features` to the `featuresRepositories` property
-* Add `opennms-oce-plugin` to the `featuresBoot` property
+
+In order to make the feature install persistent, run the following:
+```
+echo 'opennms-oce-plugin wait-for-kar=opennms-oce-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+```
 
 ## Sentinel Configuration
-
-### Rework the features boot
-
-Edit the `featuresBoot` definition in `$SENTINEL_HOME/etc/org.apache.karaf.features.cfg` to look like:
-```
-featuresBoot = \
-    (aries-blueprint, \
-    deployer, \
-    instance/4.1.5, \
-    package/4.1.5, \
-    log/4.1.5, \
-    ssh/4.1.5, \
-    framework/4.1.5, \
-    system/4.1.5, \
-    eventadmin/4.1.5, \
-    feature/4.1.5, \
-    shell/4.1.5, \
-    management/4.1.5, \
-    service/4.1.5, \
-    jaas/4.1.5, \
-    shell-compat/4.1.5, \
-    diagnostic/4.1.5, \
-    wrap, \
-    bundle/4.1.5, \
-    config/4.1.5, \
-    kar/4.1.5), \
-    scv/24.0.0-SNAPSHOT
-```
 
 ### Install the OCE plugin
 
@@ -123,9 +97,10 @@ echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.oce.da
 
 > The consumer is used to read alarms & inventory, whereas the producer is used to send events. 
 
-Enable debug logging, from the Sentinel Karaf shell:
+Enable debug logging for OCE:
 ```
-log:set DEBUG org.opennms.oce
+echo 'log4j2.logger.org_opennms_oce.level = DEBUG
+log4j2.logger.org_opennms_oce.name = org.opennms.oce' >> "$SENTINEL_HOME/etc/org.ops4j.pax.logging.cfg"
 ```
 
 ### Start OCE 
@@ -135,9 +110,14 @@ From the Sentinel Karaf shell:
 feature:install oce-datasource-opennms-kafka oce-engine-cluster oce-processor-standalone oce-driver-main oce-features-graph-shell
 ```
 
-In order to make the feature install persistent edit "$SENTINEL_HOME/etc/org.apache.karaf.features.cfg":
-* Add `mvn:org.opennms.oce/oce-karaf-features/1.0.0-SNAPSHOT/xml/features` to the `featuresRepositories` property
-* Add `oce-datasource-opennms-kafka,oce-engine-cluster,oce-processor-standalone,oce-driver-main,oce-features-graph-shell` to the `featuresBoot` property
+In order to make the feature install persistent, run the following:
+```
+echo 'oce-datasource-opennms-kafka wait-for-kar=opennms-oce-plugin
+oce-engine-cluster wait-for-kar=opennms-oce-plugin
+oce-processor-standalone wait-for-kar=opennms-oce-plugin
+oce-driver-main wait-for-kar=opennms-oce-plugin
+oce-features-graph-shell wait-for-kar=opennms-oce-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/oce.boot"
+```
 
 ## Validation
 
@@ -214,18 +194,6 @@ curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/oce.clust
 View the OCE graph in the Topology UI.
 
 ## Known Limitations
-
-### Karaf Clean Start
-
-We currently package the OCE bundles and features as a .kar file.
-When the .kar file is added the deploy directory, the .kar file is extracted and installed in `data/kar`.
-When the .kar is installed, the feature repositories are added to the list of feature repositories in the current state cache.
-On clean start (when data/cache directory is deleted), the .kar remains installed, but the feature repositories are wiped from the cache.
-To work around this, we need to add the feature repository to the `featuresRepositories` property.
-
-Now if the data directory is completely wiped and the `data/kar` directory is removed, any features from the .kar references in the `featuresBoot` property will not be installed, because the .kar is not yet installed.
-The features will be installed when the service is restarted, since the .kar will have been installed.
-This needs to be kept in mind, since the data directory is wiped when upgrading the OpenNMS and Sentinel RPM
 
 ### Delayed OCE startup on Sentinel
 

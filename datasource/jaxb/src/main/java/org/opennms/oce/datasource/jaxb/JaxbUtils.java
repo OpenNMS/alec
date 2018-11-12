@@ -47,13 +47,23 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
+import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
 import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.datasource.v1.schema.AlarmRef;
 import org.opennms.oce.datasource.v1.schema.Alarms;
 import org.opennms.oce.datasource.v1.schema.Event;
+import org.opennms.oce.datasource.v1.schema.Inventory;
+import org.opennms.oce.datasource.v1.schema.ModelObjectEntry;
+import org.opennms.oce.datasource.v1.schema.PeerRef;
+import org.opennms.oce.datasource.v1.schema.RelativeRef;
 import org.opennms.oce.datasource.v1.schema.Situations;
 
 import com.google.gson.Gson;
@@ -158,6 +168,64 @@ public class JaxbUtils {
         }
     }
 
+    public static List<InventoryObject> getInventory(Path path) throws IOException, JAXBException {
+        try (InputStream is = Files.newInputStream(path)) {
+            JAXBContext jaxbContext;
+            try {
+                jaxbContext = JAXBContext.newInstance(Inventory.class);
+            } catch (JAXBException e) {
+                throw new RuntimeException(e);
+            }
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
+
+            final List<InventoryObject> ios = new ArrayList<>();
+            for (ModelObjectEntry modelObjectEntry : inventory.getModelObjectEntry()) {
+                final InventoryObject io = toInventoryObject(modelObjectEntry);
+                if (io != null) {
+                    ios.add(io);
+                }
+            }
+            return ios;
+        }
+    }
+
+    private static InventoryObject toInventoryObject(ModelObjectEntry moe) {
+        if ("model".equals(moe.getId()) && "Model".equals(moe.getType())) {
+            return null;
+        }
+        final InventoryObjectBean io = new InventoryObjectBean();
+        io.setId(moe.getId());
+        io.setType(moe.getType());
+        if (!"model".equals(moe.getParentId()) || !"Model".equals(moe.getParentType())) {
+            io.setParentId(moe.getParentId());
+            io.setParentType(moe.getParentType());
+        }
+        io.setFriendlyName(moe.getFriendlyName());
+        if (moe.getPeerRef() != null) {
+            for (PeerRef ref : moe.getPeerRef()) {
+                final InventoryObjectPeerRefBean peerRef = new InventoryObjectPeerRefBean();
+                peerRef.setId(ref.getId());
+                peerRef.setType(ref.getType());
+                if ("A".equalsIgnoreCase(ref.getEndpoint())) {
+                    peerRef.setEndpoint(InventoryObjectPeerEndpoint.A);
+                } else {
+                    peerRef.setEndpoint(InventoryObjectPeerEndpoint.Z);
+                }
+                io.getPeers().add(peerRef);
+            }
+        }
+        if (moe.getRelativeRef() != null) {
+            for (RelativeRef ref : moe.getRelativeRef()) {
+                final InventoryObjectRelativeRefBean relativeRef = new InventoryObjectRelativeRefBean();
+                relativeRef.setId(ref.getId());
+                relativeRef.setType(ref.getType());
+                io.getRelatives().add(relativeRef);
+            }
+        }
+        return io;
+    }
+
     public static List<org.opennms.oce.datasource.v1.schema.Alarm> getRawAlarms(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
             JAXBContext jaxbContext;
@@ -183,4 +251,6 @@ public class JaxbUtils {
             marshaller.marshal(list, os);
         }
     }
+
+
 }

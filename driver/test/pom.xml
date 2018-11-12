@@ -23,6 +23,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.opennms.oce</groupId>

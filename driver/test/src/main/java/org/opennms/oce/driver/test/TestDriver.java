@@ -28,6 +28,11 @@
 
 package org.opennms.oce.driver.test;
 
+import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,10 +53,16 @@ import org.opennms.oce.datasource.api.SituationDatasource;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.features.graph.api.GraphProvider;
+import org.opennms.oce.features.graph.common.GraphMLConverter;
+import org.opennms.oce.features.graph.graphml.GraphML;
+import org.opennms.oce.features.graph.graphml.GraphMLWriter;
 
 public class TestDriver {
     private final EngineFactory engineFactory;
     private boolean verbose = false;
+    private long graphExportIntervalMs = 0;
+    private File graphOutputFolder = null;
 
     public TestDriver(EngineFactory engineFactory) {
         this.engineFactory = Objects.requireNonNull(engineFactory);
@@ -139,6 +150,15 @@ public class TestDriver {
         engine.registerSituationHandler(session);
         engine.init(previousAlarms, previousSituations, inventory);
 
+        final GraphProvider graphProvider;
+        if (engine instanceof GraphProvider) {
+            graphProvider = (GraphProvider)engine;
+        } else {
+            graphProvider = null;
+        }
+        final boolean shouldExportGraph = graphExportIntervalMs > 0 && graphProvider != null && graphOutputFolder != null;
+        long lastGraphGeneratedAt = 0;
+
         long tickResolutionMs = engine.getTickResolutionMs();
         final Map<Long,List<Alarm>> alarmsByTick = alarms.stream()
                 .collect(Collectors.groupingBy(a -> roundToTick(a.getTime(), tickResolutionMs)));
@@ -169,12 +189,19 @@ public class TestDriver {
             }
             // Tick
             engine.tick(now);
+            if (shouldExportGraph && (now - lastGraphGeneratedAt) > graphExportIntervalMs) {
+                exportGraph(graphProvider, now);
+                lastGraphGeneratedAt = now;
+            }
             printTick(now, start, end, startTime);
         }
 
         // One last tick
         now += tickResolutionMs;
         engine.tick(now);
+        if (shouldExportGraph) {
+            exportGraph(graphProvider, now);
+        }
 
         // Destroy
         engine.destroy();
@@ -182,8 +209,34 @@ public class TestDriver {
         return new ArrayList<>(session.situations.values());
     }
 
+    private void exportGraph(GraphProvider graphProvider, long now) {
+        if (graphProvider == null) {
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM_dd_yyyy_HH_mm_ss");
+        String dateFormatted = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneOffset.systemDefault()));
+        File destinationFile = new File(graphOutputFolder, "graph_" + dateFormatted  + ".graphml");
+        final GraphML graphML = graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML);
+        try {
+            System.out.printf("Saving graph snapshot to %s\n", destinationFile);
+            GraphMLWriter.write(graphML, destinationFile);
+        } catch (Exception e) {
+            System.out.printf("Failed to save graph to: %s\n", destinationFile);
+            e.printStackTrace();
+        }
+    }
+
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
+    }
+
+    private void setGraphExportIntervalMs(long graphExportIntervalMs) {
+        this.graphExportIntervalMs = graphExportIntervalMs;
+    }
+
+    private void setGraphOutputFolder(File graphOutputFolder) {
+        this.graphOutputFolder = graphOutputFolder;
     }
 
     private class DriverSession implements SituationHandler {
@@ -244,6 +297,9 @@ public class TestDriver {
         private EngineFactory engineFactory;
         private Boolean verbose;
 
+        private long graphExportIntervalMs = 0;
+        private File graphOutputFolder = new File("/tmp");
+
         public DriverBuilder withAlarmDatasource(AlarmDatasource alarmDatasource) {
             this.alarmDatasource = alarmDatasource;
             return this;
@@ -259,7 +315,6 @@ public class TestDriver {
             return this;
         }
 
-
         public DriverBuilder withEngineFactory(EngineFactory engineFactory) {
             this.engineFactory = engineFactory;
             return this;
@@ -267,6 +322,16 @@ public class TestDriver {
 
         public DriverBuilder withVerboseOutput() {
             verbose = true;
+            return this;
+        }
+
+        public DriverBuilder withGraphExportIntervalMs(long graphExportIntervalMs) {
+            this.graphExportIntervalMs = graphExportIntervalMs;
+            return this;
+        }
+
+        public DriverBuilder withGraphOutputFolder(File graphOutputFolder) {
+            this.graphOutputFolder = graphOutputFolder;
             return this;
         }
 
@@ -278,9 +343,13 @@ public class TestDriver {
             if (verbose != null) {
                 driver.setVerbose(verbose);
             }
+            driver.setGraphExportIntervalMs(graphExportIntervalMs);
+            driver.setGraphOutputFolder(graphOutputFolder);
             return driver;
         }
     }
+
+
 
     public static DriverBuilder builder() {
         return new DriverBuilder();

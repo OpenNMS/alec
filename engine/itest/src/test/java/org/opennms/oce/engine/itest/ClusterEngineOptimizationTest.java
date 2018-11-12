@@ -55,6 +55,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.driver.test.TestDriver;
@@ -63,7 +64,7 @@ import org.opennms.oce.engine.cluster.ClusterEngineFactory;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
-import org.opennms.oce.features.score.impl.SetIntersectionScoringStrategy;
+import org.opennms.oce.features.score.impl.PeerScoringStrategy;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -137,12 +138,15 @@ public class ClusterEngineOptimizationTest {
 
     private static class EngineAsFunction implements MultivariateFunction {
         private final List<Alarm> alarms;
+        private final List<InventoryObject> inventory;
 
         private Set<Situation> baseSituations;
 
         public EngineAsFunction() throws JAXBException, IOException {
             System.out.println("Loading data...");
             alarms = ImmutableList.copyOf(JaxbUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
+            inventory = ImmutableList.copyOf(JaxbUtils.getInventory(Paths.get("/tmp/cpn.inventory.xml")));
+
             System.out.printf("Read %d alarms.\n", alarms.size());
             Set<Situation> situations = JaxbUtils.getSituations(Paths.get("/tmp/cpn.situations.xml"));
             System.out.printf("Read %d situations.\n", situations.size());
@@ -160,14 +164,14 @@ public class ClusterEngineOptimizationTest {
                     .build();
 
             System.out.printf("Running simulation at point %s...\n", Arrays.toString(point));
-            final List<Situation> generatedSituations = driver.run(alarms);
+            final List<Situation> generatedSituations = driver.run(alarms, inventory);
             System.out.printf("Generated: %d situations.\n", generatedSituations.size());
             Set<Situation> generatedSituationsInSet = Sets.newHashSet(generatedSituations);
             assertThat(generatedSituationsInSet.size(), equalTo(generatedSituations.size()));
             generatedSituationsInSet = getSituationsWithOneOrMoreAlarms(generatedSituationsInSet);
 
             System.out.println("Scoring...");
-            final ScoringStrategy scoringStrategy = new SetIntersectionScoringStrategy();
+            final ScoringStrategy scoringStrategy = new PeerScoringStrategy();
             final ScoreReport report = scoringStrategy.score(baseSituations, generatedSituationsInSet);
             System.out.printf("Score: %.2f\n", report.getScore());
             for (ScoreMetric metric : report.getMetrics()) {

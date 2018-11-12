@@ -28,8 +28,10 @@
 
 package org.opennms.oce.features.shell;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.driver.test.TestDriver;
@@ -59,31 +62,55 @@ public class ProcessAlarms implements Action {
     @Reference
     private List<EngineFactory> engineFactories;
 
-    @Option(name = "-i", description = "Input file", required = true)
-    private String inFile;
+    @Option(name = "--alarms-in", description = "XML file containing the list of alarms", required = true)
+    private String alarmsIn;
 
-    @Option(name = "-o", description = "Output file", required = false)
-    private String outFile; // Default to "situations.xml"
+    @Option(name = "--inventory-in", description = "XML file containing the list of alarms")
+    private String inventoryIn;
 
-    @Option(name = "-e", description = "Engine Name", required = true)
+    @Option(name = "--situations-out", aliases = {"-o"}, description = "Output file that contains the list of generated situations.")
+    private String situationsOut;
+
+    @Option(name = "--graph-output-folder", aliases = {"-g"}, description = "Folder which in which to save the generated graphs.")
+    private String graphOutputFolder = System.getProperty("java.io.tmpdir");
+
+    @Option(name = "--graph-export-interval-ms", description = "Frequency in ms at which to generate the graphs.")
+    private long graphExportIntervalMs = 0; // disabled
+
+    @Option(name = "--engine", aliases = {"-e"}, description = "Engine Name", required = true)
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
     @Override
     public Object execute() throws Exception {
         final EngineFactory engineFactory = getEngineFactory();
-        final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(inFile));
+        final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
+        final List<InventoryObject> inventory;
+        if (inventoryIn != null ) {
+            inventory = JaxbUtils.getInventory(Paths.get(inventoryIn));
+        } else {
+            inventory = Collections.emptyList();
+        }
+
+        final File graphOutput = new File(graphOutputFolder);
+        if (graphExportIntervalMs > 0) {
+            // Create the folder if necessary
+            graphOutput.mkdirs();
+        }
+
         final TestDriver driver = TestDriver.builder()
                 .withEngineFactory(engineFactory)
                 .withVerboseOutput()
+                .withGraphExportIntervalMs(graphExportIntervalMs)
+                .withGraphOutputFolder(graphOutput)
                 .build();
-        final List<Situation> situations = driver.run(alarms);
+        final List<Situation> situations = driver.run(alarms, inventory);
         write(situations);
         return situations;
     }
 
     private void write(List<Situation> situations) throws IOException, JAXBException {
-        String filepath = outFile == null || outFile.isEmpty() ? "situations.xml" : outFile;
+        String filepath = situationsOut == null || situationsOut.isEmpty() ? "situations.xml" : situationsOut;
         System.out.printf("Writing %d situations to %s.\n", situations.size(), filepath);
         JaxbUtils.writeSituations(situations, Paths.get(filepath));
     }

@@ -162,6 +162,7 @@
         <feature version="${project.version}">oce-engine-api</feature>
         <feature version="${project.version}">oce-features-score</feature>
         <feature version="${project.version}">oce-datasource-jaxb</feature>
+        <feature version="${project.version}">oce-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.test/${project.version}</bundle>
         <bundle>mvn:org.opennms.oce.features/org.opennms.oce.features.shell/${project.version}</bundle>

@@ -135,21 +135,17 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public void init() throws IOException {
         final Properties producerProperties = loadProducerProperties();
-        producer = new KafkaProducer<>(producerProperties);
+        producer = KafkaUtils.runWithGivenClassLoader(() -> new KafkaProducer<>(producerProperties), KafkaProducer.class.getClassLoader());
 
         final Properties streamProperties = loadStreamsProperties();
         final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            // Use the class-loader for the KStream class, since the kafka-client bundle
-            // does not import the required classes from the kafka-streams bundle
-            Thread.currentThread().setContextClassLoader(KStream.class.getClassLoader());
-            streams = new KafkaStreams(getKTopology(), streamProperties);
-        } finally {
-            Thread.currentThread().setContextClassLoader(currentClassLoader);
-        }
+
+        // Use the class-loader for the KStream class, since the kafka-client bundle
+        // does not import the required classes from the kafka-streams bundle
+        streams = KafkaUtils.runWithGivenClassLoader(() -> new KafkaStreams(getKTopology(), streamProperties), KStream.class.getClassLoader());
 
         streams.setUncaughtExceptionHandler((t, e) ->
-                LOG.error(String.format("Stream errtaspmosbxpm102:3000or on thread: %s", t.getName()), e));
+                LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
         try {
             streams.start();
         } catch (StreamsException | IllegalStateException e) {

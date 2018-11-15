@@ -227,7 +227,7 @@
             entStateAdmin=%parm[#1]%
             entStateAlarm=%parm[#2]%&lt;/p>
         </logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[entPhysicalIndex]%" alarm-type="2" clear-key="uei.opennms.org/traps/ENTITY-STATE-MIB/entStateOperDisabled:%dpname%:%nodeid%:%parm[entPhysicalIndex]%">
             <managed-object type="ent-physical-entity"/>
         </alarm-data>

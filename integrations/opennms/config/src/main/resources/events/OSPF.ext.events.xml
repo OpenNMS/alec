@@ -376,7 +376,7 @@ MaxAge.&lt;/p>&lt;table>
 			ospfLsdbRouterId&lt;/b>&lt;/td>&lt;td>
 			%parm[#5]%;&lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;/table></descr>
 		<logmsg dest="logndisplay">ospfMaxAgeLsa trap received ospfRouterId=%parm[#1]% ospfLsdbAreaId=%parm[#2]% ospfLsdbType=%parm[#3]% ospfLsdbLsid=%parm[#4]% ospfLsdbRouterId=%parm[#5]%</logmsg>
-		<severity>Normal</severity>
+		<severity>Cleared</severity>
 		<alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[ospfRouterId]%" alarm-type="3" auto-clean="true">
 			<managed-object type="ospf-router"/>
 		</alarm-data>

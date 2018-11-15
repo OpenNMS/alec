@@ -225,10 +225,14 @@
             <parameter-assignment matching-group="2" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%LINK-SW2_SP-3-UPDOWN\s*: Interface (\S+), changed state to (.*)" />
-            <uei>uei.opennms.org/vendor/cisco/syslog/linkUpDown</uei>
+            <match type="regex" expression="%LINK-SW2_SP-3-UPDOWN\s*: Interface (\S+), changed state to down" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
-            <parameter-assignment matching-group="2" parameter-name="state" />
+        </ueiMatch>
+        <ueiMatch>
+            <match type="regex" expression="%LINK-SW2_SP-3-UPDOWN\s*: Interface (\S+), changed state to up" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkUp</uei>
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%TRANSCEIVER-6-REMOVED\s*: (.*): Transceiver module removed from (\S+)" />
@@ -261,10 +265,14 @@
             <parameter-assignment matching-group="3" parameter-name="reason" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%LINEPROTO-SW2_SP-5-UPDOWN\s*: Line protocol on Interface (\S+) changed state to (.*)" />
-            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUpDown</uei>
+            <match type="regex" expression="%LINEPROTO-SW2_SP-5-UPDOWN\s*: Line protocol on Interface (\S+) changed state to down" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
-            <parameter-assignment matching-group="2" parameter-name="state" />
+        </ueiMatch>
+        <ueiMatch>
+            <match type="regex" expression="%LINEPROTO-SW2_SP-5-UPDOWN\s*: Line protocol on Interface (\S+) changed state to up" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUp</uei>
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%ETHPORT-3-IF_DOWN\S+\s*: Interface (\S+) is down (.*)" />
@@ -300,10 +308,14 @@
             <parameter-assignment matching-group="2" parameter-name="bundleDescr" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%LINEPROTO-5-UPDOWN: Line protocol on Interface (\S+), changed state to (\S+)" />
-            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUpDown</uei>
+            <match type="regex" expression="%LINEPROTO-5-UPDOWN: Line protocol on Interface (\S+), changed state to down" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
-            <parameter-assignment matching-group="2" parameter-name="state" />
+        </ueiMatch>
+        <ueiMatch>
+            <match type="regex" expression="%LINEPROTO-5-UPDOWN: Line protocol on Interface (\S+), changed state to up" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUp</uei>
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from (\S+) to (\S+)" />

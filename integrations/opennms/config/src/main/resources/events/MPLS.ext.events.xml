@@ -49,7 +49,7 @@ c. Multiple interfaces are associated with this VRF, and the
           %parm[name-#2]% %parm[vrfNameOid]%
       </descr>
       <logmsg dest="logndisplay">mplsL3VpnVrfUp trap received mplsL3VpnIfConfRowStatus=%parm[#1]% mplsL3VpnVrfOperStatus=%parm[#2]%</logmsg>
-      <severity>Normal</severity>
+      <severity>Cleared</severity>
       <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[vrfNameOid]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsL3vpnStdMib/traps/mplsL3VpnVrfDown:%dpname%:%nodeid%:%interface%:%parm[vrfNameOid]%">
           <managed-object type="mpls-l3-vrf"/>
       </alarm-data>
@@ -159,7 +159,7 @@ c. The last interface with ifOperStatus equal to up(1)
             lowerLayerDown(7)
             &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
         <logmsg dest="logndisplay">mplsTunnelUp trap received mplsTunnelAdminStatus=%parm[#1]% mplsTunnelOperStatus=%parm[#2]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelDown:%dpname%:%nodeid%:%interface%:%parm[mplsTunnelEntry]%" auto-clean="true">
             <managed-object type="mpls-tunnel"/>
         </alarm-data>
@@ -434,7 +434,7 @@ c. The last interface with ifOperStatus equal to up(1)
             %parm[#4]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
         </descr>
         <logmsg dest="logndisplay">mplsLdpSessionUp trap received mplsLdpSessionState=%parm[#1]% mplsLdpSessionDiscontinuityTime=%parm[#2]% mplsLdpSessionStatsUnknownMesTypeErrors=%parm[#3]% mplsLdpSessionStatsUnknownTlvErrors=%parm[#4]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsLdpStdMib/traps/mplsLdpSessionDown:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" auto-clean="true">
             <managed-object type="mpls-ldp-session"/>
         </alarm-data>
@@ -551,7 +551,7 @@ c. The last interface with ifOperStatus equal to up(1)
             mplsLdpSessionUp trap received
             mplsLdpSessionState=%parm[#1]%&lt;/p>
         </logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" alarm-type="2" clear-key="uei.opennms.org/ietf/mplsLdpMib/traps/mplsLdpSessionDown:%dpname%:%nodeid%:%interface%:%parm[mplsLdpSessionEntry]%" auto-clean="true">
             <managed-object type="mpls-ldp-session"/>
         </alarm-data>

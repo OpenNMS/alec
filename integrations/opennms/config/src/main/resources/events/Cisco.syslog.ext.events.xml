@@ -43,7 +43,7 @@
         <descr>The node: %nodelabel% has indicated that the interface: %parm[ifDescr]% has transistioned from a "Down" state to an "Up" state via a Syslog message.
         </descr>
         <logmsg dest="logndisplay">The interface: %parm[ifDescr]% is now Up.</logmsg>
-        <severity>Clear</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -66,7 +66,7 @@
         <descr>The line protocol on %parm[ifDescr]% is up.
         </descr>
         <logmsg dest="logndisplay">Line protocol up %parm[ifDescr]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/lineProtoDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -89,7 +89,7 @@
         <descr>The link on %parm[ifDescr]% is up.
         </descr>
         <logmsg dest="logndisplay">Link up %parm[ifDescr]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/linkDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -112,7 +112,7 @@
         <descr>BGP neighbor %parm[bgpNeighbor]% up (vrf %parm[bgpVrf]%)
         </descr>
         <logmsg dest="logndisplay">BGP neighbor %parm[bgpPeer]% up (vrf %parm[bgpVrf]%)</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[bgpPeer]%:%parm[bgpVrf]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/bgpAdjChangeNeighborDown:%dpname%:%nodeid%:%parm[bgpPeer]%:%parm[bgpVrf]%">
             <managed-object type="bgp-peer"/>
         </alarm-data>
@@ -135,7 +135,7 @@
         <descr>BGP neighbor %parm[bgpNeighbor]% up (vrf %parm[bgpVrf]%)
         </descr>
         <logmsg dest="logndisplay">BGP neighbor %parm[bgpPeer]% up (vrf %parm[bgpVrf]%)</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[bgpPeer]%:%parm[bgpVrf]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/routingBgpAdjChangeNeighborDown:%dpname%:%nodeid%:%parm[bgpPeer]%:%parm[bgpVrf]%">
             <managed-object type="bgp-peer"/>
         </alarm-data>
@@ -177,7 +177,7 @@
         <event-label>CISCO defined syslog event: configChange</event-label>
         <descr>Configuration committed by user %parm[configuredBy]%. Use 'show configuration commit changes %parm[configChangeId]%' to view the changes.</descr>
         <logmsg dest="logndisplay">Configuration committed by user %parm[configuredBy]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[configChangeId]%" alarm-type="3"/>
     </event>
     <event>
@@ -203,7 +203,7 @@
         <event-label>CISCO defined syslog event: bundleActive</event-label>
         <descr>Interface %parm[ifDescr]% is active as part of %parm[bundle]%</descr>
         <logmsg dest="logndisplay">Interface %parm[ifDescr]% is active as part of %parm[bundle]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%:%parm[bundle]%" alarm-type="3"/>
     </event>
 
@@ -222,7 +222,7 @@
         <event-label>CISCO defined syslog event: bfdSessionStateUp</event-label>
         <descr>The BFD session to neighbor %parm[neighbor]% on interface %parm[ifDescr]% is up.</descr>
         <logmsg dest="logndisplay">BFD session to neighbor %parm[neighbor]% on interface %parm[ifDescr]% is up</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[neighbor]%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/bfdSessionStateDown:%dpname%:%nodeid%:%parm[neighbor]%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -233,7 +233,7 @@
         <event-label>CISCO defined syslog event: bfdSessionUp</event-label>
         <descr>The BFD session on link %parm[ifDescr]% in %parm[bundleDescr]% has gone up</descr>
         <logmsg dest="logndisplay">BFD session on link %parm[ifDescr]% in %parm[bundleDescr]% has gone up</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -316,7 +316,7 @@
         <event-label>CISCO defined syslog event: oirModuleIn</event-label>
         <descr>Node %parm[module] inserted.</descr>
         <logmsg dest="logndisplay">Node %parm[module] inserted</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[module]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/oirModuleOut:%dpname%:%nodeid%:%parm[module]%"/>
     </event>
 
@@ -333,7 +333,7 @@
         <event-label>CISCO defined syslog event: oirCardIn</event-label>
         <descr>Card %parm[cardLabel] inserted in slot %parm[slot].</descr>
         <logmsg dest="logndisplay">Card %parm[cardLabel] inserted in slot %parm[slot]</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/oirModuleOut:%dpname%:%nodeid%:%parm[slot]%"/>
     </event>
 
@@ -653,12 +653,25 @@
     </event>
 
     <event>
-        <uei>uei.opennms.org/vendor/cisco/syslog/linkUpDown</uei>
-        <event-label>CISCO defined syslog event: linkUpDown</event-label>
-        <descr>Interface %parm[ifDescr]%, changed state to %parm[state]%</descr>
-        <logmsg dest="logndisplay">Interface %parm[ifDescr]%, changed state to %parm[state]%</logmsg>
+        <uei>uei.opennms.org/vendor/cisco/syslog/linkDown</uei>
+        <event-label>CISCO defined syslog event: linkDown</event-label>
+        <descr>Interface %parm[ifDescr]%, changed state to down</descr>
+        <logmsg dest="logndisplay">Interface %parm[ifDescr]%, changed state to down</logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="1">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/linkUp</uei>
+        <event-label>CISCO defined syslog event: linkUp</event-label>
+        <descr>Interface %parm[ifDescr]%, changed state to up</descr>
+        <logmsg dest="logndisplay">Interface %parm[ifDescr]%, changed state to up</logmsg>
+        <severity>Cleared</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/linkDown:%dpname%:%nodeid%:%parm[ifDescr]%">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
 
     <event>
@@ -676,7 +689,7 @@
         <event-label>CISCO defined syslog event: ifTrunkUp</event-label>
         <descr>Interface %parm[ifDescr]% is up.</descr>
         <logmsg dest="logndisplay">Interface %parm[ifDescr]% is up</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifTrunkDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
@@ -713,7 +726,7 @@
         <event-label>CISCO defined syslog event: fantrayRpmClear</event-label>
         <descr>Fan tray RPM warning cleared on slot %parm[slot]%.</descr>
         <logmsg dest="logndisplay">Fan tray RPM warning cleared on slot %parm[slot]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/fantrayRpm:%dpname%:%nodeid%:%parm[ifDescr]%"/>
     </event>
 
@@ -740,7 +753,7 @@
         <event-label>CISCO defined syslog event: ifOirOut</event-label>
         <descr>OIR %parm[oir]% is removed, state: %parm[state]%.</descr>
         <logmsg dest="logndisplay">OIR %parm[oir]% is removed, state: %parm[state]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[oir]%" alarm-type="1"/>
     </event>
     <event>
@@ -748,7 +761,7 @@
         <event-label>CISCO defined syslog event: ifOirIn</event-label>
         <descr>OIR %parm[oir]% is inserted, state: %parm[state]%.</descr>
         <logmsg dest="logndisplay">OIR %parm[oir]% is inserted, state: %parm[state]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[oir]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifOirOut:%dpname%:%nodeid%:%parm[oir]%"/>
     </event>
 
@@ -808,19 +821,30 @@
         <event-label>CISCO defined syslog event: topologyInterfaceUp</event-label>
         <descr>Interface %parm[ifDescr]% up in fabricpath topology %parm[topology]%</descr>
         <logmsg dest="logndisplay">Interface %parm[ifDescr]% up in fabricpath topology %parm[topology]%</logmsg>
-        <severity>Normal</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%:%parm[topology]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/topologyInterfaceDown:%dpname%:%nodeid%:%parm[ifDescr]%:%parm[topology]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
     </event>
 
     <event>
-        <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUpDown</uei>
-        <event-label>CISCO defined syslog event: linkProtoUpDown</event-label>
-        <descr>Line protocol on Interface %parm[ifDescr]% changed state to %parm[state]%</descr>
-        <logmsg dest="logndisplay">Line protocol on Interface %parm[ifDescr]% changed state to %parm[state]%</logmsg>
+        <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoDown</uei>
+        <event-label>CISCO defined syslog event: linkProtoDown</event-label>
+        <descr>Line protocol on Interface %parm[ifDescr]% changed state to down</descr>
+        <logmsg dest="logndisplay">Line protocol on Interface %parm[ifDescr]% changed state to down</logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="1">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUp</uei>
+        <event-label>CISCO defined syslog event: linkProtoUp</event-label>
+        <descr>Line protocol on Interface %parm[ifDescr]% changed state to up</descr>
+        <logmsg dest="logndisplay">Line protocol on Interface %parm[ifDescr]% changed state to up</logmsg>
+        <severity>Cleared</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/linkProtoDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
     </event>

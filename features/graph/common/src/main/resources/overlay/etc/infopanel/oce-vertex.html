@@ -1,0 +1,28 @@
+{% set visible = vertex != null && vertex.namespace == "oce" %} 
+{% set title = vertex.properties.tooltipText %}
+{% set garbageCollected = vertex.properties.garbage_collected != null && vertex.properties.garbage_collected == "true" %}
+
+<table width="100%" border="0">
+    <tr>
+        <td align="right" width="80">Created: </td>
+        <td width="14"></td>
+        <td align="left">{{ vertex.properties.createdTimestamp }}</td>
+    </tr>
+    {% if (vertex.properties.updatedTimestamp != null) %}
+    <tr>
+        <td align="right" width="80">Updated: </td>
+        <td width="14"></td>
+        <td align="left">{{ vertex.properties.updatedTimestamp }}</td>
+    </tr>
+    {% endif %}
+    {% if (vertex.properties.iconKey == "reduction_key") %}
+    <tr>
+        <td align="right" width="80">Garbage Collected: </td>
+        <td width="14"></td>
+        <td align="left">{{ garbageCollected }}</td>
+    </tr>
+    {% endif %}
+
+
+</table>
+

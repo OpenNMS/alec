@@ -1,0 +1,16 @@
+{% set visible = edge != null && edge.namespace == "oce" %} 
+{% set title = edge.properties.id %}
+
+<table width="100%" border="0">
+    <tr>
+        <td align="right" width="80">Type</td>
+        <td width="14"></td>
+        <td align="left">{{ edge.properties.type }}</td>
+    </tr>
+    <tr>
+        <td align="right" width="80">Weight</td>
+        <td width="14"></td>
+        <td align="left">{{ edge.properties.edgeWeight }}</td>
+    </tr>
+</table>
+

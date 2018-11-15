@@ -111,6 +111,11 @@
             <parameter-assignment matching-group="2" parameter-name="configChangeId" />
         </ueiMatch>
         <ueiMatch>
+            <match type="regex" expression="%LINK-3-UPDOWN\s*: Interface (\S+), changed state to up" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/linkUp</uei>
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
+        </ueiMatch>
+        <ueiMatch>
             <match type="regex" expression="%LINK-3-UPDOWN\s*: Interface (\S+), changed state to down" />
             <uei>uei.opennms.org/vendor/cisco/syslog/linkDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />

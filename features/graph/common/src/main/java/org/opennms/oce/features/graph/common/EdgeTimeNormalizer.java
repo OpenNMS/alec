@@ -28,10 +28,8 @@
 
 package org.opennms.oce.features.graph.common;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Normalizes a Set of times (on a scale of 1-10) to a base time (i.e. the time of the node they are attached to). 
@@ -41,33 +39,11 @@ public class EdgeTimeNormalizer {
 
     //  The anchor time
     private final long base;
-    // The most recent time
-    private final long max;
-    // The oldest time
-    private final long min;
-    // The greatest delta from the base value
-    private long range;
+
 
     public EdgeTimeNormalizer(long base, Set<Long> times) {
         this.base = base;
-        if (times == null || times.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-        List<Long> sortedTimes = times.stream().sorted().collect(Collectors.toList());
-        Long firstTime = sortedTimes.get(0);
-        Long lastTime = sortedTimes.get(sortedTimes.size() - 1);
-        max = lastTime > base ? lastTime : base;
-        min = firstTime < base ? firstTime : base;
-        if (base == min || base == max) {
-            range = max - min;
-        } else {
-            range = max - base > base - min ? max - base : base - min;
-        }
-        // All events occurred at the same time
-        if (range == 0) {
-            // add 1 to the range to prevent dive by zero error.
-            range = 1;
-        }
+        return;
     }
 
     // Normalize over the range 1-10

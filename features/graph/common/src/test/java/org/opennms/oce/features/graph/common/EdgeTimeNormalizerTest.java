@@ -32,7 +32,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -40,16 +39,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class EdgeTimeNormalizerTest {
-
-    @Test(expected = IllegalArgumentException.class)
-    public void cannotHandleEmptyCollection() {
-        long base = 100L;
-        Set<Long> times = Collections.emptySet();
-        @SuppressWarnings("unused")
-        EdgeTimeNormalizer normalizer = new EdgeTimeNormalizer(base, times);
-
-        assertThat(normalizer.getNormalizedValue(base), is(10));
-    }
 
     @Test
     public void canNormalizeScaledValues() {

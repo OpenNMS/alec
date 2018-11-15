@@ -6,7 +6,7 @@
             does not match %parm[zVlan]% on %parm[zHostname]% %parm[zIfDescr]%.
         </descr>
         <logmsg dest="logndisplay">Native VLAN mismatch on %parm[aIfDescr]% (%parm[aVlan]% vs %parm[zVlan]%)</logmsg>
-        <severity>Warning</severity>
+        <severity>Minor</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[aIfDescr]%" alarm-type="3">
             <managed-object type="snmp-interface-link"/>
         </alarm-data>
@@ -28,21 +28,22 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/ifDown</uei>
         <event-label>CISCO defined syslog event: ifDown</event-label>
-        <descr>The interface %parm[ifDescr]% is down.
+        <descr>The node: %nodelabel% has indicated that the interface: %parm[ifDescr]% has transistioned from an "Up" state to a "Down" state via a Syslog message.
         </descr>
-        <logmsg dest="logndisplay">Interface down %parm[ifDescr]%</logmsg>
-        <severity>Warning</severity>
+        <logmsg dest="logndisplay">The interface: %parm[ifDescr]% is Down.</logmsg>
+        <severity>Minor</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="1">
             <managed-object type="snmp-interface"/>
         </alarm-data>
     </event>
+
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/ifUp</uei>
-        <event-label>CISCO defined syslog event: ifUp</event-label>
-        <descr>The interface %parm[ifDescr]% is up.
+        <event-label>Interface Up</event-label>
+        <descr>The node: %nodelabel% has indicated that the interface: %parm[ifDescr]% has transistioned from a "Down" state to an "Up" state via a Syslog message.
         </descr>
-        <logmsg dest="logndisplay">Interface up %parm[ifDescr]%</logmsg>
-        <severity>Normal</severity>
+        <logmsg dest="logndisplay">The interface: %parm[ifDescr]% is now Up.</logmsg>
+        <severity>Clear</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifDown:%dpname%:%nodeid%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>

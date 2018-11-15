@@ -456,7 +456,7 @@
         <event-label>CISCO defined syslog event: portChannelUp</event-label>
         <descr>The port channel %parm[portChannel]% is up.</descr>
         <logmsg dest="logndisplay">Port channel %parm[portChannel]% up</logmsg>
-        <severity>Warning</severity>
+        <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[portChannel]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/portChannelDown:%dpname%:%nodeid%:%parm[portChannel]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>

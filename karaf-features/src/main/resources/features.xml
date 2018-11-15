@@ -183,7 +183,12 @@
 
     <!-- Generic dependencies -->
 
+    <feature name="rocksdb" version="5.7.3">
+        <bundle>wrap:mvn:org.rocksdb/rocksdbjni/5.7.3$Export-Package=org.rocksdb;version=5.7.3,org.rocksdb.util;version=5.7.3</bundle>
+    </feature>
+
     <feature name="kafka-streams" description="Kafka Streams" version="2.0.0">
+        <feature version="5.7.3" dependency="true">rocksdb</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/2.0.0_1</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.0.0_1</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/1.4.1</bundle>
@@ -193,7 +198,6 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.6</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.0</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.6</bundle>
-        <bundle dependency="true">wrap:mvn:org.rocksdb/rocksdbjni/5.7.3</bundle>
     </feature>
 
     <feature name="commons-text" description="commons-text" version="${commons.text.version}">

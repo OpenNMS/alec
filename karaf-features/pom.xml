@@ -114,6 +114,7 @@
                                 <feature>opennms-oce-plugin</feature>-->
 
                                 <!-- 3rd party -->
+                                <feature>rocksdb</feature>
                                 <feature>kafka-streams</feature>
                                 <feature>commons-text</feature>
                                 <feature>javax.mail</feature>

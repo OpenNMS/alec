@@ -323,8 +323,16 @@
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
+            <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from (\S+) to Active" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/active</uei>
+            <parameter-assignment matching-group="1" parameter-name="uplinkId" />
+            <parameter-assignment matching-group="2" parameter-name="fexNumber" />
+            <parameter-assignment matching-group="3" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="4" parameter-name="prevStatus" />
+        </ueiMatch>
+        <ueiMatch>
             <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from (\S+) to (\S+)" />
-            <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus</uei>
+            <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/inactive</uei>
             <parameter-assignment matching-group="1" parameter-name="uplinkId" />
             <parameter-assignment matching-group="2" parameter-name="fexNumber" />
             <parameter-assignment matching-group="3" parameter-name="ifDescr" />

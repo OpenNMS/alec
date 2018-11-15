@@ -260,12 +260,22 @@
         </alarm-data>
     </event>
     <event>
-        <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus</uei>
-        <event-label>CISCO defined syslog event: fexPortStatus</event-label>
+        <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/inactive</uei>
+        <event-label>CISCO defined syslog event: fexPortStatus (inactive)</event-label>
         <descr>Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to %parm[newStatus]%.</descr>
         <logmsg dest="logndisplay">Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to %parm[newStatus]%</logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]%:%parm[ifDescr]%" alarm-type="3">
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]%:%parm[ifDescr]%" alarm-type="1">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/active</uei>
+        <event-label>CISCO defined syslog event: fexPortStatus (active)</event-label>
+        <descr>Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to Active.</descr>
+        <logmsg dest="logndisplay">Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to Active</logmsg>
+        <severity>Cleared</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/fexPortStatus/inactive:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]%:%parm[ifDescr]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
     </event>

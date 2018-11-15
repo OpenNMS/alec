@@ -103,11 +103,6 @@ public class SituationTableProcessor implements Processor<String, OpennmsModelPr
     }
 
     @Override
-    public void punctuate(long timestamp) {
-        // this method is deprecated and should not be used anymore
-    }
-
-    @Override
     public void close() {
         // pass, no external resources managed by this processor
     }

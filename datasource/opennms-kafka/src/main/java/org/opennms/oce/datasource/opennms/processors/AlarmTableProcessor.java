@@ -86,11 +86,6 @@ public class AlarmTableProcessor implements Processor<String, OpennmsModelProtos
     }
 
     @Override
-    public void punctuate(long timestamp) {
-        // this method is deprecated and should not be used anymore
-    }
-
-    @Override
     public void close() {
         // pass, no external resources managed by this processor
     }

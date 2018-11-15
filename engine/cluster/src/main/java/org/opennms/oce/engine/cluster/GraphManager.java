@@ -106,7 +106,7 @@ public class GraphManager implements ManagedGraph {
     public static GraphManager newGraphManager() {
         return new GraphManager(Collections.emptySet());
     }
-    
+
     public static GraphManager newGraphManagerWithGraphs(Set<ManagedGraph> defaultGraphs) {
         return new GraphManager(defaultGraphs);
     }
@@ -187,6 +187,9 @@ public class GraphManager implements ManagedGraph {
                 LOG.warn("close call to graph {} caused an exception", graph, e);
             }
         });
+
+        // Remove all the graphs from management
+        graphs.clear();
     }
 
     synchronized void addGraph(ManagedGraph managedGraph) {
@@ -194,6 +197,7 @@ public class GraphManager implements ManagedGraph {
     }
 
     synchronized void removeGraph(ManagedGraph managedGraph) {
+        managedGraph.close();
         graphs.remove(managedGraph);
     }
 }

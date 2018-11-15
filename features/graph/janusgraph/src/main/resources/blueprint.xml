@@ -5,11 +5,12 @@
     <cm:property-placeholder id="janusGraphProperties" persistent-id="org.opennms.oce.features.graph.janusgraph"
                              update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="storageBackend" value="inmemory"/>
+            <!-- TODO: What should the default path be? -->
+            <cm:property name="storagePropertiesFilePath" value="/opt/example.properties"/>
         </cm:default-properties>
     </cm:property-placeholder>
     <bean id="managedJanusGraph" class="org.opennms.oce.features.graph.janusgraph.ManagedJanusGraph">
-        <argument value="${storageBackend}"/>
+        <argument value="${storagePropertiesFilePath}"/>
     </bean>
     <service ref="managedJanusGraph" interface="org.opennms.oce.features.graph.api.ManagedGraph"/>
 </blueprint>

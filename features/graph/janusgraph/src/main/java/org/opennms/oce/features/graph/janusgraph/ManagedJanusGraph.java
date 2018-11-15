@@ -32,8 +32,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Resource;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Element;
@@ -41,6 +44,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
+import org.janusgraph.core.JanusGraphTransaction;
 import org.janusgraph.core.schema.JanusGraphManagement;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -63,25 +67,48 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
     private static final String KEY_RESOURCE_KEY = "resourceKey";
     private static final String KEY_INVENTORY_OBJECT_ID = "inventoryObjectId";
     private static final String KEY_ALARMS = "alarms";
+    private static final String KEY_HAS_ALARMS = "hasAlarms";
 
-    public ManagedJanusGraph(String storageBackend) {
-        janusGraph = JanusGraphFactory.build()
-                // Set the configurable properties
-                .set("storage.backend", storageBackend)
-                // The following properties should remain hardcoded
-                .set("attributes.custom.attribute1.attribute-class", "org.opennms.oce.datasource.common.AlarmBean")
-                .set("attributes.custom.attribute1.serializer-class",
-                        "org.opennms.oce.features.graph.janusgraph.AlarmBeanSerializer")
-                .open();
-
-        // Set up the vertex properties
-        JanusGraphManagement mgmt = janusGraph.openManagement();
-        mgmt.makePropertyKey(KEY_RESOURCE_KEY).dataType(String.class).cardinality(Cardinality.SINGLE).make();
-        mgmt.makePropertyKey(KEY_INVENTORY_OBJECT_ID).dataType(String.class).cardinality(Cardinality.SINGLE).make();
-        mgmt.makePropertyKey(KEY_ALARMS).dataType(Object.class).cardinality(Cardinality.SET).make();
-        mgmt.commit();
-
+    public ManagedJanusGraph(String storageConfigurationFile) {
+        janusGraph = JanusGraphFactory.open(Objects.requireNonNull(storageConfigurationFile));
+        createSchema();
         g = janusGraph.traversal();
+    }
+
+    private void createSchema() {
+        JanusGraphManagement mgmt = janusGraph.openManagement();
+
+        try {
+            // The resource key property uniquely identifies a vertex and is also used as the vertex's label
+            if (!mgmt.containsPropertyKey(KEY_RESOURCE_KEY)) {
+                mgmt.makePropertyKey(KEY_RESOURCE_KEY).dataType(String.class).cardinality(Cardinality.SINGLE).make();
+                mgmt.buildIndex(KEY_RESOURCE_KEY, Vertex.class).addKey(mgmt.getPropertyKey(KEY_RESOURCE_KEY))
+                        .buildCompositeIndex();
+            }
+
+            if (!mgmt.containsPropertyKey(KEY_INVENTORY_OBJECT_ID)) {
+                mgmt.makePropertyKey(KEY_INVENTORY_OBJECT_ID).dataType(String.class).cardinality(Cardinality.SINGLE).make();
+                mgmt.buildIndex(KEY_INVENTORY_OBJECT_ID, Vertex.class)
+                        .addKey(mgmt.getPropertyKey(KEY_INVENTORY_OBJECT_ID)).buildCompositeIndex();
+            }
+
+            if (!mgmt.containsPropertyKey(KEY_ALARMS)) {
+                mgmt.makePropertyKey(KEY_ALARMS).dataType(Object.class).cardinality(Cardinality.SET).make();
+            }
+
+            // This property is for indexing purposes and just identifies whether or not a vertex has an alarms attached
+            // to it
+            if (!mgmt.containsPropertyKey(KEY_HAS_ALARMS)) {
+                mgmt.makePropertyKey(KEY_HAS_ALARMS).dataType(Boolean.class).cardinality(Cardinality.SINGLE).make();
+                mgmt.buildIndex(KEY_HAS_ALARMS, Vertex.class)
+                        .addKey(mgmt.getPropertyKey(KEY_HAS_ALARMS)).buildCompositeIndex();
+            }
+
+            mgmt.commit();
+        } catch (Exception e) {
+            LOG.warn("Encountered exception while creating properties", e);
+            mgmt.rollback();
+        }
     }
 
     @Override
@@ -134,6 +161,7 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
                 LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex.get());
                 vertex.addEdge("parent", parentVertex.get(), "id", edgeIdGenerator.getAndIncrement(),
                         "weight", io.getWeightToParent());
+                janusGraph.tx().commit();
             }
         }
 
@@ -156,6 +184,7 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
                 LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex.get(), vertex);
                 vertex.addEdge("peer", peerVertex.get(), "id",
                         edgeIdGenerator.getAndIncrement(), "weight", peerRef.getWeight());
+                janusGraph.tx().commit();
             }
         }
 
@@ -179,6 +208,7 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
                         vertex);
                 vertex.addEdge("relative", relativeVertex.get(), "id",
                         edgeIdGenerator.getAndIncrement(), "weight", relativeRef.getWeight());
+                janusGraph.tx().commit();
             }
         }
 
@@ -195,10 +225,19 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
 
     @Override
     public void removeInventory(Collection<InventoryObject> inventory) {
-        for (InventoryObject io : inventory) {
-            ResourceKey resourceKey = getResourceKeyFor(io);
-            getVertex(resourceKey).ifPresent(Element::remove);
-            deferredIos.remove(io);
+        JanusGraphTransaction transaction = janusGraph.newTransaction();
+
+        try {
+            for (InventoryObject io : inventory) {
+                ResourceKey resourceKey = getResourceKeyFor(io);
+                getVertex(resourceKey).ifPresent(Element::remove);
+                deferredIos.remove(io);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            LOG.warn("Encountered exception while removing inventory", e);
+            transaction.rollback();
         }
     }
 
@@ -207,6 +246,7 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         if (alarm.getInventoryObjectType() == null || alarm.getInventoryObjectId() == null) {
             LOG.info("Alarm with id: {} is not associated with any resource. It will not be added to the graph.",
                     alarm.getId());
+
             return;
         }
 
@@ -220,7 +260,20 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         }
 
         // Add this alarm to the vertex replacing an existing alarm that is being updated if necessary
-        getVertex(resourceKey).get().property(KEY_ALARMS, alarm);
+        // Note: I'm not sure if there is an easier way to enforce a replacement for an updated alarm... for now I am
+        // removing the alarm if the ID is the same and then replacing it
+        JanusGraphTransaction transaction = janusGraph.newTransaction();
+
+        try {
+            removeAlarmFromVertex(resourceKey, alarm);
+            Vertex v = getVertex(resourceKey).get();
+            v.property(KEY_ALARMS, alarm);
+            v.property(KEY_HAS_ALARMS, true);
+            transaction.commit();
+        } catch (Exception e) {
+            LOG.warn("Encountered exception while adding/updating alarm", e);
+            transaction.rollback();
+        }
     }
 
     @Override
@@ -228,7 +281,7 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         long problemCutoffMs = currentTimeMs - problemTimeoutMs;
         long clearCutoffMs = currentTimeMs - clearTimeoutMs;
 
-        g.V().has(KEY_ALARMS).forEachRemaining(vertexWithAlarms -> {
+        g.V().has(KEY_HAS_ALARMS, true).forEachRemaining(vertexWithAlarms -> {
             LOG.debug("GCing vertex {}", vertexWithAlarms);
 
             vertexWithAlarms.properties(KEY_ALARMS).forEachRemaining(alarmProperty -> {
@@ -247,7 +300,13 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
                     alarmProperty.remove();
                 }
             });
+
+            if (!vertexWithAlarms.properties(KEY_ALARMS).hasNext()) {
+                vertexWithAlarms.property(KEY_HAS_ALARMS, false);
+            }
         });
+
+        janusGraph.tx().commit();
     }
 
     @Override
@@ -255,11 +314,21 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         janusGraph.close();
     }
 
+    private void removeAlarmFromVertex(ResourceKey resourceKey, Alarm alarm) {
+        // Note: the flag signifying whether or not this vertex has alarms is not modified since it is assumed this
+        // vertex is about to have an alarm added and that will take care of the flag
+        g.V().has(KEY_RESOURCE_KEY, resourceKey).properties(KEY_ALARMS).forEachRemaining(alarmOnVertex -> {
+            if (((Alarm) alarmOnVertex.value()).getId().equals(alarm.getId())) {
+                alarmOnVertex.remove();
+            }
+        });
+    }
+
     private void addVertex(ResourceKey resourceKey, String inventoryObjectId) {
         String label = resourceKey.toString();
 
         // To enforce a 1:1 mapping between resource keys and vertices
-        if (g.V().hasLabel(label).hasNext()) {
+        if (g.V().has(KEY_RESOURCE_KEY, resourceKey).hasNext()) {
             throw new IllegalArgumentException("A vertex with label '" + label + "' already exists");
         }
 
@@ -267,21 +336,22 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         Vertex v = g.addV(label).next();
         v.property(KEY_RESOURCE_KEY, resourceKey);
         v.property(KEY_INVENTORY_OBJECT_ID, inventoryObjectId);
+        janusGraph.tx().commit();
     }
 
     private Optional<Vertex> getVertex(ResourceKey resourceKey) {
-        return g.V().hasLabel(resourceKey.toString()).tryNext();
+        return g.V().has(KEY_RESOURCE_KEY, resourceKey).tryNext();
     }
 
     private boolean areVerticesAdjacent(Vertex vertexA, Vertex vertexB) {
         boolean isAdjacent = g.V()
-                .is(vertexA)
+                .has(KEY_RESOURCE_KEY, (String) vertexA.value(KEY_RESOURCE_KEY))
                 .both()
-                .is(vertexB)
+                .has(KEY_RESOURCE_KEY, (String) vertexB.value(KEY_RESOURCE_KEY))
                 .hasNext();
 
         LOG.debug("{} is {}adjacent to {}", vertexA.label(), isAdjacent ? "" : "not ", vertexB.label());
-        
+
         return isAdjacent;
     }
 

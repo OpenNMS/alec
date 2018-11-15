@@ -45,11 +45,12 @@ import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.engine.cluster.ClusterEngine;
 
-public class JanusGraphTest {
+public class ManagedJanusGraphTest {
     private static final String INVENTORY_OBJECT_ID = "inventoryObjectId";
     private static final String KEY_ALARMS = "alarms";
     private final ClusterEngine engine = new ClusterEngine();
-    private final ManagedJanusGraph janusGraph = new ManagedJanusGraph("inmemory");
+    private final ManagedJanusGraph janusGraph = new ManagedJanusGraph(getClass().getClassLoader()
+            .getResource("inmemory.properties").getPath());
     private GraphTraversalSource g;
 
     @Test
@@ -113,7 +114,7 @@ public class JanusGraphTest {
         engine.tick(Long.MAX_VALUE);
         assertThat(numAlarmsOnVertex("a"), equalTo(0L));
 
-        engine.getGraphManager().onUnbind(janusGraph, Collections.emptyMap());
+        engine.getGraphManager().close();
     }
 
     private GraphTraversal<org.apache.tinkerpop.gremlin.structure.Vertex,

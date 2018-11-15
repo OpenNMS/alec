@@ -265,7 +265,7 @@
         <descr>Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to %parm[newStatus]%.</descr>
         <logmsg dest="logndisplay">Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its status from %parm[prevStatus]% to %parm[newStatus]%</logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]:%parm[ifDescr]%" alarm-type="3">
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%:%parm[uplinkId]%:%parm[ifDescr]%" alarm-type="3">
             <managed-object type="snmp-interface"/>
         </alarm-data>
     </event>

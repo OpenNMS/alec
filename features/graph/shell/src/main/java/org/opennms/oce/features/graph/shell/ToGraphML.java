@@ -33,9 +33,10 @@ import java.io.File;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.features.graph.common.GraphMLConverter;
+import org.opennms.oce.features.graph.common.GraphMLConverterBuilder;
 import org.opennms.oce.features.graph.common.GraphProviderLocator;
 import org.opennms.oce.features.graph.common.OsgiGraphProviderLocator;
 import org.opennms.oce.features.graph.graphml.GraphML;
@@ -56,6 +57,12 @@ public class ToGraphML implements Action {
     @Argument(index=1, required = true)
     private String outputFileName;
 
+    @Option(name = "--includeAlarms", aliases = "-a", description = "Include alarms in the GraphML output.")
+    private boolean includeAlarms = true;
+
+    @Option(name = "--filterEmptyNodes", aliases = "-f", description = "Remove Inventory Objects that have no alarms and only one edge from the GraphML output.")
+    private boolean filterEmptyNodes = true;
+
     @Override
     public Object execute() throws InvalidGraphException {
         if ("empty".equalsIgnoreCase(graphProviderName)) {
@@ -66,7 +73,13 @@ public class ToGraphML implements Action {
 
         final GraphProviderLocator graphProviderLocator = new OsgiGraphProviderLocator(bundleContext);
         final GraphML graphML = graphProviderLocator.withGraphProvider(graphProviderName,
-                graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
+                graphProvider -> graphProvider.withReadOnlyGraph(g -> {
+                    return new GraphMLConverterBuilder()
+                            .withGraph(g)
+                            .withIncludeAlarms(includeAlarms)
+                            .withFilterEnptyNodes(filterEmptyNodes)
+                            .build().toGraphML();
+                }));
         if (graphML == null) {
             System.out.printf("No graph provider named '%s' was found.\n", graphProviderName);
             return null;

@@ -270,7 +270,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("{}: Processing cluster containing {} alarms.", timestampInMillis, clusterOfAlarms.getPoints().size());
                 }
-                situations.addAll(mapClusterToSituations(clusterOfAlarms, alarmIdToSituationMap, situationsById));
+                situations.addAll(mapClusterToSituations(clusterOfAlarms, alarmIdToSituationMap, situationsById, timestampInMillis));
             }
         });
 
@@ -296,7 +296,7 @@ public class ClusterEngine implements Engine, GraphProvider {
      */
     @VisibleForTesting
     protected Set<SituationBean> mapClusterToSituations(Cluster<AlarmInSpaceTime> clusterOfAlarms,
-            Map<String, SituationBean> alarmIdToSituationMap, Map<String, SituationBean> situationsById) {
+            Map<String, SituationBean> alarmIdToSituationMap, Map<String, SituationBean> situationsById, long timestampInMillis) {
         // Map the alarms by existing situation id, using the empty situation id id if they are not associated with an situation
         final Map<String, List<Alarm>> alarmsBySituationId = clusterOfAlarms.getPoints().stream()
                 .map(AlarmInSpaceTime::getAlarm)
@@ -320,6 +320,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             // Create a new situation with all of the alarms
             final SituationBean situation = new SituationBean();
             situation.setId(UUID.randomUUID().toString());
+            situation.setCreationTime(timestampInMillis);
             for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
                 situation.addAlarm(alarm.getAlarm());
 

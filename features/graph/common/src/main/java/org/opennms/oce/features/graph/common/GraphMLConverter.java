@@ -35,24 +35,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.graph.api.Edge;
-import org.opennms.oce.features.graph.api.OceGraph;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLEdge;
 import org.opennms.oce.features.graph.graphml.GraphMLGraph;
 import org.opennms.oce.features.graph.graphml.GraphMLNode;
 
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+
 import edu.uci.ics.jung.graph.Graph;
 
 public class GraphMLConverter {
     private final Graph<Vertex, Edge> g;
-
     private final List<Situation> situations;
-
 
     private final GraphML doc = new GraphML();
     private final GraphMLGraph graph = new GraphMLGraph();
@@ -60,9 +62,11 @@ public class GraphMLConverter {
     private final Map<String,GraphMLNode> alarmIdToGraphMLNode = new HashMap<>();
     private Vertex vertexWithMostAlarms = null;
 
+    private final Map<ResourceKey, GraphMLNode> inventoryObjectsForAlarms = new HashMap<>();
+    private final SetMultimap<GraphMLNode, GraphMLNode> garbageCollectedAlarmInventoryEdges = MultimapBuilder.hashKeys().hashSetValues().build(); 
+
     private Situation situationWithMostAlarms = null;
     private boolean includeAlarms = true;
-
     private boolean filterEmptyNodes = true;
 
     private static final String ONMS_GRAPHML_GRAPH_NAMESPACE = "namespace";
@@ -82,41 +86,32 @@ public class GraphMLConverter {
     private static final String CREATED_TIMESTAMP_KEY = "createdTimestamp";
     private static final String UPDATED_TIMESTAMP_KEY = "updatedTimestamp";
 
-    private GraphMLConverter(Graph<Vertex, Edge> g, List<Situation> situations) {
+    private static final String GARBAGE_COLLECTED_KEY = "garbage_collected";
+    private static final String EDGE_TYPE_KEY = "type";
+    private static final String TYPE_INVENTORY = "inventory";
+    private static final String TYPE_SITUATION = "situation";
+
+    GraphMLConverter(Graph<Vertex, Edge> g, List<Situation> situations) {
         this.g = Objects.requireNonNull(g);
         this.situations = Objects.requireNonNull(situations);
         graph.setProperty(ONMS_GRAPHML_GRAPH_NAMESPACE, "oce");
+        graph.setProperty(CREATED_TIMESTAMP_KEY, new Date().getTime());
         doc.addGraph(graph);
     }
 
-    public static GraphML toGraphMLWithSituations(Graph<? extends Vertex, ? extends Edge> graph, List<Situation> situations) {
-        return toGraphMLWithSituations(graph, situations, true);
-    }
-
-    public static GraphML toGraphMLWithSituations(Graph<? extends Vertex, ? extends Edge> graph, List<Situation> situations,
-            boolean includeAlarms) {
-        final GraphMLConverter converter = new GraphMLConverter((Graph<Vertex,Edge>)graph, situations);
-        converter.setIncludeAlarms(includeAlarms);
-        converter.processGraph();
-        return converter.doc;
-    }
-
-    public static GraphML toGraphMLWithSituations(Graph<? extends Vertex, ? extends Edge> graph, List<Situation> situations,
-            boolean includeAlarms, boolean filterEmptyNodes) {
-        final GraphMLConverter converter = new GraphMLConverter((Graph<Vertex, Edge>) graph, situations);
-        converter.setIncludeAlarms(includeAlarms);
-        converter.setFilterEmptyNodes(filterEmptyNodes);
-        converter.processGraph();
-        return converter.doc;
-    }
-
-    public static GraphML toGraphML(OceGraph oceGraph) {
-        final GraphMLConverter converter = new GraphMLConverter((Graph<Vertex,Edge>)oceGraph.getGraph(), oceGraph.getSituations());
-        converter.processGraph();
-        return converter.doc;
+    public GraphML toGraphML() {
+        processGraph();
+        return doc;
     }
 
     private void processGraph() {
+        // Find all InventoryObjects for all Alarms to ensure they do not get filtered.
+        for (Situation s : situations) {
+            for (Alarm a : s.getAlarms()) {
+                inventoryObjectsForAlarms.put(ResourceKey.key(a.getInventoryObjectType(), a.getInventoryObjectId()), null);
+            }
+        }
+
         for (Vertex v : g.getVertices()) {
             handleVertex(v);
         }
@@ -127,6 +122,7 @@ public class GraphMLConverter {
             for (Situation situation : situations) {
                 handleSituation(situation);
             }
+            createEdgesForGcAlarms();
         }
 
         if (situationWithMostAlarms != null) {
@@ -139,8 +135,10 @@ public class GraphMLConverter {
     }
 
     private void handleVertex(Vertex v) {
-        // Prune InventoryObjectes nodes with no Alarms and only one neighbor
-        if (filterEmptyNodes && g.getIncidentEdges(v).size() < 2 && v.getAlarms().isEmpty()) {
+        // Prune InventoryObjects nodes that have no Alarms and which have only one neighbor
+        if (filterEmptyNodes
+                && g.getIncidentEdges(v).size() < 2
+                && notAttachedToAlarm(v)) {
             return;
         }
         final GraphMLNode node = new GraphMLNode();
@@ -165,31 +163,18 @@ public class GraphMLConverter {
                 sb.append(io.getParentId());
             }
             node.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, sb.toString());
+            // Add to map for later lookup when processing GC'd Alarms
+            inventoryObjectsForAlarms.put(new ResourceKey(io.getType(), io.getId()), node);
         });
         graph.addNode(node);
 
         if (includeAlarms && v.getAlarms().size() > 0) {
+            EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(v.getCreatedTimestamp(), v.getAlarms().stream()
+                .map(a -> a.getTime()).collect(Collectors.toSet()));
+
             for (Alarm alarm : v.getAlarms()) {
-                final GraphMLNode nodeForAlarm = new GraphMLNode();
-                nodeForAlarm.setId(getVertexIdFor(v, alarm));
-                nodeForAlarm.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_REDUCTION_KEY);
-                nodeForAlarm.setProperty(ONMS_GRAPHML_LABEL, alarm.getId());
-
-                final String tooltip = "Alarm with key: " +
-                        alarm.getId() +
-                        " and severity: " +
-                        alarm.getSeverity() +
-                        " and time: " +
-                        new Date(alarm.getTime());
-                node.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
-                graph.addNode(nodeForAlarm);
-                alarmIdToGraphMLNode.put(alarm.getId(), nodeForAlarm);
-
-                GraphMLEdge edge = new GraphMLEdge();
-                edge.setId(node.getId() + "-" + nodeForAlarm.getId());
-                edge.setSource(node);
-                edge.setTarget(nodeForAlarm);
-                graph.addEdge(edge);
+                final GraphMLNode nodeForAlarm = getOrCreateAlarmNode(alarm, getVertexIdFor(v, alarm));
+                createAlarmEdge(nodeForAlarm, node, edgeTimeNormalizer, TYPE_INVENTORY);
             }
 
             // Track the vertex with the most alarms
@@ -233,26 +218,26 @@ public class GraphMLConverter {
         nodeForSituation.setId(getVertexIdFor(situation));
         nodeForSituation.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_IP_SERVICE);
         nodeForSituation.setProperty(ONMS_GRAPHML_LABEL, "Situation with ID: " + situation.getId());
+        nodeForSituation.setProperty(CREATED_TIMESTAMP_KEY, situation.getCreationTime());
+
         final String tooltip = "Situation with ID: " +
-                situation.getId() +
-                " and severity: " +
-                situation.getSeverity() +
-                " and creation time: " +
+                situation.getId() + " and severity: " +
+                situation.getSeverity() + " and creation time: " +
                 new Date(situation.getCreationTime());
         nodeForSituation.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
         graph.addNode(nodeForSituation);
 
-        for (Alarm alarm : situation.getAlarms()) {
-            final GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
-            if (nodeForAlarm == null) {
-                continue;
-            }
+        EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime(), situation.getAlarms().stream()
+            .map(a -> a.getTime()).collect(Collectors.toSet()));
 
-            GraphMLEdge edge = new GraphMLEdge();
-            edge.setId(nodeForSituation.getId() + "-" + nodeForAlarm.getId());
-            edge.setSource(nodeForSituation);
-            edge.setTarget(nodeForAlarm);
-            graph.addEdge(edge);
+        for (Alarm alarm : situation.getAlarms()) {
+            GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
+            if (nodeForAlarm == null) {
+                // Alarm has been GC'd. Create a new graphMLNode
+                nodeForAlarm = createNodeForGcAlarm(alarm);
+                graph.addNode(nodeForAlarm);
+            }
+            createAlarmEdge(nodeForAlarm, nodeForSituation, edgeTimeNormalizer, TYPE_SITUATION);
         }
 
         // Track the situation with the most alarms
@@ -279,8 +264,97 @@ public class GraphMLConverter {
         return "alarm-" + vertex.getId() + "-" + alarm.getId();
     }
 
+    public static String getAlarmVertexIdFor(String vertexId, String alarmId) {
+        return "alarm-" + vertexId + "-" + alarmId;
+    }
+
     public static String getVertexIdFor(Vertex vertex) {
         return "vertex-" + vertex.getId();
+    }
+
+    private static long getCreatedTime(GraphMLNode alarmNode) {
+        return (long) alarmNode.getProperty(CREATED_TIMESTAMP_KEY);
+    }
+
+    private void createAlarmEdge(GraphMLNode nodeForAlarm, final GraphMLNode node, EdgeTimeNormalizer edgeTimeNormalizer, String edgeType) {
+        GraphMLEdge edge = new GraphMLEdge();
+        edge.setId(node.getId() + "-" + nodeForAlarm.getId());
+        edge.setSource(node);
+        edge.setTarget(nodeForAlarm);
+        edge.setProperty(EDGE_WEIGHT_KEY, edgeTimeNormalizer.getNormalizedValue(getCreatedTime(nodeForAlarm)));
+        edge.setProperty(EDGE_TYPE_KEY, edgeType);
+        if (nodeForAlarm.getProperty(GARBAGE_COLLECTED_KEY) != null) {
+            edge.setProperty(GARBAGE_COLLECTED_KEY, nodeForAlarm.getProperty(GARBAGE_COLLECTED_KEY));
+        }
+        graph.addEdge(edge);
+    }
+
+    private GraphMLNode getOrCreateAlarmNode(Alarm alarm, String nodeId) {
+        GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
+        if (nodeForAlarm != null) {
+            return nodeForAlarm;
+        }
+
+        nodeForAlarm = new GraphMLNode();
+        nodeForAlarm.setId(nodeId);
+        nodeForAlarm.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_REDUCTION_KEY);
+        nodeForAlarm.setProperty(ONMS_GRAPHML_LABEL, alarm.getId());
+        nodeForAlarm.setProperty(CREATED_TIMESTAMP_KEY, alarm.getTime());
+
+        final String tooltip = "Alarm with key: " + alarm.getId()
+                + " and severity: " + alarm.getSeverity()
+                + " and time: " + new Date(alarm.getTime());
+        nodeForAlarm.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
+
+        graph.addNode(nodeForAlarm);
+        alarmIdToGraphMLNode.put(alarm.getId(), nodeForAlarm);
+
+        return nodeForAlarm;
+    }
+
+    private GraphMLNode createNodeForGcAlarm(Alarm alarm) {
+        GraphMLNode alarmNode = new GraphMLNode();
+        alarmNode.setId(getAlarmVertexIdFor("0", alarm.getId()));
+        alarmNode.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_REDUCTION_KEY);
+        alarmNode.setProperty(ONMS_GRAPHML_LABEL, alarm.getId());
+        alarmNode.setProperty(CREATED_TIMESTAMP_KEY, alarm.getTime());
+        alarmNode.setProperty(GARBAGE_COLLECTED_KEY, "true");
+
+        final String tooltip = "Alarm with key: " + alarm.getId() + " and severity: " + alarm.getSeverity() + " and time: " + new Date(alarm.getTime());
+        alarmNode.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
+
+        alarmIdToGraphMLNode.put(alarm.getId(), alarmNode);
+
+        // Add Edge for Alarm <-> InventoryObject
+        GraphMLNode inventoryObjectNode = inventoryObjectsForAlarms
+            .get(new ResourceKey(alarm.getInventoryObjectType(), alarm.getInventoryObjectId()));
+        if (inventoryObjectNode == null) {
+            // could not find InventoryObject node.
+            return alarmNode;
+        }
+
+        // Defer calculation of timeWeight until all nodes are scored
+        garbageCollectedAlarmInventoryEdges.put(inventoryObjectNode, alarmNode);
+
+        return alarmNode;
+    }
+
+    // Create the InvetoryObject<->Alarm Edges for Alarms that have been GC'd
+    private void createEdgesForGcAlarms() {
+        for (GraphMLNode inventoryObjectNode : garbageCollectedAlarmInventoryEdges.keySet()) {
+            EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(inventoryObjectNode.getProperty(CREATED_TIMESTAMP_KEY),
+                 garbageCollectedAlarmInventoryEdges.asMap().get(inventoryObjectNode)
+                 .stream().map(GraphMLConverter::getCreatedTime)
+                 .collect(Collectors.toSet()));
+            for (GraphMLNode alarmNode : garbageCollectedAlarmInventoryEdges.asMap().get(inventoryObjectNode)) {
+                createAlarmEdge(alarmNode, inventoryObjectNode, edgeTimeNormalizer, TYPE_INVENTORY);
+            }
+        }
+    }
+
+    private boolean notAttachedToAlarm(Vertex v) {
+        return v.getAlarms().isEmpty() && !(v.getInventoryObject().isPresent() && inventoryObjectsForAlarms
+            .containsKey(ResourceKey.key(v.getInventoryObject().get().getType(), v.getInventoryObject().get().getId())));
     }
 
 }

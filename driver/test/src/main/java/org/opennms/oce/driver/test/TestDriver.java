@@ -54,7 +54,7 @@ import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
 import org.opennms.oce.features.graph.api.GraphProvider;
-import org.opennms.oce.features.graph.common.GraphMLConverter;
+import org.opennms.oce.features.graph.common.GraphMLConverterBuilder;
 import org.opennms.oce.features.graph.graphml.GraphML;
 import org.opennms.oce.features.graph.graphml.GraphMLWriter;
 
@@ -217,7 +217,12 @@ public class TestDriver {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM_dd_yyyy_HH_mm_ss");
         String dateFormatted = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneOffset.systemDefault()));
         File destinationFile = new File(graphOutputFolder, "graph_" + dateFormatted  + ".graphml");
-        final GraphML graphML = graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML);
+        final GraphML graphML = graphProvider.withReadOnlyGraph(g -> {
+            return new GraphMLConverterBuilder()
+                    .withGraph(g)
+                    .withFilterEnptyNodes(false)
+                    .build().toGraphML();
+        });
         try {
             System.out.printf("Saving graph snapshot to %s\n", destinationFile);
             GraphMLWriter.write(graphML, destinationFile);

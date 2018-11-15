@@ -36,7 +36,6 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,14 +50,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -162,7 +159,6 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situation.getAlarms(), hasSize(2));
 
         // Now add a 3rd (unrelated) alarm on another resource
-        ResourceKey otherKey = new ResourceKey("w", "x", "y", "z");
         Alarm alarm3 = mock(Alarm.class);
         when(alarm3.getId()).thenReturn("3");
         when(alarm3.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
@@ -171,7 +167,6 @@ public class ClusterEngineTest implements SituationHandler {
         engine.onAlarmCreatedOrUpdated(alarm3);
 
         // And a 4th alarm near the last one in time, but on another resource
-        ResourceKey otherOtherKey = new ResourceKey("w", "x", "y", "z1");
         Alarm alarm4 = mock(Alarm.class);
         when(alarm4.getId()).thenReturn("4");
         when(alarm4.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
@@ -207,7 +202,7 @@ public class ClusterEngineTest implements SituationHandler {
 
         // An empty cluster should return no situations
         Cluster<AlarmInSpaceTime> emptyCluster = new Cluster<>();
-        Set<SituationBean> situations = engine.mapClusterToSituations(emptyCluster, Maps.newHashMap(), Maps.newHashMap());
+        Set<SituationBean> situations = engine.mapClusterToSituations(emptyCluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(0));
 
         AlarmInSpaceTime alarm1InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
@@ -222,13 +217,13 @@ public class ClusterEngineTest implements SituationHandler {
         // A cluster with a single alarm that was not previously mapped to an situation should be in a new situation
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
-        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap());
+        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(1));
 
         // A cluster with two alarms that were not previously mapped to an situation should be in a new situation
         cluster.addPoint(alarm2InSpaceTime);
-        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap());
+        situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
 
@@ -243,7 +238,7 @@ public class ClusterEngineTest implements SituationHandler {
             .put(existingSituation.getId(), existingSituation)
                 .build();
 
-        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById, 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null), sameInstance(existingSituation));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
@@ -258,7 +253,7 @@ public class ClusterEngineTest implements SituationHandler {
             .put(existingSituation2.getId(), existingSituation)
                 .build();
 
-        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById, 0L);
         assertThat(situations, hasSize(0));
 
         // If a cluster contains alarms in different situations and one or more alarms that are not
@@ -279,7 +274,7 @@ public class ClusterEngineTest implements SituationHandler {
                 .build();
 
         cluster.addPoint(alarm3InSpaceTime);
-        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById);
+        situations = engine.mapClusterToSituations(cluster, alarmIdToSituationMap, situationsById, 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null), sameInstance(existingSituation));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));

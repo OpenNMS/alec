@@ -51,7 +51,7 @@ import org.opennms.oce.feature.graph.rest.model.InventoryObjectSummary;
 import org.opennms.oce.feature.graph.rest.model.SituationSummary;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.Vertex;
-import org.opennms.oce.features.graph.common.GraphMLConverter;
+import org.opennms.oce.features.graph.common.GraphMLConverterBuilder;
 import org.opennms.oce.features.graph.common.GraphProviderLocator;
 import org.opennms.oce.features.graph.common.OsgiGraphProviderLocator;
 import org.opennms.oce.features.graph.graphml.GraphML;
@@ -91,9 +91,16 @@ public class GraphEndpointImpl implements GraphEndpoint {
     }
 
     @Override
-    public List<GraphDTO> getGraph(String name) throws NotFoundException {
-        final GraphML graphML = graphProviderLocator.withGraphProvider(name,
-                graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
+    public List<GraphDTO> getGraph(String name, String includeAlarms, String filterEmptyNodes) throws NotFoundException {
+        final GraphML graphML = (GraphML) graphProviderLocator
+            .withGraphProvider(name,
+                graphProvider -> graphProvider.withReadOnlyGraph(g -> {
+                                   return new GraphMLConverterBuilder()
+                                           .withGraph(g)
+                                           .withFilterEnptyNodes(Boolean.valueOf(filterEmptyNodes))
+                                           .withIncludeAlarms(Boolean.valueOf(includeAlarms))
+                                           .build().toGraphML();
+        }));
         if (graphML == null) {
             throw new NotFoundException("No graph found with name: " + name);
         }
@@ -103,9 +110,15 @@ public class GraphEndpointImpl implements GraphEndpoint {
     }
 
     @Override
-    public GraphmlType getGraphAsGraphML(String name) throws Exception {
+    public GraphmlType getGraphAsGraphML(String name, String includeAlarms, String filterEmptyNodes) throws Exception {
         final GraphML graphML = graphProviderLocator.withGraphProvider(name,
-                graphProvider -> graphProvider.withReadOnlyGraph(GraphMLConverter::toGraphML));
+                graphProvider -> graphProvider.withReadOnlyGraph(g -> {
+                    return new GraphMLConverterBuilder()
+                            .withGraph(g)
+                            .withFilterEnptyNodes(Boolean.valueOf(filterEmptyNodes))
+                            .withIncludeAlarms(Boolean.valueOf(includeAlarms))
+                            .build().toGraphML();
+                    }));
         if (graphML == null) {
             throw new NotFoundException("No graph found with name: " + name);
         }
@@ -176,7 +189,7 @@ public class GraphEndpointImpl implements GraphEndpoint {
     }
 
     @Override
-    public List<GraphDTO> getNeighborhoodOfVertex(String name, String vertexId, int hops) {
+    public List<GraphDTO> getNeighborhoodOfVertex(String name, String vertexId, int hops, String includeAlarms, String filterEmptyNodes) {
         if (vertexId == null) {
             throw new BadRequestException("Vertex ID cannot be null.");
         }
@@ -217,10 +230,14 @@ public class GraphEndpointImpl implements GraphEndpoint {
                         situationsWithAlarmOnGraph = Collections.emptyList();
                     }
 
-                    final boolean includeAlarms = hops >= 1;
+                    final boolean effectiveIncludeAlarms = hops >= 1 && Boolean.valueOf(includeAlarms);
 
                     // Convert
-                    return GraphMLConverter.toGraphMLWithSituations(filteredGraph, situationsWithAlarmOnGraph, includeAlarms);
+                    return new GraphMLConverterBuilder().withGraph(filteredGraph)
+                            .withSituations(situationsWithAlarmOnGraph)
+                            .withIncludeAlarms(effectiveIncludeAlarms)
+                            .withFilterEnptyNodes(Boolean.valueOf(filterEmptyNodes))
+                            .build().toGraphML();
         }));
         if (graphML == null) {
             throw new NotFoundException("No vertex found with ID: " + effectiveVertexId);

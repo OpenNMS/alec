@@ -31,10 +31,12 @@ package org.opennms.oce.feature.graph.rest.api;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.graphdrawing.graphml.GraphmlType;
 import org.opennms.oce.feature.graph.rest.model.AlarmSummary;
@@ -54,12 +56,16 @@ public interface GraphEndpoint {
     @GET
     @Path("{name}")
     @Produces("application/json")
-    List<GraphDTO> getGraph(@PathParam("name") String name) throws Exception;
+    List<GraphDTO> getGraph(@PathParam("name") String name,
+            @DefaultValue("true") @QueryParam("includeAlarms") String includeAlarms,
+            @DefaultValue("true") @QueryParam("filterEmptyNodes") String filterEmptyNodes) throws Exception;
 
     @GET
     @Path("{name}/graphml")
     @Produces("application/xml")
-    GraphmlType getGraphAsGraphML(@PathParam("name") String name) throws Exception;
+    GraphmlType getGraphAsGraphML(@PathParam("name") String name,
+            @DefaultValue("true") @QueryParam("includeAlarms") String includeAlarms,
+            @DefaultValue("true") @QueryParam("filterEmptyNodes") String filterEmptyNodes) throws Exception;
 
     @GET
     @Path("{name}/situations")
@@ -84,6 +90,8 @@ public interface GraphEndpoint {
     @GET
     @Path("{name}/neighborhood/{vertexId}")
     @Produces("application/json")
-    List<GraphDTO> getNeighborhoodOfVertex(@PathParam("name") String name, @PathParam("vertexId") String vertexId, int hops) throws Exception;
+    List<GraphDTO> getNeighborhoodOfVertex(@PathParam("name") String name, @PathParam("vertexId") String vertexId, int hops,
+            @DefaultValue("true") @QueryParam("includeAlarms") String includeAlarms,
+            @DefaultValue("true") @QueryParam("filterEmptyNodes") String filterEmptyNodes) throws Exception;
 
 }

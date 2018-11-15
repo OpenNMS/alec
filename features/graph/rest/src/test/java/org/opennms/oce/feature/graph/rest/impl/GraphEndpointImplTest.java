@@ -80,12 +80,12 @@ public class GraphEndpointImplTest {
 
     @Test
     public void canRetrieveGraphAsGraphDTO() throws Exception {
-        assertThat(graphEndpoint.getGraph("mock"), hasSize(1));
+        assertThat(graphEndpoint.getGraph("mock", "true", "true"), hasSize(1));
     }
 
     @Test
     public void canRetrieveGraphAsGraphML() throws Exception {
-        final GraphmlType graphmlType = graphEndpoint.getGraphAsGraphML("mock");
+        final GraphmlType graphmlType = graphEndpoint.getGraphAsGraphML("mock", "true", "true");
         final GraphML graphML = GraphMLReader.convert(graphmlType);
         assertThat(graphML.getGraphs(), hasSize(1));
     }
@@ -113,8 +113,8 @@ public class GraphEndpointImplTest {
     @Test
     public void canGetNeighborhoodOfInventoryObject() throws Exception {
         final InventoryObjectSummary io = graphEndpoint.getInventoryObjectsWithTypeOnGraph("mock", "c1").get(0);
-        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 0).get(0).getVertices(), hasSize(1));
-        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 1).get(0).getVertices(), hasSize(2));
-        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 2).get(0).getVertices(), hasSize(3));
+        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 0, "true", "true").get(0).getVertices(), hasSize(1));
+        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 1, "true", "true").get(0).getVertices(), hasSize(2));
+        assertThat(graphEndpoint.getNeighborhoodOfVertex("mock", io.getVertexId(), 2, "true", "true").get(0).getVertices(), hasSize(3));
     }
 }

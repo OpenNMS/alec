@@ -79,9 +79,9 @@ public class OsgiGraphProviderLocator implements GraphProviderLocator {
         }
         if (graphProviderRefs != null) {
             for (ServiceReference<?> graphProviderRef : graphProviderRefs) {
-                final String name = (String)graphProviderRef.getProperty("name");
+                final String name = (String) graphProviderRef.getProperty("name");
                 if (graphProviderName.equalsIgnoreCase(name)) {
-                    final GraphProvider graphProvider = bundleContext.getService((ServiceReference<GraphProvider>)graphProviderRef);
+                    final GraphProvider graphProvider = bundleContext.getService((ServiceReference<GraphProvider>) graphProviderRef);
                     try {
                         return function.apply(graphProvider);
                     } finally {

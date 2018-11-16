@@ -183,12 +183,12 @@ Now that we've validated the system, we can view the resulting graph generated b
 
 From the Sentinel Karaf shell:
 ```
-graph:write-graphml cluster /tmp/oce.cluster.grapml
+graph:write-graphml cluster /tmp/oce.cluster.graphml
 ```
 
 Import the graph:
 ```
-curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/oce.cluster.grapml 'http://localhost:8980/opennms/rest/graphml/OCE'
+curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/oce.cluster.graphml 'http://localhost:8980/opennms/rest/graphml/oce'
 ```
 
 View the OCE graph in the Topology UI.

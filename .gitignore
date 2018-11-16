@@ -27,5 +27,6 @@ java/bin/
 *.swp
 *.iml
 .DS_Store
+*.swo
 
 dependency-reduced-pom.xml

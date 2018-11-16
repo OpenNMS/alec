@@ -40,7 +40,7 @@
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <!-- Automatically install the standalone processor when using the direct datasource -->
-        <feature version="${opennms.api.version}">oce-processor-standalone</feature>
+        <feature version="${project.version}">oce-processor-standalone</feature>
 
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms-direct/${project.version}</bundle>

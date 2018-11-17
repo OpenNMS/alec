@@ -93,7 +93,8 @@ public class ManagedJanusGraphTest {
         alarm1.setTime(newTime);
         engine.onAlarmCreatedOrUpdated(alarm1);
         assertThat(numAlarmsOnVertex("a"), equalTo(2L));
-        boolean alarm1SeverityUpdated = getVertexTraversal("a").properties(KEY_ALARMS).toStream()
+        boolean alarm1SeverityUpdated = getVertexTraversal("a").properties(KEY_ALARMS)
+                .toStream()
                 .anyMatch(alarmProperty -> {
                     Alarm alarm = (Alarm) alarmProperty.value();
                     return alarm.getId().equals("alarm1") && alarm.getSeverity() == Severity.CRITICAL &&

@@ -65,6 +65,7 @@ public class CassandraESIT {
     private GraphTraversalSource g;
     private static Session cassandraSession;
     private static final EmbeddedElastic embeddedElastic = EmbeddedElastic.builder()
+            // TODO: Do we want to test a specific version?
             .withElasticVersion("5.0.0")
             .withSetting(PopularProperties.HTTP_PORT, 9200)
             .withSetting(PopularProperties.CLUSTER_NAME, "janusgraph")
@@ -74,7 +75,11 @@ public class CassandraESIT {
     public static void start() throws ConfigurationException, IOException, TTransportException,
             InterruptedException {
         EmbeddedCassandraServerHelper.startEmbeddedCassandra("cassandra.yaml");
-        cassandraSession = Cluster.builder().addContactPoints("127.0.0.1").withPort(9042).build().connect();
+        cassandraSession = Cluster.builder()
+                .addContactPoints("127.0.0.1")
+                .withPort(9042)
+                .build()
+                .connect();
         embeddedElastic.start();
     }
 

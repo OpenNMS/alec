@@ -36,15 +36,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
-import org.janusgraph.core.JanusGraphTransaction;
 import org.janusgraph.core.schema.JanusGraphManagement;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -76,38 +73,49 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
     }
 
     private void createSchema() {
-        JanusGraphManagement mgmt = janusGraph.openManagement();
+        JanusGraphManagement janusGraphManagement = janusGraph.openManagement();
 
         try {
             // The resource key property uniquely identifies a vertex and is also used as the vertex's label
-            if (!mgmt.containsPropertyKey(KEY_RESOURCE_KEY)) {
-                mgmt.makePropertyKey(KEY_RESOURCE_KEY).dataType(String.class).cardinality(Cardinality.SINGLE).make();
-                mgmt.buildIndex(KEY_RESOURCE_KEY, Vertex.class).addKey(mgmt.getPropertyKey(KEY_RESOURCE_KEY))
+            if (!janusGraphManagement.containsPropertyKey(KEY_RESOURCE_KEY)) {
+                janusGraphManagement.makePropertyKey(KEY_RESOURCE_KEY)
+                        .dataType(String.class)
+                        .cardinality(Cardinality.SINGLE).make();
+                janusGraphManagement.buildIndex(KEY_RESOURCE_KEY, Vertex.class)
+                        .addKey(janusGraphManagement.getPropertyKey(KEY_RESOURCE_KEY))
                         .buildCompositeIndex();
             }
 
-            if (!mgmt.containsPropertyKey(KEY_INVENTORY_OBJECT_ID)) {
-                mgmt.makePropertyKey(KEY_INVENTORY_OBJECT_ID).dataType(String.class).cardinality(Cardinality.SINGLE).make();
-                mgmt.buildIndex(KEY_INVENTORY_OBJECT_ID, Vertex.class)
-                        .addKey(mgmt.getPropertyKey(KEY_INVENTORY_OBJECT_ID)).buildCompositeIndex();
+            if (!janusGraphManagement.containsPropertyKey(KEY_INVENTORY_OBJECT_ID)) {
+                janusGraphManagement.makePropertyKey(KEY_INVENTORY_OBJECT_ID)
+                        .dataType(String.class)
+                        .cardinality(Cardinality.SINGLE).make();
+                janusGraphManagement.buildIndex(KEY_INVENTORY_OBJECT_ID, Vertex.class)
+                        .addKey(janusGraphManagement.getPropertyKey(KEY_INVENTORY_OBJECT_ID))
+                        .buildCompositeIndex();
             }
 
-            if (!mgmt.containsPropertyKey(KEY_ALARMS)) {
-                mgmt.makePropertyKey(KEY_ALARMS).dataType(Object.class).cardinality(Cardinality.SET).make();
+            if (!janusGraphManagement.containsPropertyKey(KEY_ALARMS)) {
+                janusGraphManagement.makePropertyKey(KEY_ALARMS)
+                        .dataType(Object.class)
+                        .cardinality(Cardinality.SET).make();
             }
 
             // This property is for indexing purposes and just identifies whether or not a vertex has an alarms attached
             // to it
-            if (!mgmt.containsPropertyKey(KEY_HAS_ALARMS)) {
-                mgmt.makePropertyKey(KEY_HAS_ALARMS).dataType(Boolean.class).cardinality(Cardinality.SINGLE).make();
-                mgmt.buildIndex(KEY_HAS_ALARMS, Vertex.class)
-                        .addKey(mgmt.getPropertyKey(KEY_HAS_ALARMS)).buildCompositeIndex();
+            if (!janusGraphManagement.containsPropertyKey(KEY_HAS_ALARMS)) {
+                janusGraphManagement.makePropertyKey(KEY_HAS_ALARMS)
+                        .dataType(Boolean.class)
+                        .cardinality(Cardinality.SINGLE).make();
+                janusGraphManagement.buildIndex(KEY_HAS_ALARMS, Vertex.class)
+                        .addKey(janusGraphManagement.getPropertyKey(KEY_HAS_ALARMS))
+                        .buildCompositeIndex();
             }
 
-            mgmt.commit();
+            janusGraphManagement.commit();
         } catch (Exception e) {
             LOG.warn("Encountered exception while creating properties", e);
-            mgmt.rollback();
+            janusGraphManagement.rollback();
         }
     }
 
@@ -159,9 +167,15 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
 
             if (!areVerticesAdjacent(vertex, parentVertex.get())) {
                 LOG.debug("Adding edge between child: {} and parent: {}", vertex, parentVertex.get());
-                vertex.addEdge("parent", parentVertex.get(), "id", edgeIdGenerator.getAndIncrement(),
-                        "weight", io.getWeightToParent());
-                janusGraph.tx().commit();
+
+                try {
+                    vertex.addEdge("parent", parentVertex.get(), "id", edgeIdGenerator.getAndIncrement(),
+                            "weight", io.getWeightToParent());
+                    janusGraph.tx().commit();
+                } catch (Exception e) {
+                    LOG.warn("Encountered exception while building parent relationship", e);
+                    janusGraph.tx().rollback();
+                }
             }
         }
 
@@ -182,9 +196,15 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
 
             if (!areVerticesAdjacent(vertex, peerVertex.get())) {
                 LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex.get(), vertex);
-                vertex.addEdge("peer", peerVertex.get(), "id",
-                        edgeIdGenerator.getAndIncrement(), "weight", peerRef.getWeight());
-                janusGraph.tx().commit();
+
+                try {
+                    vertex.addEdge("peer", peerVertex.get(), "id",
+                            edgeIdGenerator.getAndIncrement(), "weight", peerRef.getWeight());
+                    janusGraph.tx().commit();
+                } catch (Exception e) {
+                    LOG.warn("Encountered exception while building peer relationship", e);
+                    janusGraph.tx().rollback();
+                }
             }
         }
 
@@ -206,9 +226,14 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
             if (!areVerticesAdjacent(vertex, relativeVertex.get())) {
                 LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex.get(),
                         vertex);
-                vertex.addEdge("relative", relativeVertex.get(), "id",
-                        edgeIdGenerator.getAndIncrement(), "weight", relativeRef.getWeight());
-                janusGraph.tx().commit();
+                try {
+                    vertex.addEdge("relative", relativeVertex.get(), "id",
+                            edgeIdGenerator.getAndIncrement(), "weight", relativeRef.getWeight());
+                    janusGraph.tx().commit();
+                } catch (Exception e) {
+                    LOG.warn("Encountered exception while building relative relationship", e);
+                    janusGraph.tx().rollback();
+                }
             }
         }
 
@@ -225,8 +250,6 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
 
     @Override
     public void removeInventory(Collection<InventoryObject> inventory) {
-        JanusGraphTransaction transaction = janusGraph.newTransaction();
-
         try {
             for (InventoryObject io : inventory) {
                 ResourceKey resourceKey = getResourceKeyFor(io);
@@ -234,10 +257,10 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
                 deferredIos.remove(io);
             }
 
-            transaction.commit();
+            janusGraph.tx().commit();
         } catch (Exception e) {
             LOG.warn("Encountered exception while removing inventory", e);
-            transaction.rollback();
+            janusGraph.tx().rollback();
         }
     }
 
@@ -262,17 +285,16 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         // Add this alarm to the vertex replacing an existing alarm that is being updated if necessary
         // Note: I'm not sure if there is an easier way to enforce a replacement for an updated alarm... for now I am
         // removing the alarm if the ID is the same and then replacing it
-        JanusGraphTransaction transaction = janusGraph.newTransaction();
-
         try {
             removeAlarmFromVertex(resourceKey, alarm);
-            Vertex v = getVertex(resourceKey).get();
-            v.property(KEY_ALARMS, alarm);
-            v.property(KEY_HAS_ALARMS, true);
-            transaction.commit();
+            getVertex(resourceKey).get()
+                    .property(KEY_ALARMS, alarm)
+                    .element()
+                    .property(KEY_HAS_ALARMS, true);
+            janusGraph.tx().commit();
         } catch (Exception e) {
             LOG.warn("Encountered exception while adding/updating alarm", e);
-            transaction.rollback();
+            janusGraph.tx().rollback();
         }
     }
 
@@ -281,32 +303,42 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         long problemCutoffMs = currentTimeMs - problemTimeoutMs;
         long clearCutoffMs = currentTimeMs - clearTimeoutMs;
 
-        g.V().has(KEY_HAS_ALARMS, true).forEachRemaining(vertexWithAlarms -> {
-            LOG.debug("GCing vertex {}", vertexWithAlarms);
+        try {
+            g.V()
+                    .has(KEY_HAS_ALARMS, true)
+                    .forEachRemaining(vertexWithAlarms -> {
+                        LOG.debug("GCing vertex {}", vertexWithAlarms);
 
-            vertexWithAlarms.properties(KEY_ALARMS).forEachRemaining(alarmProperty -> {
-                Alarm alarm = (Alarm) alarmProperty.value();
-                LOG.trace("Considering alarm {} for GC", alarm);
+                        vertexWithAlarms.properties(KEY_ALARMS).forEachRemaining(alarmProperty -> {
+                            Alarm alarm = (Alarm) alarmProperty.value();
+                            LOG.trace("Considering alarm {} for GC", alarm);
 
-                if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
-                    LOG.debug("GCing cleared alarm with id: {}, alarm time is: {} " +
-                                    "which is before the cutoff time of: {}", alarm.getId(), new Date(alarm.getTime()),
-                            new Date(clearCutoffMs));
-                    alarmProperty.remove();
-                } else if (!alarm.isClear() && alarm.getTime() < problemCutoffMs) {
-                    LOG.debug("GCing problem alarm with id: {}, alarm time is: {} " +
-                                    "which is before the cutoff time of: {}", alarm.getId(), new Date(alarm.getTime()),
-                            new Date(problemCutoffMs));
-                    alarmProperty.remove();
-                }
-            });
+                            if (alarm.isClear() && alarm.getTime() < clearCutoffMs) {
+                                LOG.debug("GCing cleared alarm with id: {}, alarm time is: {} " +
+                                                "which is before the cutoff time of: {}", alarm.getId(),
+                                        new Date(alarm.getTime()),
+                                        new Date(clearCutoffMs));
+                                alarmProperty.remove();
+                            } else if (!alarm.isClear() && alarm.getTime() < problemCutoffMs) {
+                                LOG.debug("GCing problem alarm with id: {}, alarm time is: {} " +
+                                                "which is before the cutoff time of: {}", alarm.getId(),
+                                        new Date(alarm.getTime()),
+                                        new Date(problemCutoffMs));
+                                alarmProperty.remove();
+                            }
+                        });
 
-            if (!vertexWithAlarms.properties(KEY_ALARMS).hasNext()) {
-                vertexWithAlarms.property(KEY_HAS_ALARMS, false);
-            }
-        });
+                        if (!vertexWithAlarms.properties(KEY_ALARMS).hasNext()) {
+                            vertexWithAlarms.property(KEY_HAS_ALARMS, false);
+                        }
+                    });
 
-        janusGraph.tx().commit();
+            janusGraph.tx().commit();
+        } catch (Exception e) {
+            LOG.warn("Encountered exception while GCing alarms", e);
+            janusGraph.tx().rollback();
+        }
+
     }
 
     @Override
@@ -317,11 +349,14 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
     private void removeAlarmFromVertex(ResourceKey resourceKey, Alarm alarm) {
         // Note: the flag signifying whether or not this vertex has alarms is not modified since it is assumed this
         // vertex is about to have an alarm added and that will take care of the flag
-        g.V().has(KEY_RESOURCE_KEY, resourceKey).properties(KEY_ALARMS).forEachRemaining(alarmOnVertex -> {
-            if (((Alarm) alarmOnVertex.value()).getId().equals(alarm.getId())) {
-                alarmOnVertex.remove();
-            }
-        });
+        g.V()
+                .has(KEY_RESOURCE_KEY, resourceKey)
+                .properties(KEY_ALARMS)
+                .forEachRemaining(alarmOnVertex -> {
+                    if (((Alarm) alarmOnVertex.value()).getId().equals(alarm.getId())) {
+                        alarmOnVertex.remove();
+                    }
+                });
     }
 
     private void addVertex(ResourceKey resourceKey, String inventoryObjectId) {
@@ -333,10 +368,18 @@ public class ManagedJanusGraph extends AbstractManagedGraph {
         }
 
         LOG.debug("Adding vertex with resource key: {} for inventory object id: {}", resourceKey, inventoryObjectId);
-        Vertex v = g.addV(label).next();
-        v.property(KEY_RESOURCE_KEY, resourceKey);
-        v.property(KEY_INVENTORY_OBJECT_ID, inventoryObjectId);
-        janusGraph.tx().commit();
+
+        try {
+            g.addV(label)
+                    .next()
+                    .property(KEY_RESOURCE_KEY, resourceKey)
+                    .element()
+                    .property(KEY_INVENTORY_OBJECT_ID, inventoryObjectId);
+            janusGraph.tx().commit();
+        } catch (Exception e) {
+            LOG.warn("Encountered exception while adding vertex", e);
+            janusGraph.tx().rollback();
+        }
     }
 
     private Optional<Vertex> getVertex(ResourceKey resourceKey) {

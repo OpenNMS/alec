@@ -62,20 +62,6 @@ public class GraphManager implements ManagedGraph {
     }
 
     public synchronized void onBind(ManagedGraph managedGraph, Map properties) {
-        // Ignore binds for ManagedCEGraph since that implementation is manually managed
-        if (managedGraph instanceof ManagedCEGraph) {
-            LOG.warn("Attempted to bind an instance of ManagedCEGraph");
-
-            return;
-        }
-
-        // This GraphManager should never be managing another GraphManager
-        if (managedGraph instanceof GraphManager) {
-            LOG.warn("Attempted to bind an instance of GraphManager");
-
-            return;
-        }
-
         LOG.debug("bind called with {}: {}", managedGraph, properties);
 
         if (managedGraph != null) {
@@ -84,18 +70,6 @@ public class GraphManager implements ManagedGraph {
     }
 
     public synchronized void onUnbind(ManagedGraph managedGraph, Map properties) {
-        // Ignore unbinds for ManagedCEGraph since that implementation is manually managed
-        if (managedGraph instanceof ManagedCEGraph) {
-            return;
-        }
-
-        // This GraphManager should never be managing another GraphManager
-        if (managedGraph instanceof GraphManager) {
-            LOG.warn("Attempted to unbind an instance of GraphManager");
-
-            return;
-        }
-
         LOG.debug("Unbind called with {}: {}", managedGraph, properties);
 
         if (managedGraph != null) {
@@ -105,10 +79,6 @@ public class GraphManager implements ManagedGraph {
 
     public static GraphManager newGraphManager() {
         return new GraphManager(Collections.emptySet());
-    }
-    
-    public static GraphManager newGraphManagerWithGraphs(Set<ManagedGraph> defaultGraphs) {
-        return new GraphManager(defaultGraphs);
     }
 
     @Override
@@ -190,10 +160,12 @@ public class GraphManager implements ManagedGraph {
     }
 
     synchronized void addGraph(ManagedGraph managedGraph) {
+        LOG.info("Adding graph {}", managedGraph);
         graphs.add(managedGraph);
     }
 
     synchronized void removeGraph(ManagedGraph managedGraph) {
+        LOG.info("Removing graph {}", managedGraph);
         graphs.remove(managedGraph);
     }
 }

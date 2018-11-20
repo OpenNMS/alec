@@ -129,11 +129,48 @@
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.rest/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-janusgraph" description="OCE :: Features :: Graph :: JanusGraph" version="${project.version}">
+    <feature name='gremlin-driver' description='gremlin-driver OSGi bundle' version='${project.version}'>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-common/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-buffer/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-transport/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-handler/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-transport-native-epoll/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-codec/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:io.netty/netty-codec-http/4.0.43.Final</bundle>
+        <bundle start-level="40" dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
+        <bundle start-level="40" dependency="true">mvn:commons-io/commons-io/2.3</bundle>
+        <bundle start-level="40" dependency="true">mvn:commons-lang/commons-lang/2.6</bundle>
+        <bundle start-level="40" dependency="true">mvn:commons-configuration/commons-configuration/1.10</bundle>
+        <bundle start-level="40" dependency="true">mvn:commons-collections/commons-collections/3.2.2</bundle>
+        <bundle start-level="40" dependency="true">mvn:org.apache.commons/commons-lang3/3.3.1</bundle>
+        <bundle start-level="40" dependency="true">mvn:org.codehaus.groovy/groovy-all/2.4.15</bundle>
+        <bundle start-level="40" dependency="true">wrap:mvn:net.objecthunter/exp4j/0.4.8</bundle>
+        <bundle start-level="40" dependency="true">wrap:mvn:com.squareup/javapoet/1.8.0</bundle>
+        <bundle start-level="50">
+            mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.gremlin-driver/${project.version}
+        </bundle>
+    </feature>
+
+    <feature name='janusgraph-core' description='janusgraph-core OSGi bundle' version='${project.version}'>
+        <feature dependency="true">gremlin-driver</feature>
+        <bundle start-level="40" dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+        <bundle start-level="40" dependency="true">mvn:commons-codec/commons-codec/1.7</bundle>
+        <bundle start-level="40" dependency="true">mvn:org.apache.commons/commons-text/1.3</bundle>
+        <bundle start-level="40" dependency="true">mvn:org.locationtech.spatial4j/spatial4j/0.7</bundle>
+        <bundle start-level="40" dependency="true">mvn:org.locationtech.jts/jts-core/1.15.0</bundle>
+        <bundle start-level="40" dependency="true">
+            mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.gremlin-groovy/${project.version}
+        </bundle>
+        <bundle start-level="50">
+            mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.janusgraph-core/${project.version}
+        </bundle>
+    </feature>
+
+    <feature name="oce-features-graph-janusgraph" description="OCE :: Features :: Graph :: JanusGraph"
+             version="${project.version}">
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
-        <!-- TODO: The following bundle gives me an error that it does not contain a manifest when I attempt to install
-         this feature -->
-        <bundle dependency="true">mvn:org.janusgraph/janusgraph-core/0.3.1</bundle>
+        <feature dependency="true" version="${project.version}">janusgraph-core</feature>
+        <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.oce.features.graph/org.opennms.oce.features.graph.janusgraph/${project.version}</bundle>
     </feature>
 
@@ -228,7 +265,7 @@
     <feature name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
         <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle >mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>

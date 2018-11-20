@@ -138,21 +138,14 @@ public class ClusterEngine implements Engine, GraphProvider {
     private final CountDownLatch initLock = new CountDownLatch(1);
 
     public ClusterEngine() {
-        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA, null);
+        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA, GraphManager.newGraphManager());
     }
 
     public ClusterEngine(double epsilon, double alpha, double beta, GraphManager graphManager) {
         this.epsilon = epsilon;
         distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
-
-        if (graphManager != null) {
-            this.graphManager = graphManager;
-            this.graphManager.addGraph(ceGraph);
-        } else {
-            // If we didn't get passed a GraphManager then we are likely in a test context so we can instantiate one
-            // directly
-            this.graphManager = GraphManager.newGraphManagerWithGraphs(Collections.singleton(ceGraph));
-        }
+        this.graphManager = Objects.requireNonNull(graphManager);
+        this.graphManager.addGraph(ceGraph);
     }
 
     @Override

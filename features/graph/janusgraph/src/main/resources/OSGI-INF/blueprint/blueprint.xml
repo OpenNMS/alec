@@ -8,8 +8,11 @@
             <cm:property name="storageBackend" value="inmemory"/>
         </cm:default-properties>
     </cm:property-placeholder>
-    <bean id="managedJanusGraph" class="org.opennms.oce.features.graph.janusgraph.ManagedJanusGraph">
+    <bean id="managedJanusGraph" class="org.opennms.oce.features.graph.janusgraph.ManagedJanusGraph" >
         <argument value="${storageBackend}"/>
     </bean>
+    <!-- Service entry for runtime binding with the GraphManager -->
     <service ref="managedJanusGraph" interface="org.opennms.oce.features.graph.api.ManagedGraph"/>
+    <!-- Service entry for runtime binding with the ListVertices command -->
+    <service ref="managedJanusGraph" interface="org.opennms.oce.features.graph.janusgraph.ManagedJanusGraph"/>
 </blueprint>

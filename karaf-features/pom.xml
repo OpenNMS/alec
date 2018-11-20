@@ -99,9 +99,10 @@
                                 <feature>oce-features-graph-graphml</feature>
                                 <feature>oce-features-graph-common</feature>
                                 <feature>oce-features-graph-shell</feature>
-				<!-- Depends on blueprint common
-                                <feature>oce-features-graph-rest</feature>
-				-->
+                                <feature>oce-features-graph-janusgraph</feature>
+                                <!-- Depends on blueprint common
+                                                <feature>oce-features-graph-rest</feature>
+                                -->
                                 <feature>oce-processor-api</feature>
                                 <!-- Depends on a reference to a SituationDatasource impl.
                                 <feature>oce-processor-standalone</feature>

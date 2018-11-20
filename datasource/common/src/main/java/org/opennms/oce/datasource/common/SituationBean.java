@@ -29,10 +29,12 @@
 package org.opennms.oce.datasource.common;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.ResourceKey;
@@ -45,7 +47,7 @@ public class SituationBean implements Situation {
 
     private Severity severity = Severity.INDETERMINATE;
     private List<ResourceKey> resourceKeys = new ArrayList<>();
-    private Set<Alarm> alarms = new LinkedHashSet<>();
+    private Map<String, Alarm> alarms = new HashMap<>();
     private String diagnosticText;
 
     public SituationBean() {
@@ -60,7 +62,7 @@ public class SituationBean implements Situation {
         this.creationTime = situation.getCreationTime();
         this.severity = situation.getSeverity();
         this.resourceKeys.addAll(situation.getResourceKeys());
-        this.alarms.addAll(situation.getAlarms());
+        this.alarms.putAll(situation.getAlarms().stream().collect(Collectors.toMap(Alarm::getId, a -> a)));
         this.diagnosticText = situation.getDiagnosticText();
     }
 
@@ -97,15 +99,15 @@ public class SituationBean implements Situation {
 
     @Override
     public Set<Alarm> getAlarms() {
-        return alarms;
+        return alarms.values().stream().collect(Collectors.toSet());
     }
 
     public void setAlarms(Set<Alarm> alarms) {
-        this.alarms = alarms;
+        this.alarms = alarms.stream().collect(Collectors.toMap(Alarm::getId, a -> a));
     }
 
     public void addAlarm(Alarm alarm) {
-        alarms.add(alarm);
+        alarms.put(alarm.getId(), alarm);
     }
 
     public Severity getSeverity() {

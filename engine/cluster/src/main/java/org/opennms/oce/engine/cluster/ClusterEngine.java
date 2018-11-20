@@ -297,7 +297,7 @@ public class ClusterEngine implements Engine, GraphProvider {
     @VisibleForTesting
     protected Set<SituationBean> mapClusterToSituations(Cluster<AlarmInSpaceTime> clusterOfAlarms,
             Map<String, SituationBean> alarmIdToSituationMap, Map<String, SituationBean> situationsById, long timestampInMillis) {
-        // Map the alarms by existing situation id, using the empty situation id id if they are not associated with an situation
+        // Map the alarms by existing situation id, using the EMPTY_SITUATION_ID if they are not associated with an situation
         final Map<String, List<Alarm>> alarmsBySituationId = clusterOfAlarms.getPoints().stream()
                 .map(AlarmInSpaceTime::getAlarm)
                 .collect(Collectors.groupingBy(a -> {
@@ -323,7 +323,6 @@ public class ClusterEngine implements Engine, GraphProvider {
             situation.setCreationTime(timestampInMillis);
             for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
                 situation.addAlarm(alarm.getAlarm());
-
             }
             situations.add(situation);
         } else if (alarmsBySituationId.size() == 2) {
@@ -335,8 +334,10 @@ public class ClusterEngine implements Engine, GraphProvider {
             if (situation == null) {
                 throw new IllegalStateException("Should not happen.");
             }
-
-            alarmsBySituationId.get(EMPTY_SITUATION_ID).forEach(situation::addAlarm);
+            // Add all the alarms to the Situation, replacing any older references....
+            for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
+                situation.addAlarm(alarm.getAlarm());
+            }
             situations.add(situation);
         } else {
             // The alarms in this cluster already belong to different situations
@@ -351,6 +352,11 @@ public class ClusterEngine implements Engine, GraphProvider {
                 .filter(e -> !EMPTY_SITUATION_ID.equals(e.getKey()))
                     .flatMap(e -> e.getValue().stream())
                     .collect(Collectors.toList());
+
+            // refresh the situations with the existing alarms
+            candidateAlarms.stream().forEach(alarm -> {
+                alarmIdToSituationMap.get(alarm.getId()).addAlarm(alarm);
+            });
 
             // For each of these we want to associate the alarm with the other alarm that is the "closest"
             for (Alarm alarm : alarmsWithoutSituations) {

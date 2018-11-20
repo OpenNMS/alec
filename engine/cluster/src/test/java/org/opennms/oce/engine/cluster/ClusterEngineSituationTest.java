@@ -46,6 +46,8 @@ import org.opennms.oce.datasource.api.SituationHandler;
 import org.opennms.oce.datasource.common.AlarmBean;
 import org.opennms.oce.datasource.common.SituationBean;
 
+import com.google.common.collect.Iterables;
+
 public class ClusterEngineSituationTest implements SituationHandler {
 
     private List<Situation> triggeredSituations = new ArrayList<>();
@@ -102,6 +104,20 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // The situation should have the same id as the initial situation
         assertThat(triggeredSituations.get(0).getId(), equalTo(initialSituation.getId()));
         assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
+
+        // Assert that the situation alarm has been updated and has the correct time
+        AlarmBean a1_ = new AlarmBean();
+        a1_.setId("a1");
+        a1_.setInventoryObjectId("n1");
+        a1_.setInventoryObjectType("node");
+        a1_.setTime(100L);
+        alarms = Arrays.asList(a1_, a2, a3);
+        clusterEngine = new ClusterEngine();
+        clusterEngine.init(alarms, Collections.singletonList(initialSituation), Collections.emptyList());
+        clusterEngine.registerSituationHandler(this);
+        clusterEngine.tick(clusterEngine.getTickResolutionMs());
+        assertThat(Iterables.getLast(triggeredSituations).getAlarms().stream().filter(a -> a.getId().equals("a1")).findFirst().get().getTime(),
+                   equalTo(100L));
     }
 
     @Override

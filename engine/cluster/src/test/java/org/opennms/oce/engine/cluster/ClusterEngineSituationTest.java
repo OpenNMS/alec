@@ -102,22 +102,27 @@ public class ClusterEngineSituationTest implements SituationHandler {
         assertThat(triggeredSituations, hasSize(1));
 
         // The situation should have the same id as the initial situation
-        assertThat(triggeredSituations.get(0).getId(), equalTo(initialSituation.getId()));
-        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
+        assertThat(Iterables.getLast(triggeredSituations).getId(), equalTo(initialSituation.getId()));
+        assertThat(Iterables.getLast(triggeredSituations).getAlarms(), containsInAnyOrder(a1, a2, a3));
+        assertThat(Iterables.getLast(triggeredSituations).getDiagnosticText(),
+                   equalTo("The 3 alarms happened within 0.00 seconds across 1 vertices."));
 
         // Assert that the situation alarm has been updated and has the correct time
         AlarmBean a1_ = new AlarmBean();
         a1_.setId("a1");
         a1_.setInventoryObjectId("n1");
         a1_.setInventoryObjectType("node");
-        a1_.setTime(100L);
+        a1_.setTime(10000L);
         alarms = Arrays.asList(a1_, a2, a3);
         clusterEngine = new ClusterEngine();
         clusterEngine.init(alarms, Collections.singletonList(initialSituation), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());
         assertThat(Iterables.getLast(triggeredSituations).getAlarms().stream().filter(a -> a.getId().equals("a1")).findFirst().get().getTime(),
-                   equalTo(100L));
+                   equalTo(10000L));
+        assertThat(Iterables.getLast(triggeredSituations).getDiagnosticText(),
+                   equalTo("The 3 alarms happened within 10.00 seconds across 1 vertices."));
+
     }
 
     @Override

@@ -6,6 +6,7 @@
     <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms.kafka" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="alarmTopic" value="alarms"/>
+            <cm:property name="alarmFeedbackTopic" value="alarmFeedback"/>
             <cm:property name="nodeTopic" value="nodes"/>
             <cm:property name="eventSinkTopic" value="OpenNMS.Sink.Events"/>
             <cm:property name="inventoryTopic" value="oce-inventory"/>
@@ -18,6 +19,7 @@
     <bean id="opennmsDatasource" class="org.opennms.oce.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
         <property name="alarmTopic" value="${alarmTopic}"/>
+        <property name="alarmFeedbackTopic" value="${alarmFeedbackTopic}"/>
         <property name="nodeTopic" value="${nodeTopic}"/>
         <property name="eventSinkTopic" value="${eventSinkTopic}"/>
         <property name="inventoryTopic" value="${inventoryTopic}"/>
@@ -25,6 +27,7 @@
         <property name="inventoryGcIntervalMs" value="${inventoryGcIntervalMs}"/>
     </bean>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
 

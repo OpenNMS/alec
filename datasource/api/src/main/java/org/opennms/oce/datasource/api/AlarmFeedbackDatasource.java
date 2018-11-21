@@ -29,28 +29,18 @@
 package org.opennms.oce.datasource.api;
 
 import java.util.List;
-import java.util.Set;
 
 /**
- * A situation represents a group of correlated alarms that have been associated together based on their characteristics
- * (such as being close in space and time).
+ * The datasource providing {@link AlarmFeedback alarm feedback}.
  */
-public interface Situation {
+public interface AlarmFeedbackDatasource {
+    List<AlarmFeedback> getAlarmFeedback();
 
-    String getId();
+    List<AlarmFeedback> getAlarmFeedbackAndRegisterHandler(AlarmFeedbackHandler handler);
 
-    long getCreationTime();
+    void registerHandler(AlarmFeedbackHandler handler);
 
-    List<ResourceKey> getResourceKeys();
+    void unregisterHandler(AlarmFeedbackHandler handler);
 
-    Set<Alarm> getAlarms();
-
-    Severity getSeverity();
-
-    /**
-     * A human readable string that helps explain why
-     * the alarms are grouped together.
-     */
-    String getDiagnosticText();
-
+    void waitUntilReady() throws InterruptedException;
 }

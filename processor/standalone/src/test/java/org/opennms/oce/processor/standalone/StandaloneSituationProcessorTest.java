@@ -47,7 +47,7 @@ import org.opennms.oce.processor.api.SituationProcessor;
  */
 public class StandaloneSituationProcessorTest {
     /**
-     * Tests that an situation accepted by the processor is forwarded via the situation data source.
+     * Tests that a situation accepted by the processor is forwarded via the situation data source.
      */
     @Test
     public void testAccept() throws Exception {

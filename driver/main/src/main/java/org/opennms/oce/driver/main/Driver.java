@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.AlarmFeedbackDatasource;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
@@ -59,9 +61,10 @@ public class Driver {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
 
     private final AlarmDatasource alarmDatasource;
+    private final AlarmFeedbackDatasource alarmFeedbackDatasource;
     private final InventoryDatasource inventoryDatasource;
-
     private final SituationDatasource situationDatasource;
+
     private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
@@ -73,11 +76,13 @@ public class Driver {
     private Engine engine;
     private Timer timer;
 
-    public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource, InventoryDatasource inventoryDatasource,
-            SituationDatasource situationDatasource, EngineFactory engineFactory,
+    public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
+                  AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
+                  SituationDatasource situationDatasource, EngineFactory engineFactory,
                   SituationProcessorFactory situationProcessorFactory) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
+        this.alarmFeedbackDatasource = Objects.requireNonNull(alarmFeedbackDatasource);
         this.inventoryDatasource = Objects.requireNonNull(inventoryDatasource);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.engineFactory = Objects.requireNonNull(engineFactory);
@@ -118,6 +123,8 @@ public class Driver {
                 inventoryDatasource.waitUntilReady();
                 LOG.info("Waiting for alarm datasource...");
                 alarmDatasource.waitUntilReady();
+                LOG.info("Waiting for alarm feedback datasource...");
+                alarmFeedbackDatasource.waitUntilReady();
                 LOG.info("Waiting for situation datasource...");
                 situationDatasource.waitUntilReady();
 
@@ -125,10 +132,13 @@ public class Driver {
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
                 LOG.info("Retrieving alarms...");
                 final List<Alarm> alarms = alarmDatasource.getAlarmsAndRegisterHandler(engine);
+                LOG.info("Retrieving alarm feedback...");
+                final List<AlarmFeedback> alarmFeedback =
+                        alarmFeedbackDatasource.getAlarmFeedbackAndRegisterHandler(engine);
                 LOG.info("Retrieving situations...");
                 final List<Situation> situations = situationDatasource.getSituations();
                 LOG.info("Initializing engine...");
-                engine.init(alarms, situations, inventory);
+                engine.init(alarms, alarmFeedback, situations, inventory);
 
                 if (engine instanceof GraphProvider) {
                     LOG.info("Registering graph provider...");

@@ -26,31 +26,29 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.api;
+package org.opennms.oce.datasource.opennms.serialization;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-/**
- * A situation represents a group of correlated alarms that have been associated together based on their characteristics
- * (such as being close in space and time).
- */
-public interface Situation {
+import org.apache.kafka.common.serialization.Serializer;
+import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 
-    String getId();
+public class AlarmFeedbacksSerializer implements Serializer<FeedbackModelProtos.AlarmFeedbacks> {
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+        // pass
+    }
 
-    long getCreationTime();
+    @Override
+    public byte[] serialize(String topic, FeedbackModelProtos.AlarmFeedbacks alarmFeedbacks) {
+        if (alarmFeedbacks == null) {
+            return null;
+        }
+        return alarmFeedbacks.toByteArray();
+    }
 
-    List<ResourceKey> getResourceKeys();
-
-    Set<Alarm> getAlarms();
-
-    Severity getSeverity();
-
-    /**
-     * A human readable string that helps explain why
-     * the alarms are grouped together.
-     */
-    String getDiagnosticText();
-
+    @Override
+    public void close() {
+        // pass
+    }
 }

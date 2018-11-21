@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
+import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
@@ -91,8 +92,8 @@ public class TestDriver {
         final List<Alarm> sortedAlarms = timeSortAlarms(alarms);
         final List<Alarm> previousAlarms = getStartupAlarms(sortedAlarms, timestamp);
         List<Alarm> afterAlarms = sortedAlarms.stream().filter(a -> a.getTime() > timestamp).collect(Collectors.toList());
-        // Run the engine 
-        return run(afterAlarms, inventory, previousAlarms, previousSituations);
+        // Run the engine
+        return run(afterAlarms, inventory, previousAlarms, Collections.emptyList(), previousSituations);
     }
 
     /**
@@ -135,7 +136,7 @@ public class TestDriver {
      * @return
      */
     public List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory) {
-        return run(alarms, inventory, Collections.emptyList(), Collections.emptyList());
+        return run(alarms, inventory, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
 
@@ -144,11 +145,11 @@ public class TestDriver {
     }
 
     private List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms,
-            List<Situation> previousSituations) {
+                                List<AlarmFeedback> previousAlarmFeedback, List<Situation> previousSituations) {
         final DriverSession session = new DriverSession();
         final Engine engine = engineFactory.createEngine();
         engine.registerSituationHandler(session);
-        engine.init(previousAlarms, previousSituations, inventory);
+        engine.init(previousAlarms, previousAlarmFeedback, previousSituations, inventory);
 
         final GraphProvider graphProvider;
         if (engine instanceof GraphProvider) {

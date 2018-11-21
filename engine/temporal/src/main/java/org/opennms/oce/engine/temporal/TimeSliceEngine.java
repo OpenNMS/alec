@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
@@ -106,7 +107,8 @@ public class TimeSliceEngine implements Engine {
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory) {
+    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+                     List<InventoryObject> inventory) {
         // TODO
     }
 
@@ -135,6 +137,11 @@ public class TimeSliceEngine implements Engine {
     @Override
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         // pass
+    }
+
+    @Override
+    public void handleAlarmFeedback(AlarmFeedback alarmFeedback) {
+        
     }
 
     @Override

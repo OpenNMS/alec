@@ -33,52 +33,57 @@ import java.util.Objects;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.AlarmHandler;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.AlarmFeedbackHandler;
 import org.opennms.oce.datasource.common.HandlerRegistry;
 import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 import org.opennms.oce.datasource.opennms.OpennmsMapper;
+import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AlarmTableProcessor implements Processor<String, OpennmsModelProtos.Alarm> {
-    private final Logger LOG = LoggerFactory.getLogger(AlarmTableProcessor.class);
-    private final HandlerRegistry<AlarmHandler> alarmHandlers;
-    private KeyValueStore<String, OpennmsModelProtos.Alarm> kvStore;
+public class AlarmFeedbackTableProcessor implements Processor<String, OpennmsModelProtos.AlarmFeedback> {
+    private final Logger LOG = LoggerFactory.getLogger(AlarmFeedbackTableProcessor.class);
+    private final HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers;
+    private KeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks> kvStore;
 
-    public AlarmTableProcessor(HandlerRegistry<AlarmHandler> alarmHandlers) {
-        this.alarmHandlers = Objects.requireNonNull(alarmHandlers);
+    public AlarmFeedbackTableProcessor(HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers) {
+        this.alarmFeedbackHandlers = Objects.requireNonNull(alarmFeedbackHandlers);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(ProcessorContext context) {
         // retrieve the key-value store
-        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.ALARM_STORE);
+        kvStore = (KeyValueStore) context.getStateStore(OpennmsDatasource.ALARM_FEEDBACK_STORE);
     }
 
     @Override
-    public void process(String reductionKey, OpennmsModelProtos.Alarm alarm) {
-        if (alarm != null) {
-            kvStore.put(reductionKey, alarm);
-            final Alarm mappedAlarm = OpennmsMapper.toAlarm(alarm);
-            alarmHandlers.forEach(h -> {
+    public void process(String alarmKey, OpennmsModelProtos.AlarmFeedback alarmFeedback) {
+        if (alarmFeedback != null) {
+            // Store the AlarmFeedbacks object with just a single feedback for now
+            kvStore.put(alarmKey,
+                    FeedbackModelProtos.AlarmFeedbacks.newBuilder().addAlarmFeedback(alarmFeedback).build());
+            alarmFeedbackHandlers.forEach(h -> {
                 try {
-                    h.onAlarmCreatedOrUpdated(mappedAlarm);
+                    h.handleAlarmFeedback(OpennmsMapper.toAlarmFeedback(alarmFeedback));
                 } catch (Exception e) {
-                    LOG.error("onAlarmCreatedOrUpdated() call failed with alarm: {} on handler: {}", mappedAlarm, h, e);
+                    LOG.error("handleAlarmFeedback() call failed with feedback: {} on handler: {}",
+                            alarmFeedback, h, e);
                 }
             });
         } else {
-            final OpennmsModelProtos.Alarm prevAlarm = kvStore.delete(reductionKey);
-            if (prevAlarm != null) {
-                final Alarm mappedAlarm = OpennmsMapper.toAlarm(prevAlarm);
-                alarmHandlers.forEach(h -> {
+            final FeedbackModelProtos.AlarmFeedbacks prevAlarmFeedbacks = kvStore.delete(alarmKey);
+            if (prevAlarmFeedbacks != null) {
+                // For now we assume the AlarmFeedbacks container contains a single feedback
+                AlarmFeedback prevAlarmFeedback = OpennmsMapper.toAlarmFeedback(prevAlarmFeedbacks.getAlarmFeedback(0));
+                alarmFeedbackHandlers.forEach(h -> {
                     try {
-                        h.onAlarmCleared(mappedAlarm);
+                        h.handleAlarmFeedback(prevAlarmFeedback);
                     } catch (Exception e) {
-                        LOG.error("onAlarmCleared() call failed with alarm: {} on handler: {}", mappedAlarm, h, e);
+                        LOG.error("handleAlarmFeedback() call failed with feedback: {} on handler: {}",
+                                prevAlarmFeedback, h, e);
                     }
                 });
             }

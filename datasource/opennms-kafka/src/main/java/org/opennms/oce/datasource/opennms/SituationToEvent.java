@@ -36,7 +36,7 @@ import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.opennms.events.Event;
 
 /**
- * Contains the logic used to convert and incident to an event.
+ * Contains the logic used to convert a situation to an event.
  *
  */
 public class SituationToEvent {
@@ -54,7 +54,7 @@ public class SituationToEvent {
                 .getAsInt());
         e.setSeverity(maxSeverity.name().toLowerCase());
 
-        // Relay the incident id
+        // Relay the situation id
         e.addParam(SITUATION_ID_PARM_NAME, situation.getId());
 
         // Use the log message and description from the first (earliest) alarm

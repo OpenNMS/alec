@@ -29,17 +29,11 @@
 package org.opennms.oce.datasource.opennms;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import java.util.Collection;
-
 import org.junit.Test;
-import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 public class OpennmsMapperTest {
@@ -62,12 +56,11 @@ public class OpennmsMapperTest {
                         .setId(22)
                         .build())
                 .build();
-        AlarmBean alarmBean = OpennmsMapper.toAlarm(alarm);
-        assertThat(alarmBean.getId(), equalTo(alarm.getReductionKey()));
-        assertThat(alarmBean.getTime(), equalTo(alarm.getLastEventTime()));
-        assertThat(alarmBean.getSeverity(), equalTo(Severity.CRITICAL));
+        Alarm mappedAlarm = OpennmsMapper.toAlarm(alarm);
+        assertThat(mappedAlarm.getId(), equalTo(alarm.getReductionKey()));
+        assertThat(mappedAlarm.getTime(), equalTo(alarm.getLastEventTime()));
+        assertThat(mappedAlarm.getSeverity(), equalTo(Severity.CRITICAL));
     }
-
 
 
 }

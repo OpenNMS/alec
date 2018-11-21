@@ -41,6 +41,7 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.rule.FactHandle;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
@@ -88,7 +89,8 @@ public class TopologyEngine implements Engine, SituationHandler {
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventoryObjectList) {
+    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+                     List<InventoryObject> inventoryObjectList) {
         inventoryManager = new InventoryModelManager(inventoryObjectList);
         model = inventoryManager.getModel();
         priorSituations = situations;
@@ -148,6 +150,11 @@ public class TopologyEngine implements Engine, SituationHandler {
     @Override
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         // TODO
+    }
+
+    @Override
+    public void handleAlarmFeedback(AlarmFeedback alarmFeedback) {
+        
     }
 
     @Override

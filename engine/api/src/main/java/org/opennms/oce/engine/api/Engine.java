@@ -31,15 +31,22 @@ package org.opennms.oce.engine.api;
 import java.util.List;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.AlarmFeedbackHandler;
 import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
 
-public interface Engine extends AlarmHandler, InventoryHandler {
+/**
+ * An engine that consumes {@link Alarm alarms}, {@link InventoryObject inventory} and
+ * {@link AlarmFeedback alarm feedback} to produce correlated {@link Situation situations}.
+ */
+public interface Engine extends AlarmHandler, InventoryHandler, AlarmFeedbackHandler {
 
-    void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory);
+    void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+              List<InventoryObject> inventory);
 
     long getTickResolutionMs();
 

@@ -103,6 +103,19 @@ echo 'log4j2.logger.org_opennms_oce.level = DEBUG
 log4j2.logger.org_opennms_oce.name = org.opennms.oce' >> "$SENTINEL_HOME/etc/org.ops4j.pax.logging.cfg"
 ```
 
+### Topic Configuration
+
+The OCE engine will block on init until Kafka is available and topics are created. On init OCE expects to find topics
+for each of the following:
+
+* Alarms
+* Inventory
+* Situations
+* Alarm feedback
+
+To create one of the topics you could use a command like this:
+```bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic <topicName>```
+
 ### Start OCE 
 
 From the Sentinel Karaf shell:

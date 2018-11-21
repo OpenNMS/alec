@@ -28,6 +28,7 @@
 
 package org.opennms.oce.feature.graph.rest.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -69,7 +70,7 @@ public class MockGraphProvider implements GraphProvider {
         s1.setId("s1");
         s1.addAlarm(a1);
         final List<Situation> situations = Lists.newArrayList(s1);
-        clusterEngine.init(alarms, situations, inventory);
+        clusterEngine.init(alarms, Collections.emptyList(), situations, inventory);
     }
 
     @Override

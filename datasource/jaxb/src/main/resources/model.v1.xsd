@@ -199,7 +199,7 @@
 
     <element name="situation">
         <annotation>
-            <documentation>Definition for an instance of an situation</documentation>
+            <documentation>Definition for an instance of a situation</documentation>
         </annotation>
         <complexType>
             <sequence>

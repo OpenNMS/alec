@@ -29,9 +29,11 @@
 package org.opennms.oce.engine.cluster;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,8 +52,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.FeedbackType;
+import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.oce.datasource.common.SituationBean;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
@@ -70,7 +76,7 @@ public class ClusterEngineTest implements SituationHandler {
 
     @Before
     public void setUp() {
-        engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         engine.registerSituationHandler(this);
     }
 
@@ -196,13 +202,67 @@ public class ClusterEngineTest implements SituationHandler {
     }
 
     @Test
+    public void canBlacklistAlarms() {
+        long now = System.currentTimeMillis();
+        engine.setTickResolutionMs(TimeUnit.SECONDS.toMillis(30));
+
+        Alarm alarm1 = mock(Alarm.class);
+        when(alarm1.getId()).thenReturn("1");
+        when(alarm1.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm1.getInventoryObjectId()).thenReturn("a");
+        when(alarm1.getTime()).thenReturn(now);
+        engine.onAlarmCreatedOrUpdated(alarm1);
+
+        Alarm alarm2 = mock(Alarm.class);
+        when(alarm2.getId()).thenReturn("2");
+        when(alarm2.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm2.getInventoryObjectId()).thenReturn("a");
+        when(alarm2.getTime()).thenReturn(now+1);
+        engine.onAlarmCreatedOrUpdated(alarm2);
+
+        // No situations should be created yet
+        assertThat(situationsById.keySet(), hasSize(0));
+
+        // Tick
+        engine.tick(now+2);
+
+        // We should now have a single situation with both alarms
+        assertThat(situationsById.keySet(), hasSize(1));
+        Situation situation = situationsById.values().iterator().next();
+        assertThat(situation.getAlarms(), containsInAnyOrder(alarm1, alarm2));
+
+        AlarmFeedback alarmFeedback = ImmutableAlarmFeedback.newBuilder()
+                .setSituationKey("uei:" + situation.getId())
+                .setAlarmKey(alarm1.getId())
+                .setFeedbackType(FeedbackType.FALSE_POSITIVE)
+                .build();
+        engine.handleAlarmFeedback(alarmFeedback);
+
+        // Now add a 3rd (unrelated) alarm on another resource (just so an alarm is seen as being changed)
+        ResourceKey otherKey = new ResourceKey("w", "x", "y", "z");
+        Alarm alarm3 = mock(Alarm.class);
+        when(alarm3.getId()).thenReturn("3");
+        when(alarm3.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm3.getInventoryObjectId()).thenReturn("b");
+        when(alarm3.getTime()).thenReturn(now+1);
+        engine.onAlarmCreatedOrUpdated(alarm3);
+        
+        // Tick again
+        now = now + engine.getTickResolutionMs()*2;
+        engine.tick(now);
+        situation = situationsById.values().iterator().next();
+        // The alarm should have been removed from the situation
+        assertThat(situation.getAlarms(), not(contains(alarm1)));
+    }
+
+    @Test
     @Ignore("Needs rework now that the functions are no longer static")
     public void canHandleAlarmsInClusters() {
         final AtomicLong situationIdGenerator = new AtomicLong();
 
         // An empty cluster should return no situations
         Cluster<AlarmInSpaceTime> emptyCluster = new Cluster<>();
-        Set<SituationBean> situations = engine.mapClusterToSituations(emptyCluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
+        Set<Situation> situations = engine.mapClusterToSituations(emptyCluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(0));
 
         AlarmInSpaceTime alarm1InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
@@ -214,27 +274,27 @@ public class ClusterEngineTest implements SituationHandler {
         AlarmInSpaceTime alarm3InSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
         when(alarm3InSpaceTime.getAlarm().getId()).thenReturn("3");
 
-        // A cluster with a single alarm that was not previously mapped to an situation should be in a new situation
+        // A cluster with a single alarm that was not previously mapped to a situation should be in a new situation
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
         situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(1));
 
-        // A cluster with two alarms that were not previously mapped to an situation should be in a new situation
+        // A cluster with two alarms that were not previously mapped to a situation should be in a new situation
         cluster.addPoint(alarm2InSpaceTime);
         situations = engine.mapClusterToSituations(cluster, Maps.newHashMap(), Maps.newHashMap(), 0L);
         assertThat(situations, hasSize(1));
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
 
-        // A cluster with an alarm that was previously mapped to an situation, and another alarm that was not previously mapped
+        // A cluster with an alarm that was previously mapped to a situation, and another alarm that was not previously mapped
         // should be mapped to the same situation
         SituationBean existingSituation = new SituationBean();
         existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
         existingSituation.addAlarm(alarm1InSpaceTime.getAlarm());
-        Map<String, SituationBean> alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation)
+        Map<String, Situation> alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation)
                 .build();
-        Map<String, SituationBean> situationsById = new ImmutableMap.Builder<String, SituationBean>()
+        Map<String, Situation> situationsById = new ImmutableMap.Builder<String, Situation>()
             .put(existingSituation.getId(), existingSituation)
                 .build();
 
@@ -247,9 +307,9 @@ public class ClusterEngineTest implements SituationHandler {
         SituationBean existingSituation2 = new SituationBean();
         existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
         existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
-        alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation).put("2", existingSituation2)
+        alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation).put("2", existingSituation2)
                 .build();
-        situationsById = new ImmutableMap.Builder<String, SituationBean>().put(existingSituation.getId(), existingSituation)
+        situationsById = new ImmutableMap.Builder<String, Situation>().put(existingSituation.getId(), existingSituation)
             .put(existingSituation2.getId(), existingSituation)
                 .build();
 
@@ -257,7 +317,7 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situations, hasSize(0));
 
         // If a cluster contains alarms in different situations and one or more alarms that are not
-        // yet associated to an situation, then we chose to add the alarms without situations to their the same situation
+        // yet associated to a situation, then we chose to add the alarms without situations to their the same situation
         // as their closest neighbor
         existingSituation = new SituationBean();
         existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
@@ -267,9 +327,9 @@ public class ClusterEngineTest implements SituationHandler {
         existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
         existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
 
-        alarmIdToSituationMap = new ImmutableMap.Builder<String, SituationBean>().put("1", existingSituation).put("2", existingSituation2)
+        alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation).put("2", existingSituation2)
                 .build();
-        situationsById = new ImmutableMap.Builder<String, SituationBean>().put(existingSituation.getId(), existingSituation)
+        situationsById = new ImmutableMap.Builder<String, Situation>().put(existingSituation.getId(), existingSituation)
             .put(existingSituation2.getId(), existingSituation)
                 .build();
 

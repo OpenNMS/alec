@@ -116,7 +116,7 @@ public class ClusterEngineSituationTest implements SituationHandler {
         a1_.setTime(10000L);
         alarms = Arrays.asList(a1_, a2, a3);
         clusterEngine = new ClusterEngine();
-        clusterEngine.init(alarms, Collections.singletonList(initialSituation), Collections.emptyList());
+        clusterEngine.init(alarms, Collections.emptyList(), Collections.singletonList(initialSituation), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());
         assertThat(Iterables.getLast(triggeredSituations).getAlarms().stream().filter(a -> a.getId().equals("a1")).findFirst().get().getTime(),

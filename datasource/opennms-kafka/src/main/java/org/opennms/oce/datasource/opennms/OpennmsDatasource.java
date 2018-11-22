@@ -62,6 +62,9 @@ import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmDatasource;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.AlarmFeedbackDatasource;
+import org.opennms.oce.datasource.api.AlarmFeedbackHandler;
 import org.opennms.oce.datasource.api.AlarmHandler;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
@@ -74,12 +77,15 @@ import org.opennms.oce.datasource.common.HandlerRegistry;
 import org.opennms.oce.datasource.opennms.events.Event;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
 import org.opennms.oce.datasource.opennms.events.Log;
+import org.opennms.oce.datasource.opennms.processors.AlarmFeedbackTableProcessor;
 import org.opennms.oce.datasource.opennms.processors.AlarmTableProcessor;
 import org.opennms.oce.datasource.opennms.processors.InventoryTableProcessor;
 import org.opennms.oce.datasource.opennms.processors.SituationTableProcessor;
+import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.opennms.oce.datasource.opennms.serialization.AlarmDeserializer;
+import org.opennms.oce.datasource.opennms.serialization.AlarmFeedbackDeserializer;
 import org.opennms.oce.datasource.opennms.serialization.NodeDeserializer;
 import org.opennms.oce.datasource.opennms.serialization.OpennmsSerdes;
 import org.opennms.oce.datasource.opennms.serialization.ProtobufDeserializer;
@@ -87,7 +93,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, InventoryDatasource {
+public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, InventoryDatasource,
+        AlarmFeedbackDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
     public static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
@@ -95,10 +102,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public static final String DEFAULT_APPLICATION_ID = "oce-datasource";
     public static final String DEFAULT_ALARM_TOPIC = "alarms";
+    public static final String DEFAULT_ALARM_FEEDBACK_TOPIC = "alarmFeedback";
     public static final String DEFAULT_NODE_TOPIC = "nodes";
     public static final String DEFAULT_EVENT_SINK_TOPIC = "OpenNMS.Sink.Events";
     public static final String DEFAULT_INVENTORY_TOPIC = "oce-inventory";
-
 
     public static final long DEFAULT_INVENTORY_GC_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);
     public static final long DEFAULT_INVENTORY_TTL_MS = TimeUnit.DAYS.toMillis(1);
@@ -108,10 +115,11 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public static final String INVENTORY_STORE = "inventoryStore";
     public static final String ALARM_STORE = "alarmStore";
-
+    public static final String ALARM_FEEDBACK_STORE = "alarmFeedbackStore";
     public static final String SITUATION_STORE = "situationStore";
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
+    private final HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<InventoryHandler> inventoryHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<SituationHandler> situationHandlers = new HandlerRegistry<>();
 
@@ -120,6 +128,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private KafkaStreams streams;
 
     private String alarmTopic = DEFAULT_ALARM_TOPIC;
+    private String alarmFeedbackTopic = DEFAULT_ALARM_FEEDBACK_TOPIC;
     private String nodeTopic = DEFAULT_NODE_TOPIC;
     private String eventSinkTopic = DEFAULT_EVENT_SINK_TOPIC;
     private String inventoryTopic = DEFAULT_INVENTORY_TOPIC;
@@ -161,17 +170,22 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         }
     }
 
-    protected Properties loadProducerProperties() throws IOException {
+    private static void putProperties(Dictionary<String, Object> propertiesToPut, Properties properties) {
+        if (propertiesToPut != null) {
+            final Enumeration<String> keys = propertiesToPut.keys();
+            while (keys.hasMoreElements()) {
+                final String key = keys.nextElement();
+                properties.put(key, propertiesToPut.get(key));
+            }
+        }
+    }
+
+    protected Properties loadProducerProperties() throws IOException {        
         final Properties producerProperties = new Properties();
         // User
         final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_PRODUCER_PID).getProperties();
-        if (properties != null) {
-            final Enumeration<String> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                final String key = keys.nextElement();
-                producerProperties.put(key, properties.get(key));
-            }
-        }
+        putProperties(properties, producerProperties);
+
         // Overrides
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -187,13 +201,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         streamsProperties.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, Math.max(Runtime.getRuntime().availableProcessors()-2, 1));
         // User
         final Dictionary<String, Object> properties = configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties();
-        if (properties != null) {
-            final Enumeration<String> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                final String key = keys.nextElement();
-                streamsProperties.put(key, properties.get(key));
-            }
-        }
+        putProperties(properties, streamsProperties);
+
         // Overrides
         streamsProperties.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         streamsProperties.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.ByteArray().getClass());
@@ -213,11 +222,16 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 Stores.persistentKeyValueStore(SITUATION_STORE),
                 Serdes.String(),
                 OpennmsSerdes.Alarm());
+        final StoreBuilder<KeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks>> alarmFeedbackStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(ALARM_FEEDBACK_STORE),
+                Serdes.String(),
+                OpennmsSerdes.AlarmFeedbacks());
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.addStateStore(inventoryStore);
         builder.addStateStore(alarmStore);
         builder.addStateStore(situationStore);
+        builder.addStateStore(alarmFeedbackStore);
 
         final AlarmDeserializer alarmDeserializer = new AlarmDeserializer();
         KStream<String, byte[]> alarmBytesStream = builder.stream(getAlarmTopic());
@@ -275,6 +289,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         KStream<String, InventoryModelProtos.InventoryObjects> inventoryStream = inventoryByteStream.mapValues(iosBytes -> inventoryObjectsDeserializer.deserialize(null, iosBytes));
         inventoryStream.process(() -> new InventoryTableProcessor(inventoryHandlers, inventoryGcIntervalMs, inventoryTtlMs), INVENTORY_STORE);
 
+        // Process the alarm feedback
+        final AlarmFeedbackDeserializer alarmFeedbackDeserializer = new AlarmFeedbackDeserializer();
+        KStream<String, byte[]> alarmFeedbackBytesStream = builder.stream(getAlarmFeedbackTopic());
+        KStream<String, OpennmsModelProtos.AlarmFeedback> alarmFeedbackStream =
+                alarmFeedbackBytesStream.mapValues(alarmFeedbackBytes -> alarmFeedbackDeserializer.deserialize(null,
+                        alarmFeedbackBytes));
+        alarmFeedbackStream.process(() -> new AlarmFeedbackTableProcessor(alarmFeedbackHandlers), ALARM_FEEDBACK_STORE);
+
         return builder.build();
     }
 
@@ -306,6 +328,36 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     @Override
     public void unregisterHandler(AlarmHandler handler) {
         alarmHandlers.unregister(handler);
+    }
+
+    @Override
+    public List<AlarmFeedback> getAlarmFeedback() {
+        final List<AlarmFeedback> alarmFeedback = new ArrayList<>();
+        try {
+            waitUntilAlarmFeedbackStoreIsQueryable().all().forEachRemaining(entry ->
+                    alarmFeedback.addAll(OpennmsMapper.toAlarmFeedbackList(entry.value))
+            );
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return alarmFeedback;
+    }
+
+    @Override
+    public List<AlarmFeedback> getAlarmFeedbackAndRegisterHandler(AlarmFeedbackHandler handler) {
+        final List<AlarmFeedback> alarmFeedback = new ArrayList<>();
+        alarmFeedbackHandlers.register(handler, (h) -> alarmFeedback.addAll(getAlarmFeedback()));
+        return alarmFeedback;
+    }
+
+    @Override
+    public void registerHandler(AlarmFeedbackHandler handler) {
+        alarmFeedbackHandlers.register(handler);
+    }
+
+    @Override
+    public void unregisterHandler(AlarmFeedbackHandler handler) {
+        alarmFeedbackHandlers.unregister(handler);
     }
 
     @Override
@@ -389,6 +441,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         return waitUntilStoreIsQueryable(INVENTORY_STORE);
     }
 
+    private ReadOnlyKeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks> waitUntilAlarmFeedbackStoreIsQueryable() throws InterruptedException {
+        return waitUntilStoreIsQueryable(ALARM_FEEDBACK_STORE);
+    }
+
     private <K,V> ReadOnlyKeyValueStore<K, V> waitUntilStoreIsQueryable(String storeName) throws InterruptedException {
         if (streams == null) {
             throw new IllegalStateException("Datasource must be started first.");
@@ -433,6 +489,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         this.alarmTopic = alarmTopic;
     }
 
+    public String getAlarmFeedbackTopic() {
+        return alarmFeedbackTopic;
+    }
+
+    public void setAlarmFeedbackTopic(String alarmFeedbackTopic) {
+        this.alarmFeedbackTopic = alarmFeedbackTopic;
+    }
+
     public String getNodeTopic() {
         return nodeTopic;
     }
@@ -475,8 +539,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     @Override
     public void waitUntilReady() throws InterruptedException {
+        // These will block until Kafka is available and the topics are created
         waitUntilInventoryStoreIsQueryable();
         waitUntilAlarmStoreIsQueryable();
         waitUntilSituationStoreIsQueryable();
+        waitUntilAlarmFeedbackStoreIsQueryable();
     }
 }

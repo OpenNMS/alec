@@ -2,6 +2,7 @@
 
     <!-- Datasource -->
     <reference id="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource" />
+    <reference id="alarmFeedbackDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource" />
     <reference id="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource" />
     <reference id="situationDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource" />
 
@@ -14,6 +15,7 @@
     <bean id="driver" class="org.opennms.oce.driver.main.Driver" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
+        <argument ref="alarmFeedbackDatasource"/>
         <argument ref="inventoryDatasource"/>
         <argument ref="situationDatasource"/>
         <argument ref="engineFactory"/>

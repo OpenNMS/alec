@@ -28,29 +28,12 @@
 
 package org.opennms.oce.datasource.api;
 
-import java.util.List;
-import java.util.Set;
-
 /**
- * A situation represents a group of correlated alarms that have been associated together based on their characteristics
- * (such as being close in space and time).
+ * The valid types of feedback that can be specified for {@link AlarmFeedback}.
  */
-public interface Situation {
-
-    String getId();
-
-    long getCreationTime();
-
-    List<ResourceKey> getResourceKeys();
-
-    Set<Alarm> getAlarms();
-
-    Severity getSeverity();
-
-    /**
-     * A human readable string that helps explain why
-     * the alarms are grouped together.
-     */
-    String getDiagnosticText();
-
+public enum FeedbackType {
+    FALSE_POSITIVE,
+    FALSE_NEGATIVE,
+    CORRECT,
+    UNKNOWN
 }

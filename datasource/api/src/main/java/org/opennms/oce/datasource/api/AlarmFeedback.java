@@ -28,29 +28,27 @@
 
 package org.opennms.oce.datasource.api;
 
-import java.util.List;
-import java.util.Set;
-
 /**
- * A situation represents a group of correlated alarms that have been associated together based on their characteristics
- * (such as being close in space and time).
+ * Alarm feedback describes the relation between an alarm and a situation via the provided {@link FeedbackType}.
  */
-public interface Situation {
+public interface AlarmFeedback {
+    String getSituationKey();
 
-    String getId();
+    String getSituationFingerprint();
 
-    long getCreationTime();
+    String getAlarmKey();
 
-    List<ResourceKey> getResourceKeys();
+    FeedbackType getFeedbackType();
 
-    Set<Alarm> getAlarms();
+    String getReason();
 
-    Severity getSeverity();
+    String getUser();
 
-    /**
-     * A human readable string that helps explain why
-     * the alarms are grouped together.
-     */
-    String getDiagnosticText();
-
+    long getTimestamp();
+    
+    default String getSituationId() {
+        // A situation's reduction key is set via Opennms using '%uei%:%parm[situationId]%' therefore we can extract the
+        // Id with a simple substring
+        return getSituationKey().substring(getSituationKey().lastIndexOf(':') + 1);
+    }
 }

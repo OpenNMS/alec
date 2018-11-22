@@ -62,7 +62,7 @@ import org.opennms.oce.engine.api.Engine;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 /**
- * Verifies the basic functions of an situation datasource.
+ * Verifies the basic functions of a situation datasource.
  */
 public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
 

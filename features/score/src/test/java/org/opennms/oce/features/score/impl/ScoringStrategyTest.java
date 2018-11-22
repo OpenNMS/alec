@@ -75,7 +75,7 @@ public class ScoringStrategyTest {
         report = scorer.score(Sets.newHashSet(emtpySituation), Sets.newHashSet(emtpySituation));
         assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
 
-        // Comparing an situation with a single alarm to an empty situation should generate a score greater than 0
+        // Comparing a situation with a single alarm to an empty situation should generate a score greater than 0
         SituationBean situation = new SituationBean();
         AlarmBean alarm = new AlarmBean();
         situation.addAlarm(alarm);

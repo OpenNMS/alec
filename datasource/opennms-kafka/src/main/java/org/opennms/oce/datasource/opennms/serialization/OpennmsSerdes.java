@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
+import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 
@@ -78,6 +79,12 @@ public class OpennmsSerdes {
         }
     }
 
+    static public final class AlarmFeedbacksSerde extends OpennmsSerdes.WrapperSerde<FeedbackModelProtos.AlarmFeedbacks> {
+        public AlarmFeedbacksSerde() {
+            super(new AlarmFeedbacksSerializer(), new AlarmFeedbacksDeserializer());
+        }
+    }
+
     static public final class InventoryObjectSerde extends OpennmsSerdes.WrapperSerde<InventoryModelProtos.InventoryObject> {
         public InventoryObjectSerde() {
             super(new InventoryObjectSerializer(), new InventoryObjectDeserializer());
@@ -91,24 +98,31 @@ public class OpennmsSerdes {
         }
     }
 
-    /*
-     * A serde for nullable {@code InventoryModelProtos.InventoryObject} type.
+    /**
+     * A serde for nullable {@code OpennmsModelProtos.Alarm} type.
      */
     static public Serde<OpennmsModelProtos.Alarm> Alarm() {
         return new AlarmSerde();
     }
 
-    /*
+    /**
      * A serde for nullable {@code InventoryModelProtos.InventoryObject} type.
      */
     static public Serde<InventoryModelProtos.InventoryObject> InventoryObject() {
         return new InventoryObjectSerde();
     }
 
-    /*
-     * A serde for nullable {@code InventoryModelProtos.InventoryObject} type.
+    /**
+     * A serde for nullable {@code InventoryModelProtos.InventoryObjects} type.
      */
     static public Serde<InventoryModelProtos.InventoryObjects> InventoryObjects() {
         return new ProtobufSerde<>(InventoryModelProtos.InventoryObjects.class);
+    }
+
+    /**
+     * A serde for nullable {@code FeedbackModelProtos.AlarmFeedbacks} type.
+     */
+    static public Serde<FeedbackModelProtos.AlarmFeedbacks> AlarmFeedbacks() {
+        return new AlarmFeedbacksSerde();
     }
 }

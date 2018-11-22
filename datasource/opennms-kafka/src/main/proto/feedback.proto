@@ -1,0 +1,9 @@
+syntax = "proto3";
+option java_package = "org.opennms.oce.datasource.opennms.proto";
+option java_outer_classname = "FeedbackModelProtos";
+
+import "opennms-kafka-producer.proto";
+
+message AlarmFeedbacks {
+    repeated AlarmFeedback alarm_feedback = 10;
+}

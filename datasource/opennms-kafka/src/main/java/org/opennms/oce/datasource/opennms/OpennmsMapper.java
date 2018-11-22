@@ -28,16 +28,26 @@
 
 package org.opennms.oce.datasource.opennms;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.FeedbackType;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
+import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 
 public class OpennmsMapper {
 
-    public static AlarmBean toAlarm(OpennmsModelProtos.Alarm alarm) {
+    public static Alarm toAlarm(OpennmsModelProtos.Alarm alarm) {
         final AlarmBean bean = new AlarmBean();
         bean.setId(alarm.getReductionKey());
         bean.setTime(alarm.getLastEventTime());
@@ -48,8 +58,38 @@ public class OpennmsMapper {
         bean.setDescription(alarm.getDescription());
         return bean;
     }
+    
+    private static FeedbackType toFeedbackType(OpennmsModelProtos.AlarmFeedback.FeedbackType feedbackType) {
+        return Enums.getIfPresent(FeedbackType.class, feedbackType.toString()).or(FeedbackType.UNKNOWN);
+    }
 
-    public static SituationBean toSituation(OpennmsModelProtos.Alarm alarm) {
+    public static AlarmFeedback toAlarmFeedback(OpennmsModelProtos.AlarmFeedback alarmFeedback) {
+        return ImmutableAlarmFeedback.newBuilder()
+                .setSituationKey(alarmFeedback.getSituationKey())
+                .setAlarmKey(alarmFeedback.getAlarmKey())
+                .setSituationFingerprint(alarmFeedback.getSituationFingerprint())
+                .setFeedbackType(toFeedbackType(alarmFeedback.getFeedbackType()))
+                .setReason(alarmFeedback.getReason())
+                .setUser(alarmFeedback.getUser())
+                .setTimestamp(alarmFeedback.getTimestamp())
+                .build();
+    }
+
+    public static List<AlarmFeedback> toAlarmFeedbackList(FeedbackModelProtos.AlarmFeedbacks alarmFeedbacks) {
+        return alarmFeedbacks.getAlarmFeedbackList().stream()
+                .map(alarmFeedback -> ImmutableAlarmFeedback.newBuilder()
+                        .setSituationKey(alarmFeedback.getSituationKey())
+                        .setAlarmKey(alarmFeedback.getAlarmKey())
+                        .setSituationFingerprint(alarmFeedback.getSituationFingerprint())
+                        .setFeedbackType(toFeedbackType(alarmFeedback.getFeedbackType()))
+                        .setReason(alarmFeedback.getReason())
+                        .setUser(alarmFeedback.getUser())
+                        .setTimestamp(alarmFeedback.getTimestamp())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public static Situation toSituation(OpennmsModelProtos.Alarm alarm) {
         final SituationBean bean = new SituationBean();
         bean.setCreationTime(alarm.getFirstEventTime());
         final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
@@ -65,24 +105,7 @@ public class OpennmsMapper {
     }
 
     protected static Severity toSeverity(OpennmsModelProtos.Severity severity) {
-        switch (severity) {
-            case CLEARED:
-                return Severity.CLEARED;
-            case NORMAL:
-                return Severity.NORMAL;
-            case WARNING:
-                return Severity.NORMAL;
-            case MINOR:
-                return Severity.MINOR;
-            case MAJOR:
-                return Severity.MAJOR;
-            case CRITICAL:
-                return Severity.CRITICAL;
-            case INDETERMINATE:
-            case UNRECOGNIZED:
-                return Severity.INDETERMINATE;
-        }
-        return Severity.INDETERMINATE;
+        return Enums.getIfPresent(Severity.class, severity.toString()).or(Severity.INDETERMINATE);
     }
 
     protected static String toNodeCriteria(OpennmsModelProtos.Node node) {

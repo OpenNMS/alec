@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
@@ -44,7 +45,8 @@ public class TickLoggingEngine implements Engine {
     private final List<Long> ticks = new ArrayList<>();
 
     @Override
-    public void init(List<Alarm> alarms, List<Situation> situations, List<InventoryObject> inventory) {
+    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+                     List<InventoryObject> inventory) {
 
     }
 
@@ -86,6 +88,11 @@ public class TickLoggingEngine implements Engine {
     @Override
     public void onInventoryRemoved(Collection<InventoryObject> inventoryObject) {
 
+    }
+
+    @Override
+    public void handleAlarmFeedback(AlarmFeedback alarmFeedback) {
+        
     }
 
     @Override

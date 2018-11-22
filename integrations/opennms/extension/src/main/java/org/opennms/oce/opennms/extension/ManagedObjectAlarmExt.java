@@ -59,6 +59,8 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
     private static final String ENT_PHYSICAL_INDEX_PARM_NAME = "entPhysicalIndex";
     private static final String IFINDEX_PARM_NAME = "ifIndex";
     private static final String IFDESCR_PARM_NAME = "ifDescr";
+    
+    private static final String THRESHOLD_SOURCE = "threshd";
 
     protected static final String A_IFDESCR_PARM_NAME = "aIfDescr";
     protected static final String Z_IFDESCR_PARM_NAME = "zIfDescr";
@@ -102,6 +104,12 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
             // If we haven't figured out an appropriate type, and the alarm is associated with a node
             // then default to using the 'node' type
             managedObjectType = ManagedObjectType.Node;
+        }
+
+        if (managedObjectType == null && inMemoryEvent.getSource().toLowerCase().contains(THRESHOLD_SOURCE) &&
+                !inMemoryEvent.getParametersByName(IFINDEX_PARM_NAME).isEmpty()) {
+            // If this is an SNMP interface threshold alarm then we can tag it to the appropriate ifIndex
+            managedObjectType = ManagedObjectType.SnmpInterface;
         }
 
         final ManagedObject managedObject = getManagedObjectFor(managedObjectType, alarm, inMemoryEvent);

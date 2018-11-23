@@ -147,7 +147,6 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         producer = KafkaUtils.runWithGivenClassLoader(() -> new KafkaProducer<>(producerProperties), KafkaProducer.class.getClassLoader());
 
         final Properties streamProperties = loadStreamsProperties();
-        final ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
 
         // Use the class-loader for the KStream class, since the kafka-client bundle
         // does not import the required classes from the kafka-streams bundle

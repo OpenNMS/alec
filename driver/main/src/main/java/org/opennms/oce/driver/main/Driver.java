@@ -101,9 +101,6 @@ public class Driver {
         engine = engineFactory.createEngine();
         // Register the handler that confirms situations that have come round trip back to this driver
         situationDatasource.registerHandler(confirmingSituationHandler);
-        // Register the handler that deletes situations from the engine when we see they have been deleted
-        deletingSituationHandler = DeletingSituationHandler.newInstance(engine);
-        situationDatasource.registerHandler(deletingSituationHandler);
         // Register the situation processor responsible for accepting and processing all situations generated via the
         // engine
         engine.registerSituationHandler(new SituationHandler() {
@@ -127,6 +124,12 @@ public class Driver {
                 alarmFeedbackDatasource.waitUntilReady();
                 LOG.info("Waiting for situation datasource...");
                 situationDatasource.waitUntilReady();
+
+                // Register the handler that deletes situations from the engine when we see they have been deleted
+                // Only register this after the situationDatasource is ready, since we may block the callbacks
+                // while waiting for initialization otherwise
+                deletingSituationHandler = DeletingSituationHandler.newInstance(engine);
+                situationDatasource.registerHandler(deletingSituationHandler);
 
                 LOG.info("Retrieving inventory...");
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);

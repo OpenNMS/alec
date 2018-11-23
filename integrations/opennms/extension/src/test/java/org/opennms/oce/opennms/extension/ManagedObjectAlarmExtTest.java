@@ -32,10 +32,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
@@ -43,27 +46,74 @@ import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
+import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.beans.EventParameterBean;
 import org.opennms.oce.opennms.model.ManagedObjectType;
 
 public class ManagedObjectAlarmExtTest {
-    private final ManagedObjectAlarmExt managedObjectAlarmExt = new ManagedObjectAlarmExt(mock(NodeDao.class),
-            mock(SnmpInterfaceDao.class));
+    private final NodeDao nodeDao = mock(NodeDao.class);
+    private final SnmpInterfaceDao snmpInterfaceDao = mock(SnmpInterfaceDao.class);
+    private final ManagedObjectAlarmExt managedObjectAlarmExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao);
 
     @Test
-    public void testThreshholdAlarm() {
-        testSnmpInterfaceAlarm("OpenNMS.Threshd.ifHCInOctets", "ifIndex");
+    public void canAssociateAlarmWithNodeManagedObject() {
+        Alarm alarm = mock(Alarm.class);
+        Node node = mock(Node.class);
+        when(node.getId()).thenReturn(1);
+        when(alarm.getNode()).thenReturn(node);
+
+        InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
+        when(inMemoryEvent.getSource()).thenReturn("trapd");
+
+        DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
+
+        Alarm updatedalarm = managedObjectAlarmExt.afterAlarmCreated(alarm, inMemoryEvent, databaseEvent);
+        assertThat(ManagedObjectType.fromName(updatedalarm.getManagedObjectType()),
+                is(equalTo(ManagedObjectType.Node)));
+        assertThat(updatedalarm.getManagedObjectInstance(), is(equalTo(Integer.toString(node.getId()))));
+    }
+
+    @Test
+    public void canFallbackToNodeManagedObjectIfLookupFails() {
+        Alarm alarm = mock(Alarm.class);
+        when(alarm.getManagedObjectType()).thenReturn(ManagedObjectType.SnmpInterface.getName());
+        Node node = mock(Node.class);
+        when(node.getId()).thenReturn(1);
+        when(alarm.getNode()).thenReturn(node);
+
+        InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
+        when(inMemoryEvent.getSource()).thenReturn("syslogd");
+        EventParameter eventParameter = new EventParameterBean(ManagedObjectAlarmExt.IFDESCR_PARM_NAME, "ge0/99");
+        when(inMemoryEvent.getParametersByName(ManagedObjectAlarmExt.IFDESCR_PARM_NAME)).thenReturn(Collections.singletonList(eventParameter));
+
+        DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
+
+        Alarm updatedalarm = managedObjectAlarmExt.afterAlarmCreated(alarm, inMemoryEvent, databaseEvent);
+        assertThat(ManagedObjectType.fromName(updatedalarm.getManagedObjectType()),
+                is(equalTo(ManagedObjectType.Node)));
+        assertThat(updatedalarm.getManagedObjectInstance(), is(equalTo(Integer.toString(node.getId()))));
+
+        // Verify that we actually tried to perfom the lookup
+        verify(snmpInterfaceDao, times(1)).findByNodeIdAndDescrOrName(node.getId(), "ge0/99");
+    }
+
+    @Test
+    public void testThresholdAlarm() {
+        testSnmpInterfaceAlarm("OpenNMS.Threshd.ifHCInOctets", ManagedObjectAlarmExt.IFINDEX_PARM_NAME);
     }
 
     @Test
     public void testSnmpPollerAlarm() {
-        testSnmpInterfaceAlarm("OpenNMS.SnmpPoller.DefaultPollContext", "snmpifindex");
+        testSnmpInterfaceAlarm("OpenNMS.SnmpPoller.DefaultPollContext", ManagedObjectAlarmExt.SNMPIFINDEX_PARM_NAME);
     }
 
     private void testSnmpInterfaceAlarm(String source, String parameter) {
         Alarm alarm = mock(Alarm.class);
         InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
         DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
+
+        Node node = mock(Node.class);
+        when(alarm.getNode()).thenReturn(node);
 
         when(inMemoryEvent.getSource()).thenReturn(source);
         String ifIndex = "1";

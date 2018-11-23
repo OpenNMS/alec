@@ -52,15 +52,24 @@ public class ManagedObjectAlarmExtTest {
 
     @Test
     public void testThreshholdAlarm() {
+        testSnmpInterfaceAlarm("OpenNMS.Threshd.ifHCInOctets", "ifIndex");
+    }
+
+    @Test
+    public void testSnmpPollerAlarm() {
+        testSnmpInterfaceAlarm("OpenNMS.SnmpPoller.DefaultPollContext", "snmpifindex");
+    }
+
+    private void testSnmpInterfaceAlarm(String source, String parameter) {
         Alarm alarm = mock(Alarm.class);
         InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
         DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
-        
-        when(inMemoryEvent.getSource()).thenReturn("OpenNMS.Threshd.ifHCInOctets");
+
+        when(inMemoryEvent.getSource()).thenReturn(source);
         String ifIndex = "1";
-        EventParameter eventParameter = new EventParameterBean("ifIndex", ifIndex);
-        when(inMemoryEvent.getParametersByName("ifIndex")).thenReturn(Collections.singletonList(eventParameter));
-        
+        EventParameter eventParameter = new EventParameterBean(parameter, ifIndex);
+        when(inMemoryEvent.getParametersByName(parameter)).thenReturn(Collections.singletonList(eventParameter));
+
         Alarm updatedalarm = managedObjectAlarmExt.afterAlarmCreated(alarm, inMemoryEvent, databaseEvent);
         assertThat(ManagedObjectType.fromName(updatedalarm.getManagedObjectType()),
                 is(equalTo(ManagedObjectType.SnmpInterface)));

@@ -50,23 +50,23 @@ public class EdgeTimeNormalizer {
     public int getNormalizedValue(long time) {
         // return 10 - Math.toIntExact(Math.abs(base - time) * 9L / (range));
         long delta = Math.abs(base - time);
-        if (delta < TimeUnit.SECONDS.toMillis(5)) {
+        if (delta < TimeUnit.SECONDS.toMillis(1)) {
             return 10;
-        } else if (delta < TimeUnit.MINUTES.toMillis(1)) {
+        } else if (delta < TimeUnit.SECONDS.toMillis(5)) {
             return 9;
-        } else if (delta < TimeUnit.MINUTES.toMillis(15)) {
+        } else if (delta < TimeUnit.SECONDS.toMillis(15)) {
             return 8;
-        } else if (delta < TimeUnit.HOURS.toMillis(1)) {
+        } else if (delta < TimeUnit.SECONDS.toMillis(30)) {
             return 7;
-        } else if (delta < TimeUnit.HOURS.toMillis(6)) {
+        } else if (delta < TimeUnit.MINUTES.toMillis(1)) {
             return 6;
-        } else if (delta < TimeUnit.HOURS.toMillis(12)) {
+        } else if (delta < TimeUnit.MINUTES.toMillis(5)) {
             return 5;
-        } else if (delta < TimeUnit.DAYS.toMillis(1)) {
+        } else if (delta < TimeUnit.MINUTES.toMillis(30)) {
             return 4;
-        } else if (delta < TimeUnit.DAYS.toMillis(2)) {
+        } else if (delta < TimeUnit.HOURS.toMillis(1)) {
             return 3;
-        } else if (delta < TimeUnit.DAYS.toMillis(7)) {
+        } else if (delta < TimeUnit.HOURS.toMillis(8)) {
             return 2;
         } else {
             return 1;

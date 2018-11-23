@@ -470,7 +470,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
         producer.send(new ProducerRecord<>(getEventSinkTopic(), situationXml), (metadata, ex) -> {
             if (ex != null) {
-                LOG.warn("An error occured while sending event for situation with id '{}'.", situation.getId(), ex);
+                LOG.warn("An error occurred while sending event for situation with id '{}'.", situation.getId(), ex);
             } else {
                 LOG.debug("Successfully sent event for situation with id '{}'.", situation.getId());
             }

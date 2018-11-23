@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.features.graph.api.Edge;
@@ -80,7 +81,8 @@ public class GraphMLConverter {
 
     private static final String ONMS_ICON_SWITCH = "switch";
     private static final String ONMS_ICON_REDUCTION_KEY = "reduction_key";
-    private static final String ONMS_ICON_IP_SERVICE = "IP_service";
+    private static final String ONMS_ICON_INTERFACE = "interface";
+    private static final String ONMS_ICON_SITUATION = "situation";
 
     private static final String EDGE_WEIGHT_KEY = "edgeWeight";
     private static final String CREATED_TIMESTAMP_KEY = "createdTimestamp";
@@ -134,6 +136,17 @@ public class GraphMLConverter {
         }
     }
 
+    private String getIconForInventoryObject(InventoryObject io) {
+        if (io == null || io.getType() == null) {
+            return ONMS_ICON_SWITCH;
+        }
+        // TODO: Move the icon mapping logic out to a configuration file
+        if ("snmp-interface".equalsIgnoreCase(io.getType())) {
+            return ONMS_ICON_INTERFACE;
+        }
+        return ONMS_ICON_SWITCH;
+    }
+
     private void handleVertex(Vertex v) {
         // Prune InventoryObjects nodes that have no Alarms and which have only one neighbor
         if (filterEmptyNodes
@@ -149,7 +162,7 @@ public class GraphMLConverter {
             if (io.getFriendlyName() != null) {
                 node.setProperty(ONMS_GRAPHML_LABEL, io.getFriendlyName());
             }
-            node.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_SWITCH);
+            node.setProperty(ONMS_GRAPHML_ICON_KEY, getIconForInventoryObject(io));
 
             final StringBuilder sb = new StringBuilder();
             sb.append("IO of type: ");
@@ -216,7 +229,7 @@ public class GraphMLConverter {
     private void handleSituation(Situation situation) {
         final GraphMLNode nodeForSituation = new GraphMLNode();
         nodeForSituation.setId(getVertexIdFor(situation));
-        nodeForSituation.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_IP_SERVICE);
+        nodeForSituation.setProperty(ONMS_GRAPHML_ICON_KEY, ONMS_ICON_SITUATION);
         nodeForSituation.setProperty(ONMS_GRAPHML_LABEL, "Situation with ID: " + situation.getId());
         nodeForSituation.setProperty(CREATED_TIMESTAMP_KEY, situation.getCreationTime());
 

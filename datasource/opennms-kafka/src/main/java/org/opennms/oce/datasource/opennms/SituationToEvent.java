@@ -28,16 +28,18 @@
 
 package org.opennms.oce.datasource.opennms;
 
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.opennms.events.Event;
 
 /**
  * Contains the logic used to convert a situation to an event.
- *
  */
 public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
@@ -57,13 +59,10 @@ public class SituationToEvent {
         // Relay the situation id
         e.addParam(SITUATION_ID_PARM_NAME, situation.getId());
 
-        // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = situation.getAlarms().stream()
-                .min(Comparator.comparing(Alarm::getTime))
-                .get();
-        e.addParam("situationLogMsg", earliestAlarm.getSummary());
+        final Alarm alarmForDescr = getAlarmForDescription(situation.getAlarms());
+        e.addParam("situationLogMsg", alarmForDescr.getSummary());
 
-        String description = earliestAlarm.getDescription();
+        String description = alarmForDescr.getDescription();
         if (situation.getDiagnosticText() != null) {
             description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
         }
@@ -75,5 +74,18 @@ public class SituationToEvent {
                 .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
 
         return e;
+    }
+
+    private static Alarm getAlarmForDescription(Collection<Alarm> alarms) {
+        // Sort the alarms by time (ascending)
+        final List<Alarm> sortedAlarms = alarms.stream()
+                .sorted(Comparator.comparing(Alarm::getTime))
+                .collect(Collectors.toList());
+
+        // Use the alarm that is not cleared (if any), or fallback to the earliest alarm otherwise
+        return sortedAlarms.stream()
+                .filter(a -> !a.isClear())
+                .findFirst()
+                .orElseGet(() -> sortedAlarms.get(0));
     }
 }

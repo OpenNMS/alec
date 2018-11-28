@@ -33,9 +33,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 
 public class MockAlarmBuilder {
     private String id;
@@ -73,13 +72,13 @@ public class MockAlarmBuilder {
 
         final List<Alarm> alarms = new ArrayList<>();
         for (MockEvent event : events) {
-            final AlarmBean alarm = new AlarmBean();
-            alarm.setId(id);
-            alarm.setInventoryObjectType(inventoryObjectType);
-            alarm.setInventoryObjectId(inventoryObjectId);
-            alarm.setTime(event.getTime());
-            alarm.setSeverity(event.getSeverity());
-            alarms.add(alarm);
+            alarms.add(ImmutableAlarm.newBuilder()
+                    .setId(id)
+                    .setInventoryObjectType(inventoryObjectType)
+                    .setInventoryObjectId(inventoryObjectId)
+                    .setTime(event.getTime())
+                    .setSeverity(event.getSeverity())
+                    .build());
         }
 
         return alarms;

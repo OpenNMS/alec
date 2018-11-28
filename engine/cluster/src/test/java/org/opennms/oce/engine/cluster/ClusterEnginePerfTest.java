@@ -31,8 +31,8 @@ package org.opennms.oce.engine.cluster;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.driver.test.MockInventoryType;
 
 public class ClusterEnginePerfTest {
@@ -49,21 +49,21 @@ public class ClusterEnginePerfTest {
                 Collections.emptyList());
         final int K = 500;
         for (int k = 0; k < K; k++) {
-            final InventoryObjectBean node = new InventoryObjectBean();
-            node.setType(MockInventoryType.COMPONENT.getType());
-            node.setId(Integer.toString(k));
-            clusterEngine.onInventoryAdded(Collections.singletonList(node));
+            clusterEngine.onInventoryAdded(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+                    .setType(MockInventoryType.COMPONENT.getType())
+                    .setId(Integer.toString(k))
+                    .build()));
         }
 
         for (int j = 1; j <= 3; j++) {
             // Reset the alarms before every tick
             for (int k = 0; k < K; k++) {
-                final AlarmBean alarm = new AlarmBean();
-                alarm.setTime(0);
-                alarm.setId(Integer.toString(k));
-                alarm.setInventoryObjectType(MockInventoryType.COMPONENT.getType());
-                alarm.setInventoryObjectId(Integer.toString(k));
-                clusterEngine.onAlarmCreatedOrUpdated(alarm);
+                clusterEngine.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
+                        .setTime(0)
+                        .setId(Integer.toString(k))
+                        .setInventoryObjectType(MockInventoryType.COMPONENT.getType())
+                        .setInventoryObjectId(Integer.toString(k))
+                        .build());
             }
 
             long start = System.currentTimeMillis();

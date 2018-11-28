@@ -52,8 +52,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.Test;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.datasource.opennms.events.JaxbUtils;
 import org.opennms.oce.datasource.opennms.events.Log;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
@@ -70,12 +70,10 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
     public void canForwardSituation() throws IOException {
         datasource.init();
 
-        SituationBean situation = new SituationBean();
-
-        AlarmBean alarm = new AlarmBean();
-        alarm.setId("a1");
-        situation.getAlarms().add(alarm);
-        datasource.forwardSituation(situation);
+        datasource.forwardSituation(ImmutableSituation.newBuilderNow()
+                .setId("test")
+                .addAlarm(ImmutableAlarm.newBuilder().setId("a1").build())
+                .build());
 
         // Verify the situation was forwarded to Kafka
         Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafka);

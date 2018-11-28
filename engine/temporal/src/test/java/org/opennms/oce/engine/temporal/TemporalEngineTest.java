@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
-import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.engine.api.Engine;
 
 public class TemporalEngineTest implements SituationHandler {
@@ -89,12 +89,12 @@ public class TemporalEngineTest implements SituationHandler {
         Engine processor = new TimeSliceEngine();
         processor.registerSituationHandler(this);
         // First Situation
-        processor.onAlarmCreatedOrUpdated(new AlarmBean("A", 11000));
-        processor.onAlarmCreatedOrUpdated(new AlarmBean("B", 12000));
-        processor.onAlarmCreatedOrUpdated(new AlarmBean("C", 13000));
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder().setId("A").setTime(11000).build());
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder().setId("B").setTime(12000).build());
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder().setId("C").setTime(13000).build());
         // Second Situation
-        processor.onAlarmCreatedOrUpdated(new AlarmBean("X", 31000));
-        processor.onAlarmCreatedOrUpdated(new AlarmBean("Y", 32000));
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder().setId("X").setTime(31000).build());
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder().setId("Y").setTime(32000).build());
 
         // Terminate the test
         sendterminalAlarm(processor, 100);
@@ -111,8 +111,10 @@ public class TemporalEngineTest implements SituationHandler {
     // Get nAlarms all occurring at the same time in seconds
     private List<Alarm> getAlarms(int nAlarms, long seconds) {
         List<Alarm> alarms = new ArrayList<>();
-        IntStream.range(0, nAlarms).forEach(index -> alarms.add(new AlarmBean(Integer.toString(index + 1) + "." + getRandom(),
-                seconds * 1000)));
+        IntStream.range(0, nAlarms).forEach(index -> alarms.add(ImmutableAlarm.newBuilder()
+                .setId(Integer.toString(index + 1) + "." + getRandom())
+                .setTime(seconds * 1000)
+                .build()));
         return alarms;
     }
 
@@ -121,8 +123,10 @@ public class TemporalEngineTest implements SituationHandler {
     }
 
     private void sendterminalAlarm(Engine processor, long t) {
-        Alarm terminalAlarm = new AlarmBean("terminal-alarm", t * 1000);
-        processor.onAlarmCreatedOrUpdated(terminalAlarm);
+        processor.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
+                .setId("terminal-alarm")
+                .setTime(t * 1000)
+                .build());
     }
 
     @Override

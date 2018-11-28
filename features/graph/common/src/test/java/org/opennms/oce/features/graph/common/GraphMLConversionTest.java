@@ -42,9 +42,10 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.api.Situation;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.Vertex;
 import org.opennms.oce.features.graph.graphml.GraphML;
@@ -89,11 +90,8 @@ public class GraphMLConversionTest {
         MyVertex v1 = new MyVertex("v1");
         graph.addVertex(v1);
 
-        AlarmBean a1 = new AlarmBean("a1");
-        v1.addAlarm(a1);
-
-        AlarmBean a2 = new AlarmBean("a2");
-        v1.addAlarm(a2);
+        v1.addAlarm(ImmutableAlarm.newBuilder().setId("a1"));
+        v1.addAlarm(ImmutableAlarm.newBuilder().setId("a2"));
 
         GraphML graphML = new GraphMLConverterBuilder().withGraph(graph).withSituations(Collections.emptyList()).build().toGraphML();
 
@@ -127,14 +125,13 @@ public class GraphMLConversionTest {
         graph.addEdge(e2, v2, v3);
         graph.addEdge(e3, v3, v4);
 
-        AlarmBean a1 = new AlarmBean("a1");
-        v1.addAlarm(a1);
+        Alarm a1 = v1.addAlarm(ImmutableAlarm.newBuilder().setId("a1"));
+        Alarm a2 = v3.addAlarm(ImmutableAlarm.newBuilder().setId("a2"));
 
-        AlarmBean a2 = new AlarmBean("a2");
-        v3.addAlarm(a2);
-
-        SituationBean s1 = new SituationBean("s1");
-        s1.setAlarms(Sets.newHashSet(a1, a2));
+        Situation s1 = ImmutableSituation.newBuilderNow()
+                .setId("s1")
+                .setAlarms(Sets.newHashSet(a1, a2))
+                .build();
 
         GraphML graphML = new GraphMLConverterBuilder().withGraph(graph).withSituations(Lists.newArrayList(s1)).build().toGraphML();
 
@@ -172,14 +169,13 @@ public class GraphMLConversionTest {
         graph.addEdge(e2, v2, v3);
         graph.addEdge(e3, v2, v4);
 
-        AlarmBean a1 = new AlarmBean("a1");
-        v1.addAlarm(a1);
+        Alarm a1 = v1.addAlarm(ImmutableAlarm.newBuilder().setId("a1"));
+        Alarm a2 = v1.addAlarm(ImmutableAlarm.newBuilder().setId("a2"));
 
-        AlarmBean a2 = new AlarmBean("a2");
-        v1.addAlarm(a2);
-
-        SituationBean s1 = new SituationBean("s1");
-        s1.setAlarms(Sets.newHashSet(a1, a2));
+        Situation s1 = ImmutableSituation.newBuilderNow()
+                .setId("s1")
+                .setAlarms(Sets.newHashSet(a1, a2))
+                .build();
 
         GraphML graphML = new GraphMLConverterBuilder().withGraph(graph).withSituations(Lists.newArrayList(s1)).build().toGraphML();
 
@@ -219,14 +215,13 @@ public class GraphMLConversionTest {
         graph.addEdge(e2, v2, v3);
         graph.addEdge(e3, v2, v4);
 
-        AlarmBean a1 = new AlarmBean("a1");
-        v1.addAlarm(a1);
+        Alarm a1 = v1.addAlarm(ImmutableAlarm.newBuilder().setId("a1"));
+        Alarm a2 = v1.addAlarm(ImmutableAlarm.newBuilder().setId("a2"));
 
-        AlarmBean a2 = new AlarmBean("a2");
-        v1.addAlarm(a2);
-
-        SituationBean s1 = new SituationBean("s1");
-        s1.setAlarms(Sets.newHashSet(a1, a2));
+        Situation s1 = ImmutableSituation.newBuilderNow()
+                .setId("s1")
+                .setAlarms(Sets.newHashSet(a1, a2))
+                .build();
 
         // Garbage Collect the Alarms
         v1.remove(a1);
@@ -253,7 +248,13 @@ public class GraphMLConversionTest {
         MyVertex(String id) {
             this.id = Objects.requireNonNull(id);
             createdTimestamp = System.currentTimeMillis();
-            inventoryObject = new InventoryObjectBean("node", id, "", "", "");
+            inventoryObject = ImmutableInventoryObject.newBuilder()
+                    .setType("node")
+                    .setId(id)
+                    .setSubtype("")
+                    .setParentType("")
+                    .setParentId("")
+                    .build();
             updatedTimestamp = createdTimestamp;
         }
 
@@ -267,10 +268,12 @@ public class GraphMLConversionTest {
             return alarms;
         }
 
-        public void addAlarm(AlarmBean alarm) {
-            alarms.add(alarm);
-            alarm.setInventoryObjectType("node");
-            alarm.setInventoryObjectId(id);
+        public Alarm addAlarm(ImmutableAlarm.Builder alarmBuilder) {
+            alarmBuilder.setInventoryObjectType("node");
+            alarmBuilder.setInventoryObjectId(id);
+            Alarm alarm = alarmBuilder.build();
+            alarms.add(alarm);            
+            return alarm;
         }
 
         public void remove(Alarm alarm) {

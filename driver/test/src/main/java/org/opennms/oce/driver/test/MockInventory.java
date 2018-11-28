@@ -28,6 +28,7 @@
 
 package org.opennms.oce.driver.test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -58,5 +59,12 @@ public class MockInventory {
             .withInventoryObject(MockInventoryType.BGP, "bgp peer n1-n2")
             .withRelativeRelation(MockInventoryType.LINK, "n1-c1-p1___n2-c1-p1", MockInventoryType.BGP, "bgp peer n1-n2")
             .getInventory());
+
+    /**
+     * @return a mutable copy of the sample network
+     */
+    public static List<InventoryObject> getSampleNetwork() {
+        return new ArrayList<>(SAMPLE_NETWORK);
+    }
 
 }

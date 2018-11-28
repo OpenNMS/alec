@@ -32,18 +32,66 @@ import java.util.Objects;
 
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 
-public class InventoryObjectRelativeRefBean implements InventoryObjectRelativeRef {
-    private String type;
-    private String id;
-    private long weight = 1;
+public final class ImmutableInventoryObjectRelativeRef implements InventoryObjectRelativeRef {
+    private final String type;
+    private final String id;
+    private final long weight;
+
+    private ImmutableInventoryObjectRelativeRef(Builder builder) {
+        this.type = builder.type;
+        this.id = builder.id;
+        this.weight = builder.weight;
+    }
+
+    public static class Builder {
+        private String type;
+        private String id;
+        private long weight;
+
+        private Builder() {
+            weight = 1;
+        }
+
+        private Builder(InventoryObjectRelativeRef inventoryObjectRelativeRef) {
+            this.type = inventoryObjectRelativeRef.getType();
+            this.id = inventoryObjectRelativeRef.getId();
+            this.weight = inventoryObjectRelativeRef.getWeight();
+        }
+
+        public Builder setType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setWeight(long weight) {
+            this.weight = weight;
+            return this;
+        }
+
+        public ImmutableInventoryObjectRelativeRef build() {
+            Objects.requireNonNull(id, "Id cannot be null");
+            Objects.requireNonNull(type, "Type cannot be null");
+
+            return new ImmutableInventoryObjectRelativeRef(this);
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilderFrom(InventoryObjectRelativeRef inventoryObjectRelativeRef) {
+        return new Builder(inventoryObjectRelativeRef);
+    }
 
     @Override
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     @Override
@@ -51,24 +99,16 @@ public class InventoryObjectRelativeRefBean implements InventoryObjectRelativeRe
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     @Override
     public long getWeight() {
         return weight;
-    }
-
-    public void setWeight(long weight) {
-        this.weight = weight;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InventoryObjectRelativeRefBean that = (InventoryObjectRelativeRefBean) o;
+        ImmutableInventoryObjectRelativeRef that = (ImmutableInventoryObjectRelativeRef) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id);
     }
@@ -80,9 +120,10 @@ public class InventoryObjectRelativeRefBean implements InventoryObjectRelativeRe
 
     @Override
     public String toString() {
-        return "InventoryObjectRelativeRefBean{" +
+        return "ImmutableInventoryObjectRelativeRef{" +
                 "type='" + type + '\'' +
                 ", id='" + id + '\'' +
+                ", weight=" + weight +
                 '}';
     }
 }

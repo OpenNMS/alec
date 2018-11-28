@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.driver.test.MockInventory;
@@ -15,7 +17,7 @@ public class AlarmPropagationTest {
 
     @Before
     public void setUp() {
-        InventoryModelManager manager = new InventoryModelManager(MockInventory.SAMPLE_NETWORK);
+        InventoryModelManager manager = new InventoryModelManager(MockInventory.getSampleNetwork());
         testModel = manager.getModel();
     }
 

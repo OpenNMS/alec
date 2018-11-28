@@ -36,9 +36,9 @@ import java.util.function.Function;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.engine.cluster.ClusterEngine;
 import org.opennms.oce.features.graph.api.GraphProvider;
 import org.opennms.oce.features.graph.api.OceGraph;
@@ -50,26 +50,29 @@ public class MockGraphProvider implements GraphProvider {
     final ClusterEngine clusterEngine = new ClusterEngine();
 
     public MockGraphProvider() {
-        final InventoryObjectBean io1 = new InventoryObjectBean();
-        io1.setType("c1");
-        io1.setId("io1");
+        final InventoryObject io1 = ImmutableInventoryObject.newBuilder()
+                .setType("c1")
+                .setId("io1")
+                .build();
 
-        final InventoryObjectBean io2 = new InventoryObjectBean();
-        io2.setType("c2");
-        io2.setId("io2");
+        final InventoryObject io2 = ImmutableInventoryObject.newBuilder()
+                .setType("c2")
+                .setId("io2")
+                .build();
 
         final List<InventoryObject> inventory = Lists.newArrayList(io1, io2);
 
-        final AlarmBean a1 = new AlarmBean();
-        a1.setId("a1");
-        a1.setInventoryObjectType("c1");
-        a1.setInventoryObjectId("io1");
-        final List<Alarm> alarms = Lists.newArrayList(a1);
+        Alarm a1 = ImmutableAlarm.newBuilder()
+                .setId("a1")
+                .setInventoryObjectType("c1")
+                .setInventoryObjectId("io1")
+                .build();
+        final List<Alarm> alarms = Collections.singletonList(a1);
 
-        final SituationBean s1 = new SituationBean();
-        s1.setId("s1");
-        s1.addAlarm(a1);
-        final List<Situation> situations = Lists.newArrayList(s1);
+        final List<Situation> situations = Collections.singletonList(ImmutableSituation.newBuilder()
+                .setId("s1")
+                .addAlarm(a1)
+                .build());
         clusterEngine.init(alarms, Collections.emptyList(), situations, inventory);
     }
 

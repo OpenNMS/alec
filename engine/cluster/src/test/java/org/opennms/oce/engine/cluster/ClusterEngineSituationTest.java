@@ -43,8 +43,8 @@ import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 
 import com.google.common.collect.Iterables;
 
@@ -58,19 +58,17 @@ public class ClusterEngineSituationTest implements SituationHandler {
     @Test
     public void canHandleExistingSituations() {
         // Define 3 alarms which should be clustered together
-        AlarmBean a1 = new AlarmBean();
-        a1.setId("a1");
-        AlarmBean a2 = new AlarmBean();
-        a2.setId("a2");
-        AlarmBean a3 = new AlarmBean();
-        a3.setId("a3");
-        List<Alarm> alarms = Arrays.asList(a1,a2,a3);
-        for (Alarm a : alarms) {
-            AlarmBean ab = (AlarmBean)a;
-            ab.setInventoryObjectId("n1");
-            ab.setInventoryObjectType("node");
-            ab.setTime(0);
-        }
+        ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1")
+                .setInventoryObjectType("node")
+                .setTime(0);
+        
+        Alarm a1 = alarmBuilder.setId("a1").build();
+        Alarm a2 = alarmBuilder.setId("a2").build();
+        Alarm a3 = alarmBuilder.setId("a3").build();
+
+        List<Alarm> alarms = Arrays.asList(a1, a2, a3);
+
 
         // No situations should have been triggered yet
         assertThat(triggeredSituations, hasSize(0));
@@ -89,9 +87,10 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // Now we know that the 3 alarms are clustered together, let's provide an initial situation with the first two alarms
         triggeredSituations.clear();
 
-        SituationBean initialSituation = new SituationBean();
-        initialSituation.setId("i1");
-        initialSituation.setAlarms(new HashSet<>(Arrays.asList(a1, a2)));
+        Situation initialSituation = ImmutableSituation.newBuilderNow()
+                .setId("i1")
+                .setAlarms(new HashSet<>(Arrays.asList(a1, a2)))
+                .build();
 
         clusterEngine = new ClusterEngine();
         clusterEngine.init(alarms, Collections.emptyList(), Collections.singletonList(initialSituation),
@@ -109,12 +108,12 @@ public class ClusterEngineSituationTest implements SituationHandler {
                    equalTo("The 3 alarms happened within 0.00 seconds across 1 vertices."));
 
         // Assert that the situation alarm has been updated and has the correct time
-        AlarmBean a1_ = new AlarmBean();
-        a1_.setId("a1");
-        a1_.setInventoryObjectId("n1");
-        a1_.setInventoryObjectType("node");
-        a1_.setTime(10000L);
-        alarms = Arrays.asList(a1_, a2, a3);
+        alarms = Arrays.asList(ImmutableAlarm.newBuilder()
+                .setId("a1")
+                .setInventoryObjectId("n1")
+                .setInventoryObjectType("node")
+                .setTime(10000L)
+                .build(), a2, a3);
         clusterEngine = new ClusterEngine();
         clusterEngine.init(alarms, Collections.emptyList(), Collections.singletonList(initialSituation), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);

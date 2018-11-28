@@ -63,7 +63,7 @@ public final class ImmutableSituation implements Situation {
 
     public static class Builder {
         private String id;
-        private long creationTime;
+        private Long creationTime;
         private Severity severity;
         private List<ResourceKey> resourceKeys = new ArrayList<>();
         private Map<String, Alarm> alarms = new LinkedHashMap<>();

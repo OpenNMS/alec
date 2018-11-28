@@ -36,6 +36,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -95,6 +96,28 @@ public class ManagedObjectAlarmExtTest {
 
         // Verify that we actually tried to perfom the lookup
         verify(snmpInterfaceDao, times(1)).findByNodeIdAndDescrOrName(node.getId(), "ge0/99");
+    }
+
+    @Test
+    public void canAssociateSituationWithManagedObject() {
+        Alarm a1 = mock(Alarm.class);
+        when(a1.getManagedObjectType()).thenReturn(ManagedObjectType.Node.getName());
+        when(a1.getManagedObjectInstance()).thenReturn("1");
+
+        Alarm a2 = mock(Alarm.class);
+        when(a2.getManagedObjectType()).thenReturn(ManagedObjectType.SnmpInterface.getName());
+        when(a2.getManagedObjectInstance()).thenReturn("1");
+
+        Alarm situation = mock(Alarm.class);
+        when(situation.getRelatedAlarms()).thenReturn(Arrays.asList(a1, a2));
+
+        InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
+        when(inMemoryEvent.getSource()).thenReturn("syslogd");
+        DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
+        Alarm updatedSituation = managedObjectAlarmExt.afterAlarmCreated(situation, inMemoryEvent, databaseEvent);
+        assertThat(ManagedObjectType.fromName(updatedSituation.getManagedObjectType()),
+                is(equalTo(ManagedObjectType.Node)));
+        assertThat(updatedSituation.getManagedObjectInstance(), equalTo("1"));
     }
 
     @Test

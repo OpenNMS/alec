@@ -28,6 +28,8 @@
 
 package org.opennms.oce.opennms.extension;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -123,6 +125,10 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
             managedObject = getManagedObjectFor(managedObjectType, alarm, inMemoryEvent);
         }
 
+        if (managedObject == null && !alarm.getRelatedAlarms().isEmpty()) {
+            managedObject = inheritManagedObjectFromRelatedAlarms(alarm.getRelatedAlarms());
+        }
+
         if (managedObject == null) {
             // we we're not able to resolve the managed object - if the alarm is associated with a node,
             // then default to the node MO
@@ -149,6 +155,28 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
     public Alarm afterAlarmUpdated(Alarm alarm, InMemoryEvent inMemoryEvent, DatabaseEvent databaseEvent) {
         // noop
         return null;
+    }
+
+    private static ManagedObject inheritManagedObjectFromRelatedAlarms(List<Alarm> relatedAlarms) {
+        return relatedAlarms.stream().sorted(Comparator.comparing(Alarm::getId))
+                .filter(a -> {
+                    // Ensure we have some MO set
+                    if (a.getManagedObjectType() == null || a.getManagedObjectInstance() == null) {
+                        return false;
+                    }
+
+                    // Validate that the MO maps to a known type
+                    try {
+                        ManagedObjectType.fromName(a.getManagedObjectType());
+                        return true;
+                    } catch (NoSuchElementException nse) {
+                        LOG.warn("'{}' does not map to a known type for alarm with reduction key: {}", a.getManagedObjectType(), a.getReductionKey());
+                    }
+                    return false;
+                })
+                .map(a -> new ManagedObject(ManagedObjectType.fromName(a.getManagedObjectType()), a.getManagedObjectInstance()))
+                .findFirst()
+                .orElse(null);
     }
 
     protected ManagedObject getManagedObjectFor(ManagedObjectType managedObjectType, Alarm alarm, InMemoryEvent event) {

@@ -46,4 +46,9 @@ public interface Alarm {
 
     String getDescription();
 
+    /**
+     * @return the database id of the (OpenNMS) node associated with the alarm, or null of if there is none.
+     */
+    Long getNodeId();
+
 }

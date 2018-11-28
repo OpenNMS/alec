@@ -56,6 +56,9 @@ public class OpennmsMapper {
         bean.setInventoryObjectId(alarm.getManagedObjectInstance());
         bean.setSummary(alarm.getLogMessage());
         bean.setDescription(alarm.getDescription());
+        if (alarm.hasNodeCriteria()) {
+            bean.setNodeId(alarm.getNodeCriteria().getId());
+        }
         return bean;
     }
     

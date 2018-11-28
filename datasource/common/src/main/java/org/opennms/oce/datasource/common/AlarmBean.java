@@ -41,6 +41,7 @@ public class AlarmBean implements Alarm {
     private String inventoryObjectType;
     private String summary;
     private String description;
+    private Long nodeId;
 
     public AlarmBean() {
         this(null);
@@ -125,6 +126,15 @@ public class AlarmBean implements Alarm {
         this.description = description;
     }
 
+    public void setNodeId(Long nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    @Override
+    public Long getNodeId() {
+        return nodeId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -136,12 +146,13 @@ public class AlarmBean implements Alarm {
                 Objects.equals(inventoryObjectId, alarmBean.inventoryObjectId) &&
                 Objects.equals(inventoryObjectType, alarmBean.inventoryObjectType) &&
                 Objects.equals(summary, alarmBean.summary) &&
-                Objects.equals(description, alarmBean.description);
+                Objects.equals(description, alarmBean.description) &&
+                Objects.equals(nodeId, alarmBean.nodeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description);
+        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description, nodeId);
     }
 
     @Override
@@ -154,6 +165,7 @@ public class AlarmBean implements Alarm {
                 ", inventoryObjectType='" + inventoryObjectType + '\'' +
                 ", summary='" + summary + '\'' +
                 ", description='" + description + '\'' +
+                ", nodeId='" + nodeId + '\'' +
                 '}';
     }
 }

@@ -158,7 +158,7 @@ public class Driver {
                 future.completeExceptionally(e);
                 return;
             }
-            LOG.info("Initialization successful. Scheduling tickets every {}ms", engine.getTickResolutionMs());
+            LOG.info("Initialization successful. Scheduling ticks every {}ms", engine.getTickResolutionMs());
 
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override

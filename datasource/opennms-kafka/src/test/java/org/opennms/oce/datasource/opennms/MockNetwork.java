@@ -28,6 +28,8 @@
 
 package org.opennms.oce.datasource.opennms;
 
+import static org.opennms.oce.datasource.opennms.SituationToEvent.SITUATION_ID_PARM_NAME;
+
 import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
 import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
@@ -195,7 +197,11 @@ public class MockNetwork {
             for (OpennmsModelProtos.Alarm alarm : alarms) {
                 eventBuilder.addParameter(OpennmsModelProtos.EventParameter.newBuilder()
                         .setName("related-reductionKey" + i)
-                        .setValue(alarm.getReductionKey()));
+                        .setValue(alarm.getReductionKey()))
+                        .addParameter(OpennmsModelProtos.EventParameter.newBuilder()
+                                .setName(SITUATION_ID_PARM_NAME)
+                                .setValue("test")
+                                .build());
             }
         }
         builder.setFirstEventTime(1L);

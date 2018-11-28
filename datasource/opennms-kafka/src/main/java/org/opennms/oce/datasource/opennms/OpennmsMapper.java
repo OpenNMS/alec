@@ -36,9 +36,9 @@ import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.FeedbackType;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
@@ -48,18 +48,21 @@ import com.google.common.base.Strings;
 public class OpennmsMapper {
 
     public static Alarm toAlarm(OpennmsModelProtos.Alarm alarm) {
-        final AlarmBean bean = new AlarmBean();
-        bean.setId(alarm.getReductionKey());
-        bean.setTime(alarm.getLastEventTime());
-        bean.setSeverity(toSeverity(alarm.getSeverity()));
-        bean.setInventoryObjectType(alarm.getManagedObjectType());
-        bean.setInventoryObjectId(alarm.getManagedObjectInstance());
-        bean.setSummary(alarm.getLogMessage());
-        bean.setDescription(alarm.getDescription());
+        ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+
         if (alarm.hasNodeCriteria()) {
-            bean.setNodeId(alarm.getNodeCriteria().getId());
+            alarmBuilder.setNodeId(alarm.getNodeCriteria().getId());
         }
-        return bean;
+
+        return alarmBuilder
+                .setId(alarm.getReductionKey())
+                .setTime(alarm.getLastEventTime())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setInventoryObjectType(alarm.getManagedObjectType())
+                .setInventoryObjectId(alarm.getManagedObjectInstance())
+                .setSummary(alarm.getLogMessage())
+                .setDescription(alarm.getDescription())
+                .build();
     }
     
     private static FeedbackType toFeedbackType(OpennmsModelProtos.AlarmFeedback.FeedbackType feedbackType) {
@@ -93,18 +96,18 @@ public class OpennmsMapper {
     }
 
     public static Situation toSituation(OpennmsModelProtos.Alarm alarm) {
-        final SituationBean bean = new SituationBean();
-        bean.setCreationTime(alarm.getFirstEventTime());
+        final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
+                .setCreationTime(alarm.getFirstEventTime());
         final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
         if (lastEvent != null) {
             lastEvent.getParameterList().stream()
                     .filter( p -> SituationToEvent.SITUATION_ID_PARM_NAME.equals(p.getName()))
                     .findFirst()
-                    .ifPresent(p -> bean.setId(p.getValue()));
+                    .ifPresent(p -> situationBuilder.setId(p.getValue()));
         }
-        bean.setSeverity(toSeverity(alarm.getSeverity()));
-        alarm.getRelatedAlarmList().forEach(relatedAlarm -> bean.addAlarm(toAlarm(relatedAlarm)));
-        return bean;
+        situationBuilder.setSeverity(toSeverity(alarm.getSeverity()));
+        alarm.getRelatedAlarmList().forEach(relatedAlarm -> situationBuilder.addAlarm(toAlarm(relatedAlarm)));
+        return situationBuilder.build();
     }
 
     protected static Severity toSeverity(OpennmsModelProtos.Severity severity) {

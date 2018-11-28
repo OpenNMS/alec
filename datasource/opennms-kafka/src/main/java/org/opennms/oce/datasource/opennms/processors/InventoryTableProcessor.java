@@ -49,11 +49,11 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
-import org.opennms.oce.datasource.common.HandlerRegistry;
 import org.opennms.oce.datasource.api.ResourceKey;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
-import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
+import org.opennms.oce.datasource.common.HandlerRegistry;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectRelativeRef;
 import org.opennms.oce.datasource.opennms.OpennmsDatasource;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.slf4j.Logger;
@@ -232,43 +232,44 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
     }
 
     private static InventoryObject toInventory(InventoryModelProtos.InventoryObject io) {
-        final InventoryObjectBean ioBean = new InventoryObjectBean();
-        ioBean.setId(io.getId());
-        ioBean.setType(io.getType());
+        final ImmutableInventoryObject.Builder ioBuilder = ImmutableInventoryObject.newBuilder()
+                .setId(io.getId())
+                .setType(io.getType());
 
         // Optional fields
         if (!Strings.isNullOrEmpty(io.getParentId())) {
-            ioBean.setParentId(io.getParentId());
+            ioBuilder.setParentId(io.getParentId());
         }
         if (!Strings.isNullOrEmpty(io.getParentType())) {
-            ioBean.setParentType(io.getParentType());
+            ioBuilder.setParentType(io.getParentType());
         }
         if (!Strings.isNullOrEmpty(io.getFriendlyName())) {
-            ioBean.setFriendlyName(io.getFriendlyName());
+            ioBuilder.setFriendlyName(io.getFriendlyName());
         }
 
         // TODO: Uncomment when we are setting weights
-//        ioBean.setWeightToParent(io.getWeightToParent());
+//        ioBuilder.setWeightToParent(io.getWeightToParent());
 
         for (InventoryModelProtos.InventoryObjectPeerRef peerRef : io.getPeerList()) {
-            final InventoryObjectPeerRefBean ioPeerRefBean = new InventoryObjectPeerRefBean();
-            ioPeerRefBean.setType(peerRef.getType());
-            ioPeerRefBean.setId(peerRef.getId());
-            ioPeerRefBean.setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A.equals(peerRef.getEndpoint()) ? InventoryObjectPeerEndpoint.A : InventoryObjectPeerEndpoint.Z);
-            // TODO: Uncomment when we are setting weights
-//            ioPeerRefBean.setWeight(peerRef.getWeight());
-            ioBean.getPeers().add(ioPeerRefBean);
+            ioBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                    .setType(peerRef.getType())
+                    .setId(peerRef.getId())
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A.equals(peerRef.getEndpoint()) ?
+                            InventoryObjectPeerEndpoint.A : InventoryObjectPeerEndpoint.Z)
+                    // TODO: Uncomment when we are setting weights
+//                    .setWeight(peerRef.getWeight())
+                    .build());
         }
 
         for (InventoryModelProtos.InventoryObjectRelativeRef relativeRef : io.getRelativeList()) {
-            final InventoryObjectRelativeRefBean ioRelativeRefBean = new InventoryObjectRelativeRefBean();
-            ioRelativeRefBean.setId(relativeRef.getId());
-            ioRelativeRefBean.setType(relativeRef.getType());
-            // TODO: Uncomment when we are setting weights
-//            ioRelativeRefBean.setWeight(relativeRef.getWeight());
-            ioBean.getRelatives().add(ioRelativeRefBean);
+            ioBuilder.addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                    .setId(relativeRef.getId())
+                    .setType(relativeRef.getType())
+                    // TODO: Uncomment when we are setting weights
+//                    .setWeight(relativeRef.getWeight())
+                    .build());
         }
 
-        return ioBean;
+        return ioBuilder.build();
     }
 }

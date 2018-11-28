@@ -57,8 +57,9 @@ import org.opennms.oce.datasource.api.FeedbackType;
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 
@@ -135,6 +136,7 @@ public class ClusterEngineTest implements SituationHandler {
         when(alarm1.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
         when(alarm1.getInventoryObjectId()).thenReturn("a");
         when(alarm1.getTime()).thenReturn(now);
+        alarm1 = ImmutableAlarm.newBuilderFrom(alarm1).build();
         engine.onAlarmCreatedOrUpdated(alarm1);
 
         Alarm alarm2 = mock(Alarm.class);
@@ -142,6 +144,7 @@ public class ClusterEngineTest implements SituationHandler {
         when(alarm2.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
         when(alarm2.getInventoryObjectId()).thenReturn("a");
         when(alarm2.getTime()).thenReturn(now+1);
+        alarm2 = ImmutableAlarm.newBuilderFrom(alarm2).build();
         engine.onAlarmCreatedOrUpdated(alarm2);
 
         // No situations should be created yet
@@ -170,18 +173,33 @@ public class ClusterEngineTest implements SituationHandler {
         when(alarm3.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
         when(alarm3.getInventoryObjectId()).thenReturn("b");
         when(alarm3.getTime()).thenReturn(now+1);
+        alarm3 = ImmutableAlarm.newBuilderFrom(alarm3).build();
         engine.onAlarmCreatedOrUpdated(alarm3);
 
         // And a 4th alarm near the last one in time, but on another resource
         Alarm alarm4 = mock(Alarm.class);
         when(alarm4.getId()).thenReturn("4");
         when(alarm4.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
-        when(alarm4.getInventoryObjectId()).thenReturn("c");
+        when(alarm4.getInventoryObjectId()).thenReturn("b");
         when(alarm4.getTime()).thenReturn(now+1);
+        alarm4 = ImmutableAlarm.newBuilderFrom(alarm4).build();
         engine.onAlarmCreatedOrUpdated(alarm4);
 
         // Tick again
         now = now + engine.getTickResolutionMs()*2;
+        engine.tick(now);
+
+        // And a 4th alarm near the last one in time, but on another resource
+        Alarm alarm5 = mock(Alarm.class);
+        when(alarm5.getId()).thenReturn("3");
+        when(alarm5.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
+        when(alarm5.getInventoryObjectId()).thenReturn("b");
+        when(alarm5.getTime()).thenReturn(now+1);
+        alarm5 = ImmutableAlarm.newBuilderFrom(alarm5).build();
+        engine.onAlarmCreatedOrUpdated(alarm5);
+
+        // Tick again
+        now = now + engine.getTickResolutionMs()*3;
         engine.tick(now);
 
         // We should get a new situation with #3 and #4
@@ -211,6 +229,7 @@ public class ClusterEngineTest implements SituationHandler {
         when(alarm1.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
         when(alarm1.getInventoryObjectId()).thenReturn("a");
         when(alarm1.getTime()).thenReturn(now);
+        alarm1 = ImmutableAlarm.newBuilderFrom(alarm1).build();
         engine.onAlarmCreatedOrUpdated(alarm1);
 
         Alarm alarm2 = mock(Alarm.class);
@@ -218,6 +237,7 @@ public class ClusterEngineTest implements SituationHandler {
         when(alarm2.getInventoryObjectType()).thenReturn(MockInventoryType.COMPONENT.getType());
         when(alarm2.getInventoryObjectId()).thenReturn("a");
         when(alarm2.getTime()).thenReturn(now+1);
+        alarm2 = ImmutableAlarm.newBuilderFrom(alarm2).build();
         engine.onAlarmCreatedOrUpdated(alarm2);
 
         // No situations should be created yet
@@ -289,9 +309,10 @@ public class ClusterEngineTest implements SituationHandler {
 
         // A cluster with an alarm that was previously mapped to a situation, and another alarm that was not previously mapped
         // should be mapped to the same situation
-        SituationBean existingSituation = new SituationBean();
-        existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
-        existingSituation.addAlarm(alarm1InSpaceTime.getAlarm());
+        Situation existingSituation = ImmutableSituation.newBuilderNow()
+                .setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString())
+                .addAlarm(alarm1InSpaceTime.getAlarm())
+                .build();
         Map<String, Situation> alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation)
                 .build();
         Map<String, Situation> situationsById = new ImmutableMap.Builder<String, Situation>()
@@ -304,9 +325,10 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(Iterables.getFirst(situations, null).getAlarms(), hasSize(2));
 
         // A cluster with alarms that are already mapped to separate situations should not updated/create any situations
-        SituationBean existingSituation2 = new SituationBean();
-        existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
-        existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
+        Situation existingSituation2 = ImmutableSituation.newBuilderNow()
+                .setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString())
+                .addAlarm(alarm2InSpaceTime.getAlarm())
+                .build();
         alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation).put("2", existingSituation2)
                 .build();
         situationsById = new ImmutableMap.Builder<String, Situation>().put(existingSituation.getId(), existingSituation)
@@ -319,13 +341,15 @@ public class ClusterEngineTest implements SituationHandler {
         // If a cluster contains alarms in different situations and one or more alarms that are not
         // yet associated to a situation, then we chose to add the alarms without situations to their the same situation
         // as their closest neighbor
-        existingSituation = new SituationBean();
-        existingSituation.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
-        existingSituation.addAlarm(alarm1InSpaceTime.getAlarm());
+        existingSituation = ImmutableSituation.newBuilderNow()
+                .setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString())
+                .addAlarm(alarm1InSpaceTime.getAlarm())
+                .build();
 
-        existingSituation2 = new SituationBean();
-        existingSituation2.setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString());
-        existingSituation2.addAlarm(alarm2InSpaceTime.getAlarm());
+        existingSituation2 = ImmutableSituation.newBuilderNow()
+                .setId(Long.valueOf(situationIdGenerator.incrementAndGet()).toString())
+                .addAlarm(alarm2InSpaceTime.getAlarm())
+                .build();
 
         alarmIdToSituationMap = new ImmutableMap.Builder<String, Situation>().put("1", existingSituation).put("2", existingSituation2)
                 .build();

@@ -58,7 +58,7 @@ import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
@@ -194,12 +194,13 @@ public class Level1EngineComplianceTest {
     // Get nAlarms all occurring at the same time in seconds
     private List<Alarm> getAlarms(int nAlarms, long seconds, MockInventoryType inventoryObjectType, String inventoryObjectId) {
         List<Alarm> alarms = new ArrayList<>();
-        IntStream.range(0, nAlarms).forEach(index -> {
-            AlarmBean alarm = new AlarmBean(Long.valueOf(alarmIdGenerator.getAndIncrement()).toString(), seconds * 1000);
-            alarm.setInventoryObjectType(inventoryObjectType.getType());
-            alarm.setInventoryObjectId(inventoryObjectId);
-            alarms.add(alarm);
-        });
+        IntStream.range(0, nAlarms).forEach(index ->
+                alarms.add(ImmutableAlarm.newBuilder()
+                        .setId(Long.valueOf(alarmIdGenerator.getAndIncrement()).toString())
+                        .setTime(seconds * 1000)
+                        .setInventoryObjectType(inventoryObjectType.getType())
+                        .setInventoryObjectId(inventoryObjectId)
+                        .build()));
         return alarms;
     }
 

@@ -32,8 +32,8 @@ import java.util.Objects;
 
 import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.engine.topology.model.Group;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.OperationalState;
@@ -63,17 +63,21 @@ public class ActionManager {
     }
 
     public void createSituation(ReportObject report) {
-        SituationBean situation = new SituationBean(report.getId());
-        LOG.info("Create Situation {} for: {}", situation.getId(), report);
+        ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder().setId(report.getId());
+        LOG.info("Create Situation {} for: {}", report.getId(), report);
         ModelObject owner = report.getGroup().getOwner();
-        situation.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
+        situationBuilder.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));
         if (report.getStatus() == ReportStatus.CLEARED || report.getStatus() == ReportStatus.CLEARING) {
-            situation.setSeverity(Severity.CLEARED);
+            situationBuilder.setSeverity(Severity.CLEARED);
         } else {
-            situation.setSeverity(owner.getOperationalState().getSeverity());
+            situationBuilder.setSeverity(owner.getOperationalState().getSeverity());
         }
-        report.getGroup().getMembers().stream().flatMap(mo -> mo.getAlarms().stream()).forEach(situation::addAlarm);
-        topologyEngine.getSituationHandler().onSituation(situation);
+        report.getGroup()
+                .getMembers()
+                .stream()
+                .flatMap(mo -> mo.getAlarms().stream())
+                .forEach(situationBuilder::addAlarm);
+        topologyEngine.getSituationHandler().onSituation(situationBuilder.build());
         topologyEngine.addOrUpdateMemoryObject(report);
     }
 
@@ -82,14 +86,16 @@ public class ActionManager {
     }
 
     // Impact the Group Owner
-    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus, Severity severity, String alarmId) {
+    public void synthesizeAlarm(ModelObject owner, OperationalState operationalStatus, Severity severity,
+                                String alarmId) {
         LOG.info("Synthesize {}|{} Alarm for: {}", operationalStatus, severity, owner);
-        AlarmBean alarm = new AlarmBean(alarmId);
-        alarm.setInventoryObjectType(owner.getType());
-        alarm.setInventoryObjectId(owner.getId());
-        alarm.setSeverity(severity);
         // Send the synthetic alarm to the engine.
-        topologyEngine.onAlarmCreatedOrUpdated(alarm);
+        topologyEngine.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
+                .setId(alarmId)
+                .setInventoryObjectType(owner.getType())
+                .setInventoryObjectId(owner.getId())
+                .setSeverity(severity)
+                .build());
     }
 
     public void remove(WorkingMemoryObject object) {

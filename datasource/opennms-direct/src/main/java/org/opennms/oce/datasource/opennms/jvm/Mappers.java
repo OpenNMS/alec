@@ -39,29 +39,29 @@ import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 
 public class Mappers {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
 
     public static Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        final AlarmBean bean = new AlarmBean();
-        bean.setId(alarm.getReductionKey());
-        bean.setTime(alarm.getLastEventTime().getTime());
-        bean.setSeverity(toSeverity(alarm.getSeverity()));
-        bean.setInventoryObjectId(alarm.getManagedObjectInstance());
-        bean.setInventoryObjectType(alarm.getManagedObjectInstance());
-        bean.setSummary(alarm.getLogMessage());
-        bean.setDescription(alarm.getDescription());
-        return bean;
+        return ImmutableAlarm.newBuilder()
+                .setId(alarm.getReductionKey())
+                .setTime(alarm.getLastEventTime().getTime())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setInventoryObjectId(alarm.getManagedObjectInstance())
+                .setInventoryObjectType(alarm.getManagedObjectInstance())
+                .setSummary(alarm.getLogMessage())
+                .setDescription(alarm.getDescription())
+                .build();
     }
 
     public static Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
         // TODO: Create the situation
-        final SituationBean situationBean = new SituationBean();
-        return situationBean;
+        final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder();
+        return situationBuilder.build();
     }
 
     public static InMemoryEvent toEvent(Situation situation) {

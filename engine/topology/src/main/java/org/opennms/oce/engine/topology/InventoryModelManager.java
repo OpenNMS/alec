@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.engine.topology.model.Model;
 import org.opennms.oce.engine.topology.model.ModelObject;
 import org.opennms.oce.engine.topology.model.ModelObjectKey;
@@ -72,10 +72,10 @@ public class InventoryModelManager {
     private void initInventory() {
         inventory = new TopologyInventory();
         // Create the root
-        final InventoryObjectBean rootEntry = new InventoryObjectBean();
-        rootEntry.setType(MODEL_ROOT_TYPE);
-        rootEntry.setId(MODEL_ROOT_ID);
-        inventory.addObject(rootEntry);
+        inventory.addObject(ImmutableInventoryObject.newBuilder()
+                .setType(MODEL_ROOT_TYPE)
+                .setId(MODEL_ROOT_ID)
+                .build());
     }
 
     public void appendObject(InventoryObject io) {
@@ -89,7 +89,7 @@ public class InventoryModelManager {
         organizeTopologyInventory(mosByKey, inventoryToRemove);
 
         for (InventoryObject ioe : inventoryToRemove.getInventoryObjectList()) {
-            if (((InventoryObjectBean) ioe).isTopLevel()) {
+            if (ioe.isTopLevel()) {
                 model.removeObjectById(ioe.getType(), ioe.getId());
             }
         }
@@ -97,7 +97,9 @@ public class InventoryModelManager {
 
     //This assumes that input topology may not be organized structurally
     private void organizeTopologyInventory(Map<ModelObjectKey,ModelObject> mosByKey, TopologyInventory inventoryToProcess) {
-        for (InventoryObject ioe : inventoryToProcess.getInventoryObjectList()) {
+        final List<InventoryObject> ioList = inventoryToProcess.getInventoryObjectList();
+        
+        for (InventoryObject ioe : ioList) {
             final ModelObjectKey key = ModelObjectKey.key(ioe.getType(), ioe.getId());
             final ModelObject mo = mosByKey.get(key);
             if (mo == null) {
@@ -128,7 +130,10 @@ public class InventoryModelManager {
 
                 //if parent from events found mark the object as top level, else it's bad
                 if (parentMo != null) {
-                    ((InventoryObjectBean) ioe).setTopLevel(true);
+                    // Replace the original reference with a new immutable object
+                    ioList.set(ioList.indexOf(ioe), ImmutableInventoryObject.newBuilderFrom(ioe)
+                            .setTopLevel(true)
+                            .build());
                 }
                 else {
                     throw new IllegalStateException("Cannot find parent MO with key: " + parentKey + " on MO with key: " + key);
@@ -208,7 +213,7 @@ public class InventoryModelManager {
             final ModelObject mo = mosByKey.get(key);
 
             //Index top level elements only to exclude "dangling" nodes
-            if (((InventoryObjectBean) ioe).isTopLevel()) {
+            if (ioe.isTopLevel()) {
                 model.indexHierarchy(mo);
             }
         }
@@ -223,7 +228,9 @@ public class InventoryModelManager {
      * @param isAppend - specify if this is to append to existing inventory. False is default.
      */
     private void buildRelationships(Map<ModelObjectKey,ModelObject> mosByKey, TopologyInventory inventoryToProcess, boolean isAppend) {
-        for (InventoryObject ioe : inventoryToProcess.getInventoryObjectList()) {
+        final List<InventoryObject> ioList = inventoryToProcess.getInventoryObjectList();
+
+        for (InventoryObject ioe : ioList) {
             final ModelObjectKey key = ModelObjectKey.key(ioe.getType(), ioe.getId());
             final ModelObject mo = mosByKey.get(key);
             if (mo == null) {
@@ -254,7 +261,10 @@ public class InventoryModelManager {
 
                 //Mark the object as top level
                 if (parentMo != null) {
-                    ((InventoryObjectBean) ioe).setTopLevel(true);
+                    // Replace the original reference with a new immutable object
+                    ioList.set(ioList.indexOf(ioe), ImmutableInventoryObject.newBuilderFrom(ioe)
+                            .setTopLevel(true)
+                            .build());
                 }
             }
 
@@ -308,11 +318,16 @@ public class InventoryModelManager {
     }
 
     private static void findAndFixDanglingObjects(List<InventoryObject> inventoryObjectList) {
-
-        inventoryObjectList.stream().filter(obj -> obj.getParentType() == null || obj.getParentId() == null).forEach(obj -> {
-            ((InventoryObjectBean)obj).setParentId(MODEL_ROOT_ID);
-            ((InventoryObjectBean)obj).setParentType(MODEL_ROOT_TYPE);
-        });
+        for (InventoryObject inventoryObject : inventoryObjectList) {
+            if (inventoryObject.getParentType() == null || inventoryObject.getParentId() == null) {
+                // Replace the original reference with a new immutable object
+                inventoryObjectList.set(inventoryObjectList.indexOf(inventoryObject),
+                        ImmutableInventoryObject.newBuilderFrom(inventoryObject)
+                                .setParentId(MODEL_ROOT_ID)
+                                .setParentType(MODEL_ROOT_TYPE)
+                                .build());
+            }
+        }
     }
 
     private static ModelObject toModelObject(InventoryObject ioe) {

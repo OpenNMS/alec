@@ -49,14 +49,13 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
-import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.common.AlarmBean;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
-import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectRelativeRef;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.datasource.v1.schema.AlarmRef;
 import org.opennms.oce.datasource.v1.schema.Alarms;
 import org.opennms.oce.datasource.v1.schema.Event;
@@ -75,14 +74,15 @@ public class JaxbUtils {
 
     private static final Gson gson = new Gson();
 
-    public static Alarm toAlarm(org.opennms.oce.datasource.v1.schema.Alarm alarm, org.opennms.oce.datasource.v1.schema.Event event) {
-        final AlarmBean alarmBean = new AlarmBean();
-        alarmBean.setId(alarm.getId());
-        alarmBean.setTime(event.getTime());
-        alarmBean.setInventoryObjectType(alarm.getInventoryObjectType());
-        alarmBean.setInventoryObjectId(alarm.getInventoryObjectId());
-        alarmBean.setSeverity(toSeverity(event.getSeverity()));
-        return alarmBean;
+    public static Alarm toAlarm(org.opennms.oce.datasource.v1.schema.Alarm alarm,
+                                org.opennms.oce.datasource.v1.schema.Event event) {
+        return ImmutableAlarm.newBuilder()
+                .setId(alarm.getId())
+                .setTime(event.getTime())
+                .setInventoryObjectType(alarm.getInventoryObjectType())
+                .setInventoryObjectId(alarm.getInventoryObjectId())
+                .setSeverity(toSeverity(event.getSeverity()))
+                .build();
     }
 
     public static Severity toSeverity(org.opennms.oce.datasource.v1.schema.Severity severity) {
@@ -116,13 +116,16 @@ public class JaxbUtils {
 
 
     public static Situation toEngineSituation(org.opennms.oce.datasource.v1.schema.Situation situation) {
-        SituationBean engineSituation = new SituationBean(situation.getId());
-        engineSituation.setCreationTime(situation.getCreationTime());
-        for (AlarmRef a : situation.getAlarmRef()) {
-            Alarm alarm = new AlarmBean(a.getId());
-            engineSituation.addAlarm(alarm);
-        }
-        return engineSituation;
+        return ImmutableSituation.newBuilder()
+                .setId(situation.getId())
+                .setCreationTime(situation.getCreationTime())
+                .setAlarms(situation.getAlarmRef()
+                        .stream()
+                        .map(alarmRef -> ImmutableAlarm.newBuilder()
+                                .setId(alarmRef.getId())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
     public static Set<Situation> getSituations(Path path) throws JAXBException, IOException {
@@ -130,7 +133,7 @@ public class JaxbUtils {
             JAXBContext jaxbContext = JAXBContext.newInstance(Situations.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             List<org.opennms.oce.datasource.v1.schema.Situation> xmlSituations = ((Situations) unmarshaller.unmarshal(is)).getSituation();
-            return new HashSet<>(xmlSituations.stream().map(JaxbUtils::toEngineSituation).collect(Collectors.toSet()));
+            return xmlSituations.stream().map(JaxbUtils::toEngineSituation).collect(Collectors.toSet());
         } catch (Exception e) {
             throw e;
         }
@@ -194,36 +197,37 @@ public class JaxbUtils {
         if ("model".equals(moe.getId()) && "Model".equals(moe.getType())) {
             return null;
         }
-        final InventoryObjectBean io = new InventoryObjectBean();
-        io.setId(moe.getId());
-        io.setType(moe.getType());
+        final ImmutableInventoryObject.Builder ioBuilder = ImmutableInventoryObject.newBuilder()
+                .setId(moe.getId())
+                .setType(moe.getType());
         if (!"model".equals(moe.getParentId()) || !"Model".equals(moe.getParentType())) {
-            io.setParentId(moe.getParentId());
-            io.setParentType(moe.getParentType());
+            ioBuilder.setParentId(moe.getParentId())
+                    .setParentType(moe.getParentType());
         }
-        io.setFriendlyName(moe.getFriendlyName());
+        ioBuilder.setFriendlyName(moe.getFriendlyName());
         if (moe.getPeerRef() != null) {
             for (PeerRef ref : moe.getPeerRef()) {
-                final InventoryObjectPeerRefBean peerRef = new InventoryObjectPeerRefBean();
-                peerRef.setId(ref.getId());
-                peerRef.setType(ref.getType());
+                final ImmutableInventoryObjectPeerRef.Builder peerRefBuilder =
+                        ImmutableInventoryObjectPeerRef.newBuilder()
+                                .setId(ref.getId())
+                                .setType(ref.getType());
                 if ("A".equalsIgnoreCase(ref.getEndpoint())) {
-                    peerRef.setEndpoint(InventoryObjectPeerEndpoint.A);
+                    peerRefBuilder.setEndpoint(InventoryObjectPeerEndpoint.A);
                 } else {
-                    peerRef.setEndpoint(InventoryObjectPeerEndpoint.Z);
+                    peerRefBuilder.setEndpoint(InventoryObjectPeerEndpoint.Z);
                 }
-                io.getPeers().add(peerRef);
+                ioBuilder.addPeer(peerRefBuilder.build());
             }
         }
         if (moe.getRelativeRef() != null) {
             for (RelativeRef ref : moe.getRelativeRef()) {
-                final InventoryObjectRelativeRefBean relativeRef = new InventoryObjectRelativeRefBean();
-                relativeRef.setId(ref.getId());
-                relativeRef.setType(ref.getType());
-                io.getRelatives().add(relativeRef);
+                ioBuilder.addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                        .setId(ref.getId())
+                        .setType(ref.getType())
+                        .build());
             }
         }
-        return io;
+        return ioBuilder.build();
     }
 
     public static List<org.opennms.oce.datasource.v1.schema.Alarm> getRawAlarms(Path path) throws JAXBException, IOException {

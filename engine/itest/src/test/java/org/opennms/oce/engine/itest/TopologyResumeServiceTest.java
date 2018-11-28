@@ -52,7 +52,7 @@ import org.opennms.oce.engine.topology.TopologyEngineFactory;
 
 public class TopologyResumeServiceTest {
 
-    private List<InventoryObject> inventory = MockInventory.SAMPLE_NETWORK;
+    private List<InventoryObject> inventory = MockInventory.getSampleNetwork();
 
     private final EngineFactory factory = new TopologyEngineFactory();
 

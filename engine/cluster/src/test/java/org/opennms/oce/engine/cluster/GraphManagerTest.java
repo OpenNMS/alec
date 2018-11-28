@@ -30,7 +30,6 @@ package org.opennms.oce.engine.cluster;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -40,8 +39,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
-import org.opennms.oce.datasource.common.AlarmBean;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
@@ -53,7 +53,7 @@ public class GraphManagerTest {
     public void canBuildGraphAndMaintainGraph() {
         // Create a new graph manager and add some inventory
         final GraphManager graphManager = new GraphManager();
-        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        graphManager.addInventory(MockInventory.getSampleNetwork());
         // Validate the graph
         graphManager.withGraph(g -> {
             // The number of vertices should match the number of elements in the inventory
@@ -87,7 +87,7 @@ public class GraphManagerTest {
     public void canHandleSameInventory() {
         // Create a new graph manager and add some inventory
         final GraphManager graphManager = new GraphManager();
-        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        graphManager.addInventory(MockInventory.getSampleNetwork());
 
         AtomicInteger numEdges = new AtomicInteger();
         // Validate the graph
@@ -98,7 +98,7 @@ public class GraphManagerTest {
             numEdges.set(g.getEdgeCount());
         });
         // Now add the same inventory again
-        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        graphManager.addInventory(MockInventory.getSampleNetwork());
         // Validate the graph
         graphManager.withGraph(g -> {
             // The number of vertices should match the number of elements in the inventory
@@ -148,14 +148,14 @@ public class GraphManagerTest {
     public void canDeleteInventory() {
         // Create a new graph manager and add some inventory
         final GraphManager graphManager = new GraphManager();
-        graphManager.addInventory(MockInventory.SAMPLE_NETWORK);
+        graphManager.addInventory(MockInventory.getSampleNetwork());
         // The graph should contain some vertices and edges
         graphManager.withGraph(g -> {
             assertThat(g.getVertexCount(), greaterThanOrEqualTo(1));
             assertThat(g.getEdgeCount(), greaterThanOrEqualTo(1));
         });
         // Now delete that same inventory
-        graphManager.removeInventory(MockInventory.SAMPLE_NETWORK);
+        graphManager.removeInventory(MockInventory.getSampleNetwork());
         // The graph should be empty
         graphManager.withGraph(g -> {
             assertThat(g.getVertexCount(), equalTo(0));
@@ -169,12 +169,10 @@ public class GraphManagerTest {
         final GraphManager graphManager = new GraphManager();
 
         // Add an alarm to the graph
-        AlarmBean a1 = new AlarmBean();
-        a1.setTime(1);
-        a1.setId("a1");
-        a1.setInventoryObjectType(null);
-        a1.setInventoryObjectId(null);
-        graphManager.addOrUpdateAlarm(a1);
+        graphManager.addOrUpdateAlarm(ImmutableAlarm.newBuilder()
+                .setTime(1)
+                .setId("a1")
+                .build());
 
         // The graph should remain empty
         graphManager.withGraph(g -> {

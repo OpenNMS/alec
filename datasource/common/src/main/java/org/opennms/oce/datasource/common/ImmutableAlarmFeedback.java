@@ -62,7 +62,6 @@ public final class ImmutableAlarmFeedback implements AlarmFeedback {
         private long timestamp;
 
         private Builder() {
-            timestamp = System.currentTimeMillis();
         }
 
         private Builder(AlarmFeedback alarmFeedback) {
@@ -160,5 +159,37 @@ public final class ImmutableAlarmFeedback implements AlarmFeedback {
     @Override
     public long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImmutableAlarmFeedback that = (ImmutableAlarmFeedback) o;
+        return timestamp == that.timestamp &&
+                Objects.equals(situationKey, that.situationKey) &&
+                Objects.equals(situationFingerprint, that.situationFingerprint) &&
+                Objects.equals(alarmKey, that.alarmKey) &&
+                feedbackType == that.feedbackType &&
+                Objects.equals(reason, that.reason) &&
+                Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(situationKey, situationFingerprint, alarmKey, feedbackType, reason, user, timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "ImmutableAlarmFeedback{" +
+                "situationKey='" + situationKey + '\'' +
+                ", situationFingerprint='" + situationFingerprint + '\'' +
+                ", alarmKey='" + alarmKey + '\'' +
+                ", feedbackType=" + feedbackType +
+                ", reason='" + reason + '\'' +
+                ", user='" + user + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

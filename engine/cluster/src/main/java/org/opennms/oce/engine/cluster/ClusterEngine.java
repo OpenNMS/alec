@@ -30,6 +30,7 @@ package org.opennms.oce.engine.cluster;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +55,7 @@ import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.features.graph.api.Edge;
 import org.opennms.oce.features.graph.api.GraphProvider;
@@ -198,16 +199,17 @@ public class ClusterEngine implements Engine, GraphProvider {
 
             // Index the given situations and the alarms they contain, so that we can cluster alarms in existing
             // situations when applicable
-            for (Situation situation : situations) {
-                final SituationBean situationBean = new SituationBean(situation);
-                situationsById.put(situationBean.getId(), situationBean);
-                for (Alarm alarmInSituation : situationBean.getAlarms()) {
-                    alarmIdToSituationMap.put(alarmInSituation.getId(), situationBean);
-                }
-            }
+            situations.forEach(situation -> {
+                        situationsById.put(situation.getId(), situation);
+                        if (situation.getAlarms() != null) {
+                            for (Alarm alarmInSituation : situation.getAlarms()) {
+                                alarmIdToSituationMap.put(alarmInSituation.getId(), situation);
+                            }
+                        }
+                    });
             
             // Process all the alarm feedback provided on init
-            alarmFeedback.forEach(feedback -> handleAlarmFeedback(feedback));
+            alarmFeedback.forEach(this::handleAlarmFeedback);
 
             if (alarms.size() > 0) {
                 alarmsChangedSinceLastTick = true;
@@ -248,7 +250,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             return;
         }
 
-        final Set<Situation> situations = new HashSet<>();
+        final Set<Situation> situations = new LinkedHashSet<>();
 
         synchronized (situationsWithFeedback) {
             if (feedbackChangedSinceLastTick) {
@@ -264,9 +266,9 @@ public class ClusterEngine implements Engine, GraphProvider {
                             situationAlarmBlacklist.get(situationId).contains(alarm.getId()));
 
                     if (!newAlarms.equals(prevAlarms)) {
-                        SituationBean updatedSituation = new SituationBean(affectedSituation);
-                        updatedSituation.setAlarms(newAlarms);
-                        situations.add(updatedSituation);
+                        situations.add(ImmutableSituation.newBuilderFrom(affectedSituation)
+                                .setAlarms(newAlarms)
+                                .build());
                     }
                 }
                 
@@ -373,28 +375,26 @@ public class ClusterEngine implements Engine, GraphProvider {
         if (alarmsBySituationId.size() == 1) {
             // All of the alarms in the cluster are not associated with a situation yet
             // Create a new situation with all of the alarms
-            final SituationBean situation = new SituationBean();
-            situation.setId(UUID.randomUUID().toString());
-            situation.setCreationTime(timestampInMillis);
+            final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
+                    .setId(UUID.randomUUID().toString())
+                    .setCreationTime(timestampInMillis);
             for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
-                addAlarmToSituation(alarm.getAlarm(), situation);
+                situationBuilder.addAlarm(alarm.getAlarm(), this::isAlarmBlacklistedFromSituation);
             }
-            situations.add(situation);
+            situations.add(situationBuilder.build());
         } else if (alarmsBySituationId.size() == 2) {
             // Some of the alarms in the cluster already belong to a situation whereas other don't
             // Add them all to the same situation
             final String situationId = alarmsBySituationId.keySet().stream().filter(k -> !EMPTY_SITUATION_ID.equals(k))
                     .findFirst().orElseThrow(() -> new IllegalStateException("Should not happen."));
             // Create a copy of the existing situation
-            final SituationBean situation = new SituationBean(situationsById.get(situationId));
-            if (situation.getId() == null) {
-                throw new IllegalStateException("Should not happen.");
-            }
+            final ImmutableSituation.Builder situationBuilder =
+                    ImmutableSituation.newBuilderFrom(situationsById.get(situationId));
             // Add all the alarms to the Situation, replacing any older references....
             for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
-                situation.addAlarm(alarm.getAlarm());
+                situationBuilder.addAlarm(alarm.getAlarm(), this::isAlarmBlacklistedFromSituation);
             }
-            situations.add(situation);
+            situations.add(situationBuilder.build());
         } else {
             // The alarms in this cluster already belong to different situations
             // Let's locate the ones that aren't part of any situation
@@ -410,37 +410,35 @@ public class ClusterEngine implements Engine, GraphProvider {
                     .collect(Collectors.toList());
 
             // refresh the situations with the existing alarms
-            // TODO: Will clean up this casting when the beans are replaced with builders
-            candidateAlarms.forEach(alarm -> addAlarmToSituation(alarm,
-                    (SituationBean) alarmIdToSituationMap.get(alarm.getId())));
+            candidateAlarms.forEach(alarm -> {
+                ImmutableSituation.Builder situationBuilder =
+                        ImmutableSituation.newBuilderFrom(alarmIdToSituationMap.get(alarm.getId()));
+                situationBuilder.addAlarm(alarm, this::isAlarmBlacklistedFromSituation);
+                alarmIdToSituationMap.put(alarm.getId(), situationBuilder.build());
+            });
 
             // For each of these we want to associate the alarm with the other alarm that is the "closest"
             // FIXME: This break if there are multiple alarms without a situation and they get mapped to the situation
             for (Alarm alarm : alarmsWithoutSituations) {
                 final Alarm closestNeighbor = getClosestNeighborInSituation(alarm, candidateAlarms);
-                final SituationBean situation = new SituationBean(alarmIdToSituationMap.get(closestNeighbor.getId()));
-                if (situation.getId() == null) {
-                    throw new IllegalStateException("Should not happen.");
-                }
-                addAlarmToSituation(alarm, situation);
-                situations.add(situation);
+                final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilderFrom(alarmIdToSituationMap.get(closestNeighbor.getId()));
+                situationBuilder.addAlarm(alarm, this::isAlarmBlacklistedFromSituation);
+                situations.add(situationBuilder.build());
             }
         }
 
         LOG.debug("Generating diagnostic texts for {} situations...", situations.size());
         final Set<Situation> situationsWithDiagText = situations.stream()
-                .map(situation -> {
-                    final SituationBean situationWithDiagText = new SituationBean(situation);
-                    situationWithDiagText.setDiagnosticText(getDiagnosticTextForSituation(situation));
-                    return situationWithDiagText;
-                })
+                .map(situation -> ImmutableSituation.newBuilderFrom(situation)
+                        .setDiagnosticText(getDiagnosticTextForSituation(situation))
+                        .build())
                 .collect(Collectors.toSet());
         LOG.debug("Done generating diagnostic texts.");
 
         return situationsWithDiagText;
     }
 
-    private void addAlarmToSituation(Alarm alarm, SituationBean situation) {
+    private boolean isAlarmBlacklistedFromSituation(String alarmId, String situationId) {
         // Here we are doing some very primitive blacklisting to ensure that an alarm does not get re-correlated back to
         // the same situation that it has been removed from via feedback. The result is that the engine will likely
         // attempt to cluster it to the same situation but we will prevent it from being added here via blacklist. This
@@ -449,14 +447,14 @@ public class ClusterEngine implements Engine, GraphProvider {
         // alarm from being added to any situation.
         //
         // More intelligent blacklisting should follow later.
-        if (situationAlarmBlacklist.containsKey(situation.getId()) && situationAlarmBlacklist.get(situation.getId())
-                .contains(alarm.getId())) {
-            LOG.debug("Alarm {} is blacklisted from situation {} and will not be added", alarm, situation);
-
-            return;
+        if (situationAlarmBlacklist.containsKey(situationId) &&
+                situationAlarmBlacklist.get(situationId).contains(alarmId)) {
+            LOG.debug("Alarm Id {} is blacklisted from situation Id {} and will not be added", alarmId, situationId);
+            
+            return false;
         }
         
-        situation.addAlarm(alarm);
+        return true;
     }
 
     private String getDiagnosticTextForSituation(Situation situation) {

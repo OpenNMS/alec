@@ -33,25 +33,75 @@ import java.util.Objects;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 
-public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
-    private String type;
-    private String id;
-    private InventoryObjectPeerEndpoint endpoint;
-    private long weight = 1;
+public final class ImmutableInventoryObjectPeerRef implements InventoryObjectPeerRef {
+    private final String type;
+    private final String id;
+    private final InventoryObjectPeerEndpoint endpoint;
+    private final long weight;
 
-    public InventoryObjectPeerRefBean() {}
-    public InventoryObjectPeerRefBean(String type, String id, InventoryObjectPeerEndpoint endpoint) {
-        this.type = Objects.requireNonNull(type);
-        this.id = Objects.requireNonNull(id);
-        this.endpoint = Objects.requireNonNull(endpoint);
+    private ImmutableInventoryObjectPeerRef(Builder builder) {
+        this.type = builder.type;
+        this.id = builder.id;
+        this.endpoint = builder.endpoint;
+        this.weight = builder.weight;
     }
+
+    public static class Builder {
+        private String type;
+        private String id;
+        private InventoryObjectPeerEndpoint endpoint;
+        private long weight;
+
+        private Builder() {
+            weight = 1;
+        }
+
+        private Builder(InventoryObjectPeerRef inventoryObjectPeerRef) {
+            this.type = inventoryObjectPeerRef.getType();
+            this.id = inventoryObjectPeerRef.getId();
+            this.endpoint = inventoryObjectPeerRef.getEndpoint();
+            this.weight = inventoryObjectPeerRef.getWeight();
+        }
+
+        public Builder setType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setEndpoint(InventoryObjectPeerEndpoint endpoint) {
+            this.endpoint = endpoint;
+            return this;
+        }
+
+        public Builder setWeight(long weight) {
+            this.weight = weight;
+            return this;
+        }
+
+        public ImmutableInventoryObjectPeerRef build() {
+            Objects.requireNonNull(id, "Id cannot be null");
+            Objects.requireNonNull(type, "Type cannot be null");
+
+            return new ImmutableInventoryObjectPeerRef(this);
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilderFrom(InventoryObjectPeerRef inventoryObjectPeerRef) {
+        return new Builder(inventoryObjectPeerRef);
+    }
+
     @Override
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     @Override
@@ -59,17 +109,9 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     @Override
     public InventoryObjectPeerEndpoint getEndpoint() {
         return endpoint;
-    }
-
-    public void setEndpoint(InventoryObjectPeerEndpoint endpoint) {
-        this.endpoint = endpoint;
     }
 
     @Override
@@ -77,15 +119,11 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
         return weight;
     }
 
-    public void setWeight(long weight) {
-        this.weight = weight;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InventoryObjectPeerRefBean that = (InventoryObjectPeerRefBean) o;
+        ImmutableInventoryObjectPeerRef that = (ImmutableInventoryObjectPeerRef) o;
         return Objects.equals(type, that.type) &&
                 Objects.equals(id, that.id) &&
                 endpoint == that.endpoint;
@@ -98,10 +136,11 @@ public class InventoryObjectPeerRefBean implements InventoryObjectPeerRef {
 
     @Override
     public String toString() {
-        return "InventoryObjectPeerRefBean{" +
+        return "ImmutableInventoryObjectPeerRef{" +
                 "type='" + type + '\'' +
                 ", id='" + id + '\'' +
                 ", endpoint=" + endpoint +
+                ", weight=" + weight +
                 '}';
     }
 }

@@ -53,7 +53,7 @@ public class GraphTest {
 
     @Before
     public void setUp() {
-        InventoryModelManager manager = new InventoryModelManager(MockInventory.SAMPLE_NETWORK);
+        InventoryModelManager manager = new InventoryModelManager(MockInventory.getSampleNetwork());
         model = manager.getModel();
 
         // another to NSA

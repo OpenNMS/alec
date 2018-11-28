@@ -39,7 +39,7 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.api.SituationHandler;
-import org.opennms.oce.datasource.common.SituationBean;
+import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.engine.api.Engine;
 
 /**
@@ -59,7 +59,7 @@ public class TimeSliceEngine implements Engine {
 
     long windowStop = 0;
 
-    SituationBean current;
+    ImmutableSituation.Builder current;
 
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
@@ -87,11 +87,11 @@ public class TimeSliceEngine implements Engine {
     // Send the last Situation, start a new one and a new Window
     private void newWindow(Alarm alarm) {
         if (current != null) {
-            handler.onSituation(current);
+            handler.onSituation(current.build());
         }
         windowStart = alarm.getTime();
         windowStop = windowStart + sliceMillis;
-        current = new SituationBean();
+        current = ImmutableSituation.newBuilder();
         current.setId(UUID.randomUUID().toString());
         current.addAlarm(alarm);
         current.setSeverity(alarm.getSeverity());
@@ -120,7 +120,7 @@ public class TimeSliceEngine implements Engine {
     @Override
     public void tick(long timestampInMillis) {
         if (current != null) {
-            handler.onSituation(current);
+            handler.onSituation(current.build());
         }
     }
 

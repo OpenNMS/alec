@@ -33,9 +33,9 @@ import java.util.List;
 
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
-import org.opennms.oce.datasource.common.InventoryObjectBean;
-import org.opennms.oce.datasource.common.InventoryObjectPeerRefBean;
-import org.opennms.oce.datasource.common.InventoryObjectRelativeRefBean;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectRelativeRef;
 
 public class MockInventoryBuilder {
 
@@ -57,13 +57,13 @@ public class MockInventoryBuilder {
     }
 
     public MockInventoryBuilder withInventoryObject(String type, String id, String parentType, String parentId) {
-        final InventoryObjectBean iob = new InventoryObjectBean();
-        iob.setType(type);
-        iob.setId(id);
-        iob.setParentType(parentType);
-        iob.setParentId(parentId);
-        iob.setWeightToParent(PARENT_WEIGHT);
-        inventoryObjects.add(iob);
+        inventoryObjects.add(ImmutableInventoryObject.newBuilder()
+                .setType(type)
+                .setId(id)
+                .setParentType(parentType)
+                .setParentId(parentId)
+                .setWeightToParent(PARENT_WEIGHT)
+                .build());
         return this;
     }
 
@@ -72,22 +72,26 @@ public class MockInventoryBuilder {
     }
 
     public MockInventoryBuilder withPeerRelation(String type, String id, String typeA, String idA, String typeZ, String idZ) {
-        final InventoryObjectBean iob = getIoById(type, id);
+        final InventoryObject originalIo = getIoById(type, id);
+        final ImmutableInventoryObject.Builder ioBuilder = ImmutableInventoryObject.newBuilderFrom(originalIo);
 
-        InventoryObjectPeerRefBean peerRefA = new InventoryObjectPeerRefBean();
-        peerRefA.setType(typeA);
-        peerRefA.setId(idA);
-        peerRefA.setEndpoint(InventoryObjectPeerEndpoint.A);
-        peerRefA.setWeight(PEER_WEIGHT);
-        iob.getPeers().add(peerRefA);
+        ioBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                .setType(typeA)
+                .setId(idA)
+                .setEndpoint(InventoryObjectPeerEndpoint.A)
+                .setWeight(PEER_WEIGHT)
+                .build());
 
-        InventoryObjectPeerRefBean peerRefZ = new InventoryObjectPeerRefBean();
-        peerRefZ.setType(typeZ);
-        peerRefZ.setId(idZ);
-        peerRefZ.setEndpoint(InventoryObjectPeerEndpoint.Z);
-        peerRefZ.setWeight(PEER_WEIGHT);
-        iob.getPeers().add(peerRefZ);
+        ioBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                .setType(typeZ)
+                .setId(idZ)
+                .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                .setWeight(PEER_WEIGHT)
+                .build());
 
+        // Replace the io with the updated version
+        inventoryObjects.set(inventoryObjects.indexOf(originalIo), ioBuilder.build());
+        
         return this;
     }
 
@@ -96,21 +100,24 @@ public class MockInventoryBuilder {
     }
 
     public MockInventoryBuilder withRelativeRelation(String type, String id, String relativeType, String relativeId) {
-        final InventoryObjectBean iob = getIoById(type, id);
+        final InventoryObject originalIo = getIoById(type, id);
+        final ImmutableInventoryObject.Builder ioBuilder = ImmutableInventoryObject.newBuilderFrom(originalIo);
 
-        InventoryObjectRelativeRefBean relativeRef = new InventoryObjectRelativeRefBean();
-        relativeRef.setType(relativeType);
-        relativeRef.setId(relativeId);
-        relativeRef.setWeight(RELATIVE_WEIGHT);
-        iob.getRelatives().add(relativeRef);
+        ioBuilder.addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                .setType(relativeType)
+                .setId(relativeId)
+                .setWeight(RELATIVE_WEIGHT)
+                .build());
 
+        // Replace the io with the updated version
+        inventoryObjects.set(inventoryObjects.indexOf(originalIo), ioBuilder.build());
+        
         return this;
     }
 
-    private InventoryObjectBean getIoById(String type, String id) {
+    private InventoryObject getIoById(String type, String id) {
         return inventoryObjects.stream()
                 .filter(io -> type.equals(io.getType()) && id.equals(io.getId()))
-                .map(io -> (InventoryObjectBean)io)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find element with type: %s and id: %s", type, id)));
     }

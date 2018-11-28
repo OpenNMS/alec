@@ -44,10 +44,12 @@ public interface InventoryObject {
 
     String getFriendlyName();
 
-    List<? extends InventoryObjectPeerRef> getPeers();
+    List<InventoryObjectPeerRef> getPeers();
 
-    List<? extends InventoryObjectRelativeRef> getRelatives();
+    List<InventoryObjectRelativeRef> getRelatives();
     
     long getWeightToParent();
+
+    boolean isTopLevel();
 
 }

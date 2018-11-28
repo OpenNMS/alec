@@ -41,6 +41,7 @@ public class EventMarshalTest {
         Event e = new Event();
         e.setTime("Friday, September 21, 2018 2:55:07 CEST PM");
         e.setUei("someuei");
+        e.setNodeId(99L);
         e.addParam("k1", "v1");
         e.addParam("k2", "v2");
         assertThat(JaxbUtils.toXml(e, Event.class), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
@@ -59,6 +60,7 @@ public class EventMarshalTest {
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
                 "    <time>Friday, September 21, 2018 2:55:07 CEST PM</time>\n" +
+                "    <nodeid>99</nodeid>\n" +
                 "</event>"));
         assertThat(JaxbUtils.fromXml(JaxbUtils.toXml(e, Event.class), Event.class), equalTo(e));
 
@@ -81,6 +83,7 @@ public class EventMarshalTest {
                 "            </parms>\n" +
                 "            <severity>Critical</severity>\n" +
                 "            <time>Friday, September 21, 2018 2:55:07 CEST PM</time>\n" +
+                "            <nodeid>99</nodeid>\n" +
                 "        </event>\n" +
                 "    </events>\n" +
                 "</log>"));

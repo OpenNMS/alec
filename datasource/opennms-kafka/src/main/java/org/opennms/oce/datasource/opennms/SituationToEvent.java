@@ -73,6 +73,9 @@ public class SituationToEvent {
                 .map(Alarm::getId)
                 .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
 
+        // Set a node id - use the same node associated with the alarm we used to the description
+        e.setNodeId(alarmForDescr.getNodeId());
+
         return e;
     }
 

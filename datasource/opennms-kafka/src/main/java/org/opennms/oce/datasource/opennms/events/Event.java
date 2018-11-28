@@ -67,6 +67,9 @@ public class Event {
     @XmlElement(name = "time")
     private String time = createdAt;
 
+    @XmlElement(name = "nodeid")
+    private Long nodeId;
+
     public String getUei() {
         return uei;
     }
@@ -111,6 +114,14 @@ public class Event {
         this.time = time;
     }
 
+    public Long getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(Long nodeId) {
+        this.nodeId = nodeId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -120,12 +131,13 @@ public class Event {
                 Objects.equals(source, event.source) &&
                 Objects.equals(parameters, event.parameters) &&
                 Objects.equals(severity, event.severity) &&
-                Objects.equals(time, event.time);
+                Objects.equals(time, event.time) &&
+                Objects.equals(nodeId, event.nodeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uei, source, parameters, severity, time);
+        return Objects.hash(uei, source, parameters, severity, time, nodeId);
     }
 
     @Override
@@ -136,6 +148,7 @@ public class Event {
                 ", parameters=" + parameters +
                 ", severity='" + severity + '\'' +
                 ", time='" + time + '\'' +
+                ", nodeId='" + nodeId + '\'' +
                 '}';
     }
 }

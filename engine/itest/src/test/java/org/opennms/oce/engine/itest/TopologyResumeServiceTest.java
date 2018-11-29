@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -125,7 +124,6 @@ public class TopologyResumeServiceTest {
         assertThat(testSituations.get(1).getSeverity(), equalTo(Severity.CLEARED));
     }
 
-    @Ignore
     @Test
     public void resumeServiceIncludeSituationTest() {
         final List<Alarm> alarms = new ArrayList<>();

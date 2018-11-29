@@ -337,25 +337,24 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situations, hasSize(0));
     }
 
+    private AlarmInSpaceTime createAlarmWithIdOnNodeId(int alarmId, int nodeId) {
+        final Alarm a = ImmutableAlarm.newBuilder()
+                .setId(Integer.toString(alarmId))
+                .setInventoryObjectType("node")
+                .setInventoryObjectId(Integer.toString(nodeId))
+                .build();
+        AlarmInSpaceTime alarmInSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
+        when(alarmInSpaceTime.getAlarm()).thenReturn(a);
+        engine.onAlarmCreatedOrUpdated(a);
+        return alarmInSpaceTime;
+    }
+
     @Test
     public void canUpdateExistingSituationsWithManyAlarmsInCluster() {
-        // Create 4 unique alarms
-        final BiFunction<Integer,Integer,AlarmInSpaceTime> createAlarmWithIdOnNodeId = (alarmId, nodeId) -> {
-            final Alarm a = ImmutableAlarm.newBuilder()
-                    .setId(Integer.toString(alarmId))
-                    .setInventoryObjectType("node")
-                    .setInventoryObjectId(Integer.toString(nodeId))
-                    .build();
-            AlarmInSpaceTime alarmInSpaceTime = mock(AlarmInSpaceTime.class, Mockito.RETURNS_DEEP_STUBS);
-            when(alarmInSpaceTime.getAlarm()).thenReturn(a);
-            engine.onAlarmCreatedOrUpdated(a);
-            return alarmInSpaceTime;
-        };
-
-        AlarmInSpaceTime alarm1InSpaceTime = createAlarmWithIdOnNodeId.apply(1, 1);
-        AlarmInSpaceTime alarm2InSpaceTime = createAlarmWithIdOnNodeId.apply(2, 2);
-        AlarmInSpaceTime alarm3InSpaceTime = createAlarmWithIdOnNodeId.apply(3, 1);
-        AlarmInSpaceTime alarm4InSpaceTime = createAlarmWithIdOnNodeId.apply(4, 1);
+        AlarmInSpaceTime alarm1InSpaceTime = createAlarmWithIdOnNodeId(1, 1);
+        AlarmInSpaceTime alarm2InSpaceTime = createAlarmWithIdOnNodeId(2, 2);
+        AlarmInSpaceTime alarm3InSpaceTime = createAlarmWithIdOnNodeId(3, 1);
+        AlarmInSpaceTime alarm4InSpaceTime = createAlarmWithIdOnNodeId(4, 1);
 
         // Create a situation with alarm 1
         Situation situation1 = ImmutableSituation.newBuilderNow()

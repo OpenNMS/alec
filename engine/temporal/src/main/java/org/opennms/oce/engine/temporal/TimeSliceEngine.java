@@ -93,6 +93,7 @@ public class TimeSliceEngine implements Engine {
         windowStop = windowStart + sliceMillis;
         current = ImmutableSituation.newBuilder();
         current.setId(UUID.randomUUID().toString());
+        current.setCreationTime(windowStart);
         current.addAlarm(alarm);
         current.setSeverity(alarm.getSeverity());
     }

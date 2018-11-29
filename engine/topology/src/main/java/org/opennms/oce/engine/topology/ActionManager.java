@@ -63,7 +63,9 @@ public class ActionManager {
     }
 
     public void createSituation(ReportObject report) {
-        ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder().setId(report.getId());
+        ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
+                .setCreationTime(0)
+                .setId(report.getId());
         LOG.info("Create Situation {} for: {}", report.getId(), report);
         ModelObject owner = report.getGroup().getOwner();
         situationBuilder.addResourceKey(ResourceKey.key(owner.getType(), owner.getId()));

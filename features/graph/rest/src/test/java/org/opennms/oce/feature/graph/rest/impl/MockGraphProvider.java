@@ -70,6 +70,7 @@ public class MockGraphProvider implements GraphProvider {
         final List<Alarm> alarms = Collections.singletonList(a1);
 
         final List<Situation> situations = Collections.singletonList(ImmutableSituation.newBuilder()
+                .setCreationTime(1)
                 .setId("s1")
                 .addAlarm(a1)
                 .build());

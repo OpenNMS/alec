@@ -240,6 +240,8 @@ public class GraphMLConverter {
         nodeForSituation.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
         graph.addNode(nodeForSituation);
 
+        // Situation <-> Alarm edges will be weighted relative to the Cration Time of the Situation.
+        EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime());
         for (Alarm alarm : situation.getAlarms()) {
             GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
             if (nodeForAlarm == null) {

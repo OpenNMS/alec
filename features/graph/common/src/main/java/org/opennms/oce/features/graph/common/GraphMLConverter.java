@@ -65,7 +65,7 @@ public class GraphMLConverter {
     private final Map<ResourceKey, GraphMLNode> inventoryObjectsForAlarms = new HashMap<>();
     private final SetMultimap<GraphMLNode, GraphMLNode> garbageCollectedAlarmInventoryEdges = MultimapBuilder.hashKeys().hashSetValues().build(); 
 
-    private final EdgeTimeNormalizer edgeTimeNormalizer;
+    private final EdgeTimeNormalizer inventoryEdgeTimeNormalizer;
 
     private Situation situationWithMostAlarms = null;
     private boolean includeAlarms = true;
@@ -98,7 +98,7 @@ public class GraphMLConverter {
         this.g = Objects.requireNonNull(g);
         this.situations = Objects.requireNonNull(situations);
         long now = new Date().getTime();
-        edgeTimeNormalizer = new EdgeTimeNormalizer(now);
+        inventoryEdgeTimeNormalizer = new EdgeTimeNormalizer(now);
         graph.setProperty(ONMS_GRAPHML_GRAPH_NAMESPACE, "oce");
         graph.setProperty(CREATED_TIMESTAMP_KEY, now);
         doc.addGraph(graph);
@@ -187,7 +187,7 @@ public class GraphMLConverter {
         if (includeAlarms && v.getAlarms().size() > 0) {
             for (Alarm alarm : v.getAlarms()) {
                 final GraphMLNode nodeForAlarm = getOrCreateAlarmNode(alarm, getVertexIdFor(v, alarm));
-                createAlarmEdge(nodeForAlarm, node, edgeTimeNormalizer, TYPE_INVENTORY);
+                createAlarmEdge(nodeForAlarm, node, inventoryEdgeTimeNormalizer, TYPE_INVENTORY);
             }
 
             // Track the vertex with the most alarms
@@ -241,7 +241,7 @@ public class GraphMLConverter {
         graph.addNode(nodeForSituation);
 
         // Situation <-> Alarm edges will be weighted relative to the Cration Time of the Situation.
-        EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime());
+        EdgeTimeNormalizer situationEdgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime());
         for (Alarm alarm : situation.getAlarms()) {
             GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
             if (nodeForAlarm == null) {
@@ -249,7 +249,7 @@ public class GraphMLConverter {
                 nodeForAlarm = createNodeForGcAlarm(alarm);
                 graph.addNode(nodeForAlarm);
             }
-            createAlarmEdge(nodeForAlarm, nodeForSituation, edgeTimeNormalizer, TYPE_SITUATION);
+            createAlarmEdge(nodeForAlarm, nodeForSituation, situationEdgeTimeNormalizer, TYPE_SITUATION);
         }
 
         // Track the situation with the most alarms
@@ -355,7 +355,7 @@ public class GraphMLConverter {
     private void createEdgesForGcAlarms() {
         for (GraphMLNode inventoryObjectNode : garbageCollectedAlarmInventoryEdges.keySet()) {
             for (GraphMLNode alarmNode : garbageCollectedAlarmInventoryEdges.asMap().get(inventoryObjectNode)) {
-                createAlarmEdge(alarmNode, inventoryObjectNode, edgeTimeNormalizer, TYPE_INVENTORY);
+                createAlarmEdge(alarmNode, inventoryObjectNode, inventoryEdgeTimeNormalizer, TYPE_INVENTORY);
             }
         }
     }

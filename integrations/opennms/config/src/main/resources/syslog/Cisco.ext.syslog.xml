@@ -21,7 +21,7 @@
         </ueiMatch>
 
         <ueiMatch>
-            <match type="regex" expression="%ETHPORT-5-IF_DOWN\S+\s*: Interface (\S+) is down .*" />
+            <match type="regex" expression="%ETHPORT-5-IF_DOWN\S+\s*: Interface (\S+) is down.*" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
@@ -54,10 +54,10 @@
         </ueiMatch>
 
         <ueiMatch>
-            <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (vpn)? vrf (\S+) Down.*" />
+            <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (\S+ )?(vpn)? vrf (\S+) Down.*" />
             <uei>uei.opennms.org/vendor/cisco/syslog/bgpAdjChangeNeighborDown</uei>
             <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
-            <parameter-assignment matching-group="3" parameter-name="bgpVrf" />
+            <parameter-assignment matching-group="4" parameter-name="bgpVrf" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (vpn)? vrf (\S+) Up.*" />
@@ -131,6 +131,12 @@
         <ueiMatch>
             <match type="regex" expression="%L2-BM-6-ACTIVE\s*: (\S+) is Active as part of (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/bundleActive</uei>
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="2" parameter-name="bundle" />
+        </ueiMatch>
+        <ueiMatch>
+            <match type="regex" expression="%L2-BM-6-ACTIVE\s*: (\S+) is no longer Active as part of (\S+) .*" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/bundleInactive</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
             <parameter-assignment matching-group="2" parameter-name="bundle" />
         </ueiMatch>
@@ -212,16 +218,16 @@
             <parameter-assignment matching-group="2" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIROUT\s*: xFP OIR: (\S+) is removed, state: (.*)" />
+            <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIROUT\s*: xFP OIR: (\S+)( Sn: \S+\s*)? is removed, state: (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifOirOut</uei>
             <parameter-assignment matching-group="1" parameter-name="oir" />
-            <parameter-assignment matching-group="2" parameter-name="state" />
+            <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIRIN\s*: xFP OIR: (\S+) is inserted, state: (\S+)" />
+            <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIRIN\s*: xFP OIR: (\S+)( Sn: \S+\s*)? is inserted, state: (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifOirIn</uei>
             <parameter-assignment matching-group="1" parameter-name="oir" />
-            <parameter-assignment matching-group="2" parameter-name="state" />
+            <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%PLATFORM-INV-6-NODE_STATE_CHANGE\s*: Node: (\S+), state: (.*)" />
@@ -340,15 +346,15 @@
             <parameter-assignment matching-group="5" parameter-name="newStatus" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%ROUTING-OSPF-5-ADJCHG: Process (\S+), Nbr (\S+) on (\S+) in area (\S+) from (\S+) to (\S+), Loading Done, vrf (\S+) vrfid (\S+)" />
+            <match type="regex" expression="%ROUTING-OSPF-5-ADJCHG\s*: Process (\S+), Nbr (\S+) on (\S+) in area (\S+) from (\S+) to (\S+), (.*)?, vrf (\S+) vrfid (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ospfRoutingChange</uei>
             <parameter-assignment matching-group="1" parameter-name="process" />
             <parameter-assignment matching-group="2" parameter-name="neighbor" />
             <parameter-assignment matching-group="3" parameter-name="interface" />
             <parameter-assignment matching-group="4" parameter-name="area" />
             <parameter-assignment matching-group="5" parameter-name="prevState" />
-            <parameter-assignment matching-group="6" parameter-name="newState" />
-            <parameter-assignment matching-group="7" parameter-name="vrfName" />
+            <parameter-assignment matching-group="7" parameter-name="newState" />
+            <parameter-assignment matching-group="8" parameter-name="vrfName" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%PLATFORM-SHELFMGR_HAL-6-BOOT_REQ_RECEIVED\s*: Boot Request from (\S+), RomMon Version: (\S+)" />
@@ -367,12 +373,12 @@
             <parameter-assignment matching-group="1" parameter-name="operationId" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%PLATFORM-INV-6-OIROUT\s*: OIR: Node (\S+) removed" />
+            <match type="regex" expression="%PLATFORM-INV-6-OIROUT\s*: OIR: Node (\S+)( Sn: \S+\s*)? removed" />
             <uei>uei.opennms.org/vendor/cisco/syslog/oirModuleOut</uei>
             <parameter-assignment matching-group="1" parameter-name="module" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%PLATFORM-INV-6-OIRIN\s*: OIR: Node (\S+) inserted" />
+            <match type="regex" expression="%PLATFORM-INV-6-OIRIN\s*: OIR: Node (\S+)( Sn: \S+\s*)? inserted" />
             <uei>uei.opennms.org/vendor/cisco/syslog/oirModuleIn</uei>
             <parameter-assignment matching-group="1" parameter-name="module" />
         </ueiMatch>
@@ -448,12 +454,12 @@
         </ueiMatch>
 
         <ueiMatch>
-            <match type="regex" expression="%ROUTING-BGP-5-ADJCHANGE_DETAIL\s*: neighbor (\S+) (\S+) \(VRF: (\S+); AFI\/SAFI: 1\/128\) \(AS: (\S+)\)"/>
+            <match type="regex" expression="%ROUTING-BGP-5-ADJCHANGE_DETAIL\s*: neighbor (\S+) (\S+) (.* )?\(VRF: (\S+); AFI\/SAFI: \d+\/\d+(, \d+\/\d+)?\) \(AS: (\S+)\)"/>
             <uei>uei.opennms.org/vendor/cisco/syslog/bgpAdjChange</uei>
             <parameter-assignment matching-group="1" parameter-name="bgpPeer"/>
             <parameter-assignment matching-group="2" parameter-name="state"/>
-            <parameter-assignment matching-group="3" parameter-name="bgpVrf"/>
-            <parameter-assignment matching-group="4" parameter-name="as"/>
+            <parameter-assignment matching-group="4" parameter-name="bgpVrf"/>
+            <parameter-assignment matching-group="6" parameter-name="as"/>
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%L2-BM-6-MBR_BFD_STARTING\s*: The BFD session on link (\S+) in (\S+) is starting. Waiting indefinitely for peer to establish session."/>

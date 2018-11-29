@@ -228,7 +228,7 @@ public class ClusterEngine implements Engine, GraphProvider {
         Situation situationBeingRemoved = situationsById.remove(situationId);
 
         if (situationBeingRemoved == null) {
-            LOG.warn("Situation with id: {} was not found when attempting to delete", situationId);
+            LOG.warn("Situation with id: {} was not found when attempting to delete.", situationId);
             return;
         }
 
@@ -401,10 +401,24 @@ public class ClusterEngine implements Engine, GraphProvider {
             }
         }
 
+        if (LOG.isDebugEnabled()) {
+            final Map<String, List<String>> alarmIdsBySituationIds = new LinkedHashMap<>();
+            alarmsBySituationId.forEach((situationId,alarms) -> {
+                alarmIdsBySituationIds.put(situationId, alarms.stream()
+                        .map(Alarm::getId).collect(Collectors.toList()));
+            });
+            LOG.debug("{}: Alarms IDs by Situations IDs in the cluster: {}",
+                    context.getTimestampInMillis(), alarmIdsBySituationIds);
+            final List<String> alarmIdsWithoutSituations = alarmsWithoutSituations.stream()
+                    .map(Alarm::getId).collect(Collectors.toList());
+            LOG.debug("{}: Alarms IDs without situations in the cluster: {}",
+                    context.getTimestampInMillis(), alarmIdsWithoutSituations);
+        }
+
         if (alarmsWithoutSituations.isEmpty()) {
             // All of the alarms are already in situations, nothing to do here
-            LOG.debug("{}: The alarms in the cluster are already associated with the following situations: {}",
-                    context.getTimestampInMillis(), alarmsBySituationId.keySet());
+            LOG.debug("{}: All of the alarms are already in situations, nothing to do here.",
+                    context.getTimestampInMillis());
             return;
         }
 
@@ -480,7 +494,7 @@ public class ClusterEngine implements Engine, GraphProvider {
         // More intelligent blacklisting should follow later.
         if (situationAlarmBlacklist.containsKey(situationId) &&
                 situationAlarmBlacklist.get(situationId).contains(alarmId)) {
-            LOG.debug("Alarm Id {} is blacklisted from situation Id {} and will not be added", alarmId, situationId);
+            LOG.debug("Alarm with id: {} is blacklisted from situation with id: {} and will not be added.", alarmId, situationId);
             
             return false;
         }
@@ -529,7 +543,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             graphManager.addOrUpdateAlarm(alarm);
             alarmsChangedSinceLastTick = true;
         } catch (InterruptedException ignore) {
-            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCreatedOrUpdated");
+            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCreatedOrUpdated.");
             Thread.currentThread().interrupt();
         }
     }
@@ -541,7 +555,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             graphManager.addOrUpdateAlarm(alarm);
             alarmsChangedSinceLastTick = true;
         } catch (InterruptedException ignore) {
-            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCleared");
+            LOG.debug("Interrupted while handling callback, skipping processing onAlarmCleared.");
             Thread.currentThread().interrupt();
         }
     }
@@ -552,7 +566,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             initLock.await();
             graphManager.addInventory(inventory);
         } catch (InterruptedException ignore) {
-            LOG.debug("Interrupted while handling callback, skipping processing onInventoryAdded");
+            LOG.debug("Interrupted while handling callback, skipping processing onInventoryAdded.");
             Thread.currentThread().interrupt();
         }
     }
@@ -563,7 +577,7 @@ public class ClusterEngine implements Engine, GraphProvider {
             initLock.await();
             graphManager.removeInventory(inventory);
         } catch (InterruptedException ignore) {
-            LOG.debug("Interrupted while handling callback, skipping processing onInventoryRemoved");
+            LOG.debug("Interrupted while handling callback, skipping processing onInventoryRemoved.");
             Thread.currentThread().interrupt();
         }
     }

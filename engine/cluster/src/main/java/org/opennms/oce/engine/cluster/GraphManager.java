@@ -206,6 +206,7 @@ public class GraphManager {
             handleDeferredIos();
             return v;
         });
+        LOG.trace("Updating vertex: {} with alarm: {}", vertex, alarm);
         vertex.addOrUpdateAlarm(alarm);
     }
 

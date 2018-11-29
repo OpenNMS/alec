@@ -65,9 +65,11 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         }
 
         final double distance = compute(timeA, timeB, spatialDistance);
+        /* Too noisy - even for trace
         if (LOG.isTraceEnabled()) {
             LOG.trace("v1: {}, v2: {}, d({},{},{}) = {}", vertexIdA, vertexIdB, timeA, timeB, spatialDistance, distance);
         }
+        */
         return distance;
     }
 

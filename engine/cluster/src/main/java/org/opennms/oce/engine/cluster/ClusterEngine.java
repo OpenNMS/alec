@@ -403,7 +403,7 @@ public class ClusterEngine implements Engine, GraphProvider {
 
         if (LOG.isDebugEnabled()) {
             final Map<String, List<String>> alarmIdsBySituationIds = new LinkedHashMap<>();
-            alarmsBySituationId.forEach((situationId,alarms) -> {
+            alarmsBySituationId.forEach((situationId, alarms) -> {
                 alarmIdsBySituationIds.put(situationId, alarms.stream()
                         .map(Alarm::getId).collect(Collectors.toList()));
             });

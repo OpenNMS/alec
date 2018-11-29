@@ -31,35 +31,33 @@ package org.opennms.oce.features.graph.common;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class EdgeTimeNormalizerTest {
 
-    @Ignore("Needs to be reworked with the new scale")
     @Test
     public void canNormalizeScaledValues() {
         long base = 1529619060000L;
-        Set<Long> times = new HashSet<Long>(Arrays.asList(1529619077000L, 1529619077000L, 1529619079000L));
-        EdgeTimeNormalizer normalizer = new EdgeTimeNormalizer(base, times);
+        EdgeTimeNormalizer normalizer = new EdgeTimeNormalizer(base);
 
         assertThat(normalizer.getNormalizedValue(base), is(10));
-        assertThat(normalizer.getNormalizedValue(1529619079000L), is(9));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.MINUTES.toMillis(2)), is(8));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.MINUTES.toMillis(20)), is(7));
-
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.HOURS.toMillis(2)), is(6));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.HOURS.toMillis(10)), is(5));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.HOURS.toMillis(12)), is(4));
-
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.DAYS.toMillis(1)), is(3));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.DAYS.toMillis(2)), is(2));
-        assertThat(normalizer.getNormalizedValue(1529619077000L + TimeUnit.DAYS.toMillis(10)), is(1));
+        // Less than 1 second
+        assertThat(normalizer.getNormalizedValue(base + 400), is(10));
+        // less than 1 minute
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.SECONDS.toMillis(4)), is(9));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.SECONDS.toMillis(10)), is(8));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.SECONDS.toMillis(25)), is(7));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.SECONDS.toMillis(55)), is(6));
+        // less than 1 hour
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.MINUTES.toMillis(3)), is(5));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.MINUTES.toMillis(25)), is(4));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.MINUTES.toMillis(55)), is(3));
+        // less than 8 hour
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.MINUTES.toMillis(90)), is(2));
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.HOURS.toMillis(6)), is(2));
+        // more than 8 hours
+        assertThat(normalizer.getNormalizedValue(base + TimeUnit.DAYS.toMillis(10)), is(1));
     }
-
 }

@@ -33,7 +33,12 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.Severity;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectRelativeRef;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 public class OpennmsMapperTest {
@@ -60,6 +65,56 @@ public class OpennmsMapperTest {
         assertThat(mappedAlarm.getId(), equalTo(alarm.getReductionKey()));
         assertThat(mappedAlarm.getTime(), equalTo(alarm.getLastEventTime()));
         assertThat(mappedAlarm.getSeverity(), equalTo(Severity.CRITICAL));
+    }
+
+    @Test
+    public void canMapInventory() {
+        String type = "test.type";
+        String id = "test.id";
+        String parentId = "parent.id";
+        String peerId = "peer.id";
+        String peerType = "peer.type";
+        String relativeId = "relative.id";
+        String relativeType ="relative.type";
+        long weight = 1;
+
+        InventoryModelProtos.InventoryObject io = OpennmsMapper.fromInventory(ImmutableInventoryObject.newBuilder()
+                .setType(type)
+                .setId(id)
+                .setParentId(parentId)
+                .setWeightToParent(weight)
+                .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(peerId)
+                        .setType(peerType)
+                        .setEndpoint(InventoryObjectPeerEndpoint.A)
+                        .setWeight(weight)
+                        .build())
+                .addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                        .setId(relativeId)
+                        .setType(relativeType)
+                        .setWeight(weight)
+                        .build())
+                .build());
+
+        InventoryModelProtos.InventoryObject testIO = InventoryModelProtos.InventoryObject.newBuilder()
+                .setType(type)
+                .setId(id)
+                .setParentId(parentId)
+                .setWeightToParent(weight)
+                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                        .setId(peerId)
+                        .setType(peerType)
+                        .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                        .setWeight(weight)
+                        .build())
+                .addRelative(InventoryModelProtos.InventoryObjectRelativeRef.newBuilder()
+                        .setId(relativeId)
+                        .setType(relativeType)
+                        .setWeight(weight)
+                        .build())
+                .build();
+        
+        assertThat(io, equalTo(testIO));
     }
 
 

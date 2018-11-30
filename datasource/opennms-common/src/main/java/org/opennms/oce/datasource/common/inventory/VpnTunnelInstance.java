@@ -26,39 +26,42 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.inventory;
+package org.opennms.oce.datasource.common.inventory;
 
+public class VpnTunnelInstance {
+    private String peerLocalAddr;
+    private String peerRemoteAddr;
+    private String tunnelId;
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-
-public enum ManagedObjectType {
-    Node("node"),
-    SnmpInterface("snmp-interface"),
-    SnmpInterfaceLink("snmp-interface-link"),
-    BgpPeer("bgp-peer"),
-    VpnTunnel("vpn-tunnel"),
-    MplsL3Vrf("mpls-l3-vrf"),
-    EntPhysicalEntity("ent-physical-entity"),
-    OspfRouter("ospf-router"),
-    MplsTunnel("mpls-tunnel"),
-    MplsLdpSession("mpls-ldp-session");
-
-    private final String name;
-
-    ManagedObjectType(String name) {
-        this.name = Objects.requireNonNull(name);
+    public VpnTunnelInstance(String peerLocalAddr, String peerRemoteAddr, String tunnelId) {
+        this.peerLocalAddr = peerLocalAddr;
+        this.peerRemoteAddr = peerRemoteAddr;
+        this.tunnelId = tunnelId;
     }
 
-    public String getName() {
-        return name;
+    public VpnTunnelInstance() { }
+
+    public String getPeerLocalAddr() {
+        return peerLocalAddr;
     }
 
-    public static ManagedObjectType fromName(String name) {
-        return Arrays.stream(ManagedObjectType.values())
-                .filter(mot -> Objects.equals(name, mot.getName()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No type found with name: " + name));
+    public void setPeerLocalAddr(String peerLocalAddr) {
+        this.peerLocalAddr = peerLocalAddr;
+    }
+
+    public String getPeerRemoteAddr() {
+        return peerRemoteAddr;
+    }
+
+    public void setPeerRemoteAddr(String peerRemoteAddr) {
+        this.peerRemoteAddr = peerRemoteAddr;
+    }
+
+    public String getTunnelId() {
+        return tunnelId;
+    }
+
+    public void setTunnelId(String tunnelId) {
+        this.tunnelId = tunnelId;
     }
 }

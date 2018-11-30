@@ -36,7 +36,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import java.util.Collection;
 
 import org.junit.Test;
-import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 

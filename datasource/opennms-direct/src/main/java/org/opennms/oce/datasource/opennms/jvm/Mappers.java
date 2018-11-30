@@ -28,34 +28,95 @@
 
 package org.opennms.oce.datasource.opennms.jvm;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.beans.InMemoryEventBean;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.AlarmFeedback;
+import org.opennms.oce.datasource.api.FeedbackType;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.oce.datasource.common.ImmutableSituation;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+
+import com.google.common.base.Enums;
 
 public class Mappers {
+    private static final Logger LOG = LoggerFactory.getLogger(Mappers.class);
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
 
     public static Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        return ImmutableAlarm.newBuilder()
+        ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+        //noinspection ConstantConditions
+        alarmBuilder
                 .setId(alarm.getReductionKey())
                 .setTime(alarm.getLastEventTime().getTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setInventoryObjectId(alarm.getManagedObjectInstance())
-                .setInventoryObjectType(alarm.getManagedObjectInstance())
+                .setInventoryObjectType(alarm.getManagedObjectType())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
-                .build();
+                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId() : null);
+        overrideTypeAndInstance(alarmBuilder, alarm);
+
+        return alarmBuilder.build();
+    }
+
+    /**
+     * Overrides the inventory type and instance for an alarm if they aren't already scoped.
+     *
+     * @param alarmBuilder the alarm builder to update
+     * @param alarm the original alarm to derive from
+     */
+    private static void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder,
+                                                org.opennms.integration.api.v1.model.Alarm alarm) {
+        if (!Strings.isNullOrEmpty(alarm.getManagedObjectType()) &&
+                !Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
+            ManagedObjectType type;
+
+            try {
+                type = ManagedObjectType.fromName(alarm.getManagedObjectType());
+            } catch (NoSuchElementException nse) {
+                LOG.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getManagedObjectType(),
+                        alarm.getManagedObjectInstance());
+                return;
+            }
+
+            Set<ManagedObjectType> alreadyScoped = new HashSet<>(Arrays.asList(
+                    ManagedObjectType.Node,
+                    ManagedObjectType.SnmpInterfaceLink,
+                    ManagedObjectType.EntPhysicalEntity,
+                    ManagedObjectType.BgpPeer,
+                    ManagedObjectType.VpnTunnel
+            ));
+
+            if (!alreadyScoped.contains(type)) {
+                alarmBuilder.setInventoryObjectType(type.getName());
+                alarmBuilder.setInventoryObjectId(String.format("%s:%s", alarm.getNode(),
+                        alarm.getManagedObjectInstance()));
+            }
+        }
+
+        if ((alarm.getManagedObjectType() == null || alarm.getManagedObjectInstance() == null) &&
+                alarm.getNode() != null) {
+            alarmBuilder.setInventoryObjectType(ManagedObjectType.Node.getName());
+            alarmBuilder.setInventoryObjectId(alarm.getNode().getId().toString());
+        }
     }
 
     public static Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
@@ -140,8 +201,22 @@ public class Mappers {
     }
 
     public static List<InventoryObject> toInventory(Node node) {
-        // TODO: Derive the inventory
-        return Collections.emptyList();
+        return InventoryFactory.createInventoryObjects(node);
+    }
 
+    public static List<InventoryObject> toInventory(org.opennms.integration.api.v1.model.Alarm alarm) {
+        return InventoryFactory.createInventoryObjects(alarm);
+    }
+
+    public static AlarmFeedback toAlarmFeedback(org.opennms.integration.api.v1.model.AlarmFeedback alarmFeedback) {
+        return ImmutableAlarmFeedback.newBuilder()
+                .setSituationKey(alarmFeedback.getSituationKey())
+                .setSituationFingerprint(alarmFeedback.getSituationFingerprint())
+                .setAlarmKey(alarmFeedback.getAlarmKey())
+                .setReason(alarmFeedback.getReason())
+                .setFeedbackType(Enums.getIfPresent(FeedbackType.class, alarmFeedback.getFeedbackType().toString()).get())
+                .setUser(alarmFeedback.getUser())
+                .setTimestamp(alarmFeedback.getTimestamp())
+                .build();
     }
 }

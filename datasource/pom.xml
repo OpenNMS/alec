@@ -16,5 +16,6 @@
         <module>opennms-direct</module>
         <module>opennms-kafka</module>
         <module>shell</module>
+        <module>opennms-common</module>
     </modules>
 </project>

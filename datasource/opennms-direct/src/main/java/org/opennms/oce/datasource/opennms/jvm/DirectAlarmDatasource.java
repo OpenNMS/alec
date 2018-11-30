@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -65,6 +66,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     private final Map<Integer, org.opennms.integration.api.v1.model.Alarm> alarmsById = new LinkedHashMap<>();
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private final CountDownLatch initLock = new CountDownLatch(1);
 
     private final AlarmDao alarmDao;
     private final EventForwarder eventForwarder;
@@ -75,18 +77,24 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     }
 
     public void init() {
-        /// Populate the map with the current set of alarms
-        rwLock.writeLock().lock();
+        // Populate the map with the current set of alarms
+        alarmDao.getAlarms().forEach(a -> alarmsById.put(a.getId(), a));
+        initLock.countDown();
+    }
+    
+    private void waitForInit() {
         try {
-            alarmsById.clear();
-            alarmDao.getAlarms().forEach(a -> alarmsById.put(a.getId(), a));
-        } finally {
-            rwLock.writeLock().unlock();
+            initLock.await();
+        } catch (InterruptedException ignore) {
+            LOG.debug("Interrupted while waiting for init lock.");
+            Thread.currentThread().interrupt();
         }
     }
 
     @Override
     public void handleAlarmSnapshot(List<org.opennms.integration.api.v1.model.Alarm> alarms) {
+        waitForInit();
+
         final Map<Integer,org.opennms.integration.api.v1.model.Alarm> snapshotAlarmsById = alarms.stream()
                 .collect(Collectors.toMap(org.opennms.integration.api.v1.model.Alarm::getId, a -> a));
         rwLock.writeLock().lock();
@@ -118,6 +126,8 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public void handleNewOrUpdatedAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
+        waitForInit();
+
         rwLock.writeLock().lock();
         try {
             handleNewOrUpdatedAlarmNoLock(alarm);
@@ -150,6 +160,8 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public void handleDeletedAlarm(int alarmId, String reductionKey) {
+        waitForInit();
+
         rwLock.writeLock().lock();
         try {
             handleDeletedNoLock(alarmId);
@@ -173,6 +185,8 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public List<Alarm> getAlarms() {
+        waitForInit();
+
         rwLock.readLock().lock();
         try {
             return alarmsById.values().stream()
@@ -211,6 +225,8 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public List<Situation> getSituations() {
+        waitForInit();
+
         rwLock.readLock().lock();
         try {
             return alarmsById.values().stream()

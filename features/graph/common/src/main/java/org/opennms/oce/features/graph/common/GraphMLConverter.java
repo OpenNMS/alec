@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -65,6 +64,8 @@ public class GraphMLConverter {
 
     private final Map<ResourceKey, GraphMLNode> inventoryObjectsForAlarms = new HashMap<>();
     private final SetMultimap<GraphMLNode, GraphMLNode> garbageCollectedAlarmInventoryEdges = MultimapBuilder.hashKeys().hashSetValues().build(); 
+
+    private final EdgeTimeNormalizer inventoryEdgeTimeNormalizer;
 
     private Situation situationWithMostAlarms = null;
     private boolean includeAlarms = true;
@@ -96,8 +97,10 @@ public class GraphMLConverter {
     GraphMLConverter(Graph<Vertex, Edge> g, List<Situation> situations) {
         this.g = Objects.requireNonNull(g);
         this.situations = Objects.requireNonNull(situations);
+        long now = new Date().getTime();
+        inventoryEdgeTimeNormalizer = new EdgeTimeNormalizer(now);
         graph.setProperty(ONMS_GRAPHML_GRAPH_NAMESPACE, "oce");
-        graph.setProperty(CREATED_TIMESTAMP_KEY, new Date().getTime());
+        graph.setProperty(CREATED_TIMESTAMP_KEY, now);
         doc.addGraph(graph);
     }
 
@@ -182,12 +185,9 @@ public class GraphMLConverter {
         graph.addNode(node);
 
         if (includeAlarms && v.getAlarms().size() > 0) {
-            EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(v.getCreatedTimestamp(), v.getAlarms().stream()
-                .map(a -> a.getTime()).collect(Collectors.toSet()));
-
             for (Alarm alarm : v.getAlarms()) {
                 final GraphMLNode nodeForAlarm = getOrCreateAlarmNode(alarm, getVertexIdFor(v, alarm));
-                createAlarmEdge(nodeForAlarm, node, edgeTimeNormalizer, TYPE_INVENTORY);
+                createAlarmEdge(nodeForAlarm, node, inventoryEdgeTimeNormalizer, TYPE_INVENTORY);
             }
 
             // Track the vertex with the most alarms
@@ -240,9 +240,8 @@ public class GraphMLConverter {
         nodeForSituation.setProperty(ONMS_GRAPHML_TOOLTIP_TEXT, tooltip);
         graph.addNode(nodeForSituation);
 
-        EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime(), situation.getAlarms().stream()
-            .map(a -> a.getTime()).collect(Collectors.toSet()));
-
+        // Situation <-> Alarm edges will be weighted relative to the Cration Time of the Situation.
+        EdgeTimeNormalizer situationEdgeTimeNormalizer = new EdgeTimeNormalizer(situation.getCreationTime());
         for (Alarm alarm : situation.getAlarms()) {
             GraphMLNode nodeForAlarm = alarmIdToGraphMLNode.get(alarm.getId());
             if (nodeForAlarm == null) {
@@ -250,7 +249,7 @@ public class GraphMLConverter {
                 nodeForAlarm = createNodeForGcAlarm(alarm);
                 graph.addNode(nodeForAlarm);
             }
-            createAlarmEdge(nodeForAlarm, nodeForSituation, edgeTimeNormalizer, TYPE_SITUATION);
+            createAlarmEdge(nodeForAlarm, nodeForSituation, situationEdgeTimeNormalizer, TYPE_SITUATION);
         }
 
         // Track the situation with the most alarms
@@ -355,12 +354,8 @@ public class GraphMLConverter {
     // Create the InvetoryObject<->Alarm Edges for Alarms that have been GC'd
     private void createEdgesForGcAlarms() {
         for (GraphMLNode inventoryObjectNode : garbageCollectedAlarmInventoryEdges.keySet()) {
-            EdgeTimeNormalizer edgeTimeNormalizer = new EdgeTimeNormalizer(inventoryObjectNode.getProperty(CREATED_TIMESTAMP_KEY),
-                 garbageCollectedAlarmInventoryEdges.asMap().get(inventoryObjectNode)
-                 .stream().map(GraphMLConverter::getCreatedTime)
-                 .collect(Collectors.toSet()));
             for (GraphMLNode alarmNode : garbageCollectedAlarmInventoryEdges.asMap().get(inventoryObjectNode)) {
-                createAlarmEdge(alarmNode, inventoryObjectNode, edgeTimeNormalizer, TYPE_INVENTORY);
+                createAlarmEdge(alarmNode, inventoryObjectNode, inventoryEdgeTimeNormalizer, TYPE_INVENTORY);
             }
         }
     }
@@ -369,5 +364,4 @@ public class GraphMLConverter {
         return v.getAlarms().isEmpty() && !(v.getInventoryObject().isPresent() && inventoryObjectsForAlarms
             .containsKey(ResourceKey.key(v.getInventoryObject().get().getType(), v.getInventoryObject().get().getId())));
     }
-
 }

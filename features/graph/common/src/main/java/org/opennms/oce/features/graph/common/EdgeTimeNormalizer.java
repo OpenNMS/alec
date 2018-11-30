@@ -28,27 +28,23 @@
 
 package org.opennms.oce.features.graph.common;
 
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Normalizes a Set of times (on a scale of 1-10) to a base time (i.e. the time of the node they are attached to). 
+ * Normalizes a time (on a scale of 1-10) to a base time (i.e. the time the graph was created). 
  *
  */
 public class EdgeTimeNormalizer {
 
-    //  The anchor time
     private final long base;
 
-
-    public EdgeTimeNormalizer(long base, Set<Long> times) {
+    public EdgeTimeNormalizer(long base) {
         this.base = base;
-        return;
     }
 
     // Normalize over the range 1-10
+    // 10 is closest, 1 is farthest.
     public int getNormalizedValue(long time) {
-        // return 10 - Math.toIntExact(Math.abs(base - time) * 9L / (range));
         long delta = Math.abs(base - time);
         if (delta < TimeUnit.SECONDS.toMillis(1)) {
             return 10;

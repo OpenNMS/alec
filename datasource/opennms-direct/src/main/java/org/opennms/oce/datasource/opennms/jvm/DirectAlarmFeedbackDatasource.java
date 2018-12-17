@@ -153,6 +153,6 @@ public class DirectAlarmFeedbackDatasource implements AlarmFeedbackListener, Ala
 
     @Override
     public void waitUntilReady() {
-        // pass
+        waitForInit();
     }
 }

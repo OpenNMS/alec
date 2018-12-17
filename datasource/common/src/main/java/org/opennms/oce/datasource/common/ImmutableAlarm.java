@@ -62,7 +62,7 @@ public final class ImmutableAlarm implements Alarm {
         private String inventoryObjectType;
         private String summary;
         private String description;
-        private long nodeId;
+        private Long nodeId;
 
         private Builder() {
             time = System.currentTimeMillis();
@@ -114,7 +114,7 @@ public final class ImmutableAlarm implements Alarm {
             return this;
         }
 
-        public void setNodeId(long nodeId) {
+        public void setNodeId(Long nodeId) {
             this.nodeId = nodeId;
         }
 

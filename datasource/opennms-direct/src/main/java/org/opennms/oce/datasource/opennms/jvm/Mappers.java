@@ -62,7 +62,6 @@ public class Mappers {
 
     public static Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
-        //noinspection ConstantConditions
         alarmBuilder
                 .setId(alarm.getReductionKey())
                 .setTime(alarm.getLastEventTime().getTime())
@@ -71,7 +70,7 @@ public class Mappers {
                 .setInventoryObjectType(alarm.getManagedObjectType())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
-                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId() : null);
+                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null);
         overrideTypeAndInstance(alarmBuilder, alarm);
 
         return alarmBuilder.build();

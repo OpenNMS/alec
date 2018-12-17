@@ -216,7 +216,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public void waitUntilReady() {
-        // pass
+        waitForInit();
     }
 
     private static boolean isCleared(org.opennms.integration.api.v1.model.Alarm alarm) {

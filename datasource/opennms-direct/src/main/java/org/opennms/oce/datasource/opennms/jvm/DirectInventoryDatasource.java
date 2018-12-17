@@ -28,14 +28,19 @@
 
 package org.opennms.oce.datasource.opennms.jvm;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
 import org.opennms.integration.api.v1.dao.AlarmDao;
@@ -64,10 +69,28 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private final HandlerRegistry<InventoryHandler> inventoryHandlers = new HandlerRegistry<>();
 
     /**
-     * The set of inventory objects initially populated via {@link #init} and subsequently via callbacks
-     * {@link #handleAlarmSnapshot} and {@link #handleNewOrUpdatedAlarm}.
+     * The set of inventory objects derived from alarms initially populated via {@link #init} and subsequently via
+     * callbacks {@link #handleAlarmSnapshot} and {@link #handleNewOrUpdatedAlarm}.
      */
-    private Set<InventoryObject> inventoryObjects = new LinkedHashSet<>();
+    private Set<InventoryObject> inventoryFromAlarms = new LinkedHashSet<>();
+
+    /**
+     * The set of inventory objects derived from nodes populated via {@link #init}. This set is never modified after it
+     * is initially populated.
+     */
+    private Set<InventoryObject> inventoryFromNodes = new LinkedHashSet<>();
+
+    /**
+     * A map of {@link InventoryObject inventory objects} to alarm Ids to facilitate tracking which alarms derived which
+     * inventory.
+     */
+    private Map<InventoryObject, Set<Integer>> inventoryToAlarmIdMapping = new HashMap<>();
+
+    /**
+     * A map of alarm Ids to {@link InventoryObject inventory objects} to facilitate tracking which alarms derived which
+     * inventory.
+     */
+    private Map<Integer, Set<InventoryObject>> alarmIdToInventoryMapping = new HashMap<>();
 
     /**
      * A lock that prevents callbacks from being processed before we have finished {@link #init}.
@@ -75,17 +98,17 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private final CountDownLatch initLock = new CountDownLatch(1);
 
     /**
-     * A {@link ReadWriteLock} to synchronize the readers and writers of {@link #inventoryObjects}.
+     * A {@link ReadWriteLock} to synchronize the readers and writers of {@link #inventoryFromAlarms}.
      */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     /**
-     * Used during {@link #init} to initialize {@link #inventoryObjects}.
+     * Used during {@link #init} to initialize {@link #inventoryFromNodes}.
      */
     private final NodeDao nodeDao;
 
     /**
-     * Used during {@link #init} to initialize {@link #inventoryObjects}.
+     * Used during {@link #init} to initialize {@link #inventoryFromAlarms}.
      */
     private final AlarmDao alarmDao;
 
@@ -103,7 +126,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * {@link AlarmDao}.
      */
     public void init() {
-        nodeDao.getNodes().forEach(n -> inventoryObjects.addAll(Mappers.toInventory(n)));
+        nodeDao.getNodes().forEach(n -> inventoryFromAlarms.addAll(Mappers.toInventory(n)));
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
         initLock.countDown();
     }
@@ -131,13 +154,16 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
         rwLock.writeLock().lock();
         try {
             // Only add and notify for inventory that was not already known
-            Set<InventoryObject> newInventory = Sets.difference(this.inventoryObjects, new HashSet<>(inventoryObjects));
+            Set<InventoryObject> newInventory = Sets.difference(new HashSet<>(inventoryObjects),
+                    this.inventoryFromAlarms);
 
-            if (this.inventoryObjects.addAll(newInventory)) {
+            if (!newInventory.isEmpty()) {
                 if (notifyHandlers) {
                     inventoryHandlers.forEach(handler -> handler.onInventoryAdded(newInventory));
                 }
             }
+
+            inventoryFromAlarms.addAll(newInventory);
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -154,18 +180,57 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
             waitForInit();
         }
 
+        if (alarm == null) {
+            LOG.warn("Received null alarm");
+            return;
+        }
+
+        List<InventoryObject> inventoryToAdd = new ArrayList<>();
         Node nodeForAlarm = alarm.getNode();
 
         if (nodeForAlarm != null) {
-            addInventory(Mappers.toInventory(nodeForAlarm), waitForInit);
+            inventoryToAdd.addAll(Mappers.toInventory(nodeForAlarm));
+
+        } else {
+            inventoryToAdd.addAll(Mappers.toInventory(alarm));
         }
 
-        addInventory(Mappers.toInventory(alarm), waitForInit);
+        addInventory(inventoryToAdd, waitForInit);
+
+        // Update the set of alarm Ids that this inventory was derived from (alarm reference counting for this
+        // inventory)
+        inventoryToAdd.forEach(inventory ->
+                inventoryToAlarmIdMapping.compute(inventory, (k, v) -> {
+                    if (v == null) {
+                        return new HashSet<>(Collections.singleton(alarm.getId()));
+                    }
+
+                    v.add(alarm.getId());
+                    return v;
+                })
+        );
+
+        // Record that this alarm derived this inventory to make the lookup easier when it comes time to delete this
+        // alarm
+        alarmIdToInventoryMapping.compute(alarm.getId(), (k, v) -> {
+            if (v == null) {
+                return new HashSet<>(inventoryToAdd);
+            }
+
+            v.addAll(inventoryToAdd);
+            return v;
+        });
     }
 
     @Override
     public void handleAlarmSnapshot(List<Alarm> alarms) {
+        // Derive new inventory from the snapshot
         alarms.forEach(alarm -> processAlarm(alarm, true));
+
+        // Determine and process the alarms that must have been deleted according to the snapshot
+        Set<Integer> authoritativeAlarmIds = alarms.stream().map(Alarm::getId).collect(Collectors.toSet());
+        Set<Integer> deletedAlarms = Sets.difference(alarmIdToInventoryMapping.keySet(), authoritativeAlarmIds);
+        deletedAlarms.forEach(deletedAlarmId -> handleDeletedAlarm(deletedAlarmId, null));
     }
 
     @Override
@@ -175,7 +240,30 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @Override
     public void handleDeletedAlarm(int alarmId, String reductionKey) {
-        // TODO: Anything needed here?
+        // Check if this alarm had any inventory associated
+        Set<InventoryObject> inventoryForAlarm = alarmIdToInventoryMapping.get(alarmId);
+
+        if (inventoryForAlarm != null) {
+            Set<InventoryObject> inventoryToRemove = new HashSet<>();
+
+            inventoryForAlarm.forEach(inventory -> {
+                Set<Integer> alarmIdsForInventory = inventoryToAlarmIdMapping.get(inventory);
+                alarmIdsForInventory.remove(alarmId);
+
+                // If this was the last alarm to reference the inventory then we can mark it for removal
+                if (alarmIdsForInventory.isEmpty()) {
+                    inventoryToRemove.add(inventory);
+                }
+            });
+
+            // Clean up the collections that contain this inventory
+            inventoryToRemove.forEach(inventory -> {
+                inventoryToAlarmIdMapping.remove(inventory);
+                inventoryFromAlarms.remove(inventory);
+            });
+
+            inventoryHandlers.forEach(handler -> handler.onInventoryRemoved(inventoryToRemove));
+        }
     }
 
     @Override
@@ -184,7 +272,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
         rwLock.readLock().lock();
         try {
-            return ImmutableList.copyOf(inventoryObjects);
+            return ImmutableList.copyOf(Sets.union(inventoryFromAlarms, inventoryFromNodes));
         } finally {
             rwLock.readLock().unlock();
         }
@@ -208,6 +296,6 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @Override
     public void waitUntilReady() {
-        // pass - we're always ready
+        waitForInit();
     }
 }

@@ -13,6 +13,11 @@
         <feature dependency="true">aries-blueprint</feature>
     </feature>
 
+    <feature name="oce-datasource-opennms-common" description="OCE :: Datasource :: Common" version="${project.version}">
+        <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms-common/${project.version}</bundle>
+        <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
+    </feature>
+
     <feature name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
         <feature version="${project.version}">oce-datasource-api</feature>
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.jaxb/${project.version}</bundle>
@@ -33,12 +38,14 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.squareup.okhttp3/logging-interceptor/${okhttp.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <feature dependency="true" version="${project.version}">oce-datasource-opennms-common</feature>
     </feature>
 
     <feature name="oce-datasource-opennms-direct" description="OCE :: Datasource :: OpenNMS Direct" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <feature dependency="true" version="${project.version}">oce-datasource-opennms-common</feature>
         <!-- Automatically install the standalone processor when using the direct datasource -->
         <feature version="${project.version}">oce-processor-standalone</feature>
 

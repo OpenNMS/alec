@@ -30,10 +30,10 @@ package org.opennms.oce.datasource.opennms;
 
 import static org.opennms.oce.datasource.opennms.SituationToEvent.SITUATION_ID_PARM_NAME;
 
-import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
-import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
-import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
-import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
+import org.opennms.oce.datasource.common.inventory.BgpPeerInstance;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.SnmpInterfaceLinkInstance;
+import org.opennms.oce.datasource.common.inventory.VpnTunnelInstance;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 import com.google.gson.Gson;

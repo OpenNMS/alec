@@ -26,42 +26,33 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.inventory;
+package org.opennms.oce.datasource.common.inventory;
 
-public class VpnTunnelInstance {
-    private String peerLocalAddr;
-    private String peerRemoteAddr;
-    private String tunnelId;
+public class BgpPeerInstance {
 
-    public VpnTunnelInstance(String peerLocalAddr, String peerRemoteAddr, String tunnelId) {
-        this.peerLocalAddr = peerLocalAddr;
-        this.peerRemoteAddr = peerRemoteAddr;
-        this.tunnelId = tunnelId;
+    private String peer;
+    private String vrf;
+
+    public BgpPeerInstance(String peer, String vrf) {
+        this.peer = peer;
+        this.vrf = vrf;
     }
 
-    public VpnTunnelInstance() { }
+    public BgpPeerInstance() { }
 
-    public String getPeerLocalAddr() {
-        return peerLocalAddr;
+    public String getPeer() {
+        return peer;
     }
 
-    public void setPeerLocalAddr(String peerLocalAddr) {
-        this.peerLocalAddr = peerLocalAddr;
+    public void setPeer(String peer) {
+        this.peer = peer;
     }
 
-    public String getPeerRemoteAddr() {
-        return peerRemoteAddr;
+    public String getVrf() {
+        return vrf;
     }
 
-    public void setPeerRemoteAddr(String peerRemoteAddr) {
-        this.peerRemoteAddr = peerRemoteAddr;
-    }
-
-    public String getTunnelId() {
-        return tunnelId;
-    }
-
-    public void setTunnelId(String tunnelId) {
-        this.tunnelId = tunnelId;
+    public void setVrf(String vrf) {
+        this.vrf = vrf;
     }
 }

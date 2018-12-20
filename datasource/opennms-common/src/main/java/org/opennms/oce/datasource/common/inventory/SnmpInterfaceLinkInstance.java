@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.inventory;
+package org.opennms.oce.datasource.common.inventory;
 
 public class SnmpInterfaceLinkInstance {
 

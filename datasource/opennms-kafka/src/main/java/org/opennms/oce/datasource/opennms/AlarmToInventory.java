@@ -33,10 +33,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import org.opennms.oce.datasource.opennms.inventory.BgpPeerInstance;
-import org.opennms.oce.datasource.opennms.inventory.ManagedObjectType;
-import org.opennms.oce.datasource.opennms.inventory.SnmpInterfaceLinkInstance;
-import org.opennms.oce.datasource.opennms.inventory.VpnTunnelInstance;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.TypeToInventory;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.slf4j.Logger;
@@ -137,16 +135,20 @@ public class AlarmToInventory {
                 // Nothing to do here
                 break;
             case SnmpInterfaceLink:
-                ios.add(getSnmpInterfaceLinkFromAlarm(alarm));
-                break;
+                ios.add(OpennmsMapper.fromInventory(TypeToInventory
+                        .getSnmpInterfaceLink(alarm.getManagedObjectInstance())));
+            break;
             case EntPhysicalEntity:
-                ios.add(handleEntPhysicalEntity(alarm));
+                ios.add(OpennmsMapper.fromInventory(TypeToInventory
+                        .getEntPhysicalEntity(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             case BgpPeer:
-                ios.add(handleBgpPeer(alarm));
+                ios.add(OpennmsMapper.fromInventory(TypeToInventory
+                        .getBgpPeer(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             case VpnTunnel:
-                ios.add(handleVpnTunnel(alarm));
+                ios.add(OpennmsMapper.fromInventory(TypeToInventory
+                        .getVpnTunnel(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             default:
                 managedObjectType = type.getName();
@@ -154,73 +156,5 @@ public class AlarmToInventory {
                 managedObjectInstance = String.format("%s:%s", nodeCriteria, alarm.getManagedObjectInstance());
         }
         return new InventoryFromAlarm(ios, managedObjectInstance, managedObjectType);
-    }
-
-    private static InventoryModelProtos.InventoryObject getSnmpInterfaceLinkFromAlarm(OpennmsModelProtos.Alarm alarm) {
-        // Retrieve the link details
-        final SnmpInterfaceLinkInstance linkInstance = gson.fromJson(alarm.getManagedObjectInstance(), SnmpInterfaceLinkInstance.class);
-        // Build the object id
-        final String ioId = String.format("%s:%d:%s:%d",
-                linkInstance.getANodeCriteria(), linkInstance.getAIfIndex(),
-                linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex());
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.SnmpInterfaceLink.getName())
-                .setId(ioId)
-                .setFriendlyName(String.format("SNMP Interface Link Between %d on %s and %d on %s", linkInstance.getAIfIndex(),
-                        linkInstance.getANodeCriteria(), linkInstance.getZIfIndex(), linkInstance.getZNodeCriteria()))
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                        .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
-                        .setType(ManagedObjectType.SnmpInterface.getName())
-                        .setId(String.format("%s:%d", linkInstance.getANodeCriteria(), linkInstance.getAIfIndex())))
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                        .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
-                        .setType(ManagedObjectType.SnmpInterface.getName())
-                        .setId(String.format("%s:%d", linkInstance.getZNodeCriteria(), linkInstance.getZIfIndex())))
-                .build();
-    }
-
-    private static InventoryModelProtos.InventoryObject handleEntPhysicalEntity(OpennmsModelProtos.Alarm alarm) {
-        // Scope the entPhysicalIndex to the node
-        final String entPhysicalIndex = alarm.getManagedObjectInstance();
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
-        final String ioId = String.format("%s:%s", nodeCriteria, entPhysicalIndex);
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.EntPhysicalEntity.getName())
-                .setId(ioId)
-                .setParentType(ManagedObjectType.Node.getName())
-                .setParentId(nodeCriteria)
-                .build();
-    }
-
-    private static InventoryModelProtos.InventoryObject handleBgpPeer(OpennmsModelProtos.Alarm alarm) {
-        // Retrieve the BGP peer details
-        final BgpPeerInstance bgpPeerInstance = gson.fromJson(alarm.getManagedObjectInstance(), BgpPeerInstance.class);
-        // Build the object id
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
-        final String ioId = String.format("%s:%s:%s", nodeCriteria, bgpPeerInstance.getPeer(), bgpPeerInstance.getVrf());
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.BgpPeer.getName())
-                .setId(ioId)
-                .setFriendlyName(String.format("BGP Peer %s on %s in VRF: %s",
-                        bgpPeerInstance.getPeer(), nodeCriteria, bgpPeerInstance.getVrf()))
-                .setParentType(ManagedObjectType.Node.getName())
-                .setParentId(nodeCriteria)
-                .build();
-    }
-
-    private static InventoryModelProtos.InventoryObject handleVpnTunnel(OpennmsModelProtos.Alarm alarm) {
-        // Retrieve the VPN tunnel details
-        final VpnTunnelInstance vpnTunnelInstance = gson.fromJson(alarm.getManagedObjectInstance(), VpnTunnelInstance.class);
-        // Build the object id
-        final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
-        final String ioId = String.format("%s:%s:%s:%s", nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId());
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.VpnTunnel.getName())
-                .setId(ioId)
-                .setFriendlyName(String.format("VPN tunnel on %s with local addr: %s, remote addr: %s and tunnel id: %s",
-                        nodeCriteria, vpnTunnelInstance.getPeerLocalAddr(), vpnTunnelInstance.getPeerRemoteAddr(), vpnTunnelInstance.getTunnelId()))
-                .setParentType(ManagedObjectType.Node.getName())
-                .setParentId(nodeCriteria)
-                .build();
     }
 }

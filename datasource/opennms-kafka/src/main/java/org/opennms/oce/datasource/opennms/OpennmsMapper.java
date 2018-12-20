@@ -34,12 +34,17 @@ import java.util.stream.Collectors;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.FeedbackType;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
+import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
 import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 import com.google.common.base.Enums;
@@ -130,6 +135,63 @@ public class OpennmsMapper {
         } else {
             return Long.valueOf(nodeCriteria.getId()).toString();
         }
+    }
+
+    public static InventoryModelProtos.InventoryObject fromInventory(InventoryObject inventory) {
+        InventoryModelProtos.InventoryObject.Builder ioBuilder = InventoryModelProtos.InventoryObject.newBuilder();
+
+        if (inventory.getType() != null) {
+            ioBuilder.setType(inventory.getType());
+        }
+        if (inventory.getId() != null) {
+            ioBuilder.setId(inventory.getId());
+        }
+        if (inventory.getSubtype() != null) {
+            ioBuilder.setSubtype(inventory.getSubtype());
+        }
+        if (inventory.getParentType() != null) {
+            ioBuilder.setParentType(inventory.getParentType());
+        }
+        if (inventory.getParentId() != null) {
+            ioBuilder.setParentId(inventory.getParentId());
+        }
+        if (inventory.getFriendlyName() != null) {
+            ioBuilder.setFriendlyName(inventory.getFriendlyName());
+        }
+        if (inventory.getPeers() != null) {
+            ioBuilder.addAllPeer(inventory.getPeers()
+                    .stream()
+                    .map(OpennmsMapper::fromPeerRef)
+                    .collect(Collectors.toList()));
+        }
+        if (inventory.getRelatives() != null) {
+            ioBuilder.addAllRelative(inventory.getRelatives()
+                    .stream()
+                    .map(OpennmsMapper::fromRelativeRef)
+                    .collect(Collectors.toList()));
+        }
+
+        ioBuilder.setWeightToParent(inventory.getWeightToParent());
+
+
+        return ioBuilder.build();
+    }
+
+    private static InventoryModelProtos.InventoryObjectPeerRef fromPeerRef(InventoryObjectPeerRef inventoryObjectPeerRef) {
+        return InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                .setType(inventoryObjectPeerRef.getType())
+                .setId(inventoryObjectPeerRef.getId())
+                .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.valueOf(inventoryObjectPeerRef.getEndpoint().toString()))
+                .setWeight(inventoryObjectPeerRef.getWeight())
+                .build();
+    }
+
+    private static InventoryModelProtos.InventoryObjectRelativeRef fromRelativeRef(InventoryObjectRelativeRef inventoryObjectRelativeRef) {
+        return InventoryModelProtos.InventoryObjectRelativeRef.newBuilder()
+                .setType(inventoryObjectRelativeRef.getType())
+                .setId(inventoryObjectRelativeRef.getId())
+                .setWeight(inventoryObjectRelativeRef.getWeight())
+                .build();
     }
 
 }

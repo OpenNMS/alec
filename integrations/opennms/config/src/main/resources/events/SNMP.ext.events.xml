@@ -50,12 +50,9 @@
             affected interface. The name of the
             interface can be retrieved via an snmpget of .1.3.6.1.2.1.2.2.1.2.INST, where INST is the instance returned
             with the trap.&lt;/p></descr>
-        <logmsg dest="logndisplay">Agent Interface Down (linkDown Trap) enterprise:%id% (%id%) on interface %parm[#1]%</logmsg>
+        <logmsg dest="donotpersist">Agent Interface Down (linkDown Trap) enterprise:%id% (%id%) on interface %parm[#1]%</logmsg>
         <severity>Minor</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="1">
-            <managed-object type="snmp-interface"/>
-        </alarm-data>
-        <parameter name="ifIndex" value="%parm[#1]%" expand="true"/>
+        <!-- Alarm data is on the translated trap -->
     </event>
     <event>
         <mask>
@@ -72,9 +69,38 @@
             for the affected interface. The name of
             the interface can be retrieved via an snmpget of .1.3.6.1.2.1.2.2.1.2.INST, where INST is the instance
             returned with the trap.&lt;/p></descr>
-        <logmsg dest="logndisplay">Agent Interface Up (linkUp Trap) enterprise:%id% (%id%) on interface %parm[#1]%</logmsg>
+        <logmsg dest="donotpersist">Agent Interface Up (linkUp Trap) enterprise:%id% (%id%) on interface %parm[#1]%</logmsg>
         <severity>Cleared</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="2" clear-key="uei.opennms.org/generic/traps/SNMP_Link_Down:%dpname%:%nodeid%:%parm[ifIndex]%">
+        <!-- Alarm data is on the translated trap -->
+    </event>
+    <event>
+        <uei>uei.opennms.org/translator/traps/SNMP_Link_Down</uei>
+        <event-label>Translator Enriched LinkDown Event</event-label>
+        <descr>&lt;p>A linkDown trap signifies that the sending protocol entity recognizes a failure in one of the
+              communication link represented in the agent's configuration. &lt;/p>
+              &lt;p>Instance: %parm[#1]% &lt;/p>
+              &lt;p>IfDescr: %parm[ifDescr]% &lt;/p>
+              &lt;p>IfName: %parm[ifName]% &lt;/p>
+              &lt;p>IfAlias: %parm[ifAlias]% &lt;/p></descr>
+        <logmsg dest="logndisplay">linkDown on on interface index:%parm[ifIndex]%; ifDescr: %parm[ifDescr]%; ifName:%parm[ifName]%; ifAlias:%parm[ifAlias]%</logmsg>
+        <severity>Minor</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="1">
+           <managed-object type="snmp-interface"/>
+        </alarm-data>
+        <parameter name="ifIndex" value="%parm[#1]%" expand="true"/>
+    </event>
+    <event>
+        <uei>uei.opennms.org/translator/traps/SNMP_Link_Up</uei>
+        <event-label>Translator Enriched LinkUp Event</event-label>
+        <descr>&lt;p>A linkUp trap signifies that the sending protocol entity recognizes that one of the communication
+              links represented in the agent's configuration has come up. &lt;/p>
+              &lt;p>Instance: %parm[#1]% &lt;/p>
+              &lt;p>IfDescr: %parm[ifDescr]% &lt;/p>
+              &lt;p>IfName: %parm[ifName]% &lt;/p>
+              &lt;p>IfAlias: %parm[ifAlias]% &lt;/p></descr>
+        <logmsg dest="logndisplay">linkUp on interface index:%parm[ifIndex]%; ifDescr:%parm[ifDescr]%; ifName:%parm[ifName]%; IfAlias:%parm[ifAlias]%</logmsg>
+        <severity>Cleared</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="2" clear-key="uei.opennms.org/translator/traps/SNMP_Link_Down:%dpname%:%nodeid%:%parm[ifIndex]%">
             <managed-object type="snmp-interface"/>
         </alarm-data>
         <parameter name="ifIndex" value="%parm[#1]%" expand="true"/>

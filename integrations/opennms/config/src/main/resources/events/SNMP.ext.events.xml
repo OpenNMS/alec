@@ -82,7 +82,7 @@
               &lt;p>IfDescr: %parm[ifDescr]% &lt;/p>
               &lt;p>IfName: %parm[ifName]% &lt;/p>
               &lt;p>IfAlias: %parm[ifAlias]% &lt;/p></descr>
-        <logmsg dest="logndisplay">linkDown on on interface index:%parm[ifIndex]%; ifDescr: %parm[ifDescr]%; ifName:%parm[ifName]%; ifAlias:%parm[ifAlias]%</logmsg>
+        <logmsg dest="logndisplay">linkDown on interface index:%parm[ifIndex]%; ifDescr: %parm[ifDescr]%; ifName:%parm[ifName]%; ifAlias:%parm[ifAlias]%</logmsg>
         <severity>Minor</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifIndex]%" alarm-type="1">
            <managed-object type="snmp-interface"/>

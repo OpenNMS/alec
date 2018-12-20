@@ -558,7 +558,9 @@
         <logmsg dest="logndisplay">%parm[moduleType]% module inserted with interface name %parm[ifDescr]%
         </logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/moduleWithSerialRemoved</uei>
@@ -650,7 +652,9 @@
         <logmsg dest="logndisplay">%parm[moduleType]% module with interface %parm[ifDescr]% removed
         </logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
 
     <event>
@@ -659,7 +663,9 @@
         <descr>Interface %parm[ifDescr]%, changed state to %parm[state]%</descr>
         <logmsg dest="logndisplay">Interface %parm[ifDescr]%, changed state to %parm[state]%</logmsg>
         <severity>Warning</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
 
     <event>

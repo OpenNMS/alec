@@ -43,6 +43,9 @@ Requires OCE to be running in the same JVM as OpenNMS.
 Builds a graph from the inventory and alarms.
 Uses unsupervised ML for clustering the alarms into situations.
 
+This algorithm performs well when there are less than 500 candidate alarms.
+Alarms are only considered to be candidates for correlation when they have been created and/or updated in the last 2 hours (configurable).
+
 #### Temporal (POC)
 
 Groups alarms based on how close they occured in time.

@@ -33,8 +33,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.beans.InMemoryEventBean;
@@ -51,9 +54,8 @@ import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-
 import com.google.common.base.Enums;
+import com.google.common.base.Strings;
 
 public class Mappers {
     private static final Logger LOG = LoggerFactory.getLogger(Mappers.class);
@@ -119,9 +121,27 @@ public class Mappers {
     }
 
     public static Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
-        // TODO: Create the situation
-        final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder();
-        return situationBuilder.build();
+        final String situationId;
+        final Optional<String> situationIdFromAlarm = getSituationIdFromAlarm(alarm);
+        if (situationIdFromAlarm.isPresent()) {
+            situationId = situationIdFromAlarm.get();
+        } else {
+            LOG.warn("Could not find situationId on alarm: {}. Using the alarm id instead.");
+            situationId = Integer.toString(alarm.getId());
+        }
+
+        return ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(Mappers::toAlarm).collect(Collectors.toSet()))
+                .build();
+    }
+
+    private static Optional<String> getSituationIdFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
+        return alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME).stream()
+                .map(EventParameter::getValue)
+                .findFirst();
     }
 
     public static InMemoryEvent toEvent(Situation situation) {

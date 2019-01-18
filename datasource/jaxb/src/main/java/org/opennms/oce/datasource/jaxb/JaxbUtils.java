@@ -130,6 +130,14 @@ public class JaxbUtils {
 
     public static Set<Situation> getSituations(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
+            return getSituations(is);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public static Set<Situation> getSituations(InputStream is) throws JAXBException, IOException {
+        try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Situations.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             List<org.opennms.oce.datasource.v1.schema.Situation> xmlSituations = ((Situations) unmarshaller.unmarshal(is)).getSituation();
@@ -152,45 +160,53 @@ public class JaxbUtils {
 
     public static List<Alarm> getAlarms(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext;
-            try {
-                jaxbContext = JAXBContext.newInstance(Alarms.class);
-            } catch (JAXBException e) {
-                throw new RuntimeException(e);
-            }
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
-
-            final List<Alarm> engineAlarms = new ArrayList<>();
-            for (org.opennms.oce.datasource.v1.schema.Alarm alarm : alarms.getAlarm()) {
-                for (Event event : alarm.getEvent()) {
-                    engineAlarms.add(JaxbUtils.toAlarm(alarm, event));
-                }
-            }
-            return engineAlarms;
+            return getAlarms(is);
         }
+    }
+
+    public static List<Alarm> getAlarms(InputStream is) throws JAXBException, IOException {
+        JAXBContext jaxbContext;
+        try {
+            jaxbContext = JAXBContext.newInstance(Alarms.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Alarms alarms = (Alarms) unmarshaller.unmarshal(is);
+
+        final List<Alarm> engineAlarms = new ArrayList<>();
+        for (org.opennms.oce.datasource.v1.schema.Alarm alarm : alarms.getAlarm()) {
+            for (Event event : alarm.getEvent()) {
+                engineAlarms.add(JaxbUtils.toAlarm(alarm, event));
+            }
+        }
+        return engineAlarms;
     }
 
     public static List<InventoryObject> getInventory(Path path) throws IOException, JAXBException {
         try (InputStream is = Files.newInputStream(path)) {
-            JAXBContext jaxbContext;
-            try {
-                jaxbContext = JAXBContext.newInstance(Inventory.class);
-            } catch (JAXBException e) {
-                throw new RuntimeException(e);
-            }
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
-
-            final List<InventoryObject> ios = new ArrayList<>();
-            for (ModelObjectEntry modelObjectEntry : inventory.getModelObjectEntry()) {
-                final InventoryObject io = toInventoryObject(modelObjectEntry);
-                if (io != null) {
-                    ios.add(io);
-                }
-            }
-            return ios;
+            return getInventory(is);
         }
+    }
+
+    public static List<InventoryObject> getInventory(InputStream is) throws IOException, JAXBException {
+        JAXBContext jaxbContext;
+        try {
+            jaxbContext = JAXBContext.newInstance(Inventory.class);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
+
+        final List<InventoryObject> ios = new ArrayList<>();
+        for (ModelObjectEntry modelObjectEntry : inventory.getModelObjectEntry()) {
+            final InventoryObject io = toInventoryObject(modelObjectEntry);
+            if (io != null) {
+                ios.add(io);
+            }
+        }
+        return ios;
     }
 
     private static InventoryObject toInventoryObject(ModelObjectEntry moe) {

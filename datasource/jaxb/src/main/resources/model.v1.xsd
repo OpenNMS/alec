@@ -226,4 +226,96 @@
         </complexType>
     </element>
 
+    <element name="data-set-map">
+        <annotation>
+            <documentation>Top-level element for the container of mappings between data sets</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <element ref="this:event-map" minOccurs="0" maxOccurs="1"/>
+                <element ref="this:alarm-map" minOccurs="0" maxOccurs="1"/>
+                <element ref="this:situation-map" minOccurs="0" maxOccurs="1"/>
+                <element ref="this:inventory-map" minOccurs="0" maxOccurs="1"/>
+            </sequence>
+            <attribute name="data-set-a" type="string" use="required"/>
+            <attribute name="data-set-b" type="string" use="required"/>
+        </complexType>
+    </element>
+
+    <element name="a-to-b-mapping">
+        <annotation>
+            <documentation>Definition for an instance of a mapping between an Id in data set A and an Id in data set B
+            </documentation>
+        </annotation>
+        <complexType>
+            <attribute name="a-id" type="string" use="required"/>
+            <attribute name="b-id" type="string" use="required"/>
+        </complexType>
+    </element>
+
+    <element name="event-map">
+        <annotation>
+            <documentation>Top-level element for a list of event mappings</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Event mapping definition -->
+                <element ref="this:a-to-b-mapping" minOccurs="1" maxOccurs="unbounded"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="alarm-map">
+        <annotation>
+            <documentation>Top-level element for a list of alarm mappings</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Alarm mapping definition -->
+                <element ref="this:a-to-b-mapping" minOccurs="1" maxOccurs="unbounded"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="situation-map">
+        <annotation>
+            <documentation>Top-level element for a list of situation mappings</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Situation mapping definition -->
+                <element ref="this:a-to-b-mapping" minOccurs="1" maxOccurs="unbounded"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="inventory-map">
+        <annotation>
+            <documentation>Top-level element for a list of inventory mappings</documentation>
+        </annotation>
+
+        <complexType>
+            <sequence>
+                <!-- Inventory mapping definition -->
+                <element ref="this:a-to-b-inventory-mapping" minOccurs="1" maxOccurs="unbounded"/>
+            </sequence>
+        </complexType>
+    </element>
+
+    <element name="a-to-b-inventory-mapping">
+        <annotation>
+            <documentation>Definition for an instance of an inventory mapping</documentation>
+        </annotation>
+        <complexType>
+            <attribute name="a-type" type="string" use="required"/>
+            <attribute name="a-id" type="string" use="required"/>
+            <attribute name="b-type" type="string" use="required"/>
+            <attribute name="b-id" type="string" use="required"/>
+        </complexType>
+    </element>
+
 </schema>

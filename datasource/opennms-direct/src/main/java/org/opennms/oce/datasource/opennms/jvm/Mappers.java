@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.model.EventParameter;
@@ -170,9 +171,14 @@ public class Mappers {
         event.addParameter("situationDescr", description);
 
         // Set the related reduction keys
+        final AtomicInteger alarmIndex = new AtomicInteger(0);
         situation.getAlarms().stream()
                 .map(Alarm::getId)
-                .forEach(reductionKey -> event.addParameter("related-reductionKey", reductionKey));
+                // Append a unique index to each related-reductionKey parameter since the underlying event builder
+                // does not support many parameters with the same name. Alarmd will associate the related alarm
+                // provided that the parameter name *starts with* 'related-reductionKey'
+                .forEach(reductionKey -> event.addParameter("related-reductionKey" + alarmIndex.incrementAndGet(),
+                        reductionKey));
 
         return event;
     }

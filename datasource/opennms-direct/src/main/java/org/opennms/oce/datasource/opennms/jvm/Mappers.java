@@ -140,7 +140,12 @@ public class Mappers {
     }
 
     private static Optional<String> getSituationIdFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        return alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME).stream()
+        final List<EventParameter> parms = alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME);
+        if (parms == null) {
+            // No parameter with that name
+            return Optional.empty();
+        }
+        return parms.stream()
                 .map(EventParameter::getValue)
                 .findFirst();
     }

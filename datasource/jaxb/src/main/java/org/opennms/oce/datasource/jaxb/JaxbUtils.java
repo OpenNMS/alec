@@ -232,16 +232,25 @@ public class JaxbUtils {
                 } else {
                     peerRefBuilder.setEndpoint(InventoryObjectPeerEndpoint.Z);
                 }
+                if (ref.getWeight() != null) {
+                    peerRefBuilder.setWeight(ref.getWeight());
+                }
                 ioBuilder.addPeer(peerRefBuilder.build());
             }
         }
         if (moe.getRelativeRef() != null) {
             for (RelativeRef ref : moe.getRelativeRef()) {
-                ioBuilder.addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                final ImmutableInventoryObjectRelativeRef.Builder relativeRefBuilder = ImmutableInventoryObjectRelativeRef.newBuilder()
                         .setId(ref.getId())
-                        .setType(ref.getType())
-                        .build());
+                        .setType(ref.getType());
+                if (ref.getWeight() != null) {
+                    relativeRefBuilder.setWeight(ref.getWeight());
+                }
+                ioBuilder.addRelative(relativeRefBuilder.build());
             }
+        }
+        if (moe.getWeightToParent() != null) {
+            ioBuilder.setWeightToParent(moe.getWeightToParent());
         }
         return ioBuilder.build();
     }

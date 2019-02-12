@@ -86,6 +86,7 @@
             <attribute name="type" type="string" use="required" />
             <attribute name="id" type="string" use="required" />
             <attribute name="endpoint" type="string" use="required" /> <!-- TODO: Only allow A or Z -->
+            <attribute name="weight" type="long" use="optional" />
         </complexType>
     </element>
 
@@ -96,6 +97,7 @@
         <complexType>
             <attribute name="type" type="string" use="required" />
             <attribute name="id" type="string" use="required" />
+            <attribute name="weight" type="long" use="optional" />
         </complexType>
     </element>
 
@@ -122,6 +124,8 @@
             <attribute name="parent-type" type="string" use="required" />
             <!-- parent id -->
             <attribute name="parent-id" type="string" use="required" />
+            <!-- weight to parent -->
+            <attribute name="weight-to-parent" type="long" use="optional" />
         </complexType>
     </element>
 

@@ -408,17 +408,17 @@ public class ClusterEngineTest implements SituationHandler {
 
         // A-B is a parent relationship
         assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("a"), getVertexIdForComponentId("b")),
-                equalTo((int) MockInventoryBuilder.PARENT_WEIGHT));
+                equalTo((double) MockInventoryBuilder.PARENT_WEIGHT));
 
         // B-C-D is a peer relationship
         assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("b"), getVertexIdForComponentId("c")),
-                equalTo((int) MockInventoryBuilder.PEER_WEIGHT));
+                equalTo((double) MockInventoryBuilder.PEER_WEIGHT));
         assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("b"), getVertexIdForComponentId("d")),
-                equalTo(2 * (int) MockInventoryBuilder.PEER_WEIGHT));
+                equalTo(2 * (double) MockInventoryBuilder.PEER_WEIGHT));
 
         // D-E is a relative relationship
         assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("d"), getVertexIdForComponentId("e")),
-                equalTo((int) MockInventoryBuilder.RELATIVE_WEIGHT));
+                equalTo((double) MockInventoryBuilder.RELATIVE_WEIGHT));
     }
 
     private int getVertexIdForComponentId(String componentId) {

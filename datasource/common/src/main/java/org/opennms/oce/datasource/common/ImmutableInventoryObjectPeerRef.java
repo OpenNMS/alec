@@ -28,6 +28,8 @@
 
 package org.opennms.oce.datasource.common;
 
+import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
+
 import java.util.Objects;
 
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
@@ -53,7 +55,7 @@ public final class ImmutableInventoryObjectPeerRef implements InventoryObjectPee
         private long weight;
 
         private Builder() {
-            weight = 1;
+            weight = DEFAULT_WEIGHT;
         }
 
         private Builder(InventoryObjectPeerRef inventoryObjectPeerRef) {

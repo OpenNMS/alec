@@ -144,11 +144,11 @@ public class ClusterEngineOptimizationTest {
 
         public EngineAsFunction() throws JAXBException, IOException {
             System.out.println("Loading data...");
-            alarms = ImmutableList.copyOf(JaxbUtils.getAlarms(Paths.get("/tmp/cpn.alarms.xml")));
-            inventory = ImmutableList.copyOf(JaxbUtils.getInventory(Paths.get("/tmp/cpn.inventory.xml")));
+            alarms = ImmutableList.copyOf(JaxbUtils.getAlarms(Paths.get("/tmp/cpn/cpn.alarms.xml")));
+            inventory = ImmutableList.copyOf(JaxbUtils.getInventory(Paths.get("/tmp/cpn/cpn.inventory.xml")));
 
             System.out.printf("Read %d alarms.\n", alarms.size());
-            Set<Situation> situations = JaxbUtils.getSituations(Paths.get("/tmp/cpn.situations.xml"));
+            Set<Situation> situations = JaxbUtils.getSituations(Paths.get("/tmp/cpn/cpn.situations.xml"));
             System.out.printf("Read %d situations.\n", situations.size());
             baseSituations = ImmutableSet.copyOf(getSituationsWithOneOrMoreAlarms(situations));
         }

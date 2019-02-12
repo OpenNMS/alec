@@ -28,6 +28,8 @@
 
 package org.opennms.oce.engine.cluster;
 
+import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -99,9 +101,9 @@ public class ClusterEngine implements Engine, GraphProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterEngine.class);
 
-    public static final double DEFAULT_EPSILON = 100d;
-    public static final double DEFAULT_ALPHA = 781.78317629d;
-    public static final double DEFAULT_BETA = 0.53244801d;
+    public static final double  DEFAULT_EPSILON = 100d;
+    public static final double DEFAULT_ALPHA = 144.47117699d;
+    public static final double DEFAULT_BETA = 0.55257784d;
 
     private static final int NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG = 10;
 
@@ -505,7 +507,7 @@ public class ClusterEngine implements Engine, GraphProvider {
     private String getDiagnosticTextForSituation(Situation situation) {
         long minTime = Long.MAX_VALUE;
         long maxTime = Long.MIN_VALUE;
-        Long maxSpatialDistance = null;
+        Double maxSpatialDistance = null;
 
         final Set<Long> vertexIds = new HashSet<>();
         for (Alarm alarm : situation.getAlarms()) {
@@ -516,7 +518,7 @@ public class ClusterEngine implements Engine, GraphProvider {
         }
 
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
-            maxSpatialDistance = 0L;
+            maxSpatialDistance = 0d;
             for (Long vertexIdA : vertexIds) {
                 for (Long vertexIdB : vertexIds) {
                     if (!vertexIdA.equals(vertexIdB)) {
@@ -530,7 +532,7 @@ public class ClusterEngine implements Engine, GraphProvider {
         String diagText = String.format("The %d alarms happened within %.2f seconds across %d vertices",
                 situation.getAlarms().size(), Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
         if (maxSpatialDistance != null && maxSpatialDistance > 0) {
-            diagText += String.format(" %d distance apart", maxSpatialDistance);
+            diagText += String.format(" %.2f distance apart", maxSpatialDistance);
         }
         diagText += ".";
         return diagText;
@@ -701,7 +703,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                 .map(candidate -> {
                     final double timeB = candidate.getTime();
                     final long vertexIdB = getVertexIdForAlarm(candidate);
-                    final int spatialDistance = vertexIdA == vertexIdB ? 0 : getSpatialDistanceBetween(vertexIdA,
+                    final double spatialDistance = vertexIdA == vertexIdB ? 0 : getSpatialDistanceBetween(vertexIdA,
                             vertexIdB);
                     final double distance = distanceMeasure.compute(timeA, timeB, spatialDistance);
                     return new CandidateAlarmWithDistance(candidate, distance);
@@ -711,7 +713,7 @@ public class ClusterEngine implements Engine, GraphProvider {
                 .orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
     }
 
-    protected int getSpatialDistanceBetween(long vertexIdA, long vertexIdB) {
+    protected double getSpatialDistanceBetween(long vertexIdA, long vertexIdB) {
         final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
         try {
             return spatialDistances.get(key);
@@ -720,12 +722,13 @@ public class ClusterEngine implements Engine, GraphProvider {
         }
     }
 
-    private final LoadingCache<EdgeKey, Integer> spatialDistances = CacheBuilder.newBuilder()
+    private final LoadingCache<EdgeKey, Double> spatialDistances = CacheBuilder.newBuilder()
             .maximumSize(10000)
-            .build(new CacheLoader<EdgeKey, Integer>() {
-                        public Integer load(EdgeKey key) {
+            .build(new CacheLoader<EdgeKey, Double>() {
+                        public Double load(EdgeKey key) {
                             if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
-                                return 0;
+                                // No path exists
+                                return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
                             }
                             final CEVertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
                             if (vertexA == null) {
@@ -744,9 +747,9 @@ public class ClusterEngine implements Engine, GraphProvider {
 
                             if (distance == null) {
                                 // No path exists
-                                return Integer.MAX_VALUE;
+                                return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
                             } else {
-                                return distance.intValue();
+                                return distance.doubleValue();
                             }
                         }
                     });

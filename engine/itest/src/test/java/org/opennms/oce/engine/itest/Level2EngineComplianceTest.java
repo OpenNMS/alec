@@ -41,16 +41,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
+import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.engine.cluster.ClusterEngineFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Level 2 compliance: Known and observed scenarios
@@ -61,7 +67,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                //{ new ClusterEngineFactory() }
+                { new ClusterEngineFactory() }
         });
     }
 
@@ -77,6 +83,36 @@ public class Level2EngineComplianceTest {
         driver = TestDriver.builder()
                 .withEngineFactory(factory)
                 .build();
+    }
+
+    @Test
+    public void canCorrelateAlarmsAcrossObjects() {
+        final List<InventoryObject> inventory = ImmutableList.copyOf(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.DEVICE, "n1")
+                .withInventoryObject(MockInventoryType.CARD, "n1-c1", MockInventoryType.DEVICE, "n1")
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.CARD, "n1-c1", 25)
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2", MockInventoryType.CARD, "n1-c1", 25)
+                .getInventory());
+
+        final List<Alarm> alarms = new ArrayList<>();
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a1")
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
+                .withEvent(1525579974000L, Severity.MAJOR)
+                .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
+                .build());
+        alarms.addAll(new MockAlarmBuilder()
+                .withId("a2")
+                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
+                .withEvent(1525579974000L, Severity.MINOR)
+                .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
+                .build());
+
+        final List<Situation> situations = driver.run(alarms, inventory);
+        // A single situation should have been created
+        assertThat(situations, hasSize(1));
+        // It should contain all of the given alarms
+        assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("a1", "a2"));
     }
 
     @Test
@@ -120,7 +156,7 @@ public class Level2EngineComplianceTest {
         // 3919127 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:39 EDT 2018
         // 3919128 occurred at Sun May 06 00:12:43 EDT 2018 and finally cleared at Sun May 06 00:23:38 EDT 2018
 
-        final List<Situation> situations = Collections.emptyList(); // driver.run(events, alarms);
+        final List<Situation> situations = driver.run(alarms);
         // A single situation should have been created
         assertThat(situations, hasSize(1));
         // It should contain all of the given alarms

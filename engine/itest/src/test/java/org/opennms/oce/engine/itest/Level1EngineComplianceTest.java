@@ -121,8 +121,7 @@ public class Level1EngineComplianceTest {
 
         // The situation should have been created some time after the first alarm
         final long minTimestamp = alarms.stream().mapToLong(Alarm::getTime).sorted().findFirst().getAsLong();
-        // TODO: Not currently implemented
-        //assertThat(situations.get(0).getCreationTime(), greaterThanOrEqualTo(minTimestamp));
+        assertThat(situations.get(0).getCreationTime(), greaterThanOrEqualTo(minTimestamp));
     }
 
     /**

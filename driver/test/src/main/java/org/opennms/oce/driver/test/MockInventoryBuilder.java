@@ -40,9 +40,9 @@ import org.opennms.oce.datasource.common.ImmutableInventoryObjectRelativeRef;
 public class MockInventoryBuilder {
 
     private final List<InventoryObject> inventoryObjects = new ArrayList<>();
-    public static final long PARENT_WEIGHT = 1;
-    public static final long PEER_WEIGHT = 3;
-    public static final long RELATIVE_WEIGHT = 2;
+    public static final long PARENT_WEIGHT = 100;
+    public static final long PEER_WEIGHT = 300;
+    public static final long RELATIVE_WEIGHT = 200;
 
     public MockInventoryBuilder withInventoryObject(MockInventoryType type, String id) {
         return withInventoryObject(type.getType(), id);
@@ -56,13 +56,21 @@ public class MockInventoryBuilder {
         return withInventoryObject(type.getType(), id, parentType.getType(), parentId);
     }
 
+    public MockInventoryBuilder withInventoryObject(MockInventoryType type, String id, MockInventoryType parentType, String parentId, long weightToParent) {
+        return withInventoryObject(type.getType(), id, parentType.getType(), parentId, weightToParent);
+    }
+
     public MockInventoryBuilder withInventoryObject(String type, String id, String parentType, String parentId) {
+        return withInventoryObject(type, id, parentType, parentId, PARENT_WEIGHT);
+    }
+
+    public MockInventoryBuilder withInventoryObject(String type, String id, String parentType, String parentId, long weightToParent) {
         inventoryObjects.add(ImmutableInventoryObject.newBuilder()
                 .setType(type)
                 .setId(id)
                 .setParentType(parentType)
                 .setParentId(parentId)
-                .setWeightToParent(PARENT_WEIGHT)
+                .setWeightToParent(weightToParent)
                 .build());
         return this;
     }

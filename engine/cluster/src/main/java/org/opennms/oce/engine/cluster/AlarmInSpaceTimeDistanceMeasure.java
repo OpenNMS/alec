@@ -28,6 +28,8 @@
 
 package org.opennms.oce.engine.cluster;
 
+import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
+
 import java.util.Objects;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -55,7 +57,7 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         final long vertexIdA = (long)a[1];
         final long vertexIdB = (long)b[1];
 
-        int spatialDistance = 0;
+        double spatialDistance = 0;
         if (vertexIdA != vertexIdB) {
             spatialDistance = clusterEngine.getSpatialDistanceBetween(vertexIdA, vertexIdB);
             if (spatialDistance == 0) {
@@ -73,8 +75,8 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         return distance;
     }
 
-    public double compute(double timeA, double timeB, int spatialDistance) {
-        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * spatialDistance);
+    public double compute(double timeA, double timeB, double spatialDistance) {
+        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * spatialDistance / DEFAULT_WEIGHT);
     }
 
 }

@@ -32,6 +32,8 @@ import java.util.List;
 
 public interface InventoryObject {
 
+    long DEFAULT_WEIGHT = 100;
+
     String getType();
 
     String getId();

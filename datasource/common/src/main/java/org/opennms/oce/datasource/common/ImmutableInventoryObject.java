@@ -76,7 +76,7 @@ public final class ImmutableInventoryObject implements InventoryObject {
         private long weightToParent;
 
         private Builder() {
-            weightToParent = 1;
+            weightToParent = DEFAULT_WEIGHT;
         }
 
         private Builder(InventoryObject inventoryObject) {

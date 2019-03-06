@@ -1,0 +1,17 @@
+site: 
+  title: OpenNMS OCE Documentation
+  url: https://oce.opennms.eu
+  start_page: oce::index.adoc
+content: 
+  sources: 
+  - url: .
+    branches: master
+    start_path: docs
+ui:
+  bundle:
+    url: https://github.com/no42-org/antora-ui-opennms/releases/download/1.0/ui-bundle.zip
+output: 
+  clean: true 
+  dir: ./public 
+  destinations: 
+  - provider: archive 

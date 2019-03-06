@@ -1,0 +1,5 @@
+= Welcome to our Documentation Site!
+:page-layout: home
+:!sectids:
+
+Welcome to the documentation site for the OpenNMS Correlation Engine (OCE).

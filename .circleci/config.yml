@@ -1,44 +1,63 @@
-version: 2
-defaults: &defaults
-  working_directory: /home/circleci/oce
-jobs:
-  build:
-    <<: *defaults
+version: 2.1
+
+executors:
+  build-executor:
     docker:
-      - image: circleci/openjdk:8-jdk-browsers
+      - image: opennms/build-env:1.0-b4
+        environment:
+          MAVEN_OPTS: -Xmx2g
 
-    environment:
-      MAVEN_OPTS: -Xmx2g
+  docs-executor:
+    docker:
+      - image: antora/antora:2.0.0
 
+  netlify-cli-executor:
+    docker:
+      - image: opennms/netlify-cli:2.8.3-b1
+
+  package-cloud-cli-executor:
+    docker:
+      - image: opennms/package-cloud-cli:0.3.05-b1
+
+workflows:
+  build-deploy:
+    jobs:
+      - pre-build
+      - build:
+          requires:
+            - pre-build
+      - build-docs:
+          requires:
+            - pre-build
+      - deploy-maven:
+          requires:
+            - build
+      - deploy-packages:
+          requires:
+            - build
+      - deploy-docs:
+          requires:
+            - build-docs
+
+jobs:
+  pre-build:
+    executor: build-executor
     steps:
-      - run:
-          name: Install RPM
-          command: sudo apt-get update; sudo apt-get install rpm
-
-      # Restore source cache
-      - restore_cache:
-          keys:
-            - source-v1-{{ .Branch }}-{{ .Revision }}
-            - source-v1-{{ .Branch }}-
-            - source-v1-
-
       - checkout
 
-      # Save source cache
-      - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
+      - persist_to_workspace:
+          root: ~/
           paths:
-            - ".git"
+            - project
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v2-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v2-dependencies-
+  build:
+    executor: build-executor
+    steps:
+      - attach_workspace:
+          at: ~/
 
       - run: |
-           mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+          mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
 
       - save_cache:
           paths:
@@ -75,14 +94,31 @@ jobs:
           destination: dist
 
       - persist_to_workspace:
-          root: /home/circleci
+          root: ~/
           paths:
-            - oce
+            - project
+  
+  build-docs:
+    executor: docs-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Generate HTML output for documentation
+          command: |
+            antora generate site.yml
+
+      - store_artifacts:
+          path: build/site.zip
+          destination: site.zip
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project
 
   deploy-maven:
-    <<: *defaults
-    docker:
-      - image: circleci/openjdk:8-jdk-browsers
+    executor: build-executor
     steps:
       - attach_workspace:
           at: ~/
@@ -98,37 +134,22 @@ jobs:
             mvn -s .circleci.settings.xml -DskipTests deploy
 
   deploy-packages:
-    <<: *defaults
-    docker:
-      - image: circleci/jruby:9-jdk-browsers
+      executor: package-cloud-cli-executor
+      steps:
+        - attach_workspace:
+            at: ~/
+        - run:
+            name: Push RPM packages
+            command: |
+              package_cloud push opennms/plugin-snapshot/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
+              package_cloud push opennms/plugin-snapshot/el/7 assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
+  
+  deploy-docs:
+    executor: netlify-cli-executor
     steps:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install packagecloud CLI
-          command: gem install package_cloud
-      - run:
-          name: Push RPM packages
+          name: Deploy docs to Netlify
           command: |
-            package_cloud push opennms/plugin-snapshot/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-            package_cloud push opennms/plugin-snapshot/el/7 assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
-
-workflows:
-  version: 2
-  build-deploy:
-    jobs:
-      - build
-      - deploy-maven:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-               - master
-      - deploy-packages:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-               - master
+            netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}

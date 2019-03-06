@@ -17,6 +17,7 @@ dist/
 tmp/
 target
 bin/
+public/
 
 # Editors
 .idea

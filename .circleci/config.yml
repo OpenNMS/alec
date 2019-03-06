@@ -87,9 +87,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install Maven
-          command: sudo apt-get update; sudo apt-get install maven
-      - run:
           name: Install packagecloud CLI
           command: gem install package_cloud
       - run:
@@ -98,8 +95,9 @@ jobs:
             ls assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
             package_cloud push opennms/plugins/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
       - run:
-          name: Deploy to Maven
-          command: mvn -s .circleci.settings.xml deploy
+          name: Deploy to Maven repository
+          command: |
+            package_cloud push opennms/plugins/java assembly/kar/target/opennms-oce-plugin.kar --coordinates=org.opennms.oce.assembly:org.opennms.oce.assembly.kar:1.0.0-SNAPSHOT
 
 workflows:
   version: 2

@@ -44,7 +44,8 @@ import org.opennms.oce.features.graph.graphml.GraphMLWriter;
 import org.opennms.oce.features.graph.graphml.InvalidGraphException;
 import org.osgi.framework.BundleContext;
 
-@Command(scope = "graph", name = "write-graphml", description = "Render the graph as GraphML")
+@Command(scope = "oce", name = "export-graph", description = "Export an engine's graph to GraphML\n" +
+        "Use oce:list-graphs to enumerate the available providers.")
 @Service
 public class ToGraphML implements Action {
 

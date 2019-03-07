@@ -39,7 +39,7 @@ import org.opennms.oce.features.graph.common.GraphProviderLocator;
 import org.opennms.oce.features.graph.common.OsgiGraphProviderLocator;
 import org.osgi.framework.BundleContext;
 
-@Command(scope = "graph", name = "list", description = "Lists the available graph providers.")
+@Command(scope = "oce", name = "list-graphs", description = "List the available graph providers.")
 @Service
 public class ListGraphProviders  implements Action {
 

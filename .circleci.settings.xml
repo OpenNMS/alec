@@ -1,14 +1,9 @@
 <settings>
   <servers>
     <server>
-      <id>packagecloud-plugins</id>
-      <username>opennms</username>
-      <password>${env.PACKAGECLOUD_TOKEN}</password>
-    </server>
-    <server>
-      <id>packagecloud-plugin-snapshots</id>
-      <username>opennms</username>
-      <password>${env.PACKAGECLOUD_TOKEN}</password>
+      <id>oce-ossrh</id>
+      <username>${env.OPENNMS_OSSRH_USERNAME}</username>
+      <password>${env.OPENNMS_OSSRH_PASSWORD}</password>
     </server>
   </servers>
 </settings>

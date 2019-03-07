@@ -79,7 +79,25 @@ jobs:
           paths:
             - oce
 
-  deploy:
+  deploy-maven:
+    <<: *defaults
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+    steps:
+      - attach_workspace:
+          at: ~/
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+      - run:
+          name: Deploy the artifacts
+          command: |
+            mvn -s .circleci.settings.xml -DskipTests deploy
+
+  deploy-packages:
     <<: *defaults
     docker:
       - image: circleci/jruby:9-jdk-browsers
@@ -90,21 +108,27 @@ jobs:
           name: Install packagecloud CLI
           command: gem install package_cloud
       - run:
-          name: Push RPM package
+          name: Push RPM packages
           command: |
-            ls assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-            package_cloud push opennms/plugins/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-      - run:
-          name: Deploy to Maven repository
-          command: |
-            package_cloud push opennms/plugins/java assembly/kar/target/opennms-oce-plugin.kar --coordinates=org.opennms.oce.assembly:org.opennms.oce.assembly.kar:1.0.0-SNAPSHOT
+            package_cloud push opennms/plugin-snapshot/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
+            package_cloud push opennms/plugin-snapshot/el/7 assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
 
 workflows:
   version: 2
   build-deploy:
     jobs:
       - build
-      - deploy:
+      - deploy-maven:
           requires:
             - build
-
+          filters:
+            branches:
+              only:
+               - packagecloud
+      - deploy-packages:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+               - packagecloud

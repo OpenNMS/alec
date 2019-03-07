@@ -4,7 +4,8 @@ defaults: &defaults
 jobs:
   build:
     <<: *defaults
-    machine: true
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
 
     environment:
       MAVEN_OPTS: -Xmx1024m
@@ -123,11 +124,11 @@ workflows:
           filters:
             branches:
               only:
-               - packagecloud
+               - master
       - deploy-packages:
           requires:
             - build
           filters:
             branches:
               only:
-               - packagecloud
+               - master

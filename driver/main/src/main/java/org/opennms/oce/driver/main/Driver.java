@@ -124,6 +124,7 @@ public class Driver {
                 alarmFeedbackDatasource.waitUntilReady();
                 LOG.info("Waiting for situation datasource...");
                 situationDatasource.waitUntilReady();
+                LOG.info("All datasources are now available");
 
                 // Register the handler that deletes situations from the engine when we see they have been deleted
                 // Only register this after the situationDatasource is ready, since we may block the callbacks

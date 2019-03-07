@@ -34,14 +34,20 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
+import org.opennms.oce.datasource.common.ImmutableInventoryObject;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
@@ -177,6 +183,69 @@ public class GraphManagerTest {
         // The graph should remain empty
         graphManager.withGraph(g -> {
             assertThat(g.getVertexCount(), equalTo(0));
+        });
+    }
+
+    @Test
+    public void canLinkInterfaces() {
+        // Note: This could be expanded to handle segments in addition to interfaces when they are supported
+
+        // Create a new graph manager
+        final GraphManager graphManager = new GraphManager();
+
+        // Create a node with one interface
+        String node1Id = "node1";
+        String node1InterfaceId = "node1interface0";
+        InventoryObject node1Interface0 = ImmutableInventoryObject.newBuilder()
+                .setId(node1InterfaceId)
+                .setType(ManagedObjectType.SnmpInterface.getName())
+                .setParentId(node1Id)
+                .setParentType(ManagedObjectType.Node.getName())
+                .build();
+        InventoryObject node1 = ImmutableInventoryObject.newBuilder()
+                .setId(node1Id)
+                .setType(ManagedObjectType.Node.getName())
+                .build();
+
+        // Create another node with one interface
+        String node2Id = "node2";
+        String node2InterfaceId = "node2interface0";
+        InventoryObject node2Interface0 = ImmutableInventoryObject.newBuilder()
+                .setId(node2InterfaceId)
+                .setType(ManagedObjectType.SnmpInterface.getName())
+                .setParentId(node2Id)
+                .setParentType(ManagedObjectType.Node.getName())
+                .build();
+        InventoryObject node2 = ImmutableInventoryObject.newBuilder()
+                .setId(node2Id)
+                .setType(ManagedObjectType.Node.getName())
+                .build();
+
+        // Create a link that links the interfaces for both of our nodes together
+        InventoryObject linkNode1ToNode2 = ImmutableInventoryObject.newBuilder()
+                .setId("linkn1:0n2:0")
+                .setType(ManagedObjectType.SnmpInterfaceLink.getName())
+                .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(node1InterfaceId)
+                        .setType(ManagedObjectType.SnmpInterface.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.A)
+                        .build())
+                .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(node2InterfaceId)
+                        .setType(ManagedObjectType.SnmpInterface.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                        .build())
+                .build();
+
+        // Send the inventory to the graph manager
+        Collection<InventoryObject> inventory = Arrays.asList(node1, node2, node1Interface0, node2Interface0,
+                linkNode1ToNode2);
+        graphManager.addInventory(inventory);
+
+        // Verify that the graph looks as expected
+        graphManager.withGraph(g -> {
+            assertThat(g.getVertexCount(), equalTo(5));
+            assertThat(g.getEdgeCount(), equalTo(4));
         });
     }
 }

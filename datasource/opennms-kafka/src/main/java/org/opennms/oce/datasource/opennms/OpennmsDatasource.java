@@ -89,6 +89,7 @@ import org.opennms.oce.datasource.opennms.serialization.AlarmFeedbackDeserialize
 import org.opennms.oce.datasource.opennms.serialization.NodeDeserializer;
 import org.opennms.oce.datasource.opennms.serialization.OpennmsSerdes;
 import org.opennms.oce.datasource.opennms.serialization.ProtobufDeserializer;
+import org.opennms.oce.datasource.opennms.serialization.TopologyEdgeDeserializer;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,17 +107,20 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     public static final String DEFAULT_NODE_TOPIC = "nodes";
     public static final String DEFAULT_EVENT_SINK_TOPIC = "OpenNMS.Sink.Events";
     public static final String DEFAULT_INVENTORY_TOPIC = "oce-inventory";
+    public static final String DEFAULT_EDGES_TOPIC = "edges";
 
     public static final long DEFAULT_INVENTORY_GC_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);
     public static final long DEFAULT_INVENTORY_TTL_MS = TimeUnit.DAYS.toMillis(1);
 
     private static final String INVENTORY_STORE_NODE_PREFIX = "node:";
     private static final String INVENTORY_STORE_ALARM_PREFIX = "alarm:";
+    private static final String INVENTORY_STORE_EDGE_PREFIX = "edge:";
 
     public static final String INVENTORY_STORE = "inventoryStore";
     public static final String ALARM_STORE = "alarmStore";
     public static final String ALARM_FEEDBACK_STORE = "alarmFeedbackStore";
     public static final String SITUATION_STORE = "situationStore";
+    public static final String EDGE_STORE = "edgeStore";
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers = new HandlerRegistry<>();
@@ -132,6 +136,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private String nodeTopic = DEFAULT_NODE_TOPIC;
     private String eventSinkTopic = DEFAULT_EVENT_SINK_TOPIC;
     private String inventoryTopic = DEFAULT_INVENTORY_TOPIC;
+    private String edgesTopic = DEFAULT_EDGES_TOPIC;
 
     private long inventoryGcIntervalMs = DEFAULT_INVENTORY_GC_INTERVAL_MS;
     private long inventoryTtlMs = DEFAULT_INVENTORY_TTL_MS;
@@ -209,51 +214,50 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     }
 
     protected Topology getKTopology() {
-        final StoreBuilder<KeyValueStore<String, InventoryModelProtos.InventoryObjects>> inventoryStore = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(INVENTORY_STORE),
-                Serdes.String(),
-                OpennmsSerdes.InventoryObjects());
-        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> alarmStore = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(ALARM_STORE),
-                Serdes.String(),
-                OpennmsSerdes.Alarm());
-        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> situationStore = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(SITUATION_STORE),
-                Serdes.String(),
-                OpennmsSerdes.Alarm());
-        final StoreBuilder<KeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks>> alarmFeedbackStore = Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(ALARM_FEEDBACK_STORE),
-                Serdes.String(),
-                OpennmsSerdes.AlarmFeedbacks());
-
         final StreamsBuilder builder = new StreamsBuilder();
-        builder.addStateStore(inventoryStore);
-        builder.addStateStore(alarmStore);
-        builder.addStateStore(situationStore);
-        builder.addStateStore(alarmFeedbackStore);
+        createStores(builder);
 
+        // Produce a KStream of EnrichedAlarm objects from the alarm stream
         final AlarmDeserializer alarmDeserializer = new AlarmDeserializer();
         KStream<String, byte[]> alarmBytesStream = builder.stream(getAlarmTopic());
-        KStream<String, OpennmsModelProtos.Alarm> allAlarmStream = alarmBytesStream.mapValues(alarmBytes -> alarmDeserializer.deserialize(null, alarmBytes));
-        KStream<String, OpennmsModelProtos.Alarm> alarmStream = allAlarmStream.filter((k,v) -> !isSituation(k));
+        KStream<String, OpennmsModelProtos.Alarm> allAlarmStream =
+                alarmBytesStream.mapValues(alarmBytes -> alarmDeserializer.deserialize(null, alarmBytes));
+        KStream<String, OpennmsModelProtos.Alarm> alarmStream = allAlarmStream.filter((k, v) -> !isSituation(k));
         KStream<String, EnrichedAlarm> enrichedAlarmStream = alarmStream.mapValues(AlarmToInventory::enrichAlarm);
 
-        KStream<String, InventoryModelProtos.InventoryObjects> alarmInventoryStream = enrichedAlarmStream.map((reductionKey, enrichedAlarm) -> {
-            final String key = INVENTORY_STORE_ALARM_PREFIX + reductionKey;
-            if (enrichedAlarm == null) {
-                return KeyValue.pair(key, null);
-            }
-            return KeyValue.pair(key, enrichedAlarm.getInventory());
-        });
-        alarmInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
+        mapEnrichedAlarmsToInventory(enrichedAlarmStream);
+        processEnrichedAlarms(enrichedAlarmStream);
+        processSituations(allAlarmStream);
+        mapEdgesToInventory(builder);
+        mapNodesToInventory(builder);
+        processInventory(builder);
 
-        // Override the MO type and id with the ones set in the enriched alarm, since these will
-        // were update to be properly scoped and reference the inventory
+        return builder.build();
+    }
+
+    // From the stream of enriched alarms, derive inventory objects
+    private void mapEnrichedAlarmsToInventory(KStream<String, EnrichedAlarm> enrichedAlarmStream) {
+        KStream<String, InventoryModelProtos.InventoryObjects> alarmInventoryStream =
+                enrichedAlarmStream.map((reductionKey, enrichedAlarm) -> {
+                    final String key = INVENTORY_STORE_ALARM_PREFIX + reductionKey;
+                    if (enrichedAlarm == null) {
+                        return KeyValue.pair(key, null);
+                    }
+                    return KeyValue.pair(key, enrichedAlarm.getInventory());
+                });
+        // Take the newly created stream of inventory objects and serialize them onto the inventory topic
+        alarmInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
+    }
+
+    // Map the enriched alarms back to regular alarm objects overriding the MO type and id with the ones set in the
+    // enriched alarm, since these were updated to be properly scoped and reference the inventory
+    private void processEnrichedAlarms(KStream<String, EnrichedAlarm> enrichedAlarmStream) {
         enrichedAlarmStream.mapValues(enrichedAlarm -> {
             if (enrichedAlarm == null) {
                 return null;
             }
-            final OpennmsModelProtos.Alarm.Builder alarmBuilder = OpennmsModelProtos.Alarm.newBuilder(enrichedAlarm.getAlarm());
+            final OpennmsModelProtos.Alarm.Builder alarmBuilder =
+                    OpennmsModelProtos.Alarm.newBuilder(enrichedAlarm.getAlarm());
             if (enrichedAlarm.getManagedObjectInstance() != null) {
                 alarmBuilder.setManagedObjectInstance(enrichedAlarm.getManagedObjectInstance());
             }
@@ -262,14 +266,41 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             }
             return alarmBuilder.build();
         }).process(() -> new AlarmTableProcessor(alarmHandlers), ALARM_STORE);
+    }
 
-        KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k,v) -> isSituation(k));
+    // Handle converting topology edges to inventory links
+    private void mapEdgesToInventory(StreamsBuilder builder) {
+        final TopologyEdgeDeserializer topologyEdgeDeserializer = new TopologyEdgeDeserializer();
+        KStream<String, byte[]> edgesBytesStream = builder.stream(getEdgesTopic());
+        KStream<String, OpennmsModelProtos.TopologyEdge> edgesStream =
+                edgesBytesStream.mapValues(edgeBytes -> topologyEdgeDeserializer.deserialize(null, edgeBytes));
+        // From the stream of topology edges, derive inventory objects and create a KStream of those
+        KStream<String, InventoryModelProtos.InventoryObjects> edgesInventoryStream =
+                edgesStream.map((edgeKey, topologyEdge) -> {
+                    final String key = INVENTORY_STORE_EDGE_PREFIX + edgeKey;
+                    if (topologyEdge == null) {
+                        return KeyValue.pair(key, null);
+                    }
+                    return KeyValue.pair(key, EdgeToInventory.toInventoryObjects(topologyEdge));
+                });
+        // Take the newly created stream of inventory objects and serialize them onto the inventory topic
+        edgesInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
+    }
+
+    // Filter out situations from the alarm stream and process them
+    private void processSituations(KStream<String, OpennmsModelProtos.Alarm> allAlarmStream) {
+        KStream<String, OpennmsModelProtos.Alarm> situationStream = allAlarmStream.filter((k, v) -> isSituation(k));
         situationStream.process(() -> new SituationTableProcessor(situationHandlers), SITUATION_STORE);
+    }
 
+    // From the nodes stream derive inventory and map the inventory back to the inventory topic
+    private void mapNodesToInventory(StreamsBuilder builder) {
         final NodeDeserializer nodeDeserializer = new NodeDeserializer();
         KStream<String, byte[]> nodeBytesStream = builder.stream(getNodeTopic());
-        KStream<String, OpennmsModelProtos.Node> nodeStream = nodeBytesStream.mapValues(nodeBytes -> nodeDeserializer.deserialize(null, nodeBytes));
-        KStream<String, InventoryModelProtos.InventoryObjects> nodeInventoryStream = nodeStream.map((nodeCriteria,node) -> {
+        KStream<String, OpennmsModelProtos.Node> nodeStream =
+                nodeBytesStream.mapValues(nodeBytes -> nodeDeserializer.deserialize(null, nodeBytes));
+        KStream<String, InventoryModelProtos.InventoryObjects> nodeInventoryStream = nodeStream.map((nodeCriteria,
+                                                                                                     node) -> {
             final String key = INVENTORY_STORE_NODE_PREFIX + nodeCriteria;
             if (node == null) {
                 return KeyValue.pair(key, null);
@@ -282,11 +313,18 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             return KeyValue.pair(key, iosBuilder.build());
         });
         nodeInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
+    }
 
-        final ProtobufDeserializer<InventoryModelProtos.InventoryObjects> inventoryObjectsDeserializer = new ProtobufDeserializer<>(InventoryModelProtos.InventoryObjects.class);
+    // Process the inventory from the inventory topic now that alarms, nodes and edges have been mapped to the inventory
+    // topic
+    private void processInventory(StreamsBuilder builder) {
+        final ProtobufDeserializer<InventoryModelProtos.InventoryObjects> inventoryObjectsDeserializer =
+                new ProtobufDeserializer<>(InventoryModelProtos.InventoryObjects.class);
         KStream<String, byte[]> inventoryByteStream = builder.stream(getInventoryTopic());
-        KStream<String, InventoryModelProtos.InventoryObjects> inventoryStream = inventoryByteStream.mapValues(iosBytes -> inventoryObjectsDeserializer.deserialize(null, iosBytes));
-        inventoryStream.process(() -> new InventoryTableProcessor(inventoryHandlers, inventoryGcIntervalMs, inventoryTtlMs), INVENTORY_STORE);
+        KStream<String, InventoryModelProtos.InventoryObjects> inventoryStream =
+                inventoryByteStream.mapValues(iosBytes -> inventoryObjectsDeserializer.deserialize(null, iosBytes));
+        inventoryStream.process(() -> new InventoryTableProcessor(inventoryHandlers, inventoryGcIntervalMs,
+                inventoryTtlMs), INVENTORY_STORE);
 
         // Process the alarm feedback
         final AlarmFeedbackDeserializer alarmFeedbackDeserializer = new AlarmFeedbackDeserializer();
@@ -295,8 +333,39 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 alarmFeedbackBytesStream.mapValues(alarmFeedbackBytes -> alarmFeedbackDeserializer.deserialize(null,
                         alarmFeedbackBytes));
         alarmFeedbackStream.process(() -> new AlarmFeedbackTableProcessor(alarmFeedbackHandlers), ALARM_FEEDBACK_STORE);
+    }
 
-        return builder.build();
+    private void createStores(StreamsBuilder builder) {
+        final StoreBuilder<KeyValueStore<String, InventoryModelProtos.InventoryObjects>> inventoryStore =
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore(INVENTORY_STORE),
+                        Serdes.String(),
+                        OpennmsSerdes.InventoryObjects());
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> alarmStore = Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(ALARM_STORE),
+                Serdes.String(),
+                OpennmsSerdes.Alarm());
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.Alarm>> situationStore =
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore(SITUATION_STORE),
+                        Serdes.String(),
+                        OpennmsSerdes.Alarm());
+        final StoreBuilder<KeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks>> alarmFeedbackStore =
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore(ALARM_FEEDBACK_STORE),
+                        Serdes.String(),
+                        OpennmsSerdes.AlarmFeedbacks());
+        final StoreBuilder<KeyValueStore<String, OpennmsModelProtos.TopologyEdge>> topologyEdgeStore =
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore(EDGE_STORE),
+                        Serdes.String(),
+                        OpennmsSerdes.TopologyEdge());
+
+        builder.addStateStore(inventoryStore);
+        builder.addStateStore(alarmStore);
+        builder.addStateStore(situationStore);
+        builder.addStateStore(alarmFeedbackStore);
+        builder.addStateStore(topologyEdgeStore);
     }
 
     @Override
@@ -519,6 +588,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     public void setInventoryTopic(String inventoryTopic) {
         this.inventoryTopic = inventoryTopic;
     }
+    
+    public String getEdgesTopic() {
+        return edgesTopic;
+    }
+
+    public void setEdgesTopic(String edgesTopic) {
+        this.edgesTopic = edgesTopic;
+    }
 
     public long getInventoryGcIntervalMs() {
         return inventoryGcIntervalMs;
@@ -539,9 +616,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     @Override
     public void waitUntilReady() throws InterruptedException {
         // These will block until Kafka is available and the topics are created
+        LOG.debug("Waiting for inventory store...");
         waitUntilInventoryStoreIsQueryable();
+        LOG.debug("Waiting for alarm store...");
         waitUntilAlarmStoreIsQueryable();
+        LOG.debug("Waiting for situation store...");
         waitUntilSituationStoreIsQueryable();
+        LOG.debug("Waiting for alarm feedback store...");
         waitUntilAlarmFeedbackStoreIsQueryable();
+        LOG.debug("All stores are available");
     }
 }

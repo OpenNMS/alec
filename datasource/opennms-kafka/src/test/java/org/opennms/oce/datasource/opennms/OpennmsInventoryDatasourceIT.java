@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.opennms.oce.datasource.opennms.EdgeToInventory.getIdForEdge;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -159,6 +160,23 @@ public class OpennmsInventoryDatasourceIT extends OpennmsDatasourceIT {
         InventoryObject snmpIntfZ = getPeer(snmpIntfLink, InventoryObjectPeerEndpoint.Z);
         assertThat(snmpIntfZ.getType(), equalTo(ManagedObjectType.SnmpInterface.getName()));
         assertThat(snmpIntfZ.getParentType(), equalTo(ManagedObjectType.Node.getName()));
+    }
+
+    @Test
+    public void canGenerateSnmpInterfaceLinksFromEdges() {
+        OpennmsModelProtos.NodeCriteria sourceNodeCriteria = OpennmsModelProtos.NodeCriteria.newBuilder()
+                .setForeignSource("aFS")
+                .setForeignId("aFID")
+                .build();
+        OpennmsModelProtos.NodeCriteria targetNodeCriteria = OpennmsModelProtos.NodeCriteria.newBuilder()
+                .setForeignSource("zFS")
+                .setForeignId("zFID")
+                .build();
+        OpennmsModelProtos.TopologyEdge edge = MockNetwork.createEdgeFor(OpennmsModelProtos.TopologyRef.Protocol.CDP,
+                "id", sourceNodeCriteria, targetNodeCriteria, 0);
+
+        InventoryObject snmpInterfaceLink = sendEdgeToKafkaAndWaitForIO(edge);
+        EdgeToInventoryTest.verifyLinkIo(edge, snmpInterfaceLink);
     }
 
     @Test
@@ -290,6 +308,30 @@ public class OpennmsInventoryDatasourceIT extends OpennmsDatasourceIT {
         Alarm oceAlarm = alarmHandler.getAlarmById(alarm.getReductionKey());
         assertThat(oceAlarm, notNullValue());
         return oceAlarm;
+    }
+
+    private InventoryObject sendEdgeToKafkaAndWaitForIO(OpennmsModelProtos.TopologyEdge edge) {
+        String expectedId = getIdForEdge(edge);
+        ResourceKey resourceKey = ResourceKey.key(ManagedObjectType.SnmpInterfaceLink.getName(), expectedId);
+        // We currently assume that there is no existing link with this resource key
+        assertThat(inventoryHandler.getIoByKey(resourceKey), nullValue());
+
+        // Send the edge and block until it was sent to Kafka
+        try {
+            producer.send(new ProducerRecord<>("edges", String.format("topology:%s:%s",
+                    edge.getRef().getProtocol().name(), edge.getRef().getId()), edge.toByteArray())).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Wait for the link to be published to the handler
+        await().atMost(5, TimeUnit.SECONDS).until(() ->
+                inventoryHandler.getIoByKey(resourceKey), notNullValue());
+
+        // Grab a reference to the link and return
+        InventoryObject link = inventoryHandler.getIoByKey(resourceKey);
+        assertThat(link, notNullValue());
+        return link;
     }
 
     private static class MyAlarmHandler implements AlarmHandler {

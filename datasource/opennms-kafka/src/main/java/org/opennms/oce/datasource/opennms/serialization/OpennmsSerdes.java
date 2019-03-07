@@ -98,6 +98,12 @@ public class OpennmsSerdes {
         }
     }
 
+    static public final class TopologyEdgeSerde extends OpennmsSerdes.WrapperSerde<OpennmsModelProtos.TopologyEdge> {
+        public TopologyEdgeSerde() {
+            super(new TopologyEdgeSerializer(), new TopologyEdgeDeserializer());
+        }
+    }
+
     /**
      * A serde for nullable {@code OpennmsModelProtos.Alarm} type.
      */
@@ -124,5 +130,12 @@ public class OpennmsSerdes {
      */
     static public Serde<FeedbackModelProtos.AlarmFeedbacks> AlarmFeedbacks() {
         return new AlarmFeedbacksSerde();
+    }
+
+    /**
+     * A serde for nullable {@code OpennmsModelProtos.TopologyEdge} type.
+     */
+    static public Serde<OpennmsModelProtos.TopologyEdge> TopologyEdge() {
+        return new TopologyEdgeSerde();
     }
 }

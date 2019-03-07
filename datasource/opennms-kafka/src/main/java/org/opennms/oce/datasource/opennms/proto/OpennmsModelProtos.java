@@ -15960,6 +15960,3667 @@ public final class OpennmsModelProtos {
 
   }
 
+  public interface TopologyRefOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:TopologyRef)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string id = 1;</code>
+     */
+    java.lang.String getId();
+    /**
+     * <code>string id = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <code>.TopologyRef.Protocol protocol = 2;</code>
+     */
+    int getProtocolValue();
+    /**
+     * <code>.TopologyRef.Protocol protocol = 2;</code>
+     */
+    OpennmsModelProtos.TopologyRef.Protocol getProtocol();
+  }
+  /**
+   * Protobuf type {@code TopologyRef}
+   */
+  public  static final class TopologyRef extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:TopologyRef)
+      TopologyRefOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TopologyRef.newBuilder() to construct.
+    private TopologyRef(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TopologyRef() {
+      id_ = "";
+      protocol_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TopologyRef(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              id_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              protocol_ = rawValue;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return OpennmsModelProtos.internal_static_TopologyRef_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return OpennmsModelProtos.internal_static_TopologyRef_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              OpennmsModelProtos.TopologyRef.class, OpennmsModelProtos.TopologyRef.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code TopologyRef.Protocol}
+     */
+    public enum Protocol
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>LLDP = 0;</code>
+       */
+      LLDP(0),
+      /**
+       * <code>OSPF = 1;</code>
+       */
+      OSPF(1),
+      /**
+       * <code>ISIS = 2;</code>
+       */
+      ISIS(2),
+      /**
+       * <code>BRIDGE = 3;</code>
+       */
+      BRIDGE(3),
+      /**
+       * <code>CDP = 4;</code>
+       */
+      CDP(4),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>LLDP = 0;</code>
+       */
+      public static final int LLDP_VALUE = 0;
+      /**
+       * <code>OSPF = 1;</code>
+       */
+      public static final int OSPF_VALUE = 1;
+      /**
+       * <code>ISIS = 2;</code>
+       */
+      public static final int ISIS_VALUE = 2;
+      /**
+       * <code>BRIDGE = 3;</code>
+       */
+      public static final int BRIDGE_VALUE = 3;
+      /**
+       * <code>CDP = 4;</code>
+       */
+      public static final int CDP_VALUE = 4;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Protocol valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Protocol forNumber(int value) {
+        switch (value) {
+          case 0: return LLDP;
+          case 1: return OSPF;
+          case 2: return ISIS;
+          case 3: return BRIDGE;
+          case 4: return CDP;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Protocol>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Protocol> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Protocol>() {
+              public Protocol findValueByNumber(int number) {
+                return Protocol.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return OpennmsModelProtos.TopologyRef.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Protocol[] VALUES = values();
+
+      public static Protocol valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Protocol(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:TopologyRef.Protocol)
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object id_;
+    /**
+     * <code>string id = 1;</code>
+     */
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string id = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PROTOCOL_FIELD_NUMBER = 2;
+    private int protocol_;
+    /**
+     * <code>.TopologyRef.Protocol protocol = 2;</code>
+     */
+    public int getProtocolValue() {
+      return protocol_;
+    }
+    /**
+     * <code>.TopologyRef.Protocol protocol = 2;</code>
+     */
+    public OpennmsModelProtos.TopologyRef.Protocol getProtocol() {
+      OpennmsModelProtos.TopologyRef.Protocol result = OpennmsModelProtos.TopologyRef.Protocol.valueOf(protocol_);
+      return result == null ? OpennmsModelProtos.TopologyRef.Protocol.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (protocol_ != OpennmsModelProtos.TopologyRef.Protocol.LLDP.getNumber()) {
+        output.writeEnum(2, protocol_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (protocol_ != OpennmsModelProtos.TopologyRef.Protocol.LLDP.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, protocol_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof OpennmsModelProtos.TopologyRef)) {
+        return super.equals(obj);
+      }
+      OpennmsModelProtos.TopologyRef other = (OpennmsModelProtos.TopologyRef) obj;
+
+      boolean result = true;
+      result = result && getId()
+          .equals(other.getId());
+      result = result && protocol_ == other.protocol_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + PROTOCOL_FIELD_NUMBER;
+      hash = (53 * hash) + protocol_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyRef parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyRef parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyRef parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(OpennmsModelProtos.TopologyRef prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code TopologyRef}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:TopologyRef)
+        OpennmsModelProtos.TopologyRefOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return OpennmsModelProtos.internal_static_TopologyRef_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return OpennmsModelProtos.internal_static_TopologyRef_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                OpennmsModelProtos.TopologyRef.class, OpennmsModelProtos.TopologyRef.Builder.class);
+      }
+
+      // Construct using OpennmsModelProtos.TopologyRef.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        id_ = "";
+
+        protocol_ = 0;
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return OpennmsModelProtos.internal_static_TopologyRef_descriptor;
+      }
+
+      public OpennmsModelProtos.TopologyRef getDefaultInstanceForType() {
+        return OpennmsModelProtos.TopologyRef.getDefaultInstance();
+      }
+
+      public OpennmsModelProtos.TopologyRef build() {
+        OpennmsModelProtos.TopologyRef result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public OpennmsModelProtos.TopologyRef buildPartial() {
+        OpennmsModelProtos.TopologyRef result = new OpennmsModelProtos.TopologyRef(this);
+        result.id_ = id_;
+        result.protocol_ = protocol_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof OpennmsModelProtos.TopologyRef) {
+          return mergeFrom((OpennmsModelProtos.TopologyRef)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(OpennmsModelProtos.TopologyRef other) {
+        if (other == OpennmsModelProtos.TopologyRef.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          onChanged();
+        }
+        if (other.protocol_ != 0) {
+          setProtocolValue(other.getProtocolValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        OpennmsModelProtos.TopologyRef parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (OpennmsModelProtos.TopologyRef) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object id_ = "";
+      /**
+       * <code>string id = 1;</code>
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder clearId() {
+        
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int protocol_ = 0;
+      /**
+       * <code>.TopologyRef.Protocol protocol = 2;</code>
+       */
+      public int getProtocolValue() {
+        return protocol_;
+      }
+      /**
+       * <code>.TopologyRef.Protocol protocol = 2;</code>
+       */
+      public Builder setProtocolValue(int value) {
+        protocol_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.TopologyRef.Protocol protocol = 2;</code>
+       */
+      public OpennmsModelProtos.TopologyRef.Protocol getProtocol() {
+        OpennmsModelProtos.TopologyRef.Protocol result = OpennmsModelProtos.TopologyRef.Protocol.valueOf(protocol_);
+        return result == null ? OpennmsModelProtos.TopologyRef.Protocol.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.TopologyRef.Protocol protocol = 2;</code>
+       */
+      public Builder setProtocol(OpennmsModelProtos.TopologyRef.Protocol value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        protocol_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.TopologyRef.Protocol protocol = 2;</code>
+       */
+      public Builder clearProtocol() {
+        
+        protocol_ = 0;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:TopologyRef)
+    }
+
+    // @@protoc_insertion_point(class_scope:TopologyRef)
+    private static final OpennmsModelProtos.TopologyRef DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new OpennmsModelProtos.TopologyRef();
+    }
+
+    public static OpennmsModelProtos.TopologyRef getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TopologyRef>
+        PARSER = new com.google.protobuf.AbstractParser<TopologyRef>() {
+      public TopologyRef parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TopologyRef(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TopologyRef> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TopologyRef> getParserForType() {
+      return PARSER;
+    }
+
+    public OpennmsModelProtos.TopologyRef getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TopologySegmentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:TopologySegment)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    boolean hasRef();
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    OpennmsModelProtos.TopologyRef getRef();
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder();
+  }
+  /**
+   * Protobuf type {@code TopologySegment}
+   */
+  public  static final class TopologySegment extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:TopologySegment)
+      TopologySegmentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TopologySegment.newBuilder() to construct.
+    private TopologySegment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TopologySegment() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TopologySegment(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              OpennmsModelProtos.TopologyRef.Builder subBuilder = null;
+              if (ref_ != null) {
+                subBuilder = ref_.toBuilder();
+              }
+              ref_ = input.readMessage(OpennmsModelProtos.TopologyRef.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(ref_);
+                ref_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return OpennmsModelProtos.internal_static_TopologySegment_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return OpennmsModelProtos.internal_static_TopologySegment_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              OpennmsModelProtos.TopologySegment.class, OpennmsModelProtos.TopologySegment.Builder.class);
+    }
+
+    public static final int REF_FIELD_NUMBER = 1;
+    private OpennmsModelProtos.TopologyRef ref_;
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public boolean hasRef() {
+      return ref_ != null;
+    }
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public OpennmsModelProtos.TopologyRef getRef() {
+      return ref_ == null ? OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+    }
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder() {
+      return getRef();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (ref_ != null) {
+        output.writeMessage(1, getRef());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (ref_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getRef());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof OpennmsModelProtos.TopologySegment)) {
+        return super.equals(obj);
+      }
+      OpennmsModelProtos.TopologySegment other = (OpennmsModelProtos.TopologySegment) obj;
+
+      boolean result = true;
+      result = result && (hasRef() == other.hasRef());
+      if (hasRef()) {
+        result = result && getRef()
+            .equals(other.getRef());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasRef()) {
+        hash = (37 * hash) + REF_FIELD_NUMBER;
+        hash = (53 * hash) + getRef().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologySegment parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologySegment parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologySegment parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(OpennmsModelProtos.TopologySegment prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code TopologySegment}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:TopologySegment)
+        OpennmsModelProtos.TopologySegmentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return OpennmsModelProtos.internal_static_TopologySegment_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return OpennmsModelProtos.internal_static_TopologySegment_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                OpennmsModelProtos.TopologySegment.class, OpennmsModelProtos.TopologySegment.Builder.class);
+      }
+
+      // Construct using OpennmsModelProtos.TopologySegment.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        if (refBuilder_ == null) {
+          ref_ = null;
+        } else {
+          ref_ = null;
+          refBuilder_ = null;
+        }
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return OpennmsModelProtos.internal_static_TopologySegment_descriptor;
+      }
+
+      public OpennmsModelProtos.TopologySegment getDefaultInstanceForType() {
+        return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+      }
+
+      public OpennmsModelProtos.TopologySegment build() {
+        OpennmsModelProtos.TopologySegment result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public OpennmsModelProtos.TopologySegment buildPartial() {
+        OpennmsModelProtos.TopologySegment result = new OpennmsModelProtos.TopologySegment(this);
+        if (refBuilder_ == null) {
+          result.ref_ = ref_;
+        } else {
+          result.ref_ = refBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof OpennmsModelProtos.TopologySegment) {
+          return mergeFrom((OpennmsModelProtos.TopologySegment)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(OpennmsModelProtos.TopologySegment other) {
+        if (other == OpennmsModelProtos.TopologySegment.getDefaultInstance()) return this;
+        if (other.hasRef()) {
+          mergeRef(other.getRef());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        OpennmsModelProtos.TopologySegment parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (OpennmsModelProtos.TopologySegment) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private OpennmsModelProtos.TopologyRef ref_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder> refBuilder_;
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public boolean hasRef() {
+        return refBuilder_ != null || ref_ != null;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRef getRef() {
+        if (refBuilder_ == null) {
+          return ref_ == null ? OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+        } else {
+          return refBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder setRef(OpennmsModelProtos.TopologyRef value) {
+        if (refBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ref_ = value;
+          onChanged();
+        } else {
+          refBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder setRef(
+          OpennmsModelProtos.TopologyRef.Builder builderForValue) {
+        if (refBuilder_ == null) {
+          ref_ = builderForValue.build();
+          onChanged();
+        } else {
+          refBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder mergeRef(OpennmsModelProtos.TopologyRef value) {
+        if (refBuilder_ == null) {
+          if (ref_ != null) {
+            ref_ =
+              OpennmsModelProtos.TopologyRef.newBuilder(ref_).mergeFrom(value).buildPartial();
+          } else {
+            ref_ = value;
+          }
+          onChanged();
+        } else {
+          refBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder clearRef() {
+        if (refBuilder_ == null) {
+          ref_ = null;
+          onChanged();
+        } else {
+          ref_ = null;
+          refBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRef.Builder getRefBuilder() {
+        
+        onChanged();
+        return getRefFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder() {
+        if (refBuilder_ != null) {
+          return refBuilder_.getMessageOrBuilder();
+        } else {
+          return ref_ == null ?
+              OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+        }
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder> 
+          getRefFieldBuilder() {
+        if (refBuilder_ == null) {
+          refBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder>(
+                  getRef(),
+                  getParentForChildren(),
+                  isClean());
+          ref_ = null;
+        }
+        return refBuilder_;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:TopologySegment)
+    }
+
+    // @@protoc_insertion_point(class_scope:TopologySegment)
+    private static final OpennmsModelProtos.TopologySegment DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new OpennmsModelProtos.TopologySegment();
+    }
+
+    public static OpennmsModelProtos.TopologySegment getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TopologySegment>
+        PARSER = new com.google.protobuf.AbstractParser<TopologySegment>() {
+      public TopologySegment parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TopologySegment(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TopologySegment> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TopologySegment> getParserForType() {
+      return PARSER;
+    }
+
+    public OpennmsModelProtos.TopologySegment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TopologyPortOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:TopologyPort)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string vertex_id = 1;</code>
+     */
+    java.lang.String getVertexId();
+    /**
+     * <code>string vertex_id = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getVertexIdBytes();
+
+    /**
+     * <code>uint64 if_index = 2;</code>
+     */
+    long getIfIndex();
+
+    /**
+     * <code>string if_name = 3;</code>
+     */
+    java.lang.String getIfName();
+    /**
+     * <code>string if_name = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getIfNameBytes();
+
+    /**
+     * <code>string address = 4;</code>
+     */
+    java.lang.String getAddress();
+    /**
+     * <code>string address = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getAddressBytes();
+
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    boolean hasNodeCriteria();
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    OpennmsModelProtos.NodeCriteria getNodeCriteria();
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    OpennmsModelProtos.NodeCriteriaOrBuilder getNodeCriteriaOrBuilder();
+  }
+  /**
+   * Protobuf type {@code TopologyPort}
+   */
+  public  static final class TopologyPort extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:TopologyPort)
+      TopologyPortOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TopologyPort.newBuilder() to construct.
+    private TopologyPort(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TopologyPort() {
+      vertexId_ = "";
+      ifIndex_ = 0L;
+      ifName_ = "";
+      address_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TopologyPort(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              vertexId_ = s;
+              break;
+            }
+            case 16: {
+
+              ifIndex_ = input.readUInt64();
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              ifName_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              address_ = s;
+              break;
+            }
+            case 42: {
+              OpennmsModelProtos.NodeCriteria.Builder subBuilder = null;
+              if (nodeCriteria_ != null) {
+                subBuilder = nodeCriteria_.toBuilder();
+              }
+              nodeCriteria_ = input.readMessage(OpennmsModelProtos.NodeCriteria.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(nodeCriteria_);
+                nodeCriteria_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return OpennmsModelProtos.internal_static_TopologyPort_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return OpennmsModelProtos.internal_static_TopologyPort_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              OpennmsModelProtos.TopologyPort.class, OpennmsModelProtos.TopologyPort.Builder.class);
+    }
+
+    public static final int VERTEX_ID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object vertexId_;
+    /**
+     * <code>string vertex_id = 1;</code>
+     */
+    public java.lang.String getVertexId() {
+      java.lang.Object ref = vertexId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        vertexId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string vertex_id = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getVertexIdBytes() {
+      java.lang.Object ref = vertexId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        vertexId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int IF_INDEX_FIELD_NUMBER = 2;
+    private long ifIndex_;
+    /**
+     * <code>uint64 if_index = 2;</code>
+     */
+    public long getIfIndex() {
+      return ifIndex_;
+    }
+
+    public static final int IF_NAME_FIELD_NUMBER = 3;
+    private volatile java.lang.Object ifName_;
+    /**
+     * <code>string if_name = 3;</code>
+     */
+    public java.lang.String getIfName() {
+      java.lang.Object ref = ifName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        ifName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string if_name = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getIfNameBytes() {
+      java.lang.Object ref = ifName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        ifName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ADDRESS_FIELD_NUMBER = 4;
+    private volatile java.lang.Object address_;
+    /**
+     * <code>string address = 4;</code>
+     */
+    public java.lang.String getAddress() {
+      java.lang.Object ref = address_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        address_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string address = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAddressBytes() {
+      java.lang.Object ref = address_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        address_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NODE_CRITERIA_FIELD_NUMBER = 5;
+    private OpennmsModelProtos.NodeCriteria nodeCriteria_;
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    public boolean hasNodeCriteria() {
+      return nodeCriteria_ != null;
+    }
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    public OpennmsModelProtos.NodeCriteria getNodeCriteria() {
+      return nodeCriteria_ == null ? OpennmsModelProtos.NodeCriteria.getDefaultInstance() : nodeCriteria_;
+    }
+    /**
+     * <code>.NodeCriteria node_criteria = 5;</code>
+     */
+    public OpennmsModelProtos.NodeCriteriaOrBuilder getNodeCriteriaOrBuilder() {
+      return getNodeCriteria();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getVertexIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, vertexId_);
+      }
+      if (ifIndex_ != 0L) {
+        output.writeUInt64(2, ifIndex_);
+      }
+      if (!getIfNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, ifName_);
+      }
+      if (!getAddressBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, address_);
+      }
+      if (nodeCriteria_ != null) {
+        output.writeMessage(5, getNodeCriteria());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getVertexIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, vertexId_);
+      }
+      if (ifIndex_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, ifIndex_);
+      }
+      if (!getIfNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, ifName_);
+      }
+      if (!getAddressBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, address_);
+      }
+      if (nodeCriteria_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getNodeCriteria());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof OpennmsModelProtos.TopologyPort)) {
+        return super.equals(obj);
+      }
+      OpennmsModelProtos.TopologyPort other = (OpennmsModelProtos.TopologyPort) obj;
+
+      boolean result = true;
+      result = result && getVertexId()
+          .equals(other.getVertexId());
+      result = result && (getIfIndex()
+          == other.getIfIndex());
+      result = result && getIfName()
+          .equals(other.getIfName());
+      result = result && getAddress()
+          .equals(other.getAddress());
+      result = result && (hasNodeCriteria() == other.hasNodeCriteria());
+      if (hasNodeCriteria()) {
+        result = result && getNodeCriteria()
+            .equals(other.getNodeCriteria());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + VERTEX_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getVertexId().hashCode();
+      hash = (37 * hash) + IF_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getIfIndex());
+      hash = (37 * hash) + IF_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getIfName().hashCode();
+      hash = (37 * hash) + ADDRESS_FIELD_NUMBER;
+      hash = (53 * hash) + getAddress().hashCode();
+      if (hasNodeCriteria()) {
+        hash = (37 * hash) + NODE_CRITERIA_FIELD_NUMBER;
+        hash = (53 * hash) + getNodeCriteria().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyPort parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyPort parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyPort parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(OpennmsModelProtos.TopologyPort prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code TopologyPort}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:TopologyPort)
+        OpennmsModelProtos.TopologyPortOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return OpennmsModelProtos.internal_static_TopologyPort_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return OpennmsModelProtos.internal_static_TopologyPort_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                OpennmsModelProtos.TopologyPort.class, OpennmsModelProtos.TopologyPort.Builder.class);
+      }
+
+      // Construct using OpennmsModelProtos.TopologyPort.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        vertexId_ = "";
+
+        ifIndex_ = 0L;
+
+        ifName_ = "";
+
+        address_ = "";
+
+        if (nodeCriteriaBuilder_ == null) {
+          nodeCriteria_ = null;
+        } else {
+          nodeCriteria_ = null;
+          nodeCriteriaBuilder_ = null;
+        }
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return OpennmsModelProtos.internal_static_TopologyPort_descriptor;
+      }
+
+      public OpennmsModelProtos.TopologyPort getDefaultInstanceForType() {
+        return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+      }
+
+      public OpennmsModelProtos.TopologyPort build() {
+        OpennmsModelProtos.TopologyPort result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public OpennmsModelProtos.TopologyPort buildPartial() {
+        OpennmsModelProtos.TopologyPort result = new OpennmsModelProtos.TopologyPort(this);
+        result.vertexId_ = vertexId_;
+        result.ifIndex_ = ifIndex_;
+        result.ifName_ = ifName_;
+        result.address_ = address_;
+        if (nodeCriteriaBuilder_ == null) {
+          result.nodeCriteria_ = nodeCriteria_;
+        } else {
+          result.nodeCriteria_ = nodeCriteriaBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof OpennmsModelProtos.TopologyPort) {
+          return mergeFrom((OpennmsModelProtos.TopologyPort)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(OpennmsModelProtos.TopologyPort other) {
+        if (other == OpennmsModelProtos.TopologyPort.getDefaultInstance()) return this;
+        if (!other.getVertexId().isEmpty()) {
+          vertexId_ = other.vertexId_;
+          onChanged();
+        }
+        if (other.getIfIndex() != 0L) {
+          setIfIndex(other.getIfIndex());
+        }
+        if (!other.getIfName().isEmpty()) {
+          ifName_ = other.ifName_;
+          onChanged();
+        }
+        if (!other.getAddress().isEmpty()) {
+          address_ = other.address_;
+          onChanged();
+        }
+        if (other.hasNodeCriteria()) {
+          mergeNodeCriteria(other.getNodeCriteria());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        OpennmsModelProtos.TopologyPort parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (OpennmsModelProtos.TopologyPort) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object vertexId_ = "";
+      /**
+       * <code>string vertex_id = 1;</code>
+       */
+      public java.lang.String getVertexId() {
+        java.lang.Object ref = vertexId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          vertexId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string vertex_id = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getVertexIdBytes() {
+        java.lang.Object ref = vertexId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          vertexId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string vertex_id = 1;</code>
+       */
+      public Builder setVertexId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        vertexId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string vertex_id = 1;</code>
+       */
+      public Builder clearVertexId() {
+        
+        vertexId_ = getDefaultInstance().getVertexId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string vertex_id = 1;</code>
+       */
+      public Builder setVertexIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        vertexId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long ifIndex_ ;
+      /**
+       * <code>uint64 if_index = 2;</code>
+       */
+      public long getIfIndex() {
+        return ifIndex_;
+      }
+      /**
+       * <code>uint64 if_index = 2;</code>
+       */
+      public Builder setIfIndex(long value) {
+        
+        ifIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 if_index = 2;</code>
+       */
+      public Builder clearIfIndex() {
+        
+        ifIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object ifName_ = "";
+      /**
+       * <code>string if_name = 3;</code>
+       */
+      public java.lang.String getIfName() {
+        java.lang.Object ref = ifName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          ifName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string if_name = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getIfNameBytes() {
+        java.lang.Object ref = ifName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          ifName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string if_name = 3;</code>
+       */
+      public Builder setIfName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        ifName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string if_name = 3;</code>
+       */
+      public Builder clearIfName() {
+        
+        ifName_ = getDefaultInstance().getIfName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string if_name = 3;</code>
+       */
+      public Builder setIfNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        ifName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object address_ = "";
+      /**
+       * <code>string address = 4;</code>
+       */
+      public java.lang.String getAddress() {
+        java.lang.Object ref = address_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          address_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string address = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAddressBytes() {
+        java.lang.Object ref = address_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          address_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string address = 4;</code>
+       */
+      public Builder setAddress(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        address_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string address = 4;</code>
+       */
+      public Builder clearAddress() {
+        
+        address_ = getDefaultInstance().getAddress();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string address = 4;</code>
+       */
+      public Builder setAddressBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        address_ = value;
+        onChanged();
+        return this;
+      }
+
+      private OpennmsModelProtos.NodeCriteria nodeCriteria_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.NodeCriteria, OpennmsModelProtos.NodeCriteria.Builder, OpennmsModelProtos.NodeCriteriaOrBuilder> nodeCriteriaBuilder_;
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public boolean hasNodeCriteria() {
+        return nodeCriteriaBuilder_ != null || nodeCriteria_ != null;
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public OpennmsModelProtos.NodeCriteria getNodeCriteria() {
+        if (nodeCriteriaBuilder_ == null) {
+          return nodeCriteria_ == null ? OpennmsModelProtos.NodeCriteria.getDefaultInstance() : nodeCriteria_;
+        } else {
+          return nodeCriteriaBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public Builder setNodeCriteria(OpennmsModelProtos.NodeCriteria value) {
+        if (nodeCriteriaBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          nodeCriteria_ = value;
+          onChanged();
+        } else {
+          nodeCriteriaBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public Builder setNodeCriteria(
+          OpennmsModelProtos.NodeCriteria.Builder builderForValue) {
+        if (nodeCriteriaBuilder_ == null) {
+          nodeCriteria_ = builderForValue.build();
+          onChanged();
+        } else {
+          nodeCriteriaBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public Builder mergeNodeCriteria(OpennmsModelProtos.NodeCriteria value) {
+        if (nodeCriteriaBuilder_ == null) {
+          if (nodeCriteria_ != null) {
+            nodeCriteria_ =
+              OpennmsModelProtos.NodeCriteria.newBuilder(nodeCriteria_).mergeFrom(value).buildPartial();
+          } else {
+            nodeCriteria_ = value;
+          }
+          onChanged();
+        } else {
+          nodeCriteriaBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public Builder clearNodeCriteria() {
+        if (nodeCriteriaBuilder_ == null) {
+          nodeCriteria_ = null;
+          onChanged();
+        } else {
+          nodeCriteria_ = null;
+          nodeCriteriaBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public OpennmsModelProtos.NodeCriteria.Builder getNodeCriteriaBuilder() {
+        
+        onChanged();
+        return getNodeCriteriaFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      public OpennmsModelProtos.NodeCriteriaOrBuilder getNodeCriteriaOrBuilder() {
+        if (nodeCriteriaBuilder_ != null) {
+          return nodeCriteriaBuilder_.getMessageOrBuilder();
+        } else {
+          return nodeCriteria_ == null ?
+              OpennmsModelProtos.NodeCriteria.getDefaultInstance() : nodeCriteria_;
+        }
+      }
+      /**
+       * <code>.NodeCriteria node_criteria = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.NodeCriteria, OpennmsModelProtos.NodeCriteria.Builder, OpennmsModelProtos.NodeCriteriaOrBuilder> 
+          getNodeCriteriaFieldBuilder() {
+        if (nodeCriteriaBuilder_ == null) {
+          nodeCriteriaBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.NodeCriteria, OpennmsModelProtos.NodeCriteria.Builder, OpennmsModelProtos.NodeCriteriaOrBuilder>(
+                  getNodeCriteria(),
+                  getParentForChildren(),
+                  isClean());
+          nodeCriteria_ = null;
+        }
+        return nodeCriteriaBuilder_;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:TopologyPort)
+    }
+
+    // @@protoc_insertion_point(class_scope:TopologyPort)
+    private static final OpennmsModelProtos.TopologyPort DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new OpennmsModelProtos.TopologyPort();
+    }
+
+    public static OpennmsModelProtos.TopologyPort getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TopologyPort>
+        PARSER = new com.google.protobuf.AbstractParser<TopologyPort>() {
+      public TopologyPort parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TopologyPort(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TopologyPort> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TopologyPort> getParserForType() {
+      return PARSER;
+    }
+
+    public OpennmsModelProtos.TopologyPort getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface TopologyEdgeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:TopologyEdge)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    boolean hasRef();
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    OpennmsModelProtos.TopologyRef getRef();
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder();
+
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    boolean hasSource();
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    OpennmsModelProtos.TopologyPort getSource();
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    OpennmsModelProtos.TopologyPortOrBuilder getSourceOrBuilder();
+
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    boolean hasTargetPort();
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    OpennmsModelProtos.TopologyPort getTargetPort();
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    OpennmsModelProtos.TopologyPortOrBuilder getTargetPortOrBuilder();
+
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    boolean hasTargetSegment();
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    OpennmsModelProtos.TopologySegment getTargetSegment();
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    OpennmsModelProtos.TopologySegmentOrBuilder getTargetSegmentOrBuilder();
+
+    public OpennmsModelProtos.TopologyEdge.TargetCase getTargetCase();
+  }
+  /**
+   * Protobuf type {@code TopologyEdge}
+   */
+  public  static final class TopologyEdge extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:TopologyEdge)
+      TopologyEdgeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TopologyEdge.newBuilder() to construct.
+    private TopologyEdge(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TopologyEdge() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TopologyEdge(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              OpennmsModelProtos.TopologyRef.Builder subBuilder = null;
+              if (ref_ != null) {
+                subBuilder = ref_.toBuilder();
+              }
+              ref_ = input.readMessage(OpennmsModelProtos.TopologyRef.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(ref_);
+                ref_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              OpennmsModelProtos.TopologyPort.Builder subBuilder = null;
+              if (source_ != null) {
+                subBuilder = source_.toBuilder();
+              }
+              source_ = input.readMessage(OpennmsModelProtos.TopologyPort.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(source_);
+                source_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              OpennmsModelProtos.TopologyPort.Builder subBuilder = null;
+              if (targetCase_ == 3) {
+                subBuilder = ((OpennmsModelProtos.TopologyPort) target_).toBuilder();
+              }
+              target_ =
+                  input.readMessage(OpennmsModelProtos.TopologyPort.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((OpennmsModelProtos.TopologyPort) target_);
+                target_ = subBuilder.buildPartial();
+              }
+              targetCase_ = 3;
+              break;
+            }
+            case 34: {
+              OpennmsModelProtos.TopologySegment.Builder subBuilder = null;
+              if (targetCase_ == 4) {
+                subBuilder = ((OpennmsModelProtos.TopologySegment) target_).toBuilder();
+              }
+              target_ =
+                  input.readMessage(OpennmsModelProtos.TopologySegment.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((OpennmsModelProtos.TopologySegment) target_);
+                target_ = subBuilder.buildPartial();
+              }
+              targetCase_ = 4;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return OpennmsModelProtos.internal_static_TopologyEdge_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return OpennmsModelProtos.internal_static_TopologyEdge_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              OpennmsModelProtos.TopologyEdge.class, OpennmsModelProtos.TopologyEdge.Builder.class);
+    }
+
+    private int targetCase_ = 0;
+    private java.lang.Object target_;
+    public enum TargetCase
+        implements com.google.protobuf.Internal.EnumLite {
+      TARGETPORT(3),
+      TARGETSEGMENT(4),
+      TARGET_NOT_SET(0);
+      private final int value;
+      private TargetCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static TargetCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static TargetCase forNumber(int value) {
+        switch (value) {
+          case 3: return TARGETPORT;
+          case 4: return TARGETSEGMENT;
+          case 0: return TARGET_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public TargetCase
+    getTargetCase() {
+      return TargetCase.forNumber(
+          targetCase_);
+    }
+
+    public static final int REF_FIELD_NUMBER = 1;
+    private OpennmsModelProtos.TopologyRef ref_;
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public boolean hasRef() {
+      return ref_ != null;
+    }
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public OpennmsModelProtos.TopologyRef getRef() {
+      return ref_ == null ? OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+    }
+    /**
+     * <code>.TopologyRef ref = 1;</code>
+     */
+    public OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder() {
+      return getRef();
+    }
+
+    public static final int SOURCE_FIELD_NUMBER = 2;
+    private OpennmsModelProtos.TopologyPort source_;
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    public boolean hasSource() {
+      return source_ != null;
+    }
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    public OpennmsModelProtos.TopologyPort getSource() {
+      return source_ == null ? OpennmsModelProtos.TopologyPort.getDefaultInstance() : source_;
+    }
+    /**
+     * <code>.TopologyPort source = 2;</code>
+     */
+    public OpennmsModelProtos.TopologyPortOrBuilder getSourceOrBuilder() {
+      return getSource();
+    }
+
+    public static final int TARGETPORT_FIELD_NUMBER = 3;
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    public boolean hasTargetPort() {
+      return targetCase_ == 3;
+    }
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    public OpennmsModelProtos.TopologyPort getTargetPort() {
+      if (targetCase_ == 3) {
+         return (OpennmsModelProtos.TopologyPort) target_;
+      }
+      return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+    }
+    /**
+     * <code>.TopologyPort targetPort = 3;</code>
+     */
+    public OpennmsModelProtos.TopologyPortOrBuilder getTargetPortOrBuilder() {
+      if (targetCase_ == 3) {
+         return (OpennmsModelProtos.TopologyPort) target_;
+      }
+      return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+    }
+
+    public static final int TARGETSEGMENT_FIELD_NUMBER = 4;
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    public boolean hasTargetSegment() {
+      return targetCase_ == 4;
+    }
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    public OpennmsModelProtos.TopologySegment getTargetSegment() {
+      if (targetCase_ == 4) {
+         return (OpennmsModelProtos.TopologySegment) target_;
+      }
+      return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+    }
+    /**
+     * <code>.TopologySegment targetSegment = 4;</code>
+     */
+    public OpennmsModelProtos.TopologySegmentOrBuilder getTargetSegmentOrBuilder() {
+      if (targetCase_ == 4) {
+         return (OpennmsModelProtos.TopologySegment) target_;
+      }
+      return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (ref_ != null) {
+        output.writeMessage(1, getRef());
+      }
+      if (source_ != null) {
+        output.writeMessage(2, getSource());
+      }
+      if (targetCase_ == 3) {
+        output.writeMessage(3, (OpennmsModelProtos.TopologyPort) target_);
+      }
+      if (targetCase_ == 4) {
+        output.writeMessage(4, (OpennmsModelProtos.TopologySegment) target_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (ref_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getRef());
+      }
+      if (source_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getSource());
+      }
+      if (targetCase_ == 3) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, (OpennmsModelProtos.TopologyPort) target_);
+      }
+      if (targetCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (OpennmsModelProtos.TopologySegment) target_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof OpennmsModelProtos.TopologyEdge)) {
+        return super.equals(obj);
+      }
+      OpennmsModelProtos.TopologyEdge other = (OpennmsModelProtos.TopologyEdge) obj;
+
+      boolean result = true;
+      result = result && (hasRef() == other.hasRef());
+      if (hasRef()) {
+        result = result && getRef()
+            .equals(other.getRef());
+      }
+      result = result && (hasSource() == other.hasSource());
+      if (hasSource()) {
+        result = result && getSource()
+            .equals(other.getSource());
+      }
+      result = result && getTargetCase().equals(
+          other.getTargetCase());
+      if (!result) return false;
+      switch (targetCase_) {
+        case 3:
+          result = result && getTargetPort()
+              .equals(other.getTargetPort());
+          break;
+        case 4:
+          result = result && getTargetSegment()
+              .equals(other.getTargetSegment());
+          break;
+        case 0:
+        default:
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasRef()) {
+        hash = (37 * hash) + REF_FIELD_NUMBER;
+        hash = (53 * hash) + getRef().hashCode();
+      }
+      if (hasSource()) {
+        hash = (37 * hash) + SOURCE_FIELD_NUMBER;
+        hash = (53 * hash) + getSource().hashCode();
+      }
+      switch (targetCase_) {
+        case 3:
+          hash = (37 * hash) + TARGETPORT_FIELD_NUMBER;
+          hash = (53 * hash) + getTargetPort().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + TARGETSEGMENT_FIELD_NUMBER;
+          hash = (53 * hash) + getTargetSegment().hashCode();
+          break;
+        case 0:
+        default:
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.TopologyEdge parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(OpennmsModelProtos.TopologyEdge prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code TopologyEdge}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:TopologyEdge)
+        OpennmsModelProtos.TopologyEdgeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return OpennmsModelProtos.internal_static_TopologyEdge_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return OpennmsModelProtos.internal_static_TopologyEdge_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                OpennmsModelProtos.TopologyEdge.class, OpennmsModelProtos.TopologyEdge.Builder.class);
+      }
+
+      // Construct using OpennmsModelProtos.TopologyEdge.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        if (refBuilder_ == null) {
+          ref_ = null;
+        } else {
+          ref_ = null;
+          refBuilder_ = null;
+        }
+        if (sourceBuilder_ == null) {
+          source_ = null;
+        } else {
+          source_ = null;
+          sourceBuilder_ = null;
+        }
+        targetCase_ = 0;
+        target_ = null;
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return OpennmsModelProtos.internal_static_TopologyEdge_descriptor;
+      }
+
+      public OpennmsModelProtos.TopologyEdge getDefaultInstanceForType() {
+        return OpennmsModelProtos.TopologyEdge.getDefaultInstance();
+      }
+
+      public OpennmsModelProtos.TopologyEdge build() {
+        OpennmsModelProtos.TopologyEdge result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public OpennmsModelProtos.TopologyEdge buildPartial() {
+        OpennmsModelProtos.TopologyEdge result = new OpennmsModelProtos.TopologyEdge(this);
+        if (refBuilder_ == null) {
+          result.ref_ = ref_;
+        } else {
+          result.ref_ = refBuilder_.build();
+        }
+        if (sourceBuilder_ == null) {
+          result.source_ = source_;
+        } else {
+          result.source_ = sourceBuilder_.build();
+        }
+        if (targetCase_ == 3) {
+          if (targetPortBuilder_ == null) {
+            result.target_ = target_;
+          } else {
+            result.target_ = targetPortBuilder_.build();
+          }
+        }
+        if (targetCase_ == 4) {
+          if (targetSegmentBuilder_ == null) {
+            result.target_ = target_;
+          } else {
+            result.target_ = targetSegmentBuilder_.build();
+          }
+        }
+        result.targetCase_ = targetCase_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof OpennmsModelProtos.TopologyEdge) {
+          return mergeFrom((OpennmsModelProtos.TopologyEdge)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(OpennmsModelProtos.TopologyEdge other) {
+        if (other == OpennmsModelProtos.TopologyEdge.getDefaultInstance()) return this;
+        if (other.hasRef()) {
+          mergeRef(other.getRef());
+        }
+        if (other.hasSource()) {
+          mergeSource(other.getSource());
+        }
+        switch (other.getTargetCase()) {
+          case TARGETPORT: {
+            mergeTargetPort(other.getTargetPort());
+            break;
+          }
+          case TARGETSEGMENT: {
+            mergeTargetSegment(other.getTargetSegment());
+            break;
+          }
+          case TARGET_NOT_SET: {
+            break;
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        OpennmsModelProtos.TopologyEdge parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (OpennmsModelProtos.TopologyEdge) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int targetCase_ = 0;
+      private java.lang.Object target_;
+      public TargetCase
+          getTargetCase() {
+        return TargetCase.forNumber(
+            targetCase_);
+      }
+
+      public Builder clearTarget() {
+        targetCase_ = 0;
+        target_ = null;
+        onChanged();
+        return this;
+      }
+
+
+      private OpennmsModelProtos.TopologyRef ref_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder> refBuilder_;
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public boolean hasRef() {
+        return refBuilder_ != null || ref_ != null;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRef getRef() {
+        if (refBuilder_ == null) {
+          return ref_ == null ? OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+        } else {
+          return refBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder setRef(OpennmsModelProtos.TopologyRef value) {
+        if (refBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ref_ = value;
+          onChanged();
+        } else {
+          refBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder setRef(
+          OpennmsModelProtos.TopologyRef.Builder builderForValue) {
+        if (refBuilder_ == null) {
+          ref_ = builderForValue.build();
+          onChanged();
+        } else {
+          refBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder mergeRef(OpennmsModelProtos.TopologyRef value) {
+        if (refBuilder_ == null) {
+          if (ref_ != null) {
+            ref_ =
+              OpennmsModelProtos.TopologyRef.newBuilder(ref_).mergeFrom(value).buildPartial();
+          } else {
+            ref_ = value;
+          }
+          onChanged();
+        } else {
+          refBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public Builder clearRef() {
+        if (refBuilder_ == null) {
+          ref_ = null;
+          onChanged();
+        } else {
+          ref_ = null;
+          refBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRef.Builder getRefBuilder() {
+        
+        onChanged();
+        return getRefFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      public OpennmsModelProtos.TopologyRefOrBuilder getRefOrBuilder() {
+        if (refBuilder_ != null) {
+          return refBuilder_.getMessageOrBuilder();
+        } else {
+          return ref_ == null ?
+              OpennmsModelProtos.TopologyRef.getDefaultInstance() : ref_;
+        }
+      }
+      /**
+       * <code>.TopologyRef ref = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder> 
+          getRefFieldBuilder() {
+        if (refBuilder_ == null) {
+          refBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.TopologyRef, OpennmsModelProtos.TopologyRef.Builder, OpennmsModelProtos.TopologyRefOrBuilder>(
+                  getRef(),
+                  getParentForChildren(),
+                  isClean());
+          ref_ = null;
+        }
+        return refBuilder_;
+      }
+
+      private OpennmsModelProtos.TopologyPort source_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder> sourceBuilder_;
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public boolean hasSource() {
+        return sourceBuilder_ != null || source_ != null;
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public OpennmsModelProtos.TopologyPort getSource() {
+        if (sourceBuilder_ == null) {
+          return source_ == null ? OpennmsModelProtos.TopologyPort.getDefaultInstance() : source_;
+        } else {
+          return sourceBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public Builder setSource(OpennmsModelProtos.TopologyPort value) {
+        if (sourceBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          source_ = value;
+          onChanged();
+        } else {
+          sourceBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public Builder setSource(
+          OpennmsModelProtos.TopologyPort.Builder builderForValue) {
+        if (sourceBuilder_ == null) {
+          source_ = builderForValue.build();
+          onChanged();
+        } else {
+          sourceBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public Builder mergeSource(OpennmsModelProtos.TopologyPort value) {
+        if (sourceBuilder_ == null) {
+          if (source_ != null) {
+            source_ =
+              OpennmsModelProtos.TopologyPort.newBuilder(source_).mergeFrom(value).buildPartial();
+          } else {
+            source_ = value;
+          }
+          onChanged();
+        } else {
+          sourceBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public Builder clearSource() {
+        if (sourceBuilder_ == null) {
+          source_ = null;
+          onChanged();
+        } else {
+          source_ = null;
+          sourceBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public OpennmsModelProtos.TopologyPort.Builder getSourceBuilder() {
+        
+        onChanged();
+        return getSourceFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      public OpennmsModelProtos.TopologyPortOrBuilder getSourceOrBuilder() {
+        if (sourceBuilder_ != null) {
+          return sourceBuilder_.getMessageOrBuilder();
+        } else {
+          return source_ == null ?
+              OpennmsModelProtos.TopologyPort.getDefaultInstance() : source_;
+        }
+      }
+      /**
+       * <code>.TopologyPort source = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder> 
+          getSourceFieldBuilder() {
+        if (sourceBuilder_ == null) {
+          sourceBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder>(
+                  getSource(),
+                  getParentForChildren(),
+                  isClean());
+          source_ = null;
+        }
+        return sourceBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder> targetPortBuilder_;
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public boolean hasTargetPort() {
+        return targetCase_ == 3;
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public OpennmsModelProtos.TopologyPort getTargetPort() {
+        if (targetPortBuilder_ == null) {
+          if (targetCase_ == 3) {
+            return (OpennmsModelProtos.TopologyPort) target_;
+          }
+          return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+        } else {
+          if (targetCase_ == 3) {
+            return targetPortBuilder_.getMessage();
+          }
+          return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public Builder setTargetPort(OpennmsModelProtos.TopologyPort value) {
+        if (targetPortBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          target_ = value;
+          onChanged();
+        } else {
+          targetPortBuilder_.setMessage(value);
+        }
+        targetCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public Builder setTargetPort(
+          OpennmsModelProtos.TopologyPort.Builder builderForValue) {
+        if (targetPortBuilder_ == null) {
+          target_ = builderForValue.build();
+          onChanged();
+        } else {
+          targetPortBuilder_.setMessage(builderForValue.build());
+        }
+        targetCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public Builder mergeTargetPort(OpennmsModelProtos.TopologyPort value) {
+        if (targetPortBuilder_ == null) {
+          if (targetCase_ == 3 &&
+              target_ != OpennmsModelProtos.TopologyPort.getDefaultInstance()) {
+            target_ = OpennmsModelProtos.TopologyPort.newBuilder((OpennmsModelProtos.TopologyPort) target_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            target_ = value;
+          }
+          onChanged();
+        } else {
+          if (targetCase_ == 3) {
+            targetPortBuilder_.mergeFrom(value);
+          }
+          targetPortBuilder_.setMessage(value);
+        }
+        targetCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public Builder clearTargetPort() {
+        if (targetPortBuilder_ == null) {
+          if (targetCase_ == 3) {
+            targetCase_ = 0;
+            target_ = null;
+            onChanged();
+          }
+        } else {
+          if (targetCase_ == 3) {
+            targetCase_ = 0;
+            target_ = null;
+          }
+          targetPortBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public OpennmsModelProtos.TopologyPort.Builder getTargetPortBuilder() {
+        return getTargetPortFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      public OpennmsModelProtos.TopologyPortOrBuilder getTargetPortOrBuilder() {
+        if ((targetCase_ == 3) && (targetPortBuilder_ != null)) {
+          return targetPortBuilder_.getMessageOrBuilder();
+        } else {
+          if (targetCase_ == 3) {
+            return (OpennmsModelProtos.TopologyPort) target_;
+          }
+          return OpennmsModelProtos.TopologyPort.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.TopologyPort targetPort = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder> 
+          getTargetPortFieldBuilder() {
+        if (targetPortBuilder_ == null) {
+          if (!(targetCase_ == 3)) {
+            target_ = OpennmsModelProtos.TopologyPort.getDefaultInstance();
+          }
+          targetPortBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.TopologyPort, OpennmsModelProtos.TopologyPort.Builder, OpennmsModelProtos.TopologyPortOrBuilder>(
+                  (OpennmsModelProtos.TopologyPort) target_,
+                  getParentForChildren(),
+                  isClean());
+          target_ = null;
+        }
+        targetCase_ = 3;
+        onChanged();;
+        return targetPortBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologySegment, OpennmsModelProtos.TopologySegment.Builder, OpennmsModelProtos.TopologySegmentOrBuilder> targetSegmentBuilder_;
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public boolean hasTargetSegment() {
+        return targetCase_ == 4;
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public OpennmsModelProtos.TopologySegment getTargetSegment() {
+        if (targetSegmentBuilder_ == null) {
+          if (targetCase_ == 4) {
+            return (OpennmsModelProtos.TopologySegment) target_;
+          }
+          return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+        } else {
+          if (targetCase_ == 4) {
+            return targetSegmentBuilder_.getMessage();
+          }
+          return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public Builder setTargetSegment(OpennmsModelProtos.TopologySegment value) {
+        if (targetSegmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          target_ = value;
+          onChanged();
+        } else {
+          targetSegmentBuilder_.setMessage(value);
+        }
+        targetCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public Builder setTargetSegment(
+          OpennmsModelProtos.TopologySegment.Builder builderForValue) {
+        if (targetSegmentBuilder_ == null) {
+          target_ = builderForValue.build();
+          onChanged();
+        } else {
+          targetSegmentBuilder_.setMessage(builderForValue.build());
+        }
+        targetCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public Builder mergeTargetSegment(OpennmsModelProtos.TopologySegment value) {
+        if (targetSegmentBuilder_ == null) {
+          if (targetCase_ == 4 &&
+              target_ != OpennmsModelProtos.TopologySegment.getDefaultInstance()) {
+            target_ = OpennmsModelProtos.TopologySegment.newBuilder((OpennmsModelProtos.TopologySegment) target_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            target_ = value;
+          }
+          onChanged();
+        } else {
+          if (targetCase_ == 4) {
+            targetSegmentBuilder_.mergeFrom(value);
+          }
+          targetSegmentBuilder_.setMessage(value);
+        }
+        targetCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public Builder clearTargetSegment() {
+        if (targetSegmentBuilder_ == null) {
+          if (targetCase_ == 4) {
+            targetCase_ = 0;
+            target_ = null;
+            onChanged();
+          }
+        } else {
+          if (targetCase_ == 4) {
+            targetCase_ = 0;
+            target_ = null;
+          }
+          targetSegmentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public OpennmsModelProtos.TopologySegment.Builder getTargetSegmentBuilder() {
+        return getTargetSegmentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      public OpennmsModelProtos.TopologySegmentOrBuilder getTargetSegmentOrBuilder() {
+        if ((targetCase_ == 4) && (targetSegmentBuilder_ != null)) {
+          return targetSegmentBuilder_.getMessageOrBuilder();
+        } else {
+          if (targetCase_ == 4) {
+            return (OpennmsModelProtos.TopologySegment) target_;
+          }
+          return OpennmsModelProtos.TopologySegment.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.TopologySegment targetSegment = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.TopologySegment, OpennmsModelProtos.TopologySegment.Builder, OpennmsModelProtos.TopologySegmentOrBuilder> 
+          getTargetSegmentFieldBuilder() {
+        if (targetSegmentBuilder_ == null) {
+          if (!(targetCase_ == 4)) {
+            target_ = OpennmsModelProtos.TopologySegment.getDefaultInstance();
+          }
+          targetSegmentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.TopologySegment, OpennmsModelProtos.TopologySegment.Builder, OpennmsModelProtos.TopologySegmentOrBuilder>(
+                  (OpennmsModelProtos.TopologySegment) target_,
+                  getParentForChildren(),
+                  isClean());
+          target_ = null;
+        }
+        targetCase_ = 4;
+        onChanged();;
+        return targetSegmentBuilder_;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:TopologyEdge)
+    }
+
+    // @@protoc_insertion_point(class_scope:TopologyEdge)
+    private static final OpennmsModelProtos.TopologyEdge DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new OpennmsModelProtos.TopologyEdge();
+    }
+
+    public static OpennmsModelProtos.TopologyEdge getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TopologyEdge>
+        PARSER = new com.google.protobuf.AbstractParser<TopologyEdge>() {
+      public TopologyEdge parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TopologyEdge(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<TopologyEdge> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TopologyEdge> getParserForType() {
+      return PARSER;
+    }
+
+    public OpennmsModelProtos.TopologyEdge getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_NodeCriteria_descriptor;
   private static final 
@@ -16010,6 +19671,26 @@ public final class OpennmsModelProtos {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_Node_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_TopologyRef_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TopologyRef_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_TopologySegment_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TopologySegment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_TopologyPort_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TopologyPort_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_TopologyEdge_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TopologyEdge_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -16077,12 +19758,23 @@ public final class OpennmsModelProtos {
       "ys_description\030\t \001(\t\022\025\n\rsys_object_id\030\n " +
       "\001(\t\022\"\n\014ip_interface\030\013 \003(\0132\014.IpInterface\022" +
       "&\n\016snmp_interface\030\014 \003(\0132\016.SnmpInterface\022" +
-      "\037\n\014hw_inventory\030\r \001(\0132\t.HwEntity*g\n\010Seve" +
-      "rity\022\021\n\rINDETERMINATE\020\000\022\013\n\007CLEARED\020\001\022\n\n\006" +
-      "NORMAL\020\002\022\013\n\007WARNING\020\003\022\t\n\005MINOR\020\004\022\t\n\005MAJO" +
-      "R\020\005\022\014\n\010CRITICAL\020\006B>\n(org.opennms.oce.dat" +
-      "asource.opennms.protoB\022OpennmsModelProto" +
-      "sb\006proto3"
+      "\037\n\014hw_inventory\030\r \001(\0132\t.HwEntity\"\201\001\n\013Top" +
+      "ologyRef\022\n\n\002id\030\001 \001(\t\022\'\n\010protocol\030\002 \001(\0162\025" +
+      ".TopologyRef.Protocol\"=\n\010Protocol\022\010\n\004LLD" +
+      "P\020\000\022\010\n\004OSPF\020\001\022\010\n\004ISIS\020\002\022\n\n\006BRIDGE\020\003\022\007\n\003C" +
+      "DP\020\004\",\n\017TopologySegment\022\031\n\003ref\030\001 \001(\0132\014.T" +
+      "opologyRef\"{\n\014TopologyPort\022\021\n\tvertex_id\030" +
+      "\001 \001(\t\022\020\n\010if_index\030\002 \001(\004\022\017\n\007if_name\030\003 \001(\t" +
+      "\022\017\n\007address\030\004 \001(\t\022$\n\rnode_criteria\030\005 \001(\013" +
+      "2\r.NodeCriteria\"\242\001\n\014TopologyEdge\022\031\n\003ref\030" +
+      "\001 \001(\0132\014.TopologyRef\022\035\n\006source\030\002 \001(\0132\r.To" +
+      "pologyPort\022#\n\ntargetPort\030\003 \001(\0132\r.Topolog" +
+      "yPortH\000\022)\n\rtargetSegment\030\004 \001(\0132\020.Topolog" +
+      "ySegmentH\000B\010\n\006target*g\n\010Severity\022\021\n\rINDE" +
+      "TERMINATE\020\000\022\013\n\007CLEARED\020\001\022\n\n\006NORMAL\020\002\022\013\n\007" +
+      "WARNING\020\003\022\t\n\005MINOR\020\004\022\t\n\005MAJOR\020\005\022\014\n\010CRITI" +
+      "CAL\020\006B>\n(org.opennms.oce.datasource.open" +
+      "nms.protoB\022OpennmsModelProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -16156,6 +19848,30 @@ public final class OpennmsModelProtos {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Node_descriptor,
         new java.lang.String[] { "Id", "ForeignSource", "ForeignId", "Location", "Category", "Label", "CreateTime", "SysContact", "SysDescription", "SysObjectId", "IpInterface", "SnmpInterface", "HwInventory", });
+    internal_static_TopologyRef_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_TopologyRef_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_TopologyRef_descriptor,
+        new java.lang.String[] { "Id", "Protocol", });
+    internal_static_TopologySegment_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_TopologySegment_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_TopologySegment_descriptor,
+        new java.lang.String[] { "Ref", });
+    internal_static_TopologyPort_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_TopologyPort_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_TopologyPort_descriptor,
+        new java.lang.String[] { "VertexId", "IfIndex", "IfName", "Address", "NodeCriteria", });
+    internal_static_TopologyEdge_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_TopologyEdge_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_TopologyEdge_descriptor,
+        new java.lang.String[] { "Ref", "Source", "TargetPort", "TargetSegment", "Target", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

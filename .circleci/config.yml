@@ -10,6 +10,10 @@ jobs:
       MAVEN_OPTS: -Xmx1024m
 
     steps:
+      - run:
+          name: Install RPM
+          command: sudo apt-get update; sudo apt-get install rpm
+
       # Restore source cache
       - restore_cache:
           keys:
@@ -33,8 +37,7 @@ jobs:
           - v1-dependencies-
 
       - run: |
-           mvn dependency:resolve-plugins
-           mvn dependency:go-offline || true
+           mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
 
       - save_cache:
           paths:
@@ -42,13 +45,9 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
       - run:
-          name: Install RPM
-          command: sudo apt-get update; sudo apt-get install rpm
-
-      - run:
-          name: Compile and run the tests
+          name: Run the tests
           command: |
-            mvn install test integration-test
+            mvn test integration-test
 
       - run:
           name: Save test results

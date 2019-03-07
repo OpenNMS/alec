@@ -8,7 +8,7 @@ jobs:
       - image: circleci/openjdk:8-jdk-browsers
 
     environment:
-      MAVEN_OPTS: -Xmx1024m
+      MAVEN_OPTS: -Xmx2g
 
     steps:
       - run:

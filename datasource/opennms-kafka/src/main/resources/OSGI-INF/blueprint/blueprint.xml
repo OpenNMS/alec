@@ -13,6 +13,7 @@
             <cm:property name="edgesTopic" value="edges"/>
             <cm:property name="inventoryTtlMs" value="86400000"/> <!-- 24 hours -->
             <cm:property name="inventoryGcIntervalMs" value="300000"/> <!-- 5 minutes -->
+            <cm:property name="kafkaStoreInitMs" value="20000"/> <!-- 20 seconds -->
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -26,6 +27,7 @@
         <property name="inventoryTopic" value="${inventoryTopic}"/>
         <property name="inventoryTtlMs" value="${inventoryTtlMs}"/>
         <property name="inventoryGcIntervalMs" value="${inventoryGcIntervalMs}"/>
+        <property name="kafkaStoreInitMs" value="${kafkaStoreInitMs}"/>
     </bean>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource"/>

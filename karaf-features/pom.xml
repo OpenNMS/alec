@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.opennms.oce</groupId>
         <artifactId>oce-parent</artifactId>
@@ -61,7 +62,7 @@
                 <version>${karaf.version}</version>
                 <extensions>true</extensions>
                 <configuration>
-                  <skip>${skipTests}</skip>
+                    <skip>${skipTests}</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -73,8 +74,10 @@
                         <configuration>
                             <javase>1.8</javase>
                             <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
-                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features
+                                </descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features
+                                </descriptor>
                                 <descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
@@ -99,9 +102,9 @@
                                 <feature>oce-features-graph-graphml</feature>
                                 <feature>oce-features-graph-common</feature>
                                 <feature>oce-features-graph-shell</feature>
-				<!-- Depends on blueprint common
-                                <feature>oce-features-graph-rest</feature>
-				-->
+                                <!-- Depends on blueprint common
+                                 <feature>oce-features-graph-rest</feature>
+                                -->
                                 <feature>oce-processor-api</feature>
                                 <!-- Depends on a reference to a SituationDatasource impl.
                                 <feature>oce-processor-standalone</feature>
@@ -110,7 +113,7 @@
                                 <feature>oce-processor-redundant</feature>
                                 -->
 
-				                <!-- OpenNMS plugin
+                                <!-- OpenNMS plugin
                                 <feature>opennms-oce-plugin</feature>-->
 
                                 <!-- 3rd party -->
@@ -177,24 +180,24 @@
             <scope>provided</scope>
         </dependency>
 
-	<dependency>
-	    <groupId>org.opennms.oce.engine</groupId>
+        <dependency>
+            <groupId>org.opennms.oce.engine</groupId>
             <artifactId>org.opennms.oce.engine.cluster</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.opennms.oce.engine</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.engine</groupId>
             <artifactId>org.opennms.oce.engine.temporal</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.opennms.oce.engine</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.engine</groupId>
             <artifactId>org.opennms.oce.engine.topology</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
+        </dependency>
 
         <dependency>
             <groupId>org.opennms.oce</groupId>
@@ -222,23 +225,23 @@
             <scope>provided</scope>
         </dependency>
 
-	<dependency>
-	    <groupId>org.opennms.oce.features</groupId>
-	    <artifactId>org.opennms.oce.features.shell</artifactId>
+        <dependency>
+            <groupId>org.opennms.oce.features</groupId>
+            <artifactId>org.opennms.oce.features.shell</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.opennms.oce.features.graph</groupId>
-	    <artifactId>org.opennms.oce.features.graph.rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.rest</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.opennms.oce.features.graph</groupId>
-	    <artifactId>org.opennms.oce.features.graph.shell</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.features.graph</groupId>
+            <artifactId>org.opennms.oce.features.graph.shell</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-	</dependency>
+        </dependency>
     </dependencies>
 </project>

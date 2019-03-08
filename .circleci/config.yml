@@ -22,22 +22,49 @@ executors:
 workflows:
   build-deploy:
     jobs:
-      - pre-build
+      # Run build jobs for all branches and any tag
+      - pre-build:
+          filters:
+            tags:
+              only: /.*/
       - build:
           requires:
             - pre-build
+          filters:
+            tags:
+              only: /.*/
       - build-docs:
           requires:
             - pre-build
+          filters:
+            tags:
+              only: /.*/
+
+      # Run deploy jobs just on version tags and ignore branches
       - deploy-maven:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - deploy-packages:
           requires:
             - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - deploy-docs:
           requires:
             - build-docs
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
 
 jobs:
   pre-build:

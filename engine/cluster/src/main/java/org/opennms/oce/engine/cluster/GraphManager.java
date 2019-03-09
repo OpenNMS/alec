@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -191,10 +192,10 @@ public class GraphManager {
         }
     }
 
-    public synchronized void addOrUpdateAlarm(Alarm alarm) {
+    public synchronized Optional<CEVertex> addOrUpdateAlarm(Alarm alarm) {
         if (alarm.getInventoryObjectType() == null || alarm.getInventoryObjectId() == null) {
             LOG.info("Alarm with id: {} is not associated with any resource. It will not be added to the graph.", alarm.getId());
-            return;
+            return Optional.empty();
         }
         final ResourceKey resourceKey = getResourceKeyFor(alarm);
         final CEVertex vertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
@@ -208,6 +209,7 @@ public class GraphManager {
         });
         LOG.trace("Updating vertex: {} with alarm: {}", vertex, alarm);
         vertex.addOrUpdateAlarm(alarm);
+        return Optional.of(vertex);
     }
 
     public <V> V withReadOnlyGraph(Function<Graph<? extends Vertex, ? extends Edge>, V> consumer) {
@@ -247,6 +249,10 @@ public class GraphManager {
         return ResourceKey.key(io.getType(), io.getId());
     }
 
+    private static ResourceKey getResourceKeyForParentOf(InventoryObject io) {
+        return ResourceKey.key(io.getParentType(), io.getParentId());
+    }
+
     private static ResourceKey getResourceKeyFor(Alarm alarm) {
         return ResourceKey.key(alarm.getInventoryObjectType(), alarm.getInventoryObjectId());
     }
@@ -276,6 +282,16 @@ public class GraphManager {
 
     public int getNumDeferredObjects() {
         return deferredIos.size();
+    }
+
+    public Optional<CEVertex> getVertexFor(InventoryObject io) {
+        final ResourceKey resourceKey = getResourceKeyFor(io);
+        return Optional.ofNullable(resourceKeyVertexMap.get(resourceKey));
+    }
+
+    public Optional<CEVertex> getVertexForParentOf(InventoryObject io) {
+        final ResourceKey resourceKey = getResourceKeyForParentOf(io);
+        return Optional.ofNullable(resourceKeyVertexMap.get(resourceKey));
     }
 
 }

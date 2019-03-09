@@ -26,43 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.deeplearning;
 
-import java.util.Objects;
+import org.opennms.oce.engine.api.EngineFactory;
 
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.features.graph.api.Vertex;
+public class DeepLearningEngineFactory implements EngineFactory {
 
-public class AlarmInSpaceTime implements Clusterable {
-    private final CEVertex vertex;
-    private final Alarm alarm;
-    private final double[] point;
+    private DeepLearningEngineConf conf;
 
-    public AlarmInSpaceTime(CEVertex vertex, Alarm alarm) {
-        this.vertex = Objects.requireNonNull(vertex);
-        this.alarm = Objects.requireNonNull(alarm);
-        point = new double[]{alarm.getTime(), vertex.getNumericId()};
+    @Override
+    public String getName() {
+        return "deeplearning";
     }
 
     @Override
-    public double[] getPoint() {
-        return point;
+    public String toString() {
+        return getName();
     }
 
-    public String getAlarmId() {
-        return alarm.getId();
+    @Override
+    public DeepLearningEngine createEngine() {
+        return new DeepLearningEngine(conf);
     }
 
-    public Alarm getAlarm() {
-        return alarm;
-    }
-
-    public long getAlarmTime() {
-        return alarm.getTime();
-    }
-
-    public CEVertex getVertex() {
-        return vertex;
+    public void setConf(DeepLearningEngineConf conf) {
+        this.conf = conf;
     }
 }

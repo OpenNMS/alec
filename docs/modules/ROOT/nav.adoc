@@ -16,6 +16,7 @@
 
 .Engines
 * xref:engines:cluster.adoc[Cluster Engine]
+* xref:engines:deeplearning.adoc[Deep Learning Engine]
 * xref:engines:dbscan.adoc[DBSCAN Engine]
 
 .Reference

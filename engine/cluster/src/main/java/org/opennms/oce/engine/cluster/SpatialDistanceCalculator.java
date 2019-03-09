@@ -28,44 +28,6 @@
 
 package org.opennms.oce.engine.cluster;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.math3.ml.clustering.Cluster;
-import org.opennms.oce.datasource.api.Alarm;
-
-import edu.uci.ics.jung.graph.Graph;
-
-/**
- * Simple cluster engine implementation
- */
-public class ClusterEngine extends AbstractClusterEngine {
-
-    /**
-     * Use the graph structure to build clusters:
-     *   For every vertex that has 1+ alarms, add all of the alarms on that vertex to a new cluster
-     *
-     * @param timestampInMillis ignore
-     * @param g inventory graph
-     * @return list of clusters
-     */
-    @Override
-    public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
-        // Build a cluster for each vertex
-        final List<Cluster<AlarmInSpaceTime>> clusters = new LinkedList<>();
-        for (CEVertex v : g.getVertices()) {
-            if (!v.hasAlarms()) {
-                // No alarms, skip it
-                continue;
-            }
-
-            final Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
-            for (Alarm a : v.getAlarms()) {
-                cluster.addPoint(new AlarmInSpaceTime(v, a));
-            }
-            clusters.add(cluster);
-        }
-        return clusters;
-    }
-
+public interface SpatialDistanceCalculator {
+    double getSpatialDistanceBetween(long vertexIdA, long vertexIdB);
 }

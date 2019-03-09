@@ -76,7 +76,7 @@ import edu.uci.ics.jung.graph.Graph;
 /**
  * Group alarms into situations by leveraging some clustering algorithm (i.e. DBSCAN)
  */
-public abstract class AbstractClusterEngine implements Engine, GraphProvider {
+public abstract class AbstractClusterEngine implements Engine, GraphProvider, SpatialDistanceCalculator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClusterEngine.class);
 
@@ -172,14 +172,33 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider {
             if (alarms.size() > 0) {
                 alarmsChangedSinceLastTick = true;
             }
+
+            onInit();
         } finally {
             initLock.countDown();
         }
     }
 
+    /**
+     * Called once the engine has been initialized.
+     *
+     * Allows sub-classes to provide their own initialization routines.
+     */
+    public void onInit() {
+    }
+
     @Override
     public void destroy() {
-        // no-op
+        onDestroy();
+    }
+
+    /**
+     * Called once the engine has been destroyed.
+     *
+     * Allows sub-classes to provide their own destroy routines.
+     */
+    public void onDestroy() {
+
     }
 
     @Override
@@ -648,7 +667,18 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider {
         throw new IllegalStateException("No vertex found for alarm: " + alarm);
     }
 
-    public abstract double getDistanceBetween(double t1, double t2, double distance);
+    /**
+     * Used to help solve tie-breaker scenarios i.e. when attempting to find
+     * the closest neighbor in two different situations.
+     *
+     * @param t1 time of alarm1
+     * @param t2 time of alarm2
+     * @param distance spatial distance between alarm1 and alarm2
+     * @return effective distance between alarm1 and alarm2
+     */
+    public double getDistanceBetween(double t1, double t2, double distance) {
+        return Math.abs(t2 - t1) + distance;
+    }
 
     private Alarm getClosestNeighborInSituation(Alarm alarm, List<Alarm> candidates) {
         final long vertexIdA = getVertexIdForAlarm(alarm);
@@ -668,6 +698,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider {
                 .orElseThrow(() -> new IllegalStateException("Should not happen!")).alarm;
     }
 
+    @Override
     public double getSpatialDistanceBetween(long vertexIdA, long vertexIdB) {
         final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
         try {
@@ -778,4 +809,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider {
         return ImmutableMap.copyOf(situationsById);
     }
 
+    public GraphManager getGraphManager() {
+        return graphManager;
+    }
 }

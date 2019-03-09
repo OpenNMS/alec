@@ -1,0 +1,29 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.engine.deeplearning" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="modelPath" value=""/>
+            <cm:property name="epsilon" value="500"/>
+            <cm:property name="numGraphProcessingThreads" value="2"/>
+            <!-- Defaults to max(#processors - 3, 1) when value <= 0 -->
+            <cm:property name="numTensorFlowProcessingThreads" value="0"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="deepLearningEngineConf" class="org.opennms.oce.engine.deeplearning.DeepLearningEngineConf">
+        <property name="modelPath" value="${modelPath}"/>
+        <property name="epsilon" value="${epsilon}"/>
+        <property name="numGraphProcessingThreads" value="${numGraphProcessingThreads}"/>
+        <property name="numTensorFlowProcessingThreads" value="${numTensorFlowProcessingThreads}"/>
+    </bean>
+
+    <!-- Create and expose the engine factory -->
+    <service interface="org.opennms.oce.engine.api.EngineFactory">
+        <bean class="org.opennms.oce.engine.deeplearning.DeepLearningEngineFactory">
+            <property name="config" ref="deepLearningEngineConf"/>
+        </bean>
+    </service>
+
+</blueprint>

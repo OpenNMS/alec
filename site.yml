@@ -15,4 +15,5 @@ output:
   clean: true 
   dir: ./public 
   destinations: 
+  - provider: fs
   - provider: archive 

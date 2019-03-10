@@ -1,54 +1,109 @@
-version: 2
+version: 2.1
+
+executors:
+  build-executor:
+    docker:
+      - image: opennms/build-env:1.0-b4
+        environment:
+          MAVEN_OPTS: -Xmx2g
+
+  docs-executor:
+    docker:
+      - image: antora/antora:2.0.0
+
+  netlify-cli-executor:
+    docker:
+      - image: opennms/netlify-cli:2.8.3-b1
+
+  package-cloud-cli-executor:
+    docker:
+      - image: opennms/package-cloud-cli:0.3.05-b1
+
+workflows:
+  build-deploy:
+    jobs:
+      # Run build jobs for all branches and any tag
+      - pre-build:
+          filters:
+            tags:
+              only: /.*/
+      - build:
+          requires:
+            - pre-build
+          filters:
+            tags:
+              only: /.*/
+      - build-docs:
+          requires:
+            - pre-build
+          filters:
+            tags:
+              only: /.*/
+
+      # Run deploy jobs just on version tags and master branch
+      - deploy-maven:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - master
+      - deploy-packages:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - master
+      - deploy-docs:
+          requires:
+            - build-docs
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - master
 
 jobs:
-  build:
-    machine: true
-
-    working_directory: /home/circleci/oce
-
-    environment:
-      MAVEN_OPTS: -Xmx1024m
-
+  pre-build:
+    executor: build-executor
     steps:
-      # Restore source cache
-      - restore_cache:
-          keys:
-            - source-v1-{{ .Branch }}-{{ .Revision }}
-            - source-v1-{{ .Branch }}-
-            - source-v1-
-
       - checkout
 
-      # Save source cache
-      - save_cache:
-          key: source-v1-{{ .Branch }}-{{ .Revision }}
+      - persist_to_workspace:
+          root: ~/
           paths:
-            - ".git"
+            - project
 
-      # Download and cache dependencies
+  build:
+    executor: build-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
+          - v2-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          - v2-dependencies-
 
       - run: |
-           mvn dependency:resolve-plugins
-           mvn dependency:go-offline || true
+          mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
 
       - save_cache:
           paths:
             - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
+          key: v2-dependencies-{{ checksum "pom.xml" }}
 
       - run:
-          name: Install RPM
-          command: sudo apt-get update; sudo apt-get install rpm
-
-      - run:
-          name: Compile and run the tests
+          name: Run the tests
           command: |
-            mvn install test integration-test
+            mvn test integration-test
 
       - run:
           name: Save test results
@@ -75,12 +130,62 @@ jobs:
           destination: dist
 
       - persist_to_workspace:
-          root: /home/circleci
+          root: ~/
           paths:
-            - oce
+            - project
+  
+  build-docs:
+    executor: docs-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Generate HTML output for documentation
+          command: |
+            antora generate site.yml
 
-workflows:
-  version: 2
-  build-deploy:
-    jobs:
-      - build
+      - store_artifacts:
+          path: build/site.zip
+          destination: site.zip
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project
+
+  deploy-maven:
+    executor: build-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v2-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v2-dependencies-
+      - run:
+          name: Deploy the artifacts
+          command: |
+            mvn -s .circleci.settings.xml -DskipTests deploy
+
+  deploy-packages:
+      executor: package-cloud-cli-executor
+      steps:
+        - attach_workspace:
+            at: ~/
+        - run:
+            name: Push RPM packages
+            command: |
+              package_cloud push opennms/plugin-snapshot/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
+              package_cloud push opennms/plugin-snapshot/el/7 assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
+  
+  deploy-docs:
+    executor: netlify-cli-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Deploy docs to Netlify
+          command: |
+            netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}

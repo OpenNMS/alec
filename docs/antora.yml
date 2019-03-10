@@ -1,0 +1,5 @@
+name: oce
+version: '1.0.0-SNAPSHOT'
+title: OpenNMS Correlation Engine
+nav:
+  - modules/ROOT/nav.adoc

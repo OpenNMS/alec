@@ -188,6 +188,30 @@
         <bundle>mvn:org.opennms.oce.integrations.opennms/config/${project.version}</bundle>
     </feature>
 
+
+    <!-- Grouped feature sets -->
+
+    <feature name="oce-opennms-standalone">
+        <feature>opennms-oce-plugin</feature>
+        <feature>oce-driver-main</feature>
+        <feature>oce-engine-cluster</feature>
+        <feature>oce-datasource-opennms-direct</feature>
+        <feature>oce-processor-standalone</feature>
+        <feature>oce-features-graph-shell</feature>
+    </feature>
+
+    <feature name="oce-opennms-distributed">
+        <feature>opennms-oce-plugin</feature>
+    </feature>
+
+    <feature name="oce-sentinel-distributed">
+        <feature>oce-driver-main</feature>
+        <feature>oce-engine-cluster</feature>
+        <feature>oce-datasource-opennms-kafka</feature>
+        <feature>oce-processor-redundant</feature>
+        <feature>oce-features-graph-shell</feature>
+    </feature>
+
     <!-- Generic dependencies -->
 
     <feature name="rocksdb" version="5.7.3">

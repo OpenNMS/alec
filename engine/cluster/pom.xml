@@ -60,5 +60,11 @@
             <groupId>org.opennms.oce</groupId>
             <artifactId>oce-test-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.opennms-common</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

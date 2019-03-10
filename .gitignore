@@ -17,6 +17,8 @@ dist/
 tmp/
 target
 bin/
+public/
+test-api/.factorypath
 
 # Editors
 .idea

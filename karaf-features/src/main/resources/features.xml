@@ -196,7 +196,6 @@
         <feature>oce-driver-main</feature>
         <feature>oce-engine-cluster</feature>
         <feature>oce-datasource-opennms-direct</feature>
-        <feature>oce-engine-cluster</feature>
         <feature>oce-processor-standalone</feature>
         <feature>oce-features-graph-shell</feature>
     </feature>
@@ -209,7 +208,6 @@
         <feature>oce-driver-main</feature>
         <feature>oce-engine-cluster</feature>
         <feature>oce-datasource-opennms-kafka</feature>
-        <feature>oce-engine-cluster</feature>
         <feature>oce-processor-redundant</feature>
         <feature>oce-features-graph-shell</feature>
     </feature>

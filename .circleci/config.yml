@@ -86,6 +86,12 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - restore_cache:
+          keys:
+          - v2-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v2-dependencies-
+
       - run: |
           mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
 

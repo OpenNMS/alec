@@ -50,6 +50,7 @@ workflows:
             branches:
               only:
                 - master
+                - /.*OCE-47/
       - deploy-packages:
           requires:
             - build
@@ -59,6 +60,7 @@ workflows:
             branches:
               only:
                 - master
+                - /.*OCE-47/
       - deploy-docs:
           requires:
             - build-docs
@@ -68,6 +70,7 @@ workflows:
             branches:
               only:
                 - master
+                - /.*OCE-47/
 
 jobs:
   pre-build:

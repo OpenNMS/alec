@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.cluster</artifactId>
+            <artifactId>org.opennms.oce.engine.dbscan</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

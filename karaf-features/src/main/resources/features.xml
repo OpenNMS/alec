@@ -62,7 +62,7 @@
     <!-- Engines -->
 
     <feature name="oce-engine" description="OCE :: Engine" version="${project.version}">
-        <feature version="${project.version}">oce-engine-cluster</feature>
+        <feature version="${project.version}">oce-engine-dbscan</feature>
         <feature version="${project.version}">oce-engine-temporal</feature>
         <feature version="${project.version}">oce-engine-topology</feature>
     </feature>
@@ -77,6 +77,11 @@
         <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.cluster/${project.version}</bundle>
+    </feature>
+
+    <feature name="oce-engine-dbscan" description="OCE :: Engine :: DB-Scan" version="${project.version}">
+        <feature version="${project.version}">oce-engine-cluster</feature>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.dbscan/${project.version}</bundle>
     </feature>
 
     <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
@@ -194,7 +199,7 @@
     <feature name="oce-opennms-standalone">
         <feature>opennms-oce-plugin</feature>
         <feature>oce-driver-main</feature>
-        <feature>oce-engine-cluster</feature>
+        <feature>oce-engine-dbscan</feature>
         <feature>oce-datasource-opennms-direct</feature>
         <feature>oce-processor-standalone</feature>
         <feature>oce-features-graph-shell</feature>
@@ -206,7 +211,7 @@
 
     <feature name="oce-sentinel-distributed">
         <feature>oce-driver-main</feature>
-        <feature>oce-engine-cluster</feature>
+        <feature>oce-engine-dbscan</feature>
         <feature>oce-datasource-opennms-kafka</feature>
         <feature>oce-processor-redundant</feature>
         <feature>oce-features-graph-shell</feature>

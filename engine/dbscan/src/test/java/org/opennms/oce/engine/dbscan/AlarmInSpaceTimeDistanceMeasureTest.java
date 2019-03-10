@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.dbscan;
 
 import static org.mockito.Mockito.mock;
 import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
@@ -34,6 +34,7 @@ import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.opennms.oce.engine.cluster.AbstractClusterEngine;
 
 public class AlarmInSpaceTimeDistanceMeasureTest {
 
@@ -48,19 +49,19 @@ public class AlarmInSpaceTimeDistanceMeasureTest {
         double maxSpatialDistance = 5 * DEFAULT_WEIGHT;
         double spatialDistanceStep = maxSpatialDistance / 10;
 
-        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", ClusterEngine.DEFAULT_ALPHA, ClusterEngine.DEFAULT_BETA, ClusterEngine.DEFAULT_EPSILON);
+        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, DBScanEngine.DEFAULT_EPSILON);
         System.out.println("timeDeltaSecs,spatialDistance,distance,ok");
         for (double y = minSpatialDistance; y < maxSpatialDistance; y += spatialDistanceStep) {
             for (double x = minTimeDeltaMs; x <= maxTimeDeltaMs; x += timeDeltaMsStep) {
                 double val = eval(x,y);
-                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= ClusterEngine.DEFAULT_EPSILON);
+                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= DBScanEngine.DEFAULT_EPSILON);
             }
         }
     }
 
     double eval(double timeDeltaMs, double spatialDistance) {
-        final ClusterEngine clusterEngine = mock(ClusterEngine.class);
-        final AlarmInSpaceTimeDistanceMeasure alarmInSpaceTimeDistanceMeasure = new AlarmInSpaceTimeDistanceMeasure(clusterEngine, ClusterEngine.DEFAULT_ALPHA, ClusterEngine.DEFAULT_BETA);
+        final AbstractClusterEngine clusterEngine = mock(AbstractClusterEngine.class);
+        final AlarmInSpaceTimeDistanceMeasure alarmInSpaceTimeDistanceMeasure = new AlarmInSpaceTimeDistanceMeasure(clusterEngine, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA);
         return alarmInSpaceTimeDistanceMeasure.compute(0, timeDeltaMs, spatialDistance);
     }
 }

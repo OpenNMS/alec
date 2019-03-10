@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.dbscan;
 
 import static org.opennms.oce.datasource.api.InventoryObject.DEFAULT_WEIGHT;
 
@@ -34,16 +34,17 @@ import java.util.Objects;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.opennms.oce.engine.cluster.AbstractClusterEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
     private static final Logger LOG = LoggerFactory.getLogger(AlarmInSpaceTimeDistanceMeasure.class);
-    private final ClusterEngine clusterEngine;
+    private final AbstractClusterEngine clusterEngine;
     private final double alpha;
     private final double beta;
 
-    public AlarmInSpaceTimeDistanceMeasure(ClusterEngine clusterEngine, double alpha, double beta) {
+    public AlarmInSpaceTimeDistanceMeasure(AbstractClusterEngine clusterEngine, double alpha, double beta) {
         this.clusterEngine = Objects.requireNonNull(clusterEngine);
         this.alpha = alpha;
         this.beta = beta;

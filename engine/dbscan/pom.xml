@@ -6,38 +6,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.engine</groupId>
-    <artifactId>org.opennms.oce.engine.itest</artifactId>
-    <name>OCE :: Engine :: Integration Tests</name>
+    <artifactId>org.opennms.oce.engine.dbscan</artifactId>
+    <name>OCE :: Engine :: DB-Scan</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.temporal</artifactId>
+            <artifactId>org.opennms.oce.engine.cluster</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.dbscan</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.topology</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opennms.oce.driver</groupId>
-            <artifactId>org.opennms.oce.driver.test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.features</groupId>
-            <artifactId>org.opennms.oce.features.score</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
-            <scope>test</scope>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
         </dependency>
 
         <dependency>
@@ -56,13 +36,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
+            <groupId>org.opennms.oce</groupId>
+            <artifactId>oce-test-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.oce.datasource</groupId>
+            <artifactId>org.opennms.oce.datasource.opennms-common</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

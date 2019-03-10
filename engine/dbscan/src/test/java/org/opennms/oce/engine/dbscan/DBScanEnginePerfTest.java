@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.dbscan;
 
 import java.util.Collections;
 
@@ -35,7 +35,7 @@ import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.driver.test.MockInventoryType;
 
-public class ClusterEnginePerfTest {
+public class DBScanEnginePerfTest {
 
     /**
      * Utility method for testing performance of ticks.
@@ -44,12 +44,12 @@ public class ClusterEnginePerfTest {
      */
     @Test
     public void canRunDBScanOnLargeGraphs() {
-        final ClusterEngine clusterEngine = new ClusterEngine();
-        clusterEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+        final DBScanEngine dbScanEngine = new DBScanEngine();
+        dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
         for (int k = 0; k < K; k++) {
-            clusterEngine.onInventoryAdded(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+            dbScanEngine.onInventoryAdded(Collections.singletonList(ImmutableInventoryObject.newBuilder()
                     .setType(MockInventoryType.COMPONENT.getType())
                     .setId(Integer.toString(k))
                     .build()));
@@ -58,7 +58,7 @@ public class ClusterEnginePerfTest {
         for (int j = 1; j <= 3; j++) {
             // Reset the alarms before every tick
             for (int k = 0; k < K; k++) {
-                clusterEngine.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
+                dbScanEngine.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
                         .setTime(0)
                         .setId(Integer.toString(k))
                         .setInventoryObjectType(MockInventoryType.COMPONENT.getType())
@@ -67,7 +67,7 @@ public class ClusterEnginePerfTest {
             }
 
             long start = System.currentTimeMillis();
-            clusterEngine.tick(clusterEngine.getTickResolutionMs() * j);
+            dbScanEngine.tick(dbScanEngine.getTickResolutionMs() * j);
             long delta = System.currentTimeMillis() - start;
             System.out.printf("%d ms for %d vertices.\n", delta, K);
         }

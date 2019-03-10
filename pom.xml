@@ -140,6 +140,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.oce.engine</groupId>
+                <artifactId>org.opennms.oce.engine.dbscan</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.oce.features.graph</groupId>
                 <artifactId>org.opennms.oce.features.graph.api</artifactId>
                 <version>${project.version}</version>

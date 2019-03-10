@@ -26,20 +26,48 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.dbscan;
 
 import org.opennms.oce.engine.api.EngineFactory;
+import org.opennms.oce.engine.cluster.AbstractClusterEngine;
 
-public class ClusterEngineFactory implements EngineFactory {
+public class DBScanEngineFactory implements EngineFactory {
+
+    private double epsilon = DBScanEngine.DEFAULT_EPSILON;
+    private double alpha = DBScanEngine.DEFAULT_ALPHA;
+    private double beta = DBScanEngine.DEFAULT_BETA;
 
     @Override
     public String getName() {
-        return "cluster";
+        return "dbscan";
     }
 
     @Override
     public AbstractClusterEngine createEngine() {
-        return new ClusterEngine();
+        return new DBScanEngine(epsilon, alpha, beta);
     }
 
+    public double getEpsilon() {
+        return epsilon;
+    }
+
+    public void setEpsilon(double epsilon) {
+        this.epsilon = epsilon;
+    }
+
+    public double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(double alpha) {
+        this.alpha = alpha;
+    }
+
+    public double getBeta() {
+        return beta;
+    }
+
+    public void setBeta(double beta) {
+        this.beta = beta;
+    }
 }

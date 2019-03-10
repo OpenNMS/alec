@@ -39,7 +39,7 @@ import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.datasource.common.ImmutableSituation;
-import org.opennms.oce.engine.cluster.ClusterEngine;
+import org.opennms.oce.engine.dbscan.DBScanEngine;
 import org.opennms.oce.features.graph.api.GraphProvider;
 import org.opennms.oce.features.graph.api.OceGraph;
 
@@ -47,7 +47,7 @@ import com.google.common.collect.Lists;
 
 public class MockGraphProvider implements GraphProvider {
 
-    final ClusterEngine clusterEngine = new ClusterEngine();
+    final DBScanEngine dbScanEngine = new DBScanEngine();
 
     public MockGraphProvider() {
         final InventoryObject io1 = ImmutableInventoryObject.newBuilder()
@@ -74,16 +74,16 @@ public class MockGraphProvider implements GraphProvider {
                 .setId("s1")
                 .addAlarm(a1)
                 .build());
-        clusterEngine.init(alarms, Collections.emptyList(), situations, inventory);
+        dbScanEngine.init(alarms, Collections.emptyList(), situations, inventory);
     }
 
     @Override
     public <V> V withReadOnlyGraph(Function<OceGraph, V> consumer) {
-        return clusterEngine.withReadOnlyGraph(consumer);
+        return dbScanEngine.withReadOnlyGraph(consumer);
     }
 
     @Override
     public void withReadOnlyGraph(Consumer<OceGraph> consumer) {
-        clusterEngine.withReadOnlyGraph(consumer);
+        dbScanEngine.withReadOnlyGraph(consumer);
     }
 }

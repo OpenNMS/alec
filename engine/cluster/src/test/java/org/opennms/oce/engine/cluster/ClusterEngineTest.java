@@ -46,7 +46,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.junit.Before;
@@ -280,7 +279,7 @@ public class ClusterEngineTest implements SituationHandler {
     public void canHandleAlarmsInClusters() {
         // An empty cluster should return no situations
         Cluster<AlarmInSpaceTime> emptyCluster = new Cluster<>();
-        ClusterEngine.TickContext context = engine.getTickContextFor(0L);
+        AbstractClusterEngine.TickContext context = engine.getTickContextFor(0L);
         engine.mapClusterToSituations(emptyCluster, context);
         List<Situation> situations = context.getNewOrUpdatedSituations();
         assertThat(situations, hasSize(0));
@@ -377,7 +376,7 @@ public class ClusterEngineTest implements SituationHandler {
 
         // Process the cluster
         engine.setSituations(Arrays.asList(situation1, situation2));
-        ClusterEngine.TickContext context = engine.getTickContextFor(0L);
+        AbstractClusterEngine.TickContext context = engine.getTickContextFor(0L);
         engine.mapClusterToSituations(cluster, context);
 
         // We should be updating a single situation, with 3 alarms

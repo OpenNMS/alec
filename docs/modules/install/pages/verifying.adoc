@@ -3,14 +3,66 @@
 
 Here we assume that you already have OCE deployed using either the monolithic or distributed deployments.
 
-== Syslog message handling
+== Testing syslog message handling
 
-Send a syslog message.
+Here we work to verify that syslog messages are being properly converted to alarms and show that we can create a situation from multiple alarms.
 
-Verify that an alarm get attached to the correct MO.
+Let's start by provisioning a node for the `localhost` in OpenNMS:
+```
+$OPENNMS_HOME/bin/provision.pl requisition add oce
+$OPENNMS_HOME/bin/provision.pl node add oce localhost localhost
+$OPENNMS_HOME/bin/provision.pl interface add oce localhost 127.0.0.1
+$OPENNMS_HOME/bin/provision.pl requisition import oce
+```
 
-View the graph.
+IMPORTANT: We assume that the localhost is running an SNMP agent.
 
-NOTE: To generate issue `oce:export-graph cluster /tmp/cluster.graph.xml` from the Karaf shell, and then import with `curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/oce`
+Now, let's the the `ifDescr` for an interface on the node we just provisioned.
+```
+export IFDESCR="eth0"
+```
 
-Trigger multiple syslog messages to create a situation.
+Now trigger a Syslog message:
+```
+echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface $IFDESCR is down (Link failure)" | nc -v -u 127.0.0.1 10514
+```
+
+We expect to see a new "interface down" alarm attached to the node we just provisioned:
+
+image::verify_ifdown_example.png[Interface down alarm,600]
+
+TIP: If the Syslog message is not being recognized and bring formatted to a proper event & alarm, ensure that the `opennms-oce-plugin` feature is running in OpenNMS and that the related bundles are active.
+
+We can now trigger a second alarm against this same interface using:
+```
+echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %PKT_INFRA-LINEPROTO-5-UPDOWN: Line protocol on Interface $IFDESCR, changed state to Down" | nc -v -u 127.0.0.1 10514
+```
+
+If both of these alarms are triggered together in a small enough window of time (within 1 minute for the purposes of this example), a situation should be automaticall created:
+
+image::verify_situation_example.png[Situation,600]
+
+Congragulations you have correlated your first two alarms!
+
+== Viewing the OCE graph
+
+At any point in time you can export the OCE graph to view the inventory and alarms in context.
+
+We can export the OCE graph from a Karaf shell using:
+```
+oce:export-graph cluster /tmp/cluster.graph.xml
+```
+
+NOTE: If OCE is running on Sentinel, make sure to run this from the Sentinel shell.
+
+Import the graph into OpenNMS using:
+```
+curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/oce'
+```
+
+NOTE: If you get an error saying that a `"Graph with name oce already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/oce'` and try again.
+
+Next, navigate to the topology map, and view the graph name "oce".
+The resulting graph from the previous example looks like:
+
+image::verify_topology_example.png[Topology,600]

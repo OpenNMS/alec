@@ -4,6 +4,7 @@
 .Installation
 * xref:install:requirements.adoc[Requirements]
 * xref:install:monolithic_vs_distributed.adoc[Monolithic vs Distributed]
+* xref:install:common_install.adoc[Common Install]
 * xref:install:monolithic_install.adoc[Monolithic Install]
 * xref:install:distributed_install.adoc[Distributed Install]
 * xref:install:verifying.adoc[Verifying your install]

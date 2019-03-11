@@ -4,3 +4,102 @@
 This installation guide describes a distributed install where we run _OCE_ as a service on top of the _Sentinel_ runtime:
 
 image::distributed_deployment.png[Distributed,700]
+
+[[prequisites]]
+== Prequisites
+
+In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this guide assume you have:
+
+1. A Kafka broker (or cluster) running Kafka 0.11.x or greater.
+2. One or more Minions are already active in the system
+** The Minions are configured to use _Kafka_ for the transport
+** The Minions are ready to receive SNMP traps and Syslog messages
+
+== Common Setup
+
+Start by following the instructions in the link:common_install.adoc[common install] section if you have not already done so.
+
+When installing the package repository, ensure that this is done on all of the system that are running _Sentinel_ and/or _OpenNMS_.
+
+== OpenNMS Configuration
+
+=== Enable and configure the Kafka Producer (for link & alarms)
+
+Configure the Kafka Producer to point to your Kafka broker:
+```
+echo 'bootstrap.servers=127.0.0.1:9092' > "$OPENNMS_HOME/etc/org.opennms.features.kafka.producer.client.cfg"
+```
+
+Disable incremental alarm suppression:
+```
+echo 'suppressIncrementalAlarms=false' >> "$OPENNMS_HOME/etc/org.opennms.features.kafka.producer.cfg"
+```
+
+Add `opennms-kafka-producer` to the `featuresBoot` property in the `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg`.
+
+=== Enable consumption of events from Kafka
+
+Enable the Sink API consumer for Eventd:
+```
+echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.properties.d/event-sink.properties"
+```
+
+IMPORTANT: We assume that you're already using the Kafka strategy for the Sink API. See <<prequisites>>.
+
+== Install OCE in OpenNMS
+
+On the OpenNMS server, install the package:
+```
+yum -y install opennms-oce-plugin
+```
+
+Configure the feature set to be installed when OpenNMS starts:
+```
+echo 'oce-opennms-distributed wait-for-kar=opennms-oce-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+```
+
+== Install OCE in Sentinel
+
+On the Sentinel systems, install the package:
+```
+yum -y install sentinel-oce-plugin
+```
+
+Configure the Kafka Stream (consumer):
+```
+echo 'bootstrap.servers=127.0.0.1:9092
+commit.interval.ms=5000' > "$SENTINEL_HOME/etc/org.opennms.oce.datasource.opennms.kafka.streams.cfg"
+```
+
+Configure the Kafka producer:
+```
+echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.oce.datasource.opennms.kafka.producer.cfg"
+```
+
+TIP: The consumer is used to read alarms & inventory, whereas the producer is used to send events. 
+
+Configure the feature set to be installed when Sentinel starts:
+```
+echo 'oce-sentinel-distributed wait-for-kar=opennms-oce-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/oce.boot"
+```
+
+== Verify
+
+Restart OpenNMS and Sentinel.
+
+Run the `health:check` commands in both OpenNMS and Sentinel.
+
+From a Sentinel Karaf shell, enumerate the available graphs using:
+```
+oce:list-graphs
+```
+
+At this point we expect the command output a single graph called "cluster":
+```
+admin@opennms> oce:list-graphs 
+cluster: 0 situations on 524 vertices and 4 edges.
+```
+
+It's okay of there are no situations, vertices or edges on the graph at this point.
+
+Continue to xref:verifying.adoc[Verifying your install] for more details.

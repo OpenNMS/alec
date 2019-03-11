@@ -2,6 +2,8 @@
 
 The OpenNMS Correlation Engine (OCE) provides a framework for performing correlation of alarms (i.e. faults) into higher level situations.
 
+Installation instructions and additional documentation is available at: https://oce.opennms.eu/
+
 ## Terminology
 
 An *alarm* is a fault or a problem that is triggered by one or more events.
@@ -53,10 +55,6 @@ Groups alarms based on how close they occured in time.
 #### Topology (POC)
 
 Groups alarms using Drools rules.
-
-## Installing OCE
-
-See the [installation guide](INSTALL.md) for details.
 
 ## Building & developing OCE
 

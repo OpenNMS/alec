@@ -156,7 +156,7 @@ public class InventoryFactory {
      * @param node the node
      * @return the node criteria string
      */
-    private static String toNodeCriteria(Node node) {
+    protected static String toNodeCriteria(Node node) {
         return toNodeCriteria(node.getForeignSource(), node.getForeignId(), node.getId());
     }
 

@@ -109,7 +109,7 @@ public class Mappers {
 
             if (!alreadyScoped.contains(type)) {
                 alarmBuilder.setInventoryObjectType(type.getName());
-                alarmBuilder.setInventoryObjectId(String.format("%s:%s", alarm.getNode(),
+                alarmBuilder.setInventoryObjectId(String.format("%s:%s", InventoryFactory.toNodeCriteria(alarm.getNode()),
                         alarm.getManagedObjectInstance()));
             }
         }

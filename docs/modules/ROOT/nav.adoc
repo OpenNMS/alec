@@ -1,5 +1,6 @@
 .About
 * xref:about:welcome.adoc[Welcome]
+* xref:about:terminology.adoc[Terminology]
 
 .Installation
 * xref:install:requirements.adoc[Requirements]
@@ -8,3 +9,10 @@
 * xref:install:monolithic_install.adoc[Monolithic Install]
 * xref:install:distributed_install.adoc[Distributed Install]
 * xref:install:verifying.adoc[Verifying your install]
+
+.Architecture
+* xref:architecture:overview.adoc[Overview]
+* xref:architecture:opennms_integration.adoc[OpenNMS Integration]
+
+.Reference
+* xref:reference:model.adoc[Model]

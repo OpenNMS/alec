@@ -1,0 +1,16 @@
+= OCE Architecture
+:imagesdir: ../assets/images
+
+== Overview
+
+The OCE framework provides building blocks for developing correlation systems:
+
+image::architecture_components.png[Components,600]
+
+A *datasource* is responsible for interacting with the monitoring system and providing a feed of alarms, inventory objects and situations.
+Datasources  are also responsible for creating the situations in the *monitoring system*.
+
+An *engine* is responsible for doing the actual correlation.
+
+The *driver* is responsible for connecting the datasource to the engine.
+We provide a "main" driver for real-time processing as well as a "test" driver for testing and training.

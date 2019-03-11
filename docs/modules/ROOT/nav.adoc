@@ -1,2 +1,5 @@
+.About
+* xref:about:welcome.adoc[Welcome]
+
 .Installation
 * xref:install:preconditions.adoc[Preconditions]

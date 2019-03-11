@@ -13,5 +13,5 @@ npm i -g serve@6.5.8
 
 1. hack hack hack
 1. `antora generate site.yml`
-1. `serve build/`
+1. `serve public/`
 

@@ -11,7 +11,7 @@ The OpenNMS Correlation Engine (OCE) is a framework for logically grouping relat
 
 Nodes, their components and their relations are used to build a graph.
 
-image::model.png[]
+image::model.png[Model example,600]
 
 The layout of the graph, and the different types of elements on the graph are what compose "the meta-model".
 In OCE, the vertices on the graph are referred to as "inventory objects" and edges are used to represent "relationships".
@@ -21,7 +21,7 @@ In OCE, the vertices on the graph are referred to as "inventory objects" and edg
 Alarms are enriched to help identify which component in the model they relate to.
 The alarms are attached to the graph when they are triggered.
 
-image::model_with_alarms.png[]
+image::model_with_alarms.png[Model example with alarms,600]
 
 In OpenNMS, we can now populate the managed object (MO) type and MO instance of an alarm when it is created.
 These fields are used (and required) to the relate the alarm to a specific IO on the graph.
@@ -31,7 +31,7 @@ These fields are used (and required) to the relate the alarm to a specific IO on
 We aim to group the alarms into clusters based on their level or similarity, and whether or not they share the same root cause.
 The engine will periodically group (cluster) the alarms.
 
-image::model_with_alarms_in_cluster.png[]
+image::model_with_alarms_in_cluster.png[Model example with cluster,600]
 
 Different clustering algorithms can be used:
 
@@ -44,7 +44,7 @@ When we determine that a group of alarms are related, we send an event to OpenNM
 OpenNMS will then create a new *situation* for the set of related alarms.
 Situations are also managed like alarms.
 
-image::model_with_situation.png[]
+image::model_with_situation.png[Model example with situation,600]
 
 We use Drools rules for managing the state of all alarms including situations:
 

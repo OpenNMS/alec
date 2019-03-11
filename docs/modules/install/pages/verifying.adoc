@@ -1,0 +1,16 @@
+= Verifying your install
+:imagesdir: ../assets/images
+
+Here we assume that you already have OCE deployed using either the monolithic or distributed deployments.
+
+== Syslog message handling
+
+Send a syslog message.
+
+Verify that an alarm get attached to the correct MO.
+
+View the graph.
+
+NOTE: To generate issue `oce:export-graph cluster /tmp/cluster.graph.xml` from the Karaf shell, and then import with `curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/oce`
+
+Trigger multiple syslog messages to create a situation.

@@ -1,0 +1,28 @@
+= Monilithic vs Distributed
+
+OCE can be installed in the OpenNMS JVM as an additional service (monolithic deployment) or externally on the Sentinel JVM (distributed deployment).
+
+If you are looking for something easy to setup to perform an evalualation or test with your existing environment, consider the xref:monolithic_install.adoc[monolithic deployment].
+
+If you are considering deploying OCE in a production environment and have load, scaling and resiliency requirements, consider the  xref:distributed_install.adoc[distributed deployment].
+
+== Monolithic Deployment
+
+=== Pros
+
+1. Easy to setup
+
+=== Cons / Limitations
+
+1. The OIA does not yet have interfaces that support retrieving topology information (i.e. links between nodes), so the graph will not reflect these.
+
+== Distributed Deployment
+
+=== Pros
+
+1. Take load off of the core JVM
+2. Fault tolerant setup (OCE runs in HA)
+
+=== Cons / Limitations
+
+1. Additional complexity (more components to manage)

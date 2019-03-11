@@ -1,3 +1,0 @@
-= Preconditions
-
-This is what you need to install OCE.

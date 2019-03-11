@@ -1,0 +1,6 @@
+= Distributed Install
+:imagesdir: ../assets/images
+
+This installation guide describes a distributed install where we run _OCE_ as a service on top of the _Sentinel_ runtime:
+
+image::distributed_deployment.png[Distributed,700]

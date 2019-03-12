@@ -12,18 +12,3 @@ The engine takes care of mapping the clusters to situations and forwards these b
 
 The cluster engine is a generic implemenation which is meant to be extended for use with different clustering algorithms.
 This engine handles all the details of interfacing with the datasource and managing state, allowing implementors to easily extend the engine with novel clustering techniques.
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-== Building the graph
-
-== Distance on the graph
-
-== Mapping cluster results to situations
->>>>>>> fdd8931... WIP.
-=======
->>>>>>> 90b3953... adsf
->>>>>>> 6f9473d... Moar docs.

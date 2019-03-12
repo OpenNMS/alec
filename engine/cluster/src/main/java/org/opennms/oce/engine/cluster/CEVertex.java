@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 public class CEVertex implements Vertex {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClusterEngine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractClusterEngine.class);
 
     private final long id;
     private final InventoryObject inventoryObject;
@@ -77,6 +77,14 @@ public class CEVertex implements Vertex {
     @Override
     public Collection<Alarm> getAlarms() {
         return alarmsById.values();
+    }
+
+    public int getNumAlarms() {
+        return alarmsById.size();
+    }
+
+    public boolean hasAlarms() {
+        return !alarmsById.isEmpty();
     }
 
     @Override

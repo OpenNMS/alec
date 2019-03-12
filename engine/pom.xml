@@ -13,6 +13,7 @@
     <modules>
         <module>api</module>
         <module>cluster</module>
+        <module>dbscan</module>
         <module>itest</module>
         <module>temporal</module>
         <module>topology</module>

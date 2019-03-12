@@ -91,6 +91,7 @@
                                 <feature>oce-datasource-shell</feature>
                                 <feature>oce-engine</feature>
                                 <feature>oce-engine-cluster</feature>
+                                <feature>oce-engine-dbscan</feature>
                                 <feature>oce-engine-temporal</feature>
                                 <feature>oce-engine-topology</feature>
                                 <!-- Depends on a reference to a datasource impl.

@@ -34,14 +34,12 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -54,7 +52,7 @@ import org.opennms.oce.driver.test.MockInventoryBuilder;
 import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.cluster.ClusterEngineFactory;
+import org.opennms.oce.engine.dbscan.DBScanEngineFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -67,7 +65,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new ClusterEngineFactory() }
+                { new DBScanEngineFactory() }
         });
     }
 

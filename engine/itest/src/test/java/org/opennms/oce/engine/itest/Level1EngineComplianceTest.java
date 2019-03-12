@@ -64,7 +64,7 @@ import org.opennms.oce.driver.test.MockInventoryType;
 import org.opennms.oce.driver.test.TestDriver;
 import org.opennms.oce.engine.api.Engine;
 import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.cluster.ClusterEngineFactory;
+import org.opennms.oce.engine.dbscan.DBScanEngineFactory;
 import org.opennms.oce.engine.temporal.TimeSliceEngineFactory;
 
 import com.google.common.collect.Sets;
@@ -78,7 +78,7 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new TimeSliceEngineFactory() }, { new ClusterEngineFactory() },
+                { new TimeSliceEngineFactory() }, { new DBScanEngineFactory() },
                 // { new TopologyEngineFactory() }
         });
     }

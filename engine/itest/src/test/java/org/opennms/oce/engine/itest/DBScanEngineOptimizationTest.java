@@ -59,8 +59,8 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.jaxb.JaxbUtils;
 import org.opennms.oce.driver.test.TestDriver;
-import org.opennms.oce.engine.cluster.ClusterEngine;
-import org.opennms.oce.engine.cluster.ClusterEngineFactory;
+import org.opennms.oce.engine.dbscan.DBScanEngine;
+import org.opennms.oce.engine.dbscan.DBScanEngineFactory;
 import org.opennms.oce.features.score.api.ScoreMetric;
 import org.opennms.oce.features.score.api.ScoreReport;
 import org.opennms.oce.features.score.api.ScoringStrategy;
@@ -71,10 +71,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 @Ignore("Needs local data")
-public class ClusterEngineOptimizationTest {
+public class DBScanEngineOptimizationTest {
 
     // Min @ epsilon: 2831.72, hopWeight: 16.85, timeWeight: 0.69, score: 34.93 -- new double[]{2831.71849627, 16.84762927, 0.69470697};
-    private static final double[] BEST_PARAMS = new double[]{ClusterEngine.DEFAULT_ALPHA, ClusterEngine.DEFAULT_BETA};
+    private static final double[] BEST_PARAMS = new double[]{DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA};
 
     double[] currentParms = BEST_PARAMS;
     double[] bestParams = currentParms;
@@ -155,7 +155,7 @@ public class ClusterEngineOptimizationTest {
 
         @Override
         public double value(double[] point) {
-            ClusterEngineFactory factory = new ClusterEngineFactory();
+            DBScanEngineFactory factory = new DBScanEngineFactory();
             factory.setAlpha(point[0]);
             factory.setBeta(point[1]);
 

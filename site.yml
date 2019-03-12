@@ -11,6 +11,10 @@ content:
 ui:
   bundle:
     url: https://github.com/opennms-forge/antora-ui-opennms/releases/download/v1.0.0/ui-bundle.zip
+  supplemental_files: supplemental-ui
+asciidoc:
+  attributes:
+    stem: latexmath
 output: 
   clean: true 
   dir: ./public 

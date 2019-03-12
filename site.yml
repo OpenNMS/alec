@@ -4,7 +4,7 @@ site:
   start_page: oce::index.adoc
 content: 
   sources: 
-  - url: .
+  - url: https://github.com/OpenNMS/oce.git
     branches: HEAD
     tags: v*
     start_path: docs

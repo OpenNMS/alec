@@ -17,7 +17,7 @@ In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this g
 
 == Common Setup
 
-Start by following the instructions in the link:common_install.adoc[common install] section if you have not already done so.
+Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
 
 When installing the package repository, ensure that this is done on all of the system that are running _Sentinel_ and/or _OpenNMS_.
 

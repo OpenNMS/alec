@@ -19,6 +19,7 @@ When given a `ifIndex` it will be used as-is.
 
 When given a `ifDescr` we will attempt to lookup the assocated `ifIndex` with the matching `ifDescr` or `ifName` on th enode.
 
+[[snmp-interface-link]]
 === SNMP Interface Link (snmp-interface-link)
 
 Requires the `aIfDescr`, `zIfDescr` and `zHostname` parameters to be set.

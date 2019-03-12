@@ -7,7 +7,7 @@ image::monolithic_deployment.png[Monolithic,400]
 
 == Common Setup
 
-Start by following the instructions in the link:common_install.adoc[common install] section if you have not already done so.
+Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
 
 == Install OCE
 

@@ -14,5 +14,9 @@
 * xref:architecture:overview.adoc[Overview]
 * xref:architecture:opennms_integration.adoc[OpenNMS Integration]
 
+.Engines
+* xref:engines:cluster.adoc[Cluster Engine]
+* xref:engines:dbscan.adoc[DBSCAN Engine]
+
 .Reference
 * xref:reference:model.adoc[Model]

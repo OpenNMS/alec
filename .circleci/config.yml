@@ -70,6 +70,7 @@ workflows:
             branches:
               only:
                 - master
+                - features/yank-rpms
       - deploy-packages:
           requires:
             - smoke-test
@@ -81,6 +82,7 @@ workflows:
             branches:
               only:
                 - master
+                - features/yank-rpms
       - deploy-docs:
           requires:
             - build-docs
@@ -304,7 +306,7 @@ jobs:
         - run:
             name: Push RPM packages
             command: |
-              source env/package-cloud
+              source .circleci/env/package_cloud
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
   
@@ -321,8 +323,11 @@ jobs:
   yank-snapshot-packages:
     executor: build-executor
     steps:
+      - attach_workspace:
+          at: ~/
       - run:
           name: Yank SNAPSHOT packages
           command: |
-            source env/package-cloud
-            scripts/package-cloud-yank-snapshots.sh
+            source .circleci/env/package_cloud
+            .circleci/scripts/package-cloud-yank-snapshots.sh
+

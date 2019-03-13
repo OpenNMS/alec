@@ -22,6 +22,8 @@ where:
 * stem:[a_{1}] and stem:[a_{2}] are the points representing the alarms
 * stem:[\alpha \in (0, \infty)] is a scaling constant (directly related to stem:[\epsilon])
 * stem:[\beta \in [0,1]] is a weighting constant
+** When \beta is closer to 0, more weight is given to the temporal component
+** When \beta is closer to 1, more weight is given to the spatital component
 * stem:[t(a_{k})] returns the time (timestamp in seconds) of the last occurence of the given alarm
 * stem:[dg(a_{i}, a_{j})] returns the normalized distance on the shortest path between the vertices for stem:[a_{i}] and stem:[a_{k}]
 ** If both alarms are on the same vertex, then the distance is 0

@@ -67,10 +67,10 @@ The xref:reference:model.adoc#snmp-interface-link[Model reference] shows that th
  2. zIfDescr
  3. zHostname
 
-Refering to the syslog match definition above, we can see that we extract all of these tokens from the syslog message and convert them to event parameters.
+Referring to the syslog match definition above, we can see that we extract all of these tokens from the syslog message and convert them to event parameters.
 When the alarm is created, the link:https://github.com/OpenNMS/oce/blob/4e5ae2cd6271541421c3af1b4b4aafd49ace9df3/integrations/opennms/extension/src/main/java/org/opennms/oce/opennms/extension/ManagedObjectAlarmExt.java[ManagedObjectAlarmExt] extension gets triggered, and will go through the process of resolving and canonicalizing the managed object.
 
-In this case we search for a node with the same label as given in the `zHostname` attribute, and attempt to the ifIndex for SNMP interfaces with the given ifDescrs.
+In this case, we search for a node with the same label as given in the `zHostname` attribute, and attempt to the ifIndex for SNMP interfaces with the given ifDescrs.
 We then update the managed object instance on the alarm to include the resolved attributes.
 When we need to store multiple attributes in managed object instance field we encode these in JSON so that they can be represented as a single string.
 
@@ -81,13 +81,13 @@ When the alarm is received by OCE, it now contains sufficient information in the
 [[direct_datasource]]
 === Direct Datasource
 
-The direct datasource integrates with OpenNMS using the APIs provided by the link:https://github.com/OpenNMS/opennms-integration-api[OIA].
+The direct data source integrates with OpenNMS using the APIs provided by the link:https://github.com/OpenNMS/opennms-integration-api[OIA].
 
 
 [[kafka_datasource]]
 === Kafka Datasource
 
-The Kafka datasource integrates with OpenNMS by leveraging the Kafka Producer and Kafka Event Consumer features.
+The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer and Kafka Event Consumer features.
 
 The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
 The Kafka Datasource consumes from these topics and provides OCE with a feed of alarms and inventory.

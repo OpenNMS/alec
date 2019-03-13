@@ -15,9 +15,9 @@ There are no parameters required aside from the alarm being associated to a node
 
 Requires the `ifIndex` or `ifDescr` parameters to be set.
 
-When given a `ifIndex` it will be used as-is.
+When given an `ifIndex` it will be used as-is.
 
-When given a `ifDescr` we will attempt to lookup the assocated `ifIndex` with the matching `ifDescr` or `ifName` on th enode.
+When given an `ifDescr` we will attempt to lookup the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
 
 [[snmp-interface-link]]
 === SNMP Interface Link (snmp-interface-link)

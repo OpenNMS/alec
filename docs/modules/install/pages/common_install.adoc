@@ -35,10 +35,10 @@ config:property-set elasticUrl http://elastic:9200
 config:update
 ```
 
-TIP: Update the URL accordingly to point to your Elastiscearch instance.
+TIP: Update the URL accordingly to point to your Elasticsearch instance.
 
 
-We can now run the healh check again, and expect to seem output like:
+We can now run the health check again, and expect to see output like:
 ```
 admin@opennms> health:check
 Verifying the health of the container
@@ -63,7 +63,7 @@ config:property-set elasticUrl http://elastic:9200
 config:update
 ```
 
-TIP: Update the URL accordingly to point to your Elastiscearch instance.
+TIP: Update the URL accordingly to point to your Elasticsearch instance.
 
 And install the feature using:
 ```

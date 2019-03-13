@@ -17,7 +17,7 @@ $OPENNMS_HOME/bin/provision.pl requisition import oce
 
 IMPORTANT: We assume that the localhost is running an SNMP agent.
 
-Now, let's the the `ifDescr` for an interface on the node we just provisioned.
+Now, let's set the `ifDescr` for an interface on the node we just provisioned.
 ```
 export IFDESCR="eth0"
 ```
@@ -38,15 +38,15 @@ We can now trigger a second alarm against this same interface using:
 echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %PKT_INFRA-LINEPROTO-5-UPDOWN: Line protocol on Interface $IFDESCR, changed state to Down" | nc -v -u 127.0.0.1 10514
 ```
 
-If both of these alarms are triggered together in a small enough window of time (within 1 minute for the purposes of this example), a situation should be automaticall created:
+If both of these alarms are triggered together in a small enough window of time (within 1 minute for the purposes of this example), a situation should be automatically created:
 
 image::verify_situation_example.png[Situation,600]
 
-Congragulations you have correlated your first two alarms!
+Congratulations you have correlated your first two alarms!
 
 == Viewing the OCE graph
 
-At any point in time you can export the OCE graph to view the inventory and alarms in context.
+At any point in time, you can export the OCE graph to view the inventory and alarms in context.
 
 We can export the OCE graph from a Karaf shell using:
 ```

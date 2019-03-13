@@ -24,7 +24,7 @@ The alarms are attached to the graph when they are triggered.
 image::model_with_alarms.png[Model example with alarms,600]
 
 In OpenNMS, we can now populate the managed object (MO) type and MO instance of an alarm when it is created.
-These fields are used (and required) to the relate the alarm to a specific IO on the graph.
+These fields are used (and required) to relate the alarm to a specific IO on the graph.
 
 === We group alarms on the graph into clusters
 
@@ -40,7 +40,7 @@ Different clustering algorithms can be used:
 
 === We create situations for related alarms
 
-When we determine that a group of alarms are related, we send an event to OpenNMS.
+When we determine that a group of alarms is related, we send an event to OpenNMS.
 OpenNMS will then create a new *situation* for the set of related alarms.
 Situations are also managed like alarms.
 

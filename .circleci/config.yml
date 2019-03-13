@@ -63,9 +63,18 @@ workflows:
             branches:
               only:
                 - master
+      - yank-snapshot-packages:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
       - deploy-packages:
           requires:
             - smoke-test
+            - build
+            - yank-snapshot-packages
           filters:
             tags:
               only: /^v.*/
@@ -295,8 +304,9 @@ jobs:
         - run:
             name: Push RPM packages
             command: |
-              package_cloud push opennms/plugin-snapshot/el/7 assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-              package_cloud push opennms/plugin-snapshot/el/7 assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
+              source env/package-cloud
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
   
   deploy-docs:
     executor: netlify-cli-executor
@@ -307,3 +317,12 @@ jobs:
           name: Deploy docs to Netlify
           command: |
             netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}
+
+  yank-snapshot-packages:
+    executor: build-executor
+    steps:
+      - run:
+          name: Yank SNAPSHOT packages
+          command: |
+            source env/package-cloud
+            scripts/package-cloud-yank-snapshots.sh

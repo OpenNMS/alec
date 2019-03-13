@@ -90,5 +90,22 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.opennms.oce.driver</groupId>
+            <artifactId>org.opennms.oce.driver.test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

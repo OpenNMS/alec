@@ -35,7 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +48,8 @@ import javax.xml.bind.Unmarshaller;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
+import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
@@ -82,10 +83,15 @@ public class JaxbUtils {
                 .setInventoryObjectType(alarm.getInventoryObjectType())
                 .setInventoryObjectId(alarm.getInventoryObjectId())
                 .setSeverity(toSeverity(event.getSeverity()))
+                .setSummary(event.getSummary())
+                .setDescription(event.getDescription())
                 .build();
     }
 
     public static Severity toSeverity(org.opennms.oce.datasource.v1.schema.Severity severity) {
+        if (severity == null) {
+            return null;
+        }
         switch (severity) {
             case CRITICAL:
                 return Severity.CRITICAL;
@@ -103,9 +109,33 @@ public class JaxbUtils {
         return Severity.INDETERMINATE;
     }
 
+    private static org.opennms.oce.datasource.v1.schema.Severity toSeverity(Severity severity) {
+        if (severity == null) {
+            return null;
+        }
+        switch (severity) {
+            case CRITICAL:
+                return org.opennms.oce.datasource.v1.schema.Severity.CRITICAL;
+            case MAJOR:
+                return org.opennms.oce.datasource.v1.schema.Severity.MAJOR;
+            case MINOR:
+                return org.opennms.oce.datasource.v1.schema.Severity.MINOR;
+            case WARNING:
+                return org.opennms.oce.datasource.v1.schema.Severity.WARNING;
+            case NORMAL:
+                return org.opennms.oce.datasource.v1.schema.Severity.NORMAL;
+            case CLEARED:
+                return org.opennms.oce.datasource.v1.schema.Severity.CLEARED;
+        }
+        return org.opennms.oce.datasource.v1.schema.Severity.INDETERMINATE;
+    }
+
+
     public static org.opennms.oce.datasource.v1.schema.Situation toModelSituation(Situation situation) {
         org.opennms.oce.datasource.v1.schema.Situation modelSituation = new org.opennms.oce.datasource.v1.schema.Situation();
         modelSituation.setId(situation.getId());
+        modelSituation.setSeverity(toSeverity(situation.getSeverity()));
+        modelSituation.setCreationTime(situation.getCreationTime());
         for (Alarm a : situation.getAlarms()) {
             AlarmRef alarmRef = new AlarmRef();
             alarmRef.setId(a.getId());
@@ -119,6 +149,7 @@ public class JaxbUtils {
         return ImmutableSituation.newBuilder()
                 .setId(situation.getId())
                 .setCreationTime(situation.getCreationTime())
+                .setSeverity(toSeverity(situation.getSeverity()))
                 .setAlarms(situation.getAlarmRef()
                         .stream()
                         .map(alarmRef -> ImmutableAlarm.newBuilder()
@@ -199,6 +230,10 @@ public class JaxbUtils {
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         Inventory inventory = (Inventory) unmarshaller.unmarshal(is);
 
+        return toInventoryObjects(inventory);
+    }
+
+    public static List<InventoryObject> toInventoryObjects(Inventory inventory) {
         final List<InventoryObject> ios = new ArrayList<>();
         for (ModelObjectEntry modelObjectEntry : inventory.getModelObjectEntry()) {
             final InventoryObject io = toInventoryObject(modelObjectEntry);
@@ -255,6 +290,45 @@ public class JaxbUtils {
         return ioBuilder.build();
     }
 
+    public static Inventory toInventory(List<InventoryObject> ios) {
+        final Inventory inventory = new Inventory();
+
+        for (InventoryObject io : ios) {
+            ModelObjectEntry moe = new ModelObjectEntry();
+            moe.setId(io.getId());
+            moe.setType(io.getType());
+            moe.setParentId(io.getParentId());
+            moe.setParentType(io.getParentType());
+            moe.setFriendlyName(io.getFriendlyName());
+            moe.setWeightToParent(io.getWeightToParent());
+            for (InventoryObjectPeerRef peerRef : io.getPeers()) {
+                moe.getPeerRef().add(toPeerRef(peerRef));
+            }
+            for (InventoryObjectRelativeRef relativeRef : io.getRelatives()) {
+                moe.getRelativeRef().add(toRelativeRef(relativeRef));
+            }
+            inventory.getModelObjectEntry().add(moe);
+        }
+        return inventory;
+    }
+
+    private static PeerRef toPeerRef(InventoryObjectPeerRef ioPeerRef) {
+        final PeerRef peerRef = new PeerRef();
+        peerRef.setId(ioPeerRef.getId());
+        peerRef.setType(ioPeerRef.getType());
+        peerRef.setWeight(ioPeerRef.getWeight());
+        peerRef.setEndpoint(ioPeerRef.getEndpoint().name());
+        return peerRef;
+    }
+
+    private static RelativeRef toRelativeRef(InventoryObjectRelativeRef ioRelativeRef) {
+        final RelativeRef relativeRef = new RelativeRef();
+        relativeRef.setId(ioRelativeRef.getId());
+        relativeRef.setType(ioRelativeRef.getType());
+        relativeRef.setWeight(ioRelativeRef.getWeight());
+        return relativeRef;
+    }
+
     public static List<org.opennms.oce.datasource.v1.schema.Alarm> getRawAlarms(Path path) throws JAXBException, IOException {
         try (InputStream is = Files.newInputStream(path)) {
             JAXBContext jaxbContext;
@@ -281,5 +355,48 @@ public class JaxbUtils {
         }
     }
 
+    public static Alarms toAlarms(List<Alarm> apiAlarms) {
+        final Alarms alarms = new Alarms();
+        for (Alarm apiAlarm : apiAlarms) {
+            org.opennms.oce.datasource.v1.schema.Alarm alarm = new  org.opennms.oce.datasource.v1.schema.Alarm();
+            alarm.setId(apiAlarm.getId());
+            alarm.setSummary(apiAlarm.getSummary());
+            alarm.setDescription(apiAlarm.getDescription());
+            alarm.setInventoryObjectId(apiAlarm.getInventoryObjectId());
+            alarm.setInventoryObjectType(apiAlarm.getInventoryObjectType());
+            alarm.setLastSeverity(toSeverity(apiAlarm.getSeverity()));
+            alarm.setFirstEventTime(apiAlarm.getTime());
+            alarm.setLastEventTime(apiAlarm.getTime());
 
+            // Add a single "event" to the alarm
+            org.opennms.oce.datasource.v1.schema.Event event = new org.opennms.oce.datasource.v1.schema.Event();
+            event.setId(apiAlarm.getId());
+            event.setSummary(apiAlarm.getSummary());
+            event.setDescription(apiAlarm.getDescription());
+            event.setSeverity(toSeverity(apiAlarm.getSeverity()));
+            event.setTime(apiAlarm.getTime());
+            alarm.getEvent().add(event);
+
+            // Add it to the list
+            alarms.getAlarm().add(alarm);
+        }
+        return alarms;
+    }
+
+    public static Situations toSituations(List<Situation> apiSituations) {
+        final Situations situations = new Situations();
+        for (Situation apiSituation : apiSituations) {
+            situations.getSituation().add(toModelSituation(apiSituation));
+        }
+        return situations;
+    }
+
+    public static void write(Object o, Path targetFile) throws IOException, JAXBException {
+        try (OutputStream os = Files.newOutputStream(targetFile)) {
+            JAXBContext jaxbContext = JAXBContext.newInstance(o.getClass());
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(o, os);
+        }
+    }
 }

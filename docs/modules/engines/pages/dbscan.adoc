@@ -1,7 +1,7 @@
 = DBSCAN Engine
 :imagesdir: ../assets/images
 
-The DSCAN engine builds on top of the link:cluster.adoc[Cluster Engine] and builds clusters using the link:https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm].
+The DSCAN engine builds on top of the xref:engines:cluster#_overview[Cluster Engine] and builds clusters using the link:https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm].
 
 == DBSCAN
 

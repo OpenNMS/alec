@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Include settings for package cloud environment
+source .circleci/env/package_cloud
+
 if ! CURL_CMD="$(type -p curl)"; then
   echo "The command line tool curl is required and does not exist."
   echo "You can install it with apt-get -y install curl"

@@ -3,7 +3,7 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.0-b4
+      - image: opennms/build-env:1.0-b5
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -328,6 +328,5 @@ jobs:
       - run:
           name: Yank SNAPSHOT packages
           command: |
-            source .circleci/env/package_cloud
             .circleci/scripts/package-cloud-yank-snapshots.sh
 

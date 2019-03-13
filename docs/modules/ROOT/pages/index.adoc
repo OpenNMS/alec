@@ -1,4 +1,4 @@
-= Welcome to the _OpenNMS Correlation Engine_ documenation
+= Welcome to the _OpenNMS Correlation Engine_ documentation
 :page-layout: home
 :!sectids:
 

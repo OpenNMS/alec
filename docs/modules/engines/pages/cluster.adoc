@@ -3,12 +3,12 @@
 
 == Overview
 
-The cluster engine builds an in-memory graph that contains the inventory provided by the datasource.
+The cluster engine builds an in-memory graph that contains the inventory provided by the data source.
 Inventory objects are added to the graph as vertices and relationships among these objects are added as edges.
 Alarms are then attached to the vertex for the inventory object they reference.
 
 On every tick (which defaults to a 30 second interval), we run a clustering algorithm against all of the alarms on the graph which outputs a list of clusters of alarms.
-The engine takes care of mapping the clusters to situations and forwards these back to the datasource.
+The engine takes care of mapping the clusters to situations and forwards these back to the data source.
 
-The cluster engine is a generic implemenation which is meant to be extended for use with different clustering algorithms.
-This engine handles all the details of interfacing with the datasource and managing state, allowing implementors to easily extend the engine with novel clustering techniques.
+The cluster engine is a generic implementation which is meant to be extended for use with different clustering algorithms.
+This engine handles all the details of interfacing with the data source and managing state, allowing implementors to easily extend the engine with novel clustering techniques.

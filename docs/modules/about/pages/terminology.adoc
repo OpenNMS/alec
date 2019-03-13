@@ -9,4 +9,4 @@ Situations should only be created if there are two or more alarms in the tree, o
 
 An *inventory object* (IO) is some abstract element to which alarms are related.
 Alarms can be related to no, or one inventory objects.
-Inventory objects are have relations to other inventory objects.
+Inventory objects have relations to other inventory objects.

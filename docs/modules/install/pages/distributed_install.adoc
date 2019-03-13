@@ -8,7 +8,7 @@ image::distributed_deployment.png[Distributed,700]
 [[prequisites]]
 == Prequisites
 
-In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this guide assume you have:
+In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this guide assumes you have:
 
 1. A Kafka broker (or cluster) running Kafka 0.11.x or greater.
 2. One or more Minions are already active in the system
@@ -19,7 +19,7 @@ In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this g
 
 Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
 
-When installing the package repository, ensure that this is done on all of the system that are running _Sentinel_ and/or _OpenNMS_.
+When installing the package repository, ensure that this is done on all of the systems that are running _Sentinel_ and/or _OpenNMS_.
 
 == OpenNMS Configuration
 
@@ -100,6 +100,6 @@ admin@opennms> oce:list-graphs
 cluster: 0 situations on 524 vertices and 4 edges.
 ```
 
-It's okay of there are no situations, vertices or edges on the graph at this point.
+It's okay if there are no situations, vertices or edges on the graph at this point.
 
 Continue to xref:verifying.adoc[Verifying your install] for more details.

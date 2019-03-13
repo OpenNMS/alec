@@ -29,7 +29,7 @@ where:
 ** If both alarms are on the same vertex, then the distance is 0
 ** If there is no path between both alarms, then the distance is stem:[\infty]
 
-In simpler terms, we can think of the distance function as taking a weighted combination of both the distance in time and the in space.
+In simpler terms, we can think of the distance function as taking a weighted combination of both the distance in time and in space.
 
 === Defaults
 

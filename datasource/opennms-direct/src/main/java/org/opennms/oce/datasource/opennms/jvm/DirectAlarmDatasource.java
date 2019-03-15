@@ -190,6 +190,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         rwLock.readLock().lock();
         try {
             return alarmsById.values().stream()
+                    .filter(a -> !a.isSituation())
                     .map(Mappers::toAlarm)
                     .collect(Collectors.toList());
         } finally {

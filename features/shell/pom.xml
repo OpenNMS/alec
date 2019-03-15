@@ -51,11 +51,5 @@
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <version>${karaf.version}</version>
         </dependency>
-        
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

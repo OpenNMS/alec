@@ -157,6 +157,9 @@ public class InventoryFactory {
      * @return the node criteria string
      */
     protected static String toNodeCriteria(Node node) {
+        if (node == null) {
+            return null;
+        }
         return toNodeCriteria(node.getForeignSource(), node.getForeignId(), node.getId());
     }
 

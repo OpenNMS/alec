@@ -44,7 +44,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.opennms.oce.datasource.api.Alarm;
@@ -148,8 +147,8 @@ public class TFClusterer {
         // Split the graph into disconnected sub-graphs - this has complexity O(|V| + |E|)
         final Set<Set<CEVertex>> subgraphs = weakComponentClusterer.apply(g);
 
-        final BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<>();
-        final BlockingQueue<RelatesTo> relationQueue = new LinkedBlockingQueue<>();
+        final BlockingQueue<TFClustererTasks.Task> taskQueue = new LinkedBlockingQueue<>();
+        final BlockingQueue<TFClustererTasks.RelatesTo> relationQueue = new LinkedBlockingQueue<>();
 
         final AtomicBoolean doneSubmittingTasks = new AtomicBoolean(false);
 
@@ -157,68 +156,11 @@ public class TFClusterer {
         List<CompletableFuture<Void>> tfProcessingFutures = new LinkedList<>();
         for (int k = 0; k < numTfThreads; k++) {
             tfProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
-                LOG.trace("TF Processing thread started.");
-                while (!doneSubmittingTasks.get() || !taskQueue.isEmpty()) {
-                    try {
-                        // If the timeout is any higher, simulations take a while...
-                        final Task task = taskQueue.poll(50, TimeUnit.MILLISECONDS);
-                        if (task == null) {
-                            continue;
-                        }
-
-                        LOG.trace("Processing task: {}", task);
-                        final AtomicLong numIsRelatedCalls = new AtomicLong(0);
-                        task.visit(new TaskVisitor() {
-                            @Override
-                            public void pairAlarmsOnVertex(PairAlarmsOnVertex task) {
-                                // Match all of the alarms on the vertex
-                                // there are N (N -1) / 2 total combinations to check - where N is the number of alarms -> O(n^2)
-                                final CEVertex vertex = task.getVertex();
-                                final List<Alarm> alarms = new ArrayList<>(task.getVertex().getAlarms());
-                                for (int i = 0; i < alarms.size(); i++) {
-                                    final Alarm a1 = alarms.get(i);
-                                    final AlarmInSpaceTime a1st = new AlarmInSpaceTime(vertex, a1);
-                                    for (int j = i + 1; j < alarms.size(); j++) {
-                                        final Alarm a2 = alarms.get(j);
-                                        final AlarmInSpaceTime a2st = new AlarmInSpaceTime(vertex, a2);
-                                        final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
-                                        if (tfModel.isRelated(relatedVector)) {
-                                            relationQueue.add(new RelatesTo(a1st, a2st, relatedVector));
-                                        }
-                                        numIsRelatedCalls.incrementAndGet();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void pairAlarmsOnVertices(PairAlarmsOnVertices pairAlarmsOnVertices) {
-                                // Compare all the alarms on v1 to all of the alarms on v2
-                                final CEVertex v1 = pairAlarmsOnVertices.getV1();
-                                final CEVertex v2 = pairAlarmsOnVertices.getV2();
-
-                                for (Alarm a1 : v1.getAlarms()) {
-                                    final AlarmInSpaceTime a1st = new AlarmInSpaceTime(v1, a1);
-
-                                    for (Alarm a2 : v2.getAlarms()) {
-                                        final AlarmInSpaceTime a2st = new AlarmInSpaceTime(v2, a2);
-                                        final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
-                                        if (tfModel.isRelated(relatedVector)) {
-                                            relationQueue.add(new RelatesTo(a1st, a2st, relatedVector));
-                                        }
-                                        numIsRelatedCalls.incrementAndGet();
-                                    }
-                                }
-                            }
-                        });
-                        LOG.trace("Done processing task. {} related calls total.", numIsRelatedCalls);
-                    } catch (InterruptedException e) {
-                        LOG.info("Interrupted while waiting for the next task. Exiting thread.");
+                        processTfTasks(taskQueue, relationQueue, doneSubmittingTasks);
+                        // The task processer will return when we're done submitting tasks
+                        // and the queue is empty
                         return null;
-                    }
-                }
-                LOG.trace("TF Processing thread finished.");
-                return null;
-            }));
+                    }));
         }
 
         List<CompletableFuture<Void>> subgraphProcessingFutures = new LinkedList<>();
@@ -231,25 +173,7 @@ public class TFClusterer {
             }
 
             subgraphProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
-                LOG.trace("Graph Processing thread started.");
-                // Compute the distance between all of the vertices with alarms in this subgraph
-                final List<CEVertex> verticesInSubgraphWithAlarms = new ArrayList<>(verticesInSubgraphWithAlarmsAsSet);
-                for (int i = 0; i < verticesInSubgraphWithAlarms.size(); i++) {
-                    final CEVertex v1 = verticesInSubgraphWithAlarms.get(i);
-                    if (v1.getNumAlarms() > 1) {
-                        taskQueue.add(new PairAlarmsOnVertex(v1));
-                    }
-
-                    for (int j = i + 1; j < verticesInSubgraphWithAlarms.size(); j++) {
-                        final CEVertex v2 = verticesInSubgraphWithAlarms.get(j);
-                        final double distance = vectorizer.distanceOnGraph(v1, v2);
-                        if (distance <= epsilon) {
-                            // We want to try and pair alarms on v1 with alarms on v2
-                            taskQueue.add(new PairAlarmsOnVertices(v1, v2, distance));
-                        }
-                    }
-                }
-                LOG.trace("Graph Processing thread finished.");
+                processSubgraph(verticesInSubgraphWithAlarmsAsSet, taskQueue);
                 return null;
             }, graphExecutor));
         }
@@ -273,7 +197,7 @@ public class TFClusterer {
                 || !relationsProcessed.isDone()
                 || !relationQueue.isEmpty()) {
             try {
-                final RelatesTo relatesTo = relationQueue.poll(20, TimeUnit.MILLISECONDS);
+                final TFClustererTasks.RelatesTo relatesTo = relationQueue.poll(20, TimeUnit.MILLISECONDS);
                 if (relatesTo == null) {
                     continue;
                 }
@@ -333,84 +257,107 @@ public class TFClusterer {
         return clusters;
     }
 
-    private interface TaskVisitor {
-        void pairAlarmsOnVertex(PairAlarmsOnVertex task);
+    private void processSubgraph(Set<CEVertex> verticesInSubgraphWithAlarmsAsSet, BlockingQueue<TFClustererTasks.Task> taskQueue) {
+        LOG.trace("Graph Processing thread started.");
+        // Compute the distance between all of the vertices with alarms in this subgraph
+        final List<CEVertex> verticesInSubgraphWithAlarms = new ArrayList<>(verticesInSubgraphWithAlarmsAsSet);
+        for (int i = 0; i < verticesInSubgraphWithAlarms.size(); i++) {
+            final CEVertex v1 = verticesInSubgraphWithAlarms.get(i);
+            if (v1.getNumAlarms() > 1) {
+                taskQueue.add(new TFClustererTasks.PairAlarmsOnVertex(v1));
+            }
 
-        void pairAlarmsOnVertices(PairAlarmsOnVertices pairAlarmsOnVertices);
+            for (int j = i + 1; j < verticesInSubgraphWithAlarms.size(); j++) {
+                final CEVertex v2 = verticesInSubgraphWithAlarms.get(j);
+                final double distance = vectorizer.distanceOnGraph(v1, v2);
+                if (distance <= epsilon) {
+                    // We want to try and pair alarms on v1 with alarms on v2
+                    taskQueue.add(new TFClustererTasks.PairAlarmsOnVertices(v1, v2, distance));
+                }
+            }
+        }
+        LOG.trace("Graph Processing thread finished.");
     }
 
-    private interface Task {
+    private void processTfTasks(BlockingQueue<TFClustererTasks.Task> taskQueue, BlockingQueue<TFClustererTasks.RelatesTo> relationQueue, AtomicBoolean doneSubmittingTasks) {
+        LOG.trace("TF Processing thread started.");
+        while (!doneSubmittingTasks.get() || !taskQueue.isEmpty()) {
+            try {
+                // If the timeout is any higher, simulations take a while...
+                final TFClustererTasks.Task task = taskQueue.poll(50, TimeUnit.MILLISECONDS);
+                if (task == null) {
+                    continue;
+                }
 
-        void visit(TaskVisitor visitor);
+                LOG.trace("Processing task: {}", task);
+                final TFTaskVisitor visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
+                task.visit(visitor);
+                LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
+            } catch (InterruptedException e) {
+                LOG.info("Interrupted while waiting for the next task. Exiting thread.");
+                return;
+            }
+        }
+        LOG.trace("TF Processing thread finished.");
     }
 
-    private static class PairAlarmsOnVertex implements Task {
-        private final CEVertex v;
+    private static class TFTaskVisitor implements TFClustererTasks.TaskVisitor {
 
-        public PairAlarmsOnVertex(CEVertex v) {
-            this.v = Objects.requireNonNull(v);
+        private final TFModel tfModel;
+        private final Vectorizer vectorizer;
+        private final BlockingQueue<TFClustererTasks.RelatesTo> relationQueue;
+
+        private long numIsRelatedCalls = 0;
+
+        public TFTaskVisitor(TFModel tfModel, Vectorizer vectorizer, BlockingQueue<TFClustererTasks.RelatesTo> relationQueue) {
+            this.tfModel = tfModel;
+            this.vectorizer = vectorizer;
+            this.relationQueue = relationQueue;
         }
 
         @Override
-        public void visit(TaskVisitor visitor) {
-            visitor.pairAlarmsOnVertex(this);
-        }
-
-        public CEVertex getVertex() {
-            return v;
-        }
-    }
-
-    private static class PairAlarmsOnVertices implements Task {
-        private final CEVertex v1;
-        private final CEVertex v2;
-        private final double distance;
-
-        public PairAlarmsOnVertices(CEVertex v1, CEVertex v2, double distance) {
-            this.v1 = v1;
-            this.v2 = v2;
-            this.distance = distance;
+        public void pairAlarmsOnVertex(TFClustererTasks.PairAlarmsOnVertex task) {
+            // Match all of the alarms on the vertex
+            // there are N (N -1) / 2 total combinations to check - where N is the number of alarms -> O(n^2)
+            final CEVertex vertex = task.getVertex();
+            final List<Alarm> alarms = new ArrayList<>(task.getVertex().getAlarms());
+            for (int i = 0; i < alarms.size(); i++) {
+                final Alarm a1 = alarms.get(i);
+                final AlarmInSpaceTime a1st = new AlarmInSpaceTime(vertex, a1);
+                for (int j = i + 1; j < alarms.size(); j++) {
+                    final Alarm a2 = alarms.get(j);
+                    final AlarmInSpaceTime a2st = new AlarmInSpaceTime(vertex, a2);
+                    final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
+                    if (tfModel.isRelated(relatedVector)) {
+                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, relatedVector));
+                    }
+                    numIsRelatedCalls++;
+                }
+            }
         }
 
         @Override
-        public void visit(TaskVisitor visitor) {
-            visitor.pairAlarmsOnVertices(this);
+        public void pairAlarmsOnVertices(TFClustererTasks.PairAlarmsOnVertices pairAlarmsOnVertices) {
+            // Compare all the alarms on v1 to all of the alarms on v2
+            final CEVertex v1 = pairAlarmsOnVertices.getV1();
+            final CEVertex v2 = pairAlarmsOnVertices.getV2();
+
+            for (Alarm a1 : v1.getAlarms()) {
+                final AlarmInSpaceTime a1st = new AlarmInSpaceTime(v1, a1);
+
+                for (Alarm a2 : v2.getAlarms()) {
+                    final AlarmInSpaceTime a2st = new AlarmInSpaceTime(v2, a2);
+                    final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
+                    if (tfModel.isRelated(relatedVector)) {
+                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, relatedVector));
+                    }
+                    numIsRelatedCalls++;
+                }
+            }
         }
 
-        public CEVertex getV1() {
-            return v1;
-        }
-
-        public CEVertex getV2() {
-            return v2;
-        }
-
-        public double getDistance() {
-            return distance;
-        }
-    }
-
-    private static class RelatesTo {
-        private final AlarmInSpaceTime a1;
-        private final AlarmInSpaceTime a2;
-        private final RelatedVector vector;
-
-        public RelatesTo(AlarmInSpaceTime a1, AlarmInSpaceTime a2, RelatedVector vector) {
-            this.a1 = a1;
-            this.a2 = a2;
-            this.vector = vector;
-        }
-
-        public AlarmInSpaceTime getA1() {
-            return a1;
-        }
-
-        public AlarmInSpaceTime getA2() {
-            return a2;
-        }
-
-        public RelatedVector getVector() {
-            return vector;
+        public long getNumIsRelatedCalls() {
+            return numIsRelatedCalls;
         }
     }
 

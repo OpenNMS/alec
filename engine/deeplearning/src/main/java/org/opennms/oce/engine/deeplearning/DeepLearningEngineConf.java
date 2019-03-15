@@ -36,12 +36,12 @@ import java.util.Objects;
 public class DeepLearningEngineConf {
     private static final int DEFAULT_NUM_GRAPH_THREADS = 2;
     private static final int DEFAULT_NUM_TF_THREADS = Math.max(Runtime.getRuntime().availableProcessors() - 3, 1);
-    private static final double EPSILON = 500;
+    private static final double DEFAULT_EPSILON = 500;
 
     private String modelPath;
-    private Double epsilon;
-    private Integer numGraphProcessingThreads;
-    private Integer numTensorFlowProcessingThreads;
+    private double epsilon = DEFAULT_EPSILON;
+    private int numGraphProcessingThreads = DEFAULT_NUM_GRAPH_THREADS;
+    private int numTensorFlowProcessingThreads = DEFAULT_NUM_TF_THREADS;
 
     public String getModelPath() {
         return modelPath;
@@ -52,36 +52,40 @@ public class DeepLearningEngineConf {
     }
 
     public double getEpsilon() {
-        if (epsilon == null || epsilon < 0) {
-            return EPSILON;
-        }
         return epsilon;
     }
 
-    public void setEpsilon(Double epsilon) {
+    public void setEpsilon(double epsilon) {
+        if (epsilon <= 0) {
+            throw new IllegalArgumentException("Epsilon must be strictly positive. Got: " + epsilon);
+        }
         this.epsilon = epsilon;
     }
 
     public int getNumGraphProcessingThreads() {
-        if (numGraphProcessingThreads == null || numGraphProcessingThreads <= 0) {
-            return DEFAULT_NUM_GRAPH_THREADS;
-        }
         return numGraphProcessingThreads;
     }
 
-    public void setNumGraphProcessingThreads(Integer numGraphProcessingThreads) {
+    public void setNumGraphProcessingThreads(int numGraphProcessingThreads) {
+        if (numGraphProcessingThreads <= 0) {
+            throw new IllegalArgumentException("Number of graph processing threads must be strictly positive. Got: " + numGraphProcessingThreads);
+        }
         this.numGraphProcessingThreads = numGraphProcessingThreads;
     }
 
     public int getNumTensorFlowProcessingThreads() {
-        if (numTensorFlowProcessingThreads == null || numTensorFlowProcessingThreads <= 0) {
-            return DEFAULT_NUM_TF_THREADS;
-        }
         return numTensorFlowProcessingThreads;
     }
 
-    public void setNumTensorFlowProcessingThreads(Integer numTensorFlowProcessingThreads) {
-        this.numTensorFlowProcessingThreads = numTensorFlowProcessingThreads;
+    public void setNumTensorFlowProcessingThreads(int numTensorFlowProcessingThreads) {
+        if (numTensorFlowProcessingThreads < 0) {
+            throw new IllegalArgumentException("Number of TensorFlow processing threads must be >= 0. Got: " + numTensorFlowProcessingThreads);
+        } else if (numTensorFlowProcessingThreads == 0) {
+            // Use a value of 0 to fallback to the computed value - this is used in the Blueprint
+            this.numTensorFlowProcessingThreads = DEFAULT_NUM_TF_THREADS;
+        } else {
+            this.numTensorFlowProcessingThreads = numTensorFlowProcessingThreads;
+        }
     }
 
     @Override

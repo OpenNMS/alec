@@ -7,7 +7,7 @@
             <cm:property name="modelPath" value=""/>
             <cm:property name="epsilon" value="500"/>
             <cm:property name="numGraphProcessingThreads" value="2"/>
-            <!-- Defaults to max(#processors - 3, 1) when value <= 0 -->
+            <!-- Defaults to max(#processors - 3, 1) when the value is set to 0 -->
             <cm:property name="numTensorFlowProcessingThreads" value="0"/>
         </cm:default-properties>
     </cm:property-placeholder>

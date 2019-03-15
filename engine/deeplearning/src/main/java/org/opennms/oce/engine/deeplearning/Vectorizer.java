@@ -38,7 +38,7 @@ import org.opennms.oce.engine.cluster.GraphManager;
 import org.opennms.oce.engine.cluster.SpatialDistanceCalculator;
 
 /**
- * Used to build a {@link RelatedVector} from two {@link AlarmInSpaceTime} alarms.
+ * Used to build a {@link InputVector} from two {@link AlarmInSpaceTime} alarms.
  *
  * @author jwhite
  */
@@ -51,24 +51,24 @@ public class Vectorizer {
         this.spatialDistanceCalculator = Objects.requireNonNull(spatialDistanceCalculator);
     }
 
-    public RelatedVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
+    public InputVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
         return vectorize(a1, a2, distanceOnGraph(a1, a2));
     }
 
-    public RelatedVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2, double distanceOnGraph) {
-        // Input
-        RelatedVector relatedVector = new RelatedVector();
-        relatedVector.setTypeA(a1.getAlarm().getInventoryObjectType());
-        relatedVector.setTypeB(a2.getAlarm().getInventoryObjectType());
+    public InputVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2, double distanceOnGraph) {
+        // Build the input vector
+        InputVector.Builder builder = InputVector.builder()
+                .typeA(a1.getAlarm().getInventoryObjectType())
+                .typeB(a2.getAlarm().getInventoryObjectType());
 
         int firstAncestorMatch = getFirstAncestorMatch(a1, a2);
-        relatedVector.setSameInstance(firstAncestorMatch == 0);
-        relatedVector.setSameParent(firstAncestorMatch <= 1);
-        relatedVector.setShareAncestor(firstAncestorMatch >= 0);
+        builder.sameInstance(firstAncestorMatch == 0)
+                .sameParent(firstAncestorMatch <= 1)
+                .shareAncestors(firstAncestorMatch >= 0)
+                .timeDifferenceInSeconds(timeDeltaInSeconds(a1, a2))
+                .distanceOnGraph(distanceOnGraph);
 
-        relatedVector.setTimeDifferenceInSeconds(timeDeltaInSeconds(a1, a2));
-        relatedVector.setDistanceOnGraph(distanceOnGraph);
-        return relatedVector;
+        return builder.build();
     }
 
     private int getFirstAncestorMatch(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
@@ -95,8 +95,7 @@ public class Vectorizer {
                 return level;
             }
 
-            if (ioa.getParentType() == null || iob.getParentType() == null ||
-                    ioa.getParentId() == null || iob.getParentId() == null) {
+            if (ioa.getParentType() == null || iob.getParentType() == null) {
                 // One of the IOs does not have a parent, stop here
                 return -1;
             }
@@ -107,7 +106,7 @@ public class Vectorizer {
                 return level + 1;
             }
 
-            // We now now that both IOs have parents, and they are not the same, let's go up a level
+            // We now know that both IOs have parents, and they are not the same, let's go up a level
             level++;
 
             Optional<CEVertex> va = graphManager.getVertexForParentOf(ioa);

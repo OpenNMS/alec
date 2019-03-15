@@ -28,16 +28,13 @@
 
 package org.opennms.oce.engine.deeplearning;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,13 +47,15 @@ import org.tensorflow.Tensor;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
 public class TFModel implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TFModel.class);
 
     private static final Gson gson = new Gson();
+
+    private final Map<String,Integer> typeA_ioTypeToId = new HashMap<>();
+    private final Map<String,Integer> typeB_ioTypeToId = new HashMap<>();
 
     private final Session sess;
     private final Path tempDir;
@@ -89,8 +88,8 @@ public class TFModel implements AutoCloseable {
         loadModelHyperParameters(effectiveModelPath);
     }
 
-    public boolean isRelated(RelatedVector relatedVector) {
-        final List<Tensor<?>> inputTensors = toTensors(relatedVector);
+    public boolean isRelated(InputVector inputVector) {
+        final List<Tensor<?>> inputTensors = toTensors(inputVector);
         List<Tensor<?>> outputTensors = sess.runner()
                 .feed("type_a/type_a_placeholder", inputTensors.get(0))
                 .feed("type_b/type_b_placeholder", inputTensors.get(1))
@@ -109,20 +108,17 @@ public class TFModel implements AutoCloseable {
         return outputBuffer[0];
     }
 
-    public static List<Tensor<?>> toTensors(RelatedVector relatedVector) {
+    public List<Tensor<?>> toTensors(InputVector inputVector) {
         return Arrays.asList(
-                Tensor.create(new int[]{toTypeId(relatedVector.getTypeA())}, Integer.class), // type_a
-                Tensor.create(new int[]{toTypeId(relatedVector.getTypeB())}, Integer.class), // type_b
-                Tensor.create(new boolean[]{relatedVector.isSameInstance()}, Boolean.class), // same_instance
-                Tensor.create(new boolean[]{relatedVector.isSameParent()}, Boolean.class), // same_parent
-                Tensor.create(new boolean[]{relatedVector.isShareAncestor()}, Boolean.class), // share_ancestor
-                Tensor.create(new float[]{(float)relatedVector.getDistanceOnGraph()}, Float.class), // distance_on_graph
-                Tensor.create(new float[]{(float)relatedVector.getTimeDifferenceInSeconds()}, Float.class) // time_delta_seconds
+                Tensor.create(new int[]{toTypeIdA(inputVector.getTypeA())}, Integer.class), // type_a
+                Tensor.create(new int[]{toTypeIdB(inputVector.getTypeB())}, Integer.class), // type_b
+                Tensor.create(new boolean[]{inputVector.isSameInstance()}, Boolean.class), // same_instance
+                Tensor.create(new boolean[]{inputVector.isSameParent()}, Boolean.class), // same_parent
+                Tensor.create(new boolean[]{inputVector.isShareAncestor()}, Boolean.class), // share_ancestor
+                Tensor.create(new float[]{(float) inputVector.getDistanceOnGraph()}, Float.class), // distance_on_graph
+                Tensor.create(new float[]{(float) inputVector.getTimeDifferenceInSeconds()}, Float.class) // time_delta_seconds
         );
     }
-
-    private final Map<String,Integer> typeA_ioTypeToId = new HashMap<>();
-    private final Map<String,Integer> typeB_ioTypeToId = new HashMap<>();
 
     private void loadModelHyperParameters(String modelPath) {
         List<String> type_a_vocab = null;
@@ -159,26 +155,12 @@ public class TFModel implements AutoCloseable {
         }
     }
 
+    private int toTypeIdA(String inventoryObjectType) {
+        return typeA_ioTypeToId.getOrDefault(inventoryObjectType, 0);
+    }
 
-    private static int toTypeId(String inventoryObjectType) {
-        // FIXME: Don't hardcode this here - read from the model instead
-        if (inventoryObjectType == null) {
-            return 0;
-        }
-        switch(inventoryObjectType) {
-            case "SnmpInterface":
-                return 1;
-            case "BgpPeer":
-                return 2;
-            case "SnmpInterfaceLink":
-                return 3;
-            case "Node":
-                return 4;
-            case "EntPhysicalEntity":
-                return 5;
-            default:
-                return 0;
-        }
+    private int toTypeIdB(String inventoryObjectType) {
+        return typeB_ioTypeToId.getOrDefault(inventoryObjectType, 0);
     }
 
     @Override

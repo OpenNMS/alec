@@ -61,7 +61,8 @@ import org.opennms.oce.engine.cluster.AbstractClusterEngine;
 import org.opennms.oce.engine.cluster.AlarmInSpaceTime;
 import org.opennms.oce.engine.cluster.CEEdge;
 import org.opennms.oce.engine.cluster.CEVertex;
-import org.opennms.oce.engine.deeplearning.RelatedVector;
+import org.opennms.oce.engine.deeplearning.InputVector;
+import org.opennms.oce.engine.deeplearning.OutputVector;
 import org.opennms.oce.engine.deeplearning.Vectorizer;
 
 import edu.uci.ics.jung.graph.Graph;
@@ -112,12 +113,12 @@ public class Vectorize implements Action {
     }
 
     private static class MyEngine extends AbstractClusterEngine {
-        private final Consumer<RelatedVector> consumer;
+        private final Consumer<OutputVector> consumer;
         private final Set<Situation> situations;
         private final Map<String,String> alarmIdToSituationId = new LinkedHashMap<>();
         private Vectorizer vectorizer;
 
-        private MyEngine(Set<Situation> situations, Consumer<RelatedVector> consumer) {
+        private MyEngine(Set<Situation> situations, Consumer<OutputVector> consumer) {
             this.situations = Objects.requireNonNull(situations);
             this.consumer = Objects.requireNonNull(consumer);
 
@@ -142,9 +143,11 @@ public class Vectorize implements Action {
                     if (a1 == a2) {
                         continue;
                     }
-                    final RelatedVector vector = vectorizer.vectorize(a1, a2);
-                    vector.setAreAlarmsRelated(areAlarmsCurrentlyRelated(a1, a2, timestampInMillis));
-                    consumer.accept(vector);
+                    final InputVector inputVector = vectorizer.vectorize(a1, a2);
+                    consumer.accept(OutputVector.builder()
+                            .inputVector(inputVector)
+                            .areAlarmsRelated(areAlarmsCurrentlyRelated(a1, a2, timestampInMillis))
+                            .build());
                 }
             }
             return Collections.emptyList();
@@ -189,7 +192,7 @@ public class Vectorize implements Action {
         }
     }
 
-    private void streamVectors(List<InventoryObject> inventory, List<Alarm> alarms, Set<Situation> situations, Consumer<RelatedVector> consumer) {
+    private void streamVectors(List<InventoryObject> inventory, List<Alarm> alarms, Set<Situation> situations, Consumer<OutputVector> consumer) {
         // Extend the cluster engine
         final MyEngine engine = new MyEngine(situations, consumer);
 
@@ -221,7 +224,8 @@ public class Vectorize implements Action {
     /**
      * Used for CSV output.
      */
-    private static Iterable<?> toRecordValues(RelatedVector v) {
+    private static Iterable<?> toRecordValues(OutputVector ov) {
+        final InputVector v = ov.getInputVector();
         return Arrays.asList(
                 v.getTypeA(),
                 v.getTypeB(),
@@ -230,7 +234,7 @@ public class Vectorize implements Action {
                 v.isShareAncestor() ? 1 : 0,
                 v.getTimeDifferenceInSeconds(),
                 v.getDistanceOnGraph(),
-                v.isAreAlarmsRelated() ? 1 : 0
+                ov.areAlarmsRelated() ? 1 : 0
         );
     }
 

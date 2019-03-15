@@ -22,7 +22,7 @@
     <!-- Create and expose the engine factory -->
     <service interface="org.opennms.oce.engine.api.EngineFactory">
         <bean class="org.opennms.oce.engine.deeplearning.DeepLearningEngineFactory">
-            <property name="config" ref="deepLearningEngineConf"/>
+            <argument index="0" ref="deepLearningEngineConf"/>
         </bean>
     </service>
 

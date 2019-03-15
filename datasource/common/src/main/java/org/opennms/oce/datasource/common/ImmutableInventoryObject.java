@@ -157,6 +157,15 @@ public final class ImmutableInventoryObject implements InventoryObject {
             Objects.requireNonNull(id, "Id cannot be null");
             Objects.requireNonNull(type, "Type cannot be null");
 
+            // Ensure that both the parent id and type are set, if either of them is set
+            if (parentType != null && parentId == null) {
+                throw new IllegalArgumentException(String.format("Parent type was set to '%s', but the parent id is null. Id cannot be null.",
+                        parentType));
+            } else if (parentId != null && parentType == null) {
+                throw new IllegalArgumentException(String.format("Parent id was set to '%s', but the parent type is null. Type cannot be null.",
+                        parentId));
+            }
+
             return new ImmutableInventoryObject(this);
         }
     }

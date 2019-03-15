@@ -38,134 +38,164 @@ import java.util.Objects;
  *  * similarity score between labels of A and B : continuous [0,1]
  *  * similarity score between last parent that is different on A and B : continuous [0,1]
  */
-public class RelatedVector {
+public class InputVector {
     /**
      * Input: Inventory object type of alarm A
      */
-    private String typeA;
+    private final String typeA;
 
     /**
      * Input: Inventory object type of alarm B
      */
-    private String typeB;
+    private final String typeB;
 
     /**
      * Input: True if alarm A and B have the same type and instance
      */
-    private boolean sameInstance;
+    private final boolean sameInstance;
 
     /**
      * Input: True if alarm A and B have the same parent
      */
-    private boolean sameParent;
+    private final boolean sameParent;
 
     /**
-     * Input: True if alarm A and B same some common ancestor
+     * Input: True if alarm A and B share some common ancestor
      */
-    private boolean shareAncestor;
+    private final boolean shareAncestor;
 
     /**
      * Input: How many seconds between the last occurrence of A1 and A2?
      */
-    private double timeDifferenceInSeconds;
+    private final double timeDifferenceInSeconds;
 
     /**
      * Input: What is the distance on the shortest path from A1 to A2?
      */
-    private double distanceOnGraph;
+    private final double distanceOnGraph;
 
-    /**
-     * Output: Are alarms A and B related?
-     */
-    private boolean areAlarmsRelated;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    private InputVector(Builder builder) {
+        this.typeA = builder.typeA;
+        this.typeB = builder.typeB;
+        this.sameInstance = builder.sameInstance;
+        this.sameParent = builder.sameParent;
+        this.shareAncestor = builder.shareAncestors;
+        this.timeDifferenceInSeconds = builder.timeDifferenceInSeconds;
+        this.distanceOnGraph = builder.distanceOnGraph;
+    }
+
+    public static class Builder {
+        private String typeA;
+        private String typeB;
+        private Boolean sameInstance;
+        private Boolean sameParent;
+        private Boolean shareAncestors;
+        private Double timeDifferenceInSeconds;
+        private Double distanceOnGraph;
+
+        public Builder typeA(String typeA) {
+            this.typeA = typeA;
+            return this;
+        }
+
+        public Builder typeB(String typeB) {
+            this.typeB = typeB;
+            return this;
+        }
+
+        public Builder sameInstance(Boolean sameInstance) {
+            this.sameInstance = sameInstance;
+            return this;
+        }
+
+        public Builder sameParent(Boolean sameParent) {
+            this.sameParent = sameParent;
+            return this;
+        }
+
+        public Builder shareAncestors(Boolean shareAncestors) {
+            this.shareAncestors = shareAncestors;
+            return this;
+        }
+
+        public Builder timeDifferenceInSeconds(Double timeDifferenceInSeconds) {
+            this.timeDifferenceInSeconds = timeDifferenceInSeconds;
+            return this;
+        }
+
+        public Builder distanceOnGraph(Double distanceOnGraph) {
+            this.distanceOnGraph = distanceOnGraph;
+            return this;
+        }
+
+        public InputVector build() {
+            Objects.requireNonNull(typeA, "typeA is required");
+            Objects.requireNonNull(typeB, "typeB is required");
+            Objects.requireNonNull(sameInstance, "sameInstance is required");
+            Objects.requireNonNull(sameParent, "sameParent is required");
+            Objects.requireNonNull(typeA, "shareAncestors is required");
+            Objects.requireNonNull(shareAncestors, "typeA is required");
+            Objects.requireNonNull(timeDifferenceInSeconds, "timeDifferenceInSeconds is required");
+            Objects.requireNonNull(distanceOnGraph, "distanceOnGraph is required");
+            return new InputVector(this);
+        }
+    }
 
     public String getTypeA() {
         return typeA;
-    }
-
-    public void setTypeA(String typeA) {
-        this.typeA = typeA;
     }
 
     public String getTypeB() {
         return typeB;
     }
 
-    public void setTypeB(String typeB) {
-        this.typeB = typeB;
-    }
-
     public boolean isSameInstance() {
         return sameInstance;
-    }
-
-    public void setSameInstance(boolean sameInstance) {
-        this.sameInstance = sameInstance;
     }
 
     public boolean isSameParent() {
         return sameParent;
     }
 
-    public void setSameParent(boolean sameParent) {
-        this.sameParent = sameParent;
-    }
-
     public boolean isShareAncestor() {
         return shareAncestor;
-    }
-
-    public void setShareAncestor(boolean shareAncestor) {
-        this.shareAncestor = shareAncestor;
     }
 
     public double getTimeDifferenceInSeconds() {
         return timeDifferenceInSeconds;
     }
 
-    public void setTimeDifferenceInSeconds(double timeDifferenceInSeconds) {
-        this.timeDifferenceInSeconds = timeDifferenceInSeconds;
-    }
-
     public double getDistanceOnGraph() {
         return distanceOnGraph;
-    }
-
-    public void setDistanceOnGraph(double distanceOnGraph) {
-        this.distanceOnGraph = distanceOnGraph;
-    }
-
-    public boolean isAreAlarmsRelated() {
-        return areAlarmsRelated;
-    }
-
-    public void setAreAlarmsRelated(boolean areAlarmsRelated) {
-        this.areAlarmsRelated = areAlarmsRelated;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RelatedVector that = (RelatedVector) o;
+        InputVector that = (InputVector) o;
         return sameInstance == that.sameInstance &&
                 sameParent == that.sameParent &&
                 shareAncestor == that.shareAncestor &&
                 Double.compare(that.timeDifferenceInSeconds, timeDifferenceInSeconds) == 0 &&
                 Double.compare(that.distanceOnGraph, distanceOnGraph) == 0 &&
-                areAlarmsRelated == that.areAlarmsRelated &&
                 Objects.equals(typeA, that.typeA) &&
                 Objects.equals(typeB, that.typeB);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph, areAlarmsRelated);
+        return Objects.hash(typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph);
     }
 
     @Override
     public String toString() {
-        return "RelatedVector{" +
+        return "InputVector{" +
                 "typeA='" + typeA + '\'' +
                 ", typeB='" + typeB + '\'' +
                 ", sameInstance=" + sameInstance +
@@ -173,7 +203,6 @@ public class RelatedVector {
                 ", shareAncestor=" + shareAncestor +
                 ", timeDifferenceInSeconds=" + timeDifferenceInSeconds +
                 ", distanceOnGraph=" + distanceOnGraph +
-                ", areAlarmsRelated=" + areAlarmsRelated +
                 '}';
     }
 

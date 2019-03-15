@@ -117,11 +117,11 @@ public class TFClusterer {
      *
      * Threads in the graph processing pool are used to traverse the graph and
      * match candidate vertices. When alarms on these vertices need to be matched
-     * a task in placed on a queue.
+     * a task is placed on a queue.
      *
      * Threads in the TensorFlow processing pool consume and process the "pairing"
      * tasks generated the by graph processing. When pairs are matched successfully,
-     * the result in placed on a different queue.
+     * the result is placed on a different queue.
      *
      * The main thread (caller) processes the matches to build clusters incrementally
      * as the results are available and will remain blocked until all of the tasks have
@@ -130,7 +130,7 @@ public class TFClusterer {
      * Further optimizations include:
      *  * Work to avoid processing alarms that are already in clusters
      *  * Cache previous results?
-     *  * Find additional ways of limiting the number of comparisions
+     *  * Find additional ways of limiting the number of comparisons
      *
      * @param g graph with alarms to cluster
      * @return clusters of alarms
@@ -327,9 +327,9 @@ public class TFClusterer {
                 for (int j = i + 1; j < alarms.size(); j++) {
                     final Alarm a2 = alarms.get(j);
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(vertex, a2);
-                    final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(relatedVector)) {
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, relatedVector));
+                    final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
+                    if (tfModel.isRelated(inputVector)) {
+                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
                     }
                     numIsRelatedCalls++;
                 }
@@ -347,9 +347,9 @@ public class TFClusterer {
 
                 for (Alarm a2 : v2.getAlarms()) {
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(v2, a2);
-                    final RelatedVector relatedVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(relatedVector)) {
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, relatedVector));
+                    final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
+                    if (tfModel.isRelated(inputVector)) {
+                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
                     }
                     numIsRelatedCalls++;
                 }

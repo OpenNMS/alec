@@ -30,30 +30,31 @@ package org.opennms.oce.engine.deeplearning;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
 
-import java.io.File;
 import java.util.List;
 
 import org.junit.Test;
 import org.tensorflow.Tensor;
 
 public class TFModelTest {
+    /**
+     * This also verifies that the default model can be loaded from the classpath.
+     */
+    private final TFModel tfModel = new TFModel();
 
     @Test
     public void canConvertVectorToTensor() {
-        RelatedVector vector = new RelatedVector();
-        List<Tensor<?>> tensors = TFModel.toTensors(vector);
+        InputVector inputVector = InputVector.builder()
+                .typeA("a")
+                .typeB("b")
+                .sameInstance(false)
+                .sameParent(false)
+                .shareAncestors(true)
+                .timeDifferenceInSeconds(1d)
+                .distanceOnGraph(2d)
+                .build();
+        List<Tensor<?>> tensors = tfModel.toTensors(inputVector);
         assertThat(tensors, hasSize(7));
-    }
-
-    /**
-     * Verify that we can load the default model from the classpath.
-     */
-    @Test
-    public void canLoadModel() {
-        final TFModel tfModel = new TFModel();
-        assertThat(tfModel, notNullValue());
     }
 
     /**
@@ -62,13 +63,19 @@ public class TFModelTest {
      */
     @Test(timeout=30000)
     public void canMeasureLatency() {
-        final TFModel tfModel = new TFModel();
-
-        RelatedVector relatedVector = new RelatedVector();
+        InputVector inputVector = InputVector.builder()
+                .typeA("a")
+                .typeB("b")
+                .sameInstance(false)
+                .sameParent(false)
+                .shareAncestors(true)
+                .timeDifferenceInSeconds(1d)
+                .distanceOnGraph(2d)
+                .build();
         int N = 5000;
         long startMs = System.currentTimeMillis();
         for (int i = 0; i < N; i++) {
-            tfModel.isRelated(relatedVector);
+            tfModel.isRelated(inputVector);
         }
         long deltaMs = System.currentTimeMillis() - startMs;
 

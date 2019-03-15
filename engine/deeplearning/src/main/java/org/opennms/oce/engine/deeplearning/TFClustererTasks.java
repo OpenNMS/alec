@@ -95,12 +95,12 @@ public class TFClustererTasks {
     static class RelatesTo {
         private final AlarmInSpaceTime a1;
         private final AlarmInSpaceTime a2;
-        private final RelatedVector vector;
+        private final InputVector inputVector;
 
-        public RelatesTo(AlarmInSpaceTime a1, AlarmInSpaceTime a2, RelatedVector vector) {
+        public RelatesTo(AlarmInSpaceTime a1, AlarmInSpaceTime a2, InputVector inputVector) {
             this.a1 = a1;
             this.a2 = a2;
-            this.vector = vector;
+            this.inputVector = inputVector;
         }
 
         public AlarmInSpaceTime getA1() {
@@ -111,8 +111,8 @@ public class TFClustererTasks {
             return a2;
         }
 
-        public RelatedVector getVector() {
-            return vector;
+        public InputVector getInputVector() {
+            return inputVector;
         }
     }
 

@@ -28,11 +28,17 @@
 
 package org.opennms.oce.engine.deeplearning;
 
+import java.util.Objects;
+
 import org.opennms.oce.engine.api.EngineFactory;
 
 public class DeepLearningEngineFactory implements EngineFactory {
 
-    private DeepLearningEngineConf conf;
+    private final DeepLearningEngineConf conf;
+
+    public DeepLearningEngineFactory(DeepLearningEngineConf conf) {
+        this.conf = Objects.requireNonNull(conf);
+    }
 
     @Override
     public String getName() {
@@ -49,7 +55,4 @@ public class DeepLearningEngineFactory implements EngineFactory {
         return new DeepLearningEngine(conf);
     }
 
-    public void setConf(DeepLearningEngineConf conf) {
-        this.conf = conf;
-    }
 }

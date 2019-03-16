@@ -1,0 +1,13 @@
+= Deep Learning Engine
+:imagesdir: ../assets/images
+
+The Deep Learning Engine is a clusterning engine that uses link:https://www.tensorflow.org/[TensorFlow] models to build clusters.
+
+As a first attempt, we have used link:https://github.com/uber/ludwig[Ludwig] to build and train a model which is used to answer: are these two alarms related?
+In order to help answer this question, we provide features that include:
+
+* The inventory object types (categorical)
+* Relations between the inventory objects (binary)
+* Difference in time (numerical)
+* Distance on the graph (numerical)
+

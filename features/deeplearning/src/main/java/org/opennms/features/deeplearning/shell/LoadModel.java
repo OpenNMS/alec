@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,43 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.features.deeplearning.shell;
 
-import java.util.Objects;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.opennms.oce.engine.deeplearning.TFModel;
 
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.features.graph.api.Vertex;
+@Command(scope = "oce", name = "tensorflow-load-model", description = "Validate that the TensorFlow model at the given path can be loaded.")
+@Service
+public class LoadModel implements Action {
 
-public class AlarmInSpaceTime implements Clusterable {
-    private final CEVertex vertex;
-    private final Alarm alarm;
-    private final double[] point;
-
-    public AlarmInSpaceTime(CEVertex vertex, Alarm alarm) {
-        this.vertex = Objects.requireNonNull(vertex);
-        this.alarm = Objects.requireNonNull(alarm);
-        point = new double[]{alarm.getTime(), vertex.getNumericId()};
-    }
+    @Argument(name="model path", required = true)
+    private String modelPath;
 
     @Override
-    public double[] getPoint() {
-        return point;
+    public Object execute() {
+        try (TFModel tfModel = new TFModel(modelPath)) {
+            System.out.println("Model successfully loaded: " + modelPath);
+        } catch (Throwable t) {
+            System.out.println("Failed to loaded model from path: " + modelPath);
+            t.printStackTrace();
+        }
+        return null;
     }
 
-    public String getAlarmId() {
-        return alarm.getId();
-    }
-
-    public Alarm getAlarm() {
-        return alarm;
-    }
-
-    public long getAlarmTime() {
-        return alarm.getTime();
-    }
-
-    public CEVertex getVertex() {
-        return vertex;
-    }
 }

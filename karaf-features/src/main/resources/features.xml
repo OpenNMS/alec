@@ -84,6 +84,13 @@
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.dbscan/${project.version}</bundle>
     </feature>
 
+    <feature name="oce-engine-deeplearning" description="OCE :: Engine :: Deep Learning" version="${project.version}">
+        <feature version="${project.version}">oce-engine-cluster</feature>
+        <feature version="${tensorflow.version}">tensorflow</feature>
+        <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.deeplearning/${project.version}</bundle>
+    </feature>
+
     <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
         <feature version="${project.version}">oce-engine-api</feature>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.temporal/${project.version}</bundle>
@@ -180,6 +187,17 @@
         <bundle>mvn:org.opennms.oce.features/org.opennms.oce.features.shell/${project.version}</bundle>
     </feature>
 
+    <feature name="oce-features-deeplearning" description="OCE :: Features :: Deep learning" version="${project.version}">
+        <feature version="${project.version}">oce-engine-deeplearning</feature>
+        <feature version="${project.version}">oce-features-score</feature>
+        <feature version="${project.version}">oce-datasource-jaxb</feature>
+        <feature version="${project.version}">oce-features-graph-common</feature>
+        <feature dependency="true">shell</feature>
+        <bundle dependency="true">mvn:org.apache.commons/commons-csv/${commons.csv.version}</bundle>
+        <bundle>mvn:org.opennms.oce.driver/org.opennms.oce.driver.test/${project.version}</bundle>
+        <bundle>mvn:org.opennms.oce.features/org.opennms.oce.features.deeplearning/${project.version}</bundle>
+    </feature>
+
     <!-- OpenNMS Integration -->
 
     <feature name="opennms-oce-plugin" description="OpenNMS :: OCE :: Plugin" version="${project.version}">
@@ -260,6 +278,10 @@
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+    </feature>
+
+    <feature name="tensorflow" description="TensorFlow" version="${tensorflow.version}">
+        <bundle>mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.tensorflow/${project.version}</bundle>
     </feature>
 
 </features>

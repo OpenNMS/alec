@@ -71,6 +71,7 @@ public class OpennmsMapperTest {
     public void canMapInventory() {
         String type = "test.type";
         String id = "test.id";
+        String parentType = "parent.type";
         String parentId = "parent.id";
         String peerId = "peer.id";
         String peerType = "peer.type";
@@ -81,6 +82,7 @@ public class OpennmsMapperTest {
         InventoryModelProtos.InventoryObject io = OpennmsMapper.fromInventory(ImmutableInventoryObject.newBuilder()
                 .setType(type)
                 .setId(id)
+                .setParentType(parentType)
                 .setParentId(parentId)
                 .setWeightToParent(weight)
                 .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
@@ -99,6 +101,7 @@ public class OpennmsMapperTest {
         InventoryModelProtos.InventoryObject testIO = InventoryModelProtos.InventoryObject.newBuilder()
                 .setType(type)
                 .setId(id)
+                .setParentType(parentType)
                 .setParentId(parentId)
                 .setWeightToParent(weight)
                 .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()

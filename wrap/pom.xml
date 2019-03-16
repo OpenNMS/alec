@@ -12,6 +12,7 @@
 
     <modules>
         <module>jung</module>
+        <module>tensorflow</module>
     </modules>
 </project>
 

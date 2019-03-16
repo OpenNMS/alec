@@ -6,8 +6,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.oce.wrap</groupId>
-    <artifactId>org.opennms.oce.wrap.jung</artifactId>
-    <name>OCE :: Wrap :: Jung</name>
+    <artifactId>org.opennms.oce.wrap.tensorflow</artifactId>
+    <name>OCE :: Wrap :: TensorFlow</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -39,12 +39,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>com.google.common.base,com.google.common.collect</Import-Package>
-                        <Export-Package>edu.uci.ics.jung.graph;version="${jung.version}",
-                                        edu.uci.ics.jung.algorithms.cluster;version="${jung.version}",
-                                        edu.uci.ics.jung.algorithms.filters;version="${jung.version}",
-                                        edu.uci.ics.jung.algorithms.shortestpath;version="${jung.version}",
-                                        edu.uci.ics.jung.graph.util;version="${jung.version}",</Export-Package>
+                        <Export-Package>org.tensorflow;version="${tensorflow.version}",
+                                        org.tensorflow.op;version="${tensorflow.version}",
+                                        org.tensorflow.op.annotation;version="${tensorflow.version}",
+                                        org.tensorflow.op.core;version="${tensorflow.version}",
+                                        org.tensorflow.types.core;version="${tensorflow.version}"
+                        </Export-Package>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
@@ -54,19 +54,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-api</artifactId>
-            <version>${jung.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-graph-impl</artifactId>
-            <version>${jung.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-algorithms</artifactId>
-            <version>${jung.version}</version>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>${tensorflow.version}</version>
         </dependency>
     </dependencies>
 

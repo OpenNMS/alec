@@ -26,46 +26,60 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.engine.cluster;
+package org.opennms.oce.engine.deeplearning;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
-import org.opennms.oce.datasource.api.Alarm;
+import org.opennms.oce.engine.cluster.AbstractClusterEngine;
+import org.opennms.oce.engine.cluster.AlarmInSpaceTime;
+import org.opennms.oce.engine.cluster.CEEdge;
+import org.opennms.oce.engine.cluster.CEVertex;
 
 import edu.uci.ics.jung.graph.Graph;
 
 /**
- * Simple cluster engine implementation
+ * A clustering engine based on Tensorflow.
+ *
+ * We load a Tensorlfow model delegate to the {@link TFClusterer} to
+ * perform the clustering.
  */
-public class ClusterEngine extends AbstractClusterEngine {
+public class DeepLearningEngine extends AbstractClusterEngine {
+    private final DeepLearningEngineConf conf;
+    private final TFModel tfModel;
+    private Vectorizer vectorizer;
+    private TFClusterer tfClusterer;
 
-    /**
-     * Use the graph structure to build clusters:
-     *   For every vertex that has 1+ alarms, add all of the alarms on that vertex to a new cluster
-     *
-     * @param timestampInMillis ignore
-     * @param g inventory graph
-     * @return list of clusters
-     */
+    public DeepLearningEngine() {
+        this(new TFModel(), new DeepLearningEngineConf());
+    }
+
+    public DeepLearningEngine(DeepLearningEngineConf conf) {
+        this(new TFModel(conf.getModelPath()), conf);
+    }
+
+    private DeepLearningEngine(TFModel tfModel, DeepLearningEngineConf conf) {
+        this.tfModel = Objects.requireNonNull(tfModel);
+        this.conf = Objects.requireNonNull(conf);
+    }
+
+    @Override
+    public void onInit() {
+        vectorizer = new Vectorizer(getGraphManager(), this);
+        tfClusterer = new TFClusterer(tfModel, vectorizer, conf);
+        tfClusterer.init();
+    }
+
+    @Override
+    public void onDestroy() {
+        tfClusterer.destroy();
+        tfModel.close();
+    }
+
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
-        // Build a cluster for each vertex
-        final List<Cluster<AlarmInSpaceTime>> clusters = new LinkedList<>();
-        for (CEVertex v : g.getVertices()) {
-            if (!v.hasAlarms()) {
-                // No alarms, skip it
-                continue;
-            }
-
-            final Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
-            for (Alarm a : v.getAlarms()) {
-                cluster.addPoint(new AlarmInSpaceTime(v, a));
-            }
-            clusters.add(cluster);
-        }
-        return clusters;
+        return tfClusterer.cluster(g);
     }
 
 }

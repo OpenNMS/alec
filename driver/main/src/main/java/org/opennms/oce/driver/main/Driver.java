@@ -98,6 +98,7 @@ public class Driver {
 
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
+        LOG.info("Creating engine with name: {}", engineFactory.getName());
         engine = engineFactory.createEngine();
         // Register the handler that confirms situations that have come round trip back to this driver
         situationDatasource.registerHandler(confirmingSituationHandler);

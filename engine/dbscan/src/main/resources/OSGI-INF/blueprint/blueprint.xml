@@ -2,7 +2,7 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
 
     <!-- Create and expose the engine factory -->
-    <service interface="org.opennms.oce.engine.api.EngineFactory">
+    <service interface="org.opennms.oce.engine.api.EngineFactory" ranking="10">
         <bean class="org.opennms.oce.engine.dbscan.DBScanEngineFactory"/>
     </service>
 

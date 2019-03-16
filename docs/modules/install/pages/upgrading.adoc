@@ -1,0 +1,28 @@
+= Upgrading
+:imagesdir: ../assets/images
+
+General upgrading instructions for OCE.
+== Upgrading OCE on Sentinel (distributed install)
+
+Here we assume that OCE is already up and running on 1+ Sentinel instances.
+For each of these, proceed as follows:
+
+Stop Sentinel:
+```
+sudo /etc/init.d/sentinel stop
+```
+
+Delete the .kar file cache:
+```
+sudo rm -rf /opt/sentinel/data/kar
+```
+
+Install the updated OCE plugin package:
+```
+sudo yum -y install sentinel-oce-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+```
+
+Restart Sentinel:
+```
+sudo /etc/init.d/sentinel restart
+```

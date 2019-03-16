@@ -49,7 +49,7 @@ public class EdgeToInventory {
         switch (edge.getTargetCase()) {
             case TARGETPORT:
                 targetIfIndex = edge.getTargetPort().getIfIndex();
-                targetNodeCriteria = nodeCriteriaToString(edge.getTargetPort().getNodeCriteria());
+                targetNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria());
                 break;
             case TARGETSEGMENT:
                 // Segment support needs to be added when segments are available
@@ -58,7 +58,7 @@ public class EdgeToInventory {
         }
 
         String protocol = edge.getRef().getProtocol().name();
-        String sourceNodeCriteria = nodeCriteriaToString(edge.getSource().getNodeCriteria());
+        String sourceNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria());
 
         // Create a link object by setting the peers to the source and target
         ioBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName())
@@ -87,21 +87,10 @@ public class EdgeToInventory {
         return iosBuilder.build();
     }
 
-    private static String nodeCriteriaToString(OpennmsModelProtos.NodeCriteria nodeCriteria) {
-        // Note: this may need to be updated to support segments
-        if (nodeCriteria.getForeignSource().isEmpty()) {
-            throw new IllegalArgumentException("The node criteria's foreign source cannot be empty");
-        }
-        if (nodeCriteria.getForeignId().isEmpty()) {
-            throw new IllegalArgumentException("The node criteria's foreign Id cannot be empty");
-        }
-        return String.format("%s:%s", nodeCriteria.getForeignSource(), nodeCriteria.getForeignId());
-    }
-
     @VisibleForTesting
     static String getIdForEdge(OpennmsModelProtos.TopologyEdge edge) {
         return String.format("%s:%s:%d:%s:%d", edge.getRef().getProtocol(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getTargetPort().getNodeCriteria()), edge.getTargetPort().getIfIndex());
+                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()), edge.getSource().getIfIndex(),
+                OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()), edge.getTargetPort().getIfIndex());
     }
 }

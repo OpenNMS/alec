@@ -55,15 +55,17 @@ public class EdgeToInventoryTest {
                 .setSource(OpennmsModelProtos.TopologyPort.newBuilder()
                         .setIfIndex(0)
                         .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
+                                // The source port will have a node criteria with FS/FID/ID
                                 .setForeignSource("aFS")
                                 .setForeignId("aFID")
+                                .setId(1)
                                 .build())
                         .build())
                 .setTargetPort(OpennmsModelProtos.TopologyPort.newBuilder()
                         .setIfIndex(1)
                         .setNodeCriteria(OpennmsModelProtos.NodeCriteria.newBuilder()
-                                .setForeignSource("zFS")
-                                .setForeignId("zFID")
+                                // The target port will have a node criteria with just an ID
+                                .setId(2)
                                 .build())
                         .build())
                 .build();
@@ -85,20 +87,18 @@ public class EdgeToInventoryTest {
         assertThat(io.getPeers(), hasSize(2));
         assertThat(io.getId(), is(Matchers.equalTo(getIdForEdge(edge))));
 
-        String aFS = edge.getSource().getNodeCriteria().getForeignSource();
-        String aFID = edge.getSource().getNodeCriteria().getForeignId();
-        // Note: needs to be updated for segments
-        String zFS = edge.getTargetPort().getNodeCriteria().getForeignSource();
-        String zFID = edge.getTargetPort().getNodeCriteria().getForeignId();
         long aIfIndex = edge.getSource().getIfIndex();
         long zIfIndex = edge.getTargetPort().getIfIndex();
 
+        // Note: needs to be updated for segments
         io.getPeers().forEach(peer -> {
             assertThat(peer.getType(), is(Matchers.equalTo(ManagedObjectType.SnmpInterface.getName())));
             if (peer.getEndpoint() == InventoryObjectPeerEndpoint.A) {
-                assertThat(peer.getId(), is(Matchers.equalTo(String.format("%s:%s:%d", aFS, aFID, aIfIndex))));
+                assertThat(peer.getId(), is(Matchers.equalTo(String.format("%s:%d",
+                        OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()), aIfIndex))));
             } else if (peer.getEndpoint() == InventoryObjectPeerEndpoint.Z) {
-                assertThat(peer.getId(), is(Matchers.equalTo(String.format("%s:%s:%d", zFS, zFID, zIfIndex))));
+                assertThat(peer.getId(), is(Matchers.equalTo(String.format("%s:%d",
+                        OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()), zIfIndex))));
             }
         });
     }

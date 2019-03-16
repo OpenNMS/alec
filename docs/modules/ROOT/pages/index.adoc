@@ -10,8 +10,7 @@ The developer community has spent several years in R&D as well as working with a
 
 Following this guide, the user will gain sufficient knowledge about the correlation engine (CE) and the algorithms it uses to get started with transitioning from resolving Alarms (problems) to better managing the actual more complex Situations that they often represent.
 
-As a caution to the "new to OpenNMS" readers, because there are a great many new concepts and technologies to cover in this guide alone, many assumptions have been made about the reader having a basic understanding of OpenNMS as some of these concepts and supporting technologies quite complex in their own right. However, this is a living document and every effort is being made to enable organizations to benefit from the many values provided by the CE.
-
+As a caution to the "new to OpenNMS" readers, many assumptions have been made about the reader having a basic understanding of OpenNMS as some of these CE concepts and supporting technologies are quite complex in their own right. However, this is a living document and every effort is being made to enable organizations to benefit from the many values provided by the CE.
 
 
 For an overview of OCE start with: xref:about:welcome.adoc[What is OCE?]

@@ -2,6 +2,30 @@
 :imagesdir: ../assets/images
 
 General upgrading instructions for OCE.
+
+== Upgrading OCE on OpenNMS (monolithic & distributed install)
+
+Stop OpenNMS:
+```
+sudo /etc/init.d/opennms stop
+```
+
+Delete the .kar file cache:
+```
+sudo rm -rf /opt/opennms/data/kar
+```
+
+Install the updated OCE plugin package:
+```
+sudo yum -y install opennms-oce-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+```
+
+Restart OpenNMS:
+```
+sudo /etc/init.d/opennms restart
+```
+
+
 == Upgrading OCE on Sentinel (distributed install)
 
 Here we assume that OCE is already up and running on 1+ Sentinel instances.

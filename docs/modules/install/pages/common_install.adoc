@@ -70,7 +70,7 @@ And install the feature using:
 feature:install opennms-alarm-history-elastic
 ```
 
-If everything is configured properly, the heal check should show output similar to:
+If everything is configured properly, the health check should show output similar to:
 ```
 admin@opennms> health:check
 Verifying the health of the container

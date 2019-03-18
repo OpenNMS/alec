@@ -9,6 +9,7 @@
 * xref:install:monolithic_install.adoc[Monolithic Install]
 * xref:install:distributed_install.adoc[Distributed Install]
 * xref:install:verifying.adoc[Verifying your install]
+* xref:install:upgrading.adoc[Upgrading your install]
 
 .Architecture
 * xref:architecture:overview.adoc[Overview]

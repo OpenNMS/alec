@@ -308,24 +308,24 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/installOpCmpltd</uei>
         <event-label>CISCO defined syslog event: installOpCmpltd</event-label>
-        <descr>Install operation %parm[operationId] completed successfully.</descr>
-        <logmsg dest="logndisplay">Install operation %parm[operationId] completed successfully</logmsg>
+        <descr>Install operation %parm[operationId]% completed successfully.</descr>
+        <logmsg dest="logndisplay">Install operation %parm[operationId]% completed successfully</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirModuleOut</uei>
         <event-label>CISCO defined syslog event: oirModuleOut</event-label>
-        <descr>Node %parm[module] removed.</descr>
-        <logmsg dest="logndisplay">Node %parm[module] removed</logmsg>
+        <descr>Node %parm[module]% removed.</descr>
+        <logmsg dest="logndisplay">Node %parm[module]% removed</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[module]%" alarm-type="1"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirModuleIn</uei>
         <event-label>CISCO defined syslog event: oirModuleIn</event-label>
-        <descr>Node %parm[module] inserted.</descr>
-        <logmsg dest="logndisplay">Node %parm[module] inserted</logmsg>
+        <descr>Node %parm[module]% inserted.</descr>
+        <logmsg dest="logndisplay">Node %parm[module]% inserted</logmsg>
         <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[module]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/oirModuleOut:%dpname%:%nodeid%:%parm[module]%"/>
     </event>
@@ -333,16 +333,16 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirCardOut</uei>
         <event-label>CISCO defined syslog event: oirCardOut</event-label>
-        <descr>Card %parm[cardLabel] removed from slot %parm[slot].</descr>
-        <logmsg dest="logndisplay">Card %parm[cardLabel] removed from slot %parm[slot]</logmsg>
+        <descr>Card %parm[cardLabel]% removed from slot %parm[slot]%.</descr>
+        <logmsg dest="logndisplay">Card %parm[cardLabel]% removed from slot %parm[slot]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="1"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirCardIn</uei>
         <event-label>CISCO defined syslog event: oirCardIn</event-label>
-        <descr>Card %parm[cardLabel] inserted in slot %parm[slot].</descr>
-        <logmsg dest="logndisplay">Card %parm[cardLabel] inserted in slot %parm[slot]</logmsg>
+        <descr>Card %parm[cardLabel]% inserted in slot %parm[slot]%.</descr>
+        <logmsg dest="logndisplay">Card %parm[cardLabel]% inserted in slot %parm[slot]%</logmsg>
         <severity>Cleared</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/oirModuleOut:%dpname%:%nodeid%:%parm[slot]%"/>
     </event>
@@ -350,8 +350,8 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/ospfAdjChg</uei>
         <event-label>CISCO defined syslog event: ospfAdjChg</event-label>
-        <descr>Process %parm[processId], Neighbor %parm[neighbor] on %parm[ifDescr] transitioned from %parm[prevState] to %parm[newState]. Neighbor Down for reason: %parm[reason].</descr>
-        <logmsg dest="logndisplay">Process %parm[processId], Nbr %parm[neighbor] on %parm[ifDescr] from %parm[prevState] to %parm[newState], Neighbor Down: %parm[reason]</logmsg>
+        <descr>Process %parm[processId], Neighbor %parm[neighbor]% on %parm[ifDescr]% transitioned from %parm[prevState]% to %parm[newState]%. Neighbor Down for reason: %parm[reason]%.</descr>
+        <logmsg dest="logndisplay">Process %parm[processId]%, Nbr %parm[neighbor]% on %parm[ifDescr]% from %parm[prevState]% to %parm[newState]%, Neighbor Down: %parm[reason]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[neighbor]%:%parm[ifDescr]%" alarm-type="3">
             <managed-object type="snmp-interface"/>
@@ -360,64 +360,64 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/nbrChg</uei>
         <event-label>CISCO defined syslog event: nbrChg</event-label>
-        <descr>LDP Neighbor %parm[neighbor]:0 (0) is %parm[status] for reason: %parm[reason].</descr>
-        <logmsg dest="logndisplay">LDP Neighbor %parm[neighbor]:0 (0) is %parm[status] %parm[reason]</logmsg>
+        <descr>LDP Neighbor %parm[neighbor]%:0 (0) is %parm[status]% for reason: %parm[reason]%.</descr>
+        <logmsg dest="logndisplay">LDP Neighbor %parm[neighbor]%:0 (0) is %parm[stataus]% %parm[reason]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[neighbor]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/spaRemoved</uei>
         <event-label>CISCO defined syslog event: spaRemoved</event-label>
-        <descr>SPA removed from subslot %parm[subslot], %parm[reason].</descr>
-        <logmsg dest="logndisplay">SPA removed from subslot %parm[subslot], %parm[reason]</logmsg>
+        <descr>SPA removed from subslot %parm[subslot]%, %parm[reason]%.</descr>
+        <logmsg dest="logndisplay">SPA removed from subslot %parm[subslot]%, %parm[reason]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[subslot]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirSpCardIn</uei>
         <event-label>CISCO defined syslog event: oirSpCardIn</event-label>
-        <descr>Card inserted in slot %parm[slot], interfaces are now online.</descr>
-        <logmsg dest="logndisplay">Card inserted in slot %parm[slot], interfaces are now online</logmsg>
+        <descr>Card inserted in slot %parm[slot]%, interfaces are now online.</descr>
+        <logmsg dest="logndisplay">Card inserted in slot %parm[slot]%, interfaces are now online</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirSpaDown</uei>
         <event-label>CISCO defined syslog event: oirSpaDown</event-label>
-        <descr>SPA (%parm[card]) offline in subslot %parm[subslot].</descr>
-        <logmsg dest="logndisplay">SPA (%parm[card]) offline in subslot %parm[subslot]</logmsg>
+        <descr>SPA (%parm[card]%) offline in subslot %parm[subslot]%.</descr>
+        <logmsg dest="logndisplay">SPA (%parm[card]%) offline in subslot %parm[subslot]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[subslot]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirSpaIn</uei>
         <event-label>CISCO defined syslog event: oirSpaIn</event-label>
-        <descr>SPA inserted in subslot %parm[subslot].</descr>
-        <logmsg dest="logndisplay">SPA inserted in subslot %parm[subslot]</logmsg>
+        <descr>SPA inserted in subslot %parm[subslot]%.</descr>
+        <logmsg dest="logndisplay">SPA inserted in subslot %parm[subslot]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[subslot]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/oirSpaUp</uei>
         <event-label>CISCO defined syslog event: oirSpaUp</event-label>
-        <descr>SPA %parm[card] online in subslot %parm[subslot].</descr>
-        <logmsg dest="logndisplay">SPA %parm[card] online in subslot %parm[subslot]</logmsg>
+        <descr>SPA %parm[card]% online in subslot %parm[subslot]%.</descr>
+        <logmsg dest="logndisplay">SPA %parm[card]% online in subslot %parm[subslot]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[subslot]%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/reloadReq</uei>
         <event-label>CISCO defined syslog event: reloadReq</event-label>
-        <descr>Reload requested by %parm[user] on %parm[tty] %parm[host]. Reload Reason: %parm[reason].</descr>
-        <logmsg dest="logndisplay">Reload requested by %parm[user] on %parm[tty] %parm[host]. Reload Reason: %parm[reason]</logmsg>
+        <descr>Reload requested by %parm[user]% on %parm[tty]% %parm[host]%. Reload Reason: %parm[reason]%.</descr>
+        <logmsg dest="logndisplay">Reload requested by %parm[user]% on %parm[tty]% %parm[host]%. Reload Reason: %parm[reason]%</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3"/>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/pemOff</uei>
         <event-label>CISCO defined syslog event: pemOff</event-label>
-        <descr>The PEM in slot %parm[slot] is switched off or encountering a failure condition.</descr>
-        <logmsg dest="logndisplay">The PEM in slot %parm[slot] is off</logmsg>
+        <descr>The PEM in slot %parm[slot]% is switched off or encountering a failure condition.</descr>
+        <logmsg dest="logndisplay">The PEM in slot %parm[slot]% is off</logmsg>
         <severity>Warning</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slot]%" alarm-type="3"/>
     </event>

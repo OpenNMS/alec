@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -40,10 +39,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -98,8 +94,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
-
 public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, InventoryDatasource,
         AlarmFeedbackDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
@@ -117,7 +111,6 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public static final long DEFAULT_INVENTORY_GC_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);
     public static final long DEFAULT_INVENTORY_TTL_MS = TimeUnit.DAYS.toMillis(1);
-    public static final long DEFAULT_KAFKA_STORE_INIT_MS = TimeUnit.MILLISECONDS.convert(20, TimeUnit.SECONDS);
 
     private static final String INVENTORY_STORE_NODE_PREFIX = "node:";
     private static final String INVENTORY_STORE_ALARM_PREFIX = "alarm:";
@@ -147,10 +140,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     private long inventoryGcIntervalMs = DEFAULT_INVENTORY_GC_INTERVAL_MS;
     private long inventoryTtlMs = DEFAULT_INVENTORY_TTL_MS;
-    private long kafkaStoreInitMs = DEFAULT_KAFKA_STORE_INIT_MS;
 
     private KafkaProducer<String, String> producer;
-    private boolean alreadyWaitedForStores;
 
     public OpennmsDatasource(ConfigurationAdmin configAdmin) {
         this.configAdmin = Objects.requireNonNull(configAdmin);
@@ -385,10 +376,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 alarms.add(OpennmsMapper.toAlarm(entry.value));
             });
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            LOG.info("{}, returning empty list", e.getMessage());
         }
         return alarms;
     }
@@ -418,10 +406,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                     alarmFeedback.addAll(OpennmsMapper.toAlarmFeedbackList(entry.value))
             );
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            LOG.info("{}, returning empty list", e.getMessage());
         }
         return alarmFeedback;
     }
@@ -461,10 +446,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 inventory.add(entry.value);
             });
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            LOG.info("{}, returning empty list", e.getMessage());
         }
 
         Set<ResourceKey> uniqueIds = new HashSet<>();
@@ -510,60 +492,38 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 situations.add(OpennmsMapper.toSituation(entry.value));
             });
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            LOG.info("{}, returning empty list", e.getMessage());
         }
         return situations;
     }
 
-    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable()
-            throws InterruptedException, TimeoutException {
+    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable() throws InterruptedException {
         return waitUntilStoreIsQueryable(SITUATION_STORE);
     }
 
-    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilAlarmStoreIsQueryable()
-            throws InterruptedException, TimeoutException {
+    private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilAlarmStoreIsQueryable() throws InterruptedException {
         return waitUntilStoreIsQueryable(ALARM_STORE);
     }
 
-    private ReadOnlyKeyValueStore<String, InventoryModelProtos.InventoryObjects> waitUntilInventoryStoreIsQueryable()
-            throws InterruptedException, TimeoutException {
+    private ReadOnlyKeyValueStore<String, InventoryModelProtos.InventoryObjects> waitUntilInventoryStoreIsQueryable() throws InterruptedException {
         return waitUntilStoreIsQueryable(INVENTORY_STORE);
     }
 
-    private ReadOnlyKeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks> waitUntilAlarmFeedbackStoreIsQueryable()
-            throws InterruptedException, TimeoutException {
+    private ReadOnlyKeyValueStore<String, FeedbackModelProtos.AlarmFeedbacks> waitUntilAlarmFeedbackStoreIsQueryable() throws InterruptedException {
         return waitUntilStoreIsQueryable(ALARM_FEEDBACK_STORE);
     }
 
-    private <K, V> ReadOnlyKeyValueStore<K, V> waitUntilStoreIsQueryable(String storeName)
-            throws InterruptedException, TimeoutException {
+    private <K,V> ReadOnlyKeyValueStore<K, V> waitUntilStoreIsQueryable(String storeName) throws InterruptedException {
         if (streams == null) {
             throw new IllegalStateException("Datasource must be started first.");
         }
-
-        Stopwatch stopwatch = Stopwatch.createStarted();
-
-        while (stopwatch.elapsed(TimeUnit.MILLISECONDS) <= getKafkaStoreInitMs()) {
+        while (true) {
             try {
-                ReadOnlyKeyValueStore<K, V> store = streams.store(storeName, QueryableStoreTypes.keyValueStore());
-                LOG.debug("Store {} is queryable", storeName);
-                return store;
+                return streams.store(storeName, QueryableStoreTypes.keyValueStore());
             } catch (InvalidStateStoreException ignored) {
-                // If we already waited for all the stores to be ready and they were or they timed out then we should
-                // not bother waiting again. The effect of this is that after waiting the first time, any subsequent
-                // attempts to wait will immediately time out if the store is not available on the first try.
-                if (alreadyWaitedForStores) {
-                    break;
-                }
                 Thread.sleep(100);
             }
         }
-
-        stopwatch.stop();
-        throw new TimeoutException(String.format("Timed out while waiting for store %s", storeName));
     }
 
     @Override
@@ -653,71 +613,17 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         this.inventoryTtlMs = inventoryTtlMs;
     }
 
-    public long getKafkaStoreInitMs() {
-        return kafkaStoreInitMs;
-    }
-
-    public void setKafkaStoreInitMs(long kafkaStoreInitMs) {
-        this.kafkaStoreInitMs = kafkaStoreInitMs;
-    }
-
     @Override
     public void waitUntilReady() throws InterruptedException {
-        if (alreadyWaitedForStores) {
-            LOG.debug("Already waited for stores, not waiting again");
-            return;
-        }
-
-        // Create a collection of tasks that will wait for each of the data stores that this datasource depends on. We
-        // will then execute these wait tasks in parallel and join when the waiting is done.
-        Collection<Callable<Void>> waitForStoresTasks = new ArrayList<>();
-
-        // Wait for the inventory store
-        waitForStoresTasks.add(() -> {
-            LOG.debug("Waiting for inventory store...");
-            try {
-                waitUntilInventoryStoreIsQueryable();
-            } catch (TimeoutException e) {
-                LOG.info(e.getMessage());
-            }
-            return null;
-        });
-
-        // Wait for the alarm store
-        waitForStoresTasks.add(() -> {
-            LOG.debug("Waiting for alarm store...");
-            try {
-                waitUntilAlarmStoreIsQueryable();
-            } catch (TimeoutException e) {
-                LOG.info(e.getMessage());
-            }
-            return null;
-        });
-
-        // Wait for the situation store
-        waitForStoresTasks.add(() -> {
-            LOG.debug("Waiting for situation store...");
-            try {
-                waitUntilSituationStoreIsQueryable();
-            } catch (TimeoutException e) {
-                LOG.info(e.getMessage());
-            }
-            return null;
-        });
-
-        // Wait for the alarm feedback store
-        waitForStoresTasks.add(() -> {
-            LOG.debug("Waiting for alarm feedback store...");
-            try {
-                waitUntilAlarmFeedbackStoreIsQueryable();
-            } catch (TimeoutException e) {
-                LOG.info(e.getMessage());
-            }
-            return null;
-        });
-
-        Executors.newFixedThreadPool(waitForStoresTasks.size()).invokeAll(waitForStoresTasks);
-        LOG.debug("Done waiting for stores");
-        alreadyWaitedForStores = true;
+        // These will block until Kafka is available and the topics are created
+        LOG.debug("Waiting for inventory store...");
+        waitUntilInventoryStoreIsQueryable();
+        LOG.debug("Waiting for alarm store...");
+        waitUntilAlarmStoreIsQueryable();
+        LOG.debug("Waiting for situation store...");
+        waitUntilSituationStoreIsQueryable();
+        LOG.debug("Waiting for alarm feedback store...");
+        waitUntilAlarmFeedbackStoreIsQueryable();
+        LOG.debug("All stores are available");
     }
 }

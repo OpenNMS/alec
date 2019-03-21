@@ -312,13 +312,15 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
                 // GC alarms from vertices
                 int numGarbageCollectedAlarms = 0;
+                int numAlarms = 0;
                 for (CEVertex v : g.getVertices()) {
                     numGarbageCollectedAlarms += v.garbageCollectAlarms(timestampInMillis, problemTimeoutMs,
                             clearTimeoutMs);
+                    numAlarms += v.getNumAlarms();
                 }
                 LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
-                LOG.debug("{}: Clustering alarms.", timestampInMillis);
+                LOG.debug("{}: Clustering {} alarms.", timestampInMillis, numAlarms);
                 List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis, g);
                 if (clustersOfAlarms == null) {
                     LOG.debug("{}: No clustering was performed.", timestampInMillis);

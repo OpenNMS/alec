@@ -31,12 +31,15 @@ package org.opennms.oce.engine.deeplearning;
 import java.util.Objects;
 
 import org.opennms.oce.engine.api.EngineFactory;
+import org.osgi.framework.BundleContext;
 
 public class DeepLearningEngineFactory implements EngineFactory {
 
+    private final BundleContext bundleContext;
     private final DeepLearningEngineConf conf;
 
-    public DeepLearningEngineFactory(DeepLearningEngineConf conf) {
+    public DeepLearningEngineFactory(BundleContext bundleContext, DeepLearningEngineConf conf) {
+        this.bundleContext = Objects.requireNonNull(bundleContext);
         this.conf = Objects.requireNonNull(conf);
     }
 
@@ -52,7 +55,7 @@ public class DeepLearningEngineFactory implements EngineFactory {
 
     @Override
     public DeepLearningEngine createEngine() {
-        return new DeepLearningEngine(conf);
+        return new DeepLearningEngine(bundleContext, conf);
     }
 
 }

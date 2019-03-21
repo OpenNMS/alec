@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tensorflow.SavedModelBundle;
@@ -51,6 +52,7 @@ import com.google.gson.stream.JsonReader;
 
 public class TFModel implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TFModel.class);
+    private static final String CLASSPATH_MODEL_PATH = "/tf_model";
 
     private static final Gson gson = new Gson();
 
@@ -65,13 +67,22 @@ public class TFModel implements AutoCloseable {
     }
 
     public TFModel(String modelPath) {
+        this(null, modelPath);
+    }
+
+    public TFModel(BundleContext bundleContext, String modelPath) {
         final String effectiveModelPath;
         if (Strings.isNullOrEmpty(modelPath)) {
             LOG.info("No model path is set. Using default model from class-path.");
             try {
                 tempDir = Files.createTempDirectory("oce-tf");
                 effectiveModelPath = tempDir.toAbsolutePath().toString();
-                ClasspathUtils.copyResourcesRecursively(getClass().getResource("/tf_model"), tempDir.toFile());
+                if (bundleContext != null) {
+                    // If we're given a bundle context, use it
+                    ClasspathUtils.copyResourcesRecursively(bundleContext, CLASSPATH_MODEL_PATH, tempDir.toFile());
+                } else {
+                    ClasspathUtils.copyResourcesRecursively(getClass().getResource(CLASSPATH_MODEL_PATH), tempDir.toFile());
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

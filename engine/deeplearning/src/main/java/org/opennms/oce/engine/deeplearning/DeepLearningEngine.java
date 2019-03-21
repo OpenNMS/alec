@@ -36,6 +36,7 @@ import org.opennms.oce.engine.cluster.AbstractClusterEngine;
 import org.opennms.oce.engine.cluster.AlarmInSpaceTime;
 import org.opennms.oce.engine.cluster.CEEdge;
 import org.opennms.oce.engine.cluster.CEVertex;
+import org.osgi.framework.BundleContext;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -51,12 +52,8 @@ public class DeepLearningEngine extends AbstractClusterEngine {
     private Vectorizer vectorizer;
     private TFClusterer tfClusterer;
 
-    public DeepLearningEngine() {
-        this(new TFModel(), new DeepLearningEngineConf());
-    }
-
-    public DeepLearningEngine(DeepLearningEngineConf conf) {
-        this(new TFModel(conf.getModelPath()), conf);
+    public DeepLearningEngine(BundleContext bundleContext, DeepLearningEngineConf conf) {
+        this(new TFModel(bundleContext, conf.getModelPath()), conf);
     }
 
     private DeepLearningEngine(TFModel tfModel, DeepLearningEngineConf conf) {

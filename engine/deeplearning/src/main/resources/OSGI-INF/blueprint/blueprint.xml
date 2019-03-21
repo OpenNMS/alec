@@ -22,7 +22,8 @@
     <!-- Create and expose the engine factory -->
     <service interface="org.opennms.oce.engine.api.EngineFactory" ranking="20">
         <bean class="org.opennms.oce.engine.deeplearning.DeepLearningEngineFactory">
-            <argument index="0" ref="deepLearningEngineConf"/>
+            <argument index="0" ref="blueprintBundleContext"/>
+            <argument index="1" ref="deepLearningEngineConf"/>
         </bean>
     </service>
 

@@ -35,10 +35,14 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility functions for copying resources from the classpath
@@ -46,6 +50,35 @@ import org.apache.commons.io.FileUtils;
  * @author stack overflow
  */
 class ClasspathUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(ClasspathUtils.class);
+
+    /**
+     * Recursively copy a folder from a bundle to the filesystem.
+     *
+     * @param bundleContext bundle context
+     * @param path path of the resources within the bundle
+     * @param destination target folder
+     * @throws IOException on error
+     */
+    static void copyResourcesRecursively(BundleContext bundleContext, String path, File destination) throws IOException {
+        final Enumeration<URL> urls = bundleContext.getBundle().findEntries(path, "*", true);
+        while (urls.hasMoreElements()) {
+            final URL url = urls.nextElement();
+            final String fileName = removeStart(url.getPath(), path);
+            if (fileName.endsWith("/")) {
+                // This is a directory, skip it
+                continue;
+            }
+            try (InputStream entryInputStream = url.openStream()) {
+                final File targetFile = new File(destination, fileName);
+                LOG.debug("Copying '{}' to '{}'.", url, targetFile);
+                // Create the parent directory if necessary
+                FileUtils.forceMkdir(new File(targetFile.getParent()));
+                // Copy the bytes
+                FileUtils.copyInputStreamToFile(entryInputStream, targetFile);
+            }
+        }
+    }
 
     /**
      * Recursively copy a folder from the class-path to the filesystem.

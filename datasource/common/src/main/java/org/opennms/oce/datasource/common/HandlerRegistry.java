@@ -34,12 +34,16 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A thread-safe registry for maintaining a set of handlers.
  *
  * @param <T> handler type
  */
 public class HandlerRegistry<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(HandlerRegistry.class);
 
     private final ReadWriteLock handlerLock = new ReentrantReadWriteLock();
     private final Set<T> handlers = new HashSet<>();
@@ -47,7 +51,13 @@ public class HandlerRegistry<T> {
     public void forEach(Consumer<T> consumer) {
         handlerLock.readLock().lock();
         try {
-            handlers.forEach(consumer);
+            handlers.forEach(t -> {
+                try {
+                    consumer.accept(t);
+                } catch (Exception e) {
+                    LOG.error("Error occurred on handler {}: {}", t, e.getMessage(), e);
+                }
+            });
         } finally {
             handlerLock.readLock().unlock();
         }

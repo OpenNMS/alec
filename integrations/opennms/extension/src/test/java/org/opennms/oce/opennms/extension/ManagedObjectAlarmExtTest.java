@@ -58,6 +58,7 @@ public class ManagedObjectAlarmExtTest {
 
     @Test
     public void canAssociateAlarmWithNodeManagedObject() {
+        // First, test a node without a FS:FID
         Alarm alarm = mock(Alarm.class);
         Node node = mock(Node.class);
         when(node.getId()).thenReturn(1);
@@ -72,6 +73,19 @@ public class ManagedObjectAlarmExtTest {
         assertThat(ManagedObjectType.fromName(updatedalarm.getManagedObjectType()),
                 is(equalTo(ManagedObjectType.Node)));
         assertThat(updatedalarm.getManagedObjectInstance(), is(equalTo(Integer.toString(node.getId()))));
+
+        // Now test a node with a FS:FID
+        alarm = mock(Alarm.class);
+        node = mock(Node.class);
+        when(node.getId()).thenReturn(1);
+        when(node.getForeignId()).thenReturn("FID");
+        when(node.getForeignSource()).thenReturn("FS");
+        when(alarm.getNode()).thenReturn(node);
+
+        updatedalarm = managedObjectAlarmExt.afterAlarmCreated(alarm, inMemoryEvent, databaseEvent);
+        assertThat(ManagedObjectType.fromName(updatedalarm.getManagedObjectType()),
+                is(equalTo(ManagedObjectType.Node)));
+        assertThat(updatedalarm.getManagedObjectInstance(), is(equalTo("FS:FID")));
     }
 
     @Test

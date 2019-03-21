@@ -343,8 +343,8 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
         if (node == null) {
             return null;
         }
-        if (node.getForeignId() != null && node.getForeignSource() != null) {
-            return node.getForeignId() + ":" + node.getForeignSource();
+        if (node.getForeignSource() != null && node.getForeignId() != null) {
+            return node.getForeignSource() + ":" + node.getForeignId();
         }
         return node.getId() != null ? node.getId().toString() : null;
     }

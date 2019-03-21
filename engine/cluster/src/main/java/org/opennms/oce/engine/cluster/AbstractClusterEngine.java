@@ -281,6 +281,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 for (String situationId : situationsWithFeedback) {
                     // Handle the blacklisted alarm case
                     Situation affectedSituation = situationsById.get(situationId);
+                    if (affectedSituation == null) {
+                        LOG.info("Got feedback for situation with id: {}, but the engine does not know about this situation. Ignoring feedback.");
+                        continue;
+                    }
                     Set<Alarm> prevAlarms = affectedSituation.getAlarms();
                     Set<Alarm> newAlarms = new HashSet<>(prevAlarms);
 

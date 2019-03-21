@@ -319,11 +319,17 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
                 LOG.debug("{}: Clustering alarms.", timestampInMillis);
-                final List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis, g);
+                List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis, g);
                 if (clustersOfAlarms == null) {
                     LOG.debug("{}: No clustering was performed.", timestampInMillis);
                     return;
                 }
+
+                // Ignore clusters with less than 2 alarms
+                clustersOfAlarms = clustersOfAlarms.stream()
+                        .filter(c -> c.getPoints().size() >= 2)
+                        .collect(Collectors.toList());
+
                 LOG.debug("{}: Found {} clusters of alarms.", timestampInMillis, clustersOfAlarms.size());
 
                 synchronized (situationsWithFeedback) {

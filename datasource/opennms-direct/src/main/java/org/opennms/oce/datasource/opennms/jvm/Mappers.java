@@ -157,7 +157,7 @@ public class Mappers {
         final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
                 .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
                 .max()
-                .getAsInt());
+                .orElseGet(Severity.INDETERMINATE::getValue));
         event.setSeverity(toSeverity(maxSeverity));
 
         // Relay the situation id
@@ -166,14 +166,16 @@ public class Mappers {
         // Use the log message and description from the first (earliest) alarm
         final Alarm earliestAlarm = situation.getAlarms().stream()
                 .min(Comparator.comparing(Alarm::getTime))
-                .get();
-        event.addParameter("situationLogMsg", earliestAlarm.getSummary());
+                .orElse(null);
+        if (earliestAlarm != null) {
+            event.addParameter("situationLogMsg", earliestAlarm.getSummary());
 
-        String description = earliestAlarm.getDescription();
-        if (situation.getDiagnosticText() != null) {
-            description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
+            String description = earliestAlarm.getDescription();
+            if (situation.getDiagnosticText() != null) {
+                description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
+            }
+            event.addParameter("situationDescr", description);
         }
-        event.addParameter("situationDescr", description);
 
         // Set the related reduction keys
         final AtomicInteger alarmIndex = new AtomicInteger(0);

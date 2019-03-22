@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,39 +28,13 @@
 
 package org.opennms.oce.datasource.common.inventory;
 
-
-import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public enum ManagedObjectType {
-    Node("node"),
-    SnmpInterface("snmp-interface"),
-    SnmpInterfaceLink("snmp-interface-link"),
-    BgpPeer("bgp-peer"),
-    VpnTunnel("vpn-tunnel"),
-    MplsL3Vrf("mpls-l3-vrf"),
-    EntPhysicalEntity("ent-physical-entity"),
-    OspfRouter("ospf-router"),
-    MplsTunnel("mpls-tunnel"),
-    MplsLdpSession("mpls-ldp-session"),
-    Segment("segment"),
-    BridgeLink("bridge-link");
-
-    private final String name;
-
-    ManagedObjectType(String name) {
-        this.name = Objects.requireNonNull(name);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public static ManagedObjectType fromName(String name) {
-        return Arrays.stream(ManagedObjectType.values())
-                .filter(mot -> Objects.equals(name, mot.getName()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("No type found with name: " + name));
+/**
+ * Utility methods for deriving Segment attributes.
+ */
+public class Segment {
+    public static String generateId(String id, String protocol) {
+        return String.format("%s:%s", Objects.requireNonNull(protocol), Objects.requireNonNull(id));
     }
 }

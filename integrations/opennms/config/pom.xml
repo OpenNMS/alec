@@ -30,7 +30,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opennms.integration.api</groupId>
-            <artifactId>xml</artifactId>
+            <artifactId>config</artifactId>
 	    <version>${opennms.api.version}</version>
         </dependency>
 

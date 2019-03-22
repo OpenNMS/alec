@@ -29,6 +29,7 @@
 package org.opennms.oce.datasource.opennms.jvm;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,9 +43,12 @@ import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
 import org.opennms.integration.api.v1.dao.AlarmDao;
+import org.opennms.integration.api.v1.dao.EdgeDao;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.TopologyEdge;
+import org.opennms.integration.api.v1.topology.TopologyEdgeConsumer;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -52,13 +56,12 @@ import org.opennms.oce.datasource.common.HandlerRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 /**
  * A datasource that provides {@link InventoryObject inventory} via the integration API.
  */
-public class DirectInventoryDatasource implements InventoryDatasource, AlarmLifecycleListener {
+public class DirectInventoryDatasource implements InventoryDatasource, AlarmLifecycleListener, TopologyEdgeConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(DirectInventoryDatasource.class);
 
     /**
@@ -71,6 +74,12 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * callbacks {@link #handleAlarmSnapshot} and {@link #handleNewOrUpdatedAlarm}.
      */
     private Set<InventoryObject> inventoryFromAlarms = new LinkedHashSet<>();
+
+    /**
+     * The set of inventory objects derived from edges initially populated via {@link #init} and subsequently via
+     * callback {@link #onEdgeAddedOrUpdated}.
+     */
+    private Set<InventoryObject> inventoryFromEdges = new LinkedHashSet<>();
 
     /**
      * The set of inventory objects derived from nodes populated via {@link #init}. This set is never modified after it
@@ -91,7 +100,19 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private Map<Integer, Set<InventoryObject>> alarmIdToInventoryMapping = new HashMap<>();
 
     /**
-     * A lock that prevents callbacks from being processed before we have finished {@link #init}.
+     * A map of {@link InventoryObject inventory objects} to edge Ids to facilitate tracking which edges derived which
+     * inventory.
+     */
+    private Map<InventoryObject, Set<String>> inventoryToEdgeIdMapping = new HashMap<>();
+
+    /**
+     * A map of edge Ids to {@link InventoryObject inventory objects} to facilitate tracking which edges derived which
+     * inventory.
+     */
+    private Map<String, Set<InventoryObject>> edgeIdToInventoryMapping = new HashMap<>();
+
+    /**
+     * A lock that prevents callbacks from being processed before we have finished {@link #init initializing}.
      */
     private final CountDownLatch initLock = new CountDownLatch(1);
 
@@ -105,16 +126,35 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      */
     private final AlarmDao alarmDao;
 
-    private ApiMapper mapper;
+    /**
+     * Used during {@link #init} to initialize {@link #inventoryFromEdges}.
+     */
+    private final EdgeDao edgeDao;
 
     /**
-     * @param nodeDao  used to retrieve the current inventory
-     * @param alarmDao used to retrieve the current inventory
-     * @param mapper used to Map between API and OCE types
+     * A comma separated list of protocols that this datasource should consume. Effectively filters updates received
+     * from {@link #onEdgeAddedOrUpdated(TopologyEdge)} and {@link #onEdgeDeleted(TopologyEdge)}.
      */
-    public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao, ApiMapper mapper) {
+    private final String topologyProtocols;
+
+    /**
+     * A mapper for deriving inventory objects.
+     */
+    private final ApiMapper mapper;
+
+    /**
+     * @param nodeDao           used to retrieve the current inventory
+     * @param alarmDao          used to retrieve the current inventory
+     * @param edgeDao           used to retrieve the current inventory
+     * @param topologyProtocols the protocols supported for topology updates
+     * @param mapper            used to Map between API and OCE types
+     */
+    public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao, EdgeDao edgeDao, String topologyProtocols,
+                                     ApiMapper mapper) {
         this.nodeDao = Objects.requireNonNull(nodeDao);
         this.alarmDao = Objects.requireNonNull(alarmDao);
+        this.edgeDao = Objects.requireNonNull(edgeDao);
+        this.topologyProtocols = Objects.requireNonNull(topologyProtocols);
         this.mapper = Objects.requireNonNull(mapper);
     }
 
@@ -125,6 +165,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     public void init() {
         nodeDao.getNodes().forEach(n -> inventoryFromAlarms.addAll(mapper.toInventory(n)));
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
+        edgeDao.getEdges().forEach(e -> processEdge(e, false));
         initLock.countDown();
     }
 
@@ -146,11 +187,12 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      *
      * @param inventoryObjects the inventory mapped from the callback
      * @param notifyHandlers   whether or not to notify handlers
+     * @return the newly added inventory or an empty collection if no new inventory was added
      */
-    private void addInventory(List<InventoryObject> inventoryObjects, boolean notifyHandlers) {
+    private Collection<InventoryObject> addInventory(List<InventoryObject> inventoryObjects, boolean notifyHandlers) {
         // Only add and notify for inventory that was not already known
         Set<InventoryObject> newInventory = Sets.difference(new HashSet<>(inventoryObjects),
-                this.inventoryFromAlarms);
+                Sets.union(inventoryFromAlarms, inventoryFromEdges));
 
         if (!newInventory.isEmpty()) {
             if (notifyHandlers) {
@@ -158,7 +200,11 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
             }
         }
 
-        inventoryFromAlarms.addAll(newInventory);
+        return newInventory;
+    }
+
+    private void processAlarm(Alarm alarm) {
+        processAlarm(alarm, true);
     }
 
     /**
@@ -167,6 +213,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param alarm       the alarm to process
      * @param waitForInit whether or not to wait for init to finish first
      */
+    @SuppressWarnings("Duplicates")
     private void processAlarm(Alarm alarm, boolean waitForInit) {
         if (waitForInit) {
             waitForInit();
@@ -187,7 +234,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
             inventoryToAdd.addAll(mapper.toInventory(alarm));
         }
 
-        addInventory(inventoryToAdd, waitForInit);
+        inventoryFromAlarms.addAll(addInventory(inventoryToAdd, waitForInit));
 
         // Update the set of alarm Ids that this inventory was derived from (alarm reference counting for this
         // inventory)
@@ -214,10 +261,59 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
         });
     }
 
+    private void processEdge(TopologyEdge edge) {
+        processEdge(edge, true);
+    }
+
+    /**
+     * Process an edge.
+     *
+     * @param edge        the edge to process
+     * @param waitForInit whether or not to wait for init to finish first
+     */
+    @SuppressWarnings("Duplicates")
+    private void processEdge(TopologyEdge edge, boolean waitForInit) {
+        if (waitForInit) {
+            waitForInit();
+        }
+
+        if (edge == null) {
+            LOG.warn("Received null edge");
+            return;
+        }
+
+        List<InventoryObject> inventoryToAdd = mapper.toInventory(edge);
+        inventoryFromEdges.addAll(addInventory(inventoryToAdd, waitForInit));
+
+        // Update the set of edge Ids that this inventory was derived from (edge reference counting for this
+        // inventory)
+        inventoryToAdd.forEach(inventory ->
+                inventoryToEdgeIdMapping.compute(inventory, (k, v) -> {
+                    if (v == null) {
+                        return new HashSet<>(Collections.singleton(edge.getId()));
+                    }
+
+                    v.add(edge.getId());
+                    return v;
+                })
+        );
+
+        // Record that this edge derived this inventory to make the lookup easier when it comes time to delete this
+        // edge
+        edgeIdToInventoryMapping.compute(edge.getId(), (k, v) -> {
+            if (v == null) {
+                return new HashSet<>(inventoryToAdd);
+            }
+
+            v.addAll(inventoryToAdd);
+            return v;
+        });
+    }
+
     @Override
     public synchronized void handleAlarmSnapshot(List<Alarm> alarms) {
         // Derive new inventory from the snapshot
-        alarms.forEach(alarm -> processAlarm(alarm, true));
+        alarms.forEach(this::processAlarm);
 
         // Determine and process the alarms that must have been deleted according to the snapshot
         Set<Integer> authoritativeAlarmIds = alarms.stream().map(Alarm::getId).collect(Collectors.toSet());
@@ -227,9 +323,10 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @Override
     public synchronized void handleNewOrUpdatedAlarm(Alarm alarm) {
-        processAlarm(alarm, true);
+        processAlarm(alarm);
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public synchronized void handleDeletedAlarm(int alarmId, String reductionKey) {
         // Check if this alarm had any inventory associated
@@ -264,9 +361,57 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @Override
+    public synchronized void onEdgeAddedOrUpdated(TopologyEdge topologyEdge) {
+        processEdge(topologyEdge);
+    }
+
+    @SuppressWarnings("Duplicates")
+    @Override
+    public synchronized void onEdgeDeleted(TopologyEdge topologyEdge) {
+        // Check if this edge had any inventory associated
+        Set<InventoryObject> inventoryForEdge = edgeIdToInventoryMapping.get(topologyEdge.getId());
+
+        if (inventoryForEdge != null && !inventoryForEdge.isEmpty()) {
+            Set<InventoryObject> inventoryToRemove = new HashSet<>();
+
+            inventoryForEdge.forEach(inventory -> {
+                Set<String> edgeIdsForInventory = inventoryToEdgeIdMapping.get(inventory);
+                edgeIdsForInventory.remove(topologyEdge.getId());
+
+                // If this was the last alarm to reference the inventory then we can mark it for removal
+                if (edgeIdsForInventory.isEmpty()) {
+                    inventoryToRemove.add(inventory);
+                }
+            });
+
+            if (!inventoryToRemove.isEmpty()) {
+                // Clean up the collections that contain this inventory
+                inventoryToRemove.forEach(inventory -> {
+                    inventoryToEdgeIdMapping.remove(inventory);
+                    inventoryFromEdges.remove(inventory);
+                });
+
+                inventoryHandlers.forEach(handler -> handler.onInventoryRemoved(inventoryToRemove));
+            }
+
+            // Since this alarm has been deleted we can clear the inventory associated with it
+            inventoryForEdge.clear();
+        }
+    }
+
+    @Override
+    public String getProtocols() {
+        return topologyProtocols;
+    }
+
+    @Override
     public synchronized List<InventoryObject> getInventory() {
         waitForInit();
-        return ImmutableList.copyOf(Sets.union(inventoryFromAlarms, inventoryFromNodes));
+        Set<InventoryObject> currentInventory = new HashSet<>();
+        currentInventory.addAll(inventoryFromAlarms);
+        currentInventory.addAll(inventoryFromNodes);
+        currentInventory.addAll(inventoryFromEdges);
+        return Collections.unmodifiableList(new ArrayList<>(currentInventory));
     }
 
     @Override

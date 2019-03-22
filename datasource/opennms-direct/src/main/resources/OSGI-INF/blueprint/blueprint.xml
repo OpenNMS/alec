@@ -5,12 +5,14 @@
         <cm:default-properties>
             <cm:property name="scriptFile" value="" /> <!--  use empty string to use default script included in bundle" -->
             <cm:property name="scriptCacheMillis" value="30000"/>  <!-- 30 seconds -->
+            <cm:property name="topologyProtocols" value="bridge,cdp,isis,lldp,ospf,userdefined"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <reference id="alarmDao" interface="org.opennms.integration.api.v1.dao.AlarmDao" />
     <reference id="alarmFeedbackDao" interface="org.opennms.integration.api.v1.dao.AlarmFeedbackDao" />
     <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao" />
+    <reference id="edgeDao" interface="org.opennms.integration.api.v1.dao.EdgeDao" />
     <reference id="eventForwarder" interface="org.opennms.integration.api.v1.events.EventForwarder" />
 
     <bean id="scriptService" class="org.opennms.oce.datasource.opennms.jvm.ScriptedInventoryImpl">
@@ -41,12 +43,17 @@
     <service ref="directAlarmFeedbackDatasource" interface="org.opennms.integration.api.v1.feedback.AlarmFeedbackListener"/>
     <service ref="directAlarmFeedbackDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource"/>
 
-    <bean id="directInventoryDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectInventoryDatasource" init-method="init" >
+    <!-- Direct Datasource -->
+    <bean id="directInventoryDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectInventoryDatasource"
+          init-method="init">
         <argument ref="nodeDao"/>
         <argument ref="alarmDao"/>
+        <argument ref="edgeDao"/>
+        <argument value="${topologyProtocols}"/>
         <argument ref="mapper"/>
     </bean>
     <service ref="directInventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
     <service ref="directInventoryDatasource" interface="org.opennms.integration.api.v1.alarms.AlarmLifecycleListener"/>
+    <service ref="directInventoryDatasource" interface="org.opennms.integration.api.v1.topology.TopologyEdgeConsumer"/>
 
 </blueprint>

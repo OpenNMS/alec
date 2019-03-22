@@ -47,7 +47,9 @@ import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.oce.datasource.common.inventory.Edge;
 import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.Segment;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
 import org.opennms.oce.driver.test.MockInventory;
 import org.opennms.oce.driver.test.MockInventoryBuilder;
@@ -359,8 +361,6 @@ public class GraphManagerTest {
 
     @Test
     public void canLinkInterfaces() {
-        // Note: This could be expanded to handle segments in addition to interfaces when they are supported
-
         // Create a new graph manager
         final GraphManager graphManager = new GraphManager();
 
@@ -407,16 +407,38 @@ public class GraphManagerTest {
                         .setEndpoint(InventoryObjectPeerEndpoint.Z)
                         .build())
                 .build();
+        
+        // Create a segment
+        InventoryObject segment = ImmutableInventoryObject.newBuilder()
+                .setId(Segment.generateId("s1", "protocol"))
+                .setType(ManagedObjectType.Segment.getName())
+                .build();
+        
+        // Create a link between the segment and node 1 interface
+        InventoryObject segmentLink = ImmutableInventoryObject.newBuilder()
+                .setId("segmentLink")
+                .setType(ManagedObjectType.BridgeLink.getName())
+                .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(node1InterfaceId)
+                        .setType(ManagedObjectType.SnmpInterface.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.A)
+                        .build())
+                .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(Segment.generateId("s1", "protocol"))
+                        .setType(ManagedObjectType.Segment.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                        .build())
+                .build();
 
         // Send the inventory to the graph manager
         Collection<InventoryObject> inventory = Arrays.asList(node1, node2, node1Interface0, node2Interface0,
-                linkNode1ToNode2);
+                linkNode1ToNode2, segment, segmentLink);
         graphManager.addInventory(inventory);
 
         // Verify that the graph looks as expected
         graphManager.withGraph(g -> {
-            assertThat(g.getVertexCount(), equalTo(5));
-            assertThat(g.getEdgeCount(), equalTo(4));
+            assertThat(g.getVertexCount(), equalTo(7));
+            assertThat(g.getEdgeCount(), equalTo(6));
         });
     }
 }

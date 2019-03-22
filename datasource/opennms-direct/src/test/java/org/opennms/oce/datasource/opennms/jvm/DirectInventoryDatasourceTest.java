@@ -42,9 +42,14 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.integration.api.v1.dao.AlarmDao;
+import org.opennms.integration.api.v1.dao.EdgeDao;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.NodeCriteria;
+import org.opennms.integration.api.v1.model.TopologyEdge;
+import org.opennms.integration.api.v1.model.TopologyPort;
+import org.opennms.integration.api.v1.model.TopologySegment;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
@@ -52,16 +57,18 @@ import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 public class DirectInventoryDatasourceTest {
     private final NodeDao mockNodeDao = mock(NodeDao.class);
     private final AlarmDao mockAlarmDao = mock(AlarmDao.class);
-
-    private DirectInventoryDatasource dic;
+    private final ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory" +
+            ".groovy");
+    private final ApiMapper mapper = new ApiMapper(inventoryService);
+    private final EdgeDao mockEdgeDao = mock(EdgeDao.class);
+    private final String protocols = "";
+    private final DirectInventoryDatasource dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao,
+            mockEdgeDao, protocols, mapper);
     private final InventoryHandler inventoryHandler = new InventoryHandlerImpl();
     private final Set<InventoryObject> inventory = new HashSet<>();
 
     @Before
     public void setUp() {
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
-        ApiMapper mapper = new ApiMapper(inventoryService);
-        dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao, mapper);
         dic.init();
     }
 
@@ -69,7 +76,7 @@ public class DirectInventoryDatasourceTest {
      * Test the reference counting behavior of  {@link DirectInventoryDatasource#handleDeletedAlarm}.
      */
     @Test
-    public void testHandleDeletedAlarm() {
+    public void testHandleNewAndDeletedAlarm() {
         assertThat(dic.getInventoryAndRegisterHandler(inventoryHandler), hasSize(0));
         assertThat(inventory, hasSize(0));
 
@@ -107,7 +114,7 @@ public class DirectInventoryDatasourceTest {
         // inventory
         dic.handleDeletedAlarm(alarm2.getId(), alarm2.getReductionKey());
         assertThat(inventory, hasSize(0));
-        
+
         // A snapshot that would cause the alarms to be deleted should be handled without inventory changing
         // since the alarms should already be deleted
         dic.handleAlarmSnapshot(Collections.emptyList());
@@ -122,6 +129,63 @@ public class DirectInventoryDatasourceTest {
         assertThat(inventory, hasSize(0));
     }
 
+    @Test
+    public void testHandleNewAndDeletedEdge() {
+        assertThat(dic.getInventoryAndRegisterHandler(inventoryHandler), hasSize(0));
+        assertThat(inventory, hasSize(0));
+
+        // Create an edge between a segment and an interface on a node
+        int portNodeCriteriaId = 99;
+        NodeCriteria portNodeCriteria = mock(NodeCriteria.class);
+        when(portNodeCriteria.getId()).thenReturn(portNodeCriteriaId);
+
+        String portId = "port.id";
+        int portIfIndex = 1;
+        TopologyPort port = mock(TopologyPort.class);
+        when(port.getId()).thenReturn(portId);
+        when(port.getIfIndex()).thenReturn(portIfIndex);
+        when(port.getNodeCriteria()).thenReturn(portNodeCriteria);
+
+        String protocol = "protocol";
+        String segmentId = "segment.id";
+        String segmentCriteria = "segment:criteria";
+        TopologySegment segment = mock(TopologySegment.class);
+        when(segment.getId()).thenReturn(segmentId);
+        when(segment.getProtocol()).thenReturn(protocol);
+        when(segment.getSegmentCriteria()).thenReturn(segmentCriteria);
+
+        String edgeId = "edge.id";
+        TopologyEdge edge = new EdgeImpl(protocol, edgeId, port, segment);
+
+        int portNodeCriteriaId2 = 992;
+        NodeCriteria portNodeCriteria2 = mock(NodeCriteria.class);
+        when(portNodeCriteria2.getId()).thenReturn(portNodeCriteriaId2);
+        String portId2 = "port.id.2";
+        int portIfIndex2 = 2;
+        TopologyPort port2 = mock(TopologyPort.class);
+        when(port2.getId()).thenReturn(portId2);
+        when(port2.getIfIndex()).thenReturn(portIfIndex2);
+        when(port2.getNodeCriteria()).thenReturn(portNodeCriteria2);
+        String edgeId2 = "edge.id.2";
+        TopologyEdge edge2 = new EdgeImpl(protocol, edgeId2, port2, segment);
+
+        // We should have the bridge link and a segment after the first edge
+        dic.onEdgeAddedOrUpdated(edge);
+        assertThat(inventory, hasSize(2));
+
+        // We should have the same segment but a new link after the second edge
+        dic.onEdgeAddedOrUpdated(edge2);
+        assertThat(inventory, hasSize(3));
+
+        // We should still have the segment and original link after deleting edge 2
+        dic.onEdgeDeleted(edge2);
+        assertThat(inventory, hasSize(2));
+
+        // All inventory should be removed after deleting the last edge
+        dic.onEdgeDeleted(edge);
+        assertThat(inventory, hasSize(0));
+    }
+
     private class InventoryHandlerImpl implements InventoryHandler {
         @Override
         public void onInventoryAdded(Collection<InventoryObject> inventoryObjects) {
@@ -131,6 +195,45 @@ public class DirectInventoryDatasourceTest {
         @Override
         public void onInventoryRemoved(Collection<InventoryObject> inventoryObjects) {
             inventory.removeAll(inventoryObjects);
+        }
+    }
+
+    private static class EdgeImpl implements TopologyEdge {
+        private final String protocol;
+        private final String id;
+        private final TopologyPort port;
+        private final TopologySegment segment;
+
+        public EdgeImpl(String protocol, String id, TopologyPort port, TopologySegment segment) {
+            this.protocol = protocol;
+            this.id = id;
+            this.port = port;
+            this.segment = segment;
+        }
+
+        @Override
+        public String getProtocol() {
+            return protocol;
+        }
+
+        @Override
+        public TopologyPort getSource() {
+            return port;
+        }
+
+        @Override
+        public void visitTarget(TopologyEdgeTargetVisitor v) {
+            v.visitTargetSegement(segment);
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getTooltipText() {
+            return null;
         }
     }
 }

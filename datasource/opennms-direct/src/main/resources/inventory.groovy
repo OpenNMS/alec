@@ -26,26 +26,26 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms;
+package org.opennms.oce.datasource.opennms
 
+import com.google.common.base.Strings
+import groovy.util.logging.Slf4j
+import org.opennms.integration.api.v1.model.*
 import org.opennms.oce.datasource.api.InventoryObject
+import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint
 import org.opennms.oce.datasource.common.ImmutableAlarm
 import org.opennms.oce.datasource.common.ImmutableInventoryObject
-import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef
+import org.opennms.oce.datasource.common.inventory.*
 
-import org.opennms.integration.api.v1.model.Alarm
-import org.opennms.integration.api.v1.model.Node
-import org.opennms.integration.api.v1.model.SnmpInterface
-
-import org.opennms.oce.datasource.common.inventory.TypeToInventory;
-
-import com.google.common.base.Strings;
-
-import groovy.util.logging.Slf4j
-
+import java.util.concurrent.atomic.AtomicLong
 
 @Slf4j
 class InventoryFactory {
+    private static final long PORT_LINK_WEIGHT = 100;
+    // Use half the regular link weight when there is a segment since there will be twice as many hops
+    private static final long SEGMENT_LINK_WEIGHT = 50;
+
     static List<InventoryObject> nodeToInventory(Node node) {
         List<InventoryObject> inventoryObjects = new ArrayList<>();
 
@@ -58,8 +58,8 @@ class InventoryFactory {
 
         // Attach the SNMP interfaces directly to the node
         node.getSnmpInterfaces().stream()
-                .map{snmpInterface -> toInventoryObject(snmpInterface, inventoryObject)}
-                .forEach{io -> inventoryObjects.add(io)};
+                .map { snmpInterface -> toInventoryObject(snmpInterface, inventoryObject) }
+                .forEach { io -> inventoryObjects.add(io) };
 
         return inventoryObjects;
     }
@@ -67,7 +67,7 @@ class InventoryFactory {
     static Collection<InventoryObject> alarmToInventory(Alarm alarm) {
         // Only derive inventory if the alarm has an MO type and instance
         if (Strings.isNullOrEmpty(alarm.getManagedObjectType()) ||
-        Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
+                Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
             return Collections.emptyList();
         }
 
@@ -86,22 +86,22 @@ class InventoryFactory {
         switch (type) {
             case ManagedObjectType.SnmpInterfaceLink:
                 return Collections.singletonList(TypeToInventory.getSnmpInterfaceLink(
-                alarm.getManagedObjectInstance()));
+                        alarm.getManagedObjectInstance()));
             case ManagedObjectType.EntPhysicalEntity:
                 return Collections.singletonList(TypeToInventory.getEntPhysicalEntity(
-                alarm.getManagedObjectInstance(), toNodeCriteria(alarm)));
+                        alarm.getManagedObjectInstance(), toNodeCriteria(alarm)));
             case ManagedObjectType.BgpPeer:
                 return Collections.singletonList(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(),
-                toNodeCriteria(alarm)));
+                        toNodeCriteria(alarm)));
             case ManagedObjectType.VpnTunnel:
                 return Collections.singletonList(TypeToInventory.getVpnTunnel(alarm.getManagedObjectInstance(),
-                toNodeCriteria(alarm)));
+                        toNodeCriteria(alarm)));
             default:
                 return Collections.emptyList();
         }
     }
 
-    static void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm alarm ) {
+    static void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm alarm) {
         log.trace("overrideTypeAndInstance: {}", alarm);
         if (!Strings.isNullOrEmpty(alarm.getManagedObjectType()) && !Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
             ManagedObjectType type;
@@ -118,7 +118,7 @@ class InventoryFactory {
                     ManagedObjectType.EntPhysicalEntity,
                     ManagedObjectType.BgpPeer,
                     ManagedObjectType.VpnTunnel
-                    ));
+            ));
 
             if (!alreadyScoped.contains(type)) {
                 alarmBuilder.setInventoryObjectType(type.getName());
@@ -165,6 +165,102 @@ class InventoryFactory {
             return Integer.valueOf(id).toString();
         }
     }
+
+    static List<InventoryObject> edgeToInventory(TopologyEdge edge) {
+        List<InventoryObject> ios = new ArrayList<>();
+        ImmutableInventoryObject.Builder edgeIoBuilder = ImmutableInventoryObject.newBuilder();
+        // Assume this is targeting a port until we find out otherwise
+        edgeIoBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName());
+
+        final AtomicLong weightForLink = new AtomicLong(PORT_LINK_WEIGHT);
+        // Derive a segment from the edge if applicable
+        edge.visitTarget(new TopologyEdge.TopologyEdgeTargetVisitor() {
+            @Override
+            public void visitTargetSegement(TopologySegment segment) {
+                weightForLink.set(SEGMENT_LINK_WEIGHT);
+                ios.add(ImmutableInventoryObject.newBuilder()
+                        .setType(ManagedObjectType.Segment.getName())
+                        .setId(Segment.generateId(segment.getId(), segment.getProtocol()))
+                        .build());
+                // If there was a segment, this edge is a BridgeLink not an SNMP-interface link
+                edgeIoBuilder.setType(ManagedObjectType.BridgeLink.getName());
+            }
+        });
+
+        // Add the source peer (source port)
+        edgeIoBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                .setId(Port.generateId(edge.getSource().getIfIndex(),
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), edge.getProtocol()))
+                .setType(ManagedObjectType.SnmpInterface.getName())
+                .setEndpoint(InventoryObjectPeerEndpoint.A)
+                .setWeight(weightForLink.get())
+                .build());
+
+        // Add the target peer (either a port or a segment)
+        edge.visitTarget(new TopologyEdge.TopologyEdgeTargetVisitor() {
+            @Override
+            public void visitTargetPort(TopologyPort port) {
+                edgeIoBuilder.setFriendlyName(generateFriendlyNameForEdge(edge, port))
+                        .setId(generateIdForEdge(edge, port))
+                        .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(Port.generateId(port.getIfIndex(), nodeCriteriaToString(port.getNodeCriteria()),
+                        edge.getProtocol()))
+                        .setType(ManagedObjectType.SnmpInterface.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                        .setWeight(weightForLink.get())
+                        .build());
+            }
+
+            @Override
+            public void visitTargetSegement(TopologySegment segment) {
+                edgeIoBuilder.setFriendlyName(generateFriendlyNameForEdge(edge, segment))
+                        .setId(generateIdForEdge(edge, segment))
+                        .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                        .setId(Segment.generateId(segment.getId(), segment.getProtocol()))
+                        .setType(ManagedObjectType.Segment.getName())
+                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                        .setWeight(weightForLink.get())
+                        .build());
+            }
+        });
+
+        ios.add(edgeIoBuilder.build());
+
+        return ios;
+    }
+
+    private static String generateIdForEdge(TopologyEdge edge, TopologyPort targetPort) {
+        return Edge.generateId(edge.getSource().getIfIndex(),
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
+                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol());
+    }
+
+    private static String generateIdForEdge(TopologyEdge edge, TopologySegment targetSegment) {
+        return Edge.generateId(edge.getSource().getIfIndex(),
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
+                edge.getProtocol());
+    }
+
+    private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologyPort targetPort) {
+        return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
+                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol());
+    }
+
+    private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologySegment targetSegment) {
+        return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
+                edge.getProtocol());
+    }
+
+    private static String nodeCriteriaToString(NodeCriteria nodeCriteria) {
+        if (!Strings.isNullOrEmpty(nodeCriteria.getForeignSource()) &&
+                !Strings.isNullOrEmpty(nodeCriteria.getForeignId())) {
+            return nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId();
+        } else {
+            return Long.valueOf(nodeCriteria.getId()).toString();
+        }
+    }
 }
 
 def Collection<InventoryObject> alarmToInventory(Alarm alarm) {
@@ -175,6 +271,10 @@ def List<InventoryObject> nodeToInventory(Node node) {
     return InventoryFactory.nodeToInventory(node);
 }
 
-def overrideTypeAndInstance (ImmutableAlarm.Builder alarmBuilder, Alarm alarm ) {
+def overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm alarm) {
     InventoryFactory.overrideTypeAndInstance(alarmBuilder, alarm);
+}
+
+def List<InventoryObject> edgeToInventory(TopologyEdge edge) {
+    return InventoryFactory.edgeToInventory(edge);
 }

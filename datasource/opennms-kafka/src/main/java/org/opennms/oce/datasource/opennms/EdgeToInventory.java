@@ -31,6 +31,10 @@ package org.opennms.oce.datasource.opennms;
 import java.util.Objects;
 
 import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.oce.datasource.common.inventory.Edge;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.Port;
+import org.opennms.oce.datasource.common.inventory.Segment;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.slf4j.Logger;
@@ -59,8 +63,15 @@ public class EdgeToInventory {
 
     @VisibleForTesting
     static String getIdForEdge(OpennmsModelProtos.TopologyEdge edge) {
-        return String.format("%s:%s:%d:%s:%d", edge.getRef().getProtocol(),
-                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()), edge.getSource().getIfIndex(),
-                OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()), edge.getTargetPort().getIfIndex());
+        if (edge.hasTargetPort()) {
+            return Edge.generateId(edge.getSource().getIfIndex(),
+                    OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
+                    edge.getTargetPort().getIfIndex(),
+                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()),
+                    edge.getRef().getProtocol().toString());
+        }
+        return Edge.generateId(edge.getSource().getIfIndex(),
+                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
+                edge.getTargetSegment().getRef().getId(), edge.getRef().getProtocol().toString());
     }
 }

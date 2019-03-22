@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.TopologyEdge;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
@@ -44,5 +45,6 @@ public interface ScriptedInventoryService {
 
     List<InventoryObject> createInventoryObjects(Node node) throws ScriptedInventoryException;
 
+    List<InventoryObject> createInventoryObjects(TopologyEdge edge) throws ScriptedInventoryException;
 
 }

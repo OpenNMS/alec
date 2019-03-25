@@ -1690,4 +1690,89 @@
             <decode varbindvalue="2" varbinddecodedstring="false"/>
         </varbindsdecode>
     </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.106.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>1</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/cHsrpStateChange</uei>
+        <event-label>CISCO-HSRP-MIB defined trap event: cHsrpStateChange</event-label>
+        <descr>&lt;p>A cHsrpStateChange notification is sent when a
+            cHsrpGrpStandbyState transitions to either active or
+            standby state, or leaves active or standby state. There
+            will be only one notification issued when the state change
+            is from standby to active and vice versa.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            cHsrpGrpStandbyState&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>
+            initial(1) learn(2) listen(3) speak(4) standby(5) active(6)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">&lt;p>Cisco Event: HSRP State Change to %parm[#1]%.&lt;/p></logmsg>
+        <severity>Minor</severity>
+        <varbindsdecode>
+            <parmid>parm[#1]</parmid>
+            <decode varbindvalue="1" varbinddecodedstring="initial"/>
+            <decode varbindvalue="2" varbinddecodedstring="learn"/>
+            <decode varbindvalue="3" varbinddecodedstring="listen"/>
+            <decode varbindvalue="4" varbinddecodedstring="speak"/>
+            <decode varbindvalue="5" varbinddecodedstring="standby"/>
+            <decode varbindvalue="6" varbinddecodedstring="active"/>
+        </varbindsdecode>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3" auto-clean="false"/>
+    </event>
+    <event>
+        <mask>
+            <maskelement>
+                <mename>id</mename>
+                <mevalue>.1.3.6.1.4.1.9.9.42.2</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>generic</mename>
+                <mevalue>6</mevalue>
+            </maskelement>
+            <maskelement>
+                <mename>specific</mename>
+                <mevalue>3</mevalue>
+            </maskelement>
+        </mask>
+        <uei>uei.opennms.org/vendor/Cisco/traps/rttMonThresholdNotification</uei>
+        <event-label>CISCO-RTTMON-MIB defined trap event: rttMonThresholdNotification</event-label>
+        <descr>&lt;p>A rttMonThresholdNotification indicates the
+            occurrence of a threshold violation for a RTT operation,
+            and it indicates the previous violation has subsided for
+            a subsequent RTT operation.  Precisely, this has resulted
+            in rttMonCtrlOperOverThresholdOccurred changing value.
+            &lt;/p>&lt;p>
+            When the RttMonRttType is 'pathEcho', this
+            notification will only be sent when the threshold
+            violation occurs during an operation to the target and
+            not to a hop along the path to the target.  This also
+            applies to the subsiding of a threshold condition.
+            &lt;/p>&lt;p>
+            If History is not being collected, the instance values
+            for the rttMonHistoryCollectionAddress object will not
+            be valid.  When RttMonRttType is not 'echo' or 'pathEcho'
+            the rttMonHistoryCollectionAddress object will be null.&lt;/p>&lt;table>
+            &lt;tr>&lt;td>&lt;b>
+            rttMonCtrlAdminTag&lt;/b>&lt;/td>&lt;td>%parm[#1]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            rttMonHistoryCollectionAddress&lt;/b>&lt;/td>&lt;td>%parm[#2]%
+            &lt;/td>&lt;td>&lt;p;>&lt;/p>&lt;/td;>&lt;/tr>&lt;tr>&lt;td>&lt;b>
+            rttMonCtrlOperOverThresholdOccurred&lt;/b>&lt;/td>&lt;td>%parm[#3]%
+            &lt;/td>&lt;td>&lt;p;>
+            true(1) false(2)&lt;/p>
+            &lt;/td;>&lt;/tr>&lt;/table></descr>
+        <logmsg dest="logndisplay">&lt;p>Cisco Event: RTTMON Threshold Notification.&lt;/p></logmsg>
+        <severity>Warning</severity>
+    </event>
 </events>

@@ -103,6 +103,11 @@ public class DirectInventoryDatasourceTest {
         // inventory
         dic.handleDeletedAlarm(alarm2.getId(), alarm2.getReductionKey());
         assertThat(inventory, hasSize(0));
+        
+        // A snapshot that would cause the alarms to be deleted should be handled without inventory changing
+        // since the alarms should already be deleted
+        dic.handleAlarmSnapshot(Collections.emptyList());
+        assertThat(inventory, hasSize(0));
 
         // A snapshot containing both alarms should result in the inventory being re-added
         dic.handleAlarmSnapshot(Arrays.asList(alarm1, alarm2));

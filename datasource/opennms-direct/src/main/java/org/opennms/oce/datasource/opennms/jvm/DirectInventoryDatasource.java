@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
@@ -98,11 +96,6 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private final CountDownLatch initLock = new CountDownLatch(1);
 
     /**
-     * A {@link ReadWriteLock} to synchronize the readers and writers of {@link #inventoryFromAlarms}.
-     */
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-
-    /**
      * Used during {@link #init} to initialize {@link #inventoryFromNodes}.
      */
     private final NodeDao nodeDao;
@@ -126,7 +119,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * {@link AlarmDao}.
      */
     public void init() {
-        nodeDao.getNodes().forEach(n -> inventoryFromAlarms.addAll(Mappers.toInventory(n)));
+        nodeDao.getNodes().forEach(n -> inventoryFromNodes.addAll(Mappers.toInventory(n)));
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
         initLock.countDown();
     }
@@ -151,22 +144,17 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param notifyHandlers   whether or not to notify handlers
      */
     private void addInventory(List<InventoryObject> inventoryObjects, boolean notifyHandlers) {
-        rwLock.writeLock().lock();
-        try {
-            // Only add and notify for inventory that was not already known
-            Set<InventoryObject> newInventory = Sets.difference(new HashSet<>(inventoryObjects),
-                    this.inventoryFromAlarms);
+        // Only add and notify for inventory that was not already known
+        Set<InventoryObject> newInventory = Sets.difference(new HashSet<>(inventoryObjects),
+                this.inventoryFromAlarms);
 
-            if (!newInventory.isEmpty()) {
-                if (notifyHandlers) {
-                    inventoryHandlers.forEach(handler -> handler.onInventoryAdded(newInventory));
-                }
+        if (!newInventory.isEmpty()) {
+            if (notifyHandlers) {
+                inventoryHandlers.forEach(handler -> handler.onInventoryAdded(newInventory));
             }
-
-            inventoryFromAlarms.addAll(newInventory);
-        } finally {
-            rwLock.writeLock().unlock();
         }
+
+        inventoryFromAlarms.addAll(newInventory);
     }
 
     /**
@@ -223,7 +211,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @Override
-    public void handleAlarmSnapshot(List<Alarm> alarms) {
+    public synchronized void handleAlarmSnapshot(List<Alarm> alarms) {
         // Derive new inventory from the snapshot
         alarms.forEach(alarm -> processAlarm(alarm, true));
 
@@ -234,16 +222,16 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @Override
-    public void handleNewOrUpdatedAlarm(Alarm alarm) {
+    public synchronized void handleNewOrUpdatedAlarm(Alarm alarm) {
         processAlarm(alarm, true);
     }
 
     @Override
-    public void handleDeletedAlarm(int alarmId, String reductionKey) {
+    public synchronized void handleDeletedAlarm(int alarmId, String reductionKey) {
         // Check if this alarm had any inventory associated
         Set<InventoryObject> inventoryForAlarm = alarmIdToInventoryMapping.get(alarmId);
 
-        if (inventoryForAlarm != null) {
+        if (inventoryForAlarm != null && !inventoryForAlarm.isEmpty()) {
             Set<InventoryObject> inventoryToRemove = new HashSet<>();
 
             inventoryForAlarm.forEach(inventory -> {
@@ -256,26 +244,25 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
                 }
             });
 
-            // Clean up the collections that contain this inventory
-            inventoryToRemove.forEach(inventory -> {
-                inventoryToAlarmIdMapping.remove(inventory);
-                inventoryFromAlarms.remove(inventory);
-            });
+            if (!inventoryToRemove.isEmpty()) {
+                // Clean up the collections that contain this inventory
+                inventoryToRemove.forEach(inventory -> {
+                    inventoryToAlarmIdMapping.remove(inventory);
+                    inventoryFromAlarms.remove(inventory);
+                });
 
-            inventoryHandlers.forEach(handler -> handler.onInventoryRemoved(inventoryToRemove));
+                inventoryHandlers.forEach(handler -> handler.onInventoryRemoved(inventoryToRemove));
+            }
+
+            // Since this alarm has been deleted we can clear the inventory associated with it
+            inventoryForAlarm.clear();
         }
     }
 
     @Override
-    public List<InventoryObject> getInventory() {
+    public synchronized List<InventoryObject> getInventory() {
         waitForInit();
-
-        rwLock.readLock().lock();
-        try {
-            return ImmutableList.copyOf(Sets.union(inventoryFromAlarms, inventoryFromNodes));
-        } finally {
-            rwLock.readLock().unlock();
-        }
+        return ImmutableList.copyOf(Sets.union(inventoryFromAlarms, inventoryFromNodes));
     }
 
     @Override

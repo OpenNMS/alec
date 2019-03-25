@@ -40,6 +40,7 @@
         <module>test-api</module>
         <module>wrap</module>
         <module>processor</module>
+        <module>smoke-test</module>
     </modules>
 
     <properties>
@@ -450,6 +451,16 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
             <version>3.2.1</version>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>3.1.0</version>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>1.4.1</version>
           </plugin>
         </plugins>
         <extensions>

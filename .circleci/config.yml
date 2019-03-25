@@ -7,6 +7,16 @@ executors:
         environment:
           MAVEN_OPTS: -Xmx2g
 
+  # Note: Need to investigate how we can use our own image and have it configured so we can run docker inside docker
+  # rather than rely on the circleci machine VM
+  smoke-test-executor:
+    machine: true
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+      TESTCONTAINERS_RYUK_DISABLED: true
+      KEEP_TMP_OVERLAY: true
+      TEST_RECORDING_DIR: /tmp/test-recordings
+
   docs-executor:
     docker:
       - image: antora/antora:2.0.0
@@ -39,11 +49,14 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - smoke-test:
+          requires:
+            - build
 
       # Run deploy jobs just on version tags and master branch
       - deploy-maven:
           requires:
-            - build
+            - smoke-test
           filters:
             tags:
               only: /^v.*/
@@ -52,7 +65,7 @@ workflows:
                 - master
       - deploy-packages:
           requires:
-            - build
+            - smoke-test
           filters:
             tags:
               only: /^v.*/
@@ -61,7 +74,7 @@ workflows:
                 - master
       - deploy-docs:
           requires:
-            - build-docs
+            - smoke-test
           filters:
             tags:
               only: /^v.*/
@@ -88,17 +101,19 @@ jobs:
 
       - restore_cache:
           keys:
-          - v2-dependencies-{{ checksum "pom.xml" }}
+          - v4-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v2-dependencies-
+          - v4-dependencies-
 
-      - run: |
-          mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
+      - run:
+          name: Build
+          command: |
+            mvn -DskipTests clean install dependency:resolve-plugins dependency:go-offline
 
       - save_cache:
           paths:
             - ~/.m2
-          key: v2-dependencies-{{ checksum "pom.xml" }}
+          key: v4-dependencies-{{ checksum "pom.xml" }}
 
       - run:
           name: Run the tests
@@ -133,7 +148,107 @@ jobs:
           root: ~/
           paths:
             - project
+            - dist/*.kar
+
+  smoke-test:
+    executor: smoke-test-executor
+
+    steps:
+      - attach_workspace:
+          at: ~/
+
+      # Link root user's m2 repo from the cache with our user's m2 repo (the circleci user)
+      - run:
+          name: Link maven repo with cache
+          command: |
+            sudo chmod 777 /root
+            ln -s /root/.m2 ~/.m2
+
+      - restore_cache:
+          keys:
+          # attempt to use the cache from the last smoke-test run
+          - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+          # use the cache built for the same root pom
+          - v4-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v4-dependencies-
+          
+      - restore_cache:
+          keys:
+          - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+
+      - run:
+          name: Make the kar available
+          command: |
+            mkdir -p ~/assembly/kar/target/
+            ln -s ~/dist/opennms-oce-plugin.kar ~/assembly/kar/target/opennms-oce-plugin.kar
+
+      - run:
+          name: Import docker images
+          command: |
+            if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
+            source smoke-test/src/main/resources/docker_fixed_images
+            for dockerTargz in $(ls /tmp/docker); do
+              dockerName="${dockerTargz%.*}"
+              echo "Importing ${!dockerName} from $dockerTargz"
+              docker load --input /tmp/docker/"$dockerTargz"
+            done
+            docker image ls
   
+      - run:
+          name: Run the tests
+          command: |
+            mkdir $TEST_RECORDING_DIR
+            cd smoke-test
+            mvn test -DsmokeTest=true
+            
+      - save_cache:
+          paths:
+          - /root/.m2
+          key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+
+      - run:
+          name: Save cacheable docker images
+          command: |
+            if [ -d /tmp/docker ]; then exit 0; fi
+            mkdir /tmp/docker
+            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
+            source "$tagsFile"
+            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
+              echo "Saving docker image ${!dockerImg} as ${dockerImg}.tgz"
+              docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
+            done
+
+      - save_cache:
+          paths:
+          - /tmp/docker
+          key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+  
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+  
+      - store_test_results:
+          path: ~/junit
+
+      - store_artifacts:
+          path: ~/logs
+
+      # Unfortunately I can't reference the env variable containing the recording path here so I have to
+      # duplicate it
+      - store_artifacts:
+          path: /tmp/test-recordings
+
+      # Future Improvements:
+      # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
+      #   - Mount the logs directories from the containers so we can copy the logs out easier
+      # - Add nightly test run back once tests are proven stable
+      #   - We might want to test nightly against the floating (latest) images for opennms and sentinel
+
   build-docs:
     executor: docs-executor
     steps:
@@ -161,9 +276,10 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v2-dependencies-{{ checksum "pom.xml" }}
+          - v4-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v2-dependencies-
+          - v4-dependencies-
+
       - run:
           name: Deploy the artifacts
           command: |

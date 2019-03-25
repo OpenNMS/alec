@@ -1,0 +1,5 @@
+# Use this file for docker images/tags that are subject to change and shouldn't be cached to ensure we always use the
+# latest image they provide
+
+oce=opennms/sentinel:24.0.0-rc
+opennms=opennms/horizon-core-web:24.0.0-rc

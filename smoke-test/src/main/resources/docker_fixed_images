@@ -1,0 +1,9 @@
+# Use this file for docker images/tags that are fixed to a specific version and aren't changing
+# These will be eligible for caching in the CI system
+
+helm=opennms/helm:2.0.0
+# Note the tag version should match the confluent version being used by the kafka container
+kafka=confluentinc/cp-kafka:4.0.0
+postgres=postgres:9.6.1
+# Note this tag version should match the selenium version in the POM
+selenium=selenium/standalone-chrome-debug:3.4.0

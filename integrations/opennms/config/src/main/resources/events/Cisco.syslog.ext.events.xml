@@ -623,6 +623,14 @@
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%" alarm-type="3"/>
     </event>
     <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/fexOffline</uei>
+        <event-label>CISCO defined syslog event: fexOffline</event-label>
+        <descr>Fex %parm[fexNumber]% is offline</descr>
+        <logmsg dest="logndisplay">Fex %parm[fexNumber]% is offline</logmsg>
+        <severity>Major</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[fexNumber]%" alarm-type="3"/>
+    </event>
+    <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/fexPortCritical</uei>
         <event-label>CISCO defined syslog event: fexPortCritical</event-label>
         <descr>Uplink-ID %parm[uplinkId]% of Fex %parm[fexNumber]% that is connected with %parm[ifDescr]% changed its
@@ -767,18 +775,22 @@
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/ifOirOut</uei>
         <event-label>CISCO defined syslog event: ifOirOut</event-label>
-        <descr>OIR %parm[oir]% is removed, state: %parm[state]%.</descr>
-        <logmsg dest="logndisplay">OIR %parm[oir]% is removed, state: %parm[state]%</logmsg>
+        <descr>OIR %parm[ifDescr]% is removed, state: %parm[state]%.</descr>
+        <logmsg dest="logndisplay">OIR %parm[ifDescr]% is removed, state: %parm[state]%</logmsg>
         <severity>Cleared</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[oir]%" alarm-type="1"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="1">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
     <event>
         <uei>uei.opennms.org/vendor/cisco/syslog/ifOirIn</uei>
         <event-label>CISCO defined syslog event: ifOirIn</event-label>
-        <descr>OIR %parm[oir]% is inserted, state: %parm[state]%.</descr>
-        <logmsg dest="logndisplay">OIR %parm[oir]% is inserted, state: %parm[state]%</logmsg>
+        <descr>OIR %parm[ifDescr]% is inserted, state: %parm[state]%.</descr>
+        <logmsg dest="logndisplay">OIR %parm[ifDescr]% is inserted, state: %parm[state]%</logmsg>
         <severity>Cleared</severity>
-        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[oir]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifOirOut:%dpname%:%nodeid%:%parm[oir]%"/>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/ifOirOut:%dpname%:%nodeid%:%parm[ifDescr]%">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
     </event>
 
     <event>
@@ -874,6 +886,67 @@
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%" alarm-type="3">
             <managed-object type="snmp-interface"/>
         </alarm-data>
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/duplicateIpAddress</uei>
+        <event-label>CISCO defined syslog event: duplicateIpAddress</event-label>
+        <descr>Duplicate IP Address %parm[ipAddress]% found on %parm[ifDescr]%</descr>
+        <logmsg dest="logndisplay">Duplicate IP Address %parm[ipAddress]% found on %parm[ifDescr]% sourced by %parm[sourceMac]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[ifDescr]%:%parm[ipAddress]%" alarm-type="3">
+            <managed-object type="snmp-interface"/>
+        </alarm-data>
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/powerSupplyRemoved</uei>
+        <event-label>CISCO defined syslog event: powerSupplyRemoved</event-label>
+        <descr>Power supply %parm[powerSupplyIndex]% removed</descr>
+        <logmsg dest="logndisplay">Power supply %parm[powerSupplyIndex]% removed (Serial number %parm[serialNumber]%)</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[powerSupplyIndex]%" alarm-type="1" />
+    </event>
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/powerSupplyFound</uei>
+        <event-label>CISCO defined syslog event: powerSupplyFound</event-label>
+        <descr>Power supply %parm[powerSupplyIndex]% found</descr>
+        <logmsg dest="logndisplay">Power supply %parm[powerSupplyIndex]% found (Serial number %parm[serialNumber]%)</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[powerSupplyIndex]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/powerSupplyRemoved:%dpname%:%nodeid%:%parm[powerSupplyIndex]%"/>
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailure</uei>
+        <event-label>CISCO defined syslog event: powerModuleFailure</event-label>
+        <descr>Power module %parm[powerModule]% failed</descr>
+        <logmsg dest="logndisplay">Power moduled %parm[powerModule]% failed</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[powerModule]%" alarm-type="1" />
+    </event>
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailureReason</uei>
+        <event-label>CISCO defined syslog event: powerModuleFailureReason</event-label>
+        <descr>Power module %parm[powerModule]% failed</descr>
+        <logmsg dest="logndisplay">Power moduled %parm[powerModule]% failed with: %parm[reason]%</logmsg>
+        <severity>Warning</severity>
+    </event>
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailureCleared</uei>
+        <event-label>CISCO defined syslog event: powerModuleFailureCleared</event-label>
+        <descr>Power module %parm[powerModule]% failure cleared</descr>
+        <logmsg dest="logndisplay">Power moduled %parm[powerModule]% failure cleared</logmsg>
+        <severity>Normal</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[powerModule]%" alarm-type="2" clear-key="uei.opennms.org/vendor/cisco/syslog/powerModuleFailure:%dpname%:%nodeid%:%parm[powerModule]%" />
+    </event>
+
+    <event>
+        <uei>uei.opennms.org/vendor/cisco/syslog/fanFailure</uei>
+        <event-label>CISCO defined syslog event: fanFailure</event-label>
+        <descr>Fan failure on slot %parm[slotName]%, fan %parm[fanIndex]%</descr>
+        <logmsg dest="logndisplay">Fan failure on slot %parm[slotName]%, fan %parm[fanIndex]%</logmsg>
+        <severity>Warning</severity>
+        <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[slotName]%:%parm[fanIndex]%" alarm-type="3"/>
     </event>
 
 </events>

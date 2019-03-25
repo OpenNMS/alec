@@ -59,11 +59,23 @@
             <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
             <parameter-assignment matching-group="4" parameter-name="bgpVrf" />
         </ueiMatch>
+        <!-- <189>33691589: 33691582: Jan 17 00:22:05.837 CST: %BGP-5-ADJCHANGE: neighbor 10.1.1.1 Down Interface flap -->
+        <ueiMatch>
+            <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (\S+ )?(vpn )?Down.*" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/bgpAdjChangeNeighborDown</uei>
+            <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
+        </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (vpn)? vrf (\S+) Up.*" />
             <uei>uei.opennms.org/vendor/cisco/syslog/bgpAdjChangeNeighborUp</uei>
             <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
             <parameter-assignment matching-group="3" parameter-name="bgpVrf" />
+        </ueiMatch>
+        <!-- %BGP-5-ADJCHANGE: neighbor 10.1.1.1 Up -->
+        <ueiMatch>
+            <match type="regex" expression="%BGP-5-ADJCHANGE\s*: neighbor (\S+) (vpn )?Up.*" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/bgpAdjChangeNeighborUp</uei>
+            <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
         </ueiMatch>
 
         <ueiMatch>
@@ -87,17 +99,17 @@
             <parameter-assignment matching-group="1" parameter-name="bgpPeer" />
             <parameter-assignment matching-group="2" parameter-name="bgpNotification" />
         </ueiMatch>
-
+        <!-- <189>: 2019 Jan  8 16:46:12 CST: %VSHD-5-VSHD_SYSLOG_CONFIG_I: Configured from vty by  on vsh.42 -->
         <ueiMatch>
-            <match type="regex" expression="%VSHD-5-VSHD_SYSLOG_CONFIG_I\s*: Configured from (\S+) by (\S+) on (\S+)" />
+            <match type="regex" expression="%VSHD-5-VSHD_SYSLOG_CONFIG_I\s*: Configured from (\S+) by (\S*) on (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/configured</uei>
             <parameter-assignment matching-group="1" parameter-name="configuredFrom" />
             <parameter-assignment matching-group="2" parameter-name="configuredBy" />
             <parameter-assignment matching-group="3" parameter-name="configuredOn" />
         </ueiMatch>
-
+        <!-- <190>38603: RP/0/RSP1/CPU0:Jan 15 22:23:16.717 : hsrp[1104]: %IP-STANDBY-6-INFO_STATECHANGE : SB1430: Bundle-Ether1.1430: state Active	 -> Speak -->
         <ueiMatch>
-            <match type="regex" expression="%IP-STANDBY-6-INFO_STATECHANGE\s*: (\S+): (\S+): state (\S+) -> (\S+)" />
+            <match type="regex" expression="%IP-STANDBY-6-INFO_STATECHANGE\s*: (\S+): (\S+): state (\S+)\s+-> (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/standbyStateChange</uei>
             <parameter-assignment matching-group="1" parameter-name="param1" />
             <parameter-assignment matching-group="2" parameter-name="param2" />
@@ -142,13 +154,13 @@
         </ueiMatch>
 
         <ueiMatch>
-            <match type="regex" expression="%PORT-5-IF_TRUNK_UP\s*: (.*) Interface (\S+) is up" />
+            <match type="regex" expression="%PORT-5-IF_TRUNK_UP\s*: (.*) Interface ([\S ]+) is up" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifTrunkUp</uei>
             <parameter-assignment matching-group="1" parameter-name="param1" />
             <parameter-assignment matching-group="2" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%PORT-5-IF_DOWN_NONE\s*: (.*) Interface (\S+) is down \((.*)\)" />
+            <match type="regex" expression="%PORT-5-IF_DOWN_NONE\s*: (.*) Interface ([\S ]+) is down \((.*)\)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifTrunkDown</uei>
             <parameter-assignment matching-group="1" parameter-name="param1" />
             <parameter-assignment matching-group="2" parameter-name="ifDescr" />
@@ -173,6 +185,23 @@
             <parameter-assignment matching-group="2" parameter-name="neighbor" />
             <parameter-assignment matching-group="3" parameter-name="state" />
             <parameter-assignment matching-group="4" parameter-name="descr" />
+        </ueiMatch>
+        <!-- %ROUTING-LDP-5-NBR_CHANGE : VRF 'default' (0x60000000), neighbor 10.1.1.1:0, DOWN (Session-Protection client disabled targeted session) -->
+        <ueiMatch>
+            <match type="regex" expression="%ROUTING-LDP-5-NBR_CHANGE\s*: VRF '(\S+)'.*eighbor (\S+):\d+, (\S+) \((.*)\)" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/ldpNeighborChange</uei>
+            <parameter-assignment matching-group="1" parameter-name="vrf" />
+            <parameter-assignment matching-group="2" parameter-name="neighbor" />
+            <parameter-assignment matching-group="3" parameter-name="state" />
+            <parameter-assignment matching-group="4" parameter-name="descr" />
+        </ueiMatch>
+        <!-- %ROUTING-LDP-5-NBR_CHANGE : VRF 'default' (0x60000000), neighbor 10.254.101.4:0, UP -->
+        <ueiMatch>
+            <match type="regex" expression="%ROUTING-LDP-5-NBR_CHANGE\s*: VRF '(\S+)'.*eighbor (\S+):\d+, (\S+)" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/ldpNeighborChange</uei>
+            <parameter-assignment matching-group="1" parameter-name="vrf" />
+            <parameter-assignment matching-group="2" parameter-name="neighbor" />
+            <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%SECURITY-login-4-AUTHEN_FAILED\s*: Failed authentication attempt by user '(.*)' from '(.*)' on '(.*)'" />
@@ -199,7 +228,7 @@
             <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%ISIS_FABRICPATH-5-ADJCHANGE\s*: isis_fabricpath-(\S+) \[(\d+)\] (\S+) adj (\S+) (\S+) over (\S+) - (\S+) \((\S+)\) on (.*)" />
+            <match type="regex" expression="%ISIS_FABRICPATH-5-ADJCHANGE\s*:\s+isis_fabricpath-(\S+) \[(\d+)\]\s+(\S+) adj (\S+) (\S+) over (\S+) - (\S+) (\((.+)\) )?on (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/fabricPathAdjChange</uei>
             <parameter-assignment matching-group="1" parameter-name="pathName" />
             <parameter-assignment matching-group="2" parameter-name="pathId" />
@@ -208,8 +237,8 @@
             <parameter-assignment matching-group="5" parameter-name="peer" />
             <parameter-assignment matching-group="6" parameter-name="ifDescr" />
             <parameter-assignment matching-group="7" parameter-name="state" />
-            <parameter-assignment matching-group="8" parameter-name="reason" />
-            <parameter-assignment matching-group="9" parameter-name="on" />
+            <parameter-assignment matching-group="9" parameter-name="reason" />
+            <parameter-assignment matching-group="10" parameter-name="on" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%LINK-5-CHANGED\s*: Interface (\S+), changed state to (.*)" />
@@ -217,18 +246,41 @@
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
             <parameter-assignment matching-group="2" parameter-name="state" />
         </ueiMatch>
+
         <ueiMatch>
             <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIROUT\s*: xFP OIR: (\S+)( Sn: \S+\s*)? is removed, state: (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifOirOut</uei>
-            <parameter-assignment matching-group="1" parameter-name="oir" />
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
             <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
+        <!-- %PLATFORM-INV-6-INTF_OIROUT : xFP OIR: TenGigE0/2/1 port_num: 7 Sn: AVD2148K7T3      is removed, state: 0 -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-INV-6-INTF_OIROUT\s*: (\S+) OIR: (\S+) port_num: (\d+) Sn: (\S+)\s+is removed, state: (\d+)" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/ifOirOut</uei>
+            <parameter-assignment matching-group="1" parameter-name="type" />
+            <parameter-assignment matching-group="2" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="3" parameter-name="portNumber" />
+            <parameter-assignment matching-group="4" parameter-name="serialNumber" />
+            <parameter-assignment matching-group="5" parameter-name="state" />
+        </ueiMatch>
+
         <ueiMatch>
             <match type="regex" expression="%PLATFORM-INV_AGENT-6-IF_OIRIN\s*: xFP OIR: (\S+)( Sn: \S+\s*)? is inserted, state: (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/ifOirIn</uei>
-            <parameter-assignment matching-group="1" parameter-name="oir" />
+            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
             <parameter-assignment matching-group="3" parameter-name="state" />
         </ueiMatch>
+        <!-- <190>Jan  8 12:43:46.093 CST:  56122: RP/0/RSP0/CPU0:Jan  8 12:43:46.093 CST: invmgr[267]: %PLATFORM-INV-6-INTF_OIRIN : xFP OIR: TenGigE0/2/1 port_num: 7 Sn: AVD2148K7T3      is inserted, state: 1 -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-INV-6-INTF_OIRIN\s*: (\S+) OIR: (\S+) port_num: (\d+) Sn: (\S+)\s+is inserted, state: (\d+)" />
+            <uei>uei.opennms.org/vendor/cisco/syslog/ifOirIn</uei>
+            <parameter-assignment matching-group="1" parameter-name="type" />
+            <parameter-assignment matching-group="2" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="3" parameter-name="portNumber" />
+            <parameter-assignment matching-group="4" parameter-name="serialNumber" />
+            <parameter-assignment matching-group="5" parameter-name="state" />
+        </ueiMatch>
+
         <ueiMatch>
             <match type="regex" expression="%PLATFORM-INV-6-NODE_STATE_CHANGE\s*: Node: (\S+), state: (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/nodeStateChange</uei>
@@ -246,34 +298,41 @@
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%TRANSCEIVER-6-REMOVED\s*:.*(\S+):\s*Transceiver module removed from (\S+)" />
+            <match type="regex" expression="%TRANSCEIVER-6-REMOVED\s*:.*(\S+):\s*[Tt]ransceiver module removed from (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/transceiverRemoved</uei>
             <parameter-assignment matching-group="1" parameter-name="transceiver" />
             <parameter-assignment matching-group="2" parameter-name="ifDescr" />
         </ueiMatch>
+        <!-- <190>24112: Jan  8 09:59:26.111 CST: %TRANSCEIVER-6-INSERTED: SIP1/0: transceiver module inserted in TenGigabitEthernet1/0/0 -->
         <ueiMatch>
-            <match type="regex" expression="%TRANSCEIVER-6-INSERTED\s*:.*(\S+):\s*Transceiver module inserted in (\S+)" />
+            <match type="regex" expression="%TRANSCEIVER-6-INSERTED\s*:.*(\S+):\s*[Tt]ransceiver module inserted in (\S+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/transceiverInserted</uei>
             <parameter-assignment matching-group="1" parameter-name="transceiver" />
             <parameter-assignment matching-group="2" parameter-name="ifDescr" />
         </ueiMatch>
+        <!-- <190>24640: Jan  8 12:05:03.045 CST: %IOSXE_SPA-6-UPDOWN: Interface TenGigabitEthernet1/0/0, link down due to remote fault -->
         <ueiMatch>
-            <match type="regex" expression="%IOSXE_SPA-6-UPDOWN\s*: Interface (\S+), link down due to local fault" />
+            <match type="regex" expression="%IOSXE_SPA-6-UPDOWN\s*: Interface (\S+), link down due to (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/spaUpDown</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="2" parameter-name="reason" />
         </ueiMatch>
+        <!-- <189>: 2019 Jan  2 17:54:21 CST: %L3VM-5-FP_TPG_INTF_UP: Interface port-channel69 up in fabricpath topology 0 -->
         <ueiMatch>
-            <match type="regex" expression="%L3VM-5-FP_TPG_INTF_UP\s*: Interface (\S+) up in fabricpath topology (\d+)" />
+            <match type="regex" expression="%L3VM-5-FP_TPG_INTF_UP\s*: Interface (\S+ )?(\S+) up in fabricpath topology (\d+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/topologyInterfaceUp</uei>
-            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
-            <parameter-assignment matching-group="2" parameter-name="topology" />
+            <parameter-assignment matching-group="1" parameter-name="type" />
+            <parameter-assignment matching-group="2" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="3" parameter-name="topology" />
         </ueiMatch>
+        <!-- %L3VM-5-FP_TPG_INTF_DOWN: Interface port-channel69 down in fabricpath topology 0 - Interface down -->
         <ueiMatch>
-            <match type="regex" expression="%L3VM-5-FP_TPG_INTF_DOWN\s*: Interface (\S+) down in fabricpath topology (\d+) - (.*)" />
+            <match type="regex" expression="%L3VM-5-FP_TPG_INTF_DOWN\s*: Interface (\S+ )?(\S+) down in fabricpath topology (\d+) - (.*)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/topologyInterfaceDown</uei>
-            <parameter-assignment matching-group="1" parameter-name="ifDescr" />
-            <parameter-assignment matching-group="2" parameter-name="topology" />
-            <parameter-assignment matching-group="3" parameter-name="reason" />
+            <parameter-assignment matching-group="1" parameter-name="type" />
+            <parameter-assignment matching-group="2" parameter-name="ifDescr" />
+            <parameter-assignment matching-group="3" parameter-name="topology" />
+            <parameter-assignment matching-group="4" parameter-name="reason" />
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%LINEPROTO-SW2_SP-5-UPDOWN\s*: Line protocol on Interface (\S+) changed state to down" />
@@ -328,8 +387,9 @@
             <uei>uei.opennms.org/vendor/cisco/syslog/linkProtoUp</uei>
             <parameter-assignment matching-group="1" parameter-name="ifDescr" />
         </ueiMatch>
+        <!-- %FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID 0 of Fex 109 that is connected with Ethernet3/9/3 changed its status from Fabric Up to Configured -->
         <ueiMatch>
-            <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from (\S+) to Active" />
+            <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from ([\S ]+) to Active" />
             <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/active</uei>
             <parameter-assignment matching-group="1" parameter-name="uplinkId" />
             <parameter-assignment matching-group="2" parameter-name="fexNumber" />
@@ -337,7 +397,7 @@
             <parameter-assignment matching-group="4" parameter-name="prevStatus" />
         </ueiMatch>
         <ueiMatch>
-            <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from (\S+) to (\S+)" />
+            <match type="regex" expression="%FEX-5-FEX_PORT_STATUS_NOTI: Uplink-ID (\S+) of Fex (\S+) that is connected with (\S+) changed its status from ([\S ]+) to ([\S ]+)" />
             <uei>uei.opennms.org/vendor/cisco/syslog/fexPortStatus/inactive</uei>
             <parameter-assignment matching-group="1" parameter-name="uplinkId" />
             <parameter-assignment matching-group="2" parameter-name="fexNumber" />
@@ -480,13 +540,19 @@
             <parameter-assignment matching-group="1" parameter-name="portChannel" />
             <parameter-assignment matching-group="2" parameter-name="ifDescr" />
         </ueiMatch>
-
+        <!-- <189>25592: Jan  8 12:37:26.261 CST: %SYS-5-CONFIG_I: Configured from console by  on vty3 (EEM:TRACK-WAN-LINKS-UP) -->
         <ueiMatch>
-            <match type="regex" expression="%SYS-5-CONFIG_I\s*: Configured from console by (\S+) on (\S+) \((\S+)\)"/>
+            <match type="regex" expression="%SYS-5-CONFIG_I\s*: Configured from console by (\S*) on (\S+) \((\S+)\)"/>
             <uei>uei.opennms.org/vendor/cisco/syslog/sysConfig</uei>
             <parameter-assignment matching-group="1" parameter-name="user"/>
             <parameter-assignment matching-group="2" parameter-name="tty"/>
             <parameter-assignment matching-group="3" parameter-name="host"/>
+        </ueiMatch>
+        <!-- %SYS-5-CONFIG_I: Configured from console by console -->
+        <ueiMatch>
+            <match type="regex" expression="%SYS-5-CONFIG_I\s*: Configured from console by (\S*)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/sysConfig</uei>
+            <parameter-assignment matching-group="1" parameter-name="user"/>
         </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%DUAL-5-NBRCHANGE\s*: EIGRP-IPv4 65000: Neighbor (\S+) \((\S+)\) is (\S+): (.*)"/>
@@ -588,6 +654,12 @@
             <parameter-assignment matching-group="4" parameter-name="prevState"/>
             <parameter-assignment matching-group="5" parameter-name="newState"/>
         </ueiMatch>
+        <!-- <186>: 2019 Jan 18 08:57:57 CST: %FEX-2-FEX_OFFLINE: FEX 110 has gone OFFLINE -->
+        <ueiMatch>
+            <match type="regex" expression="%FEX-2-FEX_OFFLINE\s*: FEX (\S+) has gone OFFLINE"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/fexOffline</uei>
+            <parameter-assignment matching-group="1" parameter-name="fexNumber"/>
+        </ueiMatch>
         <ueiMatch>
             <match type="regex" expression="%L2-SPA-5-STATE_CHANGE\s*: SPA in bay (\S+) type (\S+) (\S+)"/>
             <uei>uei.opennms.org/vendor/cisco/syslog/spaStateChange</uei>
@@ -601,5 +673,58 @@
             <parameter-assignment matching-group="1" parameter-name="moduleType"/>
             <parameter-assignment matching-group="2" parameter-name="ifDescr"/>
         </ueiMatch>
+        <!-- <190>109239: LC/0/0/CPU0:Jan  9 00:31:48.026 : arp[117]: %IP-ARP-6-INFO_DUPADDR : 'Duplicate IP address 10.1.1.1 on Bundle-Ether1.338, sourced by 00ff.ffcc.aadd' -->
+        <ueiMatch>
+            <match type="regex" expression="%IP-ARP-6-INFO_DUPADDR\s*: .*uplicate IP address (\S+) on (\S+), sourced by (\S+)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/duplicateIpAddress</uei>
+            <parameter-assignment matching-group="1" parameter-name="ipAddress"/>
+            <parameter-assignment matching-group="2" parameter-name="ifDescr"/>
+            <parameter-assignment matching-group="3" parameter-name="sourceMac"/>
+        </ueiMatch>
+
+        <!-- <189>: 2019 Jan 10 10:20:58 CST: %PFMA-5-PS_FOUND: Power supply 2 found (Serial number XXXXXX) -->
+        <ueiMatch>
+            <match type="regex" expression="%PFMA-5-PS_FOUND\s*: Power supply (\d+) found \(Serial number (\S+)\)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/powerSupplyFound</uei>
+            <parameter-assignment matching-group="1" parameter-name="powerSupplyIndex"/>
+            <parameter-assignment matching-group="2" parameter-name="serialNumber"/>
+        </ueiMatch>
+        <!-- %PFMA-2-PS_REMOVE: Power supply 2 removed (Serial number XXXXXX) -->
+        <ueiMatch>
+            <match type="regex" expression="%PFMA-2-PS_REMOVE\s*: Power supply (\d+) removed \(Serial number (\S+)\)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/powerSupplyRemoved</uei>
+            <parameter-assignment matching-group="1" parameter-name="powerSupplyIndex"/>
+            <parameter-assignment matching-group="2" parameter-name="serialNumber"/>
+        </ueiMatch>
+
+        <!-- %PLATFORM-PWRMON-2-MODULE_FAILURE: Power-module 0/PM4/SP failure condition raised -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-PWRMON-2-MODULE_FAILURE\s*: Power-module (\S+) failure condition raised"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailure</uei>
+            <parameter-assignment matching-group="1" parameter-name="powerModule"/>
+        </ueiMatch>
+        <!-- %PLATFORM-PWRMON-2-MODULE_FAIL_REASON: Power-module 0/PM4/SP fail reason: Module shutdown due to no external stable input power feed present -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-PWRMON-2-MODULE_FAIL_REASON\s*: Power-module (\S+) fail reason: (.*)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailureReason</uei>
+            <parameter-assignment matching-group="1" parameter-name="powerModule"/>
+            <parameter-assignment matching-group="2" parameter-name="reason"/>
+        </ueiMatch>
+        <!-- %PLATFORM-PWRMON-2-MODULE_FAILURE : Power-module 0/PM4/SP failure condition cleared -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-PWRMON-2-MODULE_FAILURE\s*: Power-module (\S+) failure condition cleared"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/powerModuleFailureCleared</uei>
+            <parameter-assignment matching-group="1" parameter-name="powerSupplyIndex"/>
+        </ueiMatch>
+
+        <!-- <186>56301: RP/0/RSP0/CPU0:Jan 12 07:52:34.051 : envmon[214]: %PLATFORM-ENVMON-2-FAN_FAIL : Fan failure on slot 0/FT0/SP, fan 1, RPM 0 -->
+        <ueiMatch>
+            <match type="regex" expression="%PLATFORM-ENVMON-2-FAN_FAIL\s*: Fan failure on slot (\S+), fan (\d+), RPM (\d+)"/>
+            <uei>uei.opennms.org/vendor/cisco/syslog/fanFailure</uei>
+            <parameter-assignment matching-group="1" parameter-name="slotName"/>
+            <parameter-assignment matching-group="2" parameter-name="fanIndex"/>
+            <parameter-assignment matching-group="3" parameter-name="fanRpm"/>
+        </ueiMatch>
+
     </ueiList>
 </syslogd-configuration-group>

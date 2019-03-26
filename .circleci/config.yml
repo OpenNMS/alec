@@ -74,6 +74,7 @@ workflows:
                 - master
       - deploy-docs:
           requires:
+            - build-docs
             - smoke-test
           filters:
             tags:
@@ -266,7 +267,8 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project
+            - project/public
+            - project/build
 
   deploy-maven:
     executor: build-executor

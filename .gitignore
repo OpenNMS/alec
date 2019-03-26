@@ -32,3 +32,6 @@ java/bin/
 *.swo
 
 dependency-reduced-pom.xml
+
+# Ignore any copied KAR files produced for the smoke tests
+smoke-test/src/main/resources/sentinel-overlay/deploy/*.kar

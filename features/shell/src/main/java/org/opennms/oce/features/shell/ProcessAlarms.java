@@ -106,7 +106,7 @@ public class ProcessAlarms implements Action {
                 .build();
         final List<Situation> situations = driver.run(alarms, inventory);
         write(situations);
-        return situations;
+        return null;
     }
 
     private void write(List<Situation> situations) throws IOException, JAXBException {

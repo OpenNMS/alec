@@ -143,8 +143,18 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     private KafkaProducer<String, String> producer;
 
-    public OpennmsDatasource(ConfigurationAdmin configAdmin) {
+    private final NodeToInventory nodeToInventory;
+
+    private final AlarmToInventory alarmToInventory;
+
+    private final EdgeToInventory edgeToInventory;
+
+    public OpennmsDatasource(ConfigurationAdmin configAdmin, NodeToInventory nodeToInventory, AlarmToInventory alarmToInventory,
+            EdgeToInventory edgeToInventory) {
         this.configAdmin = Objects.requireNonNull(configAdmin);
+        this.nodeToInventory = Objects.requireNonNull(nodeToInventory);
+        this.alarmToInventory = Objects.requireNonNull(alarmToInventory);
+        this.edgeToInventory = Objects.requireNonNull(edgeToInventory);
     }
 
     public void init() throws IOException {
@@ -220,10 +230,9 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         // Produce a KStream of EnrichedAlarm objects from the alarm stream
         final AlarmDeserializer alarmDeserializer = new AlarmDeserializer();
         KStream<String, byte[]> alarmBytesStream = builder.stream(getAlarmTopic());
-        KStream<String, OpennmsModelProtos.Alarm> allAlarmStream =
-                alarmBytesStream.mapValues(alarmBytes -> alarmDeserializer.deserialize(null, alarmBytes));
+        KStream<String, OpennmsModelProtos.Alarm> allAlarmStream = alarmBytesStream.mapValues(alarmBytes -> alarmDeserializer.deserialize(null, alarmBytes));
         KStream<String, OpennmsModelProtos.Alarm> alarmStream = allAlarmStream.filter((k, v) -> !isSituation(k));
-        KStream<String, EnrichedAlarm> enrichedAlarmStream = alarmStream.mapValues(AlarmToInventory::enrichAlarm);
+        KStream<String, EnrichedAlarm> enrichedAlarmStream = alarmStream.mapValues(alarmToInventory::enrichAlarm);
 
         mapEnrichedAlarmsToInventory(enrichedAlarmStream);
         processEnrichedAlarms(enrichedAlarmStream);
@@ -281,7 +290,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                     if (topologyEdge == null) {
                         return KeyValue.pair(key, null);
                     }
-                    return KeyValue.pair(key, EdgeToInventory.toInventoryObjects(topologyEdge));
+                    return KeyValue.pair(key, edgeToInventory.toInventoryObjects(topologyEdge));
                 });
         // Take the newly created stream of inventory objects and serialize them onto the inventory topic
         edgesInventoryStream.mapValues(ios -> ios != null ? ios.toByteArray() : null).to(getInventoryTopic());
@@ -305,9 +314,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             if (node == null) {
                 return KeyValue.pair(key, null);
             }
-            final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects
-                    .newBuilder();
-            for (InventoryModelProtos.InventoryObject io : NodeToInventory.toInventoryObjects(node)) {
+            final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects.newBuilder();
+            for (InventoryModelProtos.InventoryObject io : nodeToInventory.toInventoryObjects(node)) {
                 iosBuilder.addInventoryObject(io);
             }
             return KeyValue.pair(key, iosBuilder.build());

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,30 +28,43 @@
 
 package org.opennms.oce.datasource.opennms;
 
+import java.util.List;
 import java.util.Objects;
 
-import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 
-public class AlarmToInventory {
+/**
+ * @author smith
+ *
+ */
+public class InventoryFromAlarm {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmToInventory.class);
+    private final List<InventoryModelProtos.InventoryObject> inventory;
 
-    private final ScriptedInventoryService inventoryService;
+    private final String managedObjectInstance;
 
-    public AlarmToInventory(ScriptedInventoryService inventoryService) {
-        this.inventoryService = Objects.requireNonNull(inventoryService);
+    private final String managedObjectType;
+
+    public InventoryFromAlarm(List<InventoryModelProtos.InventoryObject> inventory) {
+        this(inventory, null, null);
     }
 
-    public EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm) {
-        try {
-            return inventoryService.enrichAlarm(alarm);
-        } catch (ScriptedInventoryException e) {
-            LOG.error("Failed to enrich Alarm: {} : {}", alarm, e.getCause().getMessage());
-            throw new RuntimeException(e);
-        }
+    public InventoryFromAlarm(List<InventoryModelProtos.InventoryObject> inventory, String managedObjectInstance,
+            String managedObjectType) {
+        this.inventory = Objects.requireNonNull(inventory);
+        this.managedObjectInstance = managedObjectInstance;
+        this.managedObjectType = managedObjectType;
     }
 
+    public List<InventoryModelProtos.InventoryObject> getInventory() {
+        return inventory;
+    }
+
+    public String getManagedObjectInstance() {
+        return managedObjectInstance;
+    }
+
+    public String getManagedObjectType() {
+        return managedObjectType;
+    }
 }

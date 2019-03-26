@@ -80,7 +80,11 @@ public class OpennmsDatasourceStoreTest {
         long step = 10000L;
 
         ConfigurationAdmin configAdmin = mock(ConfigurationAdmin.class, RETURNS_DEEP_STUBS);
-        OpennmsDatasource datasource = new OpennmsDatasource(configAdmin);
+        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
+        AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
+        EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);
+        OpennmsDatasource datasource = new OpennmsDatasource(configAdmin, nodeToInventory, alarmToInventory, edgeToInventory);
         datasource.setInventoryTtlMs(step-1);
         datasource.setInventoryGcIntervalMs(step);
 

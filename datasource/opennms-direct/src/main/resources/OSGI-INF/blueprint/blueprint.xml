@@ -1,12 +1,33 @@
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" >
+
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms.direct" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="scriptFile" value="" /> <!--  use empty string to use default script included in bundle" -->
+            <cm:property name="scriptCacheMillis" value="30000"/>  <!-- 30 seconds -->
+        </cm:default-properties>
+    </cm:property-placeholder>
+
     <reference id="alarmDao" interface="org.opennms.integration.api.v1.dao.AlarmDao" />
     <reference id="alarmFeedbackDao" interface="org.opennms.integration.api.v1.dao.AlarmFeedbackDao" />
     <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao" />
     <reference id="eventForwarder" interface="org.opennms.integration.api.v1.events.EventForwarder" />
 
+    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.jvm.ScriptedInventoryImpl">
+        <argument value="${scriptFile}"/>
+        <argument value="${scriptCacheMillis}"/>
+        <argument ref="blueprintBundleContext"/>
+    </bean>
+    <service ref="scriptService" interface="org.opennms.oce.datasource.opennms.jvm.ScriptedInventoryService"/>
+
+    <bean id="mapper" class="org.opennms.oce.datasource.opennms.jvm.ApiMapper">
+        <argument ref="scriptService"/>
+    </bean>
+
     <bean id="directAlarmDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectAlarmDatasource" init-method="init" >
         <argument ref="alarmDao"/>
         <argument ref="eventForwarder"/>
+        <argument ref="mapper"/>
     </bean>
     <service ref="directAlarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
     <service ref="directAlarmDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
@@ -15,6 +36,7 @@
     <bean id="directAlarmFeedbackDatasource"
           class="org.opennms.oce.datasource.opennms.jvm.DirectAlarmFeedbackDatasource" init-method="init">
         <argument ref="alarmFeedbackDao"/>
+        <argument ref="mapper"/>
     </bean>
     <service ref="directAlarmFeedbackDatasource" interface="org.opennms.integration.api.v1.feedback.AlarmFeedbackListener"/>
     <service ref="directAlarmFeedbackDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource"/>
@@ -22,6 +44,7 @@
     <bean id="directInventoryDatasource" class="org.opennms.oce.datasource.opennms.jvm.DirectInventoryDatasource" init-method="init" >
         <argument ref="nodeDao"/>
         <argument ref="alarmDao"/>
+        <argument ref="mapper"/>
     </bean>
     <service ref="directInventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
     <service ref="directInventoryDatasource" interface="org.opennms.integration.api.v1.alarms.AlarmLifecycleListener"/>

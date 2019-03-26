@@ -13,9 +13,10 @@
         <feature dependency="true">aries-blueprint</feature>
     </feature>
 
-    <feature name="oce-datasource-opennms-common" description="OCE :: Datasource :: Common" version="${project.version}">
+    <feature name="oce-datasource-opennms-common" description="OCE :: Datasource :: OpenNMS Common" version="${project.version}">
         <bundle>mvn:org.opennms.oce.datasource/org.opennms.oce.datasource.opennms-common/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
+        <feature version="${groovy.version}">groovy</feature>
     </feature>
 
     <feature name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
@@ -282,6 +283,10 @@
 
     <feature name="tensorflow" description="TensorFlow" version="${tensorflow.version}">
         <bundle>mvn:org.opennms.oce.wrap/org.opennms.oce.wrap.tensorflow/${project.version}</bundle>
+    </feature>
+
+    <feature name="groovy" description="Groovy" version="${groovy.version}">
+        <bundle>mvn:org.codehaus.groovy/groovy-all/${groovy.version}</bundle>
     </feature>
 
 </features>

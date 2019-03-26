@@ -29,8 +29,6 @@
 package org.opennms.oce.datasource.jaxb;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -39,12 +37,10 @@ import java.util.List;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.v1.schema.Inventory;
 import org.opennms.oce.datasource.v1.schema.MetaModel;
@@ -87,33 +83,6 @@ public class ResourceLoader {
 
     public List<Situation> getSituations() {
         return Collections.emptyList();
-    }
-
-    public List<InventoryObject> getInventory() {
-        final Inventory inventory;
-        try {
-            inventory = getInventoryFromResource();
-        } catch (JAXBException|IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return Collections.emptyList();
-    }
-
-    private MetaModel getModelObject() throws JAXBException, IOException {
-        try (InputStream is = getResource(metamodelPath).openStream()) {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(modelSchema);
-            return (MetaModel) unmarshaller.unmarshal(is);
-        }
-    }
-
-    private Inventory getInventoryFromResource() throws JAXBException, IOException {
-        try (InputStream is = getResource(inventoryPath).openStream()) {
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            unmarshaller.setSchema(modelSchema);
-            return (Inventory) unmarshaller.unmarshal(is);
-        }
     }
 
     private URL getResource(final String resource) {

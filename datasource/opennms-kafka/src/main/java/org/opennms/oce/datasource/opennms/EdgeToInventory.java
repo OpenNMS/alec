@@ -28,63 +28,33 @@
 
 package org.opennms.oce.datasource.opennms;
 
-import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import java.util.Objects;
+
+import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 
 public class EdgeToInventory {
-    public static InventoryModelProtos.InventoryObjects toInventoryObjects(OpennmsModelProtos.TopologyEdge edge) {
-        final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects
-                .newBuilder();
-        final InventoryModelProtos.InventoryObject.Builder ioBuilder =
-                InventoryModelProtos.InventoryObject.newBuilder();
 
-        // The target information could be associated with a node or a segment
-        long targetIfIndex;
-        String targetNodeCriteria;
+    private static final Logger LOG = LoggerFactory.getLogger(EdgeToInventory.class);
 
-        // Note: only port is supported as a target right now
-        switch (edge.getTargetCase()) {
-            case TARGETPORT:
-                targetIfIndex = edge.getTargetPort().getIfIndex();
-                targetNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria());
-                break;
-            case TARGETSEGMENT:
-                // Segment support needs to be added when segments are available
-            default:
-                throw new UnsupportedOperationException("Unsupported target type + " + edge.getTargetCase());
+    private final ScriptedInventoryService inventoryService;
+    
+    public EdgeToInventory(ScriptedInventoryService inventoryService) {
+        this.inventoryService = Objects.requireNonNull(inventoryService);
+    }
+
+    public InventoryModelProtos.InventoryObjects toInventoryObjects(OpennmsModelProtos.TopologyEdge edge) {
+        try {
+            return inventoryService.edgeToInventory(edge);
+        } catch (ScriptedInventoryException e) {
+            LOG.error("Failed to get Inventory for Edge: {} : {}", edge, e.getCause().getMessage());
+            throw new RuntimeException(e);
         }
-
-        String protocol = edge.getRef().getProtocol().name();
-        String sourceNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria());
-
-        // Create a link object by setting the peers to the source and target
-        ioBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName())
-                // The Id for this link will incorporate the protocol so that if multiple protocols describe a link 
-                // between the same endpoints they will create multiple links (one for each protocol)
-                .setId(getIdForEdge(edge))
-                .setFriendlyName(String.format("SNMP Interface Link Between %d on %s and %d on %s discovered with " +
-                                "protocol %s", edge.getSource().getIfIndex(), sourceNodeCriteria, targetIfIndex,
-                        targetNodeCriteria, protocol))
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                        .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
-                        .setId(String.format("%s:%d", sourceNodeCriteria,
-                                edge.getSource().getIfIndex()))
-                        .setType(ManagedObjectType.SnmpInterface.getName())
-                        .build())
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                        .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
-                        .setId(String.format("%s:%d", targetNodeCriteria,
-                                targetIfIndex))
-                        .setType(ManagedObjectType.SnmpInterface.getName())
-                        .build())
-                .build();
-
-        iosBuilder.addInventoryObject(ioBuilder.build());
-
-        return iosBuilder.build();
     }
 
     @VisibleForTesting

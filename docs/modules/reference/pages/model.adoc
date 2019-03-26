@@ -3,7 +3,7 @@
 
 == Types
 
-The following types are currently supported:
+The following types are supported using the built in Inventory Scripts:
 
 === Node (node)
 

@@ -129,6 +129,7 @@
                                 <feature>moxy</feature>
                                 <feature>jackson-jaxrs</feature>
                                 <feature>tensorflow</feature>
+                                <feature>groovy</feature>
                             </features>
                         </configuration>
                     </execution>

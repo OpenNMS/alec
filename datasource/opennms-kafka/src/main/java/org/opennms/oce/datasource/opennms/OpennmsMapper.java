@@ -41,7 +41,6 @@ import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableAlarmFeedback;
-import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
 import org.opennms.oce.datasource.common.ImmutableSituation;
 import org.opennms.oce.datasource.opennms.proto.FeedbackModelProtos;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
@@ -119,7 +118,7 @@ public class OpennmsMapper {
         return Enums.getIfPresent(Severity.class, severity.toString()).or(Severity.INDETERMINATE);
     }
 
-    protected static String toNodeCriteria(OpennmsModelProtos.Node node) {
+    public static String toNodeCriteria(OpennmsModelProtos.Node node) {
         if (!Strings.isNullOrEmpty(node.getForeignSource()) &&
                 !Strings.isNullOrEmpty(node.getForeignId())) {
             return node.getForeignSource() + ":" + node.getForeignId();

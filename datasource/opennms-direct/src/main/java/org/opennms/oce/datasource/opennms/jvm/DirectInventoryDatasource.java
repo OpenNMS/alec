@@ -105,13 +105,17 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      */
     private final AlarmDao alarmDao;
 
+    private ApiMapper mapper;
+
     /**
      * @param nodeDao  used to retrieve the current inventory
      * @param alarmDao used to retrieve the current inventory
+     * @param mapper used to Map between API and OCE types
      */
-    public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao) {
+    public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao, ApiMapper mapper) {
         this.nodeDao = Objects.requireNonNull(nodeDao);
         this.alarmDao = Objects.requireNonNull(alarmDao);
+        this.mapper = Objects.requireNonNull(mapper);
     }
 
     /**
@@ -119,7 +123,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * {@link AlarmDao}.
      */
     public void init() {
-        nodeDao.getNodes().forEach(n -> inventoryFromNodes.addAll(Mappers.toInventory(n)));
+        nodeDao.getNodes().forEach(n -> inventoryFromAlarms.addAll(mapper.toInventory(n)));
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
         initLock.countDown();
     }
@@ -177,10 +181,10 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
         Node nodeForAlarm = alarm.getNode();
 
         if (nodeForAlarm != null) {
-            inventoryToAdd.addAll(Mappers.toInventory(nodeForAlarm));
+            inventoryToAdd.addAll(mapper.toInventory(nodeForAlarm));
 
         } else {
-            inventoryToAdd.addAll(Mappers.toInventory(alarm));
+            inventoryToAdd.addAll(mapper.toInventory(alarm));
         }
 
         addInventory(inventoryToAdd, waitForInit);

@@ -28,44 +28,33 @@
 
 package org.opennms.oce.datasource.opennms;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.Objects;
 
-import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NodeToInventory {
 
-    public static Collection<InventoryModelProtos.InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node) {
-        final List<InventoryModelProtos.InventoryObject> inventory = new ArrayList<>();
+    private static final Logger LOG = LoggerFactory.getLogger(NodeToInventory.class);
 
-        InventoryModelProtos.InventoryObject nodeObj = InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.Node.getName())
-                .setId(OpennmsMapper.toNodeCriteria(node))
-                .setFriendlyName(node.getLabel())
-                .build();
-        inventory.add(nodeObj);
+    private final ScriptedInventoryService inventoryService;
 
-        // Attach the SNMP interfaces directly to the node
-        node.getSnmpInterfaceList().stream()
-                .map(iff -> toInventoryObject(iff, nodeObj))
-                .forEach(inventory::add);
-
-        // TODO: Use the hardware inventory data if available
-
-        return inventory;
+    public NodeToInventory(ScriptedInventoryService inventoryService) {
+        this.inventoryService = Objects.requireNonNull(inventoryService);
     }
 
-    public static InventoryModelProtos.InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryModelProtos.InventoryObject parent) {
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.SnmpInterface.getName())
-                .setId(parent.getId() + ":" + snmpInterface.getIfIndex())
-                .setFriendlyName(snmpInterface.getIfDescr())
-                .setParentType(parent.getType())
-                .setParentId(parent.getId())
-                .build();
+    public Collection<InventoryModelProtos.InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node) {
+        try {
+            return inventoryService.toInventoryObjects(node);
+        } catch (ScriptedInventoryException e) {
+            LOG.warn("Failed to create inventory for node {} : {}", node, e.getCause().getMessage());
+            return Collections.emptyList();
+        }
     }
 
 }

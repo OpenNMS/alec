@@ -52,12 +52,16 @@ import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 public class DirectInventoryDatasourceTest {
     private final NodeDao mockNodeDao = mock(NodeDao.class);
     private final AlarmDao mockAlarmDao = mock(AlarmDao.class);
-    private final DirectInventoryDatasource dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao);
+
+    private DirectInventoryDatasource dic;
     private final InventoryHandler inventoryHandler = new InventoryHandlerImpl();
     private final Set<InventoryObject> inventory = new HashSet<>();
 
     @Before
     public void setUp() {
+        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ApiMapper mapper = new ApiMapper(inventoryService);
+        dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao, mapper);
         dic.init();
     }
 

@@ -30,11 +30,11 @@ package org.opennms.oce.datasource.opennms;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import java.util.Collection;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
@@ -42,12 +42,19 @@ import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 public class NodeToInventoryTest {
 
+    private NodeToInventory nodeToInventory;
+
+    @Before
+    public void setUp() {
+        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        nodeToInventory = new NodeToInventory(inventoryService);
+    }
+
     @Test
     public void canMapNodesToInventory() {
         // Map an empty alarm and make sure no exceptions are thrown
-        OpennmsModelProtos.Node node = OpennmsModelProtos.Node.newBuilder()
-                .build();
-        Collection<InventoryModelProtos.InventoryObject> inventory = NodeToInventory.toInventoryObjects(node);
+        OpennmsModelProtos.Node node = OpennmsModelProtos.Node.newBuilder().build();
+        Collection<InventoryModelProtos.InventoryObject> inventory = nodeToInventory.toInventoryObjects(node);
         assertThat(inventory, hasSize(1));
         // Now map a complete node and verify all of the properties
         node = OpennmsModelProtos.Node.newBuilder()
@@ -64,7 +71,7 @@ public class NodeToInventoryTest {
                         .setIfAlias("eth1")
                         .build())
                 .build();
-        inventory = NodeToInventory.toInventoryObjects(node);
+        inventory = nodeToInventory.toInventoryObjects(node);
         assertThat(inventory, hasSize(3));
         InventoryModelProtos.InventoryObject nodeObj = getObjectWithTypeAndId(inventory, ManagedObjectType.Node.getName(), "FS:FID");
         assertThat(nodeObj.getParentType(), equalTo(""));

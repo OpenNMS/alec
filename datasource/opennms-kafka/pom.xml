@@ -9,7 +9,31 @@
     <artifactId>org.opennms.oce.datasource.opennms-kafka</artifactId>
     <name>OCE :: Datasource :: OpenNMS Kafka</name>
     <packaging>bundle</packaging>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            org.opennms.oce.datasource.common.inventory.script,
+                            org.opennms.oce.datasource.opennms,
+                            org.opennms.oce.datasource.opennms.events,
+                            org.opennms.oce.datasource.opennms.processors,
+                            org.opennms.oce.datasource.opennms.proto,
+                            org.opennms.oce.datasource.opennms.serialization,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <kafka.version>2.0.0</kafka.version>
@@ -117,6 +141,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.version}</version>
             <scope>test</scope>
         </dependency>
 

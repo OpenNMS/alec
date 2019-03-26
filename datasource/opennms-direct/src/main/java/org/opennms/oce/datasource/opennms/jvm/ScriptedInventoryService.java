@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,32 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms;
+package org.opennms.oce.datasource.opennms.jvm;
 
-import java.util.Objects;
+import java.util.List;
 
+import org.opennms.integration.api.v1.model.Alarm;
+import org.opennms.integration.api.v1.model.Node;
+import org.opennms.oce.datasource.api.InventoryObject;
+import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class AlarmToInventory {
+public interface ScriptedInventoryService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmToInventory.class);
+    void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, org.opennms.integration.api.v1.model.Alarm alarm) throws ScriptedInventoryException;
 
-    private final ScriptedInventoryService inventoryService;
+    List<InventoryObject> createInventoryObjects(Alarm alarm) throws ScriptedInventoryException;
 
-    public AlarmToInventory(ScriptedInventoryService inventoryService) {
-        this.inventoryService = Objects.requireNonNull(inventoryService);
-    }
+    List<InventoryObject> createInventoryObjects(Node node) throws ScriptedInventoryException;
 
-    public EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm) {
-        try {
-            return inventoryService.enrichAlarm(alarm);
-        } catch (ScriptedInventoryException e) {
-            LOG.error("Failed to enrich Alarm: {} : {}", alarm, e.getCause().getMessage());
-            throw new RuntimeException(e);
-        }
-    }
 
 }

@@ -31,11 +31,11 @@ package org.opennms.oce.datasource.opennms;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.opennms.oce.datasource.opennms.EdgeToInventory.getIdForEdge;
 
 import java.util.Collections;
 
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
@@ -45,6 +45,14 @@ import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 
 public class EdgeToInventoryTest {
+    private EdgeToInventory edgeToInventory;
+
+    @Before
+    public void setup() {
+        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        edgeToInventory = new EdgeToInventory(inventoryService);
+    }
+
     @Test
     public void canMapEdgeToInventory() {
         OpennmsModelProtos.TopologyEdge edge = OpennmsModelProtos.TopologyEdge.newBuilder()
@@ -69,23 +77,23 @@ public class EdgeToInventoryTest {
                                 .build())
                         .build())
                 .build();
-        InventoryModelProtos.InventoryObjects inventory = EdgeToInventory.toInventoryObjects(edge);
+        InventoryModelProtos.InventoryObjects inventory = edgeToInventory.toInventoryObjects(edge);
         assertThat(inventory.getInventoryObjectList(), hasSize(1));
         InventoryModelProtos.InventoryObject io = inventory.getInventoryObjectList().iterator().next();
         verifyLinkIo(edge, io);
     }
 
-    private static void verifyLinkIo(OpennmsModelProtos.TopologyEdge edge, InventoryModelProtos.InventoryObject io) {
+    void verifyLinkIo(OpennmsModelProtos.TopologyEdge edge, InventoryModelProtos.InventoryObject io) {
         InventoryModelProtos.InventoryObjects inventoryObjects =
                 InventoryModelProtos.InventoryObjects.newBuilder().addInventoryObject(io).build();
         verifyLinkIo(edge,
                 InventoryTableProcessor.toInventory(Collections.singletonList(inventoryObjects)).iterator().next());
     }
 
-    static void verifyLinkIo(OpennmsModelProtos.TopologyEdge edge, InventoryObject io) {
+    public static void verifyLinkIo(OpennmsModelProtos.TopologyEdge edge, InventoryObject io) {
         assertThat(io.getType(), is(Matchers.equalTo(ManagedObjectType.SnmpInterfaceLink.getName())));
         assertThat(io.getPeers(), hasSize(2));
-        assertThat(io.getId(), is(Matchers.equalTo(getIdForEdge(edge))));
+        assertThat(io.getId(), is(Matchers.equalTo(EdgeToInventory.getIdForEdge(edge))));
 
         long aIfIndex = edge.getSource().getIfIndex();
         long zIfIndex = edge.getTargetPort().getIfIndex();
@@ -102,4 +110,5 @@ public class EdgeToInventoryTest {
             }
         });
     }
+
 }

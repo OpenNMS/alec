@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,30 +28,21 @@
 
 package org.opennms.oce.datasource.opennms;
 
-import java.util.Objects;
+import java.util.Collection;
 
 import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObject;
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjects;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.Alarm;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.Node;
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge;
 
-public class AlarmToInventory {
+public interface ScriptedInventoryService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmToInventory.class);
+    Collection<InventoryObject> toInventoryObjects(Node node) throws ScriptedInventoryException;
 
-    private final ScriptedInventoryService inventoryService;
+    EnrichedAlarm enrichAlarm(Alarm alarm) throws ScriptedInventoryException;
 
-    public AlarmToInventory(ScriptedInventoryService inventoryService) {
-        this.inventoryService = Objects.requireNonNull(inventoryService);
-    }
-
-    public EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm) {
-        try {
-            return inventoryService.enrichAlarm(alarm);
-        } catch (ScriptedInventoryException e) {
-            LOG.error("Failed to enrich Alarm: {} : {}", alarm, e.getCause().getMessage());
-            throw new RuntimeException(e);
-        }
-    }
+    InventoryObjects edgeToInventory(TopologyEdge edge) throws ScriptedInventoryException;
 
 }

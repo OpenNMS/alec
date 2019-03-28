@@ -83,7 +83,7 @@ public class VectorizerTest {
         InputVector v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n1_c2_p1, a2_n1_c2_p1));
         assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(true));
-        assertThat(v.getSimilarityOfInventoryObjectIds(), closeTo(1.0, 0.001));
+        assertThat(v.getSimilarityOfInventoryObjectIds(), closeTo(0.125, 0.001));
         assertThat(v.getSimilarityOfInventoryObjectLabels(), closeTo(-1.0, 0.001));
 
         v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n2_c1_p2, a3_n2_c1_p2));

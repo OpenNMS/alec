@@ -52,9 +52,11 @@ public class TFModelTest {
                 .shareAncestors(true)
                 .timeDifferenceInSeconds(1d)
                 .distanceOnGraph(2d)
+                .similarityOfInventoryObjectLabels(1.0)
+                .similarityOfInventoryObjectIds(1.0)
                 .build();
         List<Tensor<?>> tensors = tfModel.toTensors(inputVector);
-        assertThat(tensors, hasSize(7));
+        assertThat(tensors, hasSize(9));
     }
 
     /**
@@ -71,6 +73,8 @@ public class TFModelTest {
                 .shareAncestors(true)
                 .timeDifferenceInSeconds(1d)
                 .distanceOnGraph(2d)
+                .similarityOfInventoryObjectLabels(1.0)
+                .similarityOfInventoryObjectIds(1.0)
                 .build();
         int N = 5000;
         long startMs = System.currentTimeMillis();

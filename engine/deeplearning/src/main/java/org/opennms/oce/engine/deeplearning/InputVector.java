@@ -74,6 +74,15 @@ public class InputVector {
      */
     private final double distanceOnGraph;
 
+    /**
+     * Input: How similar are the IO IDs for A1 and A2?
+     */
+    private final double similarityOfInventoryObjectIds;
+
+    /**
+     * Input: How similar are the IO labels (friendly names) for A1 and A2?
+     */
+    private final double similarityOfInventoryObjectLabels;
 
     public static Builder builder() {
         return new Builder();
@@ -87,6 +96,8 @@ public class InputVector {
         this.shareAncestor = builder.shareAncestors;
         this.timeDifferenceInSeconds = builder.timeDifferenceInSeconds;
         this.distanceOnGraph = builder.distanceOnGraph;
+        this.similarityOfInventoryObjectIds = builder.similarityOfInventoryObjectIds;
+        this.similarityOfInventoryObjectLabels = builder.similarityOfInventoryObjectLabels;
     }
 
     public static class Builder {
@@ -97,6 +108,8 @@ public class InputVector {
         private Boolean shareAncestors;
         private Double timeDifferenceInSeconds;
         private Double distanceOnGraph;
+        private Double similarityOfInventoryObjectIds;
+        private Double similarityOfInventoryObjectLabels;
 
         public Builder typeA(String typeA) {
             this.typeA = typeA;
@@ -133,15 +146,26 @@ public class InputVector {
             return this;
         }
 
+        public Builder similarityOfInventoryObjectIds(Double similarityOfInventoryObjectIds) {
+            this.similarityOfInventoryObjectIds = similarityOfInventoryObjectIds;
+            return this;
+        }
+
+        public Builder similarityOfInventoryObjectLabels(Double similarityOfInventoryObjectLabels) {
+            this.similarityOfInventoryObjectLabels = similarityOfInventoryObjectLabels;
+            return this;
+        }
+
         public InputVector build() {
             Objects.requireNonNull(typeA, "typeA is required");
             Objects.requireNonNull(typeB, "typeB is required");
             Objects.requireNonNull(sameInstance, "sameInstance is required");
             Objects.requireNonNull(sameParent, "sameParent is required");
-            Objects.requireNonNull(typeA, "shareAncestors is required");
-            Objects.requireNonNull(shareAncestors, "typeA is required");
+            Objects.requireNonNull(shareAncestors, "shareAncestors is required");
             Objects.requireNonNull(timeDifferenceInSeconds, "timeDifferenceInSeconds is required");
             Objects.requireNonNull(distanceOnGraph, "distanceOnGraph is required");
+            Objects.requireNonNull(similarityOfInventoryObjectIds, "similarityOfInventoryObjectIds is required");
+            Objects.requireNonNull(similarityOfInventoryObjectLabels, "similarityOfInventoryObjectLabels is required");
             return new InputVector(this);
         }
     }
@@ -174,6 +198,14 @@ public class InputVector {
         return distanceOnGraph;
     }
 
+    public double getSimilarityOfInventoryObjectIds() {
+        return similarityOfInventoryObjectIds;
+    }
+
+    public double getSimilarityOfInventoryObjectLabels() {
+        return similarityOfInventoryObjectLabels;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -184,13 +216,15 @@ public class InputVector {
                 shareAncestor == that.shareAncestor &&
                 Double.compare(that.timeDifferenceInSeconds, timeDifferenceInSeconds) == 0 &&
                 Double.compare(that.distanceOnGraph, distanceOnGraph) == 0 &&
+                Double.compare(that.similarityOfInventoryObjectIds, similarityOfInventoryObjectIds) == 0 &&
+                Double.compare(that.similarityOfInventoryObjectLabels, similarityOfInventoryObjectLabels) == 0 &&
                 Objects.equals(typeA, that.typeA) &&
                 Objects.equals(typeB, that.typeB);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph);
+        return Objects.hash(typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph, similarityOfInventoryObjectIds, similarityOfInventoryObjectLabels);
     }
 
     @Override
@@ -203,6 +237,8 @@ public class InputVector {
                 ", shareAncestor=" + shareAncestor +
                 ", timeDifferenceInSeconds=" + timeDifferenceInSeconds +
                 ", distanceOnGraph=" + distanceOnGraph +
+                ", similarityOfInventoryObjectIds=" + similarityOfInventoryObjectIds +
+                ", similarityOfInventoryObjectLabels=" + similarityOfInventoryObjectLabels +
                 '}';
     }
 

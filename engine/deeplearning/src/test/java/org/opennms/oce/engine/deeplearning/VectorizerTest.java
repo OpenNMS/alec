@@ -29,6 +29,7 @@
 package org.opennms.oce.engine.deeplearning;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -80,12 +81,17 @@ public class VectorizerTest {
         CEVertex n2_c1_p2 = graphManager.addOrUpdateAlarm(a3_n2_c1_p2).get();
 
         InputVector v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n1_c2_p1, a2_n1_c2_p1));
+        assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(true));
+        assertThat(v.getSimilarityOfInventoryObjectIds(), closeTo(1.0, 0.001));
+        assertThat(v.getSimilarityOfInventoryObjectLabels(), closeTo(-1.0, 0.001));
 
         v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n2_c1_p2, a3_n2_c1_p2));
+        assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(false));
 
         v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c2_p1, a2_n1_c2_p1), new AlarmInSpaceTime(n2_c1_p2, a3_n2_c1_p2));
+        assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(false));
     }
 }

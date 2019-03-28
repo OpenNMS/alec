@@ -11,9 +11,8 @@
                 "<UNK>",
                 "BgpPeer",
                 "SnmpInterface",
-                "SnmpInterfaceLink",
-                "EntPhysicalEntity",
-                "Node"
+                "Node",
+                "SnmpInterfaceLink"
             ]
         },
         {
@@ -24,9 +23,8 @@
                 "<UNK>",
                 "BgpPeer",
                 "SnmpInterface",
-                "SnmpInterfaceLink",
-                "EntPhysicalEntity",
-                "Node"
+                "Node",
+                "SnmpInterfaceLink"
             ]
         },
         {
@@ -51,6 +49,16 @@
         },
         {
             "name": "distance_on_graph",
+            "tied_weights": null,
+            "type": "numerical"
+        },
+        {
+            "name": "io_id_similarity",
+            "tied_weights": null,
+            "type": "numerical"
+        },
+        {
+            "name": "io_label_similarity",
             "tied_weights": null,
             "type": "numerical"
         }

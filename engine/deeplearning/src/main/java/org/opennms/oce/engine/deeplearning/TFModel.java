@@ -109,6 +109,8 @@ public class TFModel implements AutoCloseable {
                 .feed("share_ancestor/share_ancestor_placeholder", inputTensors.get(4))
                 .feed("distance_on_graph/distance_on_graph_placeholder", inputTensors.get(5))
                 .feed("time_delta_seconds/time_delta_seconds_placeholder", inputTensors.get(6))
+                .feed("io_id_similarity/io_id_similarity_placeholder", inputTensors.get(7))
+                .feed("io_label_similarity/io_label_similarity_placeholder", inputTensors.get(8))
                 .fetch("related/predictions_related/predictions_related")
                 .run();
 
@@ -126,8 +128,10 @@ public class TFModel implements AutoCloseable {
                 Tensor.create(new boolean[]{inputVector.isSameInstance()}, Boolean.class), // same_instance
                 Tensor.create(new boolean[]{inputVector.isSameParent()}, Boolean.class), // same_parent
                 Tensor.create(new boolean[]{inputVector.isShareAncestor()}, Boolean.class), // share_ancestor
-                Tensor.create(new float[]{(float) inputVector.getDistanceOnGraph()}, Float.class), // distance_on_graph
-                Tensor.create(new float[]{(float) inputVector.getTimeDifferenceInSeconds()}, Float.class) // time_delta_seconds
+                Tensor.create(new float[]{(float)inputVector.getDistanceOnGraph()}, Float.class), // distance_on_graph
+                Tensor.create(new float[]{(float)inputVector.getTimeDifferenceInSeconds()}, Float.class), // time_delta_seconds
+                Tensor.create(new float[]{(float)inputVector.getSimilarityOfInventoryObjectIds()}, Float.class), // io_id_similarity
+                Tensor.create(new float[]{(float)inputVector.getSimilarityOfInventoryObjectLabels()}, Float.class) // io_label_similarity
         );
     }
 

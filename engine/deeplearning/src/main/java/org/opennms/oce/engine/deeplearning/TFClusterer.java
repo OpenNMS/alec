@@ -290,9 +290,13 @@ public class TFClusterer {
                 }
 
                 LOG.trace("Processing task: {}", task);
-                final TFTaskVisitor visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
-                task.visit(visitor);
-                LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
+                try {
+                    final TFTaskVisitor visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
+                    task.visit(visitor);
+                    LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
+                } catch (Exception e) {
+                    LOG.error("Error occurred while executing task: {}: {}", task, e.getMessage(), e);
+                }
             } catch (InterruptedException e) {
                 LOG.info("Interrupted while waiting for the next task. Exiting thread.");
                 return;

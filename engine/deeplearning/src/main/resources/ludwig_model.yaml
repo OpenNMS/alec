@@ -1,0 +1,22 @@
+input_features:
+  - name: type_a
+    type: category
+  - name: type_b
+    type: category
+  - name: same_instance
+    type: binary
+  - name: same_parent
+    type: binary
+  - name: share_ancestor
+    type: binary
+  - name: time_delta_seconds
+    type: numerical
+  - name: distance_on_graph
+    type: numerical
+  - name: io_id_similarity
+    type: numerical
+  - name: io_label_similarity
+    type: numerical
+output_features:
+  - name: related
+    type: binary

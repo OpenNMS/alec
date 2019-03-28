@@ -89,6 +89,7 @@
         <feature version="${project.version}">oce-engine-cluster</feature>
         <feature version="${tensorflow.version}">tensorflow</feature>
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
+        <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
         <bundle>mvn:org.opennms.oce.engine/org.opennms.oce.engine.deeplearning/${project.version}</bundle>
     </feature>
 

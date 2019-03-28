@@ -217,6 +217,8 @@ public class Vectorize implements Action {
                 "share_ancestor",
                 "time_delta_seconds",
                 "distance_on_graph",
+                "io_id_similarity",
+                "io_label_similarity",
                 "related"
         };
     }
@@ -234,6 +236,8 @@ public class Vectorize implements Action {
                 v.isShareAncestor() ? 1 : 0,
                 v.getTimeDifferenceInSeconds(),
                 v.getDistanceOnGraph(),
+                v.getSimilarityOfInventoryObjectIds(),
+                v.getSimilarityOfInventoryObjectLabels(),
                 ov.areAlarmsRelated() ? 1 : 0
         );
     }

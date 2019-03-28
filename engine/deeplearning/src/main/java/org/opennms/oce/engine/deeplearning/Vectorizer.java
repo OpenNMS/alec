@@ -37,6 +37,10 @@ import org.opennms.oce.engine.cluster.CEVertex;
 import org.opennms.oce.engine.cluster.GraphManager;
 import org.opennms.oce.engine.cluster.SpatialDistanceCalculator;
 
+import com.google.common.base.Strings;
+
+import info.debatty.java.stringsimilarity.NormalizedLevenshtein;
+
 /**
  * Used to build a {@link InputVector} from two {@link AlarmInSpaceTime} alarms.
  *
@@ -45,6 +49,7 @@ import org.opennms.oce.engine.cluster.SpatialDistanceCalculator;
 public class Vectorizer {
     private final GraphManager graphManager;
     private final SpatialDistanceCalculator spatialDistanceCalculator;
+    private final NormalizedLevenshtein normalizedLevenshtein = new NormalizedLevenshtein();
 
     public Vectorizer(GraphManager graphManager, SpatialDistanceCalculator spatialDistanceCalculator) {
         this.graphManager = Objects.requireNonNull(graphManager);
@@ -57,30 +62,42 @@ public class Vectorizer {
 
     public InputVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2, double distanceOnGraph) {
         // Build the input vector
-        InputVector.Builder builder = InputVector.builder()
+        final InputVector.Builder builder = InputVector.builder()
                 .typeA(a1.getAlarm().getInventoryObjectType())
-                .typeB(a2.getAlarm().getInventoryObjectType());
+                .typeB(a2.getAlarm().getInventoryObjectType())
+                .similarityOfInventoryObjectIds(getSimilarityOfInventoryObjectIds(a1.getAlarm().getInventoryObjectId(), a2.getAlarm().getInventoryObjectId()));
 
-        int firstAncestorMatch = getFirstAncestorMatch(a1, a2);
+        // Process additional facts if we can obtain the IO
+        int firstAncestorMatch = -1;
+        double similarityOfInventoryObjectLabels = -1;
+        final Optional<InventoryObject> io1 = a1.getVertex().getInventoryObject();
+        final Optional<InventoryObject> io2 = a2.getVertex().getInventoryObject();
+        if (io1.isPresent() && io2.isPresent()) {
+            final InventoryObject ioa = io1.get();
+            final InventoryObject iob = io2.get();
+            firstAncestorMatch = getFirstAncestorMatch(ioa, iob);
+            similarityOfInventoryObjectLabels = getSimilarityOfInventoryObjectLabels(ioa, iob);
+        }
+
         builder.sameInstance(firstAncestorMatch == 0)
-                .sameParent(firstAncestorMatch <= 1)
+                .sameParent(firstAncestorMatch == 0 || firstAncestorMatch == 1)
                 .shareAncestors(firstAncestorMatch >= 0)
                 .timeDifferenceInSeconds(timeDeltaInSeconds(a1, a2))
-                .distanceOnGraph(distanceOnGraph);
+                .distanceOnGraph(distanceOnGraph)
+                .similarityOfInventoryObjectLabels(similarityOfInventoryObjectLabels);
 
         return builder.build();
     }
 
-    private int getFirstAncestorMatch(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
-        Optional<InventoryObject> io1 = a1.getVertex().getInventoryObject();
-        Optional<InventoryObject> io2 = a2.getVertex().getInventoryObject();
-        if (!io1.isPresent() || !io2.isPresent()) {
-            return -1;
-        }
-        InventoryObject ioa = io1.get();
-        InventoryObject iob = io2.get();
+    private double getSimilarityOfInventoryObjectIds(String ioId1, String ioId2) {
+        return normalizedLevenshtein.distance(ioId1, ioId2);
+    }
 
-        return getFirstAncestorMatch(ioa, iob);
+    private double getSimilarityOfInventoryObjectLabels(final InventoryObject io1, final InventoryObject io2) {
+        if (!Strings.isNullOrEmpty(io1.getFriendlyName()) && !Strings.isNullOrEmpty(io2.getFriendlyName())) {
+            return normalizedLevenshtein.distance(io1.getFriendlyName(), io2.getFriendlyName());
+        }
+        return -1d;
     }
 
     private int getFirstAncestorMatch(final InventoryObject io1, final InventoryObject io2) {

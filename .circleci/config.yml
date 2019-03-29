@@ -29,6 +29,10 @@ executors:
     docker:
       - image: opennms/package-cloud-cli:0.3.05-b1
 
+  python-executor:
+    docker:
+      - image: circleci/python:3.7.2
+
 workflows:
   build-deploy:
     jobs:
@@ -63,26 +67,15 @@ workflows:
             branches:
               only:
                 - master
-      - yank-snapshot-packages:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-                - features/yank-rpms
       - deploy-packages:
           requires:
             - smoke-test
-            - build
-            - yank-snapshot-packages
           filters:
             tags:
               only: /^v.*/
             branches:
               only:
                 - master
-                - features/yank-rpms
       - deploy-docs:
           requires:
             - build-docs
@@ -93,6 +86,9 @@ workflows:
             branches:
               only:
                 - master
+      - yank-snapshot-packages:
+          requires:
+            - deploy-packages
 
 jobs:
   pre-build:
@@ -321,12 +317,13 @@ jobs:
             netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}
 
   yank-snapshot-packages:
-    executor: build-executor
+    executor: python-executor
     steps:
       - attach_workspace:
           at: ~/
       - run:
           name: Yank SNAPSHOT packages
           command: |
-            .circleci/scripts/package-cloud-yank-snapshots.sh
+            source .circleci/env/package_cloud
+            .circleci/scripts/packagecloud-yank-snapshot-packages.py
 

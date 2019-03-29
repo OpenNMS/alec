@@ -1,0 +1,6 @@
+#!/bin/bash
+# Package Cloud configuration
+
+PACKAGECLOUD_USER="opennms"
+PACKAGECLOUD_REPO="plugin-snapshot"
+PACKAGECLOUD_DISTRO_VERSION="el/7"

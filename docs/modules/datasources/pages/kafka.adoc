@@ -4,9 +4,15 @@
 == Overview
 
 The OpenNMS Kafka Datasource is used when OCE is deployed in a *distributed* installation.
-It runs in the same JVM as OCE and acts upon data as it is consumed from Kafka topics.
 
-== Config
+The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer and Kafka Event Consumer features.
+
+The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
+The Kafka Datasource consumes from these topics and provides OCE with a feed of alarms and inventory.
+
+== Scripted extensions
+
+=== Config
 
 To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.oce.datasource.opennms.kafka_ PID.
 
@@ -16,7 +22,7 @@ config:property-set scriptFile /tmp/inventory.groovy
 config:update
 ```
 
-== API
+=== API
 
 There are three methods exposed to the InventoryObject script.
 

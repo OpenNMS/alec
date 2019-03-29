@@ -75,19 +75,3 @@ We then update the managed object instance on the alarm to include the resolved 
 When we need to store multiple attributes in managed object instance field we encode these in JSON so that they can be represented as a single string.
 
 When the alarm is received by OCE, it now contains sufficient information in the MO type and instance fields so that it can be attached to a corresponding inventory object.
-
-== Datasources
-
-[[direct_datasource]]
-=== Direct Datasource
-
-The direct data source integrates with OpenNMS using the APIs provided by the link:https://github.com/OpenNMS/opennms-integration-api[OIA].
-
-
-[[kafka_datasource]]
-=== Kafka Datasource
-
-The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer and Kafka Event Consumer features.
-
-The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
-The Kafka Datasource consumes from these topics and provides OCE with a feed of alarms and inventory.

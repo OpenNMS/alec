@@ -4,9 +4,11 @@
 == Overview
 
 The OpenNMS Direct Datasource is used when OCE is deployed in a *monolithic* installation. 
-It runs in the same JVM as OpenNMS and acts upon new *Alarms* and *Nodes* directly.
+It runs in the same JVM as OpenNMS and acts upon new *Alarms* and *Nodes* using the APIs provided by the link:https://github.com/OpenNMS/opennms-integration-api[OIA].
 
-== Config
+== Scripted extensions
+
+=== Config
 
 To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.oce.datasource.opennms.direct_ PID. 
 
@@ -16,26 +18,26 @@ config:property-set scriptFile /tmp/inventory.groovy
 config:update
 ```
 
-== API
+=== API
 
 There are three methods exposed to the InventoryObject script: One is Alarm focussed and the other two are Inventory focussed.
 
-=== Alarms
+==== Alarms
 
 When an Alarm from OpenNMS arrives via the DirectAlarmDatasource, it is directly mapped from its OpenNMS type to the corresponding OCE type.
 During this mapping, you can modify the ModelObjectType or the ModelObjectIdentifier of the InventoryObject that the Alarm will be associated with.
 
-==== overrideTypeAndInstance
+===== overrideTypeAndInstance
 
 ```
 void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm alarm);
 ```
 
-=== Inventory
+==== Inventory
 
 As Nodes arrive via the DirectInventoryDatasource and are Mapped from their OpenNMS type to the internal OCE type, there is an opportunity to derive InventoryObjects.
 
-==== createInventoryObjects - Node
+===== createInventoryObjects - Node
 
 Each *Node* from OpenNMS is passed to the method below to derive InventoryObjects.
 
@@ -46,7 +48,7 @@ List<InventoryObject> nodeToInventory(Node node);
 As Alarms arrive on the Inventory Datasource, they are also processed to derive a List of InventoryObjects.
 If there is a *Node* in the node attribute of the alarm, the above method will be invoked. If there is no Node on the Alarm, the method below will be invoked.
 
-==== createInventoryObjects - Alarm
+===== createInventoryObjects - Alarm
 
 As each *Alarm* from OpenNMS is received by OCE, there is an opportunity to derive InventoryObjects.
 

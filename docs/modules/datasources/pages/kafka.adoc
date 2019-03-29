@@ -1,0 +1,40 @@
+= OpenNMS Kafka Datasource
+:imagesdir: ../assets/images
+
+== Overview
+
+The OpenNMS Kafka Datasource is used when OCE is deployed in a *distributed* installation.
+It runs in the same JVM as OCE and acts upon data as it is consumed from Kafka topics.
+
+== Config
+
+To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.oce.datasource.opennms.kafka_ PID.
+
+```
+config:edit org.opennms.oce.datasource.opennms.kafka
+config:property-set scriptFile /tmp/inventory.groovy
+config:update
+```
+
+== API
+
+There are three methods exposed to the InventoryObject script.
+
+As the *Edges* and  *Nodes* are received on the Kafka topic, the following methods are invoked respectively, giving the opportunity to derive a list of inventory objects.
+
+```
+InventoryObjects edgeToInventory(TopologyEdge edge)
+```
+
+```
+List<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node)
+```
+
+When *Alarms* arrive on the Kafka topic, the following method is invoked. The *EnrichedAlarm* type contains both a reference to an InventoryObject Type and a reference to an InventoryObject Identifier.
+
+Together, these denote the InventoryObject the Alarm will be attached to.
+Additionally, the EnrichedAlarm contains a list of inventory objects so multiple objects can be derived from the alarm.
+
+```
+EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm)
+```

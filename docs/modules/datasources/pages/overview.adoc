@@ -1,0 +1,27 @@
+= OCE Datasources
+:imagesdir: ../assets/images
+
+== Overview
+
+The OCE Datasource is responsible for interacting with the monitoring system and providing a feed of alarms, inventory objects and situations.
+Data sources are also responsible for creating the situations in the *monitoring system*. 
+
+We provide two datasources: one for the xref:direct.adoc[monolithic deployment] and one for the xref:kafka.adoc[distributed deployment].
+
+*Inventory Objects* may be derived from the incoming stream of alarms, nodes and links.
+
+The mapping of *Alarms*, *Nodes* and *Links* to *Inventory Objects* is done using a JSR-223 script that allows the user to override or extend the behaviour by modifying or replacing the script. 
+
+The default implementation of this mapping can be found in the _inventory.groovy_ script of each bundle:
+
+* link:https://github.com/OpenNMS/oce/tree/master/datasource/opennms-direct/src/main/resources/inventory.groovy[OpenNMS Direct]
+
+* link:https://github.com/OpenNMS/oce/tree/master/datasource/opennms-kafka/src/main/resources/inventory.groovy[OpenNMS Kafka]
+
+The included implementation uses the link:http://groovy-lang.org/[Groovy] scripting language.
+
+To modify the behaviour of the current implementation, you may begin with one of the scripts above.
+See the appropriate datasource page for specific configuration and API information.
+
+*NOTE:* If replacing the inventory script, your script *must* use a ScriptingEngine that implements _Invocable_ and your script must be UTF-8 encoded. 
+

@@ -15,6 +15,11 @@
 * xref:architecture:overview.adoc[Overview]
 * xref:architecture:opennms_integration.adoc[OpenNMS Integration]
 
+.Datasources
+* xref:datasources:overview.adoc[Overview]
+* xref:datasources:direct.adoc[Direct]
+* xref:datasources:kafka.adoc[Kafka]
+
 .Engines
 * xref:engines:cluster.adoc[Cluster Engine]
 * xref:engines:deeplearning.adoc[Deep Learning Engine]

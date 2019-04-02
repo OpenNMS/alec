@@ -48,6 +48,7 @@ import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.TopologyEdge;
+import org.opennms.integration.api.v1.model.TopologyProtocol;
 import org.opennms.integration.api.v1.topology.TopologyEdgeConsumer;
 import org.opennms.oce.datasource.api.InventoryDatasource;
 import org.opennms.oce.datasource.api.InventoryHandler;
@@ -132,29 +133,21 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private final EdgeDao edgeDao;
 
     /**
-     * A comma separated list of protocols that this datasource should consume. Effectively filters updates received
-     * from {@link #onEdgeAddedOrUpdated(TopologyEdge)} and {@link #onEdgeDeleted(TopologyEdge)}.
-     */
-    private final String topologyProtocols;
-
-    /**
      * A mapper for deriving inventory objects.
      */
     private final ApiMapper mapper;
 
     /**
-     * @param nodeDao           used to retrieve the current inventory
-     * @param alarmDao          used to retrieve the current inventory
-     * @param edgeDao           used to retrieve the current inventory
-     * @param topologyProtocols the protocols supported for topology updates
-     * @param mapper            used to Map between API and OCE types
+     * @param nodeDao  used to retrieve the current inventory
+     * @param alarmDao used to retrieve the current inventory
+     * @param edgeDao  used to retrieve the current inventory
+     * @param mapper   used to Map between API and OCE types
      */
     public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao, EdgeDao edgeDao, String topologyProtocols,
                                      ApiMapper mapper) {
         this.nodeDao = Objects.requireNonNull(nodeDao);
         this.alarmDao = Objects.requireNonNull(alarmDao);
         this.edgeDao = Objects.requireNonNull(edgeDao);
-        this.topologyProtocols = Objects.requireNonNull(topologyProtocols);
         this.mapper = Objects.requireNonNull(mapper);
     }
 
@@ -400,8 +393,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @Override
-    public String getProtocols() {
-        return topologyProtocols;
+    public Set<TopologyProtocol> getProtocols() {
+        return Collections.singleton(TopologyProtocol.ALL);
     }
 
     @Override

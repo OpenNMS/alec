@@ -5,7 +5,6 @@
         <cm:default-properties>
             <cm:property name="scriptFile" value="" /> <!--  use empty string to use default script included in bundle" -->
             <cm:property name="scriptCacheMillis" value="30000"/>  <!-- 30 seconds -->
-            <cm:property name="topologyProtocols" value="bridge,cdp,isis,lldp,ospf,userdefined"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -49,7 +48,6 @@
         <argument ref="nodeDao"/>
         <argument ref="alarmDao"/>
         <argument ref="edgeDao"/>
-        <argument value="${topologyProtocols}"/>
         <argument ref="mapper"/>
     </bean>
     <service ref="directInventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>

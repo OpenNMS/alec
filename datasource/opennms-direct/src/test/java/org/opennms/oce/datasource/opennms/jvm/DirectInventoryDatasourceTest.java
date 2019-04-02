@@ -49,6 +49,7 @@ import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.NodeCriteria;
 import org.opennms.integration.api.v1.model.TopologyEdge;
 import org.opennms.integration.api.v1.model.TopologyPort;
+import org.opennms.integration.api.v1.model.TopologyProtocol;
 import org.opennms.integration.api.v1.model.TopologySegment;
 import org.opennms.oce.datasource.api.InventoryHandler;
 import org.opennms.oce.datasource.api.InventoryObject;
@@ -146,7 +147,7 @@ public class DirectInventoryDatasourceTest {
         when(port.getIfIndex()).thenReturn(portIfIndex);
         when(port.getNodeCriteria()).thenReturn(portNodeCriteria);
 
-        String protocol = "protocol";
+        TopologyProtocol protocol = TopologyProtocol.CDP;
         String segmentId = "segment.id";
         String segmentCriteria = "segment:criteria";
         TopologySegment segment = mock(TopologySegment.class);
@@ -199,12 +200,12 @@ public class DirectInventoryDatasourceTest {
     }
 
     private static class EdgeImpl implements TopologyEdge {
-        private final String protocol;
+        private final TopologyProtocol protocol;
         private final String id;
         private final TopologyPort port;
         private final TopologySegment segment;
 
-        public EdgeImpl(String protocol, String id, TopologyPort port, TopologySegment segment) {
+        public EdgeImpl(TopologyProtocol protocol, String id, TopologyPort port, TopologySegment segment) {
             this.protocol = protocol;
             this.id = id;
             this.port = port;
@@ -212,7 +213,7 @@ public class DirectInventoryDatasourceTest {
         }
 
         @Override
-        public String getProtocol() {
+        public TopologyProtocol getProtocol() {
             return protocol;
         }
 

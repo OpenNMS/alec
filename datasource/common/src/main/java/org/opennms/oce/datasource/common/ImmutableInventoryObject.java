@@ -251,12 +251,12 @@ public final class ImmutableInventoryObject implements InventoryObject {
 
     @Override
     public List<InventoryObjectPeerRef> getPeers() {
-        return peers == null ? null : Collections.unmodifiableList(peers);
+        return peers == null ? Collections.emptyList() : Collections.unmodifiableList(peers);
     }
 
     @Override
     public List<InventoryObjectRelativeRef> getRelatives() {
-        return relatives == null ? null : Collections.unmodifiableList(relatives);
+        return relatives == null ? Collections.emptyList() : Collections.unmodifiableList(relatives);
     }
 
     @Override

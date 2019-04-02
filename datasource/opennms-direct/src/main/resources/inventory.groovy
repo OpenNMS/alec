@@ -180,7 +180,7 @@ class InventoryFactory {
                 weightForLink.set(SEGMENT_LINK_WEIGHT);
                 ios.add(ImmutableInventoryObject.newBuilder()
                         .setType(ManagedObjectType.Segment.getName())
-                        .setId(Segment.generateId(segment.getId(), segment.getProtocol()))
+                        .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
                         .build());
                 // If there was a segment, this edge is a BridgeLink not an SNMP-interface link
                 edgeIoBuilder.setType(ManagedObjectType.BridgeLink.getName());
@@ -190,7 +190,7 @@ class InventoryFactory {
         // Add the source peer (source port)
         edgeIoBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
                 .setId(Port.generateId(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), edge.getProtocol()))
+                nodeCriteriaToString(edge.getSource().getNodeCriteria()), edge.getProtocol().name()))
                 .setType(ManagedObjectType.SnmpInterface.getName())
                 .setEndpoint(InventoryObjectPeerEndpoint.A)
                 .setWeight(weightForLink.get())
@@ -204,7 +204,7 @@ class InventoryFactory {
                         .setId(generateIdForEdge(edge, port))
                         .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
                         .setId(Port.generateId(port.getIfIndex(), nodeCriteriaToString(port.getNodeCriteria()),
-                        edge.getProtocol()))
+                        edge.getProtocol().name()))
                         .setType(ManagedObjectType.SnmpInterface.getName())
                         .setEndpoint(InventoryObjectPeerEndpoint.Z)
                         .setWeight(weightForLink.get())
@@ -216,7 +216,7 @@ class InventoryFactory {
                 edgeIoBuilder.setFriendlyName(generateFriendlyNameForEdge(edge, segment))
                         .setId(generateIdForEdge(edge, segment))
                         .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
-                        .setId(Segment.generateId(segment.getId(), segment.getProtocol()))
+                        .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
                         .setType(ManagedObjectType.Segment.getName())
                         .setEndpoint(InventoryObjectPeerEndpoint.Z)
                         .setWeight(weightForLink.get())
@@ -232,25 +232,25 @@ class InventoryFactory {
     private static String generateIdForEdge(TopologyEdge edge, TopologyPort targetPort) {
         return Edge.generateId(edge.getSource().getIfIndex(),
                 nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
-                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol());
+                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol().name());
     }
 
     private static String generateIdForEdge(TopologyEdge edge, TopologySegment targetSegment) {
         return Edge.generateId(edge.getSource().getIfIndex(),
                 nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
-                edge.getProtocol());
+                edge.getProtocol().name());
     }
 
     private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologyPort targetPort) {
         return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
                 nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
-                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol());
+                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol().name());
     }
 
     private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologySegment targetSegment) {
         return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
                 nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
-                edge.getProtocol());
+                edge.getProtocol().name());
     }
 
     private static String nodeCriteriaToString(NodeCriteria nodeCriteria) {

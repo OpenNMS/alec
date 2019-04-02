@@ -195,12 +195,12 @@ public final class ImmutableSituation implements Situation {
 
     @Override
     public List<ResourceKey> getResourceKeys() {
-        return resourceKeys == null ? null : Collections.unmodifiableList(resourceKeys);
+        return resourceKeys == null ? Collections.emptyList() : Collections.unmodifiableList(resourceKeys);
     }
 
     @Override
     public Set<Alarm> getAlarms() {
-        return alarms == null ? null : Collections.unmodifiableSet(new HashSet<>(alarms.values()));
+        return alarms == null ? Collections.emptySet() : Collections.unmodifiableSet(new HashSet<>(alarms.values()));
     }
 
     @Override

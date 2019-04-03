@@ -62,9 +62,8 @@ public class DirectInventoryDatasourceTest {
             ".groovy");
     private final ApiMapper mapper = new ApiMapper(inventoryService);
     private final EdgeDao mockEdgeDao = mock(EdgeDao.class);
-    private final String protocols = "";
     private final DirectInventoryDatasource dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao,
-            mockEdgeDao, protocols, mapper);
+            mockEdgeDao, mapper);
     private final InventoryHandler inventoryHandler = new InventoryHandlerImpl();
     private final Set<InventoryObject> inventory = new HashSet<>();
 

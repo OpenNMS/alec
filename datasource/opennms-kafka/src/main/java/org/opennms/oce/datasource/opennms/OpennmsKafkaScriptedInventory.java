@@ -47,20 +47,21 @@ import org.slf4j.LoggerFactory;
  * @author smith
  *
  */
-public class ScriptedInventoryImpl extends AbstractScriptedInventory implements ScriptedInventoryService {
+public class OpennmsKafkaScriptedInventory extends AbstractScriptedInventory implements ScriptedInventoryService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScriptedInventoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpennmsKafkaScriptedInventory.class);
 
-    public ScriptedInventoryImpl(String scriptPath) {
-        super(scriptPath, 30000, null);
-    }
-
-    public ScriptedInventoryImpl(String scriptPath, long scriptCacheMillis, BundleContext bundleContext) {
+    public OpennmsKafkaScriptedInventory(String scriptPath, long scriptCacheMillis, BundleContext bundleContext) {
         super(scriptPath, scriptCacheMillis, bundleContext);
+    }
+    
+    public static OpennmsKafkaScriptedInventory withDefaults() {
+        // Empty string results in the default script being loaded
+        return new OpennmsKafkaScriptedInventory(DEFAULT_SCRIPT_FULL_PATH, 30000, null);
     }
 
     public void init() {
-        LOG.info("ScriptedInventoryImpl init'd");
+        LOG.info("OpennmsKafkaScriptedInventory init'd");
     }
 
     @Override

@@ -34,6 +34,9 @@ import java.util.Objects;
 
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 
+/**
+ * An implementation of {@link InventoryObjectRelativeRef} that enforces deep immutability.
+ */
 public final class ImmutableInventoryObjectRelativeRef implements InventoryObjectRelativeRef {
     private final String type;
     private final String id;
@@ -45,7 +48,7 @@ public final class ImmutableInventoryObjectRelativeRef implements InventoryObjec
         this.weight = builder.weight;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String type;
         private String id;
         private long weight;

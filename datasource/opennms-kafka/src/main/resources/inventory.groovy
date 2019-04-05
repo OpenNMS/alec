@@ -33,6 +33,7 @@ import groovy.util.logging.Slf4j
 import org.opennms.oce.datasource.common.inventory.Edge
 import org.opennms.oce.datasource.common.inventory.ManagedObjectType
 import org.opennms.oce.datasource.common.inventory.Port
+import org.opennms.oce.datasource.common.inventory.Segment
 import org.opennms.oce.datasource.common.inventory.TypeToInventory
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObject
@@ -53,69 +54,109 @@ class InventoryFactory {
         log.trace("EdgeToInventory - edge: {}", edge);
         final InventoryObjects.Builder iosBuilder = InventoryObjects.newBuilder();
         final InventoryObject.Builder edgeIoBuilder = InventoryObject.newBuilder();
-
+        
+        // Set the type of the link
         long weightForLink = PORT_LINK_WEIGHT;
-        // Derive a segment if applicable
-        if (edge.hasTargetSegment()) {
+        if(edge.hasSourceNode() && edge.hasTargetNode()) {
+            edgeIoBuilder.setType(NodeLink.getName());
+        } else if (edge.hasSourceSegment() || edge.hasTargetSegment()) {
             weightForLink = SEGMENT_LINK_WEIGHT;
-            final InventoryObject.Builder segmentIoBuilder = InventoryObject.newBuilder();
-            segmentIoBuilder.setType(Segment.getName())
-                    .setId(org.opennms.oce.datasource.common.inventory.Segment.generateId(edge.getTargetSegment().getRef().getId(),
-                    edge.getTargetSegment().getRef().getProtocol().toString()));
-
-            iosBuilder.addInventoryObject(segmentIoBuilder.build());
+            edgeIoBuilder.setType(BridgeLink.getName());
+        } else {
+            edgeIoBuilder.setType(SnmpInterfaceLink.getName());
         }
 
-        // Create a link object by setting the peers to the source and target
-        // The Id for this link will incorporate the protocol so that if multiple protocols describe a link 
-        // between the same endpoints they will create multiple links (one for each protocol)
-        edgeIoBuilder.setId(EdgeToInventory.getIdForEdge(edge))
-                .setFriendlyName(getFriendlyNameForEdge(edge));
-        edgeIoBuilder.addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
-                .setWeight(weightForLink)
-                .setId(Port.generateId(edge.getSource().getIfIndex(),
-                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
-                edge.getRef().getProtocol().name()))
-                .setType(SnmpInterface.getName())
-                .build());
+        // Derive segments if applicable
+        if (edge.hasSourceSegment()) {
+            iosBuilder.addInventoryObject(InventoryObject.newBuilder()
+                    .setType(BridgeSegment.getName())
+                    .setId(Segment.generateId(edge.getSourceSegment().getRef().getId(),
+                    edge.getSourceSegment().getRef().getProtocol().name()))
+                    .build());
+        }
+        if (edge.hasTargetSegment()) {
+            iosBuilder.addInventoryObject(InventoryObject.newBuilder()
+                    .setType(BridgeSegment.getName())
+                    .setId(Segment.generateId(edge.getTargetSegment().getRef().getId(),
+                    edge.getTargetSegment().getRef().getProtocol().name()))
+                    .build());
+        }
 
-        // Add the target peer conditionally based on what type it is
+        InventoryModelProtos.InventoryObjectPeerRef peerA = null;
+        InventoryModelProtos.InventoryObjectPeerRef peerZ = null;
+        
+        // Add the peers
+        if (edge.hasSourcePort()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(Port.generateId(edge.getSourcePort().getIfIndex(),
+                    OpennmsMapper.toNodeCriteria(edge.getSourcePort().getNodeCriteria())))
+                    .setType(SnmpInterface.getName())
+                    .build();
+        } else if (edge.hasSourceNode()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(OpennmsMapper.toNodeCriteria(edge.getSourceNode()))
+                    .setType(ManagedObjectType.Node.getName())
+                    .build();
+        } else if (edge.hasSourceSegment()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(Segment.generateId(edge.getSourceSegment()
+                    .getRef()
+                    .getId(),
+                    edge.getSourceSegment()
+                            .getRef()
+                            .getProtocol()
+                            .name()))
+                    .setType(BridgeSegment.getName())
+                    .build();
+        }
+
         if (edge.hasTargetPort()) {
-            edgeIoBuilder.setType(SnmpInterfaceLink.getName());
-            edgeIoBuilder.addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
                     .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
                     .setWeight(weightForLink)
                     .setId(Port.generateId(edge.getTargetPort().getIfIndex(),
-                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()),
-                    edge.getRef().getProtocol().name()))
+                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria())))
                     .setType(SnmpInterface.getName())
-                    .build());
-        } else {
-            edgeIoBuilder.setType(BridgeLink.getName());
-            edgeIoBuilder.addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .build();
+        } else if (edge.hasTargetNode()) {
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
                     .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
                     .setWeight(weightForLink)
-                    .setId(org.opennms.oce.datasource.common.inventory.Segment.generateId(edge.getRef().getId(), edge.getRef().getProtocol().toString()))
-                    .setType(Segment.getName())
-                    .build());
+                    .setId(OpennmsMapper.toNodeCriteria(edge.getTargetNode()))
+                    .setType(ManagedObjectType.Node.getName())
+                    .build();
+        } else if (edge.hasTargetSegment()) {
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
+                    .setWeight(weightForLink)
+                    .setId(Segment.generateId(edge.getTargetSegment()
+                    .getRef()
+                    .getId(),
+                    edge.getTargetSegment()
+                            .getRef()
+                            .getProtocol()
+                            .name()))
+                    .setType(BridgeSegment.getName())
+                    .build();
         }
+        
+        edgeIoBuilder.addPeer(Objects.requireNonNull(peerA));
+        edgeIoBuilder.addPeer(Objects.requireNonNull(peerZ));
+        
+        // Set Id and friendly name
+        edgeIoBuilder.setId(Edge.generateId(edge.getRef().getProtocol().name(), peerA.getId(), peerZ.getId()));
+        edgeIoBuilder.setFriendlyName(Edge.generateFriendlyName(edge.getRef().getProtocol().name(), peerA.getId(),
+                peerZ.getId()));
 
         iosBuilder.addInventoryObject(edgeIoBuilder.build());
 
         return iosBuilder.build();
-    }
-
-    private static String getFriendlyNameForEdge(TopologyEdge edge) {
-        if (edge.hasTargetPort()) {
-            return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
-                    OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()), edge.getTargetPort().getIfIndex(),
-                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()),
-                    edge.getRef().getProtocol().toString());
-        }
-        return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
-                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
-                edge.getTargetSegment().getRef().getId(), edge.getRef().getProtocol().toString());
     }
 
     static EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm) {
@@ -197,7 +238,7 @@ class InventoryFactory {
         log.trace("toInventoryObject: {} : {}", snmpInterface, parent);
         return InventoryObject.newBuilder()
                 .setType(SnmpInterface.getName())
-                .setId(parent.getId() + ":" + snmpInterface.getIfIndex())
+                .setId(Port.generateId((long) snmpInterface.getIfIndex(), parent.getId()))
                 .setFriendlyName(snmpInterface.getIfDescr())
                 .setParentType(parent.getType())
                 .setParentId(parent.getId())

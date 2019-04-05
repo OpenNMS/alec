@@ -38,6 +38,9 @@ import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 import org.opennms.oce.datasource.api.InventoryObjectRelativeRef;
 
+/**
+ * An implementation of {@link InventoryObject} that enforces deep immutability.
+ */
 public final class ImmutableInventoryObject implements InventoryObject {
     private final String type;
     private final String id;
@@ -58,12 +61,14 @@ public final class ImmutableInventoryObject implements InventoryObject {
         this.subtype = builder.subtype;
         this.friendlyName = builder.friendlyName;
         this.isTopLevel = builder.isTopLevel;
-        this.peers = builder.peers == null ? null : copyPeers(builder.peers);
-        this.relatives = builder.relatives == null ? null : copyRelatives(builder.relatives);
+        this.peers = builder.peers == null ? Collections.emptyList() :
+                Collections.unmodifiableList(copyPeers(builder.peers));
+        this.relatives = builder.relatives == null ? Collections.emptyList() :
+                Collections.unmodifiableList(copyRelatives(builder.relatives));
         this.weightToParent = builder.weightToParent;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String type;
         private String id;
         private String parentType;
@@ -71,8 +76,8 @@ public final class ImmutableInventoryObject implements InventoryObject {
         private String subtype;
         private String friendlyName;
         private boolean isTopLevel;
-        private List<InventoryObjectPeerRef> peers = new ArrayList<>();
-        private List<InventoryObjectRelativeRef> relatives = new ArrayList<>();
+        private List<InventoryObjectPeerRef> peers;
+        private List<InventoryObjectRelativeRef> relatives;
         private long weightToParent;
 
         private Builder() {
@@ -134,7 +139,10 @@ public final class ImmutableInventoryObject implements InventoryObject {
         }
 
         public Builder addPeer(InventoryObjectPeerRef peer) {
-            this.peers.add(peer);
+            if (peers == null) {
+                peers = new ArrayList<>();
+            }
+            peers.add(peer);
             return this;
         }
 
@@ -144,7 +152,10 @@ public final class ImmutableInventoryObject implements InventoryObject {
         }
 
         public Builder addRelative(InventoryObjectRelativeRef relative) {
-            this.relatives.add(relative);
+            if (relatives == null) {
+                relatives = new ArrayList<>();
+            }
+            relatives.add(relative);
             return this;
         }
 
@@ -251,12 +262,12 @@ public final class ImmutableInventoryObject implements InventoryObject {
 
     @Override
     public List<InventoryObjectPeerRef> getPeers() {
-        return peers == null ? Collections.emptyList() : Collections.unmodifiableList(peers);
+        return peers;
     }
 
     @Override
     public List<InventoryObjectRelativeRef> getRelatives() {
-        return relatives == null ? Collections.emptyList() : Collections.unmodifiableList(relatives);
+        return relatives;
     }
 
     @Override

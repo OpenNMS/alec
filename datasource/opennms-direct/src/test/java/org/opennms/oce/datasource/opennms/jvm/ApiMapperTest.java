@@ -46,7 +46,7 @@ public class ApiMapperTest {
 
     @Before
     public void setUp() {
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ScriptedInventoryService inventoryService = OpennmsDirectScriptedInventory.withDefaults();
         mapper = new ApiMapper(inventoryService);
     }
     /**

@@ -211,17 +211,17 @@ public class MockNetwork {
         return builder.build();
     }
 
-    public static OpennmsModelProtos.TopologyEdge createEdgeFor(OpennmsModelProtos.TopologyRef.Protocol protocol,
-                                                                String id,
-                                                                OpennmsModelProtos.NodeCriteria sourceNodeCriteria,
-                                                                OpennmsModelProtos.NodeCriteria targetNodeCriteria,
-                                                                long ifIndex) {
+    public static OpennmsModelProtos.TopologyEdge createPortToPortEdgeFor(OpennmsModelProtos.TopologyRef.Protocol protocol,
+                                                                          String id,
+                                                                          OpennmsModelProtos.NodeCriteria sourceNodeCriteria,
+                                                                          OpennmsModelProtos.NodeCriteria targetNodeCriteria,
+                                                                          long ifIndex) {
         OpennmsModelProtos.TopologyEdge edge = OpennmsModelProtos.TopologyEdge.newBuilder()
                 .setRef(OpennmsModelProtos.TopologyRef.newBuilder()
                         .setId(id)
                         .setProtocol(protocol)
                         .build())
-                .setSource(OpennmsModelProtos.TopologyPort.newBuilder()
+                .setSourcePort(OpennmsModelProtos.TopologyPort.newBuilder()
                         .setIfIndex(ifIndex)
                         .setNodeCriteria(sourceNodeCriteria)
                         .build())

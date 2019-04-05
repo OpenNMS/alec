@@ -58,8 +58,7 @@ import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 public class DirectInventoryDatasourceTest {
     private final NodeDao mockNodeDao = mock(NodeDao.class);
     private final AlarmDao mockAlarmDao = mock(AlarmDao.class);
-    private final ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory" +
-            ".groovy");
+    private final ScriptedInventoryService inventoryService = OpennmsDirectScriptedInventory.withDefaults();
     private final ApiMapper mapper = new ApiMapper(inventoryService);
     private final EdgeDao mockEdgeDao = mock(EdgeDao.class);
     private final DirectInventoryDatasource dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao,
@@ -217,13 +216,9 @@ public class DirectInventoryDatasourceTest {
         }
 
         @Override
-        public TopologyPort getSource() {
-            return port;
-        }
-
-        @Override
-        public void visitTarget(TopologyEdgeTargetVisitor v) {
-            v.visitTargetSegement(segment);
+        public void visitEndpoints(EndpointVisitor v) {
+            v.visitSource(port);
+            v.visitTarget(segment);
         }
 
         @Override

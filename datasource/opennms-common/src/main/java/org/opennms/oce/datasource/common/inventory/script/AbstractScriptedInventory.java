@@ -55,6 +55,8 @@ public abstract class AbstractScriptedInventory {
 
     private static final String DEFAULT_SCRIPT = "/inventory.groovy";
 
+    protected static final String DEFAULT_SCRIPT_FULL_PATH = "src/main/resources/inventory.groovy";
+
     private static final String DEFAULT_SCRIPT_EXTENSION = "groovy";
 
     private final boolean usingClasspathScript;

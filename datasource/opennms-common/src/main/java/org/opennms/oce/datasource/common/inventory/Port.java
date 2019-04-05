@@ -34,7 +34,7 @@ import java.util.Objects;
  * Utility methods for deriving Port attributes.
  */
 public class Port {
-    public static String generateId(long ifIndex, String nodeCriteria, String protocol) {
-        return String.format("%s:%s:%d", Objects.requireNonNull(protocol), Objects.requireNonNull(nodeCriteria), ifIndex);
+    public static String generateId(long ifIndex, String nodeCriteria) {
+        return String.format("%s:%d", Objects.requireNonNull(nodeCriteria), ifIndex);
     }
 }

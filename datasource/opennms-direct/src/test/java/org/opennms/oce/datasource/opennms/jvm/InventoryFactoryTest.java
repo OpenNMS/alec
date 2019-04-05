@@ -54,9 +54,9 @@ public class InventoryFactoryTest {
     private ScriptedInventoryService inventoryService;
 
     @Before
-    public void before() throws IOException, ScriptException, URISyntaxException {
+    public void before() {
         System.setProperty("log4j.skipJansi", "true");
-        inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        inventoryService = OpennmsDirectScriptedInventory.withDefaults();
     }
 
     @Test

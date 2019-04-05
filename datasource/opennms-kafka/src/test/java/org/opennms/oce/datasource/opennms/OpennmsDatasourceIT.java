@@ -74,7 +74,7 @@ public abstract class OpennmsDatasourceIT {
         producer = new KafkaProducer<>(senderProps);
 
         // Create the datasource
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ScriptedInventoryService inventoryService = OpennmsKafkaScriptedInventory.withDefaults();
         NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
         AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);

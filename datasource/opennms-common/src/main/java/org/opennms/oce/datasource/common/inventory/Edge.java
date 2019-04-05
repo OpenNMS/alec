@@ -34,43 +34,14 @@ import java.util.Objects;
  * Utility methods for deriving Edge attributes.
  */
 public class Edge {
-    /**
-     * @return the friendly name using a target port
-     */
-    public static String generateFriendlyName(long sourceIfIndex, String sourceNodeCriteria, long targetIfIndex,
-                                              String targetNodeCriteria, String protocol) {
-        return String.format("Link Between %d on %s and %d on %s discovered with " +
-                        "protocol %s", sourceIfIndex, Objects.requireNonNull(sourceNodeCriteria), targetIfIndex,
-                Objects.requireNonNull(targetNodeCriteria), Objects.requireNonNull(protocol));
+    public static String generateId(String protocol, String peerAId, String peerZId) {
+        return String.format("%s:%s:%s", Objects.requireNonNull(protocol), Objects.requireNonNull(peerAId),
+                Objects.requireNonNull(peerZId));
     }
 
-    /**
-     * @return the friendly name using a target segment
-     */
-    public static String generateFriendlyName(long sourceIfIndex, String sourceNodeCriteria,
-                                              String targetSegmentCriteria, String protocol) {
-        return String.format("Link Between %d on %s and segment %s discovered with protocol %s",
-                sourceIfIndex, Objects.requireNonNull(sourceNodeCriteria),
-                Objects.requireNonNull(targetSegmentCriteria), Objects.requireNonNull(protocol));
-    }
-
-    /**
-     * @return the Id using a target port
-     */
-    public static String generateId(long sourceIfIndex, String sourceNodeCriteria, long targetIfIndex,
-                                    String targetNodeCriteria, String protocol) {
-        return String.format("%s:%s:%d:%s:%d", Objects.requireNonNull(protocol),
-                Objects.requireNonNull(sourceNodeCriteria), sourceIfIndex, Objects.requireNonNull(targetNodeCriteria)
-                , targetIfIndex);
-    }
-
-    /**
-     * @return the Id using a target segment
-     */
-    public static String generateId(long sourceIfIndex, String sourceNodeCriteria, String targetSegmentCriteria,
-                                    String protocol) {
-        return String.format("%s:%s:%d:%s", Objects.requireNonNull(protocol),
-                Objects.requireNonNull(sourceNodeCriteria), sourceIfIndex,
-                Objects.requireNonNull(targetSegmentCriteria));
+    public static String generateFriendlyName(String protocol, String peerAId,
+                                              String peerZId) {
+        return String.format("Link Between %s and %s discovered with protocol %s", Objects.requireNonNull(peerAId),
+                Objects.requireNonNull(peerZId), Objects.requireNonNull(protocol));
     }
 }

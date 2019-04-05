@@ -47,7 +47,6 @@ import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.ImmutableInventoryObject;
 import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef;
-import org.opennms.oce.datasource.common.inventory.Edge;
 import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
 import org.opennms.oce.datasource.common.inventory.Segment;
 import org.opennms.oce.driver.test.MockAlarmBuilder;
@@ -411,7 +410,7 @@ public class GraphManagerTest {
         // Create a segment
         InventoryObject segment = ImmutableInventoryObject.newBuilder()
                 .setId(Segment.generateId("s1", "protocol"))
-                .setType(ManagedObjectType.Segment.getName())
+                .setType(ManagedObjectType.BridgeSegment.getName())
                 .build();
         
         // Create a link between the segment and node 1 interface
@@ -425,7 +424,7 @@ public class GraphManagerTest {
                         .build())
                 .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
                         .setId(Segment.generateId("s1", "protocol"))
-                        .setType(ManagedObjectType.Segment.getName())
+                        .setType(ManagedObjectType.BridgeSegment.getName())
                         .setEndpoint(InventoryObjectPeerEndpoint.Z)
                         .build())
                 .build();

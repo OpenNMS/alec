@@ -33,6 +33,9 @@ import java.util.Objects;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.Severity;
 
+/**
+ * An implementation of {@link Alarm} that enforces deep immutability.
+ */
 public final class ImmutableAlarm implements Alarm {
     private final String id;
     private final long time;
@@ -54,7 +57,7 @@ public final class ImmutableAlarm implements Alarm {
         this.nodeId = builder.nodeId;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String id;
         private long time;
         private Severity severity;

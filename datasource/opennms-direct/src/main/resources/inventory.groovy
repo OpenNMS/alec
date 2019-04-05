@@ -33,6 +33,7 @@ import groovy.util.logging.Slf4j
 import org.opennms.integration.api.v1.model.*
 import org.opennms.oce.datasource.api.InventoryObject
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint
+import org.opennms.oce.datasource.api.InventoryObjectPeerRef
 import org.opennms.oce.datasource.common.ImmutableAlarm
 import org.opennms.oce.datasource.common.ImmutableInventoryObject
 import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef
@@ -136,7 +137,7 @@ class InventoryFactory {
     static ImmutableInventoryObject toInventoryObject(SnmpInterface snmpInterface, InventoryObject parent) {
         return ImmutableInventoryObject.newBuilder()
                 .setType(ManagedObjectType.SnmpInterface.getName())
-                .setId(parent.getId() + ":" + snmpInterface.getIfIndex())
+                .setId(Port.generateId(snmpInterface.getIfIndex(), parent.getId()))
                 .setFriendlyName(snmpInterface.getIfDescr())
                 .setParentType(parent.getType())
                 .setParentId(parent.getId())
@@ -169,88 +170,143 @@ class InventoryFactory {
     static List<InventoryObject> edgeToInventory(TopologyEdge edge) {
         List<InventoryObject> ios = new ArrayList<>();
         ImmutableInventoryObject.Builder edgeIoBuilder = ImmutableInventoryObject.newBuilder();
-        // Assume this is targeting a port until we find out otherwise
         edgeIoBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName());
 
         final AtomicLong weightForLink = new AtomicLong(PORT_LINK_WEIGHT);
-        // Derive a segment from the edge if applicable
-        edge.visitTarget(new TopologyEdge.TopologyEdgeTargetVisitor() {
+
+        // Derive segments from the edge if possible and figure out if this is a link between nodes or segments
+        edge.visitEndpoints(new TopologyEdge.EndpointVisitor() {
             @Override
-            public void visitTargetSegement(TopologySegment segment) {
-                weightForLink.set(SEGMENT_LINK_WEIGHT);
+            void visitSource(Node node) {
+                // If any of the endpoints are a nod then this is a nodelink
+                edgeIoBuilder.setType(ManagedObjectType.NodeLink.getName());
+            }
+
+            @Override
+            void visitSource(TopologySegment segment) {
                 ios.add(ImmutableInventoryObject.newBuilder()
-                        .setType(ManagedObjectType.Segment.getName())
+                        .setType(ManagedObjectType.BridgeSegment.getName())
                         .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
                         .build());
-                // If there was a segment, this edge is a BridgeLink not an SNMP-interface link
+                // If any of the endpoints are a segment, then this is a bridgelink
+                weightForLink.set(SEGMENT_LINK_WEIGHT);
+                edgeIoBuilder.setType(ManagedObjectType.BridgeLink.getName());
+            }
+
+            @Override
+            void visitTarget(Node node) {
+                edgeIoBuilder.setType(ManagedObjectType.NodeLink.getName());
+            }
+
+            @Override
+            void visitTarget(TopologySegment segment) {
+                ios.add(ImmutableInventoryObject.newBuilder()
+                        .setType(ManagedObjectType.BridgeSegment.getName())
+                        .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
+                        .build());
+                // If any of the endpoints are a segment, then this is a bridgelink
+                weightForLink.set(SEGMENT_LINK_WEIGHT);
                 edgeIoBuilder.setType(ManagedObjectType.BridgeLink.getName());
             }
         });
 
-        // Add the source peer (source port)
-        edgeIoBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
-                .setId(Port.generateId(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), edge.getProtocol().name()))
-                .setType(ManagedObjectType.SnmpInterface.getName())
-                .setEndpoint(InventoryObjectPeerEndpoint.A)
-                .setWeight(weightForLink.get())
-                .build());
+        // Set the edge source and target
+        EdgePeerCreator edgePeerCreator = new EdgePeerCreator(edgeIoBuilder, edge, weightForLink.get());
+        edge.visitEndpoints(edgePeerCreator);
 
-        // Add the target peer (either a port or a segment)
-        edge.visitTarget(new TopologyEdge.TopologyEdgeTargetVisitor() {
-            @Override
-            public void visitTargetPort(TopologyPort port) {
-                edgeIoBuilder.setFriendlyName(generateFriendlyNameForEdge(edge, port))
-                        .setId(generateIdForEdge(edge, port))
-                        .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
-                        .setId(Port.generateId(port.getIfIndex(), nodeCriteriaToString(port.getNodeCriteria()),
-                        edge.getProtocol().name()))
-                        .setType(ManagedObjectType.SnmpInterface.getName())
-                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
-                        .setWeight(weightForLink.get())
-                        .build());
-            }
-
-            @Override
-            public void visitTargetSegement(TopologySegment segment) {
-                edgeIoBuilder.setFriendlyName(generateFriendlyNameForEdge(edge, segment))
-                        .setId(generateIdForEdge(edge, segment))
-                        .addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
-                        .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
-                        .setType(ManagedObjectType.Segment.getName())
-                        .setEndpoint(InventoryObjectPeerEndpoint.Z)
-                        .setWeight(weightForLink.get())
-                        .build());
-            }
-        });
-
+        edgeIoBuilder.setId(Edge.generateId(edge.getProtocol().name(), edgePeerCreator.getPeerA().getId(),
+                edgePeerCreator.getPeerZ().getId()));
+        edgeIoBuilder.setFriendlyName(Edge.generateFriendlyName(edge.getProtocol().name(), edgePeerCreator.getPeerA().getId(),
+                edgePeerCreator.getPeerZ().getId()));
         ios.add(edgeIoBuilder.build());
 
         return ios;
     }
 
-    private static String generateIdForEdge(TopologyEdge edge, TopologyPort targetPort) {
-        return Edge.generateId(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
-                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol().name());
-    }
+    private static class EdgePeerCreator implements TopologyEdge.EndpointVisitor {
+        private final ImmutableInventoryObject.Builder edgeIoBuilder;
+        private final TopologyEdge edge;
+        private final long edgeWeight;
+        private InventoryObjectPeerRef peerA;
+        private InventoryObjectPeerRef peerZ;
 
-    private static String generateIdForEdge(TopologyEdge edge, TopologySegment targetSegment) {
-        return Edge.generateId(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
-                edge.getProtocol().name());
-    }
+        EdgePeerCreator(ImmutableInventoryObject.Builder edgeIoBuilder, TopologyEdge edge, long edgeWeight) {
+            this.edgeIoBuilder = edgeIoBuilder
+            this.edge = edge
+            this.edgeWeight = edgeWeight
+        }
 
-    private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologyPort targetPort) {
-        return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetPort.getIfIndex(),
-                nodeCriteriaToString(targetPort.getNodeCriteria()), edge.getProtocol().name());
-    }
+        private ImmutableInventoryObjectPeerRef.Builder nodeEndpoint(Node node) {
+            return ImmutableInventoryObjectPeerRef.newBuilder()
+                    .setId(toNodeCriteria(node))
+                    .setType(ManagedObjectType.Node.getName())
+                    .setWeight(edgeWeight);
+        }
 
-    private static String generateFriendlyNameForEdge(TopologyEdge edge, TopologySegment targetSegment) {
-        return Edge.generateFriendlyName(edge.getSource().getIfIndex(),
-                nodeCriteriaToString(edge.getSource().getNodeCriteria()), targetSegment.getSegmentCriteria(),
-                edge.getProtocol().name());
+        private ImmutableInventoryObjectPeerRef.Builder portEndpoint(TopologyPort port) {
+            return ImmutableInventoryObjectPeerRef.newBuilder()
+                    .setId(Port.generateId(port.getIfIndex(),
+                    nodeCriteriaToString(port.getNodeCriteria())))
+                    .setType(ManagedObjectType.SnmpInterface.getName())
+                    .setWeight(edgeWeight);
+        }
+
+        private ImmutableInventoryObjectPeerRef.Builder segmentEndpoint(TopologySegment segment) {
+            return ImmutableInventoryObjectPeerRef.newBuilder()
+                    .setId(Segment.generateId(segment.getId(), segment.getProtocol().name()))
+                    .setType(ManagedObjectType.BridgeSegment.getName())
+                    .setWeight(edgeWeight);
+        }
+
+        @Override
+        public void visitSource(Node node) {
+            InventoryObjectPeerRef peer = nodeEndpoint(node).setEndpoint(InventoryObjectPeerEndpoint.A).build();
+            peerA = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        @Override
+        public void visitSource(TopologyPort port) {
+            InventoryObjectPeerRef peer = portEndpoint(port).setEndpoint(InventoryObjectPeerEndpoint.A).build();
+            peerA = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        @Override
+        public void visitSource(TopologySegment segment) {
+            InventoryObjectPeerRef peer = segmentEndpoint(segment).setEndpoint(InventoryObjectPeerEndpoint.A).build();
+            peerA = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        @Override
+        public void visitTarget(Node node) {
+            InventoryObjectPeerRef peer = nodeEndpoint(node).setEndpoint(InventoryObjectPeerEndpoint.Z).build();
+            peerZ = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        @Override
+        public void visitTarget(TopologyPort port) {
+            InventoryObjectPeerRef peer = portEndpoint(port).setEndpoint(InventoryObjectPeerEndpoint.Z).build();
+            peerZ = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        @Override
+        public void visitTarget(TopologySegment segment) {
+            InventoryObjectPeerRef peer = segmentEndpoint(segment).setEndpoint(InventoryObjectPeerEndpoint.Z).build();
+            peerZ = peer;
+            edgeIoBuilder.addPeer(peer);
+        }
+
+        InventoryObjectPeerRef getPeerA() {
+            return peerA
+        }
+
+        InventoryObjectPeerRef getPeerZ() {
+            return peerZ
+        }
     }
 
     private static String nodeCriteriaToString(NodeCriteria nodeCriteria) {

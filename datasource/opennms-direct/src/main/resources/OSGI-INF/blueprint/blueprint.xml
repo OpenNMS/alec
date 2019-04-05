@@ -14,7 +14,7 @@
     <reference id="edgeDao" interface="org.opennms.integration.api.v1.dao.EdgeDao" />
     <reference id="eventForwarder" interface="org.opennms.integration.api.v1.events.EventForwarder" />
 
-    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.jvm.ScriptedInventoryImpl">
+    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.jvm.OpennmsDirectScriptedInventory">
         <argument value="${scriptFile}"/>
         <argument value="${scriptCacheMillis}"/>
         <argument ref="blueprintBundleContext"/>

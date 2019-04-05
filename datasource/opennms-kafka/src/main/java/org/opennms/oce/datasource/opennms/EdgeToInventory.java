@@ -62,16 +62,14 @@ public class EdgeToInventory {
     }
 
     @VisibleForTesting
-    static String getIdForEdge(OpennmsModelProtos.TopologyEdge edge) {
-        if (edge.hasTargetPort()) {
-            return Edge.generateId(edge.getSource().getIfIndex(),
-                    OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
-                    edge.getTargetPort().getIfIndex(),
-                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()),
-                    edge.getRef().getProtocol().toString());
-        }
-        return Edge.generateId(edge.getSource().getIfIndex(),
-                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()),
-                edge.getTargetSegment().getRef().getId(), edge.getRef().getProtocol().toString());
+    String getIdForEdge(OpennmsModelProtos.TopologyEdge edge, String type) {
+        InventoryModelProtos.InventoryObjects ioObjects = toInventoryObjects(edge);
+        InventoryModelProtos.InventoryObject edgeIo = ioObjects.getInventoryObjectList()
+                .stream()
+                .filter(io -> io.getType().equals(type))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No edge found"));
+
+        return edgeIo.getId();
     }
 }

@@ -28,7 +28,9 @@
 
 package org.opennms.oce.engine.cluster;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -72,13 +74,17 @@ public class GraphManager {
 
     private final Set<Long> disconnectedVertices = new HashSet<>();
 
-    private Set<InventoryObject> deferredIos = new HashSet<>();
+    private final Map<ResourceKey, Set<InventoryObject>> deferredIosByDependency = new HashMap<>();
+    private final Map<InventoryObject, Set<ResourceKey>> dependenciesByDeferredIos = new HashMap<>();
 
     public synchronized void addInventory(Collection<InventoryObject> inventory) {
-        addInventory(inventory, false);
+        addOrUpdateInventory(inventory, false);
     }
 
-    private synchronized void addInventory(Collection<InventoryObject> inventory, boolean isDeferred) {
+    private synchronized void addOrUpdateInventory(Collection<InventoryObject> inventory, boolean isDeferred) {
+        // Keep track of any vertices we've added
+        final List<CEVertex> verticesAdded = new LinkedList<>();
+
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
@@ -88,15 +94,16 @@ public class GraphManager {
                 g.addVertex(vertex);
                 didGraphChange.set(true);
                 idtoVertexMap.put(vertex.getNumericId(), vertex);
+                verticesAdded.add(vertex);
                 return vertex;
             });
         }
 
         // Now handle the relationships
-        boolean didMatchAllRelations = true;
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             final CEVertex vertex = resourceKeyVertexMap.get(resourceKey);
+            boolean didDeferRelation = false;
 
             // Parent relationships
             final ResourceKey parentResourceKey = getResourceKeyForParent(io);
@@ -104,10 +111,9 @@ public class GraphManager {
                 final CEVertex parentVertex = resourceKeyVertexMap.get(parentResourceKey);
                 if (parentVertex == null) {
                     LOG.info("No existing vertex found for parent with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", parentResourceKey, resourceKey);
-                    didMatchAllRelations = false;
-                    continue;
-                }
-                if (!g.isNeighbor(parentVertex, vertex)) {
+                    defer(io, parentResourceKey);
+                    didDeferRelation = true;
+                } else if (!g.isNeighbor(parentVertex, vertex)) {
                     LOG.trace("Adding edge between child: {} and parent: {}", vertex, parentVertex);
                     final CEEdge edge = CEEdge.newParentEdge(edgeIdGenerator.getAndIncrement(), io.getWeightToParent());
                     g.addEdge(edge, parentVertex, vertex);
@@ -121,10 +127,9 @@ public class GraphManager {
                 final CEVertex peerVertex = resourceKeyVertexMap.get(peerResourceKey);
                 if (peerVertex == null) {
                     LOG.info("No existing vertex found for peer with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", peerResourceKey, resourceKey);
-                    didMatchAllRelations = false;
-                    continue;
-                }
-                if (!g.isNeighbor(peerVertex, vertex)) {
+                    defer(io, peerResourceKey);
+                    didDeferRelation = true;
+                } else if (!g.isNeighbor(peerVertex, vertex)) {
                     LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
                     final CEEdge edge = CEEdge.newPeerEdge(edgeIdGenerator.getAndIncrement(), peerRef);
                     g.addEdge(edge, peerVertex, vertex);
@@ -138,10 +143,9 @@ public class GraphManager {
                 final CEVertex relativeVertex = resourceKeyVertexMap.get(relativeResourceKey);
                 if (relativeVertex == null) {
                     LOG.info("No existing vertex found for relative with resource key '{}' on vertex with resource key '{}'. Deferring edge association.", relativeResourceKey, resourceKey);
-                    didMatchAllRelations = false;
-                    continue;
-                }
-                if (!g.isNeighbor(relativeVertex, vertex)) {
+                    defer(io, relativeResourceKey);
+                    didDeferRelation = true;
+                } else if (!g.isNeighbor(relativeVertex, vertex)) {
                     LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
                     final CEEdge edge = CEEdge.newRelativeEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
                     g.addEdge(edge, relativeVertex, vertex);
@@ -149,17 +153,16 @@ public class GraphManager {
                 }
             }
 
-            if (!didMatchAllRelations && !isDeferred) {
-                deferredIos.add(io);
-            } else if (isDeferred && didMatchAllRelations) {
-                deferredIos.remove(io);
+            if (!didDeferRelation) {
+                // We successfully matched all of the relations, clear any outstanding deferrals
+                clearDeferralsFor(io);
             }
         }
 
-        if (!isDeferred) {
-            handleDeferredIos();
-        }
+        // Up-date any deferred IOs that may related to the vertices we've added
+        handleDeferredIos(verticesAdded);
 
+        // Rebuild the list of disconnected vertices
         disconnectedVertices.clear();
         disconnectedVertices.addAll(g.getVertices().stream()
                 .filter(v -> g.getNeighborCount(v) == 0)
@@ -167,11 +170,72 @@ public class GraphManager {
                 .collect(Collectors.toList()));
     }
 
-    private void handleDeferredIos() {
-        if (deferredIos.size() < 1) {
+    private void defer(InventoryObject io, ResourceKey... waitingFor) {
+        // Add the IO to a set of IOs we maintain for each key
+        for (ResourceKey resourceKey : waitingFor) {
+            deferredIosByDependency.compute(resourceKey, (k,v) -> {
+               Set<InventoryObject> iosWaiting = v;
+               if (iosWaiting == null) {
+                   iosWaiting = new HashSet<>();
+               }
+               iosWaiting.add(io);
+               return iosWaiting;
+            });
+        }
+
+        // Also maintain the reverse mapping
+        dependenciesByDeferredIos.compute(io, (k,v) -> {
+            Set<ResourceKey> dependencies = v;
+            if (dependencies == null) {
+                dependencies = new HashSet<>();
+            }
+            dependencies.addAll(Arrays.asList(waitingFor));
+            return dependencies;
+        });
+    }
+
+    private void handleDeferredIos(List<CEVertex> newVertices) {
+        if (newVertices.isEmpty() || deferredIosByDependency.isEmpty()) {
+            // Nothing to do
             return;
         }
-        addInventory(new LinkedList<>(deferredIos), true);
+
+        // Are there any IOs waiting on any of the vertices that were added?
+        final Set<InventoryObject> iosToUpdate = newVertices.stream()
+                .flatMap(v -> deferredIosByDependency.getOrDefault(v.getResourceKey(), Collections.emptySet()).stream())
+                .collect(Collectors.toSet());
+
+        if (iosToUpdate.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+
+        addOrUpdateInventory(iosToUpdate, true);
+    }
+
+    private void clearDeferralsFor(InventoryObject io) {
+        // All of the deferrals for the given IO have been satisfied or
+        // the IO is being deleted
+        final Set<ResourceKey> dependencies = dependenciesByDeferredIos.remove(io);
+        if (dependencies == null || dependencies.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+
+        for (ResourceKey resourceKey : dependencies) {
+            final Set<InventoryObject> deferredIos = deferredIosByDependency.get(resourceKey);
+            if (deferredIos == null) {
+                continue;
+            }
+
+            // Remove the IO from the set
+            deferredIos.remove(io);
+
+            // If there are no other IOs waiting on this resource key, then delete it from the map
+            if (deferredIos.isEmpty()) {
+                deferredIosByDependency.remove(resourceKey);
+            }
+        }
     }
 
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
@@ -182,7 +246,7 @@ public class GraphManager {
                 g.removeVertex(vertex);
                 didGraphChange.set(true);
             }
-            deferredIos.remove(io);
+            clearDeferralsFor(io);
         }
     }
 
@@ -204,7 +268,7 @@ public class GraphManager {
             g.addVertex(v);
             didGraphChange.set(true);
             idtoVertexMap.put(v.getNumericId(), v);
-            handleDeferredIos();
+            handleDeferredIos(Collections.singletonList(v));
             return v;
         });
         LOG.trace("Updating vertex: {} with alarm: {}", vertex, alarm);
@@ -281,7 +345,7 @@ public class GraphManager {
     }
 
     public int getNumDeferredObjects() {
-        return deferredIos.size();
+        return dependenciesByDeferredIos.size();
     }
 
     public Optional<CEVertex> getVertexFor(InventoryObject io) {

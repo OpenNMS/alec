@@ -78,10 +78,10 @@ public class GraphManager {
     private final Map<InventoryObject, Set<ResourceKey>> dependenciesByDeferredIos = new HashMap<>();
 
     public synchronized void addInventory(Collection<InventoryObject> inventory) {
-        addOrUpdateInventory(inventory, false);
+        addOrUpdateInventory(inventory);
     }
 
-    private synchronized void addOrUpdateInventory(Collection<InventoryObject> inventory, boolean isDeferred) {
+    private synchronized void addOrUpdateInventory(Collection<InventoryObject> inventory) {
         // Keep track of any vertices we've added
         final List<CEVertex> verticesAdded = new LinkedList<>();
 
@@ -159,7 +159,7 @@ public class GraphManager {
             }
         }
 
-        // Up-date any deferred IOs that may related to the vertices we've added
+        // Update any deferred IOs that may related to the vertices we've added
         handleDeferredIos(verticesAdded);
 
         // Rebuild the list of disconnected vertices
@@ -210,7 +210,7 @@ public class GraphManager {
             return;
         }
 
-        addOrUpdateInventory(iosToUpdate, true);
+        addOrUpdateInventory(iosToUpdate);
     }
 
     private void clearDeferralsFor(InventoryObject io) {

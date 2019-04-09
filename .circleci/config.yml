@@ -7,6 +7,12 @@ executors:
         environment:
           MAVEN_OPTS: -Xmx2g
 
+  build-debian-executor:
+    docker:
+      - image: circleci/openjdk:8u212-jdk-stretch
+        environment:
+          MAVEN_OPTS: -Xmx2g
+
   # Note: Need to investigate how we can use our own image and have it configured so we can run docker inside docker
   # rather than rely on the circleci machine VM
   smoke-test-executor:
@@ -47,6 +53,9 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - build-debian:
+          requires:
+            - build
       - build-docs:
           requires:
             - pre-build
@@ -70,6 +79,7 @@ workflows:
       - deploy-packages:
           requires:
             - smoke-test
+            - build-debian
           filters:
             tags:
               only: /^v.*/
@@ -157,6 +167,45 @@ jobs:
           paths:
             - project
             - dist/*.kar
+
+  build-debian:
+    executor: build-debian-executor
+
+    steps:
+      - attach_workspace:
+          at: ~/
+
+      - restore_cache:
+          keys:
+          # Use a separate cache, since the the other build image runs as root
+          - v4-deb-dependencies-{{ checksum "pom.xml" }}
+          - v4-deb-dependencies-
+
+      - run:
+          name: Build Debian packages
+          command: |
+            mvn install --projects org.opennms.oce.assembly:org.opennms.oce.assembly.opennms.deb,org.opennms.oce.assembly:org.opennms.oce.assembly.sentinel.deb --also-make -DskipTests=true
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v4-deb-dependencies-{{ checksum "pom.xml" }}
+
+      - run:
+          name: Gather artifacts
+          command: |
+            mkdir -p ~/dist/
+            cp assembly/opennms-deb/target/opennms-oce-plugin_*.deb ~/dist/
+            cp assembly/sentinel-deb/target/sentinel-oce-plugin_*.deb ~/dist/
+
+      - store_artifacts:
+          path: ~/dist
+          destination: dist
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/assembly/
 
   smoke-test:
     executor: smoke-test-executor
@@ -303,9 +352,10 @@ jobs:
             name: Push RPM packages
             command: |
               source .circleci/env/package_cloud
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
-  
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-oce-plugin_*.deb
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-oce-plugin_*.deb
   deploy-docs:
     executor: netlify-cli-executor
     steps:

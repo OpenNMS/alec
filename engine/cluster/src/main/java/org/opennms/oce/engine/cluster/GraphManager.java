@@ -159,7 +159,7 @@ public class GraphManager {
             }
         }
 
-        // Update any deferred IOs that may related to the vertices we've added
+        // Update any deferred IOs that may be related to the vertices we've added
         handleDeferredIos(verticesAdded);
 
         // Rebuild the list of disconnected vertices

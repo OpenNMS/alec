@@ -52,11 +52,12 @@ public class OpenNMSContainer extends GenericContainer {
     private static final Logger LOG = LoggerFactory.getLogger(OpenNMSContainer.class);
     private static final int OPENNMS_WEB_PORT = 8980;
     private static final int OPENNMS_SSH_PORT = 8101;
+    private static final int OPENNMS_DEBUG_PORT = 8001;
     static final String ALIAS = "opennms";
 
     public OpenNMSContainer() {
         super(DockerImageResolver.getImageAndTag("opennms"));
-        withExposedPorts(OPENNMS_WEB_PORT, OPENNMS_SSH_PORT)
+        withExposedPorts(OPENNMS_WEB_PORT, OPENNMS_SSH_PORT, OPENNMS_DEBUG_PORT)
                 .withEnv("POSTGRES_HOST", DB_ALIAS)
                 .withEnv("POSTGRES_PORT", Integer.toString(PostgreSQLContainer.POSTGRESQL_PORT))
                 // User/pass are hardcoded in PostgreSQLContainer but are not exposed
@@ -66,6 +67,7 @@ public class OpenNMSContainer extends GenericContainer {
                 .withEnv("OPENNMS_DBUSER", "opennms")
                 .withEnv("OPENNMS_DBPASS", "opennms")
                 .withEnv("KARAF_FEATURES", "producer")
+                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,address=0.0.0.0:8001,suspend=n")
                 .withClasspathResourceMapping("opennms-overlay", "/opt/opennms-overlay", BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)
                 .withNetwork(Network.getNetwork())

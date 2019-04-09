@@ -29,7 +29,9 @@
 package org.opennms.oce.datasource.opennms.events;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -41,16 +43,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Event {
 
-    private static final ThreadLocal<DateFormat> FORMATTER_LONG = new ThreadLocal<DateFormat>() {
+    private static final ThreadLocal<DateFormat> FORMATTER_CUSTOM = new ThreadLocal<DateFormat>() {
         @Override
         protected synchronized DateFormat initialValue() {
-            final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.LONG);
+            final DateFormat formatter = new SimpleDateFormat("EEEEE, d MMMMM yyyy k:mm:ss 'o''clock' z", Locale.ENGLISH);
             formatter.setLenient(true);
             return formatter;
         }
     };
 
-    private final String createdAt = FORMATTER_LONG.get().format(new Date());
+    private final String createdAt = FORMATTER_CUSTOM.get().format(new Date());
 
     @XmlElement(name="uei")
     private String uei;
@@ -150,5 +152,9 @@ public class Event {
                 ", time='" + time + '\'' +
                 ", nodeId='" + nodeId + '\'' +
                 '}';
+    }
+
+    protected static DateFormat getDateFormat() {
+        return FORMATTER_CUSTOM.get();
     }
 }

@@ -93,8 +93,8 @@ public final class ImmutableInventoryObject implements InventoryObject {
             this.friendlyName = inventoryObject.getFriendlyName();
             this.isTopLevel = inventoryObject.isTopLevel();
             // Copy contents for the collections to avoid referencing a collection we don't control
-            this.peers.addAll(inventoryObject.getPeers());
-            this.relatives.addAll(inventoryObject.getRelatives());
+            this.peers = new ArrayList<>(inventoryObject.getPeers());
+            this.relatives = new ArrayList<>(inventoryObject.getRelatives());
             this.weightToParent = inventoryObject.getWeightToParent();
         }
 

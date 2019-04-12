@@ -256,6 +256,7 @@ jobs:
           name: Run the tests
           command: |
             mkdir $TEST_RECORDING_DIR
+            mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
             mvn test -DsmokeTest=true
             

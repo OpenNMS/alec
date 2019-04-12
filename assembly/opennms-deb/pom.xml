@@ -28,7 +28,7 @@
                     </executions>
                     <configuration>
                         <targetDir>${project.build.directory}</targetDir>
-                        <packageName>sentinel-oce-plugin</packageName>
+                        <packageName>opennms-alec-plugin</packageName>
                         <packageVersion>${project.version}</packageVersion>
                         <packageRevision>1</packageRevision>
                         <packageSection>contrib/net</packageSection>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features name="alec-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-    <repository>mvn:org.kie/kie-karaf-features/${drools.version}/xml/features</repository>
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
     <repository>mvn:org.opennms.integration.api/karaf-features/${opennms.api.version}/xml</repository>
 
@@ -64,8 +63,7 @@
 
     <feature name="alec-engine" description="OCE :: Engine" version="${project.version}">
         <feature version="${project.version}">alec-engine-dbscan</feature>
-        <feature version="${project.version}">alec-engine-temporal</feature>
-        <feature version="${project.version}">alec-engine-topology</feature>
+        <feature version="${project.version}">alec-engine-deeplearning</feature>
     </feature>
 
     <feature name="alec-engine-api" description="OCE :: Engine :: API" version="${project.version}">
@@ -88,24 +86,10 @@
     <feature name="alec-engine-deeplearning" description="OCE :: Engine :: Deep Learning" version="${project.version}">
         <feature version="${project.version}">alec-engine-cluster</feature>
         <feature version="${tensorflow.version}">tensorflow</feature>
+        <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
         <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning/${project.version}</bundle>
-    </feature>
-
-    <feature name="alec-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
-        <feature version="${project.version}">alec-engine-api</feature>
-        <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.temporal/${project.version}</bundle>
-    </feature>
-
-    <feature name="alec-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
-        <feature version="${project.version}">alec-engine-api</feature>
-        <feature version="${drools.version}">kie</feature>
-        <feature version="${drools.version}">drools-module</feature>
-        <feature version="${commons.text.version}">commons-text</feature>
-        <feature dependency="true">shell</feature>
-        <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.topology/${project.version}</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
     <!-- Drivers -->

@@ -65,7 +65,6 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.alec.engine.temporal.TimeSliceEngineFactory;
 
 import com.google.common.collect.Sets;
 
@@ -78,8 +77,7 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new TimeSliceEngineFactory() }, { new DBScanEngineFactory() },
-                // { new TopologyEngineFactory() }
+                { new DBScanEngineFactory() }
         });
     }
 

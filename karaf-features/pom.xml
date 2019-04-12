@@ -92,8 +92,7 @@
                                 <feature>alec-engine</feature>
                                 <feature>alec-engine-cluster</feature>
                                 <feature>alec-engine-dbscan</feature>
-                                <feature>alec-engine-temporal</feature>
-                                <feature>alec-engine-topology</feature>
+                                <feature>alec-engine-deeplearning</feature>
                                 <!-- Depends on a reference to a datasource impl.
                                 <feature>alec-driver-main</feature>
                                 -->
@@ -189,19 +188,7 @@
 
         <dependency>
             <groupId>org.opennms.alec.engine</groupId>
-            <artifactId>org.opennms.alec.engine.cluster</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.alec.engine</groupId>
-            <artifactId>org.opennms.alec.engine.temporal</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.alec.engine</groupId>
-            <artifactId>org.opennms.alec.engine.topology</artifactId>
+            <artifactId>org.opennms.alec.engine.dbscan</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

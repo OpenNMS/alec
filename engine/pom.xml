@@ -16,8 +16,6 @@
         <module>dbscan</module>
         <module>deeplearning</module>
         <module>itest</module>
-        <module>temporal</module>
-        <module>topology</module>
     </modules>
 </project>
 

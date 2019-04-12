@@ -50,19 +50,19 @@ IMPORTANT: We assume that you're already using the Kafka strategy for the Sink A
 
 On the OpenNMS server, install the package:
 ```
-yum -y install opennms-oce-plugin
+yum -y install opennms-alec-plugin
 ```
 
 Configure the feature set to be installed when OpenNMS starts:
 ```
-echo 'oce-opennms-distributed wait-for-kar=opennms-oce-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+echo 'oce-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
 ```
 
 == Install OCE in Sentinel
 
 On the Sentinel systems, install the package:
 ```
-yum -y install sentinel-oce-plugin
+yum -y install sentinel-alec-plugin
 ```
 
 Configure the Kafka Stream (consumer):
@@ -80,7 +80,7 @@ TIP: The consumer is used to read alarms & inventory, whereas the producer is us
 
 Configure the feature set to be installed when Sentinel starts:
 ```
-echo 'oce-sentinel-distributed wait-for-kar=opennms-oce-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/oce.boot"
+echo 'oce-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/oce.boot"
 ```
 
 == Verify

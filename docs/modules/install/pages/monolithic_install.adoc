@@ -13,12 +13,12 @@ Start by following the instructions in the xref:common_install.adoc[common insta
 
 Install the package:
 ```
-yum -y install opennms-oce-plugin
+yum -y install opennms-alec-plugin
 ```
 
 Configure the feature set to be installed when OpenNMS starts:
 ```
-echo 'oce-opennms-standalone wait-for-kar=opennms-oce-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+echo 'oce-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
 ```
 
 To install the feature set immediately without restarting, login to the OpenNMS Karaf shell and run:

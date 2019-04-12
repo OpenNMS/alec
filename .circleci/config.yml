@@ -153,9 +153,9 @@ jobs:
           name: Gather artifacts
           command: |
             mkdir -p ~/dist/
-            cp assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/* ~/dist/
-            cp assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/* ~/dist/
-            cp assembly/kar/target/opennms-oce-plugin.kar ~/dist/
+            cp assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/* ~/dist/
+            cp assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/* ~/dist/
+            cp assembly/kar/target/opennms-alec-plugin.kar ~/dist/
           when: always
 
       - store_artifacts:
@@ -195,8 +195,8 @@ jobs:
           name: Gather artifacts
           command: |
             mkdir -p ~/dist/
-            cp assembly/opennms-deb/target/opennms-oce-plugin_*.deb ~/dist/
-            cp assembly/sentinel-deb/target/sentinel-oce-plugin_*.deb ~/dist/
+            cp assembly/opennms-deb/target/opennms-alec-plugin_*.deb ~/dist/
+            cp assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb ~/dist/
 
       - store_artifacts:
           path: ~/dist
@@ -352,10 +352,10 @@ jobs:
             name: Push RPM packages
             command: |
               source .circleci/env/package_cloud
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-oce-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-oce-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-oce-plugin_*.deb
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-oce-plugin_*.deb
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/*
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/*
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-alec-plugin_*.deb
+              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb
   deploy-docs:
     executor: netlify-cli-executor
     steps:

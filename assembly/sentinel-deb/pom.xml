@@ -28,12 +28,12 @@
                     </executions>
                     <configuration>
                         <targetDir>${project.build.directory}</targetDir>
-                        <packageName>sentinel-oce-plugin</packageName>
+                        <packageName>sentinel-alec-plugin</packageName>
                         <packageVersion>${project.version}</packageVersion>
                         <packageRevision>1</packageRevision>
                         <packageSection>contrib/net</packageSection>
-                        <packageTitle>OpenNMS Correlation Engine (OCE)</packageTitle>
-                        <packageDescription>OCE</packageDescription>
+                        <packageTitle>Architecture for Learning Enabled Correlation (ALEC)</packageTitle>
+                        <packageDescription>ALEC</packageDescription>
                         <packageDependencies>
                             <packageDependency>opennms-sentinel (>= 24.0.0)</packageDependency>
                         </packageDependencies>

@@ -31,7 +31,7 @@ We expect to see a new "interface down" alarm attached to the node we just provi
 
 image::verify_ifdown_example.png[Interface down alarm,600]
 
-TIP: If the Syslog message is not being recognized and bring formatted to a proper event & alarm, ensure that the `opennms-oce-plugin` feature is running in OpenNMS and that the related bundles are active.
+TIP: If the Syslog message is not being recognized and bring formatted to a proper event & alarm, ensure that the `opennms-alec-plugin` feature is running in OpenNMS and that the related bundles are active.
 
 We can now trigger a second alarm against this same interface using:
 ```

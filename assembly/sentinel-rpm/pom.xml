@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.opennms.oce</groupId>
         <artifactId>assembly</artifactId>
@@ -32,8 +33,8 @@
                         </execution>
                     </executions>
                     <configuration>
-			<name>sentinel-oce-plugin</name>
-                        <summary>OpenNMS Correlation Engine (OCE)</summary>
+                        <name>sentinel-alec-plugin</name>
+                        <summary>Architecture for Learning Enabled Correlation (ALEC)</summary>
                         <description>OCE</description>
                         <license>AGPL v3</license>
                         <group>Applications/System</group>
@@ -43,19 +44,19 @@
                         <defaultGroupname>wheel</defaultGroupname>
                         <release>${rpmRelease}</release>
                         <requires>
-                          <require>opennms-sentinel >= 24.0.0</require>
+                            <require>opennms-sentinel >= 24.0.0</require>
                         </requires>
                         <mappings>
                             <mapping>
                                 <directory>/opt/sentinel/deploy</directory>
-				<directoryIncluded>false</directoryIncluded>
+                                <directoryIncluded>false</directoryIncluded>
                                 <dependency>
                                     <includes>
                                         <include>org.opennms.oce.assembly:org.opennms.oce.assembly.kar</include>
                                     </includes>
                                 </dependency>
                             </mapping>
-                       </mappings>
+                        </mappings>
                     </configuration>
                 </plugin>
             </plugins>
@@ -104,7 +105,7 @@
             <groupId>org.opennms.oce.assembly</groupId>
             <artifactId>org.opennms.oce.assembly.kar</artifactId>
             <version>${project.version}</version>
-	    <type>kar</type>
+            <type>kar</type>
         </dependency>
     </dependencies>
 </project>

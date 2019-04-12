@@ -54,7 +54,7 @@
                                 <resource>
                                     <directory>${basedir}/../assembly/kar/target</directory>
                                     <includes>
-                                        <include>opennms-oce-plugin.kar</include>
+                                        <include>opennms-alec-plugin.kar</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -70,7 +70,7 @@
                         <fileset>
                             <directory>${basedir}/src/main/resources/sentinel-overlay/deploy</directory>
                             <includes>
-                                <include>opennms-oce-plugin.kar</include>
+                                <include>opennms-alec-plugin.kar</include>
                             </includes>
                         </fileset>
                     </filesets>
@@ -90,7 +90,7 @@
                                 <requireFilesExist>
                                     <files>
                                         <file>
-                                            ${basedir}/../assembly/kar/target/opennms-oce-plugin.kar
+                                            ${basedir}/../assembly/kar/target/opennms-alec-plugin.kar
                                         </file>
                                     </files>
                                 </requireFilesExist>

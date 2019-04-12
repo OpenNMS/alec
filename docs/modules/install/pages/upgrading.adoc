@@ -17,7 +17,7 @@ sudo rm -rf /opt/opennms/data/kar
 
 Install the updated OCE plugin package:
 ```
-sudo yum -y install opennms-oce-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+sudo yum -y install opennms-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
 ```
 
 Restart OpenNMS:
@@ -43,7 +43,7 @@ sudo rm -rf /opt/sentinel/data/kar
 
 Install the updated OCE plugin package:
 ```
-sudo yum -y install sentinel-oce-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+sudo yum -y install sentinel-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
 ```
 
 Restart Sentinel:

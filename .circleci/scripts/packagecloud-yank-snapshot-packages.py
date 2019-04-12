@@ -11,7 +11,7 @@ PACKAGECLOUD_REPO = os.getenv('PACKAGECLOUD_REPO', 'plugin-snapshot')
 PACKAGECLOUD_TOKEN = os.getenv('PACKAGECLOUD_TOKEN', 'XXXX')
 
 PACKAGECLOUD_URL = 'https://packagecloud.io'
-FILTERED_PACKAGE_NAMES = ['opennms-oce-plugin', 'sentinel-oce-plugin']
+FILTERED_PACKAGE_NAMES = ['opennms-alec-plugin', 'sentinel-alec-plugin']
 
 def build_request(path, method=None):
     credentials = ('%s:%s' % (PACKAGECLOUD_TOKEN, ""))

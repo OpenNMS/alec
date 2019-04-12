@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>datasource</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.datasource</groupId>
-    <artifactId>org.opennms.oce.datasource.opennms-direct</artifactId>
-    <name>OCE :: Datasource :: OpenNMS Direct</name>
+    <groupId>org.opennms.alec.datasource</groupId>
+    <artifactId>org.opennms.alec.datasource.opennms-direct</artifactId>
+    <name>ALEC :: Datasource :: OpenNMS Direct</name>
     <packaging>bundle</packaging>
 	<build>
 		<plugins>
@@ -35,8 +35,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.common</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opennms.integration.api</groupId>
@@ -48,8 +48,8 @@
             <version>${opennms.api.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.opennms-common</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.opennms-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -68,8 +68,8 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-test-api</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-test-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

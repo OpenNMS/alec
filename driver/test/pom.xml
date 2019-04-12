@@ -1,37 +1,37 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>driver</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.driver</groupId>
-    <artifactId>org.opennms.oce.driver.test</artifactId>
-    <name>OCE :: Driver :: Test</name>
+    <groupId>org.opennms.alec.driver</groupId>
+    <artifactId>org.opennms.alec.driver.test</artifactId>
+    <name>ALEC :: Driver :: Test</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.common</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.api</artifactId>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.common</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-test-api</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-test-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

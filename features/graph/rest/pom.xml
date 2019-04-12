@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce.features</groupId>
+        <groupId>org.opennms.alec.features</groupId>
         <artifactId>graph</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.features.graph</groupId>
-    <artifactId>org.opennms.oce.features.graph.rest</artifactId>
-    <name>OCE :: Features :: Graph :: REST</name>
+    <groupId>org.opennms.alec.features.graph</groupId>
+    <artifactId>org.opennms.alec.features.graph.rest</artifactId>
+    <name>ALEC :: Features :: Graph :: REST</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -30,8 +30,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.common</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -51,8 +51,8 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-test-api</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-test-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -71,8 +71,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.dbscan</artifactId>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.dbscan</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

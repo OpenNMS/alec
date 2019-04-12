@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce.integrations</groupId>
+        <groupId>org.opennms.alec.integrations</groupId>
         <artifactId>opennms</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.integrations.opennms</groupId>
+    <groupId>org.opennms.alec.integrations.opennms</groupId>
     <artifactId>config</artifactId>
-    <name>OCE :: Integrations :: OpenNMS :: Config</name>
+    <name>ALEC :: Integrations :: OpenNMS :: Config</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -51,8 +51,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-test-api</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-test-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

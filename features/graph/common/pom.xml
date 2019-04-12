@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce.features</groupId>
+        <groupId>org.opennms.alec.features</groupId>
         <artifactId>graph</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.features.graph</groupId>
-    <artifactId>org.opennms.oce.features.graph.common</artifactId>
-    <name>OCE :: Features :: Graph :: Common</name>
+    <groupId>org.opennms.alec.features.graph</groupId>
+    <artifactId>org.opennms.alec.features.graph.common</artifactId>
+    <name>ALEC :: Features :: Graph :: Common</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -29,12 +29,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.api</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.graphml</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.graphml</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -43,8 +43,8 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-test-api</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-test-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -63,8 +63,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.common</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.common</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

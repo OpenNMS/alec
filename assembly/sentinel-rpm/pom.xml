@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>assembly</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.assembly</groupId>
-    <artifactId>org.opennms.oce.assembly.sentinel.rpm</artifactId>
-    <name>OCE :: Assembly :: Sentinel RPM</name>
+    <groupId>org.opennms.alec.assembly</groupId>
+    <artifactId>org.opennms.alec.assembly.sentinel.rpm</artifactId>
+    <name>ALEC :: Assembly :: Sentinel RPM</name>
     <packaging>pom</packaging>
 
     <build>
@@ -35,7 +35,7 @@
                     <configuration>
                         <name>sentinel-alec-plugin</name>
                         <summary>Architecture for Learning Enabled Correlation (ALEC)</summary>
-                        <description>OCE</description>
+                        <description>ALEC</description>
                         <license>AGPL v3</license>
                         <group>Applications/System</group>
                         <defaultDirmode>755</defaultDirmode>
@@ -52,7 +52,7 @@
                                 <directoryIncluded>false</directoryIncluded>
                                 <dependency>
                                     <includes>
-                                        <include>org.opennms.oce.assembly:org.opennms.oce.assembly.kar</include>
+                                        <include>org.opennms.alec.assembly:org.opennms.alec.assembly.kar</include>
                                     </includes>
                                 </dependency>
                             </mapping>
@@ -102,8 +102,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.assembly</groupId>
-            <artifactId>org.opennms.oce.assembly.kar</artifactId>
+            <groupId>org.opennms.alec.assembly</groupId>
+            <artifactId>org.opennms.alec.assembly.kar</artifactId>
             <version>${project.version}</version>
             <type>kar</type>
         </dependency>

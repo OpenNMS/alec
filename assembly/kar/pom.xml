@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>assembly</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.assembly</groupId>
-    <artifactId>org.opennms.oce.assembly.kar</artifactId>
-    <name>OCE :: Assembly :: Karaf KAR</name>
+    <groupId>org.opennms.alec.assembly</groupId>
+    <artifactId>org.opennms.alec.assembly.kar</artifactId>
+    <name>ALEC :: Assembly :: Karaf KAR</name>
     <packaging>kar</packaging>
 
     <build>
@@ -24,7 +24,7 @@
                             <goal>kar</goal>
                         </goals>
                         <configuration>
-                            <featuresFile>mvn:org.opennms.oce/oce-karaf-features/${project.version}/xml</featuresFile>
+                            <featuresFile>mvn:org.opennms.alec/alec-karaf-features/${project.version}/xml</featuresFile>
                             <finalName>opennms-alec-plugin</finalName>
                             <ignoreDependencyFlag>true</ignoreDependencyFlag>
                             <archive>
@@ -41,8 +41,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce</groupId>
-            <artifactId>oce-karaf-features</artifactId>
+            <groupId>org.opennms.alec</groupId>
+            <artifactId>alec-karaf-features</artifactId>
             <version>${project.version}</version>
             <type>xml</type>
             <scope>provided</scope>

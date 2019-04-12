@@ -1,30 +1,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>driver</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.driver</groupId>
-    <artifactId>org.opennms.oce.driver.main</artifactId>
-    <name>OCE :: Driver :: Main</name>
+    <groupId>org.opennms.alec.driver</groupId>
+    <artifactId>org.opennms.alec.driver.main</artifactId>
+    <name>ALEC :: Driver :: Main</name>
     <packaging>bundle</packaging>
 
     <dependencies>
          <dependency>
-             <groupId>org.opennms.oce.datasource</groupId>
-             <artifactId>org.opennms.oce.datasource.api</artifactId>
+             <groupId>org.opennms.alec.datasource</groupId>
+             <artifactId>org.opennms.alec.datasource.api</artifactId>
          </dependency>
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.api</artifactId>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.api</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce</groupId>
+            <groupId>org.opennms.alec</groupId>
             <artifactId>processor-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -57,8 +57,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.jaxb</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

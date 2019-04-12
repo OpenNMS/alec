@@ -3,12 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>oce-parent</artifactId>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
+        <artifactId>alec-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>OCE :: Smoke-test</name>
+    <name>ALEC :: Smoke-test</name>
     <packaging>jar</packaging>
     <artifactId>smoke-test</artifactId>
     <properties>
@@ -229,8 +229,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.opennms-kafka</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.opennms-kafka</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

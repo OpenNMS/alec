@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
-        <artifactId>oce-parent</artifactId>
+        <groupId>org.opennms.alec</groupId>
+        <artifactId>alec-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>oce-karaf-features</artifactId>
-    <name>OCE :: Karaf Features</name>
+    <artifactId>alec-karaf-features</artifactId>
+    <name>ALEC :: Karaf Features</name>
     <packaging>pom</packaging>
 
     <build>
@@ -156,103 +156,103 @@
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.jaxb</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.jaxb</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.opennms-direct</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.opennms-direct</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.opennms-kafka</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.opennms-kafka</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.shell</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opennms.oce.driver</groupId>
-            <artifactId>org.opennms.oce.driver.main</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.shell</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.cluster</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.temporal</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.oce.engine</groupId>
-            <artifactId>org.opennms.oce.engine.topology</artifactId>
+            <groupId>org.opennms.alec.driver</groupId>
+            <artifactId>org.opennms.alec.driver.main</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce</groupId>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.cluster</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.temporal</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.topology</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opennms.alec</groupId>
             <artifactId>processor-standalone</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce</groupId>
+            <groupId>org.opennms.alec</groupId>
             <artifactId>processor-redundant</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <groupId>org.opennms.alec.integrations.opennms</groupId>
             <artifactId>extension</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.integrations.opennms</groupId>
+            <groupId>org.opennms.alec.integrations.opennms</groupId>
             <artifactId>config</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.opennms.oce.features</groupId>
-            <artifactId>org.opennms.oce.features.shell</artifactId>
+            <groupId>org.opennms.alec.features</groupId>
+            <artifactId>org.opennms.alec.features.shell</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features</groupId>
-            <artifactId>org.opennms.oce.features.deeplearning</artifactId>
+            <groupId>org.opennms.alec.features</groupId>
+            <artifactId>org.opennms.alec.features.deeplearning</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.rest</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.rest</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.opennms.oce.features.graph</groupId>
-            <artifactId>org.opennms.oce.features.graph.shell</artifactId>
+            <groupId>org.opennms.alec.features.graph</groupId>
+            <artifactId>org.opennms.alec.features.graph.shell</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

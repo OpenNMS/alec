@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>processor</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>processor-api</artifactId>
-    <name>OCE :: Datasource :: API</name>
+    <name>ALEC :: Datasource :: API</name>
     <packaging>bundle</packaging>
     <build>
         <plugins>
@@ -22,7 +22,7 @@
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Export-Package>org.opennms.oce.processor.api</Export-Package>
+                        <Export-Package>org.opennms.alec.processor.api</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -30,8 +30,8 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.api</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

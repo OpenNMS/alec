@@ -1,19 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.oce</groupId>
+        <groupId>org.opennms.alec</groupId>
         <artifactId>engine</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.oce.engine</groupId>
-    <artifactId>org.opennms.oce.engine.api</artifactId>
-    <name>OCE :: Engine :: API</name>
+    <groupId>org.opennms.alec.engine</groupId>
+    <artifactId>org.opennms.alec.engine.api</artifactId>
+    <name>ALEC :: Engine :: API</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.oce.datasource</groupId>
-            <artifactId>org.opennms.oce.datasource.api</artifactId>
+            <groupId>org.opennms.alec.datasource</groupId>
+            <artifactId>org.opennms.alec.datasource.api</artifactId>
         </dependency>
     </dependencies>
 </project>

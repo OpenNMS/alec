@@ -1,7 +1,7 @@
 = Monolithic Install
 :imagesdir: ../assets/images
 
-This installation guide describes a monolithic install where we run _OCE_ as another service within the _OpenNMS_ core:
+This installation guide describes a monolithic install where we run _ALEC_ as another service within the _OpenNMS_ core:
 
 image::monolithic_deployment.png[Monolithic,400]
 
@@ -9,7 +9,7 @@ image::monolithic_deployment.png[Monolithic,400]
 
 Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
 
-== Install OCE
+== Install ALEC
 
 Install the package:
 ```
@@ -18,12 +18,12 @@ yum -y install opennms-alec-plugin
 
 Configure the feature set to be installed when OpenNMS starts:
 ```
-echo 'oce-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
 ```
 
 To install the feature set immediately without restarting, login to the OpenNMS Karaf shell and run:
 ```
-feature:install oce-opennms-standalone
+feature:install alec-opennms-standalone
 ```
 
 NOTE: We bundle many common features up together for ease of use, but you can also install these individually if for example, you would like to run using a different _engine_.
@@ -34,13 +34,13 @@ Run the health check again to verify that everything was loaded correctly using 
 
 You can enumerate the available graphs using:
 ```
-oce:list-graphs
+opennms-alec:list-graphs
 ```
 
-At this point we expect the command output a single graph called "cluster":
+At this point we expect the command output a single graph called "dbscan":
 ```
-admin@opennms> oce:list-graphs 
-cluster: 0 situations on 524 vertices and 4 edges.
+admin@opennms> opennms-alec:list-graphs 
+dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
 It's okay of there are no situations, vertices or edges on the graph at this point.

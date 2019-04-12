@@ -1,7 +1,7 @@
 = Distributed Install
 :imagesdir: ../assets/images
 
-This installation guide describes a distributed install where we run _OCE_ as a service on top of the _Sentinel_ runtime:
+This installation guide describes a distributed install where we run _ALEC_ as a service on top of the _Sentinel_ runtime:
 
 image::distributed_deployment.png[Distributed,700]
 
@@ -46,7 +46,7 @@ echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.p
 
 IMPORTANT: We assume that you're already using the Kafka strategy for the Sink API. See <<prequisites>>.
 
-== Install OCE in OpenNMS
+== Install ALEC in OpenNMS
 
 On the OpenNMS server, install the package:
 ```
@@ -55,10 +55,10 @@ yum -y install opennms-alec-plugin
 
 Configure the feature set to be installed when OpenNMS starts:
 ```
-echo 'oce-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/oce.boot"
+echo 'alec-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
 ```
 
-== Install OCE in Sentinel
+== Install ALEC in Sentinel
 
 On the Sentinel systems, install the package:
 ```
@@ -68,19 +68,19 @@ yum -y install sentinel-alec-plugin
 Configure the Kafka Stream (consumer):
 ```
 echo 'bootstrap.servers=127.0.0.1:9092
-commit.interval.ms=5000' > "$SENTINEL_HOME/etc/org.opennms.oce.datasource.opennms.kafka.streams.cfg"
+commit.interval.ms=5000' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.streams.cfg"
 ```
 
 Configure the Kafka producer:
 ```
-echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.oce.datasource.opennms.kafka.producer.cfg"
+echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.producer.cfg"
 ```
 
 TIP: The consumer is used to read alarms & inventory, whereas the producer is used to send events. 
 
 Configure the feature set to be installed when Sentinel starts:
 ```
-echo 'oce-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/oce.boot"
+echo 'alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/alec.boot"
 ```
 
 == Verify
@@ -91,13 +91,13 @@ Run the `health:check` commands in both OpenNMS and Sentinel.
 
 From a Sentinel Karaf shell, enumerate the available graphs using:
 ```
-oce:list-graphs
+opennms-alec:list-graphs
 ```
 
-At this point we expect the command output a single graph called "cluster":
+At this point we expect the command output a single graph called "dbscan":
 ```
-admin@opennms> oce:list-graphs 
-cluster: 0 situations on 524 vertices and 4 edges.
+admin@opennms> opennms-alec:list-graphs 
+dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
 It's okay if there are no situations, vertices or edges on the graph at this point.

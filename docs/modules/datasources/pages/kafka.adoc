@@ -3,21 +3,21 @@
 
 == Overview
 
-The OpenNMS Kafka Datasource is used when OCE is deployed in a *distributed* installation.
+The OpenNMS Kafka Datasource is used when ALEC is deployed in a *distributed* installation.
 
 The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer and Kafka Event Consumer features.
 
 The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
-The Kafka Datasource consumes from these topics and provides OCE with a feed of alarms and inventory.
+The Kafka Datasource consumes from these topics and provides ALEC with a feed of alarms and inventory.
 
 == Scripted extensions
 
 === Config
 
-To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.oce.datasource.opennms.kafka_ PID.
+To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.alec.datasource.opennms.kafka_ PID.
 
 ```
-config:edit org.opennms.oce.datasource.opennms.kafka
+config:edit org.opennms.alec.datasource.opennms.kafka
 config:property-set scriptFile /tmp/inventory.groovy
 config:update
 ```

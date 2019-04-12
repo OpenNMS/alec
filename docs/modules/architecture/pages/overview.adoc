@@ -1,9 +1,9 @@
-= OCE Architecture
+= ALEC Architecture
 :imagesdir: ../assets/images
 
 == Overview
 
-The OCE framework provides building blocks for developing correlation systems:
+ALEC provides building blocks for developing correlation systems:
 
 image::architecture_components.png[Components,600]
 

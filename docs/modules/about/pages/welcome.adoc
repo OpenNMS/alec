@@ -1,9 +1,9 @@
-= OpenNMS Correlation Engine (OCE) Documentation
+= Architecture for Learning Enabled Correlation (ALEC) Documentation
 :imagesdir: ../assets/images
 
-== What is OCE?
+== What is ALEC?
 
-The OpenNMS Correlation Engine (OCE) is a framework for logically grouping related faults (alarms) into higher level objects (situations) with OpenNMS.
+The Architecture for Learning Enabled Correlation (ALEC) is a framework for logically grouping related faults (alarms) into higher level objects (situations) with OpenNMS.
 
 == How does it work?
 
@@ -14,7 +14,7 @@ Nodes, their components and their relations are used to build a graph.
 image::model.png[Model example,600]
 
 The layout of the graph, and the different types of elements on the graph are what compose "the meta-model".
-In OCE, the vertices on the graph are referred to as "inventory objects" and edges are used to represent "relationships".
+In ALEC, the vertices on the graph are referred to as "inventory objects" and edges are used to represent "relationships".
 
 === Alarms are attached to the graph
 

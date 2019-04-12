@@ -1,7 +1,7 @@
 = Common Install
 :imagesdir: ../assets/images
 
-This guide contains instructions for installing _OCE_ that are common to both the monolithic and distributed installs.
+This guide contains instructions for installing _ALEC_ that are common to both the monolithic and distributed installs.
 
 == OpenNMS Configuration
 
@@ -53,7 +53,7 @@ Everything is awesome.
 
 === Enable alarm history storage for Elasticsearch
 
-When using OCE, we strongly recommend that leverage our  integration for maintaining alarm history in Elasticsearch.
+When using ALEC, we strongly recommend that leverage our integration for maintaining alarm history in Elasticsearch.
 This data can be used for analysis and to help train the correlation engine.
 
 From the OpenNMS Karaf shell, run:
@@ -100,11 +100,11 @@ to:
 
 This change will come in effect next time OpenNMS is restarted - we don't need to do this yet.
 
-== OCE Installation
+== ALEC Installation
 
 === Setup YUM repository
 
-OCE packages are currently available via a YUM repository hosted on link:https://packagecloud.io/opennms/plugin-snapshot[packagecloud].
+ALEC packages are currently available via a YUM repository hosted on link:https://packagecloud.io/opennms/plugin-snapshot[packagecloud].
 
 You can install the repository using instructions available on the link above, or by running:
 ```

@@ -1,7 +1,7 @@
 = Verifying your install
 :imagesdir: ../assets/images
 
-Here we assume that you already have OCE deployed using either the monolithic or distributed deployments.
+Here we assume that you already have ALEC deployed using either the monolithic or distributed deployments.
 
 == Testing syslog message handling
 
@@ -9,10 +9,10 @@ Here we work to verify that syslog messages are being properly converted to alar
 
 Let's start by provisioning a node for the `localhost` in OpenNMS:
 ```
-$OPENNMS_HOME/bin/provision.pl requisition add oce
-$OPENNMS_HOME/bin/provision.pl node add oce localhost localhost
-$OPENNMS_HOME/bin/provision.pl interface add oce localhost 127.0.0.1
-$OPENNMS_HOME/bin/provision.pl requisition import oce
+$OPENNMS_HOME/bin/provision.pl requisition add alec
+$OPENNMS_HOME/bin/provision.pl node add alec localhost localhost
+$OPENNMS_HOME/bin/provision.pl interface add alec localhost 127.0.0.1
+$OPENNMS_HOME/bin/provision.pl requisition import alec
 ```
 
 IMPORTANT: We assume that the localhost is running an SNMP agent.
@@ -44,25 +44,25 @@ image::verify_situation_example.png[Situation,600]
 
 Congratulations you have correlated your first two alarms!
 
-== Viewing the OCE graph
+== Viewing the ALEC graph
 
-At any point in time, you can export the OCE graph to view the inventory and alarms in context.
+At any point in time, you can export the ALEC graph to view the inventory and alarms in context.
 
-We can export the OCE graph from a Karaf shell using:
+We can export the ALEC graph from a Karaf shell using:
 ```
-oce:export-graph cluster /tmp/cluster.graph.xml
+opennms-alec:export-graph cluster /tmp/cluster.graph.xml
 ```
 
-NOTE: If OCE is running on Sentinel, make sure to run this from the Sentinel shell.
+NOTE: If ALEC is running on Sentinel, make sure to run this from the Sentinel shell.
 
 Import the graph into OpenNMS using:
 ```
-curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/oce'
+curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/alec'
 ```
 
-NOTE: If you get an error saying that a `"Graph with name oce already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/oce'` and try again.
+NOTE: If you get an error saying that a `"Graph with name alec already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/alec'` and try again.
 
-Next, navigate to the topology map, and view the graph name "oce".
+Next, navigate to the topology map, and view the graph named "alec".
 The resulting graph from the previous example looks like:
 
 image::verify_topology_example.png[Topology,600]

@@ -1,9 +1,9 @@
 = Upgrading
 :imagesdir: ../assets/images
 
-General upgrading instructions for OCE.
+General upgrading instructions for ALEC.
 
-== Upgrading OCE on OpenNMS (monolithic & distributed install)
+== Upgrading ALEC on OpenNMS (monolithic & distributed install)
 
 Stop OpenNMS:
 ```
@@ -15,7 +15,7 @@ Delete the .kar file cache:
 sudo rm -rf /opt/opennms/data/kar
 ```
 
-Install the updated OCE plugin package:
+Install the updated ALEC plugin package:
 ```
 sudo yum -y install opennms-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
 ```
@@ -26,9 +26,9 @@ sudo /etc/init.d/opennms restart
 ```
 
 
-== Upgrading OCE on Sentinel (distributed install)
+== Upgrading ALEC on Sentinel (distributed install)
 
-Here we assume that OCE is already up and running on 1+ Sentinel instances.
+Here we assume that ALEC is already up and running on 1+ Sentinel instances.
 For each of these, proceed as follows:
 
 Stop Sentinel:
@@ -41,7 +41,7 @@ Delete the .kar file cache:
 sudo rm -rf /opt/sentinel/data/kar
 ```
 
-Install the updated OCE plugin package:
+Install the updated ALEC plugin package:
 ```
 sudo yum -y install sentinel-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
 ```

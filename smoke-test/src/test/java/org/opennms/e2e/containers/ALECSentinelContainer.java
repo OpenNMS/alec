@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
-import org.opennms.e2e.util.DockerImageResolver;
 import org.opennms.e2e.util.Karaf;
 import org.opennms.e2e.util.Network;
 import org.opennms.e2e.util.Overlay;
@@ -51,41 +50,41 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.SelinuxContext;
 
-public class OCEContainer extends GenericContainer {
-    private static final Logger LOG = LoggerFactory.getLogger(OCEContainer.class);
-    private static final int OCE_SSH_PORT = 8301;
+public class ALECSentinelContainer extends GenericContainer {
+    private static final Logger LOG = LoggerFactory.getLogger(ALECSentinelContainer.class);
+    private static final int SENTINEL_SSH_PORT = 8301;
     private static final String OVERLAY_STANDALONE_DIR = "sentinel-overlay-standalone";
     private static final String OVERLAY_REDUNDANT_DIR = "sentinel-overlay-redundant";
     private static final String OVERLAY_DIR = "sentinel-overlay";
-    static final String ALIAS = "oce";
+    static final String ALIAS = "alec";
     private static AtomicInteger redundantIndex = new AtomicInteger(0);
     private boolean isRedundant;
     private int redundantId;
 
-    public OCEContainer(boolean isRedundant) throws Exception{
-        super(org.opennms.e2e.util.DockerImageResolver.getImageAndTag("oce"));
+    public ALECSentinelContainer(boolean isRedundant) throws Exception{
+        super(org.opennms.e2e.util.DockerImageResolver.getImageAndTag("sentinel"));
         this.isRedundant = isRedundant;
         redundantId = redundantIndex.getAndIncrement();
-        withExposedPorts(OCE_SSH_PORT)
-                .withEnv("KARAF_DEBUG_LOGGING", "org.opennms.oce")
+        withExposedPorts(SENTINEL_SSH_PORT)
+                .withEnv("KARAF_DEBUG_LOGGING", "org.opennms.alec")
                 .withNetwork(Network.getNetwork())
                 .withNetworkAliases(getIndexedAlias())
                 .withCommand("-d")
                 .withClasspathResourceMapping(prepareRedundantOverlay().getFileName().toString(), "/opt/sentinel-overlay",
                         BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)
-                .waitingFor(new WaitForOCE());
+                .waitingFor(new WaitForALEC());
     }
 
     private void verifyKar(Path overlayDeployPath) {
         // We expect to find exactly 1 kar file that will be overlayed onto the deploy directory of the sentinel
-        // container to install OCE
+        // container to install ALEC
         File[] karFiles = overlayDeployPath.toFile().listFiles((dir, name) -> name.endsWith(".kar"));
         if (karFiles == null || karFiles.length < 1) {
-            throw new RuntimeException("Could not find the .kar file to deploy OCE");
+            throw new RuntimeException("Could not find the .kar file to deploy ALEC");
         }
         if (karFiles.length > 1) {
-            throw new RuntimeException("Found too many .kar files for deploying OCE");
+            throw new RuntimeException("Found too many .kar files for deploying ALEC");
         }
     }
 
@@ -115,10 +114,10 @@ public class OCEContainer extends GenericContainer {
     }
 
     public InetSocketAddress getSSHAddress() {
-        return new InetSocketAddress(getContainerIpAddress(), getMappedPort(OCE_SSH_PORT));
+        return new InetSocketAddress(getContainerIpAddress(), getMappedPort(SENTINEL_SSH_PORT));
     }
 
-    private void waitForOCEToTerminate() {
+    private void waitForALECToTerminate() {
         LOG.info("Waiting for {} to terminate...", getIndexedAlias());
 
         await()
@@ -141,7 +140,7 @@ public class OCEContainer extends GenericContainer {
         LOG.info("Shutting down Karaf on {}", getIndexedAlias());
         Karaf.runKarafCommands(getSSHAddress(), "system:shutdown -f");
         // Make sure the Karaf instance is finished shutting down
-        waitForOCEToTerminate();
+        waitForALECToTerminate();
     }
 
     private String getIndexedAlias() {
@@ -153,17 +152,17 @@ public class OCEContainer extends GenericContainer {
     }
 
     private void insertApplicationId(Path overlayDir) throws IOException {
-        String applicationIdProperty = "\napplication.id = oce-datasource-instance-" + redundantId;
-        Files.write(Paths.get(overlayDir.toString(), "etc", "org.opennms.oce.datasource.opennms.kafka" +
+        String applicationIdProperty = "\napplication.id = alec-datasource-instance-" + redundantId;
+        Files.write(Paths.get(overlayDir.toString(), "etc", "org.opennms.alec.datasource.opennms.kafka" +
                 ".streams.cfg"), applicationIdProperty.getBytes(), StandardOpenOption.APPEND);
     }
 
-    private class WaitForOCE extends org.testcontainers.containers.wait.strategy.AbstractWaitStrategy {
+    private class WaitForALEC extends org.testcontainers.containers.wait.strategy.AbstractWaitStrategy {
         @Override
         protected void waitUntilReady() {
-            LOG.info("Waiting for OCE {}", getIndexedAlias());
-            Karaf.waitForBundleActive("org.opennms.oce.driver", Network.getConnectionAddress(waitStrategyTarget,
-                    OCE_SSH_PORT));
+            LOG.info("Waiting for ALEC {}", getIndexedAlias());
+            Karaf.waitForBundleActive("org.opennms.alec.driver", Network.getConnectionAddress(waitStrategyTarget,
+                    SENTINEL_SSH_PORT));
         }
     }
 

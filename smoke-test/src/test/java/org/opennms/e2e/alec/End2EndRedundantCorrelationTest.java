@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
-import org.opennms.e2e.containers.OCEContainer;
+import org.opennms.e2e.containers.ALECSentinelContainer;
 import org.opennms.e2e.util.Karaf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,25 +48,25 @@ import org.slf4j.LoggerFactory;
 public class End2EndRedundantCorrelationTest extends AbstractCorrelationTest {
     private static final Logger LOG = LoggerFactory.getLogger(End2EndRedundantCorrelationTest.class);
     private static final int NUM_REDUNDANT_OCE = 2;
-    private final List<OCEContainer> redundantOCEs = new ArrayList<>();
+    private final List<ALECSentinelContainer> redundantOCEs = new ArrayList<>();
 
     @Override
     RuleChain addTestSpecificContainers() {
         RuleChain ruleChain = RuleChain.emptyRuleChain();
         // Define NUM_REDUNDANT_OCE redundant OCEs
         for (int i = 0; i < NUM_REDUNDANT_OCE; i++) {
-            OCEContainer oceContainer = null;
+            ALECSentinelContainer alecSentinelContainer = null;
             try {
-                oceContainer = new OCEContainer(true);
+                alecSentinelContainer = new ALECSentinelContainer(true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            redundantOCEs.add(oceContainer);
+            redundantOCEs.add(alecSentinelContainer);
             // Initialize the first rule chain for the first OCE
             if (redundantOCEs.size() == 1) {
-                ruleChain = RuleChain.outerRule(oceContainer);
+                ruleChain = RuleChain.outerRule(alecSentinelContainer);
             } else {
-                ruleChain.around(oceContainer);
+                ruleChain.around(alecSentinelContainer);
             }
         }
         return ruleChain;
@@ -88,27 +88,27 @@ public class End2EndRedundantCorrelationTest extends AbstractCorrelationTest {
         verifyGenericSituation();
     }
 
-    private Optional<OCEContainer> getActiveOCE() throws Exception {
-        for (OCEContainer oceContainer : redundantOCEs) {
-            String[] output = Karaf.runKarafCommands(oceContainer.getSSHAddress(),
+    private Optional<ALECSentinelContainer> getActiveOCE() throws Exception {
+        for (ALECSentinelContainer alecSentinelContainer : redundantOCEs) {
+            String[] output = Karaf.runKarafCommands(alecSentinelContainer.getSSHAddress(),
                     "processor:current-role").split("\n");
 
             if (Arrays.stream(output).anyMatch(row -> row.contains("ACTIVE"))) {
-                return Optional.of(oceContainer);
+                return Optional.of(alecSentinelContainer);
             }
         }
 
         return Optional.empty();
     }
 
-    private OCEContainer waitForActiveOCE() throws Exception {
+    private ALECSentinelContainer waitForActiveOCE() throws Exception {
         LOG.info("Waiting for an active OCE instance...");
         await()
                 .atMost(2, TimeUnit.MINUTES)
                 .pollInterval(10, TimeUnit.SECONDS)
                 .until(() -> getActiveOCE().isPresent());
 
-        OCEContainer activeOCE = getActiveOCE().get();
+        ALECSentinelContainer activeOCE = getActiveOCE().get();
         LOG.info("OCE {} is now active", activeOCE);
         return activeOCE;
     }

@@ -184,7 +184,7 @@ jobs:
       - run:
           name: Build Debian packages
           command: |
-            mvn install --projects org.opennms.oce.assembly:org.opennms.oce.assembly.opennms.deb,org.opennms.oce.assembly:org.opennms.oce.assembly.sentinel.deb --also-make -DskipTests=true
+            mvn install --projects org.opennms.alec.assembly:org.opennms.alec.assembly.opennms.deb,org.opennms.alec.assembly:org.opennms.alec.assembly.sentinel.deb --also-make -DskipTests=true
 
       - save_cache:
           paths:
@@ -265,7 +265,7 @@ jobs:
           key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
 
       - run:
-          name: Save cacheable docker images
+          name: Save cacheable Docker images
           command: |
             if [ -d /tmp/docker ]; then exit 0; fi
             mkdir /tmp/docker

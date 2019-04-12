@@ -55,7 +55,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
 import org.opennms.e2e.containers.HelmContainer;
-import org.opennms.e2e.containers.OCEContainer;
+import org.opennms.e2e.containers.ALECSentinelContainer;
 import org.opennms.e2e.containers.OpenNMSContainer;
 import org.opennms.e2e.grafana.Grafana44SeleniumDriver;
 import org.opennms.e2e.grafana.GrafanaRestClient;
@@ -127,7 +127,7 @@ public abstract class AbstractCorrelationTest {
         // Define a single non-redundant OCE by default
         // If additional containers are required this method should be overridden
         try {
-            return RuleChain.outerRule(new OCEContainer(false));
+            return RuleChain.outerRule(new ALECSentinelContainer(false));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

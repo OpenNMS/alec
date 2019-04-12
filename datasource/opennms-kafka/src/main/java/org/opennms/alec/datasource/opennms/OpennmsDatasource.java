@@ -98,15 +98,15 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         AlarmFeedbackDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
 
-    public static final String KAFKA_STREAMS_PID = "org.opennms.oce.datasource.opennms.kafka.streams";
-    public static final String KAFKA_PRODUCER_PID = "org.opennms.oce.datasource.opennms.kafka.producer";
+    public static final String KAFKA_STREAMS_PID = "org.opennms.alec.datasource.opennms.kafka.streams";
+    public static final String KAFKA_PRODUCER_PID = "org.opennms.alec.datasource.opennms.kafka.producer";
 
-    public static final String DEFAULT_APPLICATION_ID = "oce-datasource";
+    public static final String DEFAULT_APPLICATION_ID = "alec-datasource";
     public static final String DEFAULT_ALARM_TOPIC = "alarms";
     public static final String DEFAULT_ALARM_FEEDBACK_TOPIC = "alarmFeedback";
     public static final String DEFAULT_NODE_TOPIC = "nodes";
     public static final String DEFAULT_EVENT_SINK_TOPIC = "OpenNMS.Sink.Events";
-    public static final String DEFAULT_INVENTORY_TOPIC = "oce-inventory";
+    public static final String DEFAULT_INVENTORY_TOPIC = "alec-inventory";
     public static final String DEFAULT_EDGES_TOPIC = "edges";
 
     public static final long DEFAULT_INVENTORY_GC_INTERVAL_MS = TimeUnit.MINUTES.toMillis(5);

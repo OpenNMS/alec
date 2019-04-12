@@ -26,76 +26,135 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
- package org.opennms.oce.datasource.opennms;
+package org.opennms.oce.datasource.opennms
 
-import org.opennms.oce.datasource.common.ImmutableInventoryObject
-import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
-import static org.opennms.oce.datasource.common.inventory.ManagedObjectType.*;
-
-import org.opennms.oce.datasource.common.inventory.TypeToInventory;
-import org.opennms.oce.datasource.opennms.EdgeToInventory
-import org.opennms.oce.datasource.opennms.EnrichedAlarm
-import org.opennms.oce.datasource.opennms.InventoryFromAlarm
-import org.opennms.oce.datasource.opennms.OpennmsMapper
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObject;
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjects;
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.Node;
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge.TargetCase
-
-import com.google.common.base.Strings;
-
+import com.google.common.base.Strings
 import groovy.util.logging.Slf4j
+import org.opennms.oce.datasource.common.inventory.Edge
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType
+import org.opennms.oce.datasource.common.inventory.Port
+import org.opennms.oce.datasource.common.inventory.Segment
+import org.opennms.oce.datasource.common.inventory.TypeToInventory
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObject
+import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjects
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.Node
+import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge
+
+import static org.opennms.oce.datasource.common.inventory.ManagedObjectType.*
 
 @Slf4j
 class InventoryFactory {
-    
+    private static final long PORT_LINK_WEIGHT = 100;
+    // Use half the regular link weight when there is a segment since there will be twice as many hops
+    private static final long SEGMENT_LINK_WEIGHT = 50;
+
     static InventoryObjects edgeToInventory(TopologyEdge edge) {
         log.trace("EdgeToInventory - edge: {}", edge);
-        final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects.newBuilder();
-        final InventoryModelProtos.InventoryObject.Builder ioBuilder = InventoryModelProtos.InventoryObject.newBuilder();
-
-        // The target information could be associated with a node or a segment
-        long targetIfIndex;
-        String targetNodeCriteria;
-
-        // Note: only port is supported as a target right now
-        switch (edge.getTargetCase()) {
-            case TargetCase.TARGETPORT:
-                targetIfIndex = edge.getTargetPort().getIfIndex();
-                targetNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria());
-                break;
-            case TargetCase.TARGETSEGMENT:
-            // Segment support needs to be added when segments are available
-            default:
-                throw new UnsupportedOperationException("Unsupported target type + " + edge.getTargetCase());
+        final InventoryObjects.Builder iosBuilder = InventoryObjects.newBuilder();
+        final InventoryObject.Builder edgeIoBuilder = InventoryObject.newBuilder();
+        
+        // Set the type of the link
+        long weightForLink = PORT_LINK_WEIGHT;
+        if(edge.hasSourceNode() && edge.hasTargetNode()) {
+            edgeIoBuilder.setType(NodeLink.getName());
+        } else if (edge.hasSourceSegment() || edge.hasTargetSegment()) {
+            weightForLink = SEGMENT_LINK_WEIGHT;
+            edgeIoBuilder.setType(BridgeLink.getName());
+        } else {
+            edgeIoBuilder.setType(SnmpInterfaceLink.getName());
         }
 
-        String protocol = edge.getRef().getProtocol().name();
-        String sourceNodeCriteria = OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria());
+        // Derive segments if applicable
+        if (edge.hasSourceSegment()) {
+            iosBuilder.addInventoryObject(InventoryObject.newBuilder()
+                    .setType(BridgeSegment.getName())
+                    .setId(Segment.generateId(edge.getSourceSegment().getRef().getId(),
+                    edge.getSourceSegment().getRef().getProtocol().name()))
+                    .build());
+        }
+        if (edge.hasTargetSegment()) {
+            iosBuilder.addInventoryObject(InventoryObject.newBuilder()
+                    .setType(BridgeSegment.getName())
+                    .setId(Segment.generateId(edge.getTargetSegment().getRef().getId(),
+                    edge.getTargetSegment().getRef().getProtocol().name()))
+                    .build());
+        }
 
-        // Create a link object by setting the peers to the source and target
-        ioBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName())
-                // The Id for this link will incorporate the protocol so that if multiple protocols describe a link
-                // between the same endpoints they will create multiple links (one for each protocol)
-                .setId(EdgeToInventory.getIdForEdge(edge))
-                .setFriendlyName(String.format("SNMP Interface Link Between %d on %s and %d on %s discovered with " +
-                    "protocol %s", edge.getSource().getIfIndex(), sourceNodeCriteria, targetIfIndex, targetNodeCriteria, protocol))
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
-                .setId(String.format("%s:%d", sourceNodeCriteria, edge.getSource().getIfIndex()))
-                .setType(ManagedObjectType.SnmpInterface.getName())
-                .build())
-                .addPeer(InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
-                .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
-                .setId(String.format("%s:%d", targetNodeCriteria, targetIfIndex))
-                .setType(ManagedObjectType.SnmpInterface.getName())
-                .build())
-                .build();
+        InventoryModelProtos.InventoryObjectPeerRef peerA = null;
+        InventoryModelProtos.InventoryObjectPeerRef peerZ = null;
+        
+        // Add the peers
+        if (edge.hasSourcePort()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(Port.generateId(edge.getSourcePort().getIfIndex(),
+                    OpennmsMapper.toNodeCriteria(edge.getSourcePort().getNodeCriteria())))
+                    .setType(SnmpInterface.getName())
+                    .build();
+        } else if (edge.hasSourceNode()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(OpennmsMapper.toNodeCriteria(edge.getSourceNode()))
+                    .setType(ManagedObjectType.Node.getName())
+                    .build();
+        } else if (edge.hasSourceSegment()) {
+            peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.A)
+                    .setWeight(weightForLink)
+                    .setId(Segment.generateId(edge.getSourceSegment()
+                    .getRef()
+                    .getId(),
+                    edge.getSourceSegment()
+                            .getRef()
+                            .getProtocol()
+                            .name()))
+                    .setType(BridgeSegment.getName())
+                    .build();
+        }
 
-        iosBuilder.addInventoryObject(ioBuilder.build());
+        if (edge.hasTargetPort()) {
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
+                    .setWeight(weightForLink)
+                    .setId(Port.generateId(edge.getTargetPort().getIfIndex(),
+                    OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria())))
+                    .setType(SnmpInterface.getName())
+                    .build();
+        } else if (edge.hasTargetNode()) {
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
+                    .setWeight(weightForLink)
+                    .setId(OpennmsMapper.toNodeCriteria(edge.getTargetNode()))
+                    .setType(ManagedObjectType.Node.getName())
+                    .build();
+        } else if (edge.hasTargetSegment()) {
+            peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
+                    .setEndpoint(InventoryModelProtos.InventoryObjectPeerEndpoint.Z)
+                    .setWeight(weightForLink)
+                    .setId(Segment.generateId(edge.getTargetSegment()
+                    .getRef()
+                    .getId(),
+                    edge.getTargetSegment()
+                            .getRef()
+                            .getProtocol()
+                            .name()))
+                    .setType(BridgeSegment.getName())
+                    .build();
+        }
+        
+        edgeIoBuilder.addPeer(Objects.requireNonNull(peerA));
+        edgeIoBuilder.addPeer(Objects.requireNonNull(peerZ));
+        
+        // Set Id and friendly name
+        edgeIoBuilder.setId(Edge.generateId(edge.getRef().getProtocol().name(), peerA.getId(), peerZ.getId()));
+        edgeIoBuilder.setFriendlyName(Edge.generateFriendlyName(edge.getRef().getProtocol().name(), peerA.getId(),
+                peerZ.getId()));
+
+        iosBuilder.addInventoryObject(edgeIoBuilder.build());
 
         return iosBuilder.build();
     }
@@ -108,12 +167,12 @@ class InventoryFactory {
         String managedObjectInstance = null;
         String managedObjectType = null;
 
-        final InventoryModelProtos.InventoryObjects.Builder iosBuilder = InventoryModelProtos.InventoryObjects.newBuilder();
-        final InventoryModelProtos.InventoryObjects ios;
+        final InventoryObjects.Builder iosBuilder = InventoryObjects.newBuilder();
+        final InventoryObjects ios;
         if (!Strings.isNullOrEmpty(alarm.getManagedObjectType()) &&
-        !Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
+                !Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
             final InventoryFromAlarm inventoryFromAlarm = getInventoryFromAlarm(alarm);
-            for (InventoryModelProtos.InventoryObject io : inventoryFromAlarm.getInventory()) {
+            for (InventoryObject io : inventoryFromAlarm.getInventory()) {
                 iosBuilder.addInventoryObject(io);
             }
             ios = iosBuilder.build();
@@ -121,7 +180,7 @@ class InventoryFactory {
                 managedObjectInstance = inventoryFromAlarm.getManagedObjectInstance();
                 managedObjectType = inventoryFromAlarm.getManagedObjectType();
             } else if (ios.getInventoryObjectCount() > 0) {
-                final InventoryModelProtos.InventoryObject io = ios.getInventoryObject(0);
+                final InventoryObject io = ios.getInventoryObject(0);
                 managedObjectInstance = io.getId();
                 managedObjectType = io.getType();
             }
@@ -129,7 +188,7 @@ class InventoryFactory {
             ios = iosBuilder.build();
         }
 
-        if ((managedObjectInstance == null  || managedObjectType == null) && alarm.hasNodeCriteria()) {
+        if ((managedObjectInstance == null || managedObjectType == null) && alarm.hasNodeCriteria()) {
             final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
             managedObjectType = ManagedObjectType.Node.getName();
             managedObjectInstance = nodeCriteria;
@@ -139,10 +198,10 @@ class InventoryFactory {
     }
 
     static InventoryFromAlarm getInventoryFromAlarm(OpennmsModelProtos.Alarm alarm) {
-        final List<InventoryModelProtos.InventoryObject> ios = new ArrayList<>();
+        final List<InventoryObject> ios = new ArrayList<>();
         final ManagedObjectType type;
-        try  {
-            type = ManagedObjectType.fromName(alarm.getManagedObjectType());
+        try {
+            type = fromName(alarm.getManagedObjectType());
         } catch (NoSuchElementException nse) {
             log.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getManagedObjectType(), alarm.getManagedObjectInstance());
             return new InventoryFromAlarm(ios);
@@ -151,9 +210,9 @@ class InventoryFactory {
         final String nodeCriteria = OpennmsMapper.toNodeCriteria(alarm.getNodeCriteria());
         String managedObjectInstance = null;
         String managedObjectType = null;
-        switch(type) {
+        switch (type) {
             case Node:
-            // Nothing to do here
+                // Nothing to do here
                 break;
             case SnmpInterfaceLink:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getSnmpInterfaceLink(alarm.getManagedObjectInstance())));
@@ -175,22 +234,22 @@ class InventoryFactory {
         return new InventoryFromAlarm(ios, managedObjectInstance, managedObjectType);
     }
 
-    static InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryModelProtos.InventoryObject parent) {
+    static InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryObject parent) {
         log.trace("toInventoryObject: {} : {}", snmpInterface, parent);
-        return InventoryModelProtos.InventoryObject.newBuilder()
-                .setType(ManagedObjectType.SnmpInterface.getName())
-                .setId(parent.getId() + ":" + snmpInterface.getIfIndex())
+        return InventoryObject.newBuilder()
+                .setType(SnmpInterface.getName())
+                .setId(Port.generateId((long) snmpInterface.getIfIndex(), parent.getId()))
                 .setFriendlyName(snmpInterface.getIfDescr())
                 .setParentType(parent.getType())
                 .setParentId(parent.getId())
                 .build();
     }
 
-    static List<InventoryModelProtos.InventoryObject> toInventoryObjects(Node node) {
+    static List<InventoryObject> toInventoryObjects(Node node) {
         log.trace("Node toInventoryObject: {}", node);
-        final List<InventoryModelProtos.InventoryObject> inventory = new ArrayList<>();
+        final List<InventoryObject> inventory = new ArrayList<>();
 
-        InventoryModelProtos.InventoryObject nodeObj = InventoryModelProtos.InventoryObject.newBuilder()
+        InventoryObject nodeObj = InventoryObject.newBuilder()
                 .setType(ManagedObjectType.Node.getName())
                 .setId(OpennmsMapper.toNodeCriteria(node))
                 .setFriendlyName(node.getLabel())
@@ -199,8 +258,8 @@ class InventoryFactory {
 
         // Attach the SNMP interfaces directly to the node
         node.getSnmpInterfaceList().stream()
-                .map{iff -> toInventoryObject(iff, nodeObj)}
-                .forEach{i -> inventory.add(i)};
+                .map { iff -> toInventoryObject(iff, nodeObj) }
+                .forEach { i -> inventory.add(i) };
 
         return inventory;
     }
@@ -215,7 +274,7 @@ def EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm) {
     InventoryFactory.enrichAlarm(alarm);
 }
 
-def List<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node) {
+def List<InventoryObject> toInventoryObjects(Node node) {
     InventoryFactory.toInventoryObjects(node);
 }
 

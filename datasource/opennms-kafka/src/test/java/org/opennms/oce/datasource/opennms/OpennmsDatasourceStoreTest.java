@@ -80,7 +80,7 @@ public class OpennmsDatasourceStoreTest {
         long step = 10000L;
 
         ConfigurationAdmin configAdmin = mock(ConfigurationAdmin.class, RETURNS_DEEP_STUBS);
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ScriptedInventoryService inventoryService = OpennmsKafkaScriptedInventory.withDefaults();
         NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
         AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);

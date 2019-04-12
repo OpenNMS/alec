@@ -30,10 +30,9 @@ package org.opennms.oce.datasource.opennms.jvm;
 
 import java.util.List;
 
-import javax.script.ScriptException;
-
 import org.opennms.integration.api.v1.model.Alarm;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.TopologyEdge;
 import org.opennms.oce.datasource.api.InventoryObject;
 import org.opennms.oce.datasource.common.ImmutableAlarm;
 import org.opennms.oce.datasource.common.inventory.script.AbstractScriptedInventory;
@@ -46,20 +45,21 @@ import org.slf4j.LoggerFactory;
  * @author smith
  *
  */
-public class ScriptedInventoryImpl extends AbstractScriptedInventory implements ScriptedInventoryService {
+public class OpennmsDirectScriptedInventory extends AbstractScriptedInventory implements ScriptedInventoryService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ScriptedInventoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OpennmsDirectScriptedInventory.class);
 
-    public ScriptedInventoryImpl(String scriptPath) {
-        super(scriptPath, 30000, null);
-    }
-
-    public ScriptedInventoryImpl(String scriptPath, long scriptCacheMillis, BundleContext bundleContext) {
+    public OpennmsDirectScriptedInventory(String scriptPath, long scriptCacheMillis, BundleContext bundleContext) {
         super(scriptPath, scriptCacheMillis, bundleContext);
+    }
+    
+    public static OpennmsDirectScriptedInventory withDefaults() {
+        // Empty string results in the default script being loaded
+        return new OpennmsDirectScriptedInventory(DEFAULT_SCRIPT_FULL_PATH, 30000, null);
     }
 
     public void init() {
-        LOG.info("ScriptedInventoryImpl init.");
+        LOG.info("OpennmsDirectScriptedInventory init.");
     }
 
     /**
@@ -67,33 +67,45 @@ public class ScriptedInventoryImpl extends AbstractScriptedInventory implements 
      *
      * @param alarmBuilder the alarm builder to update
      * @param alarm the original alarm to derive from
-     * @throws ScriptedInventoryException 
+     * @throws ScriptedInventoryException if the script invocation fails
      */
+    @Override
     public synchronized void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder,
             org.opennms.integration.api.v1.model.Alarm alarm) throws ScriptedInventoryException {
         try {
             getInvocable().invokeFunction("overrideTypeAndInstance", alarmBuilder, alarm);
-        } catch (NoSuchMethodException | ScriptException e) {
+        } catch (Exception e) {
             throw new ScriptedInventoryException("Failed to override inventory for alarm", e);
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized List<InventoryObject> createInventoryObjects(Alarm alarm) throws ScriptedInventoryException {
         try {
             return (List<InventoryObject>) getInvocable().invokeFunction("alarmToInventory", alarm);
-        } catch (NoSuchMethodException | ScriptException e) {
+        } catch (Exception e) {
             throw new ScriptedInventoryException("Failed to create inventory from alarm", e);
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized List<InventoryObject> createInventoryObjects(Node node) throws ScriptedInventoryException {
         try {
             return (List<InventoryObject>) getInvocable().invokeFunction("nodeToInventory", node);
-        } catch (NoSuchMethodException | ScriptException e) {
+        } catch (Exception e) {
             throw new ScriptedInventoryException("Failed to create inventory from node", e);
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<InventoryObject> createInventoryObjects(TopologyEdge edge) throws ScriptedInventoryException {
+        try {
+            return (List<InventoryObject>) getInvocable().invokeFunction("edgeToInventory", edge);
+        } catch (Exception e) {
+            throw new ScriptedInventoryException("Failed to create inventory from edge", e);
+        }
+    }
 }

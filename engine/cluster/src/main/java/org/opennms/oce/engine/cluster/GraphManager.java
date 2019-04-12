@@ -243,6 +243,8 @@ public class GraphManager {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             final CEVertex vertex = resourceKeyVertexMap.remove(resourceKey);
             if (vertex != null) {
+                // When a vertex that is referenced by edges is removed, the referencing edges are also removed
+                // automatically
                 g.removeVertex(vertex);
                 didGraphChange.set(true);
             }

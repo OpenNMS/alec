@@ -36,6 +36,9 @@ import java.util.Objects;
 public enum ManagedObjectType {
     Node("node"),
     SnmpInterface("snmp-interface"),
+    /**
+     * A link between two interfaces or an interface and a node.
+     */
     SnmpInterfaceLink("snmp-interface-link"),
     BgpPeer("bgp-peer"),
     VpnTunnel("vpn-tunnel"),
@@ -43,7 +46,19 @@ public enum ManagedObjectType {
     EntPhysicalEntity("ent-physical-entity"),
     OspfRouter("ospf-router"),
     MplsTunnel("mpls-tunnel"),
-    MplsLdpSession("mpls-ldp-session");
+    MplsLdpSession("mpls-ldp-session"),
+    /**
+     * A L2 segment or a bridge device.
+     */
+    BridgeSegment("bridge-segment"),
+    /**
+     * A link between two bridges or a segment and a port.
+     */
+    BridgeLink("bridge-link"),
+    /**
+     * A link directly between two nodes.
+     */
+    NodeLink("node-link");
 
     private final String name;
 

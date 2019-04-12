@@ -26,25 +26,22 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.jvm;
+package org.opennms.oce.datasource.common.inventory;
 
-import java.util.List;
+import java.util.Objects;
 
-import org.opennms.integration.api.v1.model.Alarm;
-import org.opennms.integration.api.v1.model.Node;
-import org.opennms.integration.api.v1.model.TopologyEdge;
-import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.common.ImmutableAlarm;
-import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
+/**
+ * Utility methods for deriving Edge attributes.
+ */
+public class Edge {
+    public static String generateId(String protocol, String peerAId, String peerZId) {
+        return String.format("%s:%s:%s", Objects.requireNonNull(protocol), Objects.requireNonNull(peerAId),
+                Objects.requireNonNull(peerZId));
+    }
 
-public interface ScriptedInventoryService {
-
-    void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, org.opennms.integration.api.v1.model.Alarm alarm) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(Alarm alarm) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(Node node) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(TopologyEdge edge) throws ScriptedInventoryException;
-
+    public static String generateFriendlyName(String protocol, String peerAId,
+                                              String peerZId) {
+        return String.format("Link Between %s and %s discovered with protocol %s", Objects.requireNonNull(peerAId),
+                Objects.requireNonNull(peerZId), Objects.requireNonNull(protocol));
+    }
 }

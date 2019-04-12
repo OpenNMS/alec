@@ -17,7 +17,7 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.ScriptedInventoryImpl">
+    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.OpennmsKafkaScriptedInventory">
         <argument value="${scriptFile}"/>
         <argument value="${scriptCacheMillis}"/>
         <argument ref="blueprintBundleContext"/>

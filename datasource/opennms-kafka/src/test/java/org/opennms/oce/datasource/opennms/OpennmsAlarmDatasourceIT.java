@@ -116,7 +116,7 @@ public class OpennmsAlarmDatasourceIT extends OpennmsDatasourceIT implements Ala
         // Stop & restart
         datasource.destroy();
         // (Re)create the datasource
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ScriptedInventoryService inventoryService = OpennmsKafkaScriptedInventory.withDefaults();
         NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
         AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);

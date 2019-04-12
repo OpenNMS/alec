@@ -31,6 +31,10 @@ package org.opennms.oce.datasource.opennms;
 import java.util.Objects;
 
 import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.oce.datasource.common.inventory.Edge;
+import org.opennms.oce.datasource.common.inventory.ManagedObjectType;
+import org.opennms.oce.datasource.common.inventory.Port;
+import org.opennms.oce.datasource.common.inventory.Segment;
 import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos;
 import org.slf4j.Logger;
@@ -58,9 +62,14 @@ public class EdgeToInventory {
     }
 
     @VisibleForTesting
-    static String getIdForEdge(OpennmsModelProtos.TopologyEdge edge) {
-        return String.format("%s:%s:%d:%s:%d", edge.getRef().getProtocol(),
-                OpennmsMapper.toNodeCriteria(edge.getSource().getNodeCriteria()), edge.getSource().getIfIndex(),
-                OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria()), edge.getTargetPort().getIfIndex());
+    String getIdForEdge(OpennmsModelProtos.TopologyEdge edge, String type) {
+        InventoryModelProtos.InventoryObjects ioObjects = toInventoryObjects(edge);
+        InventoryModelProtos.InventoryObject edgeIo = ioObjects.getInventoryObjectList()
+                .stream()
+                .filter(io -> io.getType().equals(type))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No edge found"));
+
+        return edgeIo.getId();
     }
 }

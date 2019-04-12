@@ -26,25 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms.jvm;
+package org.opennms.oce.datasource.common.inventory;
 
-import java.util.List;
+import java.util.Objects;
 
-import org.opennms.integration.api.v1.model.Alarm;
-import org.opennms.integration.api.v1.model.Node;
-import org.opennms.integration.api.v1.model.TopologyEdge;
-import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.common.ImmutableAlarm;
-import org.opennms.oce.datasource.common.inventory.script.ScriptedInventoryException;
-
-public interface ScriptedInventoryService {
-
-    void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, org.opennms.integration.api.v1.model.Alarm alarm) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(Alarm alarm) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(Node node) throws ScriptedInventoryException;
-
-    List<InventoryObject> createInventoryObjects(TopologyEdge edge) throws ScriptedInventoryException;
-
+/**
+ * Utility methods for deriving Port attributes.
+ */
+public class Port {
+    public static String generateId(long ifIndex, String nodeCriteria) {
+        return String.format("%s:%d", Objects.requireNonNull(nodeCriteria), ifIndex);
+    }
 }

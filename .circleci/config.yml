@@ -109,9 +109,9 @@ jobs:
 
       - restore_cache:
           keys:
-          - v4-dependencies-{{ checksum "pom.xml" }}
+          - v5-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v4-dependencies-
+          - v5-dependencies-
 
       - run:
           name: Build
@@ -121,7 +121,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: v4-dependencies-{{ checksum "pom.xml" }}
+          key: v5-dependencies-{{ checksum "pom.xml" }}
 
       - run:
           name: Run the tests
@@ -177,9 +177,9 @@ jobs:
           # attempt to use the cache from the last smoke-test run
           - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
           # use the cache built for the same root pom
-          - v4-dependencies-{{ checksum "pom.xml" }}
+          - v5-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v4-dependencies-
+          - v5-dependencies-
           
       - restore_cache:
           keys:
@@ -285,9 +285,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v4-dependencies-{{ checksum "pom.xml" }}
+          - v5-dependencies-{{ checksum "pom.xml" }}
           # fallback to using the latest cache if no exact match is found
-          - v4-dependencies-
+          - v5-dependencies-
 
       - run:
           name: Deploy the artifacts

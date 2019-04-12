@@ -35,6 +35,9 @@ import java.util.Objects;
 import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.oce.datasource.api.InventoryObjectPeerRef;
 
+/**
+ * An implementation of {@link InventoryObjectPeerRef} that enforces deep immutability.
+ */
 public final class ImmutableInventoryObjectPeerRef implements InventoryObjectPeerRef {
     private final String type;
     private final String id;
@@ -48,7 +51,7 @@ public final class ImmutableInventoryObjectPeerRef implements InventoryObjectPee
         this.weight = builder.weight;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String type;
         private String id;
         private InventoryObjectPeerEndpoint endpoint;

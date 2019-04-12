@@ -44,29 +44,36 @@ import org.opennms.oce.datasource.api.ResourceKey;
 import org.opennms.oce.datasource.api.Severity;
 import org.opennms.oce.datasource.api.Situation;
 
+/**
+ * An implementation of {@link Situation} that enforces deep immutability.
+ */
 public final class ImmutableSituation implements Situation {
     private final String id;
     private final long creationTime;
     private final Severity severity;
     private final List<ResourceKey> resourceKeys;
     private final Map<String, Alarm> alarms;
+    private final Set<Alarm> alarmsFromMap;
     private final String diagnosticText;
 
     private ImmutableSituation(Builder builder) {
         this.id = builder.id;
         this.creationTime = builder.creationTime;
         this.severity = builder.severity;
-        this.resourceKeys = builder.resourceKeys == null ? null : new ArrayList<>(builder.resourceKeys);
-        this.alarms = builder.alarms == null ? null : copyAlarms(builder.alarms);
+        this.resourceKeys = builder.resourceKeys == null ? Collections.emptyList() :
+                Collections.unmodifiableList(new ArrayList<>(builder.resourceKeys));
+        this.alarms = builder.alarms == null ? Collections.emptyMap() :
+                Collections.unmodifiableMap(copyAlarms(builder.alarms));
+        this.alarmsFromMap = Collections.unmodifiableSet(new HashSet<>(alarms.values()));
         this.diagnosticText = builder.diagnosticText;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String id;
         private Long creationTime;
         private Severity severity;
-        private List<ResourceKey> resourceKeys = new ArrayList<>();
-        private Map<String, Alarm> alarms = new LinkedHashMap<>();
+        private List<ResourceKey> resourceKeys;
+        private Map<String, Alarm> alarms;
         private String diagnosticText;
 
         private Builder() {
@@ -77,11 +84,11 @@ public final class ImmutableSituation implements Situation {
             this.creationTime = situation.getCreationTime();
             this.severity = situation.getSeverity();
             // Copy contents for the collections to avoid referencing a collection we don't control
-            this.resourceKeys.addAll(situation.getResourceKeys());
-            this.alarms.putAll(situation.getAlarms()
+            this.resourceKeys = new ArrayList<>(situation.getResourceKeys());
+            this.alarms = situation.getAlarms()
                     .stream()
                     .collect(Collectors.toMap(Alarm::getId, alarm -> alarm,
-                            (Alarm oldAlarm, Alarm newAlarm) -> newAlarm, LinkedHashMap::new)));
+                            (Alarm oldAlarm, Alarm newAlarm) -> newAlarm, LinkedHashMap::new));
             this.diagnosticText = situation.getDiagnosticText();
         }
 
@@ -106,6 +113,9 @@ public final class ImmutableSituation implements Situation {
         }
 
         public Builder addResourceKey(ResourceKey resourceKey) {
+            if (resourceKeys == null) {
+                resourceKeys = new ArrayList<>();
+            }
             resourceKeys.add(resourceKey);
             return this;
         }
@@ -122,12 +132,18 @@ public final class ImmutableSituation implements Situation {
         }
 
         public Builder addAlarm(Alarm alarm) {
-            this.alarms.put(alarm.getId(), alarm);
+            if (alarms == null) {
+                alarms = new LinkedHashMap<>();
+            }
+            alarms.put(alarm.getId(), alarm);
             return this;
         }
 
         public Builder addAlarm(Alarm alarm, BiPredicate<String, String> predicate) {
             if (predicate.test(alarm.getId(), id)) {
+                if (alarms == null) {
+                    alarms = new LinkedHashMap<>();
+                }
                 this.alarms.put(alarm.getId(), alarm);
             }
 
@@ -195,12 +211,12 @@ public final class ImmutableSituation implements Situation {
 
     @Override
     public List<ResourceKey> getResourceKeys() {
-        return resourceKeys == null ? null : Collections.unmodifiableList(resourceKeys);
+        return resourceKeys;
     }
 
     @Override
     public Set<Alarm> getAlarms() {
-        return alarms == null ? null : Collections.unmodifiableSet(new HashSet<>(alarms.values()));
+        return alarmsFromMap;
     }
 
     @Override

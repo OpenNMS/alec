@@ -46,7 +46,7 @@ public class NodeToInventoryTest {
 
     @Before
     public void setUp() {
-        ScriptedInventoryService inventoryService = new ScriptedInventoryImpl("src/main/resources/inventory.groovy");
+        ScriptedInventoryService inventoryService = OpennmsKafkaScriptedInventory.withDefaults();
         nodeToInventory = new NodeToInventory(inventoryService);
     }
 

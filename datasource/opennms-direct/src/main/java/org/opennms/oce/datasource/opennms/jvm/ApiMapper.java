@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.TopologyEdge;
 import org.opennms.integration.api.v1.model.beans.InMemoryEventBean;
 import org.opennms.oce.datasource.api.Alarm;
 import org.opennms.oce.datasource.api.AlarmFeedback;
@@ -80,7 +81,7 @@ public class ApiMapper {
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
                 .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null);
-            try {
+        try {
             inventoryService.overrideTypeAndInstance(alarmBuilder, alarm);
         } catch (ScriptedInventoryException e) {
             LOG.error("Failure overriding inventory for alarm [{}] : {}", alarm, e.getCause().getMessage());
@@ -163,7 +164,7 @@ public class ApiMapper {
         if (severity == null) {
             return null;
         }
-        switch(severity) {
+        switch (severity) {
             case CRITICAL:
                 return org.opennms.integration.api.v1.model.Severity.CRITICAL;
             case MAJOR:
@@ -184,7 +185,7 @@ public class ApiMapper {
         if (severity == null) {
             return null;
         }
-        switch(severity) {
+        switch (severity) {
             case CLEARED:
                 return Severity.CLEARED;
             case NORMAL:
@@ -231,5 +232,15 @@ public class ApiMapper {
                 .setUser(alarmFeedback.getUser())
                 .setTimestamp(alarmFeedback.getTimestamp())
                 .build();
+    }
+
+    public List<InventoryObject> toInventory(TopologyEdge edge) {
+        try {
+            return inventoryService.createInventoryObjects(edge);
+        } catch (ScriptedInventoryException e) {
+            LOG.error("Failed to retrieve inventory for edge {}, : {}", edge, e.getCause().getMessage());
+            LOG.error("Failed to retrieve inventory for edge", e);
+            return Collections.emptyList();
+        }
     }
 }

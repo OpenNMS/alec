@@ -33,6 +33,9 @@ import java.util.Objects;
 import org.opennms.oce.datasource.api.AlarmFeedback;
 import org.opennms.oce.datasource.api.FeedbackType;
 
+/**
+ * An implementation of {@link AlarmFeedback} that enforces deep immutability.
+ */
 public final class ImmutableAlarmFeedback implements AlarmFeedback {
     private final String situationKey;
     private final String situationFingerprint;
@@ -52,7 +55,7 @@ public final class ImmutableAlarmFeedback implements AlarmFeedback {
         this.timestamp = builder.timestamp;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String situationKey;
         private String situationFingerprint;
         private String alarmKey;

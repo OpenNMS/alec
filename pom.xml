@@ -4,9 +4,9 @@
     <artifactId>oce-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
-    <name>OpenNMS Correlation Engine (OCE)</name>
-    <url>https://github.com/OpenNMS/oce</url>
-    <description>End-to-end testing with JUnit and Docker</description>
+    <name>OpenNMS ALEC</name>
+    <url>https://github.com/OpenNMS/alec</url>
+    <description>Architecture for Learning Enabled Correlation</description>
 
     <licenses>
         <license>
@@ -17,7 +17,7 @@
 
     <scm>
         <url>https://github.com/OpenNMS/oce</url>
-        <connection>scm:git:git@github.com:OpenNMS/oce.git</connection>
+        <connection>scm:git:git@github.com:OpenNMS/alec.git</connection>
         <tag>HEAD</tag>
     </scm>
 
@@ -500,7 +500,7 @@
       <repository>
         <id>sonatype.org-snapshot</id>
         <name>Sonatype OSS Snapshots Repository</name>
-	    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         <releases><enabled>false</enabled></releases>
         <snapshots><enabled>true</enabled></snapshots>
       </repository>

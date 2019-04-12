@@ -1,4 +1,4 @@
-# OCE Development Guide
+# ALEC Development Guide
 
 ## Building
 
@@ -49,4 +49,3 @@ feature:install oce-datasource-opennms-kafka oce-engine-cluster oce-processor-st
 ```
 
 Correlate!
-

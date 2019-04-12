@@ -14,7 +14,7 @@
         </cxf:features>
     </cxf:bus>
 
-    <bean id="graphEndpoint" class="org.opennms.oce.feature.graph.rest.impl.GraphEndpointImpl" >
+    <bean id="graphEndpoint" class="org.opennms.alec.feature.graph.rest.impl.GraphEndpointImpl" >
         <argument ref="blueprintBundleContext"/>
     </bean>
 

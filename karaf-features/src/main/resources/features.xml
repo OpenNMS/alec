@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<features name="oce-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
+<features name="alec-features" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.kie/kie-karaf-features/${drools.version}/xml/features</repository>
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
@@ -7,20 +7,20 @@
 
     <!-- Datasources -->
 
-    <feature name="oce-datasource-api" description="OCE :: Datasource :: API" version="${project.version}">
+    <feature name="alec-datasource-api" description="OCE :: Datasource :: API" version="${project.version}">
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.api/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.common/${project.version}</bundle>
         <feature dependency="true">aries-blueprint</feature>
     </feature>
 
-    <feature name="oce-datasource-opennms-common" description="OCE :: Datasource :: OpenNMS Common" version="${project.version}">
+    <feature name="alec-datasource-opennms-common" description="OCE :: Datasource :: OpenNMS Common" version="${project.version}">
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-common/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <feature version="${groovy.version}">groovy</feature>
     </feature>
 
-    <feature name="oce-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-datasource-jaxb" description="OCE :: Datasource :: JAXB" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.jaxb/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.jvnet.jaxb2_commons/jaxb2-basics-tools/0.11.1</bundle>
@@ -29,8 +29,8 @@
         <bundle dependency="true">mvn:com.sun.xml.bind/jaxb-core/2.3.0</bundle>
     </feature>
 
-    <feature name="oce-datasource-opennms-kafka" description="OCE :: Datasource :: OpenNMS Kafka" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-datasource-opennms-kafka" description="OCE :: Datasource :: OpenNMS Kafka" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-kafka/${project.version}</bundle>
         <feature version="2.0.0">kafka-streams</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
@@ -39,67 +39,67 @@
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.squareup.okhttp3/logging-interceptor/${okhttp.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <feature dependency="true" version="${project.version}">oce-datasource-opennms-common</feature>
+        <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
     </feature>
 
-    <feature name="oce-datasource-opennms-direct" description="OCE :: Datasource :: OpenNMS Direct" version="${project.version}">
+    <feature name="alec-datasource-opennms-direct" description="OCE :: Datasource :: OpenNMS Direct" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
-        <feature dependency="true" version="${project.version}">oce-datasource-opennms-common</feature>
+        <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
         <!-- Automatically install the standalone processor when using the direct datasource -->
-        <feature version="${project.version}">oce-processor-standalone</feature>
+        <feature version="${project.version}">alec-processor-standalone</feature>
 
-        <feature version="${project.version}">oce-datasource-api</feature>
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-direct/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-datasource-shell" description="OCE :: Datasource :: Shell" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-datasource-shell" description="OCE :: Datasource :: Shell" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.shell/${project.version}</bundle>
     </feature>
 
     <!-- Engines -->
 
-    <feature name="oce-engine" description="OCE :: Engine" version="${project.version}">
-        <feature version="${project.version}">oce-engine-dbscan</feature>
-        <feature version="${project.version}">oce-engine-temporal</feature>
-        <feature version="${project.version}">oce-engine-topology</feature>
+    <feature name="alec-engine" description="OCE :: Engine" version="${project.version}">
+        <feature version="${project.version}">alec-engine-dbscan</feature>
+        <feature version="${project.version}">alec-engine-temporal</feature>
+        <feature version="${project.version}">alec-engine-topology</feature>
     </feature>
 
-    <feature name="oce-engine-api" description="OCE :: Engine :: API" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-engine-api" description="OCE :: Engine :: API" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.api/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
-        <feature dependency="true" version="${project.version}">oce-engine-api</feature>
-        <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
+    <feature name="alec-engine-cluster" description="OCE :: Engine :: Cluster" version="${project.version}">
+        <feature dependency="true" version="${project.version}">alec-engine-api</feature>
+        <feature dependency="true" version="${project.version}">alec-features-graph-api</feature>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.cluster/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-dbscan" description="OCE :: Engine :: DB-Scan" version="${project.version}">
-        <feature version="${project.version}">oce-engine-cluster</feature>
+    <feature name="alec-engine-dbscan" description="OCE :: Engine :: DB-Scan" version="${project.version}">
+        <feature version="${project.version}">alec-engine-cluster</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.dbscan/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-deeplearning" description="OCE :: Engine :: Deep Learning" version="${project.version}">
-        <feature version="${project.version}">oce-engine-cluster</feature>
+    <feature name="alec-engine-deeplearning" description="OCE :: Engine :: Deep Learning" version="${project.version}">
+        <feature version="${project.version}">alec-engine-cluster</feature>
         <feature version="${tensorflow.version}">tensorflow</feature>
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
         <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
+    <feature name="alec-engine-temporal" description="OCE :: Engine :: Temporal" version="${project.version}">
+        <feature version="${project.version}">alec-engine-api</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.temporal/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
+    <feature name="alec-engine-topology" description="OCE :: Engine :: Topology" version="${project.version}">
+        <feature version="${project.version}">alec-engine-api</feature>
         <feature version="${drools.version}">kie</feature>
         <feature version="${drools.version}">drools-module</feature>
         <feature version="${commons.text.version}">commons-text</feature>
@@ -110,60 +110,60 @@
 
     <!-- Drivers -->
 
-    <feature name="oce-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
-        <feature version="${project.version}">oce-processor-api</feature>
+    <feature name="alec-driver-main" description="OCE :: Driver :: Main" version="${project.version}">
+        <feature version="${project.version}">alec-engine-api</feature>
+        <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.main/${project.version}</bundle>
     </feature>
 
     <!-- Graph -->
 
-    <feature name="oce-features-graph-api" description="OCE :: Features :: Graph :: API" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-features-graph-api" description="OCE :: Features :: Graph :: API" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.jung/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.api/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-graphml" description="OCE :: Features :: Graph :: GraphML" version="${project.version}">
+    <feature name="alec-features-graph-graphml" description="OCE :: Features :: Graph :: GraphML" version="${project.version}">
         <feature version="${moxy.version}" dependency="true">moxy</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.graphml/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-common" description="OCE :: Features :: Graph :: Service" version="${project.version}">
-        <feature dependency="true" version="${project.version}">oce-features-graph-api</feature>
-        <feature dependency="true" version="${project.version}">oce-features-graph-graphml</feature>
+    <feature name="alec-features-graph-common" description="OCE :: Features :: Graph :: Service" version="${project.version}">
+        <feature dependency="true" version="${project.version}">alec-features-graph-api</feature>
+        <feature dependency="true" version="${project.version}">alec-features-graph-graphml</feature>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.common/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
-        <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
+    <feature name="alec-features-graph-shell" description="OCE :: Features :: Graph :: Shell" version="${project.version}">
+        <feature dependency="true" version="${project.version}">alec-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.shell/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-graph-rest" description="OCE :: Features :: Graph :: REST" version="${project.version}">
+    <feature name="alec-features-graph-rest" description="OCE :: Features :: Graph :: REST" version="${project.version}">
         <feature version="${cxf.version}">cxf</feature>
         <feature version="${cxf.version}">cxf-jackson</feature>
-        <feature dependency="true" version="${project.version}">oce-features-graph-common</feature>
+        <feature dependency="true" version="${project.version}">alec-features-graph-common</feature>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.rest/${project.version}</bundle>
     </feature>
 
     <!-- Situation Processors -->
 
-    <feature name="oce-processor-api" description="OCE :: Processor :: API" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-processor-api" description="OCE :: Processor :: API" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec/processor-api/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-processor-standalone" description="OCE :: Processor :: Standalone" version="${project.version}">
-        <feature version="${project.version}">oce-processor-api</feature>
+    <feature name="alec-processor-standalone" description="OCE :: Processor :: Standalone" version="${project.version}">
+        <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec/processor-standalone/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-processor-redundant" description="OCE :: Processor :: Redundant" version="${project.version}">
-        <feature version="${project.version}">oce-processor-api</feature>
+    <feature name="alec-processor-redundant" description="OCE :: Processor :: Redundant" version="${project.version}">
+        <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec/processor-redundant/${project.version}</bundle>
 
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
@@ -172,28 +172,28 @@
 
     <!-- Other features -->
 
-    <feature name="oce-features-score" description="OCE :: Features :: Score" version="${project.version}">
-        <feature version="${project.version}">oce-datasource-api</feature>
+    <feature name="alec-features-score" description="OCE :: Features :: Score" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.score/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
-    <feature name="oce-features-shell" description="OCE :: Features :: Shell" version="${project.version}">
-        <feature version="${project.version}">oce-engine-api</feature>
-        <feature version="${project.version}">oce-features-score</feature>
-        <feature version="${project.version}">oce-datasource-jaxb</feature>
-        <feature version="${project.version}">oce-features-graph-common</feature>
+    <feature name="alec-features-shell" description="OCE :: Features :: Shell" version="${project.version}">
+        <feature version="${project.version}">alec-engine-api</feature>
+        <feature version="${project.version}">alec-features-score</feature>
+        <feature version="${project.version}">alec-datasource-jaxb</feature>
+        <feature version="${project.version}">alec-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.test/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.shell/${project.version}</bundle>
     </feature>
 
-    <feature name="oce-features-deeplearning" description="OCE :: Features :: Deep learning" version="${project.version}">
-        <feature version="${project.version}">oce-engine-deeplearning</feature>
-        <feature version="${project.version}">oce-features-score</feature>
-        <feature version="${project.version}">oce-datasource-jaxb</feature>
-        <feature version="${project.version}">oce-features-graph-common</feature>
+    <feature name="alec-features-deeplearning" description="OCE :: Features :: Deep learning" version="${project.version}">
+        <feature version="${project.version}">alec-engine-deeplearning</feature>
+        <feature version="${project.version}">alec-features-score</feature>
+        <feature version="${project.version}">alec-datasource-jaxb</feature>
+        <feature version="${project.version}">alec-features-graph-common</feature>
         <feature dependency="true">shell</feature>
         <bundle dependency="true">mvn:org.apache.commons/commons-csv/${commons.csv.version}</bundle>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.test/${project.version}</bundle>
@@ -202,7 +202,7 @@
 
     <!-- OpenNMS Integration -->
 
-    <feature name="opennms-oce-plugin" description="OpenNMS :: OCE :: Plugin" version="${project.version}">
+    <feature name="opennms-alec-plugin" description="OpenNMS :: OCE :: Plugin" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
@@ -216,25 +216,25 @@
 
     <!-- Grouped feature sets -->
 
-    <feature name="oce-opennms-standalone">
-        <feature>opennms-oce-plugin</feature>
-        <feature>oce-driver-main</feature>
-        <feature>oce-engine-dbscan</feature>
-        <feature>oce-datasource-opennms-direct</feature>
-        <feature>oce-processor-standalone</feature>
-        <feature>oce-features-graph-shell</feature>
+    <feature name="alec-opennms-standalone">
+        <feature>opennms-alec-plugin</feature>
+        <feature>alec-driver-main</feature>
+        <feature>alec-engine-dbscan</feature>
+        <feature>alec-datasource-opennms-direct</feature>
+        <feature>alec-processor-standalone</feature>
+        <feature>alec-features-graph-shell</feature>
     </feature>
 
-    <feature name="oce-opennms-distributed">
-        <feature>opennms-oce-plugin</feature>
+    <feature name="alec-opennms-distributed">
+        <feature>opennms-alec-plugin</feature>
     </feature>
 
-    <feature name="oce-sentinel-distributed">
-        <feature>oce-driver-main</feature>
-        <feature>oce-engine-dbscan</feature>
-        <feature>oce-datasource-opennms-kafka</feature>
-        <feature>oce-processor-redundant</feature>
-        <feature>oce-features-graph-shell</feature>
+    <feature name="alec-sentinel-distributed">
+        <feature>alec-driver-main</feature>
+        <feature>alec-engine-dbscan</feature>
+        <feature>alec-datasource-opennms-kafka</feature>
+        <feature>alec-processor-redundant</feature>
+        <feature>alec-features-graph-shell</feature>
     </feature>
 
     <!-- Generic dependencies -->

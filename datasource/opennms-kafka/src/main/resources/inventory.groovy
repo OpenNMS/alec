@@ -30,19 +30,22 @@ package org.opennms.oce.datasource.opennms
 
 import com.google.common.base.Strings
 import groovy.util.logging.Slf4j
-import org.opennms.oce.datasource.common.inventory.Edge
-import org.opennms.oce.datasource.common.inventory.ManagedObjectType
-import org.opennms.oce.datasource.common.inventory.Port
-import org.opennms.oce.datasource.common.inventory.Segment
-import org.opennms.oce.datasource.common.inventory.TypeToInventory
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObject
-import org.opennms.oce.datasource.opennms.proto.InventoryModelProtos.InventoryObjects
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.Node
-import org.opennms.oce.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge
+import org.opennms.alec.datasource.common.inventory.Edge
+import org.opennms.alec.datasource.common.inventory.ManagedObjectType
+import org.opennms.alec.datasource.common.inventory.Port
+import org.opennms.alec.datasource.common.inventory.Segment
+import org.opennms.alec.datasource.common.inventory.TypeToInventory
+import org.opennms.alec.datasource.opennms.EnrichedAlarm
+import org.opennms.alec.datasource.opennms.InventoryFromAlarm
+import org.opennms.alec.datasource.opennms.OpennmsMapper
+import org.opennms.alec.datasource.opennms.proto.InventoryModelProtos
+import org.opennms.alec.datasource.opennms.proto.InventoryModelProtos.InventoryObject
+import org.opennms.alec.datasource.opennms.proto.InventoryModelProtos.InventoryObjects
+import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos
+import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos.Node
+import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge
 
-import static org.opennms.oce.datasource.common.inventory.ManagedObjectType.*
+import static org.opennms.alec.datasource.common.inventory.ManagedObjectType.*
 
 @Slf4j
 class InventoryFactory {

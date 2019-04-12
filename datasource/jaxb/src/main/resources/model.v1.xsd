@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://xmlns.opennms.org/xsd/oce/model/v1.0.0"
+<schema targetNamespace="http://xmlns.opennms.org/xsd/alec/model/v1.0.0"
         xmlns="http://www.w3.org/2001/XMLSchema"
-        xmlns:this="http://xmlns.opennms.org/xsd/oce/model/v1.0.0"
+        xmlns:this="http://xmlns.opennms.org/xsd/alec/model/v1.0.0"
         elementFormDefault="qualified">
     <annotation>
         <documentation>XML schema for the OpenNMS Correlation Model</documentation>

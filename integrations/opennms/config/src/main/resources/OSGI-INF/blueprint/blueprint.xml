@@ -3,10 +3,10 @@
         http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <service interface="org.opennms.integration.api.v1.config.events.EventConfExtension">
-        <bean class="org.opennms.oce.integrations.opennms.config.CiscoEventConfExtension"/>
+        <bean class="org.opennms.alec.integrations.opennms.config.CiscoEventConfExtension"/>
     </service>
 
     <service interface="org.opennms.integration.api.v1.config.syslog.SyslogMatchExtension">
-        <bean class="org.opennms.oce.integrations.opennms.config.CiscoSyslogMatchExtension"/>
+        <bean class="org.opennms.alec.integrations.opennms.config.CiscoSyslogMatchExtension"/>
     </service>
 </blueprint>

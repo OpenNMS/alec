@@ -85,40 +85,40 @@
                                 <feature>framework</feature>
                             </framework>
                             <features>
-                                <feature>oce-datasource-api</feature>
-                                <feature>oce-datasource-jaxb</feature>
-                                <feature>oce-datasource-opennms-kafka</feature>
-                                <feature>oce-datasource-shell</feature>
-                                <feature>oce-engine</feature>
-                                <feature>oce-engine-cluster</feature>
-                                <feature>oce-engine-dbscan</feature>
-                                <feature>oce-engine-temporal</feature>
-                                <feature>oce-engine-topology</feature>
+                                <feature>alec-datasource-api</feature>
+                                <feature>alec-datasource-jaxb</feature>
+                                <feature>alec-datasource-opennms-kafka</feature>
+                                <feature>alec-datasource-shell</feature>
+                                <feature>alec-engine</feature>
+                                <feature>alec-engine-cluster</feature>
+                                <feature>alec-engine-dbscan</feature>
+                                <feature>alec-engine-temporal</feature>
+                                <feature>alec-engine-topology</feature>
                                 <!-- Depends on a reference to a datasource impl.
-                                <feature>oce-driver-main</feature>
+                                <feature>alec-driver-main</feature>
                                 -->
-                                <feature>oce-features-score</feature>
-                                <feature>oce-features-shell</feature>
-                                <feature>oce-features-graph-api</feature>
-                                <feature>oce-features-graph-graphml</feature>
-                                <feature>oce-features-graph-common</feature>
-                                <feature>oce-features-graph-shell</feature>
-                                <feature>oce-features-deeplearning</feature>
+                                <feature>alec-features-score</feature>
+                                <feature>alec-features-shell</feature>
+                                <feature>alec-features-graph-api</feature>
+                                <feature>alec-features-graph-graphml</feature>
+                                <feature>alec-features-graph-common</feature>
+                                <feature>alec-features-graph-shell</feature>
+                                <feature>alec-features-deeplearning</feature>
 
                                 <!-- Depends on blueprint common
-                                <feature>oce-features-graph-rest</feature>
+                                <feature>alec-features-graph-rest</feature>
                                 -->
-                                <feature>oce-processor-api</feature>
+                                <feature>alec-processor-api</feature>
 
                                 <!-- Depends on a reference to a SituationDatasource impl.
-                                <feature>oce-processor-standalone</feature>
+                                <feature>alec-processor-standalone</feature>
                                 -->
                                 <!-- Depends on a reference to a DomainManagerFactory impl.
-                                <feature>oce-processor-redundant</feature>
+                                <feature>alec-processor-redundant</feature>
                                 -->
 
                                 <!-- OpenNMS plugin
-                                <feature>opennms-oce-plugin</feature>
+                                <feature>opennms-alec-plugin</feature>
                                 -->
 
                                 <!-- 3rd party -->

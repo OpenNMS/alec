@@ -50,24 +50,24 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.datasource.api.Alarm;
-import org.opennms.oce.datasource.api.InventoryObject;
-import org.opennms.oce.datasource.api.Situation;
-import org.opennms.oce.datasource.jaxb.JaxbUtils;
-import org.opennms.oce.driver.test.TestDriver;
-import org.opennms.oce.engine.api.Engine;
-import org.opennms.oce.engine.api.EngineFactory;
-import org.opennms.oce.engine.cluster.AbstractClusterEngine;
-import org.opennms.oce.engine.cluster.AlarmInSpaceTime;
-import org.opennms.oce.engine.cluster.CEEdge;
-import org.opennms.oce.engine.cluster.CEVertex;
-import org.opennms.oce.engine.deeplearning.InputVector;
-import org.opennms.oce.engine.deeplearning.OutputVector;
-import org.opennms.oce.engine.deeplearning.Vectorizer;
+import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.InventoryObject;
+import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.jaxb.JaxbUtils;
+import org.opennms.alec.driver.test.TestDriver;
+import org.opennms.alec.engine.api.Engine;
+import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
+import org.opennms.alec.engine.cluster.CEEdge;
+import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.engine.deeplearning.InputVector;
+import org.opennms.alec.engine.deeplearning.OutputVector;
+import org.opennms.alec.engine.deeplearning.Vectorizer;
 
 import edu.uci.ics.jung.graph.Graph;
 
-@Command(scope = "oce", name = "tensorflow-vectorize", description = "Convert a fault data set to vectors for the purpose of training a TensorFlow model.")
+@Command(scope = "opennms-alec", name = "tensorflow-vectorize", description = "Convert a fault data set to vectors for the purpose of training a TensorFlow model.")
 @Service
 public class Vectorize implements Action {
 

@@ -29,7 +29,7 @@
                     <sources>
                         <source>src/main/resources/model.v1.xsd</source>
                     </sources>
-                    <packageName>org.opennms.oce.datasource.v1.schema</packageName>
+                    <packageName>org.opennms.alec.datasource.v1.schema</packageName>
                     <arguments>
                         <argument>-Xequals</argument>
                         <argument>-XhashCode</argument>

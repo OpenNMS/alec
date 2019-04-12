@@ -26,18 +26,23 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms
+package org.opennms.alec.datasource.opennms
 
 import com.google.common.base.Strings
 import groovy.util.logging.Slf4j
+import org.opennms.alec.datasource.common.inventory.Edge
+import org.opennms.alec.datasource.common.inventory.ManagedObjectType
+import org.opennms.alec.datasource.common.inventory.Port
+import org.opennms.alec.datasource.common.inventory.Segment
+import org.opennms.alec.datasource.common.inventory.TypeToInventory
 import org.opennms.integration.api.v1.model.*
-import org.opennms.oce.datasource.api.InventoryObject
-import org.opennms.oce.datasource.api.InventoryObjectPeerEndpoint
-import org.opennms.oce.datasource.api.InventoryObjectPeerRef
-import org.opennms.oce.datasource.common.ImmutableAlarm
-import org.opennms.oce.datasource.common.ImmutableInventoryObject
-import org.opennms.oce.datasource.common.ImmutableInventoryObjectPeerRef
-import org.opennms.oce.datasource.common.inventory.*
+import org.opennms.alec.datasource.api.InventoryObject
+import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint
+import org.opennms.alec.datasource.api.InventoryObjectPeerRef
+import org.opennms.alec.datasource.common.ImmutableAlarm
+import org.opennms.alec.datasource.common.ImmutableInventoryObject
+import org.opennms.alec.datasource.common.ImmutableInventoryObjectPeerRef
+import org.opennms.alec.datasource.common.inventory.*
 
 import java.util.concurrent.atomic.AtomicLong
 

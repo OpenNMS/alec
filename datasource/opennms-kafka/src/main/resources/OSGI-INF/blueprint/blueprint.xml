@@ -2,13 +2,13 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0" >
 
     <!-- Configuration properties -->
-    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.datasource.opennms.kafka" update-strategy="reload">
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.alec.datasource.opennms.kafka" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="alarmTopic" value="alarms"/>
             <cm:property name="alarmFeedbackTopic" value="alarmFeedback"/>
             <cm:property name="nodeTopic" value="nodes"/>
             <cm:property name="eventSinkTopic" value="OpenNMS.Sink.Events"/>
-            <cm:property name="inventoryTopic" value="oce-inventory"/>
+            <cm:property name="inventoryTopic" value="alec-inventory"/>
             <cm:property name="edgesTopic" value="edges"/>
             <cm:property name="inventoryTtlMs" value="86400000"/> <!-- 24 hours -->
             <cm:property name="inventoryGcIntervalMs" value="300000"/> <!-- 5 minutes -->
@@ -17,27 +17,27 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="scriptService" class="org.opennms.oce.datasource.opennms.OpennmsKafkaScriptedInventory">
+    <bean id="scriptService" class="org.opennms.alec.datasource.opennms.OpennmsKafkaScriptedInventory">
         <argument value="${scriptFile}"/>
         <argument value="${scriptCacheMillis}"/>
         <argument ref="blueprintBundleContext"/>
     </bean>
-    <service ref="scriptService" interface="org.opennms.oce.datasource.opennms.ScriptedInventoryService"/>
+    <service ref="scriptService" interface="org.opennms.alec.datasource.opennms.ScriptedInventoryService"/>
 
-    <bean id="nodeToInventory" class="org.opennms.oce.datasource.opennms.NodeToInventory">
+    <bean id="nodeToInventory" class="org.opennms.alec.datasource.opennms.NodeToInventory">
         <argument ref="scriptService"/>
     </bean>
 
-    <bean id="alarmToInventory" class="org.opennms.oce.datasource.opennms.AlarmToInventory">
+    <bean id="alarmToInventory" class="org.opennms.alec.datasource.opennms.AlarmToInventory">
         <argument ref="scriptService"/>
     </bean>
 
-    <bean id="edgeToInventory" class="org.opennms.oce.datasource.opennms.EdgeToInventory">
+    <bean id="edgeToInventory" class="org.opennms.alec.datasource.opennms.EdgeToInventory">
         <argument ref="scriptService"/>
     </bean>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
-    <bean id="opennmsDatasource" class="org.opennms.oce.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
+    <bean id="opennmsDatasource" class="org.opennms.alec.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
         <argument ref="nodeToInventory"/>
         <argument ref="alarmToInventory"/>
@@ -50,9 +50,9 @@
         <property name="inventoryTtlMs" value="${inventoryTtlMs}"/>
         <property name="inventoryGcIntervalMs" value="${inventoryGcIntervalMs}"/>
     </bean>
-    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
-    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource"/>
-    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
-    <service ref="opennmsDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.AlarmFeedbackDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource"/>
+    <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource"/>
 
 </blueprint>

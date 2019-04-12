@@ -6,7 +6,7 @@
     <reference id="snmpInterfaceDao" interface="org.opennms.integration.api.v1.dao.SnmpInterfaceDao" />
 
     <service interface="org.opennms.integration.api.v1.alarms.AlarmPersisterExtension">
-        <bean class="org.opennms.oce.opennms.extension.ManagedObjectAlarmExt">
+        <bean class="org.opennms.alec.opennms.extension.ManagedObjectAlarmExt">
             <argument ref="nodeDao"/>
             <argument ref="snmpInterfaceDao"/>
         </bean>

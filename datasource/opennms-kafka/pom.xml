@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.opennms.alec</groupId>
         <artifactId>datasource</artifactId>
@@ -21,12 +22,12 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
-                            org.opennms.oce.datasource.common.inventory.script,
-                            org.opennms.oce.datasource.opennms,
-                            org.opennms.oce.datasource.opennms.events,
-                            org.opennms.oce.datasource.opennms.processors,
-                            org.opennms.oce.datasource.opennms.proto,
-                            org.opennms.oce.datasource.opennms.serialization,
+                            org.opennms.alec.datasource.common.inventory.script,
+                            org.opennms.alec.datasource.opennms,
+                            org.opennms.alec.datasource.opennms.events,
+                            org.opennms.alec.datasource.opennms.processors,
+                            org.opennms.alec.datasource.opennms.proto,
+                            org.opennms.alec.datasource.opennms.serialization,
                             *
                         </Import-Package>
                     </instructions>

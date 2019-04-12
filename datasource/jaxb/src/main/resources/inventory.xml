@@ -1,5 +1,5 @@
 <!-- Lists of instances of the types defined in the meta-events -->
-<inventory xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+<inventory xmlns="http://xmlns.opennms.org/xsd/alec/model/v1.0.0">
     <!-- The events -->
     <model-object-entry type="Model" id="model" friendly-name="Test Model" parent-type="Model" parent-id="model"/>
 

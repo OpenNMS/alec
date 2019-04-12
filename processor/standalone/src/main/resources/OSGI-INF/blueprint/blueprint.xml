@@ -1,8 +1,8 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
     <reference id="situationDataSource"
-               interface="org.opennms.oce.datasource.api.SituationDatasource"/>
-    <service interface="org.opennms.oce.processor.api.SituationProcessorFactory">
-        <bean class="org.opennms.oce.processor.standalone.StandaloneSituationProcessorFactory">
+               interface="org.opennms.alec.datasource.api.SituationDatasource"/>
+    <service interface="org.opennms.alec.processor.api.SituationProcessorFactory">
+        <bean class="org.opennms.alec.processor.standalone.StandaloneSituationProcessorFactory">
             <argument ref="situationDataSource"/>
         </bean>
     </service>

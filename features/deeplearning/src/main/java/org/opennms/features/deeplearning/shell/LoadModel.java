@@ -32,9 +32,9 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opennms.oce.engine.deeplearning.TFModel;
+import org.opennms.alec.engine.deeplearning.TFModel;
 
-@Command(scope = "oce", name = "tensorflow-load-model", description = "Validate that the TensorFlow model at the given path can be loaded.")
+@Command(scope = "opennms-alec", name = "tensorflow-load-model", description = "Validate that the TensorFlow model at the given path can be loaded.")
 @Service
 public class LoadModel implements Action {
 

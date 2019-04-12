@@ -11,7 +11,7 @@
     </cm:property-placeholder>
 
     <!-- Create the resource loader -->
-    <bean id="resourceLoader" class=" org.opennms.oce.datasource.jaxb.ResourceLoader">
+    <bean id="resourceLoader" class=" org.opennms.alec.datasource.jaxb.ResourceLoader">
         <argument ref="blueprintBundleContext"/>
     </bean>
 
@@ -21,19 +21,19 @@
     <bean id="inventory" factory-ref="resourceLoader" factory-method="getInventory"/>
 
     <!-- Create and expose the static data sources -->
-    <bean id="alarmDatasource" class="org.opennms.oce.datasource.common.StaticAlarmDatasource">
+    <bean id="alarmDatasource" class="org.opennms.alec.datasource.common.StaticAlarmDatasource">
         <argument ref="alarms"/>
     </bean>
-    <service ref="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource"/>
+    <service ref="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource"/>
 
-    <bean id="situationDatasource" class="org.opennms.oce.datasource.common.StaticSituationDatasource">
+    <bean id="situationDatasource" class="org.opennms.alec.datasource.common.StaticSituationDatasource">
         <argument ref="situations"/>
     </bean>
-    <service ref="situationDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource"/>
+    <service ref="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource"/>
 
-    <bean id="inventoryDatasource" class="org.opennms.oce.datasource.common.StaticInventoryDatasource">
+    <bean id="inventoryDatasource" class="org.opennms.alec.datasource.common.StaticInventoryDatasource">
         <argument ref="inventory"/>
     </bean>
-    <service ref="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource"/>
+    <service ref="inventoryDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource"/>
 
 </blueprint>

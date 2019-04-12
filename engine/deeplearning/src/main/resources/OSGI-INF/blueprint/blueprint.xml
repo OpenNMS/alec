@@ -2,7 +2,7 @@
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
 
     <!-- Configuration properties -->
-    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.oce.engine.deeplearning" update-strategy="reload">
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.alec.engine.deeplearning" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="modelPath" value=""/>
             <cm:property name="epsilon" value="500"/>
@@ -12,7 +12,7 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="deepLearningEngineConf" class="org.opennms.oce.engine.deeplearning.DeepLearningEngineConf">
+    <bean id="deepLearningEngineConf" class="org.opennms.alec.engine.deeplearning.DeepLearningEngineConf">
         <property name="modelPath" value="${modelPath}"/>
         <property name="epsilon" value="${epsilon}"/>
         <property name="numGraphProcessingThreads" value="${numGraphProcessingThreads}"/>
@@ -20,8 +20,8 @@
     </bean>
 
     <!-- Create and expose the engine factory -->
-    <service interface="org.opennms.oce.engine.api.EngineFactory" ranking="20">
-        <bean class="org.opennms.oce.engine.deeplearning.DeepLearningEngineFactory">
+    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="20">
+        <bean class="org.opennms.alec.engine.deeplearning.DeepLearningEngineFactory">
             <argument index="0" ref="blueprintBundleContext"/>
             <argument index="1" ref="deepLearningEngineConf"/>
         </bean>

@@ -1,4 +1,4 @@
-<meta-model xmlns="http://xmlns.opennms.org/xsd/oce/model/v1.0.0">
+<meta-model xmlns="http://xmlns.opennms.org/xsd/alec/model/v1.0.0">
     <model-object-def type="Model">
         <parent-def-ref type="Model"/>
     </model-object-def>

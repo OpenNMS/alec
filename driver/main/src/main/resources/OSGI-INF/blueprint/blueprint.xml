@@ -1,18 +1,18 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <!-- Datasource -->
-    <reference id="alarmDatasource" interface="org.opennms.oce.datasource.api.AlarmDatasource" />
-    <reference id="alarmFeedbackDatasource" interface="org.opennms.oce.datasource.api.AlarmFeedbackDatasource" />
-    <reference id="inventoryDatasource" interface="org.opennms.oce.datasource.api.InventoryDatasource" />
-    <reference id="situationDatasource" interface="org.opennms.oce.datasource.api.SituationDatasource" />
+    <reference id="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource" />
+    <reference id="alarmFeedbackDatasource" interface="org.opennms.alec.datasource.api.AlarmFeedbackDatasource" />
+    <reference id="inventoryDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource" />
+    <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
 
     <!-- Engine -->
-    <reference id="engineFactory" interface="org.opennms.oce.engine.api.EngineFactory" />
+    <reference id="engineFactory" interface="org.opennms.alec.engine.api.EngineFactory" />
 
     <!-- Situation Processor -->
-    <reference id="situationProcessorFactory" interface="org.opennms.oce.processor.api.SituationProcessorFactory"/>
+    <reference id="situationProcessorFactory" interface="org.opennms.alec.processor.api.SituationProcessorFactory"/>
 
-    <bean id="driver" class="org.opennms.oce.driver.main.Driver" init-method="init" destroy-method="destroy">
+    <bean id="driver" class="org.opennms.alec.driver.main.Driver" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
         <argument ref="alarmFeedbackDatasource"/>

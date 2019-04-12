@@ -12,7 +12,9 @@
 
     <modules>
         <module>kar</module>
+        <module>opennms-deb</module>
         <module>opennms-rpm</module>
+        <module>sentinel-deb</module>
         <module>sentinel-rpm</module>
     </modules>
 </project>

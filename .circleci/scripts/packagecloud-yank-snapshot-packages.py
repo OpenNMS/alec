@@ -33,19 +33,20 @@ with urllib.request.urlopen(req) as url:
 
 # Group the packages we're interested in by name
 # OPTIMIZATION: Can we limit the response from the API to only include those we're interested in in the first place?
-packages_by_name = {}
+packages_by_key = {}
 for package in all_packages:
+    # Filter
     if package['name'] in FILTERED_PACKAGE_NAMES:
+        # Group by
+        key = (package['name'], package['type'])
         # Convert the created_at field from a ISO8601 string  '2019-03-28T21:10:11.000Z' to a date
         package['created_at'] = datetime.strptime(package['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
-        packages_by_name.setdefault(package['name'], []).append(package)
+        # Append
+        packages_by_key.setdefault(key, []).append(package)
 
 # Figure out which packages we should delete
 packages_to_delete = []
-for filtered_package_name in FILTERED_PACKAGE_NAMES:
-    packages = packages_by_name.get(filtered_package_name, [])
-    if len(packages) < 1:
-        continue
+for key, packages in packages_by_key.items():
     # Sort the packages by creation time in reverse order - most recent first
     packages = sorted(packages, key=lambda pkg: pkg['created_at'], reverse=True)
     # Grab all of the packages, except the first

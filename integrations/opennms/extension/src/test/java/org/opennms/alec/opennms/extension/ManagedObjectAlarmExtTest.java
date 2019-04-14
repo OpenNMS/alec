@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
+import org.opennms.alec.opennms.model.ManagedObjectType;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
 import org.opennms.integration.api.v1.model.Alarm;
@@ -47,8 +48,7 @@ import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
-import org.opennms.integration.api.v1.model.beans.EventParameterBean;
-import org.opennms.alec.opennms.model.ManagedObjectType;
+import org.opennms.integration.api.v1.model.immutables.ImmutableEventParameter;
 
 public class ManagedObjectAlarmExtTest {
     private final NodeDao nodeDao = mock(NodeDao.class);
@@ -97,7 +97,7 @@ public class ManagedObjectAlarmExtTest {
 
         InMemoryEvent inMemoryEvent = mock(InMemoryEvent.class);
         when(inMemoryEvent.getSource()).thenReturn("syslogd");
-        EventParameter eventParameter = new EventParameterBean(ManagedObjectAlarmExt.IFDESCR_PARM_NAME, "ge0/99");
+        EventParameter eventParameter = ImmutableEventParameter.newInstance(ManagedObjectAlarmExt.IFDESCR_PARM_NAME, "ge0/99");
         when(inMemoryEvent.getParametersByName(ManagedObjectAlarmExt.IFDESCR_PARM_NAME)).thenReturn(Collections.singletonList(eventParameter));
 
         DatabaseEvent databaseEvent = mock(DatabaseEvent.class);
@@ -153,7 +153,7 @@ public class ManagedObjectAlarmExtTest {
 
         when(inMemoryEvent.getSource()).thenReturn(source);
         String ifIndex = "1";
-        EventParameter eventParameter = new EventParameterBean(parameter, ifIndex);
+        EventParameter eventParameter = ImmutableEventParameter.newInstance(parameter, ifIndex);
         when(inMemoryEvent.getParametersByName(parameter)).thenReturn(Collections.singletonList(eventParameter));
 
         Alarm updatedalarm = managedObjectAlarmExt.afterAlarmCreated(alarm, inMemoryEvent, databaseEvent);

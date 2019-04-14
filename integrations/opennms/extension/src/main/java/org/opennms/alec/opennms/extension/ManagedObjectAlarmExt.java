@@ -33,6 +33,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import org.opennms.alec.opennms.model.BgpPeerInstance;
+import org.opennms.alec.opennms.model.ManagedObjectType;
+import org.opennms.alec.opennms.model.SnmpInterfaceLinkInstance;
+import org.opennms.alec.opennms.model.VpnTunnelInstance;
 import org.opennms.integration.api.v1.alarms.AlarmPersisterExtension;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
@@ -42,11 +46,7 @@ import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.SnmpInterface;
-import org.opennms.integration.api.v1.model.beans.AlarmBean;
-import org.opennms.alec.opennms.model.BgpPeerInstance;
-import org.opennms.alec.opennms.model.ManagedObjectType;
-import org.opennms.alec.opennms.model.SnmpInterfaceLinkInstance;
-import org.opennms.alec.opennms.model.VpnTunnelInstance;
+import org.opennms.integration.api.v1.model.immutables.ImmutableAlarm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
@@ -145,10 +145,10 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
             return null;
         }
 
-        final AlarmBean updatedAlarm = new AlarmBean(alarm);
-        updatedAlarm.setManagedObjectInstance(managedObject.getInstance());
-        updatedAlarm.setManagedObjectType(managedObject.getType().getName());
-        return updatedAlarm;
+        return ImmutableAlarm.newBuilderFrom(alarm)
+                .setManagedObjectInstance(managedObject.getInstance())
+                .setManagedObjectType(managedObject.getType().getName())
+                .build();
     }
 
     @Override

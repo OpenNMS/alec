@@ -35,10 +35,11 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.integration.api.v1.model.beans.AlarmBean;
-import org.opennms.integration.api.v1.model.beans.NodeBean;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.common.inventory.ManagedObjectType;
+import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.immutables.ImmutableAlarm;
+import org.opennms.integration.api.v1.model.immutables.ImmutableNode;
 
 public class ApiMapperTest {
 
@@ -55,18 +56,19 @@ public class ApiMapperTest {
      */
     @Test
     public void canScopeLinkDownAlarms() {
-        AlarmBean apiAlarm = new AlarmBean();
-        apiAlarm.setId(43);
-        apiAlarm.setReductionKey("boo:1");
-        apiAlarm.setLastEventTime(new Date(0));
-        apiAlarm.setManagedObjectType(ManagedObjectType.SnmpInterface.getName());
-        apiAlarm.setManagedObjectInstance("123");
-
-        NodeBean apiNode = new NodeBean();
-        apiNode.setForeignId("fid");
-        apiNode.setForeignSource("fs");
-        apiNode.setId(42);
-        apiAlarm.setNode(apiNode);
+        Node apiNode = ImmutableNode.newBuilder()
+                .setForeignId("fid")
+                .setForeignSource("fs")
+                .setId(42)
+                .build();
+        org.opennms.integration.api.v1.model.Alarm apiAlarm = ImmutableAlarm.newBuilder()
+                .setId(43)
+                .setReductionKey("boo:1")
+                .setLastEventTime(new Date(0))
+                .setManagedObjectType(ManagedObjectType.SnmpInterface.getName())
+                .setManagedObjectInstance("123")
+                .setNode(apiNode)
+                .build();
 
         Alarm alarm = mapper.toAlarm(apiAlarm);
         assertThat(alarm.getInventoryObjectType(), equalTo(ManagedObjectType.SnmpInterface.getName()));

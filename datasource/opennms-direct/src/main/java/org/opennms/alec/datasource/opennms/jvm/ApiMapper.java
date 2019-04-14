@@ -36,11 +36,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.opennms.integration.api.v1.model.EventParameter;
-import org.opennms.integration.api.v1.model.InMemoryEvent;
-import org.opennms.integration.api.v1.model.Node;
-import org.opennms.integration.api.v1.model.TopologyEdge;
-import org.opennms.integration.api.v1.model.beans.InMemoryEventBean;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmFeedback;
 import org.opennms.alec.datasource.api.FeedbackType;
@@ -51,6 +46,12 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.integration.api.v1.model.EventParameter;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
+import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.TopologyEdge;
+import org.opennms.integration.api.v1.model.immutables.ImmutableEventParameter;
+import org.opennms.integration.api.v1.model.immutables.ImmutableInMemoryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,30 +122,32 @@ public class ApiMapper {
     }
 
     public InMemoryEvent toEvent(Situation situation) {
-        final InMemoryEventBean event = new InMemoryEventBean(SITUATION_UEI, "oce");
+        final ImmutableInMemoryEvent.Builder eventBuilder = ImmutableInMemoryEvent.newBuilder();
+        eventBuilder.setUei(SITUATION_UEI).setSource("oce");
 
         // Use the max severity as the situation severity
         final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
                 .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
                 .max()
                 .orElseGet(Severity.INDETERMINATE::getValue));
-        event.setSeverity(toSeverity(maxSeverity));
+        eventBuilder.setSeverity(toSeverity(maxSeverity));
 
         // Relay the situation id
-        event.addParameter(SITUATION_ID_PARM_NAME, situation.getId());
+        eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
 
         // Use the log message and description from the first (earliest) alarm
         final Alarm earliestAlarm = situation.getAlarms().stream()
                 .min(Comparator.comparing(Alarm::getTime))
                 .orElse(null);
         if (earliestAlarm != null) {
-            event.addParameter("situationLogMsg", earliestAlarm.getSummary());
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
+                    earliestAlarm.getSummary()));
 
             String description = earliestAlarm.getDescription();
             if (situation.getDiagnosticText() != null) {
                 description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
             }
-            event.addParameter("situationDescr", description);
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
         }
 
         // Set the related reduction keys
@@ -154,10 +157,10 @@ public class ApiMapper {
                 // Append a unique index to each related-reductionKey parameter since the underlying event builder
                 // does not support many parameters with the same name. Alarmd will associate the related alarm
                 // provided that the parameter name *starts with* 'related-reductionKey'
-                .forEach(reductionKey -> event.addParameter("related-reductionKey" + alarmIndex.incrementAndGet(),
-                        reductionKey));
+                .forEach(reductionKey -> eventBuilder.addParameter(ImmutableEventParameter
+                        .newInstance("related-reductionKey" + alarmIndex.incrementAndGet(), reductionKey)));
 
-        return event;
+        return eventBuilder.build();
     }
 
     public org.opennms.integration.api.v1.model.Severity toSeverity(Severity severity) {

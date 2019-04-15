@@ -98,6 +98,7 @@
     <feature name="alec-driver-main" description="ALEC :: Driver :: Main" version="${project.version}">
         <feature version="${project.version}">alec-engine-api</feature>
         <feature version="${project.version}">alec-processor-api</feature>
+        <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metrics.core.version}</bundle>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.main/${project.version}</bundle>
     </feature>
 

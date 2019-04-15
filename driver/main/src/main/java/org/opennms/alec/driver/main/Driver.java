@@ -28,6 +28,8 @@
 
 package org.opennms.alec.driver.main;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +59,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class Driver {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
 
@@ -75,6 +79,12 @@ public class Driver {
     private Thread initThread;
     private Engine engine;
     private Timer timer;
+
+    // Health
+    private final MetricRegistry metrics = new MetricRegistry();
+    private final com.codahale.metrics.Timer ticks = metrics.timer(name(Driver.class, "ticks"));
+    private long tickResolutionMs = 0;
+    private DriverState state = DriverState.CREATED;
 
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
                   AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
@@ -115,6 +125,8 @@ public class Driver {
         // The get methods on the datasources may block, so we do this on a separate thread
         initThread = new Thread(() -> {
             try {
+                state = DriverState.WAITING_FOR_DATASOURCES;
+
                 // Wait for all the data sources to be ready to minimize the time between when we register handlers and
                 // the engine inits
                 LOG.info("Waiting for inventory datasource...");
@@ -132,6 +144,8 @@ public class Driver {
                 // while waiting for initialization otherwise
                 deletingSituationHandler = DeletingSituationHandler.newInstance(engine);
                 situationDatasource.registerHandler(deletingSituationHandler);
+
+                state = DriverState.INITIALIZING_ENGINE;
 
                 LOG.info("Retrieving inventory...");
                 final List<InventoryObject> inventory = inventoryDatasource.getInventoryAndRegisterHandler(engine);
@@ -162,24 +176,28 @@ public class Driver {
             }
             LOG.info("Initialization successful. Scheduling ticks every {}ms", engine.getTickResolutionMs());
 
+            tickResolutionMs = engine.getTickResolutionMs();
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    try {
+                    Thread.currentThread().setName("ALEC Driver Tick");
+                    try (com.codahale.metrics.Timer.Context context = ticks.time()) {
                         engine.tick(System.currentTimeMillis());
                     } catch (Exception e) {
                         LOG.error("Tick failed with exception.", e);
                     }
                 }
-            }, 0, engine.getTickResolutionMs());
+            }, 0, tickResolutionMs);
+            state = DriverState.RUNNING;
             future.complete(null);
         });
-        initThread.setName(String.format("OCE Driver Startup [%s]", engineFactory.getName()));
+        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getName()));
         initThread.start();
         return future;
     }
 
     public void destroy() {
+        state = DriverState.DESTROYING;
         situationDatasource.unregisterHandler(deletingSituationHandler);
         situationDatasource.unregisterHandler(confirmingSituationHandler);
         
@@ -207,5 +225,18 @@ public class Driver {
             engine.destroy();
             engine = null;
         }
+        state = DriverState.DESTROYED;
+    }
+
+    DriverState getState() {
+        return state;
+    }
+
+    long getTickResolutionMs() {
+        return tickResolutionMs;
+    }
+
+    com.codahale.metrics.Timer getTickTimer() {
+        return ticks;
     }
 }

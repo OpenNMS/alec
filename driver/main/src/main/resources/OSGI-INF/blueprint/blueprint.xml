@@ -22,4 +22,10 @@
         <argument ref="situationProcessorFactory"/>
     </bean>
 
+    <!-- Expose a health check that can be used when we're running in an OpenNMS container -->
+    <bean id="healthCheck" class="org.opennms.alec.driver.main.DriverHealthCheck">
+        <argument ref="driver"/>
+    </bean>
+    <service ref="healthCheck" interface="org.opennms.integration.api.v1.health.HealthCheck"/>
+
 </blueprint>

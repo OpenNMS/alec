@@ -103,6 +103,7 @@
                                 <feature>alec-features-graph-common</feature>
                                 <feature>alec-features-graph-shell</feature>
                                 <feature>alec-features-deeplearning</feature>
+                                <feature>alec-integrations-opennms-sink</feature>
 
                                 <!-- Depends on blueprint common
                                 <feature>alec-features-graph-rest</feature>
@@ -240,6 +241,13 @@
         <dependency>
             <groupId>org.opennms.alec.features.graph</groupId>
             <artifactId>org.opennms.alec.features.graph.shell</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+	    <groupId>org.opennms.alec.integrations.opennms.sink</groupId>
+	    <artifactId>impl</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

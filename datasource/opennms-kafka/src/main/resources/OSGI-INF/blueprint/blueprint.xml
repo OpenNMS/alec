@@ -37,11 +37,14 @@
     </bean>
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+    <reference id="sinkWrapper" interface="org.opennms.alec.integrations.opennms.sink.api.SinkWrapper" />
+
     <bean id="opennmsDatasource" class="org.opennms.alec.datasource.opennms.OpennmsDatasource" init-method="init" destroy-method="destroy">
         <argument ref="configAdmin"/>
         <argument ref="nodeToInventory"/>
         <argument ref="alarmToInventory"/>
         <argument ref="edgeToInventory"/>
+        <argument ref="sinkWrapper"/>
         <property name="alarmTopic" value="${alarmTopic}"/>
         <property name="alarmFeedbackTopic" value="${alarmFeedbackTopic}"/>
         <property name="nodeTopic" value="${nodeTopic}"/>

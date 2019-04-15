@@ -31,6 +31,7 @@ package org.opennms.alec.datasource.opennms;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -42,6 +43,7 @@ import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmHandler;
 import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos;
+import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 
 /**
  * Verifies the basic functions of an alarm datasource.
@@ -120,7 +122,8 @@ public class OpennmsAlarmDatasourceIT extends OpennmsDatasourceIT implements Ala
         NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
         AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);
-        datasource = new OpennmsDatasource(getDatasourceConfig(), nodeToInventory, alarmToInventory, edgeToInventory);
+        SinkWrapper sinkWrapper = mock(SinkWrapper.class);
+        datasource = new OpennmsDatasource(getDatasourceConfig(), nodeToInventory, alarmToInventory, edgeToInventory, sinkWrapper);
         datasource.init();
 
         // One alarm initially

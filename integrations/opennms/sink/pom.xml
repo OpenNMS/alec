@@ -1,19 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.opennms.alec</groupId>
-        <artifactId>integrations</artifactId>
+        <groupId>org.opennms.alec.integrations</groupId>
+        <artifactId>opennms</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.opennms.alec.integrations</groupId>
-    <artifactId>opennms</artifactId>
-    <name>ALEC :: Integrations :: OpenNMS</name>
+    <groupId>org.opennms.alec.integrations.opennms</groupId>
+    <artifactId>sink</artifactId>
+    <name>ALEC :: Integrations :: OpenNMS :: Sink</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>config</module>
-        <module>extension</module>
-        <module>model</module>
-        <module>sink</module>
+        <module>api</module>
+        <module>impl</module>
     </modules>
 </project>

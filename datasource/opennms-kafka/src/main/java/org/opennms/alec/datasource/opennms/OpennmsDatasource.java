@@ -29,6 +29,7 @@
 package org.opennms.alec.datasource.opennms;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -39,12 +40,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -90,6 +93,7 @@ import org.opennms.alec.datasource.opennms.serialization.TopologyEdgeDeserialize
 import org.opennms.alec.datasource.opennms.events.Event;
 import org.opennms.alec.datasource.opennms.events.JaxbUtils;
 import org.opennms.alec.datasource.opennms.events.Log;
+import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +145,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private long inventoryGcIntervalMs = DEFAULT_INVENTORY_GC_INTERVAL_MS;
     private long inventoryTtlMs = DEFAULT_INVENTORY_TTL_MS;
 
-    private KafkaProducer<String, String> producer;
+    private KafkaProducer<String, byte[]> producer;
 
     private final NodeToInventory nodeToInventory;
 
@@ -149,12 +153,15 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     private final EdgeToInventory edgeToInventory;
 
+    private final SinkWrapper sinkWrapper;
+
     public OpennmsDatasource(ConfigurationAdmin configAdmin, NodeToInventory nodeToInventory, AlarmToInventory alarmToInventory,
-            EdgeToInventory edgeToInventory) {
+            EdgeToInventory edgeToInventory, SinkWrapper sinkWrapper) {
         this.configAdmin = Objects.requireNonNull(configAdmin);
         this.nodeToInventory = Objects.requireNonNull(nodeToInventory);
         this.alarmToInventory = Objects.requireNonNull(alarmToInventory);
         this.edgeToInventory = Objects.requireNonNull(edgeToInventory);
+        this.sinkWrapper = Objects.requireNonNull(sinkWrapper);
     }
 
     public void init() throws IOException {
@@ -202,7 +209,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
         // Overrides
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
         return producerProperties;
     }
 
@@ -544,7 +551,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         final Event e = SituationToEvent.toEvent(situation);
         final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
         LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
-        producer.send(new ProducerRecord<>(getEventSinkTopic(), situationXml), (metadata, ex) -> {
+
+        final String messageId = UUID.randomUUID().toString();
+        final byte[] payload = sinkWrapper.wrapMessageInProto(messageId, situationXml.getBytes(StandardCharsets.UTF_8));
+        producer.send(new ProducerRecord<>(getEventSinkTopic(), payload), (metadata, ex) -> {
             if (ex != null) {
                 LOG.warn("An error occurred while sending event for situation with id '{}'.", situation.getId(), ex);
             } else {

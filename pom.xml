@@ -69,6 +69,7 @@
         <okio.bundle.version>1.14.0_1</okio.bundle.version>
         <okhttp.bundle.version>3.10.0_2</okhttp.bundle.version>
         <opennms.api.version>0.1.0</opennms.api.version>
+        <sink.protobuf.version>2.6.1</sink.protobuf.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <protobuf.version>3.5.1</protobuf.version>
@@ -200,6 +201,11 @@
                 <artifactId>alec-test-api</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.alec.integrations.opennms.sink</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

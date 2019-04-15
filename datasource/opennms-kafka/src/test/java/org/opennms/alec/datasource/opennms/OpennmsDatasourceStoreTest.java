@@ -59,6 +59,7 @@ import org.opennms.alec.datasource.opennms.proto.InventoryModelProtos;
 import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos;
 import org.opennms.alec.datasource.opennms.serialization.AlarmSerializer;
 import org.opennms.alec.datasource.opennms.serialization.NodeSerializer;
+import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 import com.google.common.collect.Iterators;
@@ -84,7 +85,8 @@ public class OpennmsDatasourceStoreTest {
         NodeToInventory nodeToInventory = new NodeToInventory(inventoryService);
         AlarmToInventory alarmToInventory = new AlarmToInventory(inventoryService);
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);
-        OpennmsDatasource datasource = new OpennmsDatasource(configAdmin, nodeToInventory, alarmToInventory, edgeToInventory);
+        SinkWrapper sinkWrapper = mock(SinkWrapper.class);
+        OpennmsDatasource datasource = new OpennmsDatasource(configAdmin, nodeToInventory, alarmToInventory, edgeToInventory, sinkWrapper);
         datasource.setInventoryTtlMs(step-1);
         datasource.setInventoryGcIntervalMs(step);
 

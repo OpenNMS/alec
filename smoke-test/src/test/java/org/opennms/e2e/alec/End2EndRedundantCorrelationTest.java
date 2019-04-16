@@ -44,14 +44,14 @@ import org.opennms.e2e.util.Karaf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore("Ignored due to dependency issue on sentinel container related to integration API")
 public class End2EndRedundantCorrelationTest extends AbstractCorrelationTest {
     private static final Logger LOG = LoggerFactory.getLogger(End2EndRedundantCorrelationTest.class);
     private static final int NUM_REDUNDANT_OCE = 2;
-    private final List<ALECSentinelContainer> redundantOCEs = new ArrayList<>();
+    private List<ALECSentinelContainer> redundantOCEs;
 
     @Override
     RuleChain addTestSpecificContainers() {
+        redundantOCEs = new ArrayList<>();
         RuleChain ruleChain = RuleChain.emptyRuleChain();
         // Define NUM_REDUNDANT_OCE redundant OCEs
         for (int i = 0; i < NUM_REDUNDANT_OCE; i++) {
@@ -66,7 +66,7 @@ public class End2EndRedundantCorrelationTest extends AbstractCorrelationTest {
             if (redundantOCEs.size() == 1) {
                 ruleChain = RuleChain.outerRule(alecSentinelContainer);
             } else {
-                ruleChain.around(alecSentinelContainer);
+                ruleChain = ruleChain.around(alecSentinelContainer);
             }
         }
         return ruleChain;

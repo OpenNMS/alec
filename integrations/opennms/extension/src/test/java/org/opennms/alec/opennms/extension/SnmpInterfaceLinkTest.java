@@ -34,14 +34,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.opennms.integration.api.v1.dao.NodeDao;
-import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
-import org.opennms.integration.api.v1.model.beans.AlarmBean;
-import org.opennms.integration.api.v1.model.beans.InMemoryEventBean;
-import org.opennms.integration.api.v1.model.beans.NodeBean;
-import org.opennms.integration.api.v1.model.beans.SnmpInterfaceBean;
 import org.opennms.alec.opennms.model.ManagedObjectType;
 import org.opennms.alec.opennms.model.SnmpInterfaceLinkInstance;
+import org.opennms.integration.api.v1.dao.NodeDao;
+import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
+import org.opennms.integration.api.v1.model.Alarm;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
+import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.SnmpInterface;
+import org.opennms.integration.api.v1.model.immutables.ImmutableAlarm;
+import org.opennms.integration.api.v1.model.immutables.ImmutableEventParameter;
+import org.opennms.integration.api.v1.model.immutables.ImmutableInMemoryEvent;
+import org.opennms.integration.api.v1.model.immutables.ImmutableNode;
+import org.opennms.integration.api.v1.model.immutables.ImmutableSnmpInterface;
 
 import com.google.gson.Gson;
 
@@ -52,17 +57,13 @@ public class SnmpInterfaceLinkTest {
     @Test
     public void canBuildSnmpInterfaceLinkInstanceFromEventParameters() {
         // Mock the related objects and the DAOs
-        NodeBean nodeA = new NodeBean();
-        nodeA.setId(1);
+        Node nodeA = ImmutableNode.newBuilder().setId(1).build();
 
-        SnmpInterfaceBean snmpInterfaceA = new SnmpInterfaceBean();
-        snmpInterfaceA.setIfIndex(1);
+        SnmpInterface snmpInterfaceA = ImmutableSnmpInterface.newBuilder().setIfIndex(1).build();
 
-        NodeBean nodeZ = new NodeBean();
-        nodeZ.setId(2);
+        Node nodeZ = ImmutableNode.newBuilder().setId(2).build();
 
-        SnmpInterfaceBean snmpInterfaceZ = new SnmpInterfaceBean();
-        snmpInterfaceZ.setIfIndex(2);
+        SnmpInterface snmpInterfaceZ = ImmutableSnmpInterface.newBuilder().setIfIndex(2).build();
 
         NodeDao nodeDao = mock(NodeDao.class);
         when(nodeDao.getNodeByLabel("switch.fqdn.com")).thenReturn(nodeZ);
@@ -74,13 +75,19 @@ public class SnmpInterfaceLinkTest {
         ManagedObjectAlarmExt managedObjectAlarmdExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao);
 
         // Tag the alarm
-        AlarmBean alarm = new AlarmBean();
-        alarm.setNode(nodeA);
+        Alarm alarm = ImmutableAlarm.newBuilder().setNode(nodeA).build();
 
-        InMemoryEventBean event = new InMemoryEventBean("uei", "test");
-        event.addParameter(ManagedObjectAlarmExt.A_IFDESCR_PARM_NAME, "Ethernet1/1");
-        event.addParameter(ManagedObjectAlarmExt.Z_HOSTNAME_PARM_NAME, "switch.fqdn.com");
-        event.addParameter(ManagedObjectAlarmExt.Z_IFDESCR_PARM_NAME, "Ethernet2/1");
+        InMemoryEvent event = ImmutableInMemoryEvent.newBuilder()
+                .setUei("uei")
+                .setSource("test")
+                .addParameter(ImmutableEventParameter.newInstance(ManagedObjectAlarmExt.A_IFDESCR_PARM_NAME, 
+                        "Ethernet1/1"))
+                .addParameter(ImmutableEventParameter.newInstance(ManagedObjectAlarmExt.Z_HOSTNAME_PARM_NAME, "switch" +
+                        ".fqdn.com"))
+                .addParameter(ImmutableEventParameter.newInstance(ManagedObjectAlarmExt.Z_IFDESCR_PARM_NAME, 
+                        "Ethernet2/1"))
+                .build();
+
         ManagedObjectAlarmExt.ManagedObject mo = managedObjectAlarmdExt.getManagedObjectFor(ManagedObjectType.SnmpInterfaceLink, alarm, event);
 
         // Verify

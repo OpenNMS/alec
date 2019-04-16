@@ -136,7 +136,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            mvn test integration-test
+            mvn -P '!build.rpms.usr,!build.rpms.usr.clocal,!build.debs' test integration-test
 
       - run:
           name: Save test results

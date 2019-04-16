@@ -14,6 +14,7 @@
             <cm:property name="inventoryGcIntervalMs" value="300000"/> <!-- 5 minutes -->
             <cm:property name="scriptFile" value="" /> <!--  use empty string to use default script included in bundle" -->
             <cm:property name="scriptCacheMillis" value="30000"/>  <!-- 30 seconds -->
+            <cm:property name="wrapSinkMessagesInProto" value="true"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -52,6 +53,7 @@
         <property name="inventoryTopic" value="${inventoryTopic}"/>
         <property name="inventoryTtlMs" value="${inventoryTtlMs}"/>
         <property name="inventoryGcIntervalMs" value="${inventoryGcIntervalMs}"/>
+        <property name="wrapSinkMessagesInProto" value="${wrapSinkMessagesInProto}"/>
     </bean>
     <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource"/>
     <service ref="opennmsDatasource" interface="org.opennms.alec.datasource.api.AlarmFeedbackDatasource"/>

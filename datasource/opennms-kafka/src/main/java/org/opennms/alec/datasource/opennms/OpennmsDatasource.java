@@ -145,6 +145,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private long inventoryGcIntervalMs = DEFAULT_INVENTORY_GC_INTERVAL_MS;
     private long inventoryTtlMs = DEFAULT_INVENTORY_TTL_MS;
 
+    private boolean wrapSinkMessagesInProto = true;
+
     private KafkaProducer<String, byte[]> producer;
 
     private final NodeToInventory nodeToInventory;
@@ -552,8 +554,12 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
         LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
 
-        final String messageId = UUID.randomUUID().toString();
-        final byte[] payload = sinkWrapper.wrapMessageInProto(messageId, situationXml.getBytes(StandardCharsets.UTF_8));
+        byte[] payload = situationXml.getBytes(StandardCharsets.UTF_8);
+        if (wrapSinkMessagesInProto) {
+            final String messageId = UUID.randomUUID().toString();
+            payload = sinkWrapper.wrapMessageInProto(messageId, payload);
+        }
+
         producer.send(new ProducerRecord<>(getEventSinkTopic(), payload), (metadata, ex) -> {
             if (ex != null) {
                 LOG.warn("An error occurred while sending event for situation with id '{}'.", situation.getId(), ex);
@@ -629,6 +635,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public void setInventoryTtlMs(long inventoryTtlMs) {
         this.inventoryTtlMs = inventoryTtlMs;
+    }
+
+    public boolean isWrapSinkMessagesInProto() {
+        return wrapSinkMessagesInProto;
+    }
+
+    public void setWrapSinkMessagesInProto(boolean wrapSinkMessagesInProto) {
+        this.wrapSinkMessagesInProto = wrapSinkMessagesInProto;
     }
 
     @Override

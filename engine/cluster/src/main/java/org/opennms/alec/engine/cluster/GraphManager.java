@@ -157,17 +157,13 @@ public class GraphManager {
                 // We successfully matched all of the relations, clear any outstanding deferrals
                 clearDeferralsFor(io);
             }
+
+            // Update the set of disconnected vertices
+            trackDisconnectedVertices(Collections.singleton(vertex));
         }
 
         // Update any deferred IOs that may be related to the vertices we've added
         handleDeferredIos(verticesAdded);
-
-        // Rebuild the list of disconnected vertices
-        disconnectedVertices.clear();
-        disconnectedVertices.addAll(g.getVertices().stream()
-                .filter(v -> g.getNeighborCount(v) == 0)
-                .map(CEVertex::getNumericId)
-                .collect(Collectors.toList()));
     }
 
     private void defer(InventoryObject io, ResourceKey... waitingFor) {
@@ -243,12 +239,29 @@ public class GraphManager {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             final CEVertex vertex = resourceKeyVertexMap.remove(resourceKey);
             if (vertex != null) {
-                // When a vertex that is referenced by edges is removed, the referencing edges are also removed
-                // automatically
+                // Find the neighbors
+                final Collection<CEVertex> neighbors = g.getNeighbors(vertex);
+                // Remove the vertex. When a vertex that is referenced by edges is removed, the referencing edges
+                // are also removed automatically
                 g.removeVertex(vertex);
+                // Maybe add the neighboring vertices to the set of disconnected vertices now
+                // that we've removed one
+                disconnectedVertices.remove(vertex.getNumericId());
+                trackDisconnectedVertices(neighbors);
                 didGraphChange.set(true);
             }
             clearDeferralsFor(io);
+        }
+    }
+
+    private void trackDisconnectedVertices(Collection<CEVertex> verticesToVerify) {
+        // Update the set of disconnected vertices
+        for (CEVertex v : verticesToVerify) {
+            if (g.getNeighborCount(v) == 0) {
+                disconnectedVertices.add(v.getNumericId());
+            } else {
+                disconnectedVertices.remove(v.getNumericId());
+            }
         }
     }
 

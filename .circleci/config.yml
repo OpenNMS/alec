@@ -56,6 +56,9 @@ workflows:
       - build-debian:
           requires:
             - build
+          filters:
+            tags:
+              only: /.*/
       - build-docs:
           requires:
             - pre-build
@@ -65,6 +68,9 @@ workflows:
       - smoke-test:
           requires:
             - build
+          filters:
+            tags:
+              only: /.*/
 
       # Run deploy jobs just on version tags and master branch
       - deploy-maven:

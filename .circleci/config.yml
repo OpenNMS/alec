@@ -89,7 +89,6 @@ workflows:
       - deploy-docs:
           requires:
             - build-docs
-            - smoke-test
           filters:
             tags:
               only: /^v.*/

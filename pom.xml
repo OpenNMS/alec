@@ -381,7 +381,7 @@
                 <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>oce-ossrh</serverId>
+                    <serverId>alec-ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
@@ -499,11 +499,11 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>oce-ossrh</id>
+            <id>alec-ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>oce-ossrh</id>
+            <id>alec-ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>

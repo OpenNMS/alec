@@ -95,7 +95,7 @@ alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/e
 Restart OpenNMS and Sentinel.
 
 Ensure that the required Kafka topics are created.
-See xref:datasources:kafka.adoc#topics[Kafka datasource topics] for details.
+See xref:datasources:kafka.adoc#_topics[topics] for details.
 
 Run the `health:check` commands in both OpenNMS and Sentinel.
 

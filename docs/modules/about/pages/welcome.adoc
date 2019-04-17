@@ -1,4 +1,4 @@
-= Architecture for Learning Enabled Correlation (ALEC) Documentation
+= ALEC Documentation
 :imagesdir: ../assets/images
 
 == What is ALEC?

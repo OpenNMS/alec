@@ -1,8 +1,6 @@
 = Cluster Engine
 :imagesdir: ../assets/images
 
-== Overview
-
 The cluster engine builds an in-memory graph that contains the inventory provided by the data source.
 Inventory objects are added to the graph as vertices and relationships among these objects are added as edges.
 Alarms are then attached to the vertex for the inventory object they reference.
@@ -12,3 +10,8 @@ The engine takes care of mapping the clusters to situations and forwards these b
 
 The cluster engine is a generic implementation which is meant to be extended for use with different clustering algorithms.
 This engine handles all the details of interfacing with the data source and managing state, allowing implementors to easily extend the engine with novel clustering techniques.
+
+Implementation extending the cluster engine include:
+
+ * The xref:dbscan.adoc[DBSCAN] engine
+ * The xref:deeplearning.adoc[Deep Learning] engine

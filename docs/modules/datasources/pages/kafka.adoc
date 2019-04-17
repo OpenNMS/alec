@@ -10,6 +10,23 @@ The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer a
 The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
 The Kafka Datasource consumes from these topics and provides ALEC with a feed of alarms and inventory.
 
+[topics]
+== Topics
+
+The following properties can be used to configure the names of the Kafka topics used.
+These topics are expected to exist in the Kafka broker for the datasource to operate.
+
+[options="header"]
+|=======
+|Property            | Default Value         | Description
+|alarmTopic          | `alarms`              | Alarms managed by OpenNMS
+|alarmFeedbackTopic  | `alarmFeedback`       | Alarm feedback managed by OpenNMS
+|edgesTopic          | `edges`               | Topology managed by OpenNMS
+|nodeTopic           | `nodes`               | Node inventory managed by OpenNMS
+|eventSinkTopic      | `OpenNMS.Sink.Events` | Used to forward events to OpenNMS
+|inventoryTopic      | `alec-inventory`      | Used to maintain inventory state
+|=======
+
 == Scripted extensions
 
 === Config

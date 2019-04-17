@@ -50,14 +50,14 @@ At any point in time, you can export the ALEC graph to view the inventory and al
 
 We can export the ALEC graph from a Karaf shell using:
 ```
-opennms-alec:export-graph cluster /tmp/cluster.graph.xml
+opennms-alec:export-graph dbscan /tmp/dbscan.graph.xml
 ```
 
 NOTE: If ALEC is running on Sentinel, make sure to run this from the Sentinel shell.
 
 Import the graph into OpenNMS using:
 ```
-curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/cluster.graph.xml 'http://localhost:8980/opennms/rest/graphml/alec'
+curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/dbscan.graph.xml 'http://localhost:8980/opennms/rest/graphml/alec'
 ```
 
 NOTE: If you get an error saying that a `"Graph with name alec already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/alec'` and try again.

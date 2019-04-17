@@ -12,19 +12,18 @@ sudo /etc/init.d/opennms stop
 
 Delete the .kar file cache:
 ```
-sudo rm -rf /opt/opennms/data/kar
+sudo rm -rf $OPENNMS_HOME/data/kar
 ```
 
 Install the updated ALEC plugin package:
 ```
-sudo yum -y install opennms-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+sudo yum -y install opennms-alec-plugin
 ```
 
 Restart OpenNMS:
 ```
 sudo /etc/init.d/opennms restart
 ```
-
 
 == Upgrading ALEC on Sentinel (distributed install)
 
@@ -38,12 +37,12 @@ sudo /etc/init.d/sentinel stop
 
 Delete the .kar file cache:
 ```
-sudo rm -rf /opt/sentinel/data/kar
+sudo rm -rf $SENTINEL_HOME/data/kar
 ```
 
 Install the updated ALEC plugin package:
 ```
-sudo yum -y install sentinel-alec-plugin-1.0.0-SNAPSHOT20190316173934.noarch.rpm
+sudo yum -y install sentinel-alec-plugin
 ```
 
 Restart Sentinel:

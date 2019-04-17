@@ -1,4 +1,4 @@
-= User's Guide to the _Architecture for Learning Enabled Correlation_
+= User's Guide to _ALEC_
 :page-layout: home
 :!sectids:
 

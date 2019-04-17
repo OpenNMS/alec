@@ -14,7 +14,7 @@ If you are considering deploying ALEC in a production environment and have load,
 
 === Cons / Limitations
 
-1. The OIA does not yet have interfaces that support retrieving topology information (i.e. links between nodes), so the graph will not reflect these.
+1. Additional load on your OpenNMS instance
 
 == Distributed Deployment
 

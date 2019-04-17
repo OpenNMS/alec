@@ -1,13 +1,145 @@
 = Deep Learning Engine
 :imagesdir: ../assets/images
 
-The Deep Learning Engine is a clusterning engine that uses link:https://www.tensorflow.org/[TensorFlow] models to build clusters.
+The Deep Learning Engine is a xref:cluster.adoc[Cluster Engine] that uses a link:https://www.tensorflow.org/[TensorFlow] model to build clusters.
 
-As a first attempt, we have used link:https://github.com/uber/ludwig[Ludwig] to build and train a model which is used to answer: are these two alarms related?
-In order to help answer this question, we provide features that include:
+In order to build clusters using TensorFlow, we reduce the cluster problem to a binary classification problem that is analogous to asking: are these two alarms related?
+When two alarms are related, we add these to a cluster along with any other alarms that are related to any of these and so on.
+In order to help reduce the computational complexity in performing these pairwise computations, we limit the search of potential candidates to those that are nearby (within a distance of stem:[\epsilon].)
+
+The current model definition has been developped using link:https://github.com/uber/ludwig[Ludwig]:
+
+image::ludwig_training.png[Ludwing training example,600]
+
+The model input features include:
 
 * The inventory object types (categorical)
 * Relations between the inventory objects (binary)
 * Difference in time (numerical)
 * Distance on the graph (numerical)
 
+TIP: See link:https://github.com/OpenNMS/alec/blob/master/engine/deeplearning/src/main/resources/ludwig_model.yaml[ludwig_model.yaml] for the complete model definition.
+
+== Using the engine
+
+To use the engine, install the `alec-engine-deeplearning` feature.
+
+Once installed, restart the driver from the Karaf shell using:
+
+```
+bundle:restart org.opennms.alec.driver.main
+```
+
+Running the `list-graphs` command should now reflect that the `deeplearning` engine is being used:
+
+```
+admin@opennms> opennms-alec:list-graphs
+deeplearning: 2 situations on 976 vertices and 839 edges.
+```
+
+TIP: Once installed add the feature to the `alec.boot` in a new line with `alec-engine-deeplearning wait-for-kar=opennms-alec-plugin` to ensure that engine is re-installed when the services are restarted.
+
+== Training
+
+CAUTION: These instructions are here to help you get started but are by no means complete.
+We plan to help make this process easier in future releases.
+
+Install the following features to access the shell commands required for training:
+
+```
+feature:install alec-features-deeplearning alec-features-shell
+```
+
+=== Vectorize the datasets
+
+Let's take a snapshot of the current graph:
+
+```
+opennms-alec:datasource-snapshot /tmp/snap1
+```
+
+Now edit `/tmp/snap1/oce.situations.xml` to reflect the desired state of situations.
+
+Build vectors from the dataset:
+
+```
+opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/oce.alarms.xml \
+               --inventory-in /tmp/snap1/oce.inventory.xml \
+               --situations-in /tmp/snap1/oce.situations.xml \
+                --csv-out /tmp/snap1/oce.vector.dataset.csv
+```
+
+=== Train with Ludwig
+
+Use Ludwig to train the model:
+
+```
+ludwig train --data_csv /tmp/snap1/oce.vector.dataset.csv --model_definition_file model.yaml
+```
+
+NOTE: Pull `model.yaml` from the `ludwig_model.yaml` file in the source tree
+
+=== Exporting the trained model
+
+Adapt the following script to export the model to a format that can be used in ALEC:
+
+```
+echo '#!/usr/bin/env python
+import numpy as np
+import tensorflow as tf
+from tensorflow.python.framework import graph_util
+from tensorflow.python.framework import ops
+from tensorflow.python.saved_model import builder as saved_model_builder
+from ludwig import LudwigModel
+
+model_path = "results/experiment_run_0/model"
+model = LudwigModel.load(model_path)
+
+builder = tf.saved_model.Builder("export")
+with tf.Session(graph=model.model.graph) as sess:
+  saver = tf.train.Saver()
+  saver.restore(sess, model.model.weights_save_path)
+  builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
+builder.save()
+
+model.close()' > export_model.py
+chmod +x export_model.py
+./export_model.py
+mkdir -p /tmp/tf-export
+cp -R ./export/* /tmp/tf-export/
+cp results/experiment_run_0/model/model_hyperparameters.json /tmp/tf-export/
+```
+
+
+=== Use the trained model in ALEC
+
+Verify that the model can be loaded:
+
+```
+opennms-alec:tensorflow-load-model /tmp/tf-export
+```
+
+Configure the engine to use the model:
+
+```
+config:edit org.opennms.alec.engine.deeplearning
+property-set modelPath /tmp/tf-export
+config:update
+```
+
+=== Run simulations using the trained model
+
+Generate situations:
+
+```
+opennms-alec:process-alarms --alarms-in /tmp/snap1/oce.alarms.xml \
+    --inventory-in /tmp/snap1/oce.inventory.xml \
+    --situations-out /tmp/snap1/oce.situations.deeplearning.trained.xml \
+    --engine deeplearning
+```
+
+Compare results:
+
+```
+opennms-alec:score-situations -s peer /tmp/snap1/oce.situations.xml /tmp/snap1/oce.situations.deeplearning.trained.xml
+```

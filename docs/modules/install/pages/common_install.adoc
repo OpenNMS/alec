@@ -5,6 +5,20 @@ This guide contains instructions for installing _ALEC_ that are common to both t
 
 == OpenNMS Configuration
 
+=== $OPENMS_HOME
+
+The installation instructions will refer to the `$OPENNMS_HOME` environment variable which is expected to be set.
+
+If running OpenNMS on RHEL or CentOS, this is commonly set as:
+```
+export OPENNMS_HOME=/opt/opennms
+```
+
+If running OpenNMS on Ubuntu or Debian, this is commonly set as:
+```
+export OPENNMS_HOME=/usr/share/opennms
+```
+
 ===  Health check
 
 We're going to use the `health:check` command in the Karaf shell to help validate our deployment.
@@ -27,7 +41,7 @@ Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did 
 ```
 
 The `opennms-flows` feature is installed by default, and the health check will fail no Elasticsearch server is configured.
-You can choose to either uninstall the feature (using `feature:uninstall opennms-flows`), or point to feature to an Elasticsearch instance using:
+You can choose to either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance using:
 
 ```
 config:edit org.opennms.features.flows.persistence.elastic
@@ -100,24 +114,29 @@ to:
 
 This change will come in effect next time OpenNMS is restarted - we don't need to do this yet.
 
-== ALEC Installation
+== ALEC/OpenNMS Package Repositories
 
-=== Setup YUM repository
+Packages for ALEC are made available the same Debian and YUM repositories as OpenNMS.
+If you already have the stable repository installed, you may skip this step.
 
-ALEC packages are currently available via a YUM repository hosted on link:https://packagecloud.io/opennms/plugin-snapshot[packagecloud].
+=== Setup APT repository (Ubuntu/Debian)
 
-You can install the repository using instructions available on the link above, or by running:
+For Ubuntu or Debian based distributions, install the repository using:
+
 ```
-echo '[opennms_plugin-snapshot]
-name=opennms_plugin-snapshot
-baseurl=https://packagecloud.io/opennms/plugin-snapshot/el/7/$basearch
-repo_gpgcheck=1
-gpgcheck=0
-enabled=1
-gpgkey=https://packagecloud.io/opennms/plugin-snapshot/gpgkey
-sslverify=1
-sslcacert=/etc/pki/tls/certs/ca-bundle.crt
-metadata_expire=300' > /etc/yum.repos.d/opennms-plugins.repo
+cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
+deb https://debian.opennms.org stable main
+deb-src https://debian.opennms.org stable main
+EOF
+wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
+apt update
 ```
 
-IMPORTANT: TODO: Use stable instead of snapshot artifacts once 1.0.0 is released.
+=== Setup YUM repository (RHEL/CentOS)
+
+For RHEL or CentOS based distributions, install the repository using:
+
+```
+yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
+rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
+```

@@ -11,9 +11,14 @@ Start by following the instructions in the xref:common_install.adoc[common insta
 
 == Install ALEC
 
-Install the package:
+For RHEL or CentOS users, install the package via YUM:
 ```
 yum -y install opennms-alec-plugin
+```
+
+For Ubuntu or Debian users, the package via APT:
+```
+apt install opennms-alec-plugin
 ```
 
 Configure the feature set to be installed when OpenNMS starts:

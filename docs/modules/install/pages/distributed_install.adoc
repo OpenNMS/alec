@@ -23,7 +23,7 @@ When installing the package repository, ensure that this is done on all of the s
 
 == OpenNMS Configuration
 
-=== Enable and configure the Kafka Producer (for link & alarms)
+=== Enable and configure the Kafka Producer (for topology & alarms)
 
 Configure the Kafka Producer to point to your Kafka broker:
 ```
@@ -76,16 +76,26 @@ Configure the Kafka producer:
 echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.producer.cfg"
 ```
 
-TIP: The consumer is used to read alarms & inventory, whereas the producer is used to send events. 
+TIP: The consumer is used to read alarms & inventory, whereas the producer is used to send events.
+
+Configure ZooKeeper for distributed coordination:
+```
+echo 'connectString=127.0.0.1:2181' > "$SENTINEL_HOME/etc/org.opennms.features.distributed.coordination.zookeeper.cfg"
+```
 
 Configure the feature set to be installed when Sentinel starts:
 ```
-echo 'alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/alec.boot"
+echo 'sentinel-core
+sentinel-coordination-zookeeper
+alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/alec.boot"
 ```
 
 == Verify
 
 Restart OpenNMS and Sentinel.
+
+Ensure that the required Kafka topics are created.
+See xref:datasources:kafka.adoc#topics[Kafka datasource topics] for details.
 
 Run the `health:check` commands in both OpenNMS and Sentinel.
 

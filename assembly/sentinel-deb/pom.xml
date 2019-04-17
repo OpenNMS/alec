@@ -66,26 +66,23 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
                 <executions>
                     <execution>
                         <id>copy-deb-resources</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>copy-resources</goal>
+                            <goal>rename</goal>
                         </goals>
                         <configuration>
-                            <overwrite>true</overwrite>
-                            <outputDirectory>${project.build.directory}/deb/var/lib/sentinel/deploy/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.build.directory}/releases/${project.artifactId}-${project.version}/oce/
-                                    </directory>
-                                </resource>
-                            </resources>
+                            <sourceFile>
+                                ${project.build.directory}/releases/${project.artifactId}-${project.version}/oce/org.opennms.alec.assembly.kar-${project.version}.kar
+                            </sourceFile>
+                            <destinationFile>
+                                ${project.build.directory}/deb/var/lib/sentinel/deploy/opennms-alec-plugin.kar
+                            </destinationFile>
                         </configuration>
                     </execution>
                 </executions>

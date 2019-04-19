@@ -98,6 +98,9 @@
                 <file>
                     <exists>/usr/bin/dpkg-buildpackage</exists>
                 </file>
+                <property>
+                    <name>build.packages</name>
+                </property>
             </activation>
             <build>
                 <plugins>

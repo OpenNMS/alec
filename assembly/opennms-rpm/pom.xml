@@ -71,6 +71,9 @@
                 <file>
                     <exists>/usr/bin/rpmbuild</exists>
                 </file>
+                <property>
+                    <name>build.packages</name>
+                </property>
             </activation>
             <build>
                 <plugins>
@@ -88,6 +91,9 @@
                 <file>
                     <exists>/usr/local/bin/rpmbuild</exists>
                 </file>
+                <property>
+                    <name>build.packages</name>
+                </property>
             </activation>
             <build>
                 <plugins>

@@ -279,7 +279,7 @@ public class GraphManagerTest {
         final GraphManager graphManager = new GraphManager();
 
         // Add K objects that refer to non-existent IOs
-        final int K = 5000;
+        final int K = 500;
         MockInventoryBuilder builder = new MockInventoryBuilder();
         for (int i = 0; i < K; i++) {
             final String id = "link-" + i;
@@ -289,7 +289,7 @@ public class GraphManagerTest {
         graphManager.addInventory(builder.getInventory());
 
         // Add N vertices to the graph
-        final int N = 5000;
+        final int N = 500;
         builder = new MockInventoryBuilder();
         for (int i = 0; i < N; i++) {
             builder.withInventoryObject(MockInventoryType.PORT, "v" + i);

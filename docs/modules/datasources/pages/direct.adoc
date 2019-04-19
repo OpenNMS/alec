@@ -13,7 +13,7 @@ It runs in the same JVM as OpenNMS and acts upon new *Alarms* and *Nodes* using 
 To update the bundle configuration and point to a script on the file system, you must update the _scriptFile_ property of the _org.opennms.alec.datasource.opennms.direct_ PID. 
 
 ```
-config:edit org.opennms.oce.datasource.opennms.direct
+config:edit org.opennms.alec.datasource.opennms.direct
 config:property-set scriptFile /tmp/inventory.groovy
 config:update
 ```

@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
+import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
-import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +99,6 @@ public class DBScanEngine extends AbstractClusterEngine {
             return null;
         }
 
-        LOG.debug("{}: Clustering {} alarms.", timestampInMillis, alarms.size());
         final DBSCANClusterer<AlarmInSpaceTime> clusterer = new DBSCANClusterer<>(epsilon, 1, distanceMeasure);
         return clusterer.cluster(alarms);
     }
@@ -107,5 +106,9 @@ public class DBScanEngine extends AbstractClusterEngine {
     @Override
     public double getDistanceBetween(double t1, double t2, double distance) {
         return distanceMeasure.compute(t1, t2, distance);
+    }
+
+    public AlarmInSpaceTimeDistanceMeasure getDistanceMeasure() {
+        return distanceMeasure;
     }
 }

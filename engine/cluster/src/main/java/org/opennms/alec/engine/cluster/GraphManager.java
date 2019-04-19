@@ -84,11 +84,12 @@ public class GraphManager {
     private synchronized void addOrUpdateInventory(Collection<InventoryObject> inventory) {
         // Keep track of any vertices we've added
         final List<CEVertex> verticesAdded = new LinkedList<>();
+        final List<CEVertex> verticesToVerify = new LinkedList<>();
 
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
-            resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
+            verticesToVerify.add(resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
                 LOG.trace("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
                 final CEVertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
@@ -96,7 +97,7 @@ public class GraphManager {
                 idtoVertexMap.put(vertex.getNumericId(), vertex);
                 verticesAdded.add(vertex);
                 return vertex;
-            });
+            }));
         }
 
         // Now handle the relationships
@@ -117,6 +118,7 @@ public class GraphManager {
                     LOG.trace("Adding edge between child: {} and parent: {}", vertex, parentVertex);
                     final CEEdge edge = CEEdge.newParentEdge(edgeIdGenerator.getAndIncrement(), io.getWeightToParent());
                     g.addEdge(edge, parentVertex, vertex);
+                    verticesToVerify.add(parentVertex);
                     didGraphChange.set(true);
                 }
             }
@@ -133,6 +135,7 @@ public class GraphManager {
                     LOG.debug("Adding edge between peers A: {} and Z: {}", peerVertex, vertex);
                     final CEEdge edge = CEEdge.newPeerEdge(edgeIdGenerator.getAndIncrement(), peerRef);
                     g.addEdge(edge, peerVertex, vertex);
+                    verticesToVerify.add(peerVertex);
                     didGraphChange.set(true);
                 }
             }
@@ -149,6 +152,7 @@ public class GraphManager {
                     LOG.debug("Adding edge between relatives A: {} and Z: {}", relativeVertex, vertex);
                     final CEEdge edge = CEEdge.newRelativeEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
                     g.addEdge(edge, relativeVertex, vertex);
+                    verticesToVerify.add(relativeVertex);
                     didGraphChange.set(true);
                 }
             }
@@ -157,13 +161,13 @@ public class GraphManager {
                 // We successfully matched all of the relations, clear any outstanding deferrals
                 clearDeferralsFor(io);
             }
-
-            // Update the set of disconnected vertices
-            trackDisconnectedVertices(Collections.singleton(vertex));
         }
 
         // Update any deferred IOs that may be related to the vertices we've added
         handleDeferredIos(verticesAdded);
+
+        // Update the set of disconnected vertices
+        trackDisconnectedVertices(verticesToVerify);
     }
 
     private void defer(InventoryObject io, ResourceKey... waitingFor) {

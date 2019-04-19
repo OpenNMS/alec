@@ -323,6 +323,38 @@ public class GraphManagerTest {
     }
 
     @Test
+    public void canComputeDisconnectedVertices() {
+        final GraphManager graphManager = new GraphManager();
+        assertThat(graphManager.getDisconnectedVertices(), hasSize(0));
+
+        // Add 2 IOs
+        graphManager.addInventory(new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.DEVICE, "n1")
+                .withInventoryObject(MockInventoryType.DEVICE, "n2")
+                .getInventory());
+
+        // They should be disconnected
+        assertThat(graphManager.getDisconnectedVertices(), hasSize(2));
+
+        // Now add a link between them
+        Collection<InventoryObject> linkIo = new MockInventoryBuilder()
+                .withInventoryObject(MockInventoryType.LINK, "n1<->n2")
+                .withPeerRelation(MockInventoryType.LINK, "n1<->n2", MockInventoryType.DEVICE, "n1", MockInventoryType.DEVICE, "n2")
+                .getInventory();
+        graphManager.addInventory(linkIo);
+
+        // We should be fully connected now
+        assertThat(graphManager.getDisconnectedVertices(), hasSize(0));
+        assertThat(graphManager.getNumDeferredObjects(), equalTo(0));
+
+        // Delete the link
+        graphManager.removeInventory(linkIo);
+
+        // We should be disconnected again
+        assertThat(graphManager.getDisconnectedVertices(), hasSize(2));
+    }
+
+    @Test
     public void canDeleteInventory() {
         // Create a new graph manager and add some inventory
         final GraphManager graphManager = new GraphManager();

@@ -21,6 +21,7 @@
         <argument ref="engineFactory"/>
         <argument ref="situationProcessorFactory"/>
     </bean>
+    <service ref="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 
     <!-- Expose a health check that can be used when we're running in an OpenNMS container -->
     <bean id="healthCheck" class="org.opennms.alec.driver.main.DriverHealthCheck">

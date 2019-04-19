@@ -30,6 +30,8 @@ package org.opennms.alec.driver.main;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +52,7 @@ import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.processor.api.SituationConfirmer;
 import org.opennms.alec.processor.api.SituationProcessor;
@@ -61,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
-public class Driver {
+public class Driver implements EngineRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
 
     private final AlarmDatasource alarmDatasource;
@@ -238,5 +241,14 @@ public class Driver {
 
     com.codahale.metrics.Timer getTickTimer() {
         return ticks;
+    }
+
+    @Override
+    public Collection<Engine> getEngines() {
+        if (DriverState.RUNNING.equals(state)) {
+            return Collections.singleton(engine);
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

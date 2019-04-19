@@ -80,6 +80,7 @@
     </feature>
 
     <feature name="alec-engine-dbscan" description="ALEC :: Engine :: DB-Scan" version="${project.version}">
+        <feature dependency="true">shell</feature>
         <feature version="${project.version}">alec-engine-cluster</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.dbscan/${project.version}</bundle>
     </feature>

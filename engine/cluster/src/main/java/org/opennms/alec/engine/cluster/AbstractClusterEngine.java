@@ -29,6 +29,7 @@
 package org.opennms.alec.engine.cluster;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -309,9 +310,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 if (graphManager.getDidGraphChangeAndReset()) {
                     // If the graph has changed, then reset the cache
                     LOG.debug("{}: Graph has changed. Resetting hop cache.", timestampInMillis);
-                    spatialDistances.invalidateAll();
-                    shortestPath = null;
-                    disconnectedVertices = graphManager.getDisconnectedVertices();
+                    resetHopCache();
                 }
 
                 // GC alarms from vertices
@@ -361,6 +360,12 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             situationsById.put(situation.getId(), situation);
             situationHandler.onSituation(situation);
         }
+    }
+
+    public synchronized void resetHopCache() {
+        spatialDistances.invalidateAll();
+        shortestPath = null;
+        disconnectedVertices = graphManager.getDisconnectedVertices();
     }
 
     public abstract List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g);
@@ -779,6 +784,33 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         public int hashCode() {
             return Objects.hash(vertexIdA, vertexIdB);
         }
+    }
+
+    /**
+     * Search the graph for alarms with the given ids and return
+     * references to these/
+     *
+     * @param alarmIds alarm ids to look for
+     * @return a map containing the alarms that were found
+     */
+    public Map<String, AlarmInSpaceTime> findAlarmsWithIds(String... alarmIds) {
+        final Set<String> alarmIdsToFind = new HashSet<>(Arrays.asList(alarmIds));
+        final Map<String, AlarmInSpaceTime> alarmsById = new HashMap<>();
+        graphManager.withGraph(g -> {
+            for (CEVertex v : g.getVertices()) {
+                for (Alarm a : v.getAlarms()) {
+                    if (alarmIdsToFind.contains(a.getId())) {
+                        alarmsById.put(a.getId(), new AlarmInSpaceTime(v, a));
+                        alarmIdsToFind.remove(a.getId());
+                    }
+
+                    if (alarmIdsToFind.isEmpty()) {
+                        return;
+                    }
+                }
+            }
+        });
+        return alarmsById;
     }
 
     @VisibleForTesting

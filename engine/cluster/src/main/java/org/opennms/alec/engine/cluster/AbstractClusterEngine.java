@@ -94,7 +94,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     /**
      * The set of situations that have been received feedback since the last tick.
-     * 
+     * <p>
      * This object also serves as the implicit lock for operations dealing with feedback.
      */
     private final Set<String> situationsWithFeedback = new HashSet<>();
@@ -114,7 +114,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     private Set<Long> disconnectedVertices = new HashSet<>();
 
     private final GraphManager graphManager = new GraphManager();
-    
+
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
 
@@ -159,14 +159,14 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             // Index the given situations and the alarms they contain, so that we can cluster alarms in existing
             // situations when applicable
             situations.forEach(situation -> {
-                        situationsById.put(situation.getId(), situation);
-                        if (situation.getAlarms() != null) {
-                            for (Alarm alarmInSituation : situation.getAlarms()) {
-                                alarmIdToSituationMap.put(alarmInSituation.getId(), situation);
-                            }
-                        }
-                    });
-            
+                situationsById.put(situation.getId(), situation);
+                if (situation.getAlarms() != null) {
+                    for (Alarm alarmInSituation : situation.getAlarms()) {
+                        alarmIdToSituationMap.put(alarmInSituation.getId(), situation);
+                    }
+                }
+            });
+
             // Process all the alarm feedback provided on init
             alarmFeedback.forEach(this::handleAlarmFeedback);
 
@@ -182,7 +182,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     /**
      * Called once the engine has been initialized.
-     *
+     * <p>
      * Allows sub-classes to provide their own initialization routines.
      */
     public void onInit() {
@@ -195,7 +195,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     /**
      * Called once the engine has been destroyed.
-     *
+     * <p>
      * Allows sub-classes to provide their own destroy routines.
      */
     public void onDestroy() {
@@ -224,7 +224,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     /**
      * Any operations that update a situation during a tick should be done using this context in order
      * to ensure we get consistent results.
-     *
+     * <p>
      * This helps align the updates performed by the feedback on the cluster mapping operations, since
      * each of these may end up touching the same situations.
      */
@@ -283,7 +283,8 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     // Handle the blacklisted alarm case
                     Situation affectedSituation = situationsById.get(situationId);
                     if (affectedSituation == null) {
-                        LOG.info("Got feedback for situation with id: {}, but the engine does not know about this situation. Ignoring feedback.");
+                        LOG.info("Got feedback for situation with id: {}, but the engine does not know about this " +
+                                "situation. Ignoring feedback.");
                         continue;
                     }
                     Set<Alarm> prevAlarms = affectedSituation.getAlarms();
@@ -297,11 +298,11 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                                 .setAlarms(newAlarms);
                     }
                 }
-                
+
                 situationsWithFeedback.clear();
             }
         }
-        
+
         if (alarmsChangedSinceLastTick) {
             alarmsChangedSinceLastTick = false;
 
@@ -374,7 +375,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      * Maps the clusters to situations.
      *
      * @param clusterOfAlarms clusters to group into situations
-     * @param context context in which to maintain situation updates
+     * @param context         context in which to maintain situation updates
      */
     @VisibleForTesting
     void mapClusterToSituations(Cluster<AlarmInSpaceTime> clusterOfAlarms, TickContext context) {
@@ -427,10 +428,12 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             // Some of the alarms in the cluster already belong to a situation whereas other don't
             // Add them all to the same situation
             final String situationId = Iterables.getFirst(alarmsBySituationId.keySet(), null);
-            LOG.debug("{}: Some of the alarms in the cluster are not part of a situation yet. Adding alarms to existing situation with id: {}",
+            LOG.debug("{}: Some of the alarms in the cluster are not part of a situation yet. Adding alarms to " +
+                            "existing situation with id: {}",
                     context.getTimestampInMillis(), situationId);
             // Create a copy of the existing situation
-            final ImmutableSituation.Builder situationBuilder = context.getBuilderForExistingSituationWithId(situationId);
+            final ImmutableSituation.Builder situationBuilder =
+                    context.getBuilderForExistingSituationWithId(situationId);
             // Add all the alarms to the Situation, replacing any older references...
             for (AlarmInSpaceTime alarm : clusterOfAlarms.getPoints()) {
                 situationBuilder.addAlarm(alarm.getAlarm(), this::isAlarmBlacklistedFromSituation);
@@ -438,7 +441,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         } else {
             // The alarms in this cluster already belong to different situations
             LOG.debug("{}: Found {} unclassified alarms in a cluster with existing alarms associated to {} situations.",
-                        context.getTimestampInMillis(), alarmsWithoutSituations.size(), alarmsBySituationId.size());
+                    context.getTimestampInMillis(), alarmsWithoutSituations.size(), alarmsBySituationId.size());
 
             // Gather the list of candidates from all the existing situations referenced by this cluster
             final List<Alarm> candidateAlarms = alarmsBySituationId.values().stream()
@@ -446,13 +449,17 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     .collect(Collectors.toList());
 
             final Set<String> situationsUpdated = new HashSet<>();
-            // For each alarm without a situation, we want to associate the alarm with the other alarm that is the "closest"
+            // For each alarm without a situation, we want to associate the alarm with the other alarm that is the 
+            // "closest"
             for (Alarm alarm : alarmsWithoutSituations) {
                 final Alarm closestNeighbor = getClosestNeighborInSituation(alarm, candidateAlarms);
-                final Situation existingSituationForClosestNeighbor = alarmIdToSituationMap.get(closestNeighbor.getId());
-                // Use the situation builder from a previous pass, or create a new copy of the existing situation if there is none
+                final Situation existingSituationForClosestNeighbor =
+                        alarmIdToSituationMap.get(closestNeighbor.getId());
+                // Use the situation builder from a previous pass, or create a new copy of the existing situation if 
+                // there is none
                 final String existingSituationId = existingSituationForClosestNeighbor.getId();
-                final ImmutableSituation.Builder situationBuilder = context.getBuilderForExistingSituationWithId(existingSituationId);
+                final ImmutableSituation.Builder situationBuilder =
+                        context.getBuilderForExistingSituationWithId(existingSituationId);
                 situationBuilder.addAlarm(alarm, this::isAlarmBlacklistedFromSituation);
                 // Keep track of the situations we actually updated, so we can refresh all of the alarms in them
                 situationsUpdated.add(existingSituationId);
@@ -460,7 +467,8 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
             // Refresh the situations with the existing alarms
             for (String situationId : situationsUpdated) {
-                final ImmutableSituation.Builder situationBuilder = context.getBuilderForExistingSituationWithId(situationId);
+                final ImmutableSituation.Builder situationBuilder =
+                        context.getBuilderForExistingSituationWithId(situationId);
                 for (Alarm alarm : alarmsBySituationId.getOrDefault(situationId, Collections.emptyList())) {
                     situationBuilder.addAlarm(alarm, this::isAlarmBlacklistedFromSituation);
                 }
@@ -468,7 +476,8 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         }
 
         Collection<ImmutableSituation.Builder> situationBuilders = context.getBuildersForNewOrUpdatedSituations();
-        LOG.debug("{}: Generating diagnostic texts for {} situations...", context.getTimestampInMillis(), situationBuilders.size());
+        LOG.debug("{}: Generating diagnostic texts for {} situations...", context.getTimestampInMillis(),
+                situationBuilders.size());
         situationBuilders.forEach(situationBuilder ->
                 situationBuilder.setDiagnosticText(getDiagnosticTextForSituation(situationBuilder.build())));
         LOG.debug("{}: Done generating diagnostic texts.", context.getTimestampInMillis());
@@ -485,11 +494,12 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         // More intelligent blacklisting should follow later.
         if (situationAlarmBlacklist.containsKey(situationId) &&
                 situationAlarmBlacklist.get(situationId).contains(alarmId)) {
-            LOG.debug("Alarm with id: {} is blacklisted from situation with id: {} and will not be added.", alarmId, situationId);
-            
+            LOG.debug("Alarm with id: {} is blacklisted from situation with id: {} and will not be added.", alarmId,
+                    situationId);
+
             return false;
         }
-        
+
         return true;
     }
 
@@ -555,7 +565,14 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     public void onInventoryAdded(Collection<InventoryObject> inventory) {
         try {
             initLock.await();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Adding inventory {}", inventory);
+            }
             graphManager.addInventory(inventory);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("There are now {} vertices", graphManager.getGraph().getVertexCount());
+                LOG.trace("There are now {} edges", graphManager.getGraph().getEdgeCount());
+            }
         } catch (InterruptedException ignore) {
             LOG.debug("Interrupted while handling callback, skipping processing onInventoryAdded.");
             Thread.currentThread().interrupt();
@@ -566,7 +583,14 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     public void onInventoryRemoved(Collection<InventoryObject> inventory) {
         try {
             initLock.await();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Removing inventory {}", inventory);
+            }
             graphManager.removeInventory(inventory);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("There are now {} vertices", graphManager.getGraph().getVertexCount());
+                LOG.trace("There are now {} edges", graphManager.getGraph().getEdgeCount());
+            }
         } catch (InterruptedException ignore) {
             LOG.debug("Interrupted while handling callback, skipping processing onInventoryRemoved.");
             Thread.currentThread().interrupt();
@@ -688,8 +712,8 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      * Used to help solve tie-breaker scenarios i.e. when attempting to find
      * the closest neighbor in two different situations.
      *
-     * @param t1 time of alarm1
-     * @param t2 time of alarm2
+     * @param t1       time of alarm1
+     * @param t2       time of alarm2
      * @param distance spatial distance between alarm1 and alarm2
      * @return effective distance between alarm1 and alarm2
      */
@@ -728,34 +752,34 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     private final LoadingCache<EdgeKey, Double> spatialDistances = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .build(new CacheLoader<EdgeKey, Double>() {
-                        public Double load(EdgeKey key) {
-                            if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
-                                // No path exists
-                                return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
-                            }
-                            final CEVertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
-                            if (vertexA == null) {
-                                throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);
-                            }
-                            final CEVertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
-                            if (vertexB == null) {
-                                throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
-                            }
+                public Double load(EdgeKey key) {
+                    if (disconnectedVertices.contains(key.vertexIdA) || disconnectedVertices.contains(key.vertexIdB)) {
+                        // No path exists
+                        return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
+                    }
+                    final CEVertex vertexA = graphManager.getVertexWithId(key.vertexIdA);
+                    if (vertexA == null) {
+                        throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdA);
+                    }
+                    final CEVertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
+                    if (vertexB == null) {
+                        throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
+                    }
 
-                            if (shortestPath == null) {
-                                shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight,true);
-                            }
+                    if (shortestPath == null) {
+                        shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight, true);
+                    }
 
-                            Number distance = shortestPath.getDistance(vertexA, vertexB);
+                    Number distance = shortestPath.getDistance(vertexA, vertexB);
 
-                            if (distance == null) {
-                                // No path exists
-                                return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
-                            } else {
-                                return distance.doubleValue();
-                            }
-                        }
-                    });
+                    if (distance == null) {
+                        // No path exists
+                        return Integer.valueOf(Integer.MAX_VALUE).doubleValue();
+                    } else {
+                        return distance.doubleValue();
+                    }
+                }
+            });
 
     private static class EdgeKey {
         private long vertexIdA;
@@ -826,7 +850,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     /**
      * Update the situation and alarm to situation maps to authoritatively
      * use the given list of situations.
-     *
+     * <p>
      * Only use for testing.
      *
      * @param situations collection of situations to use

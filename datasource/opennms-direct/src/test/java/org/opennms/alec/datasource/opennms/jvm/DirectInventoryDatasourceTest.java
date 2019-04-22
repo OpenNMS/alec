@@ -29,8 +29,10 @@
 package org.opennms.alec.datasource.opennms.jvm;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -41,19 +43,25 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.opennms.alec.datasource.api.InventoryHandler;
+import org.opennms.alec.datasource.api.InventoryObject;
+import org.opennms.alec.datasource.common.inventory.ManagedObjectType;
 import org.opennms.integration.api.v1.dao.AlarmDao;
 import org.opennms.integration.api.v1.dao.EdgeDao;
 import org.opennms.integration.api.v1.dao.NodeDao;
+import org.opennms.integration.api.v1.events.EventListener;
+import org.opennms.integration.api.v1.events.EventSubscriptionService;
 import org.opennms.integration.api.v1.model.Alarm;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
 import org.opennms.integration.api.v1.model.NodeCriteria;
+import org.opennms.integration.api.v1.model.SnmpInterface;
 import org.opennms.integration.api.v1.model.TopologyEdge;
 import org.opennms.integration.api.v1.model.TopologyPort;
 import org.opennms.integration.api.v1.model.TopologyProtocol;
 import org.opennms.integration.api.v1.model.TopologySegment;
-import org.opennms.alec.datasource.api.InventoryHandler;
-import org.opennms.alec.datasource.api.InventoryObject;
-import org.opennms.alec.datasource.common.inventory.ManagedObjectType;
 
 public class DirectInventoryDatasourceTest {
     private final NodeDao mockNodeDao = mock(NodeDao.class);
@@ -61,8 +69,9 @@ public class DirectInventoryDatasourceTest {
     private final ScriptedInventoryService inventoryService = OpennmsDirectScriptedInventory.withDefaults();
     private final ApiMapper mapper = new ApiMapper(inventoryService);
     private final EdgeDao mockEdgeDao = mock(EdgeDao.class);
+    private final EventSubscriptionService mockEventSubscriptionService = mock(EventSubscriptionService.class);
     private final DirectInventoryDatasource dic = new DirectInventoryDatasource(mockNodeDao, mockAlarmDao,
-            mockEdgeDao, mapper);
+            mockEdgeDao, mapper, mockEventSubscriptionService);
     private final InventoryHandler inventoryHandler = new InventoryHandlerImpl();
     private final Set<InventoryObject> inventory = new HashSet<>();
 
@@ -126,6 +135,9 @@ public class DirectInventoryDatasourceTest {
         // An empty snapshot should now result in the inventory being removed since both references are gone
         dic.handleAlarmSnapshot(Collections.emptyList());
         assertThat(inventory, hasSize(0));
+        // This will verify all the references the datasource keeps to ensure no references are still lingering that
+        // could cause a memory leak
+        assertThat(dic.hasAnyInventoryReferences(), equalTo(false));
     }
 
     @Test
@@ -183,6 +195,99 @@ public class DirectInventoryDatasourceTest {
         // All inventory should be removed after deleting the last edge
         dic.onEdgeDeleted(edge);
         assertThat(inventory, hasSize(0));
+    }
+
+    @Test
+    public void testHandleNewAndDeletedNode() {
+        assertThat(dic.getInventoryAndRegisterHandler(inventoryHandler), hasSize(0));
+        assertThat(inventory, hasSize(0));
+        ArgumentCaptor<EventListener> nodeListenerCaptor =
+                ArgumentCaptor.forClass(EventListener.class);
+        verify(mockEventSubscriptionService).addEventListener(nodeListenerCaptor.capture(),
+                ArgumentMatchers.any(Collection.class));
+
+        EventListener nodeEventListener = nodeListenerCaptor.getValue();
+
+        InMemoryEvent mockInMemoryEvent = mock(InMemoryEvent.class);
+        when(mockInMemoryEvent.getUei()).thenReturn(DirectInventoryDatasource.NodeEventListener.NODE_ADDED_UEI);
+        when(mockInMemoryEvent.getNodeId()).thenReturn(1);
+
+        // Add a node with 1 interface
+        Node mockNode = mock(Node.class);
+        when(mockNode.getId()).thenReturn(1);
+
+        SnmpInterface mockSnmpInterface = mock(SnmpInterface.class);
+        when(mockSnmpInterface.getIfName()).thenReturn("ethernet 0");
+        when(mockSnmpInterface.getIfIndex()).thenReturn(0);
+        when(mockSnmpInterface.getIfDescr()).thenReturn("eth0/0");
+        when(mockNode.getSnmpInterfaces()).thenReturn(Collections.singletonList(mockSnmpInterface));
+        when(mockNodeDao.getNodeById(1)).thenReturn(mockNode);
+
+        // Send the event and then we should expect two inventory objects, one for the node and one for the interface
+        nodeEventListener.onEvent(mockInMemoryEvent);
+        assertThat(inventory, hasSize(2));
+
+        // Send a delete for the node Id we just added
+        // This should result in no more inventory, the node and interface should both be cleaned up
+        InMemoryEvent mockDeleteInMemoryEvent = mock(InMemoryEvent.class);
+        when(mockDeleteInMemoryEvent.getUei()).thenReturn(DirectInventoryDatasource.NodeEventListener.NODE_DELETED_UEI);
+        when(mockDeleteInMemoryEvent.getNodeId()).thenReturn(1);
+        nodeEventListener.onEvent(mockDeleteInMemoryEvent);
+        assertThat(inventory, hasSize(0));
+    }
+
+    @Test
+    public void testReferenceCounting() {
+        ArgumentCaptor<EventListener> nodeListenerCaptor =
+                ArgumentCaptor.forClass(EventListener.class);
+        verify(mockEventSubscriptionService).addEventListener(nodeListenerCaptor.capture(),
+                ArgumentMatchers.any(Collection.class));
+
+        int nodeId = 100;
+
+        Node node = mock(Node.class);
+        when(node.getForeignSource()).thenReturn("fs");
+        when(node.getForeignId()).thenReturn("fi");
+        when(node.getId()).thenReturn(nodeId);
+
+        Alarm alarm1 = mock(Alarm.class);
+        when(alarm1.getId()).thenReturn(1);
+        when(alarm1.getManagedObjectInstance()).thenReturn("test:1");
+        when(alarm1.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
+        when(alarm1.getNode()).thenReturn(node);
+
+        InMemoryEvent mockInMemoryEvent = mock(InMemoryEvent.class);
+        when(mockInMemoryEvent.getUei()).thenReturn(DirectInventoryDatasource.NodeEventListener.NODE_ADDED_UEI);
+        when(mockInMemoryEvent.getNodeId()).thenReturn(nodeId);
+
+        InMemoryEvent mockDeleteInMemoryEvent = mock(InMemoryEvent.class);
+        when(mockDeleteInMemoryEvent.getUei()).thenReturn(DirectInventoryDatasource.NodeEventListener.NODE_DELETED_UEI);
+        when(mockDeleteInMemoryEvent.getNodeId()).thenReturn(nodeId);
+
+        when(mockNodeDao.getNodeById(nodeId)).thenReturn(node);
+        EventListener nodeEventListener = nodeListenerCaptor.getValue();
+
+        // Add inventory from the node source
+        nodeEventListener.onEvent(mockInMemoryEvent);
+        assertThat(dic.getInventory(), hasSize(1));
+        assertThat(dic.hasAnyNodeReferences(), equalTo(true));
+
+        // Add the same inventory from an alarm source
+        dic.handleNewOrUpdatedAlarm(alarm1);
+        assertThat(dic.getInventory(), hasSize(1));
+        assertThat(dic.hasAnyAlarmReferences(), equalTo(true));
+
+        // Delete from the alarm source, inventory should still exist
+        dic.handleAlarmSnapshot(Collections.emptyList());
+        assertThat(dic.getInventory(), hasSize(1));
+        assertThat(dic.hasAnyAlarmReferences(), equalTo(false));
+
+        // Delete from the node source, inventory should now be gone
+        nodeEventListener.onEvent(mockDeleteInMemoryEvent);
+        assertThat(dic.getInventory(), hasSize(0));
+        assertThat(dic.hasAnyNodeReferences(), equalTo(false));
+
+        assertThat(dic.hasAnyInventoryReferences(), equalTo(false));
     }
 
     private class InventoryHandlerImpl implements InventoryHandler {

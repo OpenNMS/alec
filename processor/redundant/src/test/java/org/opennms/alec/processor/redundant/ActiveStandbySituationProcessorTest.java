@@ -91,7 +91,7 @@ public class ActiveStandbySituationProcessorTest {
         ArgumentCaptor<Situation> argumentCaptor = ArgumentCaptor.forClass(Situation.class);
         doNothing().when(mockSituationDataSource).forwardSituation(argumentCaptor.capture());
 
-        situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.OCE_DOMAIN);
+        situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.ALEC_DOMAIN);
 
         situationProcessor.accept(mockSituation);
         verify(mockSituationDataSource, times(1)).forwardSituation(mockSituation);
@@ -121,7 +121,7 @@ public class ActiveStandbySituationProcessorTest {
         ArgumentCaptor<Situation> argumentCaptor = ArgumentCaptor.forClass(Situation.class);
         doNothing().when(mockSituationDataSource).forwardSituation(argumentCaptor.capture());
 
-        situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.OCE_DOMAIN);
+        situationProcessor.handleRoleChange(Role.ACTIVE, ActiveStandbySituationProcessor.ALEC_DOMAIN);
 
         await().atMost(10, TimeUnit.SECONDS).until(() ->
                 situationProcessor.getUnconfirmedSituations().isEmpty());

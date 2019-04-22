@@ -123,7 +123,7 @@ public class ApiMapper {
 
     public InMemoryEvent toEvent(Situation situation) {
         final ImmutableInMemoryEvent.Builder eventBuilder = ImmutableInMemoryEvent.newBuilder();
-        eventBuilder.setUei(SITUATION_UEI).setSource("oce");
+        eventBuilder.setUei(SITUATION_UEI).setSource("alec");
 
         // Use the max severity as the situation severity
         final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
@@ -145,7 +145,7 @@ public class ApiMapper {
 
             String description = earliestAlarm.getDescription();
             if (situation.getDiagnosticText() != null) {
-                description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
+                description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
             }
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
         }

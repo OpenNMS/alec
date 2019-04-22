@@ -99,7 +99,7 @@ public class GraphMLConverter {
         this.situations = Objects.requireNonNull(situations);
         long now = new Date().getTime();
         inventoryEdgeTimeNormalizer = new EdgeTimeNormalizer(now);
-        graph.setProperty(ONMS_GRAPHML_GRAPH_NAMESPACE, "oce");
+        graph.setProperty(ONMS_GRAPHML_GRAPH_NAMESPACE, "alec");
         graph.setProperty(CREATED_TIMESTAMP_KEY, now);
         doc.addGraph(graph);
     }

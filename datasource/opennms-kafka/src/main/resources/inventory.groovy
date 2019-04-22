@@ -26,15 +26,11 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms
+package org.opennms.alec.datasource.opennms
 
 import com.google.common.base.Strings
 import groovy.util.logging.Slf4j
-import org.opennms.alec.datasource.common.inventory.Edge
-import org.opennms.alec.datasource.common.inventory.ManagedObjectType
-import org.opennms.alec.datasource.common.inventory.Port
-import org.opennms.alec.datasource.common.inventory.Segment
-import org.opennms.alec.datasource.common.inventory.TypeToInventory
+import org.opennms.alec.datasource.common.inventory.*
 import org.opennms.alec.datasource.opennms.EnrichedAlarm
 import org.opennms.alec.datasource.opennms.InventoryFromAlarm
 import org.opennms.alec.datasource.opennms.OpennmsMapper

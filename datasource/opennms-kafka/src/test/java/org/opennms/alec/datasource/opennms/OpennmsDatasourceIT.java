@@ -57,7 +57,7 @@ public abstract class OpennmsDatasourceIT {
 
     @Rule
     public KafkaEmbedded embeddedKafka = new KafkaEmbedded(2, true, 2,
-            "alarms", "alarmFeedback", "nodes", "oce-inventory", "edges");
+            "alarms", "alarmFeedback", "nodes", "alec-inventory", "edges");
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();

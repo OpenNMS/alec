@@ -84,7 +84,7 @@ public class DirectAlarmFeedbackDatasource implements AlarmFeedbackListener, Ala
 
     /**
      * @param alarmFeedbackDao used to retrieve the current feedback
-     * @param mapper used to Map between API and OCE types
+     * @param mapper used to Map between API and ALEC types
      */
     public DirectAlarmFeedbackDatasource(AlarmFeedbackDao alarmFeedbackDao, ApiMapper mapper) {
         this.feedbackDao = Objects.requireNonNull(alarmFeedbackDao);

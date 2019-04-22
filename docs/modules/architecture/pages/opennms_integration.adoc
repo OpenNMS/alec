@@ -11,7 +11,7 @@ These events are then sent to _eventd_ where they are processed and enriched wit
 _alarmd_ listens for events that contain alarm meta-data and creates or updates alarms that correspond to these.
 In addition to the existing alarm processing that was present in OpenNMS before 24.0.0, _alarmd_ now expose a series of link:https://github.com/OpenNMS/opennms-integration-api/blob/1f08398169d10538da7379e13eb8f4cd23933450/api/src/main/java/org/opennms/integration/api/v1/alarms/AlarmPersisterExtension.java[hooks] that can be used to alter/enrich the alarms when they are created.
 
-OCE leverages these hooks to perform additional processing and *tag* the alarms with a managed object type and managed object instance.
+ALEC leverages these hooks to perform additional processing and *tag* the alarms with a managed object type and managed object instance.
 See the <<managed_object_tagging>> section bellow for more details.
 
 OpenNMS also provides facilities to be notified when alarms are in some way modified.

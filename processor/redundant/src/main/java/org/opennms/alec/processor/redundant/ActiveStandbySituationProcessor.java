@@ -64,12 +64,12 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
     /**
      * The redundancy domain to register with.
      */
-    static final String OCE_DOMAIN = "oce";
+    static final String ALEC_DOMAIN = "alec";
 
     /**
      * The service Id to register with the redundancy domain.
      */
-    private static final String OCE_SERVICE_ID = "oce.driver";
+    private static final String ALEC_SERVICE_ID = "alec.driver";
 
     /**
      * The domain manager.
@@ -108,7 +108,7 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
     private ActiveStandbySituationProcessor(SituationDatasource situationDatasource,
                                             DomainManagerFactory domainManagerFactory) {
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
-        domainManager = Objects.requireNonNull(domainManagerFactory).getManagerForDomain(OCE_DOMAIN);
+        domainManager = Objects.requireNonNull(domainManagerFactory).getManagerForDomain(ALEC_DOMAIN);
     }
 
     /**
@@ -122,10 +122,10 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
                                                        DomainManagerFactory domainManagerFactory) {
         ActiveStandbySituationProcessor instance = new ActiveStandbySituationProcessor(situationDatasource,
                 domainManagerFactory);
-        LOG.debug("Registering service {} for domain {}", OCE_SERVICE_ID, OCE_DOMAIN);
+        LOG.debug("Registering service {} for domain {}", ALEC_SERVICE_ID, ALEC_DOMAIN);
         // The domain registration has to happen after the instance has been created to prevent leaking a 'this'
         // reference that may be used by the domain manager before the processor has been fully constructed
-        instance.domainManager.register(OCE_SERVICE_ID, instance);
+        instance.domainManager.register(ALEC_SERVICE_ID, instance);
 
         return instance;
     }
@@ -198,8 +198,8 @@ public class ActiveStandbySituationProcessor implements SituationProcessor, Role
      * Deregister with the domain manager.
      */
     void destroy() {
-        LOG.debug("Deregistering service {}", OCE_SERVICE_ID);
-        domainManager.deregister(OCE_SERVICE_ID);
+        LOG.debug("Deregistering service {}", ALEC_SERVICE_ID);
+        domainManager.deregister(ALEC_SERVICE_ID);
     }
 
     /**

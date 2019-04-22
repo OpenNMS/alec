@@ -43,13 +43,31 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-resources</id>
+                        <id>copy-resources-sentinel</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/sentinel-overlay/deploy</outputDirectory>
+                            <outputDirectory>${basedir}/src/main/resources/overlays/sentinel-overlay/deploy</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/../assembly/kar/target</directory>
+                                    <includes>
+                                        <include>opennms-alec-plugin.kar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-resources-integrated</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/src/main/resources/overlays/opennms-integrated-overlay/deploy</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${basedir}/../assembly/kar/target</directory>
@@ -68,7 +86,13 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>${basedir}/src/main/resources/sentinel-overlay/deploy</directory>
+                            <directory>${basedir}/src/main/resources/overlays/sentinel-overlay/deploy</directory>
+                            <includes>
+                                <include>opennms-alec-plugin.kar</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/src/main/resources/overlays/opennms-integrated-overlay/deploy</directory>
                             <includes>
                                 <include>opennms-alec-plugin.kar</include>
                             </includes>

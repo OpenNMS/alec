@@ -7,7 +7,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>/oce/</outputDirectory>
+            <outputDirectory>/alec/</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveFiltering>true</useTransitiveFiltering>
         </dependencySet>

@@ -98,7 +98,7 @@ Number of active alarms stored in Elasticsearch (Alarm History)   [ Success  ] =
 
 === Enable Syslogd
 
-Let's take advantage of the Syslog patterns and event definitions provided in OCE by enabling Syslogd.
+Let's take advantage of the Syslog patterns and event definitions provided in ALEC by enabling Syslogd.
 
 Enable Syslogd by editing `$OPENNMS_HOME/etc/service-configuration.xml` and changing:
 ```

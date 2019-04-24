@@ -202,7 +202,7 @@ class InventoryFactory {
         final List<InventoryObject> ios = new ArrayList<>();
         final ManagedObjectType type;
         try {
-            type = fromName(alarm.getManagedObjectType());
+            type = ManagedObjectType.fromName(alarm.getManagedObjectType());
         } catch (NoSuchElementException nse) {
             log.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getManagedObjectType(), alarm.getManagedObjectInstance());
             return new InventoryFromAlarm(ios);

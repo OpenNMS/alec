@@ -22,7 +22,7 @@ The default implementation of this mapping can be found in the _inventory.groovy
 
 The included implementation uses the link:http://groovy-lang.org/[Groovy] scripting language.
 
-IMPORANT: Ensure to reference the script that corresponds to the same version of ALEC that you are running.
+IMPORTANT: Ensure to reference the script that corresponds to the same version of ALEC that you are running.
 
 To modify the behaviour of the current implementation, you may begin with one of the scripts above.
 See the appropriate datasource page for specific configuration and API information.

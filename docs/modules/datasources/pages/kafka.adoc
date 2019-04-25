@@ -10,6 +10,8 @@ The Kafka data source integrates with OpenNMS by leveraging the Kafka Producer a
 The Kafka Producer feature is used to forward alarms, nodes and topology data encoded in link:https://developers.google.com/protocol-buffers/[protocol buffers] to several topics.
 The Kafka Datasource consumes from these topics and provides ALEC with a feed of alarms and inventory.
 
+TIP: The protocol buffers used by the Kafka Producer feature in OpenNMS Horizon 24.0.0 are available link:https://github.com/OpenNMS/opennms/tree/0ae966e9ac632fb40ea7a915e57c1e057ba95989/features/kafka/producer/src/main/proto[here].
+
 [topics]
 == Topics
 

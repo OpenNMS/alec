@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import base64
 import os
+import re
 import json
 import urllib.request
 from urllib.error import URLError

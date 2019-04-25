@@ -13,6 +13,7 @@
     <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao" />
     <reference id="edgeDao" interface="org.opennms.integration.api.v1.dao.EdgeDao" />
     <reference id="eventForwarder" interface="org.opennms.integration.api.v1.events.EventForwarder" />
+    <reference id="eventService" interface="org.opennms.integration.api.v1.events.EventSubscriptionService" />
 
     <bean id="scriptService" class="org.opennms.alec.datasource.opennms.jvm.OpennmsDirectScriptedInventory">
         <argument value="${scriptFile}"/>
@@ -44,11 +45,12 @@
 
     <!-- Direct Datasource -->
     <bean id="directInventoryDatasource" class="org.opennms.alec.datasource.opennms.jvm.DirectInventoryDatasource"
-          init-method="init">
+          init-method="init" destroy-method="destroy">
         <argument ref="nodeDao"/>
         <argument ref="alarmDao"/>
         <argument ref="edgeDao"/>
         <argument ref="mapper"/>
+        <argument ref="eventService"/>
     </bean>
     <service ref="directInventoryDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource"/>
     <service ref="directInventoryDatasource" interface="org.opennms.integration.api.v1.alarms.AlarmLifecycleListener"/>

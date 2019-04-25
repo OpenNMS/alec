@@ -72,16 +72,16 @@ workflows:
             tags:
               only: /.*/
 
-      # Run deploy jobs just on version tags and master branch
+      # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
           requires:
             - smoke-test
           filters:
-            tags:
-              only: /^v.*/
+            # Maven deploy requires GPG signing for releases - we do this manually
             branches:
               only:
-                - master
+                - develop
+                - /release-.*/
       - deploy-packages:
           requires:
             - smoke-test
@@ -91,7 +91,8 @@ workflows:
               only: /^v.*/
             branches:
               only:
-                - master
+                - develop
+                - /release-.*/
       - deploy-docs:
           requires:
             - build-docs
@@ -100,7 +101,8 @@ workflows:
               only: /^v.*/
             branches:
               only:
-                - master
+                - develop
+                - /release-.*/
       - yank-snapshot-packages:
           requires:
             - deploy-packages

@@ -26,6 +26,9 @@ def build_request(path, method=None):
             method=method
     )
 
+def tupleversion(v):
+    return tuple(re.split('[.+-]+', v))
+
 # Load the list of packages available in the repository
 req = build_request('/api/v1/repos/opennms/plugin-snapshot/packages.json')
 with urllib.request.urlopen(req) as url:
@@ -37,8 +40,10 @@ packages_by_key = {}
 for package in all_packages:
     # Filter
     if package['name'] in FILTERED_PACKAGE_NAMES:
+        # Extract major/min/patch version
+        version = tupleversion(package['version'])[:3]
         # Group by
-        key = (package['name'], package['type'])
+        key = (package['name'], package['type'], version)
         # Convert the created_at field from a ISO8601 string  '2019-03-28T21:10:11.000Z' to a date
         package['created_at'] = datetime.strptime(package['created_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
         # Append

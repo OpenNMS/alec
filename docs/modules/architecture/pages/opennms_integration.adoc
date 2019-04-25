@@ -74,4 +74,4 @@ In this case we search for a node with the same label as given in the `zHostname
 We then update the managed object instance on the alarm to include the resolved attributes.
 When we need to store multiple attributes in managed object instance field we encode these in JSON so that they can be represented as a single string.
 
-When the alarm is received by ALEC, it now contains sufficient information in the MO type and instance fields so that it can be attached to a corresponding inventory object.
+When the alarm is received by ALEC, it now contains sufficient information in the managed object type and instance fields so that it can be attached to a corresponding inventory object.

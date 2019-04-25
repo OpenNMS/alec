@@ -78,7 +78,7 @@
                         </goals>
                         <configuration>
                             <sourceFile>
-                                ${project.build.directory}/releases/${project.artifactId}-${project.version}/oce/org.opennms.alec.assembly.kar-${project.version}.kar
+                                ${project.build.directory}/releases/${project.artifactId}-${project.version}/alec/org.opennms.alec.assembly.kar-${project.version}.kar
                             </sourceFile>
                             <destinationFile>
                                 ${project.build.directory}/deb/usr/share/opennms/deploy/opennms-alec-plugin.kar

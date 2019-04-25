@@ -52,7 +52,7 @@ public class EventMarshalTest {
         assertThat(JaxbUtils.toXml(e, Event.class), isSimilarTo("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
                 "<event xmlns=\"http://xmlns.opennms.org/xsd/event\">\n" +
                 "    <uei>someuei</uei>\n" +
-                "    <source>oce</source>\n" +
+                "    <source>alec</source>\n" +
                 "    <parms>\n" +
                 "        <parm>\n" +
                 "            <parmName>k1</parmName>\n" +
@@ -75,7 +75,7 @@ public class EventMarshalTest {
                 "    <events>\n" +
                 "        <event>\n" +
                 "            <uei>someuei</uei>\n" +
-                "            <source>oce</source>\n" +
+                "            <source>alec</source>\n" +
                 "            <parms>\n" +
                 "                <parm>\n" +
                 "                    <parmName>k1</parmName>\n" +

@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.oce.datasource.opennms
+package org.opennms.alec.datasource.opennms
 
 import com.google.common.base.Strings
 import groovy.util.logging.Slf4j
@@ -45,8 +45,6 @@ import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos
 import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos.Node
 import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos.TopologyEdge
 
-import static org.opennms.alec.datasource.common.inventory.ManagedObjectType.*
-
 @Slf4j
 class InventoryFactory {
     private static final long PORT_LINK_WEIGHT = 100;
@@ -61,25 +59,25 @@ class InventoryFactory {
         // Set the type of the link
         long weightForLink = PORT_LINK_WEIGHT;
         if(edge.hasSourceNode() && edge.hasTargetNode()) {
-            edgeIoBuilder.setType(NodeLink.getName());
+            edgeIoBuilder.setType(ManagedObjectType.NodeLink.getName());
         } else if (edge.hasSourceSegment() || edge.hasTargetSegment()) {
             weightForLink = SEGMENT_LINK_WEIGHT;
-            edgeIoBuilder.setType(BridgeLink.getName());
+            edgeIoBuilder.setType(ManagedObjectType.BridgeLink.getName());
         } else {
-            edgeIoBuilder.setType(SnmpInterfaceLink.getName());
+            edgeIoBuilder.setType(ManagedObjectType.SnmpInterfaceLink.getName());
         }
 
         // Derive segments if applicable
         if (edge.hasSourceSegment()) {
             iosBuilder.addInventoryObject(InventoryObject.newBuilder()
-                    .setType(BridgeSegment.getName())
+                    .setType(ManagedObjectType.BridgeSegment.getName())
                     .setId(Segment.generateId(edge.getSourceSegment().getRef().getId(),
                     edge.getSourceSegment().getRef().getProtocol().name()))
                     .build());
         }
         if (edge.hasTargetSegment()) {
             iosBuilder.addInventoryObject(InventoryObject.newBuilder()
-                    .setType(BridgeSegment.getName())
+                    .setType(ManagedObjectType.BridgeSegment.getName())
                     .setId(Segment.generateId(edge.getTargetSegment().getRef().getId(),
                     edge.getTargetSegment().getRef().getProtocol().name()))
                     .build());
@@ -95,7 +93,7 @@ class InventoryFactory {
                     .setWeight(weightForLink)
                     .setId(Port.generateId(edge.getSourcePort().getIfIndex(),
                     OpennmsMapper.toNodeCriteria(edge.getSourcePort().getNodeCriteria())))
-                    .setType(SnmpInterface.getName())
+                    .setType(ManagedObjectType.SnmpInterface.getName())
                     .build();
         } else if (edge.hasSourceNode()) {
             peerA = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
@@ -115,7 +113,7 @@ class InventoryFactory {
                             .getRef()
                             .getProtocol()
                             .name()))
-                    .setType(BridgeSegment.getName())
+                    .setType(ManagedObjectType.BridgeSegment.getName())
                     .build();
         }
 
@@ -125,7 +123,7 @@ class InventoryFactory {
                     .setWeight(weightForLink)
                     .setId(Port.generateId(edge.getTargetPort().getIfIndex(),
                     OpennmsMapper.toNodeCriteria(edge.getTargetPort().getNodeCriteria())))
-                    .setType(SnmpInterface.getName())
+                    .setType(ManagedObjectType.SnmpInterface.getName())
                     .build();
         } else if (edge.hasTargetNode()) {
             peerZ = InventoryModelProtos.InventoryObjectPeerRef.newBuilder()
@@ -145,7 +143,7 @@ class InventoryFactory {
                             .getRef()
                             .getProtocol()
                             .name()))
-                    .setType(BridgeSegment.getName())
+                    .setType(ManagedObjectType.BridgeSegment.getName())
                     .build();
         }
         
@@ -204,7 +202,7 @@ class InventoryFactory {
         final List<InventoryObject> ios = new ArrayList<>();
         final ManagedObjectType type;
         try {
-            type = fromName(alarm.getManagedObjectType());
+            type = ManagedObjectType.fromName(alarm.getManagedObjectType());
         } catch (NoSuchElementException nse) {
             log.warn("Found unsupported type: {} with id: {}. Skipping.", alarm.getManagedObjectType(), alarm.getManagedObjectInstance());
             return new InventoryFromAlarm(ios);
@@ -217,16 +215,16 @@ class InventoryFactory {
             case Node:
                 // Nothing to do here
                 break;
-            case SnmpInterfaceLink:
+            case ManagedObjectType.SnmpInterfaceLink:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getSnmpInterfaceLink(alarm.getManagedObjectInstance())));
                 break;
-            case EntPhysicalEntity:
+            case ManagedObjectType.EntPhysicalEntity:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getEntPhysicalEntity(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
-            case BgpPeer:
+            case ManagedObjectType.BgpPeer:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
-            case VpnTunnel:
+            case ManagedObjectType.VpnTunnel:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getVpnTunnel(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             default:
@@ -240,7 +238,7 @@ class InventoryFactory {
     static InventoryObject toInventoryObject(OpennmsModelProtos.SnmpInterface snmpInterface, InventoryObject parent) {
         log.trace("toInventoryObject: {} : {}", snmpInterface, parent);
         return InventoryObject.newBuilder()
-                .setType(SnmpInterface.getName())
+                .setType(ManagedObjectType.SnmpInterface.getName())
                 .setId(Port.generateId((long) snmpInterface.getIfIndex(), parent.getId()))
                 .setFriendlyName(snmpInterface.getIfDescr())
                 .setParentType(parent.getType())

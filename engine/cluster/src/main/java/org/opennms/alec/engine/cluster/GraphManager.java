@@ -282,7 +282,7 @@ public class GraphManager {
         }
         final ResourceKey resourceKey = getResourceKeyFor(alarm);
         final CEVertex vertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
-            LOG.info("No existing vertex was found with resource key: {} for alarm with id: {}. Creating a new vertex.", resourceKey, alarm.getId());
+            LOG.info("No existing vertex was found with resource key: {} for alarm with id: {} and contents: {}. Creating a new vertex.", resourceKey, alarm.getId(), alarm);
             final CEVertex v = new CEVertex(vertexIdGenerator.getAndIncrement(), resourceKey);
             g.addVertex(v);
             didGraphChange.set(true);

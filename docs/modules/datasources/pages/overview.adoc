@@ -1,9 +1,9 @@
-= OCE Datasources
+= ALEC Datasources
 :imagesdir: ../assets/images
 
 == Overview
 
-The OCE Datasource is responsible for interacting with the monitoring system and providing a feed of alarms, inventory objects and situations.
+The ALEC Datasource is responsible for interacting with the monitoring system and providing a feed of alarms, inventory objects and situations.
 Data sources are also responsible for creating the situations in the *monitoring system*. 
 
 We provide two datasources for integrating with OpenNMS: one for the xref:direct.adoc[monolithic deployment] and one for the xref:kafka.adoc[distributed deployment].

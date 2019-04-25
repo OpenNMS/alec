@@ -75,7 +75,7 @@ public class TFModel implements AutoCloseable {
         if (Strings.isNullOrEmpty(modelPath)) {
             LOG.info("No model path is set. Using default model from class-path.");
             try {
-                tempDir = Files.createTempDirectory("oce-tf");
+                tempDir = Files.createTempDirectory("alec-tf");
                 effectiveModelPath = tempDir.toAbsolutePath().toString();
                 if (bundleContext != null) {
                     // If we're given a bundle context, use it

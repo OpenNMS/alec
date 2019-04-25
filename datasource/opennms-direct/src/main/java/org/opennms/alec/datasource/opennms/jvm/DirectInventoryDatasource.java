@@ -141,7 +141,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param nodeDao  used to retrieve the current inventory
      * @param alarmDao used to retrieve the current inventory
      * @param edgeDao  used to retrieve the current inventory
-     * @param mapper   used to Map between API and OCE types
+     * @param mapper   used to Map between API and ALEC types
      */
     public DirectInventoryDatasource(NodeDao nodeDao, AlarmDao alarmDao, EdgeDao edgeDao, ApiMapper mapper) {
         this.nodeDao = Objects.requireNonNull(nodeDao);

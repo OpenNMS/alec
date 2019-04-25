@@ -160,7 +160,6 @@ jobs:
             mkdir -p ~/dist/
             cp assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/* ~/dist/
             cp assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/* ~/dist/
-            cp assembly/kar/target/opennms-alec-plugin.kar ~/dist/
           when: always
 
       - store_artifacts:
@@ -171,7 +170,6 @@ jobs:
           root: ~/
           paths:
             - project
-            - dist/*.kar
 
   build-debian:
     executor: build-debian-executor
@@ -238,12 +236,6 @@ jobs:
       - restore_cache:
           keys:
           - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
-
-      - run:
-          name: Make the kar available
-          command: |
-            mkdir -p ~/assembly/kar/target/
-            ln -s ~/dist/opennms-oce-plugin.kar ~/assembly/kar/target/opennms-oce-plugin.kar
 
       - run:
           name: Import docker images

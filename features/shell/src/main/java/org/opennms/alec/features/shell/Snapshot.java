@@ -85,21 +85,21 @@ public class Snapshot implements Action {
         final Path outputPath = Paths.get(outputFolder);
         Files.createDirectories(outputPath);
 
-        final Path inventoryPath = outputPath.resolve("oce.inventory.xml");
+        final Path inventoryPath = outputPath.resolve("alec.inventory.xml");
         System.out.printf("Saving inventory to: %s\n", inventoryPath);
         final List<InventoryObject> ios = inventoryDatasource.getInventory();
         final Inventory inventory = JaxbUtils.toInventory(ios);
         JaxbUtils.write(inventory, inventoryPath);
         System.out.printf("Done saving %d inventory objects.\n", inventory.getModelObjectEntry().size());
 
-        final Path alarmsPath = outputPath.resolve("oce.alarms.xml");
+        final Path alarmsPath = outputPath.resolve("alec.alarms.xml");
         System.out.printf("Saving alarms to: %s\n", alarmsPath);
         final List<Alarm> apiAlarms = alarmDatasource.getAlarms();
         final Alarms alarms = JaxbUtils.toAlarms(apiAlarms);
         JaxbUtils.write(alarms, alarmsPath);
         System.out.printf("Done saving %d alarms.\n", alarms.getAlarm().size());
 
-        final Path situationsPath = outputPath.resolve("oce.situations.xml");
+        final Path situationsPath = outputPath.resolve("alec.situations.xml");
         System.out.printf("Saving situations to: %s\n", situationsPath);
         final List<Situation> apiSituations = situationDatasource.getSituations();
         final Situations situations = JaxbUtils.toSituations(apiSituations);

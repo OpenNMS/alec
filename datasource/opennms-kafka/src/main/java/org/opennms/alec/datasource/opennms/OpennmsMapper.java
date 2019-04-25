@@ -58,12 +58,20 @@ public class OpennmsMapper {
             alarmBuilder.setNodeId(alarm.getNodeCriteria().getId());
         }
 
+        // Type and instance may be empty strings and in that case we don't want to set them on the alarm we are
+        // creating
+        if(!Strings.isNullOrEmpty(alarm.getManagedObjectType())) {
+            alarmBuilder.setInventoryObjectType(alarm.getManagedObjectType());
+        }
+
+        if(!Strings.isNullOrEmpty(alarm.getManagedObjectInstance())) {
+            alarmBuilder.setInventoryObjectId(alarm.getManagedObjectInstance());
+        }
+        
         return alarmBuilder
                 .setId(alarm.getReductionKey())
                 .setTime(alarm.getLastEventTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
-                .setInventoryObjectType(alarm.getManagedObjectType())
-                .setInventoryObjectId(alarm.getManagedObjectInstance())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
                 .build();

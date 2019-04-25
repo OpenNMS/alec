@@ -58,7 +58,7 @@ public class Event {
     private String uei;
 
     @XmlElement(name="source")
-    private String source = "oce";
+    private String source = "alec";
 
     @XmlElement(name="parms")
     private Parameters parameters = new Parameters();

@@ -58,15 +58,15 @@ Let's take a snapshot of the current graph:
 opennms-alec:datasource-snapshot /tmp/snap1
 ```
 
-Now edit `/tmp/snap1/oce.situations.xml` to reflect the desired state of situations.
+Now edit `/tmp/snap1/alec.situations.xml` to reflect the desired state of situations.
 
 Build vectors from the dataset:
 
 ```
-opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/oce.alarms.xml \
-               --inventory-in /tmp/snap1/oce.inventory.xml \
-               --situations-in /tmp/snap1/oce.situations.xml \
-                --csv-out /tmp/snap1/oce.vector.dataset.csv
+opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/alec.alarms.xml \
+               --inventory-in /tmp/snap1/alec.inventory.xml \
+               --situations-in /tmp/snap1/alec.situations.xml \
+                --csv-out /tmp/snap1/alec.vector.dataset.csv
 ```
 
 === Train with Ludwig
@@ -74,7 +74,7 @@ opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/oce.alarms.xml \
 Use Ludwig to train the model:
 
 ```
-ludwig train --data_csv /tmp/snap1/oce.vector.dataset.csv --model_definition_file model.yaml
+ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv --model_definition_file model.yaml
 ```
 
 NOTE: Pull `model.yaml` from the `ludwig_model.yaml` file in the source tree
@@ -132,14 +132,14 @@ config:update
 Generate situations:
 
 ```
-opennms-alec:process-alarms --alarms-in /tmp/snap1/oce.alarms.xml \
-    --inventory-in /tmp/snap1/oce.inventory.xml \
-    --situations-out /tmp/snap1/oce.situations.deeplearning.trained.xml \
+opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
+    --inventory-in /tmp/snap1/alec.inventory.xml \
+    --situations-out /tmp/snap1/alec.situations.deeplearning.trained.xml \
     --engine deeplearning
 ```
 
 Compare results:
 
 ```
-opennms-alec:score-situations -s peer /tmp/snap1/oce.situations.xml /tmp/snap1/oce.situations.deeplearning.trained.xml
+opennms-alec:score-situations -s peer /tmp/snap1/alec.situations.xml /tmp/snap1/alec.situations.deeplearning.trained.xml
 ```

@@ -3,7 +3,7 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <!-- Configuration properties -->
-    <cm:property-placeholder id="modelProperties" persistent-id="org.opennms.oce.datasource.jaxb" update-strategy="reload">
+    <cm:property-placeholder id="modelProperties" persistent-id="org.opennms.alec.datasource.jaxb" update-strategy="reload">
         <cm:default-properties>
             <cm:property name="metamodelPath" value=""/>
             <cm:property name="inventoryPath" value=""/>

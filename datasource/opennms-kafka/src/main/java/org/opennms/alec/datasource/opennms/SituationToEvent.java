@@ -64,7 +64,7 @@ public class SituationToEvent {
 
         String description = alarmForDescr.getDescription();
         if (situation.getDiagnosticText() != null) {
-            description += "\n<p>OCE Diagnostic: " + situation.getDiagnosticText() + "</p>";
+            description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
         }
         e.addParam("situationDescr", description);
 

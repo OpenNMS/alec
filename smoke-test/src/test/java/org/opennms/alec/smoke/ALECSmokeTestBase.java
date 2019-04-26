@@ -29,8 +29,6 @@
 package org.opennms.alec.smoke;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_ALARM_FEEDBACK_TOPIC;
 import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_ALARM_TOPIC;
 import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_EDGES_TOPIC;
@@ -38,14 +36,11 @@ import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_INVE
 import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_NODE_TOPIC;
 import static org.opennms.alec.smoke.containers.OpenNMSContainer.DB_ALIAS;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -55,16 +50,13 @@ import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
-import org.opennms.alec.smoke.containers.BrowserWebDriverContainer;
-import org.opennms.alec.smoke.containers.HelmContainer;
+import org.junit.rules.TestRule;
 import org.opennms.alec.smoke.containers.KafkaContainer;
 import org.opennms.alec.smoke.containers.OpenNMSContainer;
 import org.opennms.alec.smoke.containers.PostgreSQLContainer;
-import org.opennms.alec.smoke.grafana.GrafanaRestClient;
 import org.opennms.alec.smoke.opennms.OpenNMSRestClient;
 import org.opennms.alec.smoke.util.DockerImageResolver;
 import org.opennms.alec.smoke.util.Network;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -73,109 +65,76 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public abstract class ALECSmokeTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(ALECSmokeTestBase.class);
-    protected static final String PLUGIN_NAME = "opennms-helm-app";
-    protected static final String DATA_SOURCE_NAME = "OpenNMS-Fault-Management";
-    protected static final String DASHBOARD_NAME = "Helm-Dashboard";
-    protected static final String GENERIC_ALARM_TITLE = "Alarm: Generic Trigger";
-    protected GrafanaRestClient grafanaRestClient;
     protected OpenNMSRestClient openNMSRestClient;
 
-    // Define the containers used by all correlation tests
-
+    // Define the containers used by all tests
     protected final GenericContainer kafkaContainer = new KafkaContainer("4.0.0")
             .withNetwork(Network.getNetwork())
             .withNetworkAliases("kafka")
             .waitingFor(new ALECSmokeTestBase.WaitForKafkaTopics());
 
-    protected final GenericContainer postgreSQLContainer = new PostgreSQLContainer(DockerImageResolver.getImageAndTag(
-            "postgres"))
-            .withNetwork(Network.getNetwork())
-            .withNetworkAliases(DB_ALIAS);
-
-    protected final org.testcontainers.containers.BrowserWebDriverContainer webDriverContainer =
-            new BrowserWebDriverContainer(DockerImageResolver.getImageAndTag("selenium"))
-                    .withCapabilities(DesiredCapabilities.chrome())
-                    .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_FAILING,
-                            new File(Optional.ofNullable(System.getenv("TEST_RECORDING_DIR")).orElse("/tmp")));
+    protected final GenericContainer postgreSQLContainer =
+            new PostgreSQLContainer(DockerImageResolver.getImageAndTag(
+                    "postgres"))
+                    .withNetwork(Network.getNetwork())
+                    .withNetworkAliases(DB_ALIAS);
 
     protected final OpenNMSContainer opennmsContainer = new OpenNMSContainer();
 
-    protected final HelmContainer helmContainer = new HelmContainer();
+    // The list of containers to use for tests in startup-order which can be modified by tests through the add/replace
+    // methods in this class
+    private final List<GenericContainer> baseContainers = new ArrayList<>(Arrays.asList(kafkaContainer,
+            postgreSQLContainer, opennmsContainer));
 
-    // The list of containers to use for tests in startup-order
-    private final List<GenericContainer> containers = new ArrayList<>(Arrays.asList(kafkaContainer, postgreSQLContainer,
-            opennmsContainer, helmContainer));
-
-    // Future improvement could be to define a docker compose file and load that rather than individual
-    // containers in a rule chain
     @Rule
-    public RuleChain rc = containerStartupRuleChain();
+    public final RuleChain containerRuleChain = buildContainerStartupRuleChain();
 
-    private RuleChain containerStartupRuleChain() {
+    private RuleChain buildContainerStartupRuleChain() {
+        // Let subclasses change the containers
         adjustContainersForTest();
-        CorrelationSetupAndCleanupRule setupAndCleanup =
-                new CorrelationSetupAndCleanupRule(() -> setup(getOpennmsContainer()), this::cleanup);
-        Iterator<GenericContainer> containerIterator = containers.iterator();
+
+        // Add all the containers to the rule chain
+        Iterator<GenericContainer> containerIterator = baseContainers.iterator();
         RuleChain rc = RuleChain.outerRule(containerIterator.next());
 
         while (containerIterator.hasNext()) {
             rc = rc.around(containerIterator.next());
         }
 
-        // Add the web driver container and the setup/cleanup rules last
-        return rc.around(webDriverContainer).around(setupAndCleanup);
+        // Add setup/cleanup rules
+        return rc.around(new CorrelationSetupAndCleanupRule(this::setup, this::cleanup))
+                .around(setupAndCleanupRule());
     }
 
-    protected abstract void adjustContainersForTest();
-
-    protected void addContainers(List<GenericContainer> containersToAdd) {
-        containers.addAll(Objects.requireNonNull(containersToAdd));
+    protected final void addContainers(List<GenericContainer> containersToAdd) {
+        baseContainers.addAll(Objects.requireNonNull(containersToAdd));
     }
 
-    protected void replaceContainer(GenericContainer existingContainer, GenericContainer newContainer) {
+    protected final void replaceContainer(GenericContainer existingContainer, GenericContainer newContainer) {
         Objects.requireNonNull(existingContainer);
         Objects.requireNonNull(newContainer);
-        containers.set(containers.indexOf(existingContainer), newContainer);
+        baseContainers.set(baseContainers.indexOf(existingContainer), newContainer);
     }
 
-    protected OpenNMSContainer getOpennmsContainer() {
-        return opennmsContainer;
-    }
-
-    private void setupHelm(GrafanaRestClient grafanaRestClient) throws IOException {
-        // Enable Helm plugin
-        grafanaRestClient.setPluginStatus(PLUGIN_NAME, true);
-
-        // Create FM datasource
-        grafanaRestClient.addFMDataSource(DATA_SOURCE_NAME);
-
-        // Create dashboard with alarm table
-        grafanaRestClient.addFMDasboard(DASHBOARD_NAME, DATA_SOURCE_NAME);
-    }
-
-    private void cleanupHelm(GrafanaRestClient grafanaRestClient) {
-        grafanaRestClient.deleteDashboard(DASHBOARD_NAME);
-        grafanaRestClient.deleteDataSource(DATA_SOURCE_NAME);
-        grafanaRestClient.setPluginStatus(PLUGIN_NAME, false);
-    }
-
-    private void setup(OpenNMSContainer openNMSContainer) {
+    private void setup() {
         LOG.info("Setting up...");
-        grafanaRestClient = new GrafanaRestClient(helmContainer.getHelmExternalUrl());
-        openNMSRestClient = new OpenNMSRestClient(openNMSContainer.getOpenNMSUrl());
-        try {
-            setupHelm(grafanaRestClient);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        // No alarms/situations
-        assertThat(openNMSRestClient.getAlarms(), hasSize(0));
+        openNMSRestClient = new OpenNMSRestClient(getOpennmsContainer().getOpenNMSUrl());
     }
 
     private void cleanup() {
         LOG.info("Cleaning up...");
         openNMSRestClient.clearAllAlarms();
-        cleanupHelm(grafanaRestClient);
+    }
+
+    // The following methods are intended to be overridden by sub classes
+    protected abstract void adjustContainersForTest();
+
+    protected TestRule setupAndCleanupRule() {
+        return RuleChain.emptyRuleChain();
+    }
+
+    protected OpenNMSContainer getOpennmsContainer() {
+        return opennmsContainer;
     }
 
     // This ensures the ALEC engine can initialize, without the topics it will wait forever

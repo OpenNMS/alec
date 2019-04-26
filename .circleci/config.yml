@@ -65,7 +65,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - smoke-test:
+      - smoke-test-commit:
           requires:
             - build
           filters:
@@ -75,7 +75,7 @@ workflows:
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
           requires:
-            - smoke-test
+            - smoke-test-commit
           filters:
             # Maven deploy requires GPG signing for releases - we do this manually
             branches:
@@ -84,7 +84,7 @@ workflows:
                 - /release-.*/
       - deploy-packages:
           requires:
-            - smoke-test
+            - smoke-test-commit
             - build-debian
           filters:
             tags:
@@ -106,6 +106,135 @@ workflows:
       - yank-snapshot-packages:
           requires:
             - deploy-packages
+
+  nightly:
+    triggers:
+    - schedule:
+        # Run daily @ 5:00am UTC
+        cron: "0 5 * * *"
+        filters:
+          branches:
+            only:
+            - develop
+            - /release-.*/
+    jobs:
+    - pre-build:
+        filters:
+          tags:
+            only: /.*/
+    - build:
+        requires:
+        - pre-build
+        filters:
+          tags:
+            only: /.*/
+    - smoke-test-nightly:
+        requires:
+        - build
+        filters:
+          tags:
+            only: /.*/
+
+commands:
+  smoke-test:
+    description: "Run the smoke tests"
+    parameters:
+      context:
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+
+        # Link root user's m2 repo from the cache with our user's m2 repo (the circleci user)
+      - run:
+          name: Link maven repo with cache
+          command: |
+            sudo chmod 777 /root
+            ln -s /root/.m2 ~/.m2
+
+      - restore_cache:
+          keys:
+          # attempt to use the cache from the last smoke-test run
+          - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+          # use the cache built for the same root pom
+          - v5-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v5-dependencies-
+
+      - restore_cache:
+          keys:
+          - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+
+      - run:
+          name: Import docker images
+          command: |
+            if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
+            source smoke-test/src/main/resources/docker_fixed_images
+            for dockerTargz in $(ls /tmp/docker); do
+              dockerName="${dockerTargz%.*}"
+              echo "Importing ${!dockerName} from $dockerTargz"
+              docker load --input /tmp/docker/"$dockerTargz"
+            done
+            docker image ls
+
+      - run:
+          name: Run the tests
+          command: |
+            mkdir $TEST_RECORDING_DIR
+            mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
+            cd smoke-test
+            if [ "<< parameters.context >>" = "commit" ]; then
+              mvn surefire:test -Dtest=OnCommitSmokeTest -DsmokeTest=true
+            elif [ "<< parameters.context >>" = "nightly" ]; then
+              mvn test -DsmokeTest=true
+            fi
+
+      - save_cache:
+          paths:
+          - /root/.m2
+          key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+
+      - run:
+          name: Save cacheable Docker images
+          command: |
+            if [ -d /tmp/docker ]; then exit 0; fi
+            mkdir /tmp/docker
+            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
+            source "$tagsFile"
+            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
+              echo "Saving docker image ${!dockerImg} as ${dockerImg}.tgz"
+              docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
+            done
+
+      - save_cache:
+          paths:
+          - /tmp/docker
+          key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+
+      - store_test_results:
+          path: ~/junit
+
+      - store_artifacts:
+          path: ~/logs
+
+      # Unfortunately I can't reference the env variable containing the recording path here so I have to
+      # duplicate it
+      - store_artifacts:
+          path: /tmp/test-recordings
+
+      # Future Improvements:
+      # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
+      #   - Mount the logs directories from the containers so we can copy the logs out easier
+      # - Add nightly test run back once tests are proven stable
+      #   - We might want to test nightly against the floating (latest) images for opennms and sentinel
 
 jobs:
   pre-build:
@@ -212,99 +341,19 @@ jobs:
           paths:
             - project/assembly/
 
-  smoke-test:
+  smoke-test-commit:
     executor: smoke-test-executor
 
     steps:
-      - attach_workspace:
-          at: ~/
+    - smoke-test:
+        context: commit
 
-      # Link root user's m2 repo from the cache with our user's m2 repo (the circleci user)
-      - run:
-          name: Link maven repo with cache
-          command: |
-            sudo chmod 777 /root
-            ln -s /root/.m2 ~/.m2
+  smoke-test-nightly:
+    executor: smoke-test-executor
 
-      - restore_cache:
-          keys:
-          # attempt to use the cache from the last smoke-test run
-          - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
-          # use the cache built for the same root pom
-          - v5-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v5-dependencies-
-          
-      - restore_cache:
-          keys:
-          - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
-
-      - run:
-          name: Import docker images
-          command: |
-            if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
-            source smoke-test/src/main/resources/docker_fixed_images
-            for dockerTargz in $(ls /tmp/docker); do
-              dockerName="${dockerTargz%.*}"
-              echo "Importing ${!dockerName} from $dockerTargz"
-              docker load --input /tmp/docker/"$dockerTargz"
-            done
-            docker image ls
-  
-      - run:
-          name: Run the tests
-          command: |
-            mkdir $TEST_RECORDING_DIR
-            mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
-            cd smoke-test
-            mvn test -DsmokeTest=true
-            
-      - save_cache:
-          paths:
-          - /root/.m2
-          key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
-
-      - run:
-          name: Save cacheable Docker images
-          command: |
-            if [ -d /tmp/docker ]; then exit 0; fi
-            mkdir /tmp/docker
-            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
-            source "$tagsFile"
-            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
-              echo "Saving docker image ${!dockerImg} as ${dockerImg}.tgz"
-              docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
-            done
-
-      - save_cache:
-          paths:
-          - /tmp/docker
-          key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
-  
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/junit/
-            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
-            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
-          when: always
-  
-      - store_test_results:
-          path: ~/junit
-
-      - store_artifacts:
-          path: ~/logs
-
-      # Unfortunately I can't reference the env variable containing the recording path here so I have to
-      # duplicate it
-      - store_artifacts:
-          path: /tmp/test-recordings
-
-      # Future Improvements:
-      # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
-      #   - Mount the logs directories from the containers so we can copy the logs out easier
-      # - Add nightly test run back once tests are proven stable
-      #   - We might want to test nightly against the floating (latest) images for opennms and sentinel
+    steps:
+    - smoke-test:
+        context: nightly
 
   build-docs:
     executor: docs-executor
@@ -376,4 +425,3 @@ jobs:
           command: |
             source .circleci/env/package_cloud
             .circleci/scripts/packagecloud-yank-snapshot-packages.py
-

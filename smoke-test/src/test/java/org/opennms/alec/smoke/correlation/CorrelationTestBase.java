@@ -28,16 +28,60 @@
 
 package org.opennms.alec.smoke.correlation;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.rules.TestRule;
 import org.opennms.alec.smoke.ALECSmokeTestBase;
+import org.opennms.alec.smoke.CorrelationSetupAndCleanupRule;
+import org.opennms.alec.smoke.containers.BrowserWebDriverContainer;
+import org.opennms.alec.smoke.containers.HelmContainer;
 import org.opennms.alec.smoke.grafana.Grafana44SeleniumDriver;
+import org.opennms.alec.smoke.grafana.GrafanaRestClient;
+import org.opennms.alec.smoke.util.DockerImageResolver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class CorrelationTestBase extends ALECSmokeTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(CorrelationTestBase.class);
+    private static final String PLUGIN_NAME = "opennms-helm-app";
+    private static final String DATA_SOURCE_NAME = "OpenNMS-Fault-Management";
+    private static final String DASHBOARD_NAME = "Helm-Dashboard";
+    private static final String GENERIC_ALARM_TITLE = "Alarm: Generic Trigger";
+    private GrafanaRestClient grafanaRestClient;
+    private HelmContainer helmContainer;
+    private org.testcontainers.containers.BrowserWebDriverContainer webDriverContainer;
+
+    @Override
+    protected final void adjustContainersForTest() {
+        helmContainer = new HelmContainer();
+        webDriverContainer =
+                new BrowserWebDriverContainer(DockerImageResolver.getImageAndTag("selenium"))
+                        .withCapabilities(DesiredCapabilities.chrome())
+                        .withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_FAILING,
+                                new File(Optional.ofNullable(System.getenv("TEST_RECORDING_DIR"))
+                                        .orElse("/tmp")));
+
+        addContainers(Collections.singletonList(helmContainer));
+        // Any containers sub classes add will be in between the helm container and web driver container in startup
+        // order
+        adjustCorrelationContainers();
+        addContainers(Collections.singletonList(webDriverContainer));
+    }
+
+    @Override
+    protected final TestRule setupAndCleanupRule() {
+        return new CorrelationSetupAndCleanupRule(this::setup, this::cleanup);
+    }
+
+    protected abstract void adjustCorrelationContainers();
 
     private void verifyGenericSituation() throws Exception {
         new Grafana44SeleniumDriver(webDriverContainer.getWebDriver(),
@@ -48,7 +92,7 @@ public abstract class CorrelationTestBase extends ALECSmokeTestBase {
                 .verifyRelatedAlarmLabels(Collections.singletonList(Pair.of(GENERIC_ALARM_TITLE, 3)));
     }
 
-    protected void runBasicCorrelation() throws Exception {
+    protected final void runBasicCorrelation() throws Exception {
         // Add a node
         LOG.info("Adding node");
         int nodeId = openNMSRestClient.addTestNode();
@@ -64,5 +108,39 @@ public abstract class CorrelationTestBase extends ALECSmokeTestBase {
         // Login, navigate to dashboard, view alarm in table, verify the related alarms
         LOG.info("Situation received, verifying via Helm...");
         verifyGenericSituation();
+    }
+
+    private void setupHelm(GrafanaRestClient grafanaRestClient) throws IOException {
+        // Enable Helm plugin
+        grafanaRestClient.setPluginStatus(PLUGIN_NAME, true);
+
+        // Create FM datasource
+        grafanaRestClient.addFMDataSource(DATA_SOURCE_NAME);
+
+        // Create dashboard with alarm table
+        grafanaRestClient.addFMDasboard(DASHBOARD_NAME, DATA_SOURCE_NAME);
+    }
+
+    private void cleanupHelm(GrafanaRestClient grafanaRestClient) {
+        grafanaRestClient.deleteDashboard(DASHBOARD_NAME);
+        grafanaRestClient.deleteDataSource(DATA_SOURCE_NAME);
+        grafanaRestClient.setPluginStatus(PLUGIN_NAME, false);
+    }
+
+    private void setup() {
+        LOG.info("Setting up...");
+        grafanaRestClient = new GrafanaRestClient(helmContainer.getHelmExternalUrl());
+        try {
+            setupHelm(grafanaRestClient);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // No alarms/situations
+        assertThat(openNMSRestClient.getAlarms(), hasSize(0));
+    }
+
+    private void cleanup() {
+        LOG.info("Cleaning up...");
+        cleanupHelm(grafanaRestClient);
     }
 }

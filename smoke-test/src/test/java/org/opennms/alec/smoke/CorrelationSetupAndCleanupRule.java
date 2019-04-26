@@ -39,7 +39,7 @@ public class CorrelationSetupAndCleanupRule implements TestRule {
     private final Runnable setup;
     private final Runnable cleanup;
 
-    CorrelationSetupAndCleanupRule(Runnable setup, Runnable cleanup) {
+    public CorrelationSetupAndCleanupRule(Runnable setup, Runnable cleanup) {
         this.setup = Objects.requireNonNull(setup);
         this.cleanup = Objects.requireNonNull(cleanup);
     }

@@ -26,31 +26,31 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.smoke.correlation;
+package org.opennms.alec.smoke.udl;
 
-import java.util.Objects;
+import static org.awaitility.Awaitility.await;
 
-import org.junit.Test;
-import org.opennms.alec.smoke.containers.IntegratedOpenNMSALECContainer;
-import org.opennms.alec.smoke.containers.OpenNMSContainer;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-public class IntegratedCorrelationTest extends CorrelationTestBase {
-    private IntegratedOpenNMSALECContainer integratedContainer;
+import org.opennms.alec.smoke.ALECSmokeTestBase;
+import org.opennms.alec.smoke.util.Karaf;
 
-    @Override
-    protected void adjustCorrelationContainers() {
-        // Replace the base opennms container with an integrated one
-        integratedContainer = new IntegratedOpenNMSALECContainer();
-        replaceContainer(opennmsContainer, integratedContainer);
-    }
+public abstract class UDLTestBase extends ALECSmokeTestBase {
+    protected void testAddingUDL() {
+        Map<String, Integer> nodeIds = openNMSRestClient.addTestNodes("test1", "test2");
+        openNMSRestClient.addUDLBetweenNodes(nodeIds.get("test1"), nodeIds.get("test2"));
+        // We should see 3 vertices in the ALEC graph, two nodes and one UDL
+        await()
+                .atMost(1, TimeUnit.MINUTES)
+                .pollInterval(5, TimeUnit.SECONDS)
+                .ignoreExceptions()
+                .until(() -> {
+                    String[] output = Karaf.runKarafCommands(getOpennmsContainer().getSSHAddress(),
+                            "list-graphs").split("\n");
 
-    @Override
-    protected OpenNMSContainer getOpennmsContainer() {
-        return Objects.requireNonNull(integratedContainer);
-    }
-
-    @Test
-    public void canCorrelateAlarms() throws Exception {
-        runBasicCorrelation();
+                    return Arrays.stream(output).anyMatch(row -> row.contains("3 vertices and 2 edges"));
+                });
     }
 }

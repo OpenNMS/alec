@@ -55,7 +55,7 @@ public class DistributedStandaloneCorrelationTest extends CorrelationTestBase {
     }
 
     @Override
-    protected void adjustContainersForTest() {
+    protected void adjustCorrelationContainers() {
         // Define a single non-redundant ALEC
         try {
             alecSentinelContainer = new ALECSentinelContainer(false, () -> engine);

@@ -28,21 +28,29 @@
 
 package org.opennms.alec.smoke.udl;
 
+import java.net.InetSocketAddress;
 import java.util.Collections;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.alec.smoke.containers.ALECSentinelContainer;
 
 public class DistributedUDLTest extends UDLTestBase {
+    private ALECSentinelContainer alecSentinelContainer;
+
     @Override
     protected void adjustContainersForTest() {
         // Define a single non-redundant ALEC
         try {
-            addContainers(Collections.singletonList(new ALECSentinelContainer(false, () -> "cluster")));
+            alecSentinelContainer = new ALECSentinelContainer(false, () -> "cluster");
+            addContainers(Collections.singletonList(alecSentinelContainer));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected InetSocketAddress getALECContainerSSHAddress() {
+        return alecSentinelContainer.getSSHAddress();
     }
 
     @Test

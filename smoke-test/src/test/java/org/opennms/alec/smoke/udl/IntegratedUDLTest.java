@@ -28,6 +28,7 @@
 
 package org.opennms.alec.smoke.udl;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 
 import org.junit.Ignore;
@@ -43,6 +44,11 @@ public class IntegratedUDLTest extends UDLTestBase {
         // Replace the base opennms container with an integrated one
         integratedOpenNMSALECContainer = new IntegratedOpenNMSALECContainer();
         replaceContainer(opennmsContainer, integratedOpenNMSALECContainer);
+    }
+
+    @Override
+    protected InetSocketAddress getALECContainerSSHAddress() {
+        return integratedOpenNMSALECContainer.getSSHAddress();
     }
 
     @Override

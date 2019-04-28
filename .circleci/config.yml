@@ -184,7 +184,7 @@ commands:
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
             if [ "<< parameters.context >>" = "commit" ]; then
-              mvn surefire:test -Dtest=OnCommitSmokeTest -DsmokeTest=true
+              mvn surefire:test -Dtest=OnCommitSmokeTestSuite -DsmokeTest=true
             elif [ "<< parameters.context >>" = "nightly" ]; then
               mvn test -DsmokeTest=true
             fi

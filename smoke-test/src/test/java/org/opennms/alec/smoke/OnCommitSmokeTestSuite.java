@@ -28,7 +28,6 @@
 
 package org.opennms.alec.smoke;
 
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.opennms.alec.smoke.correlation.DistributedRedundantCorrrelationTest;
@@ -39,6 +38,5 @@ import org.opennms.alec.smoke.correlation.DistributedRedundantCorrrelationTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses(DistributedRedundantCorrrelationTest.class)
-@Ignore("This test is intended to be invoked explicitly")
-public class OnCommitSmokeTest {
+public class OnCommitSmokeTestSuite {
 }

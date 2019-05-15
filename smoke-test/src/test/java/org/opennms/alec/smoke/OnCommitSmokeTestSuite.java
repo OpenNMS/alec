@@ -26,31 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.smoke.correlation;
+package org.opennms.alec.smoke;
 
-import java.util.Objects;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.opennms.alec.smoke.correlation.DistributedRedundantCorrrelationTest;
 
-import org.junit.Test;
-import org.opennms.alec.smoke.containers.IntegratedOpenNMSALECContainer;
-import org.opennms.alec.smoke.containers.OpenNMSContainer;
-
-public class IntegratedCorrelationTest extends CorrelationTestBase {
-    private IntegratedOpenNMSALECContainer integratedContainer;
-
-    @Override
-    protected void adjustCorrelationContainers() {
-        // Replace the base opennms container with an integrated one
-        integratedContainer = new IntegratedOpenNMSALECContainer();
-        replaceContainer(opennmsContainer, integratedContainer);
-    }
-
-    @Override
-    protected OpenNMSContainer getOpennmsContainer() {
-        return Objects.requireNonNull(integratedContainer);
-    }
-
-    @Test
-    public void canCorrelateAlarms() throws Exception {
-        runBasicCorrelation();
-    }
+/**
+ * This test suite determines which smoke tests run on-commit in CI. The list of test classes should be kept to a
+ * minimum to reduce the time taken by the commit job, the rest of the smoke tests will run nightly.
+ */
+@RunWith(Suite.class)
+@Suite.SuiteClasses(DistributedRedundantCorrrelationTest.class)
+public class OnCommitSmokeTestSuite {
 }

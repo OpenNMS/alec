@@ -26,31 +26,38 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.smoke.correlation;
+package org.opennms.alec.smoke.udl;
 
+import java.net.InetSocketAddress;
 import java.util.Objects;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.alec.smoke.containers.IntegratedOpenNMSALECContainer;
 import org.opennms.alec.smoke.containers.OpenNMSContainer;
 
-public class IntegratedCorrelationTest extends CorrelationTestBase {
-    private IntegratedOpenNMSALECContainer integratedContainer;
+public class IntegratedUDLTest extends UDLTestBase {
+    private IntegratedOpenNMSALECContainer integratedOpenNMSALECContainer;
 
     @Override
-    protected void adjustCorrelationContainers() {
+    protected void adjustContainersForTest() {
         // Replace the base opennms container with an integrated one
-        integratedContainer = new IntegratedOpenNMSALECContainer();
-        replaceContainer(opennmsContainer, integratedContainer);
+        integratedOpenNMSALECContainer = new IntegratedOpenNMSALECContainer();
+        replaceContainer(opennmsContainer, integratedOpenNMSALECContainer);
+    }
+
+    @Override
+    protected InetSocketAddress getALECContainerSSHAddress() {
+        return integratedOpenNMSALECContainer.getSSHAddress();
     }
 
     @Override
     protected OpenNMSContainer getOpennmsContainer() {
-        return Objects.requireNonNull(integratedContainer);
+        return Objects.requireNonNull(integratedOpenNMSALECContainer);
     }
 
     @Test
-    public void canCorrelateAlarms() throws Exception {
-        runBasicCorrelation();
+    public void canAddUDL() {
+        testAddingUDL();
     }
 }

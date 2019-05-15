@@ -26,31 +26,35 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.smoke.correlation;
+package org.opennms.alec.smoke.udl;
 
-import java.util.Objects;
+import java.net.InetSocketAddress;
+import java.util.Collections;
 
 import org.junit.Test;
-import org.opennms.alec.smoke.containers.IntegratedOpenNMSALECContainer;
-import org.opennms.alec.smoke.containers.OpenNMSContainer;
+import org.opennms.alec.smoke.containers.ALECSentinelContainer;
 
-public class IntegratedCorrelationTest extends CorrelationTestBase {
-    private IntegratedOpenNMSALECContainer integratedContainer;
+public class DistributedUDLTest extends UDLTestBase {
+    private ALECSentinelContainer alecSentinelContainer;
 
     @Override
-    protected void adjustCorrelationContainers() {
-        // Replace the base opennms container with an integrated one
-        integratedContainer = new IntegratedOpenNMSALECContainer();
-        replaceContainer(opennmsContainer, integratedContainer);
+    protected void adjustContainersForTest() {
+        // Define a single non-redundant ALEC
+        try {
+            alecSentinelContainer = new ALECSentinelContainer(false, () -> "cluster");
+            addContainers(Collections.singletonList(alecSentinelContainer));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    protected OpenNMSContainer getOpennmsContainer() {
-        return Objects.requireNonNull(integratedContainer);
+    protected InetSocketAddress getALECContainerSSHAddress() {
+        return alecSentinelContainer.getSSHAddress();
     }
 
     @Test
-    public void canCorrelateAlarms() throws Exception {
-        runBasicCorrelation();
+    public void canAddUDL() {
+        testAddingUDL();
     }
 }

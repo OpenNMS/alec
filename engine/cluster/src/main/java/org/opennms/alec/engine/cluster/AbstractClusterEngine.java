@@ -45,6 +45,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -687,17 +688,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
-        return graphManager.withGraph(g -> {
-            for (CEVertex v : graphManager.getGraph().getVertices()) {
-                final Optional<Alarm> match = v.getAlarms().stream()
-                        .filter(a -> a.equals(alarm))
-                        .findFirst();
-                if (match.isPresent()) {
-                    return Optional.of(v.getNumericId());
-                }
-            }
-            return Optional.empty();
-        });
+        AtomicReference<Long> id = new AtomicReference<>();
+        graphManager.withVertex(alarm.getInventoryObjectType(), alarm.getInventoryObjectId(),
+                (g, v) -> id.set(v == null ? null : v.getNumericId()));
+        return Optional.ofNullable(id.get());
     }
 
     private long getVertexIdForAlarm(Alarm alarm) {
@@ -767,7 +761,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     }
 
                     if (shortestPath == null) {
-                        shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight, true);
+                        shortestPath = new SoftValueDijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight);
                     }
 
                     Number distance = shortestPath.getDistance(vertexA, vertexB);

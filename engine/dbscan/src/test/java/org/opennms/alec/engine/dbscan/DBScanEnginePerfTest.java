@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.InventoryObject;
@@ -90,6 +91,7 @@ public class DBScanEnginePerfTest {
     }
 
     @Test
+    @Ignore("For manual testing")
     public void canNotRunOOM() {
         final DBScanEngine engine = new DBScanEngine();
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),

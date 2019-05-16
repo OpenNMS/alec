@@ -28,12 +28,29 @@
 
 package org.opennms.alec.engine.dbscan;
 
-import java.util.Collections;
+import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
+import org.junit.Ignore;
 import org.junit.Test;
+import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.InventoryObject;
+import org.opennms.alec.datasource.api.Severity;
+import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
+import org.opennms.alec.driver.test.MockInventoryBuilder;
 import org.opennms.alec.driver.test.MockInventoryType;
+import org.opennms.alec.engine.api.Engine;
+
+import com.google.common.base.Stopwatch;
 
 public class DBScanEnginePerfTest {
 
@@ -70,6 +87,71 @@ public class DBScanEnginePerfTest {
             dbScanEngine.tick(dbScanEngine.getTickResolutionMs() * j);
             long delta = System.currentTimeMillis() - start;
             System.out.printf("%d ms for %d vertices.\n", delta, K);
+        }
+    }
+
+    @Test
+    @Ignore("For manual testing")
+    public void canNotRunOOM() {
+        final DBScanEngine engine = new DBScanEngine();
+        engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList());
+        engine.registerSituationHandler(mock(SituationHandler.class));
+
+        // With a 1GB heap these values would cause the cluster engine to run OOM before we swapped to using a soft
+        // reference backed implementation of Dijkstra's algorithm after ~50 seconds
+        //
+        // With the new impl this test passes after ~50 seconds
+        int numVertices = 3000;
+        int numAlarmsToAddPerIteration = 100;
+
+        // Create inventory for numVertices
+        MockInventoryBuilder mockInventoryBuilder = new MockInventoryBuilder();
+        List<Integer> existingInventoryIds = new ArrayList<>();
+
+        // Add a root inventory element
+        existingInventoryIds.add(0);
+        mockInventoryBuilder.withInventoryObject(MockInventoryType.COMPONENT, "0");
+
+        Random random = new Random(1);
+        // Add the rest of the inventory
+        for (int i = 1; i < numVertices; i++) {
+            int parent = existingInventoryIds.get(random.nextInt(existingInventoryIds.size()));
+            mockInventoryBuilder.withInventoryObject(MockInventoryType.COMPONENT, Integer.toString(i),
+                    MockInventoryType.COMPONENT, Integer.toString(parent));
+            existingInventoryIds.add(i);
+        }
+
+        // Add the inventory to the engine
+        Collection<InventoryObject> inventory = mockInventoryBuilder.getInventory();
+        engine.onInventoryAdded(inventory);
+
+        long tickTime = System.currentTimeMillis();
+        long tickInterval = TimeUnit.MINUTES.toMillis(6);
+
+        int alarmedVertex = 0;
+        while (alarmedVertex < numVertices) {
+            List<Alarm> alarmsAdded = new ArrayList<>();
+            for (int i = 0; i < numAlarmsToAddPerIteration; i++) {
+                int id = existingInventoryIds.get(alarmedVertex++);
+                Alarm alarmToAdd = ImmutableAlarm.newBuilder()
+                        .setInventoryObjectType(MockInventoryType.COMPONENT.getType())
+                        .setInventoryObjectId(Integer.toString(id))
+                        .setId("test.id." + Integer.toString(id))
+                        .setTime(tickTime)
+                        .build();
+                alarmsAdded.add(alarmToAdd);
+                engine.onAlarmCreatedOrUpdated(alarmToAdd);
+            }
+
+            engine.onTick(tickTime);
+
+            // Clear the alarms we just added and tick by a big enough interval that they are GC'd so we end up with a
+            // fresh set of alarms on the next iteration
+            alarmsAdded.forEach(alarm -> engine.onAlarmCleared(ImmutableAlarm.newBuilderFrom(alarm)
+                    .setSeverity(Severity.CLEARED)
+                    .build()));
+            tickTime += tickInterval;
         }
     }
 }

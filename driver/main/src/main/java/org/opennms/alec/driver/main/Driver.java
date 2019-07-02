@@ -84,15 +84,15 @@ public class Driver implements EngineRegistry {
     private Timer timer;
 
     // Health
-    private final MetricRegistry metrics = new MetricRegistry();
-    private final com.codahale.metrics.Timer ticks = metrics.timer(name(Driver.class, "ticks"));
+    private final com.codahale.metrics.Timer ticks;
     private long tickResolutionMs = 0;
     private DriverState state = DriverState.CREATED;
 
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
                   AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
                   SituationDatasource situationDatasource, EngineFactory engineFactory,
-                  SituationProcessorFactory situationProcessorFactory) {
+                  SituationProcessorFactory situationProcessorFactory,
+                  MetricRegistry metrics) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.alarmFeedbackDatasource = Objects.requireNonNull(alarmFeedbackDatasource);
@@ -102,6 +102,7 @@ public class Driver implements EngineRegistry {
         this.situationProcessor =
                 Objects.requireNonNull(situationProcessorFactory).getInstance();
         confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
+        ticks = metrics.timer(name(engineFactory.getName(), "ticks"));
     }
 
     public void init() {

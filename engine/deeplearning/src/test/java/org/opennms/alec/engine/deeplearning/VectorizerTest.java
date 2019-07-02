@@ -32,6 +32,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
@@ -80,11 +81,16 @@ public class VectorizerTest {
                 .build();
         CEVertex n2_c1_p2 = graphManager.addOrUpdateAlarm(a3_n2_c1_p2).get();
 
+        // Mock the distance calculation to some non-zero value
+        when(spatialDistanceCalculator.getSpatialDistanceBetween(n1_c1_p1.getNumericId(), n1_c2_p1.getNumericId()))
+                .thenReturn(0.2016);
+
         InputVector v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n1_c2_p1, a2_n1_c2_p1));
         assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(true));
         assertThat(v.getSimilarityOfInventoryObjectIds(), closeTo(0.125, 0.001));
         assertThat(v.getSimilarityOfInventoryObjectLabels(), closeTo(-1.0, 0.001));
+        assertThat(v.getDistanceOnGraph(), closeTo(0.2016, 0.0001));
 
         v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c1_p1, a1_n1_c1_p1), new AlarmInSpaceTime(n2_c1_p2, a3_n2_c1_p2));
         assertThat(v.isSameParent(), equalTo(false));
@@ -93,5 +99,6 @@ public class VectorizerTest {
         v = vectorizer.vectorize(new AlarmInSpaceTime(n1_c2_p1, a2_n1_c2_p1), new AlarmInSpaceTime(n2_c1_p2, a3_n2_c1_p2));
         assertThat(v.isSameParent(), equalTo(false));
         assertThat(v.isShareAncestor(), equalTo(false));
+
     }
 }

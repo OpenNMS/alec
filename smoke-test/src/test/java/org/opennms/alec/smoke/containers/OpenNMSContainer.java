@@ -76,7 +76,7 @@ public class OpenNMSContainer extends GenericContainer {
                 .withEnv("OPENNMS_DBUSER", "opennms")
                 .withEnv("OPENNMS_DBPASS", "opennms")
                 .withEnv("KARAF_FEATURES", "producer")
-                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,address=0.0.0.0:8001,suspend=n")
+                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,address=0.0.0.0:8001,suspend=n -Djava.security.egd=file:/dev/./urandom")
                 .withClasspathResourceMapping(prepareOverlay().getFileName().toString(), "/opt/opennms-overlay",
                         BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)

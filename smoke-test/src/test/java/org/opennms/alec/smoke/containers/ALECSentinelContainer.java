@@ -83,6 +83,7 @@ public class ALECSentinelContainer extends GenericContainer {
                 .withNetwork(Network.getNetwork())
                 .withNetworkAliases(getIndexedAlias())
                 .withCommand("-d")
+                .withEnv("JAVA_OPTS", "-Djava.security.egd=file:/dev/./urandom")
                 .withClasspathResourceMapping(overlayPath.getFileName().toString(), "/opt/sentinel-overlay",
                         BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)

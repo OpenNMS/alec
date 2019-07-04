@@ -46,6 +46,8 @@ import org.opennms.alec.processor.api.SituationProcessor;
 import org.opennms.alec.processor.api.SituationProcessorFactory;
 import org.osgi.framework.BundleContext;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class DriverTest {
 
     @Test
@@ -61,10 +63,11 @@ public class DriverTest {
         when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
         TickLoggingEngine tickLoggingEngine = new TickLoggingEngine();
         when(engineFactory.createEngine()).thenReturn(tickLoggingEngine);
+        MetricRegistry metrics = new MetricRegistry();
 
         // Create and initialize the driver
         Driver driver = new Driver(bundleContext, alarmDatasource, alarmFeedbackDatasource, inventoryDatasource,
-                situationDatasource, engineFactory, situationProcessorFactory);
+                situationDatasource, engineFactory, situationProcessorFactory, metrics);
         driver.initAsync().get();
 
         // Tick tock

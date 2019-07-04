@@ -145,7 +145,7 @@ public class Vectorizer {
     }
 
     private double distanceOnGraph(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
-        return spatialDistanceCalculator.getSpatialDistanceBetween(a1.getVertex().getNumericId(), a1.getVertex().getNumericId());
+        return spatialDistanceCalculator.getSpatialDistanceBetween(a1.getVertex().getNumericId(), a2.getVertex().getNumericId());
     }
 
     public double distanceOnGraph(CEVertex v1, CEVertex v2) {

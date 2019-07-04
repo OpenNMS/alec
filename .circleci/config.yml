@@ -166,7 +166,7 @@ commands:
           - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
 
       - run:
-          name: Import docker images
+          name: Import Docker images
           command: |
             if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
             source smoke-test/src/main/resources/docker_fixed_images
@@ -212,11 +212,13 @@ commands:
           key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
 
       - run:
-          name: Save test results
+          name: Gather test artifacts
           command: |
             mkdir -p ~/junit/
             find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
             find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+            mkdir -p ~/logs/
+            cp -R smoke-test/target/logs/* ~/logs/ || true
           when: always
 
       - store_test_results:

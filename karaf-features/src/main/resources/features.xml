@@ -31,7 +31,7 @@
     <feature name="alec-datasource-opennms-kafka" description="ALEC :: Datasource :: OpenNMS Kafka" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-kafka/${project.version}</bundle>
-        <feature version="2.0.0">kafka-streams</feature>
+        <feature version="${kafka.version}">kafka-streams</feature>
         <feature version="${project.version}">alec-integrations-opennms-sink</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
@@ -239,14 +239,14 @@
         <bundle>wrap:mvn:org.rocksdb/rocksdbjni/5.7.3$Export-Package=org.rocksdb;version=5.7.3,org.rocksdb.util;version=5.7.3</bundle>
     </feature>
 
-    <feature name="kafka-streams" description="Kafka Streams" version="2.0.0">
+    <feature name="kafka-streams" description="Kafka Streams" version="${kafka.version}">
         <feature version="5.7.3" dependency="true">rocksdb</feature>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/2.0.0_1</bundle>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/2.0.0_1</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/1.4.1</bundle>
         <bundle dependency="true">wrap:mvn:org.xerial.snappy/snappy-java/1.1.7.1</bundle>
-        <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-json/2.0.0</bundle>
-        <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-api/2.0.0</bundle>
+        <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-json/${kafka.version}</bundle>
+        <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-api/${kafka.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.6</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.0</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.6</bundle>

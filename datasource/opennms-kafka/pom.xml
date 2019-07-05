@@ -36,11 +36,12 @@
         </plugins>
     </build>
 
-    <properties>
-        <kafka.version>2.0.0</kafka.version>
-        <kafka.bundle.version>2.0.0_1</kafka.bundle.version>
+    <!-- <properties>
+        <kafka.scala.version>2.12</kafka.scala.version>
+        <kafka.version>2.2.0</kafka.version>
+        <kafka.bundle.version>2.2.0_1</kafka.bundle.version>
         <spring.kafka.version>2.2.0.RELEASE</spring.kafka.version>
-    </properties>
+    </properties> -->
 
     <dependencies>
         <dependency>
@@ -163,13 +164,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
+            <artifactId>kafka_${kafka.scala.version}</artifactId>
             <version>${kafka.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
+            <artifactId>kafka_${kafka.scala.version}</artifactId>
             <version>${kafka.version}</version>
             <classifier>test</classifier>
             <scope>test</scope>

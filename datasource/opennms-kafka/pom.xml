@@ -36,13 +36,6 @@
         </plugins>
     </build>
 
-    <!-- <properties>
-        <kafka.scala.version>2.12</kafka.scala.version>
-        <kafka.version>2.2.0</kafka.version>
-        <kafka.bundle.version>2.2.0_1</kafka.bundle.version>
-        <spring.kafka.version>2.2.0.RELEASE</spring.kafka.version>
-    </properties> -->
-
     <dependencies>
         <dependency>
             <groupId>org.opennms.alec.datasource</groupId>

@@ -235,26 +235,26 @@
 
     <!-- Generic dependencies -->
 
-    <feature name="rocksdb" version="5.7.3">
-        <bundle>wrap:mvn:org.rocksdb/rocksdbjni/5.7.3$Export-Package=org.rocksdb;version=5.7.3,org.rocksdb.util;version=5.7.3</bundle>
+    <feature name="rocksdb" version="${rocksdb.version}">
+        <bundle>wrap:mvn:org.rocksdb/rocksdbjni/${rocksdb.version}$Export-Package=org.rocksdb;version=${rocksdb.version},org.rocksdb.util;version=${rocksdb.version}</bundle>
     </feature>
 
     <feature name="kafka-streams" description="Kafka Streams" version="${kafka.version}">
-        <feature version="5.7.3" dependency="true">rocksdb</feature>
+        <feature version="${rocksdb.version}" dependency="true">rocksdb</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/${kafka.bundle.version}</bundle>
-        <bundle dependency="true">mvn:org.lz4/lz4-java/1.4.1</bundle>
-        <bundle dependency="true">wrap:mvn:org.xerial.snappy/snappy-java/1.1.7.1</bundle>
+        <bundle dependency="true">mvn:org.lz4/lz4-java/${lz4.version}</bundle>
+        <bundle dependency="true">wrap:mvn:org.xerial.snappy/snappy-java/${snappy-java.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-json/${kafka.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-api/${kafka.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.9.6</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.9.0</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.9.6</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson-annotations.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
     </feature>
 
     <feature name="commons-text" description="commons-text" version="${commons.text.version}">
         <bundle>mvn:org.apache.commons/commons-text/${commons.text.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.7</bundle>
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     </feature>
 
     <feature name="javax.mail" description="javax.mail" version="1.4.5">
@@ -272,7 +272,7 @@
     <feature name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
         <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle >mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson-annotations.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>

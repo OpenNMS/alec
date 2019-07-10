@@ -201,9 +201,10 @@ public class ALECSentinelContainer extends GenericContainer implements TestLifec
 
     @Override
     public void afterTest(TestDescription description, Optional<Throwable> throwable) {
-        Cleanup.skipCleanupIfNeeded(throwable.get());
         LOG.info("Gathering logs...");
         copyLogs(description.getFilesystemFriendlyName());
+        // Optionally skip cleanup if the test failed
+        throwable.ifPresent(Cleanup::skipCleanupIfNeeded);
     }
 
     private void copyLogs(String prefix) {

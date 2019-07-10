@@ -42,6 +42,8 @@ import org.opennms.alec.engine.cluster.CEVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -74,11 +76,12 @@ public class DBScanEngine extends AbstractClusterEngine {
     private final double epsilon;
     private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
 
-    public DBScanEngine() {
-        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
+    public DBScanEngine(MetricRegistry metrics) {
+        this(metrics, DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
     }
 
-    public DBScanEngine(double epsilon, double alpha, double beta) {
+    public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta) {
+        super(metrics);
         this.epsilon = epsilon;
         distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
     }

@@ -33,6 +33,8 @@ import java.util.Objects;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.osgi.framework.BundleContext;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class DeepLearningEngineFactory implements EngineFactory {
 
     private final BundleContext bundleContext;
@@ -54,8 +56,8 @@ public class DeepLearningEngineFactory implements EngineFactory {
     }
 
     @Override
-    public DeepLearningEngine createEngine() {
-        return new DeepLearningEngine(bundleContext, conf);
+    public DeepLearningEngine createEngine(MetricRegistry metrics) {
+        return new DeepLearningEngine(metrics, bundleContext, conf);
     }
 
 }

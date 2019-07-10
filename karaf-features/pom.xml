@@ -130,6 +130,7 @@
                                 <feature>jackson-jaxrs</feature>
                                 <feature>tensorflow</feature>
                                 <feature>groovy</feature>
+                                <feature>dropwizard-metrics</feature>
                             </features>
                         </configuration>
                     </execution>

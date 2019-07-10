@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
 
 public class Driver implements EngineRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
@@ -84,6 +85,8 @@ public class Driver implements EngineRegistry {
     private Timer timer;
 
     // Health
+    private final MetricRegistry metrics;
+    private final JmxReporter jmxReporter;
     private final com.codahale.metrics.Timer ticks;
     private long tickResolutionMs = 0;
     private DriverState state = DriverState.CREATED;
@@ -91,8 +94,7 @@ public class Driver implements EngineRegistry {
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
                   AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
                   SituationDatasource situationDatasource, EngineFactory engineFactory,
-                  SituationProcessorFactory situationProcessorFactory,
-                  MetricRegistry metrics) {
+                  SituationProcessorFactory situationProcessorFactory) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.alarmFeedbackDatasource = Objects.requireNonNull(alarmFeedbackDatasource);
@@ -102,7 +104,12 @@ public class Driver implements EngineRegistry {
         this.situationProcessor =
                 Objects.requireNonNull(situationProcessorFactory).getInstance();
         confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
-        ticks = metrics.timer(name(engineFactory.getName(), "ticks"));
+
+        metrics = new MetricRegistry();
+        jmxReporter = JmxReporter.forRegistry(metrics)
+                .inDomain(name(Driver.class, engineFactory.getName()))
+                .build();
+        ticks = metrics.timer(name("ticks"));
     }
 
     public void init() {
@@ -113,7 +120,7 @@ public class Driver implements EngineRegistry {
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         LOG.info("Creating engine with name: {}", engineFactory.getName());
-        engine = engineFactory.createEngine();
+        engine = engineFactory.createEngine(metrics);
         // Register the handler that confirms situations that have come round trip back to this driver
         situationDatasource.registerHandler(confirmingSituationHandler);
         // Register the situation processor responsible for accepting and processing all situations generated via the
@@ -169,6 +176,9 @@ public class Driver implements EngineRegistry {
                     props.put("name", engineFactory.getName());
                     graphProviderServiceRegistrationRef.set(bundleContext.registerService(GraphProvider.class.getCanonicalName(), engine, props));
                 }
+
+                // Expose the metrics for this engine via JMX
+                jmxReporter.start();
             } catch (Exception e) {
                 if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
                     LOG.warn("Initialization was interrupted.");
@@ -229,6 +239,9 @@ public class Driver implements EngineRegistry {
             engine.destroy();
             engine = null;
         }
+
+        jmxReporter.stop();
+
         state = DriverState.DESTROYED;
     }
 

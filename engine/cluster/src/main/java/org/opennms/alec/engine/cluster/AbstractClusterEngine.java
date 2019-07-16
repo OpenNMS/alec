@@ -161,7 +161,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+    public synchronized void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
                      List<InventoryObject> inventory) {
         try {
             LOG.debug("Initialized with {} alarms, {} alarm feedback, {} situations and {} inventory objects.",

@@ -68,7 +68,6 @@ import org.opennms.alec.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
@@ -79,7 +78,6 @@ import com.google.common.collect.Iterables;
 
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.Hypergraph;
 
 /**
  * Group alarms into situations by leveraging some clustering algorithm (i.e. DBSCAN)
@@ -133,11 +131,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         metrics.gauge(name("vertices"), () -> numVerticesFromLastTick::get);
         metrics.gauge(name("edges"), () -> numEdgesFromLastTick::get);
         metrics.gauge(name("alarms"), () -> numAlarmsFromLastTick::get);
-        metrics.gauge(name("situations"), () -> () -> {
-            synchronized(AbstractClusterEngine.this){
-                return situationsById.size();
-            }
-        });
+        metrics.gauge(name("situations"), () -> this::getSituationsCount);
     }
 
     @Override
@@ -893,8 +887,12 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      *
      * @return immutable map
      */
-    Map<String, Situation> getSituationsById() {
+    synchronized Map<String, Situation> getSituationsById() {
         return ImmutableMap.copyOf(situationsById);
+    }
+
+    synchronized long getSituationsCount() {
+        return situationsById.size();
     }
 
     public GraphManager getGraphManager() {

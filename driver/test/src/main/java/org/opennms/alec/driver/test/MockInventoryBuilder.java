@@ -28,7 +28,6 @@
 
 package org.opennms.alec.driver.test;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,13 +35,14 @@ import java.util.Map;
 
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectPeerRef;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectRelativeRef;
 
 public class MockInventoryBuilder {
 
-    private final Map<Map.Entry<String, String>, InventoryObject> inventoryObjectsById = new HashMap<>();
+    private final Map<ResourceKey, InventoryObject> inventoryObjectsById = new HashMap<>();
     public static final long PARENT_WEIGHT = 100;
     public static final long PEER_WEIGHT = 300;
     public static final long RELATIVE_WEIGHT = 200;
@@ -75,7 +75,7 @@ public class MockInventoryBuilder {
                 .setParentId(parentId)
                 .setWeightToParent(weightToParent)
                 .build();
-        inventoryObjectsById.put(new AbstractMap.SimpleImmutableEntry<>(type, id), io);
+        inventoryObjectsById.put(new ResourceKey(type, id), io);
         return this;
     }
 
@@ -94,7 +94,7 @@ public class MockInventoryBuilder {
                 .setWeight(PEER_WEIGHT)
                 .build());
 
-        inventoryObjectsById.put(new AbstractMap.SimpleImmutableEntry<>(originalIo.getType(), idA), ioBuilder.build());
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), idA), ioBuilder.build());
         return this;
     }
 
@@ -116,7 +116,7 @@ public class MockInventoryBuilder {
                 .setWeight(PEER_WEIGHT)
                 .build());
 
-        inventoryObjectsById.put(new AbstractMap.SimpleImmutableEntry<>(originalIo.getType(), id), ioBuilder.build());
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), id), ioBuilder.build());
         return this;
     }
 
@@ -134,12 +134,12 @@ public class MockInventoryBuilder {
                 .setWeight(RELATIVE_WEIGHT)
                 .build());
 
-        inventoryObjectsById.put(new AbstractMap.SimpleImmutableEntry<>(originalIo.getType(), id), ioBuilder.build());
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), id), ioBuilder.build());
         return this;
     }
 
     private InventoryObject getIoById(String type, String id) {
-        Map.Entry<String, String> lookup = new AbstractMap.SimpleImmutableEntry<>(type, id);
+        ResourceKey lookup = new ResourceKey(type, id);
         InventoryObject io = inventoryObjectsById.get(lookup);
         if(io == null) {
             throw new IllegalArgumentException(String.format("Could not find element with type: %s and id: %s", type, id));

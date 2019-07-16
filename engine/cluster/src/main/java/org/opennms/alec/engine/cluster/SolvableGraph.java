@@ -57,4 +57,10 @@ public interface SolvableGraph<V> {
      * been invalidated since solving.
      */
     Number getDistance(V source, V target);
+
+    /**
+     * Destroy this instance, invalidating the graph and releasing any resources that were being used for solving. The
+     * instance can no longer be used for solving the graph.
+     */
+    void destroy();
 }

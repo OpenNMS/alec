@@ -25,6 +25,17 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
+/*
+ * Created on Jul 9, 2005
+ *
+ * Copyright (c) 2005, The JUNG Authors
+ *
+ * All rights reserved.
+ *
+ * This software is open-source under the BSD license; see either
+ * "license.txt" or
+ * https://github.com/jrtom/jung/blob/master/LICENSE for a description.
+ */
 
 package org.opennms.alec.engine.cluster;
 
@@ -43,6 +54,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.opennms.alec.datasource.api.ResourceKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +66,9 @@ import edu.uci.ics.jung.graph.Graph;
 /**
  * Uses Dijkstra's single-source algorithm to solve the graph in parallel from N sources at once where N is the
  * configured number of threads to use.
+ * <p>
+ * Portions of this class were derived directly from the JUNG library. See 
+ * <a href="https://github.com/jrtom/jung/blob/master/jung-algorithms/src/main/java/edu/uci/ics/jung/algorithms/shortestpath/DijkstraDistance.java">DijkstraDistance</a>.
  *
  * @param <V> the vertex type
  * @param <E> the edge type
@@ -172,6 +187,12 @@ public class DijkstraSolvableGraph<V, E> implements SolvableGraph<V> {
         }
 
         return sd.distances.get(target);
+    }
+
+    @Override
+    public void destroy() {
+        threadPool.shutdownNow();
+        invalidate();
     }
 
     protected static class VertexComparator<V> implements Comparator<V> {

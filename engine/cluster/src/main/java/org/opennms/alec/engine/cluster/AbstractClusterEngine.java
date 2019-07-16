@@ -114,7 +114,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             FilterableGraphManager.withFilter(this::filterVertex);
     private final SolvableGraph<CEVertex> shortestPath =
             DijkstraSolvableGraph.newInstance(graphManager.getFilteredGraph(), e -> (double) e.getWeight(),
-                    Runtime.getRuntime().availableProcessors());
+                    Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
     private boolean shouldFilterGraph = true;
     private Set<Long> disconnectedVertices = new HashSet<>();
     
@@ -193,6 +193,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     @Override
     public void destroy() {
+        shortestPath.destroy();
         onDestroy();
     }
 
@@ -328,10 +329,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
                 graphManager.updateAndFilter();
-                List<CEVertex> eligbleVertices =
-                        graphManager.getFilteredMatchingVertices(this::vertexIsEligbleForClustering);
-                LOG.debug("Solving {} vertices", eligbleVertices.size());
-                shortestPath.solve(eligbleVertices);
+                List<CEVertex> eligibleVertices =
+                        graphManager.getFilteredMatchingVertices(this::vertexIsEligibleForClustering);
+                LOG.debug("Solving {} vertices", eligibleVertices.size());
+                shortestPath.solve(eligibleVertices);
 
                 LOG.debug("{}: Clustering {} alarms.", timestampInMillis, numAlarms);
                 List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis,
@@ -841,10 +842,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             // If we are not filtering, don't mark any vertices to be dropped
             return false;
         }
-        return !vertexIsEligbleForClustering(vertex) && graph.getIncidentEdges(vertex).size() < 2;
+        return !vertexIsEligibleForClustering(vertex) && graph.getIncidentEdges(vertex).size() < 2;
     }
 
-    private boolean vertexIsEligbleForClustering(CEVertex vertex) {
+    private boolean vertexIsEligibleForClustering(CEVertex vertex) {
         if (!shouldFilterGraph) {
             // If we are not filtering, select all the vertices
             return true;

@@ -28,6 +28,8 @@
 
 package org.opennms.alec.engine.cluster;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +47,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -65,6 +68,7 @@ import org.opennms.alec.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -121,6 +125,17 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
 
+    private final AtomicInteger numVerticesFromLastTick = new AtomicInteger(-1);
+    private final AtomicInteger numEdgesFromLastTick = new AtomicInteger(-1);
+    private final AtomicInteger numAlarmsFromLastTick = new AtomicInteger(-1);
+
+    public AbstractClusterEngine(MetricRegistry metrics) {
+        metrics.gauge(name("vertices"), () -> numVerticesFromLastTick::get);
+        metrics.gauge(name("edges"), () -> numEdgesFromLastTick::get);
+        metrics.gauge(name("alarms"), () -> numAlarmsFromLastTick::get);
+        metrics.gauge(name("situations"), () -> this::getSituationsCount);
+    }
+
     @Override
     public void registerSituationHandler(SituationHandler handler) {
         this.situationHandler = handler;
@@ -148,7 +163,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+    public synchronized void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
                      List<InventoryObject> inventory) {
         try {
             LOG.debug("Initialized with {} alarms, {} alarm feedback, {} situations and {} inventory objects.",
@@ -358,6 +373,11 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                         mapClusterToSituations(clusterOfAlarms, context);
                     }
                 }
+
+                // Store statistics that are exposed via the metric registry
+                numVerticesFromLastTick.set(g.getVertexCount());
+                numEdgesFromLastTick.set(g.getEdgeCount());
+                numAlarmsFromLastTick.set(numAlarms);
             });
         }
 
@@ -889,8 +909,12 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      *
      * @return immutable map
      */
-    Map<String, Situation> getSituationsById() {
+    synchronized Map<String, Situation> getSituationsById() {
         return ImmutableMap.copyOf(situationsById);
+    }
+
+    synchronized long getSituationsCount() {
+        return situationsById.size();
     }
 
     public GraphManager getGraphManager() {

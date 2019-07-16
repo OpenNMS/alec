@@ -63,13 +63,14 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.driver.test.MockInventoryBuilder;
 import org.opennms.alec.driver.test.MockInventoryType;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Iterables;
 
 import edu.uci.ics.jung.graph.Graph;
 
 public class ClusterEngineTest implements SituationHandler {
 
-    private ClusterEngine engine = new ClusterEngine();
+    private ClusterEngine engine = new ClusterEngine(new MetricRegistry());
 
     private Map<String, Situation> situationsById = new LinkedHashMap<>();
 

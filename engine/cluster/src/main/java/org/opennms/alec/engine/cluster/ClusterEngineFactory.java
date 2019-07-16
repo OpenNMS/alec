@@ -30,6 +30,9 @@ package org.opennms.alec.engine.cluster;
 
 import org.opennms.alec.engine.api.EngineFactory;
 
+import com.codahale.metrics.MetricRegistry;
+
+
 public class ClusterEngineFactory implements EngineFactory {
 
     @Override
@@ -38,8 +41,8 @@ public class ClusterEngineFactory implements EngineFactory {
     }
 
     @Override
-    public AbstractClusterEngine createEngine() {
-        return new ClusterEngine();
+    public AbstractClusterEngine createEngine(MetricRegistry metrics) {
+        return new ClusterEngine(metrics);
     }
 
 }

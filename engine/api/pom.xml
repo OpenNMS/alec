@@ -15,5 +15,9 @@
             <groupId>org.opennms.alec.datasource</groupId>
             <artifactId>org.opennms.alec.datasource.api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
     </dependencies>
 </project>

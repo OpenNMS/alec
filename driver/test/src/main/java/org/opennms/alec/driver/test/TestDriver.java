@@ -59,6 +59,8 @@ import org.opennms.alec.features.graph.common.GraphMLConverterBuilder;
 import org.opennms.alec.features.graph.graphml.GraphML;
 import org.opennms.alec.features.graph.graphml.GraphMLWriter;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class TestDriver {
     private final EngineFactory engineFactory;
     private boolean verbose = false;
@@ -147,7 +149,7 @@ public class TestDriver {
     private List<Situation> run(List<Alarm> alarms, List<InventoryObject> inventory, List<Alarm> previousAlarms,
                                 List<AlarmFeedback> previousAlarmFeedback, List<Situation> previousSituations) {
         final DriverSession session = new DriverSession();
-        final Engine engine = engineFactory.createEngine();
+        final Engine engine = engineFactory.createEngine(new MetricRegistry());
         engine.registerSituationHandler(session);
         engine.init(previousAlarms, previousAlarmFeedback, previousSituations, inventory);
 

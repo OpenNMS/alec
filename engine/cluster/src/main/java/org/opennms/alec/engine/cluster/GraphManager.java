@@ -315,6 +315,10 @@ public class GraphManager {
         consumer.accept(g, resourceKeyVertexMap.get(ResourceKey.key(type, id)));
     }
 
+    public int getVertexCount() {
+        return g.getVertexCount();
+    }
+
     protected Graph<CEVertex, CEEdge> getGraph() {
         return g;
     }

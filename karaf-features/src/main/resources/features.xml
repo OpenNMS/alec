@@ -69,6 +69,7 @@
 
     <feature name="alec-engine-api" description="ALEC :: Engine :: API" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
+        <feature dependency="true" version="${metrics.version}">dropwizard-metrics</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.api/${project.version}</bundle>
     </feature>
 
@@ -100,8 +101,6 @@
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <feature version="${project.version}">alec-engine-api</feature>
         <feature version="${project.version}">alec-processor-api</feature>
-        <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metrics.version}</bundle>
-        <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-jmx/${metrics.version}</bundle>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.main/${project.version}</bundle>
     </feature>
 
@@ -284,6 +283,11 @@
 
     <feature name="groovy" description="Groovy" version="${groovy.version}">
         <bundle>mvn:org.codehaus.groovy/groovy-all/${groovy.version}</bundle>
+    </feature>
+
+    <feature name="dropwizard-metrics" description="Dropwizard :: Metrics" version="${metrics.version}">
+        <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metrics.version}</bundle>
+        <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-jmx/${metrics.version}</bundle>
     </feature>
 
 </features>

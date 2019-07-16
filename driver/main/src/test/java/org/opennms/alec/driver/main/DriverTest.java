@@ -31,6 +31,7 @@ package org.opennms.alec.driver.main;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,12 +63,11 @@ public class DriverTest {
         SituationProcessorFactory situationProcessorFactory = mock(SituationProcessorFactory.class);
         when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
         TickLoggingEngine tickLoggingEngine = new TickLoggingEngine();
-        when(engineFactory.createEngine()).thenReturn(tickLoggingEngine);
-        MetricRegistry metrics = new MetricRegistry();
+        when(engineFactory.createEngine(any(MetricRegistry.class))).thenReturn(tickLoggingEngine);
 
         // Create and initialize the driver
         Driver driver = new Driver(bundleContext, alarmDatasource, alarmFeedbackDatasource, inventoryDatasource,
-                situationDatasource, engineFactory, situationProcessorFactory, metrics);
+                situationDatasource, engineFactory, situationProcessorFactory);
         driver.initAsync().get();
 
         // Tick tock

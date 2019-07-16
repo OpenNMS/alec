@@ -66,6 +66,7 @@ import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
 
 /**
@@ -98,10 +99,11 @@ public class Level1EngineComplianceTest {
 
     @Test
     public void canCreateDistinctEngines() {
-        Engine engine1 = factory.createEngine();
+        MetricRegistry metrics = new MetricRegistry();
+        Engine engine1 = factory.createEngine(metrics);
         assertThat(engine1, notNullValue());
 
-        Engine engine2 = factory.createEngine();
+        Engine engine2 = factory.createEngine(metrics);
         assertThat(engine2, notNullValue());
         assertThat(engine1, not(sameInstance(engine2)));
     }

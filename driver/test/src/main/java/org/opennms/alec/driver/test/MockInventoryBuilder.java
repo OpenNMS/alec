@@ -29,17 +29,20 @@
 package org.opennms.alec.driver.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectPeerRef;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectRelativeRef;
 
 public class MockInventoryBuilder {
 
-    private final List<InventoryObject> inventoryObjects = new ArrayList<>();
+    private final Map<ResourceKey, InventoryObject> inventoryObjectsById = new HashMap<>();
     public static final long PARENT_WEIGHT = 100;
     public static final long PEER_WEIGHT = 300;
     public static final long RELATIVE_WEIGHT = 200;
@@ -65,18 +68,34 @@ public class MockInventoryBuilder {
     }
 
     public MockInventoryBuilder withInventoryObject(String type, String id, String parentType, String parentId, long weightToParent) {
-        inventoryObjects.add(ImmutableInventoryObject.newBuilder()
+        InventoryObject io = ImmutableInventoryObject.newBuilder()
                 .setType(type)
                 .setId(id)
                 .setParentType(parentType)
                 .setParentId(parentId)
                 .setWeightToParent(weightToParent)
-                .build());
+                .build();
+        inventoryObjectsById.put(new ResourceKey(type, id), io);
         return this;
     }
 
     public MockInventoryBuilder withPeerRelation(MockInventoryType type, String id, MockInventoryType typeA, String idA, MockInventoryType typeZ, String idZ) {
         return withPeerRelation(type.getType(), id, typeA.getType(), idA, typeZ.getType(), idZ);
+    }
+
+    public MockInventoryBuilder withEdgeTo(String typeA, String idA, String typeZ, String idZ) {
+        final InventoryObject originalIo = getIoById(typeA, idA);
+        final ImmutableInventoryObject.Builder ioBuilder = ImmutableInventoryObject.newBuilderFrom(originalIo);
+
+        ioBuilder.addPeer(ImmutableInventoryObjectPeerRef.newBuilder()
+                .setType(typeZ)
+                .setId(idZ)
+                .setEndpoint(InventoryObjectPeerEndpoint.Z)
+                .setWeight(PEER_WEIGHT)
+                .build());
+
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), idA), ioBuilder.build());
+        return this;
     }
 
     public MockInventoryBuilder withPeerRelation(String type, String id, String typeA, String idA, String typeZ, String idZ) {
@@ -97,9 +116,7 @@ public class MockInventoryBuilder {
                 .setWeight(PEER_WEIGHT)
                 .build());
 
-        // Replace the io with the updated version
-        inventoryObjects.set(inventoryObjects.indexOf(originalIo), ioBuilder.build());
-        
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), id), ioBuilder.build());
         return this;
     }
 
@@ -117,21 +134,22 @@ public class MockInventoryBuilder {
                 .setWeight(RELATIVE_WEIGHT)
                 .build());
 
-        // Replace the io with the updated version
-        inventoryObjects.set(inventoryObjects.indexOf(originalIo), ioBuilder.build());
-        
+        inventoryObjectsById.put(new ResourceKey(originalIo.getType(), id), ioBuilder.build());
         return this;
     }
 
     private InventoryObject getIoById(String type, String id) {
-        return inventoryObjects.stream()
-                .filter(io -> type.equals(io.getType()) && id.equals(io.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Could not find element with type: %s and id: %s", type, id)));
+        ResourceKey lookup = new ResourceKey(type, id);
+        InventoryObject io = inventoryObjectsById.get(lookup);
+        if(io == null) {
+            throw new IllegalArgumentException(String.format("Could not find element with type: %s and id: %s", type, id));
+        }
+        
+        return io;
     }
 
     public List<InventoryObject> getInventory() {
-        return inventoryObjects;
+        return new ArrayList<>(inventoryObjectsById.values());
     }
 
 }

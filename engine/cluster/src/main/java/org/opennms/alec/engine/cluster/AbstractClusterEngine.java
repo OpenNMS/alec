@@ -72,7 +72,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
-import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -111,11 +110,14 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     private boolean alarmsChangedSinceLastTick = false;
     private boolean feedbackChangedSinceLastTick = false;
-    private DijkstraShortestPath<CEVertex, CEEdge> shortestPath;
+    private final FilterableGraphManager graphManager =
+            FilterableGraphManager.withFilter(this::filterVertex);
+    private final SolvableGraph<CEVertex> shortestPath =
+            DijkstraSolvableGraph.newInstance(graphManager.getFilteredGraph(), e -> (double) e.getWeight(),
+                    Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
+    private boolean shouldFilterGraph = true;
     private Set<Long> disconnectedVertices = new HashSet<>();
-
-    private final GraphManager graphManager = new GraphManager();
-
+    
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
 
@@ -191,6 +193,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     @Override
     public void destroy() {
+        shortestPath.destroy();
         onDestroy();
     }
 
@@ -325,8 +328,15 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 }
                 LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
+                graphManager.updateAndFilter();
+                List<CEVertex> eligibleVertices =
+                        graphManager.getFilteredMatchingVertices(this::vertexIsEligibleForClustering);
+                LOG.debug("Solving {} vertices", eligibleVertices.size());
+                shortestPath.solve(eligibleVertices);
+
                 LOG.debug("{}: Clustering {} alarms.", timestampInMillis, numAlarms);
-                List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis, g);
+                List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis,
+                        graphManager.getFilteredGraph());
                 if (clustersOfAlarms == null) {
                     LOG.debug("{}: No clustering was performed.", timestampInMillis);
                     return;
@@ -366,7 +376,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     public synchronized void resetHopCache() {
         spatialDistances.invalidateAll();
-        shortestPath = null;
+        shortestPath.invalidate();
         disconnectedVertices = graphManager.getDisconnectedVertices();
     }
 
@@ -760,10 +770,6 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                         throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
                     }
 
-                    if (shortestPath == null) {
-                        shortestPath = new SoftValueDijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight);
-                    }
-
                     Number distance = shortestPath.getDistance(vertexA, vertexB);
 
                     if (distance == null) {
@@ -831,6 +837,22 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         return alarmsById;
     }
 
+    private boolean filterVertex(CEVertex vertex, Graph<CEVertex, CEEdge> graph) {
+        if (!shouldFilterGraph) {
+            // If we are not filtering, don't mark any vertices to be dropped
+            return false;
+        }
+        return !vertexIsEligibleForClustering(vertex) && graph.getIncidentEdges(vertex).size() < 2;
+    }
+
+    private boolean vertexIsEligibleForClustering(CEVertex vertex) {
+        if (!shouldFilterGraph) {
+            // If we are not filtering, select all the vertices
+            return true;
+        }
+        return vertex.hasAlarms();
+    }
+
     @VisibleForTesting
     Graph<CEVertex, CEEdge> getGraph() {
         return graphManager.getGraph();
@@ -873,5 +895,15 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     public GraphManager getGraphManager() {
         return graphManager;
+    }
+    
+    @VisibleForTesting
+    void solveEntireGraphForTesting() {
+        // For testing purposes we can have the filtered graph be a straight copy of the original and solve distances
+        // for all vertices
+        shouldFilterGraph = false;
+        graphManager.updateAndFilter();
+        shortestPath.solve(graphManager.getFilteredGraph().getVertices());
+        shouldFilterGraph = true;
     }
 }

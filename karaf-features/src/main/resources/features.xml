@@ -57,6 +57,7 @@
     <feature name="alec-datasource-shell" description="ALEC :: Datasource :: Shell" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
         <feature dependency="true">shell</feature>
+        <feature version="${asciitable.version}" dependency="true">asciitable</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.shell/${project.version}</bundle>
     </feature>
 
@@ -288,6 +289,11 @@
     <feature name="dropwizard-metrics" description="Dropwizard :: Metrics" version="${metrics.version}">
         <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metrics.version}</bundle>
         <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-jmx/${metrics.version}</bundle>
+    </feature>
+
+    <feature name="asciitable" description="asciitable" version="${asciitable.version}">
+        <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.asciitable/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     </feature>
 
 </features>

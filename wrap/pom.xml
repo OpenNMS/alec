@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>asciitable</module>
         <module>jung</module>
         <module>tensorflow</module>
     </modules>

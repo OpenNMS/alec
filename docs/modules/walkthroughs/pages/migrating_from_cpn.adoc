@@ -1,0 +1,316 @@
+= Migrating from CPN
+:imagesdir: ../assets/images
+
+This guide will walk you through the tooling we developed to help migrate from using Cisco Prime Networks (CPN) to OCE using a data-driven approach.
+
+NOTE: These instructions and the tooling was tested against Cisco Prime Networks v4.2.2, OpenNMS 24.0.0 and OCE 1.0.0.
+
+== Enable daily reports
+
+We leverage the data from the reports in CPN to validate the solution.
+
+Ensure that the following daily reports are enabled:
+
+1. Detailed Tickets
+1. Detailed Syslog
+1. Detained Traps
+1. Detailed Service Events
+
+We expect to find these reports in the _Report Manager_ as follows:
+
+image::cpn_daily_reports.png[Daily CPN reports]
+
+== Setup OCE tools
+
+We'll be using the `oce-tools` package to interfacing with CPN and manipulating the datasets.
+
+Build `oce-tools` using:
+
+```
+git clone https://github.com/OpenNMS/oce-tools.git
+cd oce-tools
+mvn clean package
+```
+
+In the remainder of the document we'll simply refer to the binary as `oce-tools`.
+You can setup an alias using:
+
+```
+alias oce-tools="java -jar ~/git/oce-tools/main/target/oce-tools.jar"
+```
+
+Adjust the path as necessary.
+
+== Download the reports
+
+The `oce-tools` utility has facilities for automatically enumerating and downloading the daily reports in `.csv` format.
+This is done using the BQL API provided by CPN which is made available over HTTPS.
+
+Download the reports using:
+
+```
+oce-tools --url https://ana-cluster-ana:6081/ana --username oce --password secret --output /data/cpn/reports/ --from "March 20 2019"
+```
+
+Adjust the URL, credentials, path, and date range as necessary.
+
+When succesful, the tool should download the daily reports in .csv format to the target directory:
+
+```
+-rw-r--r--  1 jesse jesse 1.5M Mar 22 12:51 Mar_20_2019_Daily_Detailed_Service.csv
+-rw-r--r--  1 jesse jesse  21M Mar 22 12:51 Mar_20_2019_Daily_Detailed_Syslog.csv
+-rw-r--r--  1 jesse jesse 360K Mar 22 12:51 Mar_20_2019_Daily_Detailed_Tickets.csv
+-rw-r--r--  1 jesse jesse 5.1M Mar 22 12:51 Mar_20_2019_Daily_Detailed_Traps.csv
+-rw-r--r--  1 jesse jesse 1.4M Mar 22 12:51 Mar_21_2019_Daily_Detailed_Service.csv
+-rw-r--r--  1 jesse jesse  20M Mar 22 12:51 Mar_21_2019_Daily_Detailed_Syslog.csv
+-rw-r--r--  1 jesse jesse 331K Mar 22 12:51 Mar_21_2019_Daily_Detailed_Tickets.csv
+-rw-r--r--  1 jesse jesse 4.9M Mar 22 12:51 Mar_21_2019_Daily_Detailed_Traps.csv
+```
+
+== Import the reports into Elasticsearch
+
+Once we have extracted the .csv files from CPN, we can we now import them into Elasticsearch.
+This makes them easier to search and consume in other applications.
+
+Configure your Elastiscearch cluster:
+
+```sh
+mkdir -p ~/.oce
+echo 'clusters:
+  localhost:
+    url: http://localhost:9200
+    read-timeout: 120000
+    conn-timeout: 30000
+```
+
+Import the reports into Elasticsearch:
+
+```
+oce-tools cpn-csv-import --source /data/cpn/reports/ --timezone America/Chicago
+```
+
+Adjust the path and timezone as necessary.
+
+IMPORTANT: The tool may run out of memory when attempting to import reports that span a large timeframe.
+In order to work around this, try splitting the reports up into smaller date ranges i.e. weekly, and importing these in batches.
+
+You should see output similar to:
+
+```
+10:45:54.206 [main] DEBUG org.opennms.oce.tools.es.ESClient - Inserting batch of 1000 records into index 'services'. 843 records remaining.
+10:45:54.303 [main] DEBUG org.opennms.oce.tools.es.ESClient - Inserting batch of 843 records into index 'services'. 0 records remaining.
+10:45:54.402 [main] DEBUG org.opennms.oce.tools.es.ESClient - Done inserting into index 'services'.
+10:45:54.403 [main] DEBUG org.opennms.oce.tools.es.ESClient - Inserting 2227165 records into index 'syslogs'.
+10:45:54.403 [main] DEBUG org.opennms.oce.tools.es.ESClient - Inserting batch of 1000 records into index 'syslogs'. 2226165 records remaining.
+10:45:55.086 [main] DEBUG org.opennms.oce.tools.es.ESClient - Inserting batch of 1000 records into index 'syslogs'. 2225165 records remaining.
+```
+
+== View the results in Kibana
+
+image::cpn_kibana_tickets.png[CPN Tickets in Kibana]
+
+Now that we have the report data imported in Elasticsearch, we can leverage Kibana to visualize and export the tickets and associated events.
+
+Some interesting facts to visualize include:
+
+1. Number of tickets per day
+1. Number of acknowledged vs un-acknowledged tickets
+1. Number of affected devices per ticket
+1. Number of alarms per ticket
+1. Devices with the most syslog/trap events
+
+== Audit OpenNMS event support
+
+The purpose of the following tools is to help validate that OpenNMS and OCE supports and has knowledge of all the Syslog and SNMP traps events that occurred in CPN within a given time range.
+
+=== Verify Syslog support
+
+Validate that OpenNMS supports parsing all of the different Syslog message formats:
+
+```
+oce-tools cpn-opennms-syslog-audit --from "Jan 1 2019" --to "Feb 1 2019"
+```
+
+This tool will attempt to parse all of the Syslog messages found in the given time range with the facilitities provided by OpenNMS and the definitions provided in OCE.
+Errors will be reported in the form of "header" failures, or "body" (content) failures.
+
+Header failures imply that the header (or format) of the message was not understood and will likely require updates to the Syslog parser configuration to be resolved.
+Body faiulres imply that the content of the message could not be properly converted to an OpenNMS event and will likely require updates to the Syslog definitions or event configuration to be resolved.
+
+=== Verify event definitions
+
+Validate that `oce-tools` has knowledge of all the event types.
+This will be used to generate and further validate handling in OpenNMS.
+
+```
+oce-tools cpn-opennms-event-definition-audit --from "Jan 1 2019" --to "Feb 1 2019"
+```
+
+=== Verify event handling
+
+Generate simulated SNMP traps and Syslog messages for all the known event types and verify that the corresponding alarms are created in OpenNMS.
+
+When used in conjunction with the `cpn-opennms-event-definition-audit` above,  this helps ensure that the system is capable of handling all of the known event types.
+
+Example usage:
+
+```
+oce-tools cpn-opennms-event-handling-audit \
+  --node-a-label localhost --node-a-id 1 --node-a-ifindex 2 --node-a-ifdescr ens33 \
+  --node-z-label localhost --node-z-id 1 --node-z-ifindex 1 --node-z-ifdescr lo \
+  --opennms-host localhost
+```
+
+== Migrating to OpenNMS
+
+Using the knowledge gained from the previous audits and tests we should now have confidence that OpenNMS is capable of handling and creating alarms for all of the given messages.
+
+You can now begin forwarding messages from your devices directly to OpenNMS.
+Briefly, the process is:
+
+1. Setup OpenNMS & OCE
+2. Configure SNMP support
+  * Configure OpenNMS with the SNMP community strings
+3. Configure Syslog support
+  * Enable syslog processing
+4. Use SNMP traps and Syslog messages to driver inventory discovery
+   * Enable `new-suspect-on-trap` and `new-suspect-on-message` (Syslog)
+5. Configure devices to send messages to OpenNMS
+   * Start sending SNMP traps and Syslog messages to OpenNMS
+
+== Comparing events in OpenNMS and CPN
+
+After running both systems in parallel you can also leverage the tooling to help validate that both systems are in fact receiving the same events.
+
+IMPORTANT: This requires that both OpenNMS events and CPN events (extracted from the reports) are available in the same Elastisearch instance.
+
+Example usage:
+```
+oce-tools cpn-opennms-event-materialization-audit --from "Feb 1 2019" --to "March 1 2019"
+```
+
+=== Exporting/imports OpenNMS events & alarms from Elasticsearch
+
+If you find yourself having to export/import data from Elasticsearch you can do so using: link:https://www.npmjs.com/package/elasticdump[elasticdump]
+
+==== Exporting
+
+Backup the templates:
+
+```
+curl http://localhost:9200/_template/eventsindextemplate?pretty=true --output events.template.json
+curl http://localhost:9200/_template/alarms?pretty=true --output alarms.template.json
+```
+
+Export the events:
+
+```
+EVENT_INDEX_NAME="opennms-events-raw-2019-01"
+elasticdump \
+  --input=http://localhost:9200/$EVENT_INDEX_NAME \
+  --output=$ \
+  | gzip > /data/cpn/elastic/events.jan.2019.complete.json.gz
+```
+
+Export the alarms:
+
+```
+ALARM_INDEX_NAME="opennms-alarms-2019-01"
+elasticdump \
+  --input=http://localhost:9200/$ALARM_INDEX_NAME \
+  --output=$ \
+  | gzip > /data/cpn/elastic/alarms.jan.2019.complete.json.gz
+```
+
+==== Importing
+
+Restore the templates:
+
+```
+curl -X POST -H "Content-Type: application/json" -d @my.events.json http://localhost:9200/_template/my-events
+curl -X POST -H "Content-Type: application/json" -d @my.alarms.json http://localhost:9200/_template/my-alarms
+```
+
+Import the events:
+
+```
+EVENT_INDEX_NAME="my-opennms-events-raw-2019-01"
+zcat events.jan.2019.complete.json.gz | elasticdump \
+  --input=$ \
+  --output=http://localhost:9200/$EVENT_INDEX_NAME
+```
+
+Import the alarms:
+
+```
+ALARM_INDEX_NAME="my-opennms-alarms-2019-01"
+zcat alarms.jan.2019.complete.json.gz | elasticdump \
+  --input=$ \
+  --output=http://localhost:9200/$ALARM_INDEX_NAME
+```
+
+== Simulate correlation
+
+Let's export a dataset for simulation purposes:
+```
+oce-tools cpn-oce-export --from "Feb 10 2019" --to "Feb 17 2019" --output /tmp/cpn
+```
+
+From a Karaf shell, install the required features from OCE:
+```
+feature:repo-add mvn:org.opennms.oce/oce-karaf-features/1.0.0-SNAPSHOT/xml
+feature:install oce-engine-dbscan oce-datasource-jaxb oce-features-shell
+```
+
+Process the alarms:
+```
+oce:process-alarms --alarms-in /tmp/cpn/cpn.alarms.xml \
+    --inventory-in /tmp/cpn/cpn.inventory.xml \
+    --situations-out /tmp/cpn/oce.situations.dbscan.xml \
+    --engine dbscan
+```
+
+Score:
+```
+oce:score-situations -s peer /tmp/cpn/cpn.situations.xml /tmp/cpn/oce.situations.dbscan.xml
+```
+
+You should see output similar to:
+```
+karaf@root()> oce:score-situations -s peer /tmp/cpn/cpn.situations.xml /tmp/cpn/oce.situations.dbscan.xml                                                                                                          
+Score: 3614.8644 (65.88%)
+exactMatches : 6542.0
+partialMatches : 2860.0
+mismatches : 83.0
+```
+
+Install a new correlation engine:
+```
+feature:install oce-engine-deeplearning
+```
+
+Run the simulation again using the new engine:
+```
+oce:process-alarms --alarms-in /tmp/cpn/cpn.alarms.xml \
+    --inventory-in /tmp/cpn/cpn.inventory.xml \
+    --situations-out /tmp/cpn/oce.situations.deeplearning.xml \
+    --engine deeplearning
+```
+
+Re-evaluate the score:
+```
+oce:score-situations -s peer /tmp/cpn/cpn.situations.xml /tmp/cpn/oce.situations.deeplearning.xml
+```
+
+You should see output similar to:
+```
+karaf@root()> oce:score-situations -s peer /tmp/cpn/cpn.situations.xml /tmp/cpn/oce.situations.deeplearning.xml                                                                                                    
+Score: 7591.2329 (28.36%)
+exactMatches : 2168.0
+partialMatches : 7943.0
+mismatches : 281.0
+```
+
+=== Train the AI
+
+See xref:training_with_ludwig.adoc[Training with Ludwig].

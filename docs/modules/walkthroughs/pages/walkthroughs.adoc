@@ -1,0 +1,7 @@
+
+= Walkthroughs
+
+These walkthroughs are written to help provide direction and insight into how OCE is currently used and developed.
+
+IMPORTANT: The content of these walkthroughs assume a certain level of knowledge and familiarity with the platform.
+Based on your feedback, we'll continue to improve these in order to make them more accessible.

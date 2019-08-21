@@ -38,43 +38,43 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.SituationDatasource;
 
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
 
-@Command(scope = "opennms-alec", name = "alarms", description="List the alarms known by the datasource.")
+@Command(scope = "opennms-alec", name = "situations", description="List the situations known by the datasource")
 @Service
-public class AlarmList implements Action {
+public class SituationList implements Action {
 
     @Reference
-    private AlarmDatasource alarmDatasource;
+    private SituationDatasource situationDatasource;
 
     @Override
     public Object execute() {
-        printAlarms(alarmDatasource.getAlarms());
+        printSituations(situationDatasource.getSituations());
         return null;
     }
 
-    private static void printAlarms(List<? extends Alarm> alarms) {
+    private static void printSituations(List<Situation> situations) {
         AsciiTable at = new AsciiTable();
         at.addRule();
-        at.addRow("ID", "Time", "Severity", "Node ID", "IO Type", "IO ID");
+        at.addRow("ID", "Creation Time", "Severity", "# Alarms", "Alarm IDs", "Resource Keys");
         at.addRule();
 
         // Situations
-        alarms.stream()
-                // Sort by time descending
-                .sorted(Comparator.comparing(Alarm::getTime).reversed().thenComparing(Alarm::getId))
-                .forEach(a -> {
-                    at.addRow(a.getId(),
-                            new Date(a.getTime()),
-                            a.getSeverity(),
-                            a.getNodeId(),
-                            a.getInventoryObjectType(),
-                            a.getInventoryObjectId());
+        situations.stream()
+                // Sort by creation time descending
+                .sorted(Comparator.comparing(Situation::getCreationTime).reversed().thenComparing(Situation::getId))
+                .forEach(s -> {
+                    at.addRow(s.getId(),
+                            new Date(s.getCreationTime()),
+                            s.getSeverity(),
+                            s.getAlarms().size(),
+                            s.getAlarms().stream().map(Alarm::getId).collect(Collectors.joining(",")),
+                            s.getResourceKeys().stream().map(ResourceKey::toString).collect(Collectors.joining(",")));
                     at.addRule();
                 });
 

@@ -46,6 +46,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <asciitable.version>0.3.2</asciitable.version>
         <awaitility.version>3.1.1</awaitility.version>
         <commons.csv.version>1.5</commons.csv.version>
         <commons.io.version>2.6</commons.io.version>
@@ -203,6 +204,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opennms.alec.wrap</groupId>
+                <artifactId>org.opennms.alec.wrap.asciitable</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.alec.wrap</groupId>
                 <artifactId>org.opennms.alec.wrap.jung</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -216,6 +222,11 @@
                 <groupId>org.opennms.alec.integrations.opennms.sink</groupId>
                 <artifactId>api</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.vandermeer</groupId>
+                <artifactId>asciitable</artifactId>
+                <version>${asciitable.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

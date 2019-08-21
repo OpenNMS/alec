@@ -131,6 +131,7 @@
                                 <feature>tensorflow</feature>
                                 <feature>groovy</feature>
                                 <feature>dropwizard-metrics</feature>
+                                <feature>asciitable</feature>
                             </features>
                         </configuration>
                     </execution>

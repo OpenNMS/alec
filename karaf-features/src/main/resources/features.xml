@@ -12,7 +12,7 @@
     <feature name="alec-datasource-opennms-common" description="ALEC :: Datasource :: OpenNMS Common" version="${project.version}">
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-common/${project.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <feature version="${groovy.version}">groovy</feature>
+        <feature version="${groovy.version}">alec-dependency-groovy</feature>
     </feature>
 
     <feature name="alec-datasource-jaxb" description="ALEC :: Datasource :: JAXB" version="${project.version}">
@@ -28,7 +28,7 @@
     <feature name="alec-datasource-opennms-kafka" description="ALEC :: Datasource :: OpenNMS Kafka" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-kafka/${project.version}</bundle>
-        <feature version="${kafka.version}">kafka-streams</feature>
+        <feature version="${kafka.version}">alec-dependency-kafka-streams</feature>
         <feature version="${project.version}">alec-integrations-opennms-sink</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
@@ -54,7 +54,7 @@
     <feature name="alec-datasource-shell" description="ALEC :: Datasource :: Shell" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
         <feature dependency="true">shell</feature>
-        <feature version="${asciitable.version}" dependency="true">asciitable</feature>
+        <feature version="${asciitable.version}" dependency="true">alec-dependency-asciitable</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.shell/${project.version}</bundle>
     </feature>
 
@@ -67,7 +67,7 @@
 
     <feature name="alec-engine-api" description="ALEC :: Engine :: API" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
-        <feature dependency="true" version="${metrics.version}">dropwizard-metrics</feature>
+        <feature dependency="true" version="${metrics.version}">alec-dependency-dropwizard-metrics</feature>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.api/${project.version}</bundle>
     </feature>
 
@@ -86,7 +86,7 @@
 
     <feature name="alec-engine-deeplearning" description="ALEC :: Engine :: Deep Learning" version="${project.version}">
         <feature version="${project.version}">alec-engine-cluster</feature>
-        <feature version="${tensorflow.version}">tensorflow</feature>
+        <feature version="${tensorflow.version}">alec-dependency-tensorflow</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
         <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
@@ -112,7 +112,7 @@
     </feature>
 
     <feature name="alec-features-graph-graphml" description="ALEC :: Features :: Graph :: GraphML" version="${project.version}">
-        <feature version="${moxy.version}" dependency="true">moxy</feature>
+        <feature version="${moxy.version}" dependency="true">alec-dependency-moxy</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.graphml/${project.version}</bundle>
     </feature>
@@ -232,12 +232,12 @@
 
     <!-- Generic dependencies -->
 
-    <feature name="rocksdb" version="${rocksdb.version}">
+    <feature name="alec-dependency-rocksdb" version="${rocksdb.version}">
         <bundle>wrap:mvn:org.rocksdb/rocksdbjni/${rocksdb.version}$Export-Package=org.rocksdb;version=${rocksdb.version},org.rocksdb.util;version=${rocksdb.version}</bundle>
     </feature>
 
-    <feature name="kafka-streams" description="Kafka Streams" version="${kafka.version}">
-        <feature version="${rocksdb.version}" dependency="true">rocksdb</feature>
+    <feature name="alec-dependency-kafka-streams" description="Kafka Streams" version="${kafka.version}">
+        <feature version="${rocksdb.version}" dependency="true">alec-dependency-rocksdb</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/${lz4.version}</bundle>
@@ -249,24 +249,19 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
     </feature>
 
-    <feature name="commons-text" description="commons-text" version="${commons.text.version}">
-        <bundle>mvn:org.apache.commons/commons-text/${commons.text.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
-    </feature>
-
-    <feature name="javax.mail" description="javax.mail" version="1.4.5">
+    <feature name="alec-dependency-javax.mail" description="javax.mail" version="1.4.5">
         <bundle>mvn:javax.mail/mail/1.4.5</bundle>
     </feature>
 
-    <feature name="moxy" description="EclipseLink :: MOXy" version="${moxy.version}">
-        <feature>javax.mail</feature>
+    <feature name="alec-dependency-moxy" description="EclipseLink :: MOXy" version="${moxy.version}">
+        <feature>alec-dependency-javax.mail</feature>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.asm/${moxy.version}</bundle>
         <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.antlr/${moxy.version}</bundle>
     </feature>
 
-    <feature name="jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
+    <feature name="alec-dependency-jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
         <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson-annotations.version}</bundle>
@@ -275,20 +270,20 @@
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
     </feature>
 
-    <feature name="tensorflow" description="TensorFlow" version="${tensorflow.version}">
+    <feature name="alec-dependency-tensorflow" description="TensorFlow" version="${tensorflow.version}">
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.tensorflow/${project.version}</bundle>
     </feature>
 
-    <feature name="groovy" description="Groovy" version="${groovy.version}">
+    <feature name="alec-dependency-groovy" description="Groovy" version="${groovy.version}">
         <bundle>mvn:org.codehaus.groovy/groovy-all/${groovy.version}</bundle>
     </feature>
 
-    <feature name="dropwizard-metrics" description="Dropwizard :: Metrics" version="${metrics.version}">
+    <feature name="alec-dependency-dropwizard-metrics" description="Dropwizard :: Metrics" version="${metrics.version}">
         <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-core/${metrics.version}</bundle>
         <bundle dependency="true">mvn:io.dropwizard.metrics/metrics-jmx/${metrics.version}</bundle>
     </feature>
 
-    <feature name="asciitable" description="asciitable" version="${asciitable.version}">
+    <feature name="alec-dependency-asciitable" description="asciitable" version="${asciitable.version}">
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.asciitable/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
     </feature>

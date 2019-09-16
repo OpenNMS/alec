@@ -122,16 +122,16 @@
                                 -->
 
                                 <!-- 3rd party -->
-                                <feature>rocksdb</feature>
-                                <feature>kafka-streams</feature>
-                                <feature>commons-text</feature>
-                                <feature>javax.mail</feature>
-                                <feature>moxy</feature>
-                                <feature>jackson-jaxrs</feature>
-                                <feature>tensorflow</feature>
-                                <feature>groovy</feature>
-                                <feature>dropwizard-metrics</feature>
-                                <feature>asciitable</feature>
+                                <feature>alec-dependency-rocksdb</feature>
+                                <feature>alec-dependency-kafka-streams</feature>
+                                <feature>alec-dependency-commons-text</feature>
+                                <feature>alec-dependency-javax.mail</feature>
+                                <feature>alec-dependency-moxy</feature>
+                                <feature>alec-dependency-jackson-jaxrs</feature>
+                                <feature>alec-dependency-tensorflow</feature>
+                                <feature>alec-dependency-groovy</feature>
+                                <feature>alec-dependency-dropwizard-metrics</feature>
+                                <feature>alec-dependency-asciitable</feature>
                             </features>
                         </configuration>
                     </execution>

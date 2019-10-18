@@ -49,6 +49,7 @@
         <property name="alarmTopic" value="${alarmTopic}"/>
         <property name="alarmFeedbackTopic" value="${alarmFeedbackTopic}"/>
         <property name="nodeTopic" value="${nodeTopic}"/>
+        <property name="edgesTopic" value="${edgesTopic}"/>
         <property name="eventSinkTopic" value="${eventSinkTopic}"/>
         <property name="inventoryTopic" value="${inventoryTopic}"/>
         <property name="inventoryTtlMs" value="${inventoryTtlMs}"/>

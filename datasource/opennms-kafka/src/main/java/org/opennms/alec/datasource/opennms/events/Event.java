@@ -30,6 +30,8 @@ package org.opennms.alec.datasource.opennms.events;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -43,6 +45,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Event {
 
+    public enum TimeFormat {
+        ISO,
+        SIMPLE
+    }
+
     private static final ThreadLocal<DateFormat> FORMATTER_CUSTOM = new ThreadLocal<DateFormat>() {
         @Override
         protected synchronized DateFormat initialValue() {
@@ -51,8 +58,6 @@ public class Event {
             return formatter;
         }
     };
-
-    private final String createdAt = FORMATTER_CUSTOM.get().format(new Date());
 
     @XmlElement(name="uei")
     private String uei;
@@ -67,10 +72,30 @@ public class Event {
     private String severity = "Critical";
 
     @XmlElement(name = "time")
-    private String time = createdAt;
+    private String time;
 
     @XmlElement(name = "nodeid")
     private Long nodeId;
+
+    public Event() {
+       this(TimeFormat.ISO);
+    }
+
+    private Event(TimeFormat timeFormat) {
+        // Set the initial time based on what format has been specified for the time
+        switch (timeFormat) {
+            case SIMPLE:
+                time = FORMATTER_CUSTOM.get().format(new Date());
+                break;
+            case ISO:
+            default:
+                time = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now());
+        }
+    }
+
+    public static Event withDateFormat(TimeFormat timeFormat) {
+        return new Event(Objects.requireNonNull(timeFormat));
+    }
 
     public String getUei() {
         return uei;
@@ -154,7 +179,4 @@ public class Event {
                 '}';
     }
 
-    protected static DateFormat getDateFormat() {
-        return FORMATTER_CUSTOM.get();
-    }
 }

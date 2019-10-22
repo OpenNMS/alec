@@ -156,6 +156,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private final EdgeToInventory edgeToInventory;
 
     private final SinkWrapper sinkWrapper;
+    
+    private Event.TimeFormat eventTimeFormat = Event.TimeFormat.ISO;
 
     public OpennmsDatasource(ConfigurationAdmin configAdmin, NodeToInventory nodeToInventory, AlarmToInventory alarmToInventory,
             EdgeToInventory edgeToInventory, SinkWrapper sinkWrapper) {
@@ -557,7 +559,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             return;
         }
 
-        final Event e = SituationToEvent.toEvent(situation);
+        final Event e = SituationToEvent.toEvent(situation, eventTimeFormat);
         final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
         LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
 
@@ -650,6 +652,11 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public void setWrapSinkMessagesInProto(boolean wrapSinkMessagesInProto) {
         this.wrapSinkMessagesInProto = wrapSinkMessagesInProto;
+    }
+
+    public void setEventTimeFormat(String eventTimeFormat) {
+        Objects.requireNonNull(eventTimeFormat);
+        this.eventTimeFormat = Event.TimeFormat.valueOf(eventTimeFormat.toUpperCase());
     }
 
     @Override

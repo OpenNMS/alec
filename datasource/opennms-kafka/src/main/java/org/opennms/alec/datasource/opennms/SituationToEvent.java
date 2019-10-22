@@ -45,8 +45,8 @@ public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
 
-    public static Event toEvent(Situation situation) {
-        final Event e = new Event();
+    public static Event toEvent(Situation situation, Event.TimeFormat timeFormat) {
+        final Event e = Event.withDateFormat(timeFormat);
         e.setUei(SITUATION_UEI);
 
         // Use the max severity as the situation severity

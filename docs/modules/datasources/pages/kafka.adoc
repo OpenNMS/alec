@@ -29,6 +29,20 @@ These topics are expected to exist in the Kafka broker for the datasource to ope
 |inventoryTopic      | `alec-inventory`      | Used to maintain inventory state
 |=======
 
+== Event Compatibility
+
+The following property is used to determine how event creation times are encoded when ALEC sends events via Kafka to
+OpenNMS. The value should be set depending on the version of OpenNMS being used.
+
+[options="header"]
+|=======
+|Property            | Default Value         | Description
+|eventTimeFormat     | `iso`                 | The time format used to encode event creation times
+|=======
+
+For any OpenNMS version < Horizon 25.1.0 or < Meridian 2019.1.0 the value should be set to "simple". Otherwise the
+default value of "iso" should be used.
+
 == Scripted extensions
 
 === Config

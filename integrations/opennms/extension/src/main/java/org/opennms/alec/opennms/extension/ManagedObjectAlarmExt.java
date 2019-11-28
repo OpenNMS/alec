@@ -28,16 +28,22 @@
 
 package org.opennms.alec.opennms.extension;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import org.opennms.alec.opennms.model.BgpPeerInstance;
 import org.opennms.alec.opennms.model.ManagedObjectType;
 import org.opennms.alec.opennms.model.SnmpInterfaceLinkInstance;
 import org.opennms.alec.opennms.model.VpnTunnelInstance;
 import org.opennms.integration.api.v1.alarms.AlarmPersisterExtension;
+import org.opennms.integration.api.v1.dao.InterfaceToNodeCache;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
 import org.opennms.integration.api.v1.model.Alarm;
@@ -87,10 +93,12 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
 
     private final NodeDao nodeDao;
     private final SnmpInterfaceDao snmpInterfaceDao;
+    private final InterfaceToNodeCache interfaceToNodeCache;
 
-    public ManagedObjectAlarmExt(NodeDao nodeDao, SnmpInterfaceDao snmpInterfaceDao) {
+    public ManagedObjectAlarmExt(NodeDao nodeDao, SnmpInterfaceDao snmpInterfaceDao, InterfaceToNodeCache interfaceToNodeCache) {
         this.nodeDao = Objects.requireNonNull(nodeDao);
         this.snmpInterfaceDao = Objects.requireNonNull(snmpInterfaceDao);
+        this.interfaceToNodeCache = Objects.requireNonNull(interfaceToNodeCache);
     }
 
     @Override
@@ -288,9 +296,26 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
             LOG.info("No BGP peer found for event: {}", event);
             return null;
         }
+
+        // Find the a matching node with the peer IP address
+        String bgpPeerNodeCriteria = null;
+        try {
+            final Node node = alarm.getNode();
+            final String location = node != null ? node.getLocation() : null;
+            final InetAddress peerAddr = InetAddress.getByName(bgpPeer);
+            bgpPeerNodeCriteria = interfaceToNodeCache.getFirstNodeId(location, peerAddr)
+                    .map(nodeId -> {
+                        Node peerNode = nodeDao.getNodeById(nodeId);
+                        return peerNode != null ? toNodeCriteria(peerNode) : null;
+                    })
+                    .orElse(null);
+        } catch (UnknownHostException e) {
+            LOG.warn("Failed to resolve BGP peer address: {}", bgpPeer);
+        }
+
         final String bgpVrf = getStringValueForParamNamed(BGP_VRF_PARM_NAME, event);
 
-        final BgpPeerInstance bgpPeerInstance = new BgpPeerInstance(bgpPeer, bgpVrf);
+        final BgpPeerInstance bgpPeerInstance = new BgpPeerInstance(bgpPeer, bgpPeerNodeCriteria, bgpVrf);
         return new ManagedObject(ManagedObjectType.BgpPeer, gson.toJson(bgpPeerInstance));
     }
 

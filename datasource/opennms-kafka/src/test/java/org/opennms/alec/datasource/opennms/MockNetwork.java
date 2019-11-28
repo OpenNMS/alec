@@ -139,8 +139,8 @@ public class MockNetwork {
                 .build();
     }
 
-    public static OpennmsModelProtos.Alarm createBgpPeerAlarmFor(OpennmsModelProtos.Node node, String peer, String vrf) {
-        final BgpPeerInstance bgpPeerInstance = new BgpPeerInstance(peer, vrf);
+    public static OpennmsModelProtos.Alarm createBgpPeerAlarmFor(OpennmsModelProtos.Node node, String peer, String peerNodeCriteria, String vrf) {
+        final BgpPeerInstance bgpPeerInstance = new BgpPeerInstance(peer, peerNodeCriteria, vrf);
         return OpennmsModelProtos.Alarm.newBuilder()
                 .setReductionKey(String.format("bgpBackwardTransition::%d::%s:%s", node.getId(), peer, vrf))
                 .setLastEventTime(1)

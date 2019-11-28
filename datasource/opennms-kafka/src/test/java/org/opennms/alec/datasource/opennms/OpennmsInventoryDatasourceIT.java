@@ -36,6 +36,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,6 +52,7 @@ import org.opennms.alec.datasource.api.InventoryHandler;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.alec.datasource.api.InventoryObjectPeerRef;
+import org.opennms.alec.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.common.inventory.ManagedObjectType;
 import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos;
@@ -221,30 +223,40 @@ public class OpennmsInventoryDatasourceIT extends OpennmsDatasourceIT {
     @Test
     public void canGenerateBgpPeerRelatedAlarmsAndInventory() {
         // Create a node
-        OpennmsModelProtos.Node node = MockNetwork.getNode1();
-        sendNodeToKafka(node);
+        OpennmsModelProtos.Node R1 = MockNetwork.getNode1();
+        sendNodeToKafka(R1);
 
-        // Send an alarm related to a peer on the node
-        OpennmsModelProtos.Alarm alarm = MockNetwork.createBgpPeerAlarmFor(node, "192.168.1.1", "kanata");
+        // Create another node
+        OpennmsModelProtos.Node R2 = MockNetwork.getNode2();
+        sendNodeToKafka(R2);
+
+        // Send alarm from node 1 peering with node 2
+        OpennmsModelProtos.Alarm alarm = MockNetwork.createBgpPeerAlarmFor(R1, "192.168.1.1", toNodeCriteria(R2),"kanata");
         Alarm oceAlarm = sendAlarmToKafkaAndWaitForRef(alarm);
 
         // Validate that the alarm references the peer
         assertThat(oceAlarm.getInventoryObjectType(), equalTo(alarm.getManagedObjectType()));
-        String expectedId = String.format("%s:%s:%s", OpennmsMapper.toNodeCriteria(node), "192.168.1.1", "kanata");
-        assertThat(oceAlarm.getInventoryObjectId(), equalTo(expectedId));
+        assertThat(oceAlarm.getInventoryObjectId(), equalTo("192.168.1.1"));
 
-        // Wait for the node
-        ResourceKey nodeKey = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(node));
-        await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(nodeKey), notNullValue());
+        // Wait for the nodes
+        for (OpennmsModelProtos.Node RN : Arrays.asList(R1, R2)) {
+            ResourceKey nodeKey = ResourceKey.key(ManagedObjectType.Node.getName(), toNodeCriteria(RN));
+            await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(nodeKey), notNullValue());
+        }
 
         // The BGP peer should exist with the same type/id referenced by the alarm
         ResourceKey bgpPeerKey = ResourceKey.key(oceAlarm.getInventoryObjectType(), oceAlarm.getInventoryObjectId());
         await().atMost(5, TimeUnit.SECONDS).until(() -> inventoryHandler.getIoByKey(bgpPeerKey), notNullValue());
 
-        // The BGP peer should have the node as it's parent
+        // The BGP peer should have R2 as it's parent
         InventoryObject bgpPeer = inventoryHandler.getIoByKey(bgpPeerKey);
         assertThat(bgpPeer.getParentType(), equalTo(ManagedObjectType.Node.getName()));
-        assertThat(bgpPeer.getParentId(), equalTo(toNodeCriteria(node)));
+        assertThat(bgpPeer.getParentId(), equalTo(toNodeCriteria(R2)));
+
+        assertThat(bgpPeer.getRelatives(), hasSize(1));
+        InventoryObjectRelativeRef relativeRef = bgpPeer.getRelatives().get(0);
+        assertThat(relativeRef.getType(), equalTo(ManagedObjectType.Node.getName()));
+        assertThat(relativeRef.getId(), equalTo(toNodeCriteria(R1)));
     }
 
     @Test

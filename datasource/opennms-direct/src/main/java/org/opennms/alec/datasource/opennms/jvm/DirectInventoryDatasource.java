@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -38,7 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +72,11 @@ import com.google.common.collect.Sets;
  */
 public class DirectInventoryDatasource implements InventoryDatasource, AlarmLifecycleListener, TopologyEdgeConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(DirectInventoryDatasource.class);
+
+    /**
+     * The startup thread; handles initialization.
+     */
+    private Thread initThread;
 
     /**
      * The registry of handlers interested in receiving callbacks for inventory.
@@ -190,10 +197,57 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * {@link AlarmDao}.
      */
     public synchronized void init() {
+        // The Blueprint requires the init method to return 'void', so we can't make it call initAsync directly
+        initAsync();
+    }
+
+    /**
+     * Perform the initialization tasks in a dedicated thread.
+     *
+     * @return the Future of the initialization thread.
+     */
+    public CompletableFuture<Void> initAsync() {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        LOG.info("Initializing...");
+
+        initThread = new Thread(() -> {
+            try {
+                doInit();
+            } catch (Exception e) {
+                if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                    LOG.warn("Initialization was interrupted.");
+                } else {
+                    LOG.error("Initialization failed with exception.", e);
+                }
+                future.completeExceptionally(e);
+                return;
+            }
+
+            LOG.info("Initialization successful.");
+            future.complete(null);
+        });
+
+        initThread.setName("ALEC Inventory Datasource Initializer");
+        initThread.start();
+        return future;
+    }
+
+    /**
+     * Perform the initialization tasks. Populate inventory from '{@link NodeDao}',
+     * '{@link AlarmDao}', and '{@link EdgeDao}'.
+     */
+    protected void doInit() {
         eventSubscriptionService.addEventListener(nodeEventListener, nodeEventListener.nodeEventUeis);
+
+        LOG.debug("Loading nodes...");
         nodeDao.getNodes().forEach(n -> processNode(n, false));
+
+        LOG.debug("Loading alarms...");
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
+
+        LOG.debug("Loading edges...");
         edgeDao.getEdges().forEach(e -> processEdge(e, false));
+
         initLock.countDown();
     }
 
@@ -202,6 +256,18 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      */
     public synchronized void destroy() {
         eventSubscriptionService.removeEventListener(nodeEventListener);
+
+        if (initThread != null && initThread.isAlive()) {
+            initThread.interrupt();
+            try {
+                initThread.join(TimeUnit.MINUTES.toMillis(1));
+                if (initThread.isAlive()) {
+                    LOG.warn("Initializing thread is still running.");
+                }
+            } catch (InterruptedException e) {
+                LOG.error("Interrupted while waiting for initialization thread to stop.");
+            }
+        }
     }
 
     /**
@@ -227,7 +293,15 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private synchronized Collection<InventoryObject> considerNewInventory(Set<InventoryObject> inventoryObjects,
                                                                           boolean notifyHandlers) {
         // Only add and notify for inventory that was not already known
-        Set<InventoryObject> newInventory = Sets.difference(inventoryObjects, allInventory()).immutableCopy();
+        Set<InventoryObject> diffAlarm = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromAlarms));
+        Set<InventoryObject> diffNode = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromNodes));
+        Set<InventoryObject> diffEdge = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromEdges));
+
+        Set<InventoryObject> newInventory = Sets.intersection(
+                Sets.intersection(diffAlarm, diffNode), diffEdge).immutableCopy();
 
         if (!newInventory.isEmpty()) {
             if (notifyHandlers) {

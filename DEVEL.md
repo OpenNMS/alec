@@ -27,6 +27,13 @@ feature:repo-add mvn:org.opennms.alec/alec-karaf-features/1.0.0-SNAPSHOT/xml
 
 ## Usage
 
+### OpenNMS Integration (direct)
+
+In the Karaf shell, install the feature:
+```
+feature:install alec-opennms-standalone
+```
+
 ### OpenNMS Integration (using Kafka)
 
 From the Karaf shell, point to your Kafka instance:

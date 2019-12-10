@@ -608,9 +608,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @Override
     public void handleAlarmSnapshot(List<Alarm> alarms) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Received alarm snapshot {}", alarms);
-        }
+        LOG.trace("Received alarm snapshot {}", alarms);
+        waitForInit(); // Wait for initialization before acquiring the write lock to avoid deadlocks
         inventoryLock.writeLock().lock();
         try {
             // Derive new inventory from the snapshot
@@ -636,6 +635,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     @Override
     public void handleDeletedAlarm(int alarmId, String reductionKey) {
         LOG.trace("Received delete for alarm Id {}", alarmId);
+        waitForInit(); // Wait for initialization before acquiring the write lock to avoid deadlocks
         inventoryLock.writeLock().lock();
         try {
             // Check if this alarm had any inventory associated

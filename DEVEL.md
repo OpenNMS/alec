@@ -6,6 +6,8 @@
 mvn clean package install
 ```
 
+Note: maven version 3.5 (or newer) is required due to compatibility issues with 'karaf-maven-plugin'.
+
 ## Setup
 
 Download and extract the tarball distribution of Apache Karaf 4.1.5:

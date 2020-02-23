@@ -193,7 +193,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         try {
             return alarmsById.values().stream()
                     .filter(a -> !a.isSituation())
-                    .map(a -> mapper.toAlarm(a))
+                    .map(mapper::toAlarm)
                     .collect(Collectors.toList());
         } finally {
             rwLock.readLock().unlock();
@@ -202,9 +202,13 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
     @Override
     public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        final List<Alarm> alarms = new ArrayList<>();
-        alarmHandlers.register(handler, (h) -> alarms.addAll(getAlarms()));
-        return alarms;
+        rwLock.readLock().lock();
+        try {
+            alarmHandlers.register(handler);
+            return getAlarms();
+        } finally {
+            rwLock.readLock().unlock();
+        }
     }
 
     @Override
@@ -234,7 +238,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         try {
             return alarmsById.values().stream()
                     .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
-                    .map(s -> mapper.toSituation(s))
+                    .map(mapper::toSituation)
                     .collect(Collectors.toList());
         } finally {
             rwLock.readLock().unlock();

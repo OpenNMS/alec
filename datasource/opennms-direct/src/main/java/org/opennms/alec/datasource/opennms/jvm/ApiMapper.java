@@ -46,6 +46,7 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
@@ -111,7 +112,12 @@ public class ApiMapper {
     }
 
     private Optional<String> getSituationIdFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        final List<EventParameter> parms = alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME);
+        final DatabaseEvent databaseEvent = alarm.getLastEvent();
+        if (databaseEvent == null) {
+            // Last event is missing
+            return Optional.empty();
+        }
+        final List<EventParameter> parms = databaseEvent.getParametersByName(SITUATION_ID_PARM_NAME);
         if (parms == null) {
             // No parameter with that name
             return Optional.empty();

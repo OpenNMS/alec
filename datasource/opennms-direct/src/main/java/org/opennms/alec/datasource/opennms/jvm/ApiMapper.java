@@ -28,6 +28,7 @@
 
 package org.opennms.alec.datasource.opennms.jvm;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -141,19 +142,20 @@ public class ApiMapper {
         // Relay the situation id
         eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
 
-        // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = situation.getAlarms().stream()
-                .min(Comparator.comparing(Alarm::getTime))
-                .orElse(null);
-        if (earliestAlarm != null) {
+        // Populate logmsg, descr and related node with details from the most relevant alarm
+        final Alarm alarmForDescr = getAlarmForDescription(situation.getAlarms());
+        if (alarmForDescr != null) {
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
-                    earliestAlarm.getSummary()));
+                    alarmForDescr.getSummary()));
 
-            String description = earliestAlarm.getDescription();
+            String description = alarmForDescr.getDescription();
             if (situation.getDiagnosticText() != null) {
                 description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
             }
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
+
+            // Set a node id - use the same node associated with the alarm we used to the description
+            eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);
         }
 
         // Set the related reduction keys
@@ -251,5 +253,18 @@ public class ApiMapper {
             LOG.error("Failed to retrieve inventory for edge", e);
             return Collections.emptyList();
         }
+    }
+
+    private static Alarm getAlarmForDescription(Collection<Alarm> alarms) {
+        // Sort the alarms by time (ascending)
+        final List<Alarm> sortedAlarms = alarms.stream()
+                .sorted(Comparator.comparing(Alarm::getTime))
+                .collect(Collectors.toList());
+
+        // Use the alarm that is not cleared (if any), or fallback to the earliest alarm otherwise
+        return sortedAlarms.stream()
+                .filter(a -> !a.isClear())
+                .findFirst()
+                .orElseGet(() -> sortedAlarms.get(0));
     }
 }

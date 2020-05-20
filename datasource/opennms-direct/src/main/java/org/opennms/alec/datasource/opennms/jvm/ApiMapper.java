@@ -28,9 +28,7 @@
 
 package org.opennms.alec.datasource.opennms.jvm;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,6 +45,7 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.alec.datasource.common.util.AlarmUtil;
 import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
@@ -143,7 +142,7 @@ public class ApiMapper {
         eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
 
         // Populate logmsg, descr and related node with details from the most relevant alarm
-        final Alarm alarmForDescr = getAlarmForDescription(situation.getAlarms());
+        final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
         if (alarmForDescr != null) {
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
                     alarmForDescr.getSummary()));
@@ -253,18 +252,5 @@ public class ApiMapper {
             LOG.error("Failed to retrieve inventory for edge", e);
             return Collections.emptyList();
         }
-    }
-
-    private static Alarm getAlarmForDescription(Collection<Alarm> alarms) {
-        // Sort the alarms by time (ascending)
-        final List<Alarm> sortedAlarms = alarms.stream()
-                .sorted(Comparator.comparing(Alarm::getTime))
-                .collect(Collectors.toList());
-
-        // Use the alarm that is not cleared (if any), or fallback to the earliest alarm otherwise
-        return sortedAlarms.stream()
-                .filter(a -> !a.isClear())
-                .findFirst()
-                .orElseGet(() -> sortedAlarms.get(0));
     }
 }

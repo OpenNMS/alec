@@ -28,14 +28,10 @@
 
 package org.opennms.alec.datasource.opennms;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.common.util.AlarmUtil;
 import org.opennms.alec.datasource.opennms.events.Event;
 
 /**
@@ -59,7 +55,7 @@ public class SituationToEvent {
         // Relay the situation id
         e.addParam(SITUATION_ID_PARM_NAME, situation.getId());
 
-        final Alarm alarmForDescr = getAlarmForDescription(situation.getAlarms());
+        final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
         e.addParam("situationLogMsg", alarmForDescr.getSummary());
 
         String description = alarmForDescr.getDescription();
@@ -77,18 +73,5 @@ public class SituationToEvent {
         e.setNodeId(alarmForDescr.getNodeId());
 
         return e;
-    }
-
-    private static Alarm getAlarmForDescription(Collection<Alarm> alarms) {
-        // Sort the alarms by time (ascending)
-        final List<Alarm> sortedAlarms = alarms.stream()
-                .sorted(Comparator.comparing(Alarm::getTime))
-                .collect(Collectors.toList());
-
-        // Use the alarm that is not cleared (if any), or fallback to the earliest alarm otherwise
-        return sortedAlarms.stream()
-                .filter(a -> !a.isClear())
-                .findFirst()
-                .orElseGet(() -> sortedAlarms.get(0));
     }
 }

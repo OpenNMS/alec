@@ -44,11 +44,12 @@ import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 
 public class MockGraphProvider implements GraphProvider {
 
-    final DBScanEngine dbScanEngine = new DBScanEngine();
+    final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry());
 
     public MockGraphProvider() {
         final InventoryObject io1 = ImmutableInventoryObject.newBuilder()

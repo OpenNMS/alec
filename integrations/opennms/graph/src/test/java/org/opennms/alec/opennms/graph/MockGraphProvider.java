@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.feature.graph.rest.impl;
+package org.opennms.alec.opennms.graph;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,12 +44,11 @@ import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 
 public class MockGraphProvider implements GraphProvider {
 
-    final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry());
+    final DBScanEngine dbScanEngine = new DBScanEngine();
 
     public MockGraphProvider() {
         final InventoryObject io1 = ImmutableInventoryObject.newBuilder()

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2020 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2020 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -28,14 +28,6 @@
 
 package org.opennms.alec.features.graph.api;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-public interface GraphProvider {
-
-    <V> V withReadOnlyGraph(Function<OceGraph, V> consumer);
-
-    void withReadOnlyGraph(Consumer<OceGraph> consumer);
-
-    void registerGraphChangeListener(GraphChangedListener listener);
+public interface GraphChangedListener {
+    void graphHasChanged();
 }

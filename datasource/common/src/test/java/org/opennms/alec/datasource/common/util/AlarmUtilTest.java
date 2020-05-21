@@ -20,34 +20,28 @@ public class AlarmUtilTest {
     }
 
     @Test
-    public void shouldGetTheOldestNonClearedAlarm() {
-        List<Alarm> alarms = new ArrayList<>();
-        alarms.add(alarm("oldestButCleared", 1, true));
-        alarms.add(alarm("old", 2, false));
-        alarms.add(alarm("middleage", 3, false));
-        alarms.add(alarm("young", 4, false));
-        alarms.add(alarm("youngest", 5, false));
+    public void shouldGetTheAlarmWithTheHighestSeverityAndOldest() {
 
-        assertEquals("old", AlarmUtil.getAlarmForDescription(alarms).getId());
+        List<Alarm> alarms = new ArrayList<>();
+
+        // Generate a list with all severities with 3 ages:
+        for(Severity severity : Severity.values()) {
+            alarms.add(alarm(3, severity)); // young
+            alarms.add(alarm(2, severity)); // middle age
+            alarms.add(alarm(1, severity)); // old
+        }
+
+        // We expect the oldest alarm with the highest severity.
+        Alarm selectedAlarm = AlarmUtil.getAlarmForDescription(alarms);
+        assertEquals(1, selectedAlarm.getTime());
+        assertEquals(Severity.CRITICAL, selectedAlarm.getSeverity());
     }
 
-    @Test
-    public void shouldGetTheOldestOfAllClearedAlarms() {
-        List<Alarm> alarms = new ArrayList<>();
-        alarms.add(alarm("oldest", 1, true));
-        alarms.add(alarm("old", 2, true));
-        alarms.add(alarm("middleage", 3, true));
-        alarms.add(alarm("young", 4, true));
-        alarms.add(alarm("youngest", 5, true));
-
-        assertEquals("oldest", AlarmUtil.getAlarmForDescription(alarms).getId());
-    }
-
-    private Alarm alarm(String id, long time, boolean cleared) {
+    private Alarm alarm(final long time, final Severity severity) {
         return ImmutableAlarm.newBuilder()
-                .setId(id)
+                .setId(severity.name() + "_" + time)
                 .setTime(time)
-                .setSeverity(cleared ? Severity.CLEARED : Severity.WARNING)
+                .setSeverity(severity)
                 .build();
     }
 

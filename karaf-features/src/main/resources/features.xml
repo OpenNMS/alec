@@ -37,6 +37,7 @@
         <bundle dependency="true">wrap:mvn:com.squareup.okhttp3/logging-interceptor/${okhttp.version}</bundle>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
+        <feature dependency="true" version="${resilience4j.version}">alec-dependency-resilience4j</feature>
     </feature>
 
     <feature name="alec-datasource-opennms-direct" description="ALEC :: Datasource :: OpenNMS Direct" version="${project.version}">
@@ -287,6 +288,16 @@
     <feature name="alec-dependency-asciitable" description="asciitable" version="${asciitable.version}">
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.asciitable/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
+    </feature>
+
+    <feature name="alec-dependency-resilience4j" version="${resilience4j.version}" description="resilience4j">
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/3.0.2_1</bundle>
+        <bundle>mvn:io.vavr/vavr/0.10.0</bundle>
+        <bundle>mvn:io.vavr/vavr-match/0.10.0</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-core/${resilience4j.version}</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-circuitbreaker/${resilience4j.version}</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-bulkhead/${resilience4j.version}</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-retry/${resilience4j.version}</bundle>
     </feature>
 
 </features>

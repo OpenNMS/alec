@@ -45,6 +45,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.springframework.kafka.test.rule.KafkaEmbedded;
@@ -64,6 +66,7 @@ public abstract class OpennmsDatasourceIT {
 
     public KafkaProducer<String, byte[]> producer;
 
+    @Spy
     public OpennmsDatasource datasource;
 
     @Before
@@ -81,6 +84,9 @@ public abstract class OpennmsDatasourceIT {
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);
         SinkWrapper sinkWrapper = mock(SinkWrapper.class);
         datasource = new OpennmsDatasource(getDatasourceConfig(), nodeToInventory, alarmToInventory, edgeToInventory, sinkWrapper);
+        MockitoAnnotations.initMocks(this); // make the @Spy work
+        KafkaStreamMonitor streamMonitor = new KafkaStreamMonitor(datasource);
+        datasource.setStreamStateListener(streamMonitor);
     }
 
     public ConfigurationAdmin getDatasourceConfig() throws IOException {

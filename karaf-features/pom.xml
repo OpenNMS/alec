@@ -132,6 +132,7 @@
                                 <feature>alec-dependency-groovy</feature>
                                 <feature>alec-dependency-dropwizard-metrics</feature>
                                 <feature>alec-dependency-asciitable</feature>
+                                <feature>alec-dependency-resilience4j</feature>
                             </features>
                         </configuration>
                     </execution>

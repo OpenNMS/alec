@@ -82,6 +82,7 @@
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
         <protobuf.version>3.5.1</protobuf.version>
         <rocksdb.version>5.18.3</rocksdb.version>
+        <resilience4j.version>1.4.0</resilience4j.version>
         <slf4j-api.version>1.7.26</slf4j-api.version>
         <snappy-java.version>1.1.7.3</snappy-java.version>
         <snmp4j.bundle.version>2.6.3_1</snmp4j.bundle.version>

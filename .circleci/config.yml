@@ -3,7 +3,7 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.0-b5
+      - image: opennms/build-env:1.8.0.252.b09-3.6.3-b5231
         environment:
           MAVEN_OPTS: -Xmx2g
 

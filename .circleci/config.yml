@@ -40,6 +40,10 @@ executors:
     docker:
       - image: circleci/python:3.7.2
 
+orbs:
+  cloudsmith: cloudsmith/cloudsmith@1.0.3
+  sign-packages: opennms/sign-packages@2.2.0
+
 workflows:
   build-deploy:
     jobs:
@@ -268,6 +272,12 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-rpm-dependencies:
+          skip_if_forked_pr: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           - v5-dependencies-{{ checksum "pom.xml" }}
@@ -300,6 +310,12 @@ jobs:
       - store_test_results:
           path: ~/junit
 
+      - sign-packages/sign-rpms:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-rpm/target/rpm/*-alec-plugin/RPMS/noarch/*.rpm
+
       - run:
           name: Gather artifacts
           command: |
@@ -324,6 +340,13 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-deb-dependencies:
+          skip_if_forked_pr: true
+          use_sudo: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           # Use a separate cache, since the the other build image runs as root
@@ -339,6 +362,12 @@ jobs:
           paths:
             - ~/.m2
           key: v4-deb-dependencies-{{ checksum "pom.xml" }}
+
+      - sign-packages/sign-debs:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-deb/target/*.deb
 
       - run:
           name: Gather artifacts

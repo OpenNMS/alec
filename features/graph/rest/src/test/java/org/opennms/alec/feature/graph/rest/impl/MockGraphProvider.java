@@ -40,7 +40,6 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
-import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 
@@ -87,10 +86,5 @@ public class MockGraphProvider implements GraphProvider {
     @Override
     public void withReadOnlyGraph(Consumer<OceGraph> consumer) {
         dbScanEngine.withReadOnlyGraph(consumer);
-    }
-
-    @Override
-    public void registerGraphChangeListener(GraphChangedListener listener) {
-        // do nothing
     }
 }

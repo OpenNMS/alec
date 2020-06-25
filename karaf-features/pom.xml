@@ -222,12 +222,6 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.opennms.alec.integrations.opennms</groupId>
-            <artifactId>graph</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.opennms.alec.features</groupId>

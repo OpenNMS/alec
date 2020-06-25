@@ -195,10 +195,9 @@
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${snmp4j.bundle.version}</bundle>
-        <bundle>mvn:org.opennms.alec.integrations.opennms/config/${project.version}</bundle>
-        <bundle>mvn:org.opennms.alec.integrations.opennms/extension/${project.version}</bundle>
-        <bundle>mvn:org.opennms.alec.integrations.opennms/graph/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.integrations.opennms/model/${project.version}</bundle>
+        <bundle>mvn:org.opennms.alec.integrations.opennms/extension/${project.version}</bundle>
+        <bundle>mvn:org.opennms.alec.integrations.opennms/config/${project.version}</bundle>
     </feature>
 
 

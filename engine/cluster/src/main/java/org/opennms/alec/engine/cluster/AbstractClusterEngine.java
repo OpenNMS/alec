@@ -62,7 +62,6 @@ import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.features.graph.api.Edge;
-import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 import org.opennms.alec.features.graph.api.Vertex;
@@ -122,7 +121,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
     private boolean shouldFilterGraph = true;
     private Set<Long> disconnectedVertices = new HashSet<>();
-
+    
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
 
@@ -304,7 +303,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     Situation affectedSituation = situationsById.get(situationId);
                     if (affectedSituation == null) {
                         LOG.info("Got feedback for situation with id: {}, but the engine does not know about this " +
-                                "situation. Ignoring feedback.", situationId);
+                                "situation. Ignoring feedback.");
                         continue;
                     }
                     Set<Alarm> prevAlarms = affectedSituation.getAlarms();
@@ -921,7 +920,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     public GraphManager getGraphManager() {
         return graphManager;
     }
-
+    
     @VisibleForTesting
     void solveEntireGraphForTesting() {
         // For testing purposes we can have the filtered graph be a straight copy of the original and solve distances
@@ -930,10 +929,5 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         graphManager.updateAndFilter();
         shortestPath.solve(graphManager.getFilteredGraph().getVertices());
         shouldFilterGraph = true;
-    }
-
-    @Override
-    public void registerGraphChangeListener(final GraphChangedListener listener) {
-        this.graphManager.registerGraphChangedListener(listener);
     }
 }

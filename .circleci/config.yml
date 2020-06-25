@@ -45,28 +45,33 @@ workflows:
     jobs:
       # Run build jobs for all branches and any tag
       - pre-build:
+          context: "OpenNMS Build"
           filters:
             tags:
               only: /.*/
       - build:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - build-debian:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
             tags:
               only: /.*/
       - build-docs:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - smoke-test-commit:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
@@ -75,6 +80,7 @@ workflows:
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
+          context: "OpenNMS Build"
           requires:
             - smoke-test-commit
           filters:
@@ -84,6 +90,7 @@ workflows:
                 - develop
                 - /release-.*/
       - deploy-packages:
+          context: "OpenNMS Build"
           requires:
             - smoke-test-commit
             - build-debian
@@ -95,6 +102,7 @@ workflows:
                 - develop
                 - /release-.*/
       - deploy-docs:
+          context: "OpenNMS Build"
           requires:
             - build-docs
           filters:
@@ -105,6 +113,7 @@ workflows:
                 - develop
                 - /release-.*/
       - yank-snapshot-packages:
+          context: "OpenNMS Build"
           requires:
             - deploy-packages
 
@@ -120,16 +129,19 @@ workflows:
             - /release-.*/
     jobs:
     - pre-build:
+        context: "OpenNMS Build"
         filters:
           tags:
             only: /.*/
     - build:
+        context: "OpenNMS Build"
         requires:
         - pre-build
         filters:
           tags:
             only: /.*/
     - smoke-test-nightly:
+        context: "OpenNMS Build"
         requires:
         - build
         filters:
@@ -140,7 +152,7 @@ commands:
   smoke-test:
     description: "Run the smoke tests"
     parameters:
-      context:
+      build_type:
         type: string
     steps:
       - attach_workspace:
@@ -184,9 +196,9 @@ commands:
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
-            if [ "<< parameters.context >>" = "commit" ]; then
+            if [ "<< parameters.build_type >>" = "commit" ]; then
               mvn surefire:test -Dtest=OnCommitSmokeTestSuite -DsmokeTest=true
-            elif [ "<< parameters.context >>" = "nightly" ]; then
+            elif [ "<< parameters.build_type >>" = "nightly" ]; then
               mvn test -DsmokeTest=true
             fi
 
@@ -349,14 +361,14 @@ jobs:
 
     steps:
     - smoke-test:
-        context: commit
+        build_type: commit
 
   smoke-test-nightly:
     executor: smoke-test-executor
 
     steps:
     - smoke-test:
-        context: nightly
+        build_type: nightly
 
   build-docs:
     executor: docs-executor

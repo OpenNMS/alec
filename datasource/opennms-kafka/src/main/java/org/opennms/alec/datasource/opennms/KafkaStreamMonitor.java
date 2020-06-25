@@ -87,7 +87,7 @@ public class KafkaStreamMonitor implements KafkaStreams.StateListener {
     private synchronized KafkaStreams.State restartKafka() {
         // double check that the restart is still needed (maybe the state has changed back to RUNNING already)
         if(KafkaStreams.State.ERROR != this.currentState) {
-            LOG.info("State is {}, not {}, restart sees to have been sucessful. Will abort.", this.currentState, KafkaStreams.State.ERROR);
+            LOG.info("State is {}, not {}, restart seems to have been successful. Will abort.", this.currentState, KafkaStreams.State.ERROR);
             return this.currentState; // nothing to do
         }
         try {

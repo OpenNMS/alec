@@ -85,8 +85,6 @@ public abstract class OpennmsDatasourceIT {
         SinkWrapper sinkWrapper = mock(SinkWrapper.class);
         datasource = new OpennmsDatasource(getDatasourceConfig(), nodeToInventory, alarmToInventory, edgeToInventory, sinkWrapper);
         MockitoAnnotations.initMocks(this); // make the @Spy work
-        KafkaStreamMonitor streamMonitor = new KafkaStreamMonitor(datasource);
-        datasource.setStreamStateListener(streamMonitor);
     }
 
     public ConfigurationAdmin getDatasourceConfig() throws IOException {

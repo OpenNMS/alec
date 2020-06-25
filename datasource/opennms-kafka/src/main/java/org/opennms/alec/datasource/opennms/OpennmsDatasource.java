@@ -179,9 +179,12 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         // Use the class-loader for the KStream class, since the kafka-client bundle
         // does not import the required classes from the kafka-streams bundle
         streams = KafkaUtils.runWithGivenClassLoader(() -> new KafkaStreams(getKTopology(), streamProperties), KStream.class.getClassLoader());
-        if(this.streamStateListener != null) {
-            streams.setStateListener(streamStateListener);
+        
+        if(this.streamStateListener == null) {
+            LOG.debug("Creating a new Kafka Stream Monitor");
+            this.streamStateListener = new KafkaStreamMonitor(this);
         }
+        streams.setStateListener(streamStateListener);
 
         streams.setUncaughtExceptionHandler((t, e) ->
                 LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
@@ -676,9 +679,5 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         LOG.debug("Waiting for alarm feedback store...");
         waitUntilAlarmFeedbackStoreIsQueryable();
         LOG.debug("All stores are available");
-    }
-
-    public void setStreamStateListener(final KafkaStreams.StateListener streamStateListener) {
-        this.streamStateListener = streamStateListener;
     }
 }

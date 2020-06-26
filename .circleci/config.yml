@@ -105,6 +105,20 @@ workflows:
               only:
                 - develop
                 - /release-.*/
+                - ranger/package-updates
+      - deploy-packages-cloudsmith:
+          context: "OpenNMS Build"
+          requires:
+            - smoke-test-commit
+            - build-debian
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - develop
+                - /release-.*/
+                - ranger/package-updates
       - deploy-docs:
           context: "OpenNMS Build"
           requires:
@@ -438,17 +452,34 @@ jobs:
 
   deploy-packages:
       executor: package-cloud-cli-executor
+      resource_class: small
       steps:
         - attach_workspace:
             at: ~/
+
         - run:
-            name: Push RPM packages
+            name: Push packages to PackageCloud
             command: |
               source .circleci/env/package_cloud
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/*
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/*
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-alec-plugin_*.deb
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb
+
+  deploy-packages-cloudsmith:
+      executor: cloudsmith/default
+      resource_class: small
+      steps:
+        - attach_workspace:
+            at: ~/
+
+        - cloudsmith/ensure-api-key
+        - cloudsmith/install-cli
+
+        - run:
+            name: Push packages to CloudSmith
+            command: .circleci/scripts/publish-cloudsmith.sh
+
   deploy-docs:
     executor: netlify-cli-executor
     steps:

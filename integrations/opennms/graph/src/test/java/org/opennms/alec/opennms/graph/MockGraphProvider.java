@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.feature.graph.rest.impl;
+package org.opennms.alec.opennms.graph;
 
 import java.util.Collections;
 import java.util.List;

@@ -13,6 +13,7 @@
     <modules>
         <module>config</module>
         <module>extension</module>
+        <module>graph</module>
         <module>model</module>
         <module>sink</module>
     </modules>

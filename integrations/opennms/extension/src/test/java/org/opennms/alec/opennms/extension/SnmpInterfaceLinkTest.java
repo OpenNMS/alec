@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Test;
 import org.opennms.alec.opennms.model.ManagedObjectType;
 import org.opennms.alec.opennms.model.SnmpInterfaceLinkInstance;
+import org.opennms.integration.api.v1.dao.InterfaceToNodeCache;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
 import org.opennms.integration.api.v1.model.Alarm;
@@ -72,7 +73,7 @@ public class SnmpInterfaceLinkTest {
         when(snmpInterfaceDao.findByNodeIdAndDescrOrName(1,"Ethernet1/1")).thenReturn(snmpInterfaceA);
         when(snmpInterfaceDao.findByNodeIdAndDescrOrName(2,"Ethernet2/1")).thenReturn(snmpInterfaceZ);
 
-        ManagedObjectAlarmExt managedObjectAlarmdExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao);
+        ManagedObjectAlarmExt managedObjectAlarmdExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao, mock(InterfaceToNodeCache.class));
 
         // Tag the alarm
         Alarm alarm = ImmutableAlarm.newBuilder().setNode(nodeA).build();

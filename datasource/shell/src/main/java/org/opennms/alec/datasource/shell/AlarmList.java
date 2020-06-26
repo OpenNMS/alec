@@ -28,7 +28,10 @@
 
 package org.opennms.alec.datasource.shell;
 
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
@@ -36,8 +39,13 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
+import org.opennms.alec.datasource.api.ResourceKey;
+import org.opennms.alec.datasource.api.Situation;
 
-@Command(scope = "opennms-alec", name = "alarms", description="Alarms!")
+import de.vandermeer.asciitable.AsciiTable;
+import de.vandermeer.asciitable.CWC_LongestLine;
+
+@Command(scope = "opennms-alec", name = "alarms", description="List the alarms known by the datasource.")
 @Service
 public class AlarmList implements Action {
 
@@ -46,15 +54,33 @@ public class AlarmList implements Action {
 
     @Override
     public Object execute() {
-        final List<? extends Alarm> alarms = alarmDatasource.getAlarms();
-        if (alarms.size() < 1) {
-            System.out.println("(No alarms)");
-        } else {
-            for (Alarm alarm : alarms) {
-                System.out.println(alarm);
-            }
-        }
+        printAlarms(alarmDatasource.getAlarms());
         return null;
     }
 
+    private static void printAlarms(List<? extends Alarm> alarms) {
+        AsciiTable at = new AsciiTable();
+        at.addRule();
+        at.addRow("ID", "Time", "Severity", "Node ID", "IO Type", "IO ID");
+        at.addRule();
+
+        // Situations
+        alarms.stream()
+                // Sort by time descending
+                .sorted(Comparator.comparing(Alarm::getTime).reversed().thenComparing(Alarm::getId))
+                .forEach(a -> {
+                    at.addRow(a.getId(),
+                            new Date(a.getTime()),
+                            a.getSeverity(),
+                            a.getNodeId(),
+                            a.getInventoryObjectType(),
+                            a.getInventoryObjectId());
+                    at.addRule();
+                });
+
+        CWC_LongestLine cwc = new CWC_LongestLine();
+        at.getRenderer().setCWC(cwc);
+
+        System.out.println(at.render());
+    }
 }

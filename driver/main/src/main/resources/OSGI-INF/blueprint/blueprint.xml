@@ -12,20 +12,6 @@
     <!-- Situation Processor -->
     <reference id="situationProcessorFactory" interface="org.opennms.alec.processor.api.SituationProcessorFactory"/>
 
-    <!-- Metrics -->
-    <bean id="metricRegistry" class="com.codahale.metrics.MetricRegistry"/>
-    <bean id="metricRegistryJmxReporterBuilder" class="com.codahale.metrics.jmx.JmxReporter" factory-method="forRegistry">
-        <argument ref="metricRegistry"/>
-    </bean>
-    <bean id="metricRegistryDomainedJmxReporterBuilder" factory-ref="metricRegistryJmxReporterBuilder" factory-method="inDomain">
-        <argument value="org.opennms.alec.driver.main"/>
-    </bean>
-    <bean id="metricRegistryJmxReporter"
-          factory-ref="metricRegistryDomainedJmxReporterBuilder"
-          factory-method="build"
-          init-method="start"
-          destroy-method="stop" />
-
     <bean id="driver" class="org.opennms.alec.driver.main.Driver" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundleContext"/>
         <argument ref="alarmDatasource"/>
@@ -34,7 +20,6 @@
         <argument ref="situationDatasource"/>
         <argument ref="engineFactory"/>
         <argument ref="situationProcessorFactory"/>
-        <argument ref="metricRegistry"/>
     </bean>
     <service ref="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 

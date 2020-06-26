@@ -38,6 +38,8 @@ import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
 import org.osgi.framework.BundleContext;
 
+import com.codahale.metrics.MetricRegistry;
+
 import edu.uci.ics.jung.graph.Graph;
 
 /**
@@ -52,11 +54,12 @@ public class DeepLearningEngine extends AbstractClusterEngine {
     private Vectorizer vectorizer;
     private TFClusterer tfClusterer;
 
-    public DeepLearningEngine(BundleContext bundleContext, DeepLearningEngineConf conf) {
-        this(new TFModel(bundleContext, conf.getModelPath()), conf);
+    public DeepLearningEngine(MetricRegistry metrics, BundleContext bundleContext, DeepLearningEngineConf conf) {
+        this(metrics, new TFModel(bundleContext, conf.getModelPath()), conf);
     }
 
-    private DeepLearningEngine(TFModel tfModel, DeepLearningEngineConf conf) {
+    private DeepLearningEngine(MetricRegistry metrics, TFModel tfModel, DeepLearningEngineConf conf) {
+        super(metrics);
         this.tfModel = Objects.requireNonNull(tfModel);
         this.conf = Objects.requireNonNull(conf);
     }

@@ -31,6 +31,8 @@ package org.opennms.alec.engine.dbscan;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class DBScanEngineFactory implements EngineFactory {
 
     private double epsilon = DBScanEngine.DEFAULT_EPSILON;
@@ -43,8 +45,8 @@ public class DBScanEngineFactory implements EngineFactory {
     }
 
     @Override
-    public AbstractClusterEngine createEngine() {
-        return new DBScanEngine(epsilon, alpha, beta);
+    public AbstractClusterEngine createEngine(MetricRegistry metrics) {
+        return new DBScanEngine(metrics, epsilon, alpha, beta);
     }
 
     public double getEpsilon() {

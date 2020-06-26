@@ -144,6 +144,12 @@ public class OpennmsMapper {
         }
     }
 
+    public static List<InventoryModelProtos.InventoryObject> fromInventory(List<InventoryObject> inventory) {
+       return inventory.stream()
+               .map(OpennmsMapper::fromInventory)
+               .collect(Collectors.toList());
+    }
+
     public static InventoryModelProtos.InventoryObject fromInventory(InventoryObject inventory) {
         InventoryModelProtos.InventoryObject.Builder ioBuilder = InventoryModelProtos.InventoryObject.newBuilder();
 

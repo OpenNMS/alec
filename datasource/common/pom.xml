@@ -19,5 +19,11 @@
             <groupId>org.opennms.alec.datasource</groupId>
             <artifactId>org.opennms.alec.datasource.api</artifactId>
         </dependency>
+       <!-- Test -->
+       <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <scope>test</scope>
+       </dependency>
    </dependencies>
 </project>

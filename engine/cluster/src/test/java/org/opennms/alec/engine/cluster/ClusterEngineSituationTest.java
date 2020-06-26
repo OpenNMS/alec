@@ -46,6 +46,7 @@ import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Iterables;
 
 public class ClusterEngineSituationTest implements SituationHandler {
@@ -73,7 +74,7 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // No situations should have been triggered yet
         assertThat(triggeredSituations, hasSize(0));
 
-        ClusterEngine clusterEngine = new ClusterEngine();
+        ClusterEngine clusterEngine = new ClusterEngine(new MetricRegistry());
         clusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());
@@ -92,7 +93,7 @@ public class ClusterEngineSituationTest implements SituationHandler {
                 .setAlarms(new HashSet<>(Arrays.asList(a1, a2)))
                 .build();
 
-        clusterEngine = new ClusterEngine();
+        clusterEngine = new ClusterEngine(new MetricRegistry());
         clusterEngine.init(alarms, Collections.emptyList(), Collections.singletonList(initialSituation),
                 Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
@@ -114,7 +115,7 @@ public class ClusterEngineSituationTest implements SituationHandler {
                 .setInventoryObjectType("node")
                 .setTime(10000L)
                 .build(), a2, a3);
-        clusterEngine = new ClusterEngine();
+        clusterEngine = new ClusterEngine(new MetricRegistry());
         clusterEngine.init(alarms, Collections.emptyList(), Collections.singletonList(initialSituation), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
         clusterEngine.tick(clusterEngine.getTickResolutionMs());

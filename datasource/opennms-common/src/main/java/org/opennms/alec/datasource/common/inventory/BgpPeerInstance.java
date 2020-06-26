@@ -28,13 +28,16 @@
 
 package org.opennms.alec.datasource.common.inventory;
 
+
 public class BgpPeerInstance {
 
     private String peer;
+    private String peerNodeCriteria;
     private String vrf;
 
-    public BgpPeerInstance(String peer, String vrf) {
+    public BgpPeerInstance(String peer, String peerNodeCriteria, String vrf) {
         this.peer = peer;
+        this.peerNodeCriteria = peerNodeCriteria;
         this.vrf = vrf;
     }
 
@@ -46,6 +49,14 @@ public class BgpPeerInstance {
 
     public void setPeer(String peer) {
         this.peer = peer;
+    }
+
+    public String getPeerNodeCriteria() {
+        return peerNodeCriteria;
+    }
+
+    public void setPeerNodeCriteria(String peerNodeCriteria) {
+        this.peerNodeCriteria = peerNodeCriteria;
     }
 
     public String getVrf() {

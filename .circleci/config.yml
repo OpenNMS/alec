@@ -16,7 +16,8 @@ executors:
   # Note: Need to investigate how we can use our own image and have it configured so we can run docker inside docker
   # rather than rely on the circleci machine VM
   smoke-test-executor:
-    machine: true
+    machine:
+      image: ubuntu-1604:201903-01
     environment:
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true

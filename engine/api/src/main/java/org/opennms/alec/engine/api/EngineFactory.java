@@ -28,10 +28,12 @@
 
 package org.opennms.alec.engine.api;
 
+import com.codahale.metrics.MetricRegistry;
+
 public interface EngineFactory {
 
     String getName();
 
-    Engine createEngine();
+    Engine createEngine(MetricRegistry metrics);
 
 }

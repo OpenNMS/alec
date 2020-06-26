@@ -6,6 +6,8 @@
 mvn clean package install
 ```
 
+Note: maven version 3.5 (or newer) is required due to compatibility issues with 'karaf-maven-plugin'.
+
 ## Setup
 
 Download and extract the tarball distribution of Apache Karaf 4.1.5:
@@ -26,6 +28,13 @@ feature:repo-add mvn:org.opennms.alec/alec-karaf-features/1.0.0-SNAPSHOT/xml
 ```
 
 ## Usage
+
+### OpenNMS Integration (direct)
+
+In the Karaf shell, install the feature:
+```
+feature:install alec-opennms-standalone
+```
 
 ### OpenNMS Integration (using Kafka)
 

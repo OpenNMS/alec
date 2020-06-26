@@ -29,7 +29,6 @@
 package org.opennms.alec.datasource.opennms.jvm;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +45,8 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.alec.datasource.common.util.AlarmUtil;
+import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
@@ -111,7 +112,12 @@ public class ApiMapper {
     }
 
     private Optional<String> getSituationIdFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        final List<EventParameter> parms = alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME);
+        final DatabaseEvent databaseEvent = alarm.getLastEvent();
+        if (databaseEvent == null) {
+            // Last event is missing
+            return Optional.empty();
+        }
+        final List<EventParameter> parms = databaseEvent.getParametersByName(SITUATION_ID_PARM_NAME);
         if (parms == null) {
             // No parameter with that name
             return Optional.empty();
@@ -135,19 +141,20 @@ public class ApiMapper {
         // Relay the situation id
         eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
 
-        // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = situation.getAlarms().stream()
-                .min(Comparator.comparing(Alarm::getTime))
-                .orElse(null);
-        if (earliestAlarm != null) {
+        // Populate logmsg, descr and related node with details from the most relevant alarm
+        final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
+        if (alarmForDescr != null) {
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
-                    earliestAlarm.getSummary()));
+                    alarmForDescr.getSummary()));
 
-            String description = earliestAlarm.getDescription();
+            String description = alarmForDescr.getDescription();
             if (situation.getDiagnosticText() != null) {
                 description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
             }
             eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
+
+            // Set a node id - use the same node associated with the alarm we used to the description
+            eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);
         }
 
         // Set the related reduction keys

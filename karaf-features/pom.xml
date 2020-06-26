@@ -74,10 +74,10 @@
                         <configuration>
                             <javase>1.8</javase>
                             <descriptors>
-                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features
-                                </descriptor>
-                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features
-                                </descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/framework/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</descriptor>
+                                <descriptor>mvn:org.opennms.integration.api/karaf-features/${opennms.api.version}/xml</descriptor>
                                 <descriptor>file:${project.build.directory}/classes/features.xml</descriptor>
                             </descriptors>
                             <distribution>org.apache.karaf.features:framework</distribution>
@@ -122,14 +122,17 @@
                                 -->
 
                                 <!-- 3rd party -->
-                                <feature>rocksdb</feature>
-                                <feature>kafka-streams</feature>
-                                <feature>commons-text</feature>
-                                <feature>javax.mail</feature>
-                                <feature>moxy</feature>
-                                <feature>jackson-jaxrs</feature>
-                                <feature>tensorflow</feature>
-                                <feature>groovy</feature>
+                                <feature>alec-dependency-rocksdb</feature>
+                                <feature>alec-dependency-kafka-streams</feature>
+                                <feature>alec-dependency-commons-text</feature>
+                                <feature>alec-dependency-javax.mail</feature>
+                                <feature>alec-dependency-moxy</feature>
+                                <feature>alec-dependency-jackson-jaxrs</feature>
+                                <feature>alec-dependency-tensorflow</feature>
+                                <feature>alec-dependency-groovy</feature>
+                                <feature>alec-dependency-dropwizard-metrics</feature>
+                                <feature>alec-dependency-asciitable</feature>
+                                <feature>alec-dependency-resilience4j</feature>
                             </features>
                         </configuration>
                     </execution>

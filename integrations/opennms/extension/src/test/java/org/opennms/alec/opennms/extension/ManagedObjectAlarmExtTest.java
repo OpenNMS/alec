@@ -41,6 +41,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import org.opennms.alec.opennms.model.ManagedObjectType;
+import org.opennms.integration.api.v1.dao.InterfaceToNodeCache;
 import org.opennms.integration.api.v1.dao.NodeDao;
 import org.opennms.integration.api.v1.dao.SnmpInterfaceDao;
 import org.opennms.integration.api.v1.model.Alarm;
@@ -53,7 +54,8 @@ import org.opennms.integration.api.v1.model.immutables.ImmutableEventParameter;
 public class ManagedObjectAlarmExtTest {
     private final NodeDao nodeDao = mock(NodeDao.class);
     private final SnmpInterfaceDao snmpInterfaceDao = mock(SnmpInterfaceDao.class);
-    private final ManagedObjectAlarmExt managedObjectAlarmExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao);
+    private final InterfaceToNodeCache interfaceToNodeCache = mock(InterfaceToNodeCache.class);
+    private final ManagedObjectAlarmExt managedObjectAlarmExt = new ManagedObjectAlarmExt(nodeDao, snmpInterfaceDao, interfaceToNodeCache);
 
     @Test
     public void canAssociateAlarmWithNodeManagedObject() {

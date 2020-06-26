@@ -21,7 +21,10 @@
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
+                        <!-- we need to exclude org.apache.kafka.streams.KafkaStreams because it is otherwise treated as package,
+                             see https://stackoverflow.com/questions/18844987/creating-a-blueprint-bean-from-an-inner-class -->
                         <Import-Package>
+                            !org.apache.kafka.streams.KafkaStreams,
                             org.opennms.alec.datasource.common.inventory.script,
                             org.opennms.alec.datasource.opennms,
                             org.opennms.alec.datasource.opennms.events,
@@ -107,6 +110,18 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+
+        <!-- Resilience -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-core</artifactId>
+            <version>${resilience4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-retry</artifactId>
+            <version>${resilience4j.version}</version>
         </dependency>
 
         <!-- Test -->

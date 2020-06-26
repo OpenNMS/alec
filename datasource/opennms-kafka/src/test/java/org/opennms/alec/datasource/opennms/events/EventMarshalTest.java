@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import java.text.ParseException;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class EventMarshalTest {
     @Test
     public void canMarshalAndUnmarshal() {
         Event e = new Event();
-        e.setTime("Tuesday, 9 April 2019 14:07:27 o'clock EDT");
+        e.setTime("2019-10-21T22:30:43.103-04:00");
         e.setUei("someuei");
         e.setNodeId(99L);
         e.addParam("k1", "v1");
@@ -64,7 +65,7 @@ public class EventMarshalTest {
                 "        </parm>\n" +
                 "    </parms>\n" +
                 "    <severity>Critical</severity>\n" +
-                "    <time>Tuesday, 9 April 2019 14:07:27 o'clock EDT</time>\n" +
+                "    <time>2019-10-21T22:30:43.103-04:00</time>\n" +
                 "    <nodeid>99</nodeid>\n" +
                 "</event>"));
         assertThat(JaxbUtils.fromXml(JaxbUtils.toXml(e, Event.class), Event.class), equalTo(e));
@@ -87,7 +88,7 @@ public class EventMarshalTest {
                 "                </parm>\n" +
                 "            </parms>\n" +
                 "            <severity>Critical</severity>\n" +
-                "            <time>Tuesday, 9 April 2019 14:07:27 o'clock EDT</time>\n" +
+                "            <time>2019-10-21T22:30:43.103-04:00</time>\n" +
                 "            <nodeid>99</nodeid>\n" +
                 "        </event>\n" +
                 "    </events>\n" +
@@ -96,12 +97,12 @@ public class EventMarshalTest {
     }
 
     @Test
-    public void canParseDate() throws ParseException {
+    public void canParseDate() {
         Date start = new Date();
 
         // Create a new event and parse the date from the default string that was generated
         Event e = new Event();
-        Date dateFromEvent = Event.getDateFormat().parse(e.getTime());
+        Date dateFromEvent = Date.from(ZonedDateTime.parse(e.getTime()).toInstant());
 
         // The parsed date should be >= the date from the start of the test - add 1 second to adjust for miissing millis
         assertThat(dateFromEvent.getTime() + 1000, greaterThanOrEqualTo(start.getTime()));

@@ -65,6 +65,8 @@ import org.opennms.alec.engine.deeplearning.InputVector;
 import org.opennms.alec.engine.deeplearning.OutputVector;
 import org.opennms.alec.engine.deeplearning.Vectorizer;
 
+import com.codahale.metrics.MetricRegistry;
+
 import edu.uci.ics.jung.graph.Graph;
 
 @Command(scope = "opennms-alec", name = "tensorflow-vectorize", description = "Convert a fault data set to vectors for the purpose of training a TensorFlow model.")
@@ -119,6 +121,7 @@ public class Vectorize implements Action {
         private Vectorizer vectorizer;
 
         private MyEngine(Set<Situation> situations, Consumer<OutputVector> consumer) {
+            super(new MetricRegistry());
             this.situations = Objects.requireNonNull(situations);
             this.consumer = Objects.requireNonNull(consumer);
 
@@ -187,7 +190,7 @@ public class Vectorize implements Action {
         }
 
         @Override
-        public Engine createEngine() {
+        public Engine createEngine(MetricRegistry metrics) {
             return engine;
         }
     }

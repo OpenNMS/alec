@@ -156,6 +156,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     private final EdgeToInventory edgeToInventory;
 
     private final SinkWrapper sinkWrapper;
+    
+    private Event.TimeFormat eventTimeFormat = Event.TimeFormat.ISO;
+
+    private KafkaStreams.StateListener streamStateListener;
 
     public OpennmsDatasource(ConfigurationAdmin configAdmin, NodeToInventory nodeToInventory, AlarmToInventory alarmToInventory,
             EdgeToInventory edgeToInventory, SinkWrapper sinkWrapper) {
@@ -175,6 +179,12 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         // Use the class-loader for the KStream class, since the kafka-client bundle
         // does not import the required classes from the kafka-streams bundle
         streams = KafkaUtils.runWithGivenClassLoader(() -> new KafkaStreams(getKTopology(), streamProperties), KStream.class.getClassLoader());
+        
+        if(this.streamStateListener == null) {
+            LOG.debug("Creating a new Kafka Stream Monitor");
+            this.streamStateListener = new KafkaStreamMonitor(this);
+        }
+        streams.setStateListener(streamStateListener);
 
         streams.setUncaughtExceptionHandler((t, e) ->
                 LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
@@ -506,7 +516,14 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         final List<Situation> situations = new ArrayList<>();
         try {
             waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
-                situations.add(OpennmsMapper.toSituation(entry.value));
+                final Situation situation;
+                try {
+                    situation = OpennmsMapper.toSituation(entry.value);
+                } catch (Exception e) {
+                    LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
+                    return;
+                }
+                situations.add(situation);
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -550,7 +567,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             return;
         }
 
-        final Event e = SituationToEvent.toEvent(situation);
+        final Event e = SituationToEvent.toEvent(situation, eventTimeFormat);
         final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
         LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
 
@@ -643,6 +660,11 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public void setWrapSinkMessagesInProto(boolean wrapSinkMessagesInProto) {
         this.wrapSinkMessagesInProto = wrapSinkMessagesInProto;
+    }
+
+    public void setEventTimeFormat(String eventTimeFormat) {
+        Objects.requireNonNull(eventTimeFormat);
+        this.eventTimeFormat = Event.TimeFormat.valueOf(eventTimeFormat.toUpperCase());
     }
 
     @Override

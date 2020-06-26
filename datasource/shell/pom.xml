@@ -33,10 +33,14 @@
             <groupId>org.opennms.alec.datasource</groupId>
             <artifactId>org.opennms.alec.datasource.api</artifactId>
         </dependency>
-	<dependency>
+        <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
             <version>${karaf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.wrap</groupId>
+            <artifactId>org.opennms.alec.wrap.asciitable</artifactId>
         </dependency>
     </dependencies>
 </project>

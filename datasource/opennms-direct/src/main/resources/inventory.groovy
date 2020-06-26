@@ -97,8 +97,7 @@ class InventoryFactory {
                 return Collections.singletonList(TypeToInventory.getEntPhysicalEntity(
                         alarm.getManagedObjectInstance(), toNodeCriteria(alarm)));
             case ManagedObjectType.BgpPeer:
-                return Collections.singletonList(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(),
-                        toNodeCriteria(alarm)));
+                return TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), toNodeCriteria(alarm));
             case ManagedObjectType.VpnTunnel:
                 return Collections.singletonList(TypeToInventory.getVpnTunnel(alarm.getManagedObjectInstance(),
                         toNodeCriteria(alarm)));

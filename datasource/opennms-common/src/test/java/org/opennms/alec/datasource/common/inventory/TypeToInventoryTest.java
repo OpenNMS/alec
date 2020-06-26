@@ -30,12 +30,16 @@ package org.opennms.alec.datasource.common.inventory;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.alec.datasource.common.ImmutableInventoryObjectRelativeRef;
 
 public class TypeToInventoryTest {
     @Test
@@ -92,16 +96,22 @@ public class TypeToInventoryTest {
         String vrf = "vrf";
         String moInstance = "{\"peer\": \"" + peer + "\", \"vrf\": \"" + vrf + "\"}";
 
-        InventoryObject io = TypeToInventory.getBgpPeer(moInstance, nodeCriteria);
+        List<InventoryObject> ios = TypeToInventory.getBgpPeer(moInstance, nodeCriteria);
+        assertThat(ios, hasSize(2));
+
+        InventoryObject bgpPeerIo = ios.get(0);
+
         InventoryObject testIo = ImmutableInventoryObject.newBuilder()
                 .setType(ManagedObjectType.BgpPeer.getName())
-                .setId(String.format("%s:%s:%s", nodeCriteria, peer, vrf))
-                .setFriendlyName(String.format("BGP Peer %s on %s in VRF: %s", peer, nodeCriteria, vrf))
-                .setParentType(ManagedObjectType.Node.getName())
-                .setParentId(nodeCriteria)
+                .setId(peer)
+                .setFriendlyName(String.format("BGP Peer %s", peer))
+                .addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                        .setType(ManagedObjectType.Node.getName())
+                        .setId(nodeCriteria)
+                        .build())
                 .build();
 
-        assertThat(io, equalTo(testIo));
+        assertThat(bgpPeerIo, equalTo(testIo));
     }
 
     @Test

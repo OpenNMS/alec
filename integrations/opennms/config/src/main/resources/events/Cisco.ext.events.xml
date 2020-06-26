@@ -655,11 +655,7 @@
 		reverseConcatenatedPathDown(8)
 	&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
 	</descr>
-      <logmsg dest="logndisplay">&lt;p>
-	ciscoBfdSessDown trap received
-	ciscoBfdSessDiag=%parm[#1]%
-	ciscoBfdSessDiag=%parm[#2]%&lt;/p>
-	</logmsg>
+      <logmsg dest="logndisplay">ciscoBfdSessDown trap received ciscoBfdSessDiag=%parm[#1]% ciscoBfdSessDiag=%parm[#2]%</logmsg>
       <severity>Warning</severity>
       <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[sessionId]%" alarm-type="1"/>
       <parameter name="sessionId" value="%parm[name-#1.-1]%" expand="true"/>
@@ -932,12 +928,7 @@
             cmplsFrrConstBandwidth&lt;/b>&lt;/td>&lt;td>
             %parm[#3]%;&lt;/td>&lt;td>&lt;p>&lt;/p>&lt;/td>&lt;/tr>&lt;/table>
         </descr>
-        <logmsg dest="logndisplay">&lt;p>
-            cmplsFrrUnProtected trap received
-            cmplsFrrConstNumProtectingTunOnIf=%parm[#1]%
-            cmplsFrrConstNumProtectedTunOnIf=%parm[#2]%
-            cmplsFrrConstBandwidth=%parm[#3]%&lt;/p>
-        </logmsg>
+        <logmsg dest="logndisplay">cmplsFrrUnProtected trap received cmplsFrrConstNumProtectingTunOnIf=%parm[#1]% cmplsFrrConstNumProtectedTunOnIf=%parm[#2]% cmplsFrrConstBandwidth=%parm[#3]%</logmsg>
         <severity>Minor</severity>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%interface%:%parm[cmplsFrrConstEntry]%" alarm-type="1">
             <managed-object type="mpls-tunnel"/>

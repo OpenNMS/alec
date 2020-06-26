@@ -34,12 +34,18 @@ import java.util.List;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.opennms.alec.datasource.api.Alarm;
 
+import com.codahale.metrics.MetricRegistry;
+
 import edu.uci.ics.jung.graph.Graph;
 
 /**
  * Simple cluster engine implementation
  */
 public class ClusterEngine extends AbstractClusterEngine {
+
+    public ClusterEngine(MetricRegistry metrics) {
+        super(metrics);
+    }
 
     /**
      * Use the graph structure to build clusters:

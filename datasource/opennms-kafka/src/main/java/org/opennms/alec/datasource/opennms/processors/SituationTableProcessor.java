@@ -64,7 +64,15 @@ public class SituationTableProcessor implements Processor<String, OpennmsModelPr
     public void process(String reductionKey, OpennmsModelProtos.Alarm alarm) {
         if (alarm != null) {
             kvStore.put(reductionKey, alarm);
-            Situation situation = OpennmsMapper.toSituation(alarm);
+
+            final Situation situation;
+            try {
+                situation = OpennmsMapper.toSituation(alarm);
+            } catch (Exception e) {
+                LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", alarm, e);
+                return;
+            }
+
             situationHandlers.forEach(h -> {
                 try {
                     h.onSituation(situation);

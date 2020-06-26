@@ -39,6 +39,9 @@ public interface Situation {
 
     String getId();
 
+    /**
+     * Timestamp in millis
+     */
     long getCreationTime();
 
     List<ResourceKey> getResourceKeys();

@@ -3,7 +3,7 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.0-b5
+      - image: opennms/build-env:1.8.0.252.b09-3.6.3-b5231
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -40,33 +40,42 @@ executors:
     docker:
       - image: circleci/python:3.7.2
 
+orbs:
+  cloudsmith: cloudsmith/cloudsmith@1.0.3
+  sign-packages: opennms/sign-packages@2.2.0
+
 workflows:
   build-deploy:
     jobs:
       # Run build jobs for all branches and any tag
       - pre-build:
+          context: "OpenNMS Build"
           filters:
             tags:
               only: /.*/
       - build:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - build-debian:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
             tags:
               only: /.*/
       - build-docs:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - smoke-test-commit:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
@@ -75,6 +84,7 @@ workflows:
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
+          context: "OpenNMS Build"
           requires:
             - smoke-test-commit
           filters:
@@ -84,6 +94,7 @@ workflows:
                 - develop
                 - /release-.*/
       - deploy-packages:
+          context: "OpenNMS Build"
           requires:
             - smoke-test-commit
             - build-debian
@@ -94,7 +105,22 @@ workflows:
               only:
                 - develop
                 - /release-.*/
+                - ranger/package-updates
+      - deploy-packages-cloudsmith:
+          context: "OpenNMS Build"
+          requires:
+            - smoke-test-commit
+            - build-debian
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - develop
+                - /release-.*/
+                - ranger/package-updates
       - deploy-docs:
+          context: "OpenNMS Build"
           requires:
             - build-docs
           filters:
@@ -105,6 +131,7 @@ workflows:
                 - develop
                 - /release-.*/
       - yank-snapshot-packages:
+          context: "OpenNMS Build"
           requires:
             - deploy-packages
 
@@ -120,16 +147,19 @@ workflows:
             - /release-.*/
     jobs:
     - pre-build:
+        context: "OpenNMS Build"
         filters:
           tags:
             only: /.*/
     - build:
+        context: "OpenNMS Build"
         requires:
         - pre-build
         filters:
           tags:
             only: /.*/
     - smoke-test-nightly:
+        context: "OpenNMS Build"
         requires:
         - build
         filters:
@@ -140,7 +170,7 @@ commands:
   smoke-test:
     description: "Run the smoke tests"
     parameters:
-      context:
+      build_type:
         type: string
     steps:
       - attach_workspace:
@@ -184,9 +214,9 @@ commands:
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
-            if [ "<< parameters.context >>" = "commit" ]; then
+            if [ "<< parameters.build_type >>" = "commit" ]; then
               mvn surefire:test -Dtest=OnCommitSmokeTestSuite -DsmokeTest=true
-            elif [ "<< parameters.context >>" = "nightly" ]; then
+            elif [ "<< parameters.build_type >>" = "nightly" ]; then
               mvn test -DsmokeTest=true
             fi
 
@@ -256,6 +286,12 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-rpm-dependencies:
+          skip_if_forked_pr: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           - v5-dependencies-{{ checksum "pom.xml" }}
@@ -288,6 +324,12 @@ jobs:
       - store_test_results:
           path: ~/junit
 
+      - sign-packages/sign-rpms:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-rpm/target/rpm/*-alec-plugin/RPMS/noarch/*.rpm
+
       - run:
           name: Gather artifacts
           command: |
@@ -312,6 +354,13 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-deb-dependencies:
+          skip_if_forked_pr: true
+          use_sudo: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           # Use a separate cache, since the the other build image runs as root
@@ -327,6 +376,12 @@ jobs:
           paths:
             - ~/.m2
           key: v4-deb-dependencies-{{ checksum "pom.xml" }}
+
+      - sign-packages/sign-debs:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-deb/target/*.deb
 
       - run:
           name: Gather artifacts
@@ -349,14 +404,14 @@ jobs:
 
     steps:
     - smoke-test:
-        context: commit
+        build_type: commit
 
   smoke-test-nightly:
     executor: smoke-test-executor
 
     steps:
     - smoke-test:
-        context: nightly
+        build_type: nightly
 
   build-docs:
     executor: docs-executor
@@ -397,17 +452,34 @@ jobs:
 
   deploy-packages:
       executor: package-cloud-cli-executor
+      resource_class: small
       steps:
         - attach_workspace:
             at: ~/
+
         - run:
-            name: Push RPM packages
+            name: Push packages to PackageCloud
             command: |
               source .circleci/env/package_cloud
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/*
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/*
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-alec-plugin_*.deb
               package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb
+
+  deploy-packages-cloudsmith:
+      executor: cloudsmith/default
+      resource_class: small
+      steps:
+        - attach_workspace:
+            at: ~/
+
+        - cloudsmith/ensure-api-key
+        - cloudsmith/install-cli
+
+        - run:
+            name: Push packages to CloudSmith
+            command: .circleci/scripts/publish-cloudsmith.sh
+
   deploy-docs:
     executor: netlify-cli-executor
     steps:

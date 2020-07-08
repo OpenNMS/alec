@@ -76,6 +76,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -551,20 +552,19 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         boolean skippedDistanceCalc = false;
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
             maxSpatialDistance = 0d;
-            for (Long vertexIdA : vertexIds) {
-                for (Long vertexIdB : vertexIds) {
+            // Exclude all vertices that are no longer on the filtered graph
+            Set<Long> vertexIdsOnFilteredGraph = vertexIds.stream()
+                    .filter(id -> graphManager.getFilteredGraph().containsVertex(graphManager.getVertexWithId(id)))
+                    .collect(Collectors.toSet());
+            if (vertexIdsOnFilteredGraph.size() != vertexIds.size()) {
+                skippedDistanceCalc = true;
+                Set<Long> idsSkipped = Sets.difference(vertexIds, vertexIdsOnFilteredGraph);
+                LOG.debug("Skipped distance calculation to the following vertices which are no longer on the filtered" +
+                        " graph {}", idsSkipped);
+            }
+            for (Long vertexIdA : vertexIdsOnFilteredGraph) {
+                for (Long vertexIdB : vertexIdsOnFilteredGraph) {
                     if (!vertexIdA.equals(vertexIdB)) {
-                        // Make sure both vertices are still on the filtered graph and if not, skip this pair
-                        CEVertex a = graphManager.getVertexWithId(vertexIdA);
-                        CEVertex b = graphManager.getVertexWithId(vertexIdB);
-                        if (!graphManager.getFilteredGraph().containsVertex(a) ||
-                                !graphManager.getFilteredGraph().containsVertex(b)) {
-                            skippedDistanceCalc = true;
-                            LOG.debug("Skipped distance calculation between vertices {} and {} during diagnostic" +
-                                    " text generation", vertexIdA, vertexIdB);
-                            continue;
-                        }
-
                         maxSpatialDistance = Math.max(maxSpatialDistance, getSpatialDistanceBetween(vertexIdA,
                                 vertexIdB));
                     }

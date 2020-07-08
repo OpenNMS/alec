@@ -548,11 +548,23 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             getOptionalVertexIdForAlarm(alarm).ifPresent(vertexIds::add);
         }
 
+        boolean skippedDistanceCalc = false;
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
             maxSpatialDistance = 0d;
             for (Long vertexIdA : vertexIds) {
                 for (Long vertexIdB : vertexIds) {
                     if (!vertexIdA.equals(vertexIdB)) {
+                        // Make sure both vertices are still on the filtered graph and if not, skip this pair
+                        CEVertex a = graphManager.getVertexWithId(vertexIdA);
+                        CEVertex b = graphManager.getVertexWithId(vertexIdB);
+                        if (!graphManager.getFilteredGraph().containsVertex(a) ||
+                                !graphManager.getFilteredGraph().containsVertex(b)) {
+                            skippedDistanceCalc = true;
+                            LOG.debug("Skipped distance calculation between vertices {} and {} during diagnostic" +
+                                    " text generation", vertexIdA, vertexIdB);
+                            continue;
+                        }
+
                         maxSpatialDistance = Math.max(maxSpatialDistance, getSpatialDistanceBetween(vertexIdA,
                                 vertexIdB));
                     }
@@ -564,6 +576,9 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 situation.getAlarms().size(), Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
         if (maxSpatialDistance != null && maxSpatialDistance > 0) {
             diagText += String.format(" %.2f distance apart", maxSpatialDistance);
+            if (skippedDistanceCalc) {
+                diagText += " based on partial vertex distance information";
+            }
         }
         diagText += ".";
         return diagText;

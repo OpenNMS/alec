@@ -552,9 +552,17 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         boolean skippedDistanceCalc = false;
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
             maxSpatialDistance = 0d;
-            // Exclude all vertices that are no longer on the filtered graph
+
+            // Exclude all vertices that are no longer on the filtered graph or are no longer eligible for clustering as
+            // we will no longer be able to compute distances for them. This exclusion is performed to handle the case
+            // where this situation includes vertices that no longer match the criteria we use to limit the number of
+            // distance calculations that are performed.
             Set<Long> vertexIdsOnFilteredGraph = vertexIds.stream()
-                    .filter(id -> graphManager.getFilteredGraph().containsVertex(graphManager.getVertexWithId(id)))
+                    .filter(id -> {
+                        CEVertex v = graphManager.getVertexWithId(id);
+                        
+                        return graphManager.getFilteredGraph().containsVertex(v) && vertexIsEligibleForClustering(v);
+                    })
                     .collect(Collectors.toSet());
             if (vertexIdsOnFilteredGraph.size() != vertexIds.size()) {
                 skippedDistanceCalc = true;
@@ -562,6 +570,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 LOG.debug("Skipped distance calculation to the following vertices which are no longer on the filtered" +
                         " graph {}", idsSkipped);
             }
+
             for (Long vertexIdA : vertexIdsOnFilteredGraph) {
                 for (Long vertexIdB : vertexIdsOnFilteredGraph) {
                     if (!vertexIdA.equals(vertexIdB)) {

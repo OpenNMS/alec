@@ -196,6 +196,76 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // There should now be a single situation
         assertThat(triggeredSituations, hasSize(1));
 
+        // The situation should contain a1,a2,a3
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
+    }
+    
+    @Test
+    public void canHandleSituationWithNonEligbleVertex() {
+        // Create two alarms on on separate inventory items
+        Alarm a1 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1-c1-p1")
+                .setInventoryObjectType("Port")
+                .setTime(1)
+                .setId("a1")
+                .build();
+
+        // a2 is special here since it exists on an inventory item that will be connecting other alarmed vertices (a3
+        // later) and so can't be filtered off the graph
+        Alarm a2 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1-c1-p1___n2-c1-p1")
+                .setInventoryObjectType("Link")
+                .setTime(1)
+                .setId("a2")
+                .build();
+
+        List<Alarm> alarms = Arrays.asList(a1, a2);
+
+        // No situations should have been triggered yet
+        assertThat(triggeredSituations, hasSize(0));
+
+        Engine oneClusterEngine = new OneClusterEngine(new MetricRegistry());
+        oneClusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), MockInventory.SAMPLE_NETWORK);
+        oneClusterEngine.registerSituationHandler(this);
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs());
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
+        // The situation should contain a1,a2
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2));
+        triggeredSituations.clear();
+
+        // Clear the alarm a2 so that it gets garbage collected
+        // Now the vertex a2 was on is no longer eligible to be added to new situation clusters, however it is still in
+        // a pre-existing situation
+        Alarm a2Cleared = ImmutableAlarm.newBuilderFrom(a2).setSeverity(Severity.CLEARED).build();
+        oneClusterEngine.onAlarmCleared(a2Cleared);
+        // Remove some unrelated inventory so the graph is considered changed and we invalidate our hop cache
+        oneClusterEngine.onInventoryRemoved(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+                .setId("n1-c1-p2")
+                .setType(MockInventoryType.PORT.getType())
+                .build()));
+
+        // Create a new alarm that we expect to cluster into the existing situation (which has a1,a2 currently)
+        Alarm a3 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n2-c1-p1")
+                .setInventoryObjectType("Port")
+                .setTime(1)
+                .setId("a3")
+                .build();
+        oneClusterEngine.onAlarmCreatedOrUpdated(a3);
+
+        // Tick again far enough into the future that a1 will have been garbage collected
+        // We are making sure this tick does not blow up since the vertex a2 was on no longer is eligible for being
+        // added to new clusters so we don't bother solving its distance on the graph. It is part of an existing
+        // situation so we need to make sure not to ask for its distance since that would cause an exception if our
+        // cache no longer has a distance for it
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs()*100);
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
         // The situation should contain a1,a2,3
         assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
     }

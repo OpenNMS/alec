@@ -10,10 +10,10 @@ case "${CIRCLE_BRANCH}" in
     REPO="develop"
     ;;
   release-*)
-    REPO="testing"
+    REPO="common-testing"
     ;;
   ranger/*)
-    REPO="testing"
+    REPO="common-testing"
     ;;
   *)
     echo "This branch is not eligible for deployment: ${CIRCLE_BRANCH}"

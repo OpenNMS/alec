@@ -75,6 +75,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -547,10 +548,30 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             getOptionalVertexIdForAlarm(alarm).ifPresent(vertexIds::add);
         }
 
+        boolean skippedDistanceCalc = false;
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
             maxSpatialDistance = 0d;
-            for (Long vertexIdA : vertexIds) {
-                for (Long vertexIdB : vertexIds) {
+
+            // Exclude all vertices that are no longer on the filtered graph or are no longer eligible for clustering as
+            // we will no longer be able to compute distances for them. This exclusion is performed to handle the case
+            // where this situation includes vertices that no longer match the criteria we use to limit the number of
+            // distance calculations that are performed.
+            Set<Long> vertexIdsOnFilteredGraph = vertexIds.stream()
+                    .filter(id -> {
+                        CEVertex v = graphManager.getVertexWithId(id);
+                        
+                        return graphManager.getFilteredGraph().containsVertex(v) && vertexIsEligibleForClustering(v);
+                    })
+                    .collect(Collectors.toSet());
+            if (vertexIdsOnFilteredGraph.size() != vertexIds.size()) {
+                skippedDistanceCalc = true;
+                Set<Long> idsSkipped = Sets.difference(vertexIds, vertexIdsOnFilteredGraph);
+                LOG.debug("Skipped distance calculation to the following vertices which are no longer on the filtered" +
+                        " graph {}", idsSkipped);
+            }
+
+            for (Long vertexIdA : vertexIdsOnFilteredGraph) {
+                for (Long vertexIdB : vertexIdsOnFilteredGraph) {
                     if (!vertexIdA.equals(vertexIdB)) {
                         maxSpatialDistance = Math.max(maxSpatialDistance, getSpatialDistanceBetween(vertexIdA,
                                 vertexIdB));
@@ -563,6 +584,9 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 situation.getAlarms().size(), Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
         if (maxSpatialDistance != null && maxSpatialDistance > 0) {
             diagText += String.format(" %.2f distance apart", maxSpatialDistance);
+            if (skippedDistanceCalc) {
+                diagText += " based on partial vertex distance information";
+            }
         }
         diagText += ".";
         return diagText;

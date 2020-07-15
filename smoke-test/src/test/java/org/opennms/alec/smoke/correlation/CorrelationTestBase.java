@@ -28,6 +28,7 @@
 
 package org.opennms.alec.smoke.correlation;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
@@ -35,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.rules.TestRule;
@@ -83,13 +85,26 @@ public abstract class CorrelationTestBase extends ALECSmokeTestBase {
 
     protected abstract void adjustCorrelationContainers();
 
-    private void verifyGenericSituation() throws Exception {
-        new Grafana44SeleniumDriver(webDriverContainer.getWebDriver(),
-                helmContainer.getHelmUrlForWebDriver())
-                .home()
-                .dashboard(DASHBOARD_NAME)
-                .verifyAnAlarmIsPresent()
-                .verifyRelatedAlarmLabels(Collections.singletonList(Pair.of(GENERIC_ALARM_TITLE, 3)));
+    private void verifyGenericSituation() {
+        Grafana44SeleniumDriver driver = new Grafana44SeleniumDriver(webDriverContainer.getWebDriver(),
+                helmContainer.getHelmUrlForWebDriver());
+
+        // Wait for some time in case the situation we receive at first doesn't contain everything we expect but later
+        // gets updated to the correct state
+        await().atMost(5, TimeUnit.MINUTES).until(() -> {
+            try {
+                driver
+                        .home()
+                        .dashboard(DASHBOARD_NAME)
+                        .verifyAnAlarmIsPresent()
+                        .verifyRelatedAlarmLabels(Collections.singletonList(Pair.of(GENERIC_ALARM_TITLE, 3)));
+            } catch (AssertionError e) {
+                LOG.warn("Failed to validate generic situation", e);
+                return false;
+            }
+
+            return true;
+        });
     }
 
     protected final void runBasicCorrelation() throws Exception {

@@ -55,7 +55,7 @@ public class DistributedRedundantCorrrelationTest extends CorrelationTestBase {
         for (int i = 0; i < NUM_REDUNDANT_ALEC; i++) {
             ALECSentinelContainer alecSentinelContainer = null;
             try {
-                alecSentinelContainer = new ALECSentinelContainer(true, () -> "oce-engine-cluster");
+                alecSentinelContainer = new ALECSentinelContainer(true, () -> "cluster");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

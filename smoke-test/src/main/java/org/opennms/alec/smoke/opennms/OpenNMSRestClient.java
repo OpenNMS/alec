@@ -163,15 +163,16 @@ public class OpenNMSRestClient {
     public void triggerAlarmsForCorrelation(int nodeId) {
         Event e1 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e1);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e1.reductionKey()));
-
         Event e2 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e2);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e2.reductionKey()));
-
         Event e3 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e3);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e3.reductionKey()));
+
+        await().atMost(1, TimeUnit.MINUTES).until(() ->
+                testForAlarmWithReductionKey(e1.reductionKey()) &&
+                        testForAlarmWithReductionKey(e2.reductionKey()) &&
+                        testForAlarmWithReductionKey(e3.reductionKey())
+        );
     }
 
     public int addTestNode() {

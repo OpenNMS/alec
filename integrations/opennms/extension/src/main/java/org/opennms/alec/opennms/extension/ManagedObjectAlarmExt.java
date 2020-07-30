@@ -109,7 +109,19 @@ public class ManagedObjectAlarmExt implements AlarmPersisterExtension {
             try {
                 managedObjectType = ManagedObjectType.fromName(alarm.getManagedObjectType());
             } catch (NoSuchElementException nse) {
-                LOG.warn("'{}' does not map to a known type for alarm with reduction key: {}", alarm.getManagedObjectType(), alarm.getReductionKey());
+                LOG.debug("'{}' does not map to a known type for alarm with reduction key: {}", alarm.getManagedObjectType(), alarm.getReductionKey());
+            }
+        }
+
+        // FIXME: We really need to make the MO type handling extensible from the OIA
+        if ("zone".equals(alarm.getManagedObjectType())) {
+            Optional<EventParameter> maybeAZone = databaseEvent.getParametersByName("zone").stream().findFirst();
+            if (maybeAZone.isPresent()) {
+                EventParameter zone = maybeAZone.get();
+                return ImmutableAlarm.newBuilderFrom(alarm)
+                        .setManagedObjectType(zone.getName())
+                        .setManagedObjectInstance(zone.getValue())
+                        .build();
             }
         }
 

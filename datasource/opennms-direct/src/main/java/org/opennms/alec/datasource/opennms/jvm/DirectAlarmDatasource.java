@@ -28,25 +28,18 @@
 
 package org.opennms.alec.datasource.opennms.jvm;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
-import org.opennms.integration.api.v1.dao.AlarmDao;
-import org.opennms.integration.api.v1.events.EventForwarder;
-import org.opennms.integration.api.v1.model.InMemoryEvent;
-import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.AlarmHandler;
@@ -54,6 +47,11 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.HandlerRegistry;
+import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
+import org.opennms.integration.api.v1.dao.AlarmDao;
+import org.opennms.integration.api.v1.events.EventForwarder;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
+import org.opennms.integration.api.v1.model.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +163,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
                 }
             }
         } else {
-            final Situation oceSituation = mapper.toSituation(existingAlarm);
+            final Situation oceSituation = mapper.toSituation(alarm);
             return (a) ->  situationHandlers.forEach(h -> h.onSituation(oceSituation));
         }
         return (a) -> {};

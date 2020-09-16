@@ -105,7 +105,6 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-                - ranger/package-updates
       - deploy-packages-cloudsmith:
           context: "OpenNMS Build"
           requires:
@@ -118,7 +117,6 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-                - ranger/package-updates
       - deploy-docs:
           context: "OpenNMS Build"
           requires:

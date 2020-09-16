@@ -5,21 +5,24 @@ set -o pipefail
 
 PROJECT="opennms"
 REPO=""
-case "${CIRCLE_BRANCH}" in
-  develop)
-    REPO="develop"
-    ;;
-  release-*)
-    REPO="common-testing"
-    ;;
-  ranger/*)
-    REPO="common-testing"
-    ;;
-  *)
-    echo "This branch is not eligible for deployment: ${CIRCLE_BRANCH}"
-    exit 0
-    ;;
-esac
+
+if [ -n "${CIRCLE_TAG}" ]; then
+  REPO="common"
+else
+  case "${CIRCLE_BRANCH}" in
+    develop)
+      REPO="develop"
+      ;;
+    release-*)
+      REPO="common-testing"
+      ;;
+    *)
+      echo "This branch is not eligible for deployment: ${CIRCLE_BRANCH}"
+      exit 0
+      ;;
+  esac
+fi
+
 
 if [ -n "${CIRCLE_TAG}" ]; then
   REPO="stable"

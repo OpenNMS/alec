@@ -39,15 +39,23 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.math3.ml.clustering.Cluster;
 import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
+import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.driver.test.MockInventory;
+import org.opennms.alec.driver.test.MockInventoryType;
+import org.opennms.alec.engine.api.Engine;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Iterables;
+
+import edu.uci.ics.jung.graph.Graph;
 
 public class ClusterEngineSituationTest implements SituationHandler {
 
@@ -125,9 +133,171 @@ public class ClusterEngineSituationTest implements SituationHandler {
                    equalTo("The 3 alarms happened within 10.00 seconds across 1 vertices."));
 
     }
+    
+    @Test
+    public void canHandleSituationThatIncludesADeadVertex() {
+        // Create two alarms on separate nodes
+        Alarm a1 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1")
+                .setInventoryObjectType("Device")
+                .setTime(1)
+                .setId("a1")
+                .build();
+        
+        Alarm a2 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n2")
+                .setInventoryObjectType("Device")
+                .setTime(1)
+                .setId("a2")
+                .build();
+
+        List<Alarm> alarms = Arrays.asList(a1, a2);
+
+        // No situations should have been triggered yet
+        assertThat(triggeredSituations, hasSize(0));
+
+        Engine oneClusterEngine = new OneClusterEngine(new MetricRegistry());
+        oneClusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), MockInventory.SAMPLE_NETWORK);
+        oneClusterEngine.registerSituationHandler(this);
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs());
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
+        // The situation should contain a1,a2
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2));
+        triggeredSituations.clear();
+
+        // Clear the alarm on n1 so that it gets garbage collected
+        Alarm a1Cleared = ImmutableAlarm.newBuilderFrom(a1).setSeverity(Severity.CLEARED).build();
+        oneClusterEngine.onAlarmCleared(a1Cleared);
+        // Remove the port connecting n1 to n2 so there is no longer a connecting path, this should result in n1 being
+        // filtered off the graph for distance calculation purposes
+        oneClusterEngine.onInventoryRemoved(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+                .setId("n1-c1-p1")
+                .setType(MockInventoryType.PORT.getType())
+                .build()));
+        
+        // Create a new alarm on n2 that we expect to cluster into the existing situation (which has a1,a2 currently)
+        Alarm a3 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n2")
+                .setInventoryObjectType("Device")
+                .setTime(1)
+                .setId("a3")
+                .build();
+        oneClusterEngine.onAlarmCreatedOrUpdated(a3);
+        
+        // Tick again far enough into the future that a1 will have been garbage collected
+        // We are making sure this tick does not blow up since the vertex a1 was on no longer exists in the "filtered"
+        // graph so if we were to attempt to use it as a source/destination vertex for any distance calculations that
+        // would fail
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs()*100);
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
+        // The situation should contain a1,a2,a3
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
+    }
+    
+    @Test
+    public void canHandleSituationWithNonEligbleVertex() {
+        // Create two alarms on on separate inventory items
+        Alarm a1 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1-c1-p1")
+                .setInventoryObjectType("Port")
+                .setTime(1)
+                .setId("a1")
+                .build();
+
+        // a2 is special here since it exists on an inventory item that will be connecting other alarmed vertices (a3
+        // later) and so can't be filtered off the graph
+        Alarm a2 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n1-c1-p1___n2-c1-p1")
+                .setInventoryObjectType("Link")
+                .setTime(1)
+                .setId("a2")
+                .build();
+
+        List<Alarm> alarms = Arrays.asList(a1, a2);
+
+        // No situations should have been triggered yet
+        assertThat(triggeredSituations, hasSize(0));
+
+        Engine oneClusterEngine = new OneClusterEngine(new MetricRegistry());
+        oneClusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), MockInventory.SAMPLE_NETWORK);
+        oneClusterEngine.registerSituationHandler(this);
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs());
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
+        // The situation should contain a1,a2
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2));
+        triggeredSituations.clear();
+
+        // Clear the alarm a2 so that it gets garbage collected
+        // Now the vertex a2 was on is no longer eligible to be added to new situation clusters, however it is still in
+        // a pre-existing situation
+        Alarm a2Cleared = ImmutableAlarm.newBuilderFrom(a2).setSeverity(Severity.CLEARED).build();
+        oneClusterEngine.onAlarmCleared(a2Cleared);
+        // Remove some unrelated inventory so the graph is considered changed and we invalidate our hop cache
+        oneClusterEngine.onInventoryRemoved(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+                .setId("n1-c1-p2")
+                .setType(MockInventoryType.PORT.getType())
+                .build()));
+
+        // Create a new alarm that we expect to cluster into the existing situation (which has a1,a2 currently)
+        Alarm a3 = ImmutableAlarm.newBuilder()
+                .setInventoryObjectId("n2-c1-p1")
+                .setInventoryObjectType("Port")
+                .setTime(1)
+                .setId("a3")
+                .build();
+        oneClusterEngine.onAlarmCreatedOrUpdated(a3);
+
+        // Tick again far enough into the future that a1 will have been garbage collected
+        // We are making sure this tick does not blow up since the vertex a2 was on no longer is eligible for being
+        // added to new clusters so we don't bother solving its distance on the graph. It is part of an existing
+        // situation so we need to make sure not to ask for its distance since that would cause an exception if our
+        // cache no longer has a distance for it
+        oneClusterEngine.tick(oneClusterEngine.getTickResolutionMs()*100);
+
+        // There should now be a single situation
+        assertThat(triggeredSituations, hasSize(1));
+
+        // The situation should contain a1,a2,3
+        assertThat(triggeredSituations.get(0).getAlarms(), containsInAnyOrder(a1, a2, a3));
+    }
 
     @Override
     public void onSituation(Situation i) {
         triggeredSituations.add(i);
+    }
+
+    /**
+     * A test cluster engine that always clusters all alarms into a single cluster regardless of their position in
+     * space/time.
+     */
+    private static class OneClusterEngine extends AbstractClusterEngine {
+        public OneClusterEngine(MetricRegistry metrics) {
+            super(metrics);
+        }
+
+        @Override
+        public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
+            Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
+
+            g.getVertices()
+                    .stream()
+                    .filter(CEVertex::hasAlarms)
+                    .forEach(v -> {
+                        for (Alarm a : v.getAlarms()) {
+                            cluster.addPoint(new AlarmInSpaceTime(v, a));
+                        }
+                    });
+
+            return Collections.singletonList(cluster);
+        }
     }
 }

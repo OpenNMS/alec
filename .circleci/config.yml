@@ -32,10 +32,6 @@ executors:
     docker:
       - image: opennms/netlify-cli:2.8.3-b1
 
-  package-cloud-cli-executor:
-    docker:
-      - image: opennms/package-cloud-cli:0.3.05-b1
-
   python-executor:
     docker:
       - image: circleci/python:3.7.2
@@ -105,20 +101,6 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-                - ranger/package-updates
-      - deploy-packages-cloudsmith:
-          context: "OpenNMS Build"
-          requires:
-            - smoke-test-commit
-            - build-debian
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              only:
-                - develop
-                - /release-.*/
-                - ranger/package-updates
       - deploy-docs:
           context: "OpenNMS Build"
           requires:
@@ -130,10 +112,6 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-      - yank-snapshot-packages:
-          context: "OpenNMS Build"
-          requires:
-            - deploy-packages
 
   nightly:
     triggers:
@@ -451,22 +429,6 @@ jobs:
             mvn -s .circleci.settings.xml -DskipTests deploy
 
   deploy-packages:
-      executor: package-cloud-cli-executor
-      resource_class: small
-      steps:
-        - attach_workspace:
-            at: ~/
-
-        - run:
-            name: Push packages to PackageCloud
-            command: |
-              source .circleci/env/package_cloud
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-alec-plugin_*.deb
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb
-
-  deploy-packages-cloudsmith:
       executor: cloudsmith/default
       resource_class: small
       steps:
@@ -489,14 +451,3 @@ jobs:
           name: Deploy docs to Netlify
           command: |
             netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}
-
-  yank-snapshot-packages:
-    executor: python-executor
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Yank SNAPSHOT packages
-          command: |
-            source .circleci/env/package_cloud
-            .circleci/scripts/packagecloud-yank-snapshot-packages.py

@@ -75,14 +75,30 @@ workflows:
           requires:
             - build
           filters:
+            branches:
+              ignore:
+                - develop
+                - /^release-.*/
             tags:
-              only: /.*/
+              ignore: /^v.*/
+      - smoke-test-full:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - /^release-.*/
+            tags:
+              only: /^v.*/
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
           context: "OpenNMS Build"
           requires:
             - smoke-test-commit
+            - smoke-test-full
           filters:
             # Maven deploy requires GPG signing for releases - we do this manually
             branches:
@@ -93,6 +109,7 @@ workflows:
           context: "OpenNMS Build"
           requires:
             - smoke-test-commit
+            - smoke-test-full
             - build-debian
           filters:
             tags:
@@ -113,36 +130,6 @@ workflows:
                 - develop
                 - /release-.*/
 
-  nightly:
-    triggers:
-    - schedule:
-        # Run daily @ 5:00am UTC
-        cron: "0 5 * * *"
-        filters:
-          branches:
-            only:
-            - develop
-            - /release-.*/
-    jobs:
-    - pre-build:
-        context: "OpenNMS Build"
-        filters:
-          tags:
-            only: /.*/
-    - build:
-        context: "OpenNMS Build"
-        requires:
-        - pre-build
-        filters:
-          tags:
-            only: /.*/
-    - smoke-test-nightly:
-        context: "OpenNMS Build"
-        requires:
-        - build
-        filters:
-          tags:
-            only: /.*/
 
 commands:
   smoke-test:
@@ -194,7 +181,7 @@ commands:
             cd smoke-test
             if [ "<< parameters.build_type >>" = "commit" ]; then
               mvn surefire:test -Dtest=OnCommitSmokeTestSuite -DsmokeTest=true
-            elif [ "<< parameters.build_type >>" = "nightly" ]; then
+            elif [ "<< parameters.build_type >>" = "full" ]; then
               mvn test -DsmokeTest=true
             fi
 
@@ -243,9 +230,8 @@ commands:
 
       # Future Improvements:
       # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
-      #   - Mount the logs directories from the containers so we can copy the logs out easier
-      # - Add nightly test run back once tests are proven stable
-      #   - We might want to test nightly against the floating (latest) images for opennms and sentinel
+      # - Mount the logs directories from the containers so we can copy the logs out easier
+      # - We might want to test full against the floating (latest) images for opennms and sentinel
 
 jobs:
   pre-build:
@@ -384,12 +370,12 @@ jobs:
     - smoke-test:
         build_type: commit
 
-  smoke-test-nightly:
+  smoke-test-full:
     executor: smoke-test-executor
 
     steps:
     - smoke-test:
-        build_type: nightly
+        build_type: full
 
   build-docs:
     executor: docs-executor

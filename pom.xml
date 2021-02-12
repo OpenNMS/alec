@@ -3,7 +3,7 @@
     <groupId>org.opennms.alec</groupId>
     <artifactId>alec-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
     <name>OpenNMS ALEC</name>
     <url>https://github.com/OpenNMS/alec</url>
     <description>Architecture for Learning Enabled Correlation</description>

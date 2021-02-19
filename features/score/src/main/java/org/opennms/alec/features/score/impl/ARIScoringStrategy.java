@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2021 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -100,10 +100,10 @@ public class ARIScoringStrategy implements ScoringStrategy {
 
         final ScoreReport scoreReport = new ScoreReport();
         scoreReport.setScore(score);
-        scoreReport.getMetrics().add(new ScoreMetric("TP", tp, "TODO"));
-        scoreReport.getMetrics().add(new ScoreMetric("FP", fp, "TODO"));
-        scoreReport.getMetrics().add(new ScoreMetric("FN", fn, "TODO"));
-        scoreReport.getMetrics().add(new ScoreMetric("TN", tn, "TODO"));
+        scoreReport.getMetrics().add(new ScoreMetric("TP", tp, "Number of pairs of alarms correctly clustered together"));
+        scoreReport.getMetrics().add(new ScoreMetric("FP", fp, "Number of pairs of alarms incorrectly clustered together"));
+        scoreReport.getMetrics().add(new ScoreMetric("FN", fn, "Number of pairs of alarms incorrectly clustered apart"));
+        scoreReport.getMetrics().add(new ScoreMetric("TN", tn, "Number of pairs of alarms correctly clustered apart"));
 
         return scoreReport;
     }

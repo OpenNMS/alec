@@ -78,14 +78,18 @@ public class ScoringStrategyTest {
         report = scorer.score(Sets.newHashSet(emtpySituation), Sets.newHashSet(emtpySituation));
         assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
 
-        // ARI and AMI won't pass this test unless we add missing alarms as singletons
-        if(!scorer.getName().equals("ari") && !scorer.getName().equals("ami")){
-            // Comparing a situation with a single alarm to an empty situation should generate a score greater than 0
-            Situation situation = ImmutableSituation.newBuilderNow()
-                    .setId("test")
-                    .addAlarm(ImmutableAlarm.newBuilder().setId("test").build())
-                    .build();
-            report = scorer.score(Sets.newHashSet(situation), Sets.newHashSet(emtpySituation));
+
+        // Comparing a situation with a single alarm to an empty situation should generate a score greater than 0
+        Situation situation = ImmutableSituation.newBuilderNow()
+                .setId("test")
+                .addAlarm(ImmutableAlarm.newBuilder().setId("test").build())
+                .build();
+        report = scorer.score(Sets.newHashSet(situation), Sets.newHashSet(emtpySituation));
+
+        // ARI and AMI currently use the intersection of the alarm sets and will return 0 
+        if(scorer.getName().equals("ari") || scorer.getName().equals("ami")){
+            assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
+        } else {
             assertThat(report.getScore(), Matchers.greaterThan(0.0d));
         }
     }

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2021 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -118,9 +118,9 @@ public class AMIScoringStrategy implements ScoringStrategy {
 
         final ScoreReport scoreReport = new ScoreReport();
         scoreReport.setScore(ami);
-        scoreReport.getMetrics().add(new ScoreMetric("rawMutualInformation", mutualInfo, "TODO"));
-        scoreReport.getMetrics().add(new ScoreMetric("baselineEntropy", hu, "TODO"));
-        scoreReport.getMetrics().add(new ScoreMetric("queryEntropy ", hv, "TODO"));
+        scoreReport.getMetrics().add(new ScoreMetric("rawMutualInformation", mutualInfo, "Base mutual information before adjusting for chance"));
+        scoreReport.getMetrics().add(new ScoreMetric("baselineEntropy", hu, "Entropy of baseline situations"));
+        scoreReport.getMetrics().add(new ScoreMetric("queryEntropy ", hv, "Entropy of query situations"));
 
         return scoreReport;
 

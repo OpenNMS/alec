@@ -43,7 +43,6 @@ import org.opennms.alec.features.score.api.ScoringStrategy;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.math3.special.Gamma;
-//import org.apache.commons.math3.util.CombinatoricsUtils;
 
 public class AMIScoringStrategy implements ScoringStrategy {
 

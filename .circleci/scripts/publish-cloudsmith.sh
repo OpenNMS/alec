@@ -7,7 +7,7 @@ PROJECT="opennms"
 REPO=""
 
 if [ -n "${CIRCLE_TAG}" ]; then
-  REPO="common"
+  REPO="stable"
 else
   case "${CIRCLE_BRANCH}" in
     develop)
@@ -21,11 +21,6 @@ else
       exit 0
       ;;
   esac
-fi
-
-
-if [ -n "${CIRCLE_TAG}" ]; then
-  REPO="stable"
 fi
 
 publishPackage() {

@@ -16,4 +16,14 @@
         <bean class="org.opennms.alec.features.score.impl.SetIntersectionScoringStrategy"/>
     </service>
 
+    <!-- ARI scoring strategy -->
+    <service interface="org.opennms.alec.features.score.api.ScoringStrategy">
+        <bean class="org.opennms.alec.features.score.impl.ARIScoringStrategy"/>
+    </service>
+
+    <!-- AMI scoring strategy -->
+    <service interface="org.opennms.alec.features.score.api.ScoringStrategy">
+        <bean class="org.opennms.alec.features.score.impl.AMIScoringStrategy"/>
+    </service>
+
 </blueprint>

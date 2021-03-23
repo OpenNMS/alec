@@ -26,7 +26,7 @@ executors:
 
   docs-executor:
     docker:
-      - image: antora/antora:2.0.0
+      - image: opennms/antora:2.3.4-b6293
 
   netlify-cli-executor:
     docker:
@@ -383,9 +383,13 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Generate HTML output for documentation
+          name: Validate Xrefs in docs
           command: |
-            antora generate site.yml
+            NODE_PATH="$(npm -g root)" antora --generator @antora/xref-validator site.yml
+      - run:
+          name: Build docs with Antora
+          command: |
+             NODE_PATH="$(npm -g root)" antora --stacktrace generate site.yml
 
       - store_artifacts:
           path: build/site.zip

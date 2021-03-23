@@ -26,7 +26,7 @@ executors:
 
   docs-executor:
     docker:
-      - image: antora/antora:2.3.4
+      - image: opennms/antora:2.3.4-b6293
 
   netlify-cli-executor:
     docker:
@@ -382,11 +382,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk --no-cache add git openssh-client
-            npm i -g gitlab:antora/xref-validator
       - run:
           name: Validate Xrefs in docs
           command: |

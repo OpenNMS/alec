@@ -28,10 +28,6 @@ executors:
     docker:
       - image: antora/antora:2.0.0
 
-  netlify-cli-executor:
-    docker:
-      - image: opennms/netlify-cli:2.8.3-b1
-
   python-executor:
     docker:
       - image: circleci/python:3.7.2
@@ -111,17 +107,6 @@ workflows:
             - smoke-test-commit
             - smoke-test-full
             - build-debian
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              only:
-                - develop
-                - /release-.*/
-      - deploy-docs:
-          context: "OpenNMS Build"
-          requires:
-            - build-docs
           filters:
             tags:
               only: /^v.*/
@@ -428,12 +413,3 @@ jobs:
             name: Push packages to CloudSmith
             command: .circleci/scripts/publish-cloudsmith.sh
 
-  deploy-docs:
-    executor: netlify-cli-executor
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Deploy docs to Netlify
-          command: |
-            netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}

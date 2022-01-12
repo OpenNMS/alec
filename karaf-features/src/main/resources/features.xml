@@ -240,14 +240,14 @@
 
     <feature name="alec-dependency-kafka-streams" description="Kafka Streams" version="${kafka.version}">
         <feature version="${rocksdb.version}" dependency="true">alec-dependency-rocksdb</feature>
-        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}</bundle>
+        <bundle dependency="true">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}$overwrite=merge&amp;Import-Package=com.fasterxml.jackson.databind,*</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/${lz4.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.xerial.snappy/snappy-java/${snappy-java.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-json/${kafka.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-api/${kafka.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson-annotations.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
     </feature>
 
@@ -266,7 +266,7 @@
     <feature name="alec-dependency-jackson-jaxrs" description="Jackson :: JAXRS :: JSON Provider" version="${jackson.version}">
         <feature dependency="true" version="${cxf.version}">cxf-jaxrs</feature>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson-annotations.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>

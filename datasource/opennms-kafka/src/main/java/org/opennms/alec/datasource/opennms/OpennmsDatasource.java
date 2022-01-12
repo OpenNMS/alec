@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -52,12 +54,14 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StoreQueryParameters;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -197,7 +201,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     public void destroy() {
         if (streams != null) {
-            if (!streams.close(1, TimeUnit.MINUTES)) {
+            if (!streams.close(Duration.of(1, ChronoUnit.MINUTES))) {
                 LOG.error("Stream failed to close in 1 minute.");
             }
         }
@@ -553,7 +557,12 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         }
         while (true) {
             try {
-                return streams.store(storeName, QueryableStoreTypes.keyValueStore());
+                ReadOnlyKeyValueStore<K, V> store = streams.store(StoreQueryParameters.fromNameAndType(storeName, QueryableStoreTypes.keyValueStore()));
+                // Attempt to read from the store to make sure it is in fact queryable, just fetching the store is not sufficient
+                try (KeyValueIterator<K,V> it = store.all()) {
+                    it.hasNext();
+                }
+                return store;
             } catch (InvalidStateStoreException ignored) {
                 Thread.sleep(100);
             }
@@ -665,6 +674,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     public void setEventTimeFormat(String eventTimeFormat) {
         Objects.requireNonNull(eventTimeFormat);
         this.eventTimeFormat = Event.TimeFormat.valueOf(eventTimeFormat.toUpperCase());
+    }
+
+    public KafkaStreams.StateListener getStreamStateListener() {
+        return streamStateListener;
     }
 
     @Override

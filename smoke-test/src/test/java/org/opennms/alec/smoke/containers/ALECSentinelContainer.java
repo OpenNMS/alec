@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.runner.Description;
 import org.opennms.alec.smoke.util.Cleanup;
 import org.opennms.alec.smoke.util.DevDebugUtils;
 import org.opennms.alec.smoke.util.Karaf;

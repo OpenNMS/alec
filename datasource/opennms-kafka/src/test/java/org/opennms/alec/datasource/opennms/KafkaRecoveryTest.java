@@ -33,13 +33,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.times;
 
-import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.streams.processor.internals.StreamThread;
+import org.apache.kafka.streams.KafkaStreams;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opennms.alec.datasource.api.Alarm;
@@ -59,7 +58,6 @@ public class KafkaRecoveryTest extends OpennmsDatasourceIT implements AlarmHandl
     @Test
     public void canHandleAlarms() throws Exception {
         datasource.init();
-
         // No alarms initially
         assertThat(datasource.getAlarms(), hasSize(0));
 
@@ -79,22 +77,10 @@ public class KafkaRecoveryTest extends OpennmsDatasourceIT implements AlarmHandl
         assertThat(alarmsCreatedOrUpdatedById.entrySet(), hasSize(0));
         assertThat(alarmsClearedById.entrySet(), hasSize(0));
 
-        // Simulate a problem with KafkaStreams in OpennmsDatsource:
-        // Stop all StreamsThreads and wait for the KafkaStreamMonitor to restart the OpennmsDatasource
-        LOG.info("Trigger KafkaStream problem.");
-        // "Kill" all threads
-        for (Thread t : Thread.getAllStackTraces().keySet()) {
-            if (t instanceof StreamThread) {
-                LOG.info("Stopping Thread: " + t.getName());
-                StreamThread thread = (StreamThread)t;
-                thread.shutdown();
-                Method method = thread.getClass().getDeclaredMethod("setState", StreamThread.State.class);
-                method.setAccessible(true);
-                method.invoke(thread, StreamThread.State.DEAD); // make sure we are really dead
-            }
-        }
+        // Trigger our monitor with a state change, simulating a problem with  KafkaStreams in the data source
+        datasource.getStreamStateListener().onChange(KafkaStreams.State.ERROR, KafkaStreams.State.RUNNING);
 
-        // lets wait a bit to allow OpennmsDatsource initialize
+        // Let's wait a bit to allow OpennmsDatasource initialize
         Thread.sleep(2000);
 
         // make sure initialize was actually called:

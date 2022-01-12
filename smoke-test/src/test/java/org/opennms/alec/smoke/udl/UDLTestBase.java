@@ -51,7 +51,7 @@ public abstract class UDLTestBase extends ALECSmokeTestBase {
         LOG.info("Adding user defined link");
         openNMSRestClient.addUDLBetweenNodes(nodeIds.get("test1"), nodeIds.get("test2"));
         LOG.info("Waiting for ALEC to populate the user defined link");
-        // We should see 3 vertices in the ALEC graph, two nodes and one UDL
+        // We should see 3 (or 4) vertices in the ALEC graph, three nodes and one UDL
         await()
                 .atMost(1, TimeUnit.MINUTES)
                 .pollInterval(5, TimeUnit.SECONDS)
@@ -59,8 +59,8 @@ public abstract class UDLTestBase extends ALECSmokeTestBase {
                 .until(() -> {
                     String[] output = Karaf.runKarafCommands(getALECContainerSSHAddress(),
                             "opennms-alec:list-graphs").split("\n");
-
-                    return Arrays.stream(output).anyMatch(row -> row.contains("3 vertices and 2 edges"));
+                    return Arrays.stream(output).anyMatch(row -> row.contains("3 vertices and 2 edges") ||
+                            row.contains("4 vertices and 2 edges"));
                 });
     }
 }

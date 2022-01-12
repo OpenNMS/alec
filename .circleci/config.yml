@@ -3,13 +3,13 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:8u322b06-3.8.4-b8247
+      - image: opennms/build-env:11.0.14_9-3.8.4-b8249
         environment:
           MAVEN_OPTS: -Xmx2g
 
   build-debian-executor:
     docker:
-      - image: cimg/openjdk:8.0
+      - image: cimg/openjdk:11.0.13
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -17,9 +17,9 @@ executors:
   # rather than rely on the circleci machine VM
   smoke-test-executor:
     machine:
-      image: ubuntu-2004:202201-02
+      image: ubuntu-2204:2022.04.1
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true
       KEEP_TMP_OVERLAY: true

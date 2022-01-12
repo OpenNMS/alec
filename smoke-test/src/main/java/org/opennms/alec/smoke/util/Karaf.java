@@ -63,10 +63,12 @@ public class Karaf {
                     .atMost(10, SECONDS)
                     .until(sshClient.isShellClosedCallable());
 
-            return sshClient.getStdout();
+            String stdout = sshClient.getStdout();
+            LOG.debug("Karaf command stdout: {}", stdout);
+            return stdout;
         }
     }
-    
+
     public static void waitForBundleActive(String bundleName, InetSocketAddress serviceAddress) {
         LOG.debug("Checking for active bundle with prefix {}", bundleName);
 
@@ -76,7 +78,6 @@ public class Karaf {
                 .ignoreExceptions()
                 .until(() -> {
                     String[] output = runKarafCommands(serviceAddress, "bundle:list -s").split("\n");
-
                     return Arrays.stream(output).anyMatch(row -> row.contains(bundleName) &&
                             row.contains("Active"));
                 });

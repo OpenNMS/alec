@@ -206,6 +206,10 @@ public class Driver implements EngineRegistry {
             future.complete(null);
         });
         initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getName()));
+        initThread.setUncaughtExceptionHandler((th,ex) -> {
+            LOG.error("Initialization failed with uncaught exception.", ex);
+            future.completeExceptionally(ex);
+        });
         initThread.start();
         return future;
     }

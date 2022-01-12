@@ -28,6 +28,9 @@
 
 package org.opennms.alec.datasource.opennms.processors;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,6 +40,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -96,7 +100,7 @@ public class InventoryTableProcessor implements Processor<String, InventoryModel
         }
 
         // schedule a punctuate() method based on clock time
-        this.context.schedule(inventoryGcIntervalMs, PunctuationType.WALL_CLOCK_TIME, this::onPunctuate);
+        this.context.schedule(Duration.of(inventoryGcIntervalMs, ChronoUnit.MILLIS), PunctuationType.WALL_CLOCK_TIME, this::onPunctuate);
     }
     
     private void initReferences(KeyValue<String, InventoryModelProtos.InventoryObjects> keyValue) {

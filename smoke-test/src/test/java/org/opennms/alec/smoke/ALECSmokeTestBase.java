@@ -36,17 +36,21 @@ import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_INVE
 import static org.opennms.alec.datasource.opennms.OpennmsDatasource.DEFAULT_NODE_TOPIC;
 import static org.opennms.alec.smoke.containers.OpenNMSContainer.DB_ALIAS;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
@@ -59,16 +63,19 @@ import org.opennms.alec.smoke.util.DockerImageResolver;
 import org.opennms.alec.smoke.util.Network;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
+
+import com.google.common.collect.ImmutableMap;
 
 public abstract class ALECSmokeTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(ALECSmokeTestBase.class);
     protected OpenNMSRestClient openNMSRestClient;
 
     // Define the containers used by all tests
-    protected final GenericContainer kafkaContainer = new KafkaContainer("4.0.0")
+    protected final GenericContainer kafkaContainer = new KafkaContainer("7.0.0")
             .withNetwork(Network.getNetwork())
             .withNetworkAliases("kafka")
             .waitingFor(new ALECSmokeTestBase.WaitForKafkaTopics());
@@ -141,27 +148,25 @@ public abstract class ALECSmokeTestBase {
     private static class WaitForKafkaTopics extends AbstractWaitStrategy {
         @Override
         protected void waitUntilReady() {
-            Wait.forListeningPort().waitUntilReady(waitStrategyTarget);
-            Properties config = new Properties();
-            config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:%d",
-                    "localhost",
-                    waitStrategyTarget.getMappedPort(KafkaContainer.KAFKA_PORT)));
-            AdminClient admin = AdminClient.create(config);
-
-            int partitions = 8;
-            short replication = 1;
-
-            // All of the topics that ALEC requires to be present in order to initialize the Kafka datasource
-            List<NewTopic> topics = Arrays.asList(
-                    new NewTopic(DEFAULT_ALARM_TOPIC, partitions, replication),
-                    new NewTopic(DEFAULT_ALARM_FEEDBACK_TOPIC, partitions, replication),
-                    new NewTopic(DEFAULT_NODE_TOPIC, partitions, replication),
-                    new NewTopic(DEFAULT_INVENTORY_TOPIC, partitions, replication),
-                    new NewTopic(DEFAULT_EDGES_TOPIC, partitions, replication));
-
-            CreateTopicsResult result = admin.createTopics(topics);
-            await().atMost(1, TimeUnit.MINUTES).until(() -> result.all().isDone());
-            admin.close();
+            KafkaContainer kafka = (KafkaContainer)waitStrategyTarget;
+            for (String topic : Arrays.asList(DEFAULT_ALARM_TOPIC, DEFAULT_ALARM_FEEDBACK_TOPIC, DEFAULT_NODE_TOPIC, DEFAULT_INVENTORY_TOPIC, DEFAULT_EDGES_TOPIC)) {
+                Container.ExecResult result = null;
+                try {
+                    result = kafka.execInContainer(
+                            "kafka-topics",
+                            "--create",
+                            "--bootstrap-server", "localhost:9092",
+                            "--topic", topic,
+                            "--partitions", "8",
+                            "--replication-factor", "1"
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                if (result.getExitCode() != 0) {
+                    throw new IllegalStateException(result.toString());
+                }
+            }
         }
     }
 }

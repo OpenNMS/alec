@@ -76,7 +76,7 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
                 .build());
 
         // Verify the situation was forwarded to Kafka
-        Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafka);
+        Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafkaRule.getEmbeddedKafka());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

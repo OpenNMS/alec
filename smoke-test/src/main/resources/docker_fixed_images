@@ -4,9 +4,7 @@
 alpine=alpine:3.5
 helm=opennms/helm:2.0.0
 # Note the tag version should match the confluent version being used by the kafka container
-kafka=confluentinc/cp-kafka:4.0.0
+kafka=confluentinc/cp-kafka:7.0.0
 postgres=postgres:10.7-alpine
 # Note this tag version should match the selenium version in the POM
 selenium=selenium/standalone-chrome-debug:3.4.0
-sentinel=opennms/sentinel:26.1.1
-opennms=opennms/horizon:26.1.1

@@ -3,13 +3,13 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.8.0.252.b09-3.6.3-b5231
+      - image: opennms/build-env:11.0.12.0.7-3.6.3-b7295
         environment:
           MAVEN_OPTS: -Xmx2g
 
   build-debian-executor:
     docker:
-      - image: circleci/openjdk:8u212-jdk-stretch
+      - image: cimg/openjdk:11.0.13
         environment:
           MAVEN_OPTS: -Xmx2g
 

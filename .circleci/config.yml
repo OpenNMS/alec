@@ -3,13 +3,13 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.8.0.252.b09-3.6.3-b5231
+      - image: opennms/build-env:8u322b06-3.8.4-b8247
         environment:
           MAVEN_OPTS: -Xmx2g
 
   build-debian-executor:
     docker:
-      - image: circleci/openjdk:8u212-jdk-stretch
+      - image: cimg/openjdk:8.0
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -17,8 +17,9 @@ executors:
   # rather than rely on the circleci machine VM
   smoke-test-executor:
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202201-02
     environment:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true
       KEEP_TMP_OVERLAY: true
@@ -26,15 +27,15 @@ executors:
 
   docs-executor:
     docker:
-      - image: opennms/antora:2.3.4-b6293
+      - image: opennms/antora:2.3.4-b7274
 
   python-executor:
     docker:
-      - image: circleci/python:3.7.2
+      - image: cimg/python:3.10
 
 orbs:
-  cloudsmith: cloudsmith/cloudsmith@1.0.3
-  sign-packages: opennms/sign-packages@2.2.0
+  cloudsmith: cloudsmith/cloudsmith@1.0.5
+  sign-packages: opennms/sign-packages@2.3.0
 
 workflows:
   build-deploy:
@@ -170,6 +171,10 @@ commands:
               mvn test -DsmokeTest=true
             fi
 
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "/root/.m2/repository"
+
       - save_cache:
           paths:
           - /root/.m2
@@ -252,6 +257,10 @@ jobs:
           command: |
             mvn -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline
 
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
+
       - save_cache:
           paths:
             - ~/.m2
@@ -320,6 +329,10 @@ jobs:
           name: Build Debian packages
           command: |
             mvn install --projects org.opennms.alec.assembly:org.opennms.alec.assembly.opennms.deb,org.opennms.alec.assembly:org.opennms.alec.assembly.sentinel.deb --also-make -DskipTests=true -Dbuild.packages
+
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
 
       - save_cache:
           paths:

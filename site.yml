@@ -6,7 +6,9 @@ content:
   sources: 
   - url: https://github.com/OpenNMS/alec.git
     branches: HEAD
-    tags: v*
+    tags:
+      - v*
+      - '!v2.0.0.alpha0'
     start_path: docs
 ui:
   bundle:

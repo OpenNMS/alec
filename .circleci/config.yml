@@ -171,6 +171,10 @@ commands:
               mvn test -DsmokeTest=true
             fi
 
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "/root/.m2/repository"
+
       - save_cache:
           paths:
           - /root/.m2
@@ -253,6 +257,10 @@ jobs:
           command: |
             mvn -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline
 
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
+
       - save_cache:
           paths:
             - ~/.m2
@@ -321,6 +329,10 @@ jobs:
           name: Build Debian packages
           command: |
             mvn install --projects org.opennms.alec.assembly:org.opennms.alec.assembly.opennms.deb,org.opennms.alec.assembly:org.opennms.alec.assembly.sentinel.deb --also-make -DskipTests=true -Dbuild.packages
+
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
 
       - save_cache:
           paths:

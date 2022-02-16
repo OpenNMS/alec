@@ -145,17 +145,26 @@ commands:
 
       - restore_cache:
           keys:
-          - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-{{ .Revision }}
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
 
       - run:
-          name: Import Docker images
+          name: Refresh and import Docker cache
           command: |
-            if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
-            source smoke-test/src/main/resources/docker_fixed_images
-            for dockerTargz in $(ls /tmp/docker); do
-              dockerName="${dockerTargz%.*}"
-              echo "Importing ${!dockerName} from $dockerTargz"
-              docker load --input /tmp/docker/"$dockerTargz"
+            mkdir -p /tmp/docker
+            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
+            source "${tagsFile}"
+            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
+              if [ -e /tmp/docker/"$dockerImg".tgz ]; then
+                echo "Importing ${!dockerName} from $dockerTargz"
+                docker load --input /tmp/docker/"$dockerTargz"
+              else
+                echo "Cached image not found, pulling ${!dockerImg} from DockerHub"
+                docker pull "${!dockerImg}"
+                docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
+              fi
             done
             docker image ls
 
@@ -180,22 +189,10 @@ commands:
           - /root/.m2
           key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
 
-      - run:
-          name: Save cacheable Docker images
-          command: |
-            if [ -d /tmp/docker ]; then exit 0; fi
-            mkdir /tmp/docker
-            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
-            source "$tagsFile"
-            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
-              echo "Saving docker image ${!dockerImg} as ${dockerImg}.tgz"
-              docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
-            done
-
       - save_cache:
           paths:
           - /tmp/docker
-          key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+          key: v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-{{ .Revision }}
 
       - run:
           name: Gather test artifacts

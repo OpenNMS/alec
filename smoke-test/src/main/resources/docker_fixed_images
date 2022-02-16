@@ -1,6 +1,7 @@
 # Use this file for docker images/tags that are fixed to a specific version and aren't changing
 # These will be eligible for caching in the CI system
 
+alpine=alpine:3.5
 helm=opennms/helm:2.0.0
 # Note the tag version should match the confluent version being used by the kafka container
 kafka=confluentinc/cp-kafka:4.0.0

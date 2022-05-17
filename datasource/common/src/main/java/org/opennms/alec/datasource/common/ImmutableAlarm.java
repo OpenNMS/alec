@@ -38,6 +38,7 @@ import org.opennms.alec.datasource.api.Severity;
  */
 public final class ImmutableAlarm implements Alarm {
     private final String id;
+    private final long firstTime;
     private final long time;
     private final Severity severity;
     private final String inventoryObjectId;
@@ -48,6 +49,7 @@ public final class ImmutableAlarm implements Alarm {
 
     private ImmutableAlarm(Builder builder) {
         this.id = builder.id;
+        this.firstTime = builder.firstTime;
         this.time = builder.time;
         this.severity = builder.severity;
         this.inventoryObjectId = builder.inventoryObjectId;
@@ -59,6 +61,7 @@ public final class ImmutableAlarm implements Alarm {
 
     public static final class Builder {
         private String id;
+        private long firstTime;
         private long time;
         private Severity severity;
         private String inventoryObjectId;
@@ -68,11 +71,13 @@ public final class ImmutableAlarm implements Alarm {
         private Long nodeId;
 
         private Builder() {
+            firstTime = System.currentTimeMillis();
             time = System.currentTimeMillis();
         }
 
         private Builder(Alarm alarm) {
             this.id = alarm.getId();
+            this.firstTime = alarm.getFirstTime();
             this.time = alarm.getTime();
             this.severity = alarm.getSeverity();
             this.inventoryObjectId = alarm.getInventoryObjectId();
@@ -84,6 +89,11 @@ public final class ImmutableAlarm implements Alarm {
 
         public Builder setId(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder setFirstTime(long firstTime){
+            this.firstTime = firstTime;
             return this;
         }
 
@@ -142,6 +152,11 @@ public final class ImmutableAlarm implements Alarm {
     }
 
     @Override
+    public long getFirstTime(){
+        return firstTime;
+    }
+
+    @Override
     public long getTime() {
         return time;
     }
@@ -187,6 +202,7 @@ public final class ImmutableAlarm implements Alarm {
         if (o == null || getClass() != o.getClass()) return false;
         ImmutableAlarm that = (ImmutableAlarm) o;
         return time == that.time &&
+                firstTime == that.firstTime &&
                 Objects.equals(id, that.id) &&
                 severity == that.severity &&
                 Objects.equals(inventoryObjectId, that.inventoryObjectId) &&
@@ -205,6 +221,7 @@ public final class ImmutableAlarm implements Alarm {
     public String toString() {
         return "ImmutableAlarm{" +
                 "id='" + id + '\'' +
+                ", firstTime=" + firstTime +
                 ", time=" + time +
                 ", severity=" + severity +
                 ", inventoryObjectId='" + inventoryObjectId + '\'' +

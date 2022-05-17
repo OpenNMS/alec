@@ -63,6 +63,8 @@ public class Vectorizer {
     public InputVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2, double distanceOnGraph) {
         // Build the input vector
         final InputVector.Builder builder = InputVector.builder()
+                .alarmAid(a1.getAlarmId().toString())
+                .alarmBid(a2.getAlarmId().toString())
                 .typeA(a1.getAlarm().getInventoryObjectType())
                 .typeB(a2.getAlarm().getInventoryObjectType())
                 .similarityOfInventoryObjectIds(getSimilarityOfInventoryObjectIds(a1.getAlarm().getInventoryObjectId(), a2.getAlarm().getInventoryObjectId()));

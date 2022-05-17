@@ -24,7 +24,7 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- *******************************************************************************/
+ ******************************************************************************/
 
 package org.opennms.alec.engine.dbscan;
 
@@ -69,12 +69,14 @@ import edu.uci.ics.jung.graph.Graph;
 public class DBScanEngine extends AbstractClusterEngine {
     private static final Logger LOG = LoggerFactory.getLogger(DBScanEngine.class);
 
+    //public static final double  DEFAULT_EPSILON = 0.0002;
     public static final double  DEFAULT_EPSILON = 100d;
     public static final double DEFAULT_ALPHA = 144.47117699d;
     public static final double DEFAULT_BETA = 0.55257784d;
 
     private final double epsilon;
-    private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
+    //private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
+    private final HellingerDistanceMeasure distanceMeasure;
 
     public DBScanEngine(MetricRegistry metrics) {
         this(metrics, DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
@@ -83,7 +85,8 @@ public class DBScanEngine extends AbstractClusterEngine {
     public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta) {
         super(metrics);
         this.epsilon = epsilon;
-        distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
+        //distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
+        distanceMeasure = new HellingerDistanceMeasure(this, alpha, beta);
     }
 
     @Override
@@ -107,11 +110,12 @@ public class DBScanEngine extends AbstractClusterEngine {
     }
 
     @Override
-    public double getDistanceBetween(double t1, double t2, double distance) {
-        return distanceMeasure.compute(t1, t2, distance);
+    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
+        return distanceMeasure.compute(t1, t2, firstTimeA, firstTimeB, distance);
     }
 
-    public AlarmInSpaceTimeDistanceMeasure getDistanceMeasure() {
+    //public AlarmInSpaceTimeDistanceMeasure getDistanceMeasure() {
+    public HellingerDistanceMeasure getDistanceMeasure() {
         return distanceMeasure;
     }
 }

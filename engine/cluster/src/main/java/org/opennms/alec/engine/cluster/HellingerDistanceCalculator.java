@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,31 +26,8 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.datasource.api;
+package org.opennms.alec.engine.cluster;
 
-public interface Alarm {
-
-    String getId();
-
-    long getFirstTime();
-    
-    long getTime();
-
-    boolean isClear();
-
-    Severity getSeverity();
-
-    String getInventoryObjectId();
-
-    String getInventoryObjectType();
-
-    String getSummary();
-
-    String getDescription();
-
-    /**
-     * @return the database id of the (OpenNMS) node associated with the alarm, or null of if there is none.
-     */
-    Long getNodeId();
-
+public interface HellingerDistanceCalculator {
+    double getHellingerDistanceBetween(long vertexIdA, long vertexIdB);
 }

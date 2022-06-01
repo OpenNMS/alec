@@ -79,6 +79,7 @@ public class JaxbUtils {
                                 org.opennms.alec.datasource.v1.schema.Event event) {
         return ImmutableAlarm.newBuilder()
                 .setId(alarm.getId())
+                .setFirstTime(alarm.getFirstEventTime())
                 .setTime(event.getTime())
                 .setInventoryObjectType(alarm.getInventoryObjectType())
                 .setInventoryObjectId(alarm.getInventoryObjectId())

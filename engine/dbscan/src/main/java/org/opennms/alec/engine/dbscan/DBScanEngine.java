@@ -73,6 +73,7 @@ public class DBScanEngine extends AbstractClusterEngine {
     public static final double  DEFAULT_EPSILON = 100d;
     public static final double DEFAULT_ALPHA = 144.47117699d;
     public static final double DEFAULT_BETA = 0.55257784d;
+
     private final double epsilon;
     private DistanceMeasure distanceMeasure;
     public DBScanEngine(MetricRegistry metrics) {
@@ -81,11 +82,6 @@ public class DBScanEngine extends AbstractClusterEngine {
 
     public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta, DistanceMeasureFactory distanceMeasureFactory) {
         super(metrics);
-        LOG.debug(
-                "\n=======================================================================================================================================\n" +
-                "DBScanEngine\nalpha: {}\nbeta: {}\nepsilon: {}\ndistanceMeasure: {}\n" +
-                "=======================================================================================================================================", epsilon, alpha, beta, distanceMeasureFactory.getName());
-
         this.epsilon = epsilon;
         distanceMeasure = distanceMeasureFactory.createDistanceMeasure(this, alpha, beta);
     }

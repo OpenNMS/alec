@@ -48,7 +48,9 @@ import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.jaxb.JaxbUtils;
 import org.opennms.alec.driver.test.TestDriver;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Situations.
@@ -61,6 +63,8 @@ public class ProcessAlarms implements Action {
 
     @Reference
     private List<EngineFactory> engineFactories;
+    @Reference
+    private List<DistanceMeasureFactory> distanceMeasureFactories;
 
     @Option(name = "--alarms-in", description = "XML file containing the list of alarms", required = true)
     private String alarmsIn;
@@ -81,9 +85,21 @@ public class ProcessAlarms implements Action {
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
+    @Option(name = "--measure", aliases = {"-m"}, description = "Distance Measure", required = true)
+    @Completion(DistanceMeasureCompleter.class)
+    private String distanceMeasureName;
+
+    @Option(name = "--epsilon", description = "Define epsilon")
+    private double epsilon = 100d;
+
     @Override
     public Object execute() throws Exception {
-        final EngineFactory engineFactory = getEngineFactory();
+        EngineFactory engineFactory = getEngineFactory();
+        final DistanceMeasureFactory distanceMeasureFactory = getDistanceMeasureFactory();
+        if("dbscan".equals(engineFactory.getName())){
+            ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactory(distanceMeasureFactory);
+            ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
+        }
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
         final List<InventoryObject> inventory;
         if (inventoryIn != null ) {
@@ -124,6 +140,18 @@ public class ProcessAlarms implements Action {
                             .collect(Collectors.joining( "," ));
                     return new RuntimeException("No engine found for " + engineName
                             + ". Available engines include: " + engineNames);
+                });
+    }
+
+    private DistanceMeasureFactory getDistanceMeasureFactory() {
+        return distanceMeasureFactories.stream().filter(e -> e.getName().toLowerCase().equals(distanceMeasureName))
+                .findFirst()
+                .orElseThrow(() -> {
+                    final String distanceMeasureNames = distanceMeasureFactories.stream()
+                            .map(DistanceMeasureFactory::getName)
+                            .collect(Collectors.joining( "," ));
+                    return new RuntimeException("No distance measure found for " + distanceMeasureName
+                            + ". Available distance measure include: " + distanceMeasureNames);
                 });
     }
 }

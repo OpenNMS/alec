@@ -18,5 +18,11 @@
             <property name="beta" value="${beta}"/>
         </bean>
     </service>
+    <service interface="org.opennms.alec.engine.api.DistanceMeasureFactory" ranking="10">
+        <bean class="org.opennms.alec.engine.dbscan.HellingerDistanceMeasureFactory"/>
+    </service>
+    <service interface="org.opennms.alec.engine.api.DistanceMeasureFactory" ranking="10">
+        <bean class="org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory"/>
+    </service>
 
 </blueprint>

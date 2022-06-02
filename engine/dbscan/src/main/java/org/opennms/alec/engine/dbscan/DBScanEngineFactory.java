@@ -28,6 +28,7 @@
 
 package org.opennms.alec.engine.dbscan;
 
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 
@@ -39,6 +40,8 @@ public class DBScanEngineFactory implements EngineFactory {
     private double alpha = DBScanEngine.DEFAULT_ALPHA;
     private double beta = DBScanEngine.DEFAULT_BETA;
 
+    private DistanceMeasureFactory distanceMeasureFactory;
+
     @Override
     public String getName() {
         return "dbscan";
@@ -46,7 +49,7 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
-        return new DBScanEngine(metrics, epsilon, alpha, beta);
+        return new DBScanEngine(metrics, epsilon, alpha, beta, distanceMeasureFactory);
     }
 
     public double getEpsilon() {
@@ -71,5 +74,9 @@ public class DBScanEngineFactory implements EngineFactory {
 
     public void setBeta(double beta) {
         this.beta = beta;
+    }
+
+    public void setDistanceMeasureFactory(DistanceMeasureFactory distanceMeasureFactory) {
+        this.distanceMeasureFactory = distanceMeasureFactory;
     }
 }

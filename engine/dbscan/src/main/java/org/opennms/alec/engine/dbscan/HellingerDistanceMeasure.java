@@ -28,12 +28,10 @@
 
 package org.opennms.alec.engine.dbscan;
 
-import static org.opennms.alec.datasource.api.InventoryObject.DEFAULT_WEIGHT;
-
 import java.util.Objects;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +46,7 @@ public class HellingerDistanceMeasure implements DistanceMeasure {
         this.spatialDistanceCalculator = Objects.requireNonNull(SpatialDistanceCalculator);
         this.alpha = alpha;
         this.beta = beta;
-        System.out.printf("Running hellinger...");
+        LOG.info("Running hellinger...");
     }
 
     @Override

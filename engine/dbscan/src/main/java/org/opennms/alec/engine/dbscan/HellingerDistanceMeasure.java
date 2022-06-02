@@ -46,7 +46,7 @@ public class HellingerDistanceMeasure implements DistanceMeasure {
         this.spatialDistanceCalculator = Objects.requireNonNull(SpatialDistanceCalculator);
         this.alpha = alpha;
         this.beta = beta;
-        LOG.info("Running hellinger...");
+        System.out.printf("Running hellinger...");
     }
 
     @Override

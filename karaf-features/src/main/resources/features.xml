@@ -59,6 +59,13 @@
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.shell/${project.version}</bundle>
     </feature>
 
+    <feature name="alec-ui" description="ALEC :: Features :: UI" version="${project.version}">
+        <feature version="${project.version}" dependency="true">alec-datasource-opennms-direct</feature>
+
+        <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.ui/${project.version}</bundle>
+        <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
+    </feature>
+
     <!-- Engines -->
 
     <feature name="alec-engine" description="ALEC :: Engine" version="${project.version}">
@@ -218,6 +225,7 @@
         <feature>alec-datasource-opennms-direct</feature>
         <feature>alec-processor-standalone</feature>
         <feature>alec-features-graph-shell</feature>
+        <feature>alec-ui</feature>
     </feature>
 
     <feature name="alec-opennms-distributed">

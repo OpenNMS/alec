@@ -253,6 +253,12 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.features</groupId>
+            <artifactId>org.opennms.alec.features.ui</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
 	    <groupId>org.opennms.alec.integrations.opennms.sink</groupId>

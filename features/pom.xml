@@ -14,5 +14,6 @@
         <module>graph</module>
         <module>score</module>
         <module>shell</module>
+        <module>ui</module>
     </modules>
 </project>

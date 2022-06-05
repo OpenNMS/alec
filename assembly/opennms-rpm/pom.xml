@@ -43,7 +43,7 @@
                         <defaultGroupname>wheel</defaultGroupname>
                         <release>${rpmRelease}</release>
                         <requires>
-                            <require>opennms-core &gt;= 24.0.0</require>
+                            <require>opennms-core &gt;= 30.0.0</require>
                         </requires>
                         <mappings>
                             <mapping>

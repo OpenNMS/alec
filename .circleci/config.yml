@@ -158,8 +158,8 @@ commands:
             source "${tagsFile}"
             for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
               if [ -e /tmp/docker/"$dockerImg".tgz ]; then
-                echo "Importing ${!dockerName} from $dockerTargz"
-                docker load --input /tmp/docker/"$dockerTargz"
+                echo "Importing ${!dockerImg} from ${!dockerImg}.tgz"
+                docker load --input /tmp/docker/"$dockerImg".tgz
               else
                 echo "Cached image not found, pulling ${!dockerImg} from DockerHub"
                 docker pull "${!dockerImg}"

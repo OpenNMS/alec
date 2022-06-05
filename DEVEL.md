@@ -10,11 +10,11 @@ Note: maven version 3.5 (or newer) is required due to compatibility issues with 
 
 ## Setup
 
-Download and extract the tarball distribution of Apache Karaf 4.1.5:
+Download and extract the tarball distribution of Apache Karaf 4.3.7:
 ```
-wget http://httpd-mirror.sergal.org/apache/karaf/4.1.5/apache-karaf-4.1.5.tar.gz
-tar zxvf apache-karaf-4.1.5.tar.gz
-cd apache-karaf-4.1.5
+wget https://dlcdn.apache.org/karaf/4.3.7/apache-karaf-4.3.7.tar.gz
+tar zxvf apache-karaf-4.3.7.tar.gz
+cd apache-karaf-4.3.7
 ```
 
 Run the Karaf container:
@@ -24,7 +24,7 @@ Run the Karaf container:
 
 In the Karaf shell, add the features repository:
 ```
-feature:repo-add mvn:org.opennms.alec/alec-karaf-features/1.0.0-SNAPSHOT/xml
+feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.0-SNAPSHOT/xml
 ```
 
 ## Usage

@@ -31,7 +31,7 @@ export default defineConfig({
 	build: {
 		cssCodeSplit: false, // keep css in one chunk
 		lib: {
-			entry: new URL('src/main.ts', import.meta.url).pathname,
+			entry: path.resolve(__dirname, 'src/main.ts'),
 			name: 'uiextension',
 			fileName: (format) => `uiextension.${format}.js`
 		},

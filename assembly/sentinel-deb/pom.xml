@@ -34,7 +34,7 @@
                         <packageTitle>Architecture for Learning Enabled Correlation (ALEC)</packageTitle>
                         <packageDescription>ALEC</packageDescription>
                         <packageDependencies>
-                            <packageDependency>opennms-sentinel (&gt;= 24.0.0)</packageDependency>
+                            <packageDependency>opennms-sentinel (&gt;= 30.0.0)</packageDependency>
                         </packageDependencies>
                         <maintainerName>Jesse White</maintainerName>
                         <maintainerEmail>jesse@opennms.com</maintainerEmail>

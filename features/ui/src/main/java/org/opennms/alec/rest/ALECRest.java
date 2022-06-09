@@ -20,4 +20,12 @@ public interface ALECRest {
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes({MediaType.APPLICATION_JSON})
     Response handleWebhook(String body);
+
+    @GET
+    @Path("/versions")
+    Response getVersions(String filename, String path);
+
+    @POST
+    @Path("/agreement")
+    Response storeAgreement(String filename, String path, String content);
 }

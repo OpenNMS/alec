@@ -15,5 +15,6 @@
         <module>score</module>
         <module>shell</module>
         <module>ui</module>
+        <module>data</module>
     </modules>
 </project>

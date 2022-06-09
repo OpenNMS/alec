@@ -3,7 +3,7 @@
 
     <!-- Expose our UI Extension -->
     <service id="uiExtension" interface="org.opennms.integration.api.v1.ui.UIExtension">
-        <bean class="ui.UIExtension">
+        <bean class="org.opennms.alec.ui.UIExtension">
             <property name="id" value="uiExtension"/>
             <property name="menuEntry" value="ALEC"/>
             <property name="resourceRoot" value="ui-ext"/>
@@ -13,8 +13,8 @@
 
     <!-- Build and expose the JAX-RS annotated webhook handler.
      This will automatically mount the endpoint over the REST API. -->
-    <bean id="restImpl" class="rest.ALECRestImpl" />
-    <service interface="rest.ALECRest" ref="restImpl">
+    <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl" />
+    <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
         <service-properties>
             <entry key="application-path" value="/rest" />
         </service-properties>

@@ -1,4 +1,4 @@
-package rest;
+package org.opennms.alec.rest;
 
 import javax.ws.rs.core.Response;
 

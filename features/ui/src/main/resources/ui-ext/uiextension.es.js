@@ -79,7 +79,7 @@ const _openBlock = window["Vue"].openBlock;
 const _createElementBlock = window["Vue"].createElementBlock;
 const _pushScopeId = window["Vue"].pushScopeId;
 const _popScopeId = window["Vue"].popScopeId;
-const _withScopeId = (n) => (_pushScopeId("data-v-12d2eeac"), n = n(), _popScopeId(), n);
+const _withScopeId = (n) => (_pushScopeId("data-v-07d680f3"), n = n(), _popScopeId(), n);
 const _hoisted_1 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ _createElementVNode("img", {
   alt: "Ocean",
   src: _imports_0
@@ -89,10 +89,10 @@ const _sfc_main = /* @__PURE__ */ _defineComponent({
     return (_ctx, _cache) => {
       return _openBlock(), _createElementBlock(_Fragment, null, [
         _hoisted_1,
-        _createVNode(HelloWorld, { msg: "This is an example UI Extension component plugin installed at runtime as a Karaf feature" })
+        _createVNode(HelloWorld, { msg: "oops I did it again" })
       ], 64);
     };
   }
 });
-var App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-12d2eeac"]]);
+var App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-07d680f3"]]);
 window["uiextension"] = App;

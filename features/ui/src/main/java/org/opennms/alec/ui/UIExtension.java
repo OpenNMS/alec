@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package ui;
+package org.opennms.alec.ui;
 
 public class UIExtension implements org.opennms.integration.api.v1.ui.UIExtension {
     private String id;

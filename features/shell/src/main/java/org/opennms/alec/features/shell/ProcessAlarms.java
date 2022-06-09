@@ -91,6 +91,12 @@ public class ProcessAlarms implements Action {
     @Option(name = "--epsilon", description = "Define epsilon")
     private double epsilon = 100d;
 
+    @Option(name = "--alpha", description = "Define alpha")
+    private double alpha = 144.47117699d;
+
+    @Option(name = "--beta", description = "Define beta")
+    private double beta = 0.55257784d;
+
     @Override
     public Object execute() throws Exception {
         EngineFactory engineFactory = getEngineFactory();
@@ -98,6 +104,8 @@ public class ProcessAlarms implements Action {
         if("dbscan".equals(engineFactory.getName())){
             ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactory(distanceMeasureFactory);
             ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
+            ((DBScanEngineFactory) engineFactory).setAlpha(alpha);
+            ((DBScanEngineFactory) engineFactory).setBeta(beta);
         }
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
         final List<InventoryObject> inventory;

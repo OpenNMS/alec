@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import path from 'path'
 import vue from '@vitejs/plugin-vue'
 import { viteExternalsPlugin } from 'vite-plugin-externals'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -12,7 +13,7 @@ export default defineConfig({
       pinia: 'Pinia'
 		}),
 		AutoImport({
-			imports: ['vue', '@vueuse/core', 'pinia'],
+			imports: ['@vueuse/core', 'pinia'],
 			eslintrc: {
 				enabled: true,
 				filepath: './.eslintrc-auto-import.json'
@@ -29,7 +30,7 @@ export default defineConfig({
 	build: {
 		cssCodeSplit: false, // keep css in one chunk
 		lib: {
-			entry: new URL('src/main.ts', import.meta.url).pathname,
+			entry: path.resolve(__dirname, 'src/main.ts'),
 			name: 'uiextension',
 			fileName: (format) => `uiextension.${format}.js`
 		},

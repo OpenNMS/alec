@@ -1,4 +1,3 @@
-import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { viteExternalsPlugin } from 'vite-plugin-externals'
@@ -29,7 +28,7 @@ export default defineConfig({
 	build: {
 		cssCodeSplit: false, // keep css in one chunk
 		lib: {
-			entry: path.resolve(__dirname, 'src/main.ts'),
+			entry: new URL('src/main.ts', import.meta.url).pathname,
 			name: 'uiextension',
 			fileName: (format) => `uiextension.${format}.js`
 		},

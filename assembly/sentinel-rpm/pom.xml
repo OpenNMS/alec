@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.opennms.alec</groupId>
         <artifactId>assembly</artifactId>
@@ -44,7 +43,7 @@
                         <defaultGroupname>wheel</defaultGroupname>
                         <release>${rpmRelease}</release>
                         <requires>
-                            <require>opennms-sentinel >= 24.0.0</require>
+                            <require>opennms-sentinel &gt;= 30.0.0</require>
                         </requires>
                         <mappings>
                             <mapping>

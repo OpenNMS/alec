@@ -113,8 +113,6 @@ Ensure CORS is configured in OpenNMS to be able to make API calls
 In browser:
 http://localhost:3000/
 
-> This is currently broken, but worth fixing
-
 ## Enabling CORS
 
 Uncomment this block in `jetty-webapps/opennms/WEB-INF/web.xml` and restart OpenNMS:
@@ -144,12 +142,6 @@ Then rebuild the `features/ui/` bundle and reload it in the runtime.
 > Use `bundle:watch` in the Karaf shell for hot reloads.
 
 ## TODO
-
-### Standalone UI
-
-*Success criteria*
-
-Be able to run the UI standalone outside of OpenNMS with `vite` or similar
 
 ### Integrate UI into build pipeline
 

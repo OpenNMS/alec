@@ -1,9 +1,9 @@
 {
   "name": "ui-extension",
   "version": "0.0.0",
-   "files" : [
-      "dist"
-   ],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/uiextension.umd.js",
   "module": "./dist/uiextension.es.js",
   "exports": {
@@ -12,15 +12,15 @@
       "require": "./dist/uiextension.umd.js"
     }
   },
-
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 5002"
   },
   "dependencies": {
-    "vue": "^3.2.25",
-    "vite-plugin-externals": "^0.3.4"
+    "pinia": "^2.0.14",
+    "vite-plugin-externals": "^0.3.4",
+    "vue": "^3.2.25"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.2.0",

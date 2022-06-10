@@ -1,7 +1,11 @@
 package org.opennms.alec.rest;
 
 import java.io.IOException;
+import java.util.List;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.data.StoreFile;
@@ -33,18 +37,24 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("Got payload: {}", body);
         return Response.ok().build();
     }
-
+    @GET
+    @Path("/versions/{path}/{filename}")
     @Override
-    public Response getVersions(String filename, String path) {
+    public Response getVersions(@PathParam("path") String path,
+                                @PathParam("filename") String filename) {
         LOG.debug("Get agreement versions: {}/{}", path, filename);
-        return Response.ok(storeFile.getVersions(path, filename)).build();
+//        return Response.ok(storeFile.getVersions(path, filename)).build();
+        List<String> ret = storeFile.getVersions("/var/tmp", "filename");
+        return Response.ok().entity(ret.toArray()).build();
     }
 
     @Override
-    public Response storeAgreement(String filename, String path, String content) {
+    public Response storeAgreement(String path,
+                                   String filename,
+                                   String body) {
         LOG.debug("Store agreement: {}{}", path, filename);
         try {
-            storeFile.write(path, filename, content);
+            storeFile.write("/var/tmp", "filename", body);
         } catch (IOException e) {
             return Response.status(400, e.getMessage()).build();
         }

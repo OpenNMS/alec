@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,6 +56,8 @@ public class StoreFileImpl implements StoreFile {
                     .filter(file -> !Files.isDirectory(file))
                     .map(Path::getFileName)
                     .map(Path::toString)
+                    .filter(s -> !s.isEmpty())
+                    .filter(s -> s.lastIndexOf("_v") > 0)
                     .filter(s -> filename.equalsIgnoreCase(s.substring(0, s.lastIndexOf("_v"))))
                     .map(s -> s.substring(s.lastIndexOf("_v") + 2, s.lastIndexOf('.')))
                     .sorted()
@@ -71,7 +72,7 @@ public class StoreFileImpl implements StoreFile {
         return String.valueOf(getVersions(filePath, filename)
                 .stream()
                 .mapToInt(Integer::parseInt)
-                .max().orElseThrow(NoSuchElementException::new));
+                .max().orElse(0));
 
     }
 }

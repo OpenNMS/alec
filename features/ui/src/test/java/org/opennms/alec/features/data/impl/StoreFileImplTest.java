@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -46,10 +47,33 @@ public class StoreFileImplTest {
     }
 
     @Test
+    public void getVersionsOneFileTest() {
+        String filename = "agreement";
+        List<String> expected = Arrays.asList("4");
+        Assert.assertEquals(expected, storeFile.getVersions(ABSOLUTE_PATH, filename));
+    }
+
+    @Test
+    public void getEmptyVersionsTest() {
+        String filename = "test";
+        List<String> expected = Collections.emptyList();
+        Assert.assertEquals(expected, storeFile.getVersions("", filename));
+    }
+
+    @Test
     public void writeTest() throws IOException {
         String filename = "test";
         storeFile.write(ABSOLUTE_PATH, filename, "agreement");
         Path path = Path.of(ABSOLUTE_PATH, filename + "_v4.agr");
+        Assert.assertEquals("agreement", Files.readString(path));
+        Files.delete(path);
+    }
+
+    @Test
+    public void writeNewFileTest() throws IOException {
+        String filename = "dumb";
+        storeFile.write(ABSOLUTE_PATH, filename, "agreement");
+        Path path = Path.of(ABSOLUTE_PATH, filename + "_v1.agr");
         Assert.assertEquals("agreement", Files.readString(path));
         Files.delete(path);
     }

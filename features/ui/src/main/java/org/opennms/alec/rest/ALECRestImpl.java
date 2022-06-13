@@ -3,9 +3,6 @@ package org.opennms.alec.rest;
 import java.io.IOException;
 import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.data.StoreFile;
@@ -37,27 +34,69 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("Got payload: {}", body);
         return Response.ok().build();
     }
-    @GET
-    @Path("/versions/{path}/{filename}")
+
     @Override
-    public Response getVersions(@PathParam("path") String path,
-                                @PathParam("filename") String filename) {
+    public Response getVersions(final String path,
+                                final String filename) {
+        if (path.isEmpty() || filename.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         LOG.debug("Get agreement versions: {}/{}", path, filename);
-//        return Response.ok(storeFile.getVersions(path, filename)).build();
-        List<String> ret = storeFile.getVersions("/var/tmp", "filename");
+        List<String> ret;
+        try {
+            ret = storeFile.getVersions(path, filename);
+        } catch (IOException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
         return Response.ok().entity(ret.toArray()).build();
     }
 
     @Override
-    public Response storeAgreement(String path,
-                                   String filename,
-                                   String body) {
+    public Response storeAgreement(final String path,
+                                   final String filename,
+                                   final String body) {
+        if (path.isEmpty() || filename.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
         LOG.debug("Store agreement: {}{}", path, filename);
         try {
-            storeFile.write("/var/tmp", "filename", body);
+            storeFile.write(path, filename, body);
         } catch (IOException e) {
-            return Response.status(400, e.getMessage()).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
         return Response.ok().build();
+    }
+
+    @Override
+    public Response getAgreement(final String path,
+                                 final String filename,
+                                 final String version) {
+        if (path.isEmpty() || filename.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        LOG.debug("Get agreement: {}/{} version: {}", path, filename, version);
+        String agreement;
+        try {
+            agreement = storeFile.read(path, filename, version);
+        } catch (IOException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+        return Response.ok(agreement).build();
+    }
+
+    @Override
+    public Response getAgreement(final String path,
+                                 final String filename) {
+        if (path.isEmpty() || filename.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        LOG.debug("Get last version agreement: {}/{}", path, filename);
+        String agreement;
+        try {
+            agreement = storeFile.read(path, filename);
+        } catch (IOException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+        return Response.ok(agreement).build();
     }
 }

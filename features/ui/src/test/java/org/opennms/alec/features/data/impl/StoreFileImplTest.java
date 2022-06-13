@@ -28,33 +28,33 @@ public class StoreFileImplTest {
     }
 
     @Test
-    public void getLastVersionTest() {
+    public void getLastVersionTest() throws IOException {
         String filename = "test";
         Assert.assertEquals("3", storeFile.getLastVersion(ABSOLUTE_PATH, filename));
     }
 
     @Test(expected = NoSuchElementException.class)
-    public void getLastVersionOfNewFileTest() {
+    public void getLastVersionOfNewFileTest() throws IOException {
         String filename = "newFile";
         storeFile.getLastVersion(ABSOLUTE_PATH, filename);
     }
 
     @Test
-    public void getVersionsTest() {
+    public void getVersionsTest() throws IOException {
         String filename = "test";
         List<String> expected = Arrays.asList("1", "2", "3");
         Assert.assertEquals(expected, storeFile.getVersions(ABSOLUTE_PATH, filename));
     }
 
     @Test
-    public void getVersionsOneFileTest() {
+    public void getVersionsOneFileTest() throws IOException {
         String filename = "agreement";
         List<String> expected = Arrays.asList("4");
         Assert.assertEquals(expected, storeFile.getVersions(ABSOLUTE_PATH, filename));
     }
 
     @Test
-    public void getEmptyVersionsTest() {
+    public void getEmptyVersionsTest() throws IOException {
         String filename = "test";
         List<String> expected = Collections.emptyList();
         Assert.assertEquals(expected, storeFile.getVersions("", filename));
@@ -76,5 +76,17 @@ public class StoreFileImplTest {
         Path path = Path.of(ABSOLUTE_PATH, filename + "_v1.agr");
         Assert.assertEquals("agreement", Files.readString(path));
         Files.delete(path);
+    }
+
+    @Test
+    public void readLastVersionTest() throws IOException {
+        String filename = "test";
+        Assert.assertEquals("test v3", storeFile.read(ABSOLUTE_PATH, filename));
+    }
+
+    @Test
+    public void readTest() throws IOException {
+        String filename = "test";
+        Assert.assertEquals("test v2", storeFile.read(ABSOLUTE_PATH, filename, "2"));
     }
 }

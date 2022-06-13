@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /*******************************************************************************
  * This file is part of OpenNMS(R).
@@ -50,29 +49,36 @@ public class StoreFileImpl implements StoreFile {
     }
 
     @Override
-    public List<String> getVersions(String filePath, String filename) {
-        try (Stream<Path> stream = Files.walk(Paths.get(filePath), 1)) {
-            return stream
-                    .filter(file -> !Files.isDirectory(file))
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .filter(s -> !s.isEmpty())
-                    .filter(s -> s.lastIndexOf("_v") > 0)
-                    .filter(s -> filename.equalsIgnoreCase(s.substring(0, s.lastIndexOf("_v"))))
-                    .map(s -> s.substring(s.lastIndexOf("_v") + 2, s.lastIndexOf('.')))
-                    .sorted()
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public List<String> getVersions(String filePath, String filename) throws IOException {
+        return Files.walk(Paths.get(filePath), 1)
+                .filter(file -> !Files.isDirectory(file))
+                .map(Path::getFileName)
+                .map(Path::toString)
+                .filter(s -> !s.isEmpty())
+                .filter(s -> s.lastIndexOf("_v") > 0)
+                .filter(s -> filename.equalsIgnoreCase(s.substring(0, s.lastIndexOf("_v"))))
+                .map(s -> s.substring(s.lastIndexOf("_v") + 2, s.lastIndexOf('.')))
+                .sorted()
+                .collect(Collectors.toList());
+
     }
 
     @Override
-    public String getLastVersion(String filePath, String filename) {
+    public String getLastVersion(String filePath, String filename) throws IOException {
         return String.valueOf(getVersions(filePath, filename)
                 .stream()
                 .mapToInt(Integer::parseInt)
                 .max().orElse(0));
 
+    }
+
+    @Override
+    public String read(String filePath, String filename) throws IOException {
+        return read(filePath, filename, getLastVersion(filePath, filename));
+    }
+
+    @Override
+    public String read(String filePath, String filename, String version) throws IOException {
+        return Files.readString(Path.of(filePath, filename + "_v" + version + ".agr"));
     }
 }

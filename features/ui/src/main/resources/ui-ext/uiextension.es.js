@@ -8,7 +8,7 @@ async function doHook() {
   return await response.json();
 }
 async function storeAgreement() {
-  const response = await fetch("/opennms/rest/alec/agreement?fileName=test&path=%2Ftmp", {
+  const response = await fetch("/opennms/rest/alec/agreement?filename=test&path=%2Fvar%2Ftmp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({})
@@ -16,13 +16,13 @@ async function storeAgreement() {
   return await response.json();
 }
 async function getVersions() {
-  const response = await fetch("/opennms/rest/alec/versions?fileName=test&path=%2Ftmp", {
+  const response = await fetch("/opennms/rest/alec/versions?filename=test&path=%2Fvar%2Ftmp", {
     method: "GET",
     headers: { "Content-Type": "application/json" }
   });
   return await response.json();
 }
-var HelloWorld_vue_vue_type_style_index_0_scoped_true_lang = /* @__PURE__ */ (() => "a[data-v-33e1a9ed]{color:#42b983}code[data-v-33e1a9ed]{background-color:#eee;padding:2px 4px;border-radius:4px;color:#304455}table[data-v-33e1a9ed],th[data-v-33e1a9ed],td[data-v-33e1a9ed]{border:2px solid black;border-collapse:collapse}th[data-v-33e1a9ed]{background-color:#228b22}\n")();
+var HelloWorld_vue_vue_type_style_index_0_scoped_true_lang = /* @__PURE__ */ (() => "a[data-v-09619222]{color:#42b983}code[data-v-09619222]{background-color:#eee;padding:2px 4px;border-radius:4px;color:#304455}table[data-v-09619222],th[data-v-09619222],td[data-v-09619222]{border:2px solid black;border-collapse:collapse}th[data-v-09619222]{background-color:#228b22}\n")();
 var _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props) {
@@ -39,7 +39,7 @@ const _openBlock$1 = window["Vue"].openBlock;
 const _createElementBlock$1 = window["Vue"].createElementBlock;
 const _pushScopeId$1 = window["Vue"].pushScopeId;
 const _popScopeId$1 = window["Vue"].popScopeId;
-const _withScopeId$1 = (n) => (_pushScopeId$1("data-v-33e1a9ed"), n = n(), _popScopeId$1(), n);
+const _withScopeId$1 = (n) => (_pushScopeId$1("data-v-09619222"), n = n(), _popScopeId$1(), n);
 const _hoisted_1$1 = /* @__PURE__ */ _withScopeId$1(() => /* @__PURE__ */ _createElementVNode$1("p", null, [
   /* @__PURE__ */ _createTextVNode(" For more information: "),
   /* @__PURE__ */ _createElementVNode$1("a", {
@@ -69,6 +69,7 @@ const _sfc_main$1 = /* @__PURE__ */ _defineComponent$1({
   },
   setup(__props) {
     const count = ref(0);
+    const version = ref(0);
     function handleButtonClick(event) {
       doHook();
     }
@@ -89,7 +90,7 @@ const _sfc_main$1 = /* @__PURE__ */ _defineComponent$1({
         _createElementVNode$1("button", {
           type: "button",
           onClick: getVersionsClick
-        }, "Get Agreement versions"),
+        }, "Get Agreement versions: " + _toDisplayString(version.value), 1),
         _createElementVNode$1("button", {
           type: "button",
           onClick: storeAgreementClick
@@ -99,7 +100,7 @@ const _sfc_main$1 = /* @__PURE__ */ _defineComponent$1({
     };
   }
 });
-var HelloWorld = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-33e1a9ed"]]);
+var HelloWorld = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["__scopeId", "data-v-09619222"]]);
 var App_vue_vue_type_style_index_0_scoped_true_lang = /* @__PURE__ */ (() => "#app[data-v-12d2eeac]{font-family:Avenir,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-align:center;color:#2c3e50;margin-top:60px}\n")();
 const _defineComponent = window["Vue"].defineComponent;
 const _createElementVNode = window["Vue"].createElementVNode;

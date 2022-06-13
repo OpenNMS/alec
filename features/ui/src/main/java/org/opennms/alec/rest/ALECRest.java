@@ -4,8 +4,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -23,11 +23,18 @@ public interface ALECRest {
     Response handleWebhook(String body);
 
     @GET
-    @Path("/versions/{path}/{filename}")
-    Response getVersions(@PathParam("path") String path, @PathParam("filename") String filename);
+    @Path("/versions")
+    Response getVersions(@QueryParam("path") String path, @QueryParam("filename") String filename);
 
     @POST
-    @Path("/agreement/{path}/{filename}")
-    Response storeAgreement(@PathParam("path") String path, @PathParam("filename") String filename, String body);
+    @Path("/agreement")
+    Response storeAgreement(@QueryParam("path") String path, @QueryParam("filename") String filename, String body);
 
+    @GET
+    @Path("/agreement")
+    Response getAgreement(@QueryParam("path") String path, @QueryParam("filename") String filename, @QueryParam("version") String version);
+
+    @GET
+    @Path("/agreement/lastversion")
+    Response getAgreement(@QueryParam("path") String path, @QueryParam("filename") String filename);
 }

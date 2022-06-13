@@ -35,8 +35,12 @@ public interface StoreFile {
 
     void write(String filePath, String filename,String content) throws IOException;
 
-    List<String> getVersions(String filePath, String filename);
+    List<String> getVersions(String filePath, String filename) throws IOException;
 
-    String getLastVersion(String filePath, String filename);
+    String getLastVersion(String filePath, String filename) throws IOException;
+
+    String read(String filePath, String filename) throws IOException;
+
+    String read(String filePath, String filename, String version) throws IOException;
 
 }

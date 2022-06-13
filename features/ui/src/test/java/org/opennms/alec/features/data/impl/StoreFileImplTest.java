@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,10 +32,10 @@ public class StoreFileImplTest {
         Assert.assertEquals("3", storeFile.getLastVersion(ABSOLUTE_PATH, filename));
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void getLastVersionOfNewFileTest() throws IOException {
         String filename = "newFile";
-        storeFile.getLastVersion(ABSOLUTE_PATH, filename);
+        Assert.assertEquals("0", storeFile.getLastVersion(ABSOLUTE_PATH, filename));
     }
 
     @Test

@@ -23,7 +23,10 @@
     "lodash": "^4.17.21",
     "pinia": "^2.0.14",
     "vite-plugin-externals": "^0.3.4",
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vue-router": "4.0.15",
+    "sass": "^1.52.1",
+    "sass-loader": "^13.0.0"
   },
   "devDependencies": {
     "@featherds/styles": "0.10.12",

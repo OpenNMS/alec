@@ -1,10 +1,8 @@
-<script setup lang="ts">
-import WelcomePage from '@/components/WelcomePage.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
 	<div class="main">
-		<WelcomePage />
+		<router-view></router-view>
 	</div>
 </template>
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { TSituation } from '@/types/TSituation'
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 
@@ -15,12 +14,12 @@ console.log(props.alarmInfo)
 <template>
 	<div v-if="props.alarmInfo" class="detail">
 		<div>
-			<div class="id">Situation - {{ props.alarmInfo.id }}</div>
+			<div class="id">Situation - {{ props.alarmInfo?.id }}</div>
 		</div>
-		<SeverityStatus :severity="props.alarmInfo.severity" />
+		<SeverityStatus :severity="props.alarmInfo?.severity" />
 		<span v-html="props.alarmInfo.description"></span>
 
-		<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo.relatedAlarms" />
+		<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo?.relatedAlarms" />
 	</div>
 </template>
 

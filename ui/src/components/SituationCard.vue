@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { SEVERITY_COLOR } from '@/helpers/constants'
-import { groupBy } from 'lodash'
-import { TSituation } from '@/types/TSituation'
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 
@@ -12,10 +10,10 @@ const props = defineProps({
 	}
 })
 
-const severity = SEVERITY_COLOR[props.alarmInfo.severity.toLowerCase()]
+const severity = SEVERITY_COLOR[props.alarmInfo?.severity?.toLowerCase()]
 const emit = defineEmits(['situation-selected'])
 const handleSituationSelected = () => {
-	emit('situation-selected', props.alarmInfo.id)
+	emit('situation-selected', props.alarmInfo?.id)
 }
 </script>
 
@@ -24,11 +22,11 @@ const handleSituationSelected = () => {
 		<div class="severity-line"></div>
 		<div class="content">
 			<div class="title-row">
-				<span class="title">Situation {{ props.alarmInfo.id }} </span>
-				<SeverityStatus :severity="props.alarmInfo.severity" />
+				<span class="title">Situation {{ props.alarmInfo?.id }} </span>
+				<SeverityStatus :severity="props.alarmInfo?.severity" />
 			</div>
-			<span v-html="props.alarmInfo.description"></span>
-			<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo.relatedAlarms" />
+			<span v-html="props.alarmInfo?.description"></span>
+			<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo?.relatedAlarms" />
 		</div>
 	</div>
 </template>

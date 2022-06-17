@@ -7,7 +7,9 @@ const props = defineProps({
 		type: String
 	}
 })
-const severity = SEVERITY_COLOR[props.severity.toLowerCase()]
+const severity = props?.severity
+	? SEVERITY_COLOR[props?.severity?.toLowerCase()]
+	: null
 </script>
 
 <template>

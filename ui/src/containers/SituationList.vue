@@ -2,12 +2,13 @@
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
+import { reactive } from 'vue'
 const situationStore = useSituationsStore()
 situationStore.getSituations()
 const state = reactive({
 	selectedSituationIndex: 0
 })
-const situationSelected = (id) => {
+const situationSelected = (id: string) => {
 	state.selectedSituationIndex = situationStore.$state.situations.findIndex(
 		(s) => s.id === id
 	)

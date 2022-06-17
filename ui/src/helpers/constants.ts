@@ -1,4 +1,4 @@
-export const SEVERITY_COLOR = {
+export const SEVERITY_COLOR: Record<string, string> = {
 	critical: 'red',
 	major: 'orange',
 	warning: 'orange',

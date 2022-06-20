@@ -2,25 +2,30 @@ package org.opennms.alec.rest;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
+import javax.sql.DataSource;
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.StoreFile;
-import org.opennms.alec.data.StoreFileImpl;
+import org.opennms.alec.data.FileStore;
+import org.opennms.alec.data.PostgresKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
+    private static final String CONTEXT = "alec";
 
-    private final StoreFile storeFile;
+    private final FileStore fileStore;
+    private final PostgresKVStore postgresKVStore;
 
-    public ALECRestImpl() {
-        this(new StoreFileImpl());
+    public ALECRestImpl(DataSource dataSource) {
+        this(new FileStore(), new PostgresKVStore(dataSource));
     }
 
-    public ALECRestImpl(StoreFile storeFile) {
-        this.storeFile = storeFile;
+    public ALECRestImpl(FileStore fileStore, PostgresKVStore postgresKVStore) {
+        this.fileStore = fileStore;
+        this.postgresKVStore = postgresKVStore;
     }
 
     @Override
@@ -36,15 +41,14 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response getVersions(final String path,
-                                final String filename) {
-        if (path.isEmpty() || filename.isEmpty()) {
+    public Response getFileVersions(final String key) {
+        if (key.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        LOG.debug("Get agreement versions: {}/{}", path, filename);
+        LOG.debug("Get {} versions", key);
         List<String> ret;
         try {
-            ret = storeFile.getVersions(path, filename);
+            ret = fileStore.getVersions(key);
         } catch (IOException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
@@ -52,51 +56,69 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response storeAgreement(final String path,
-                                   final String filename,
-                                   final String body) {
-        if (path.isEmpty() || filename.isEmpty()) {
+    public Response saveFile(final String key,
+                             final String value) {
+        if (key.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        LOG.debug("Store agreement: {}{}", path, filename);
-        try {
-            storeFile.write(path, filename, body);
-        } catch (IOException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+        LOG.debug("Store {} - {}", key, value);
+        fileStore.save(key, value, CONTEXT);
         return Response.ok().build();
     }
 
     @Override
-    public Response getAgreement(final String path,
-                                 final String filename,
+    public Response retrieveFile(final String key,
                                  final String version) {
-        if (path.isEmpty() || filename.isEmpty()) {
+        if (key.isEmpty() || version.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        LOG.debug("Get agreement: {}/{} version: {}", path, filename, version);
-        String agreement;
+        LOG.debug("Get {} version: {}", key, version);
+        Optional<String> value;
         try {
-            agreement = storeFile.read(path, filename, version);
-        } catch (IOException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            value = fileStore.retrieve(key, null, version);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().entity(e.getMessage()).build();
         }
-        return Response.ok(agreement).build();
+        return getResponse(value);
     }
 
     @Override
-    public Response getAgreement(final String path,
-                                 final String filename) {
-        if (path.isEmpty() || filename.isEmpty()) {
+    public Response getFileLastVersion(final String key) {
+        if (key.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        LOG.debug("Get last version agreement: {}/{}", path, filename);
-        String agreement;
+        LOG.debug("Get last version {}", key);
+        Optional<String> value;
         try {
-            agreement = storeFile.read(path, filename);
-        } catch (IOException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            value = fileStore.retrieve(key, CONTEXT);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().entity(e.getMessage()).build();
         }
-        return Response.ok(agreement).build();
+        return getResponse(value);
+    }
+    @Override
+    public Response getDB(String key) {
+        if (key.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        LOG.debug("Get DB {}", key);
+        Optional<String> value = postgresKVStore.get(key, "1");
+        return getResponse(value);
+    }
+
+    @Override
+    public Response storeDB(String key, String body) {
+        Long ret = postgresKVStore.put(key, body, "1");
+        return Response.ok().entity(ret).build();
+    }
+
+    private Response getResponse(Optional<String> value) {
+        if (value.isPresent()) {
+            return Response.ok().entity(value.get()).build();
+        } else {
+            return Response.noContent().build();
+        }
     }
 }

@@ -16,7 +16,7 @@ const situationSelected = (id: string) => {
 </script>
 
 <template>
-	<div class="main">
+	<div class="list-main">
 		<h2>Situation List</h2>
 		<div class="container">
 			<div class="situation-list">
@@ -41,11 +41,11 @@ const situationSelected = (id: string) => {
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
-.main {
-	margin: 15px;
+.list-main {
 	background-color: #ffffff;
 	padding: 30px;
 	border: 1px solid $border-grey;
+	min-height: 580px;
 }
 h2 {
 	margin-top: 0;

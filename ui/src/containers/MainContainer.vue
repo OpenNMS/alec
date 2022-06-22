@@ -8,6 +8,6 @@
 
 <style scoped>
 .main {
-	margin: 40px;
+	margin: 20px;
 }
 </style>

@@ -7,22 +7,25 @@ const props = defineProps({
 		type: String
 	}
 })
-const severity = props?.severity
-	? SEVERITY_COLOR[props?.severity?.toLowerCase()]
-	: null
 </script>
 
 <template>
-	<span class="severity-status">{{ props.severity }}</span>
+	<span
+		class="severity-status"
+		:style="{
+			color: SEVERITY_COLOR[props?.severity?.toLowerCase()],
+			borderColor: SEVERITY_COLOR[props?.severity?.toLowerCase()]
+		}"
+		>{{ props.severity }}</span
+	>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
 .severity-status {
-	border: 1px solid v-bind('severity');
+	border: 1px solid;
 	padding: 5px 10px;
-	color: v-bind('severity');
 	font-size: 13px;
 	border-radius: 50px;
 	font-weight: 600;

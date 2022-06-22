@@ -11,7 +11,7 @@ import Vitals from '@featherds/icon/medical/Vitals'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const handleClickContinue = () => {
-	router.push({ path: '/situations' })
+	router.push({ path: '/setup' })
 }
 </script>
 
@@ -22,11 +22,13 @@ const handleClickContinue = () => {
 			The Architecture for Learning Enabled Correlation, or ALEC, provides a
 			machine learning powered solution for alarm correlation. Complex networks
 			produce significant, and potentially overwhelming, amount of events and
-			alarms. Our goal with ALEC, is to aid IT Operators to tackle these issues
-			effectively identifying alarm groups that are easier to manage.
+			alarms.
+			<br />
+			<strong>Our goal</strong> with ALEC to aid IT Operators to tackle these
+			issues effectively identifying alarm groups that are easier to manage.
 		</div>
 		<div>
-			<h2>Key Benefits:</h2>
+			<h3>Key Benefits:</h3>
 			<div class="list">
 				<div>
 					<FeatherIcon :icon="Apps" aria-hidden="true" class="icon" />
@@ -73,7 +75,7 @@ const handleClickContinue = () => {
 <style scoped>
 .container {
 	display: flex;
-	padding: 30px 140px;
+	padding: 30px 80px;
 	padding-bottom: 40px;
 	flex-direction: column;
 	border: #dfdfdf 1px solid;
@@ -85,11 +87,11 @@ const handleClickContinue = () => {
 	font-size: 60px;
 	text-align: center;
 	padding-top: 30px;
-	padding-bottom: 50px;
+	padding-bottom: 20px;
 }
 
 .description {
-	padding-bottom: 25px;
+	padding-bottom: 15px;
 	font-size: 18px;
 }
 
@@ -99,15 +101,16 @@ const handleClickContinue = () => {
 	justify-content: space-between;
 }
 .list div {
-	width: 200px;
+	width: 16%;
+	max-width: 230px;
 	border: 1px solid #dfdfdf;
-	padding: 20px;
+	padding: 20px 15px;
 	text-align: center;
 }
 
 .icon {
-	height: 40px;
-	width: 40px;
+	height: 32px;
+	width: 32px;
 	display: block;
 	margin: auto;
 	color: #4b5ad6;
@@ -122,7 +125,7 @@ const handleClickContinue = () => {
 	width: fit-content;
 	margin-left: auto;
 }
-h2 {
+h3 {
 	color: #555555;
 }
 </style>

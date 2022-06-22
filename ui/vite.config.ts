@@ -10,7 +10,7 @@ export default defineConfig({
 		vue(),
 		viteExternalsPlugin({
 			vue: 'Vue',
-      pinia: 'Pinia'
+			pinia: 'Pinia'
 		}),
 		AutoImport({
 			imports: ['@vueuse/core', 'pinia'],
@@ -43,7 +43,7 @@ export default defineConfig({
 				// for externalized deps
 				globals: {
 					vue: 'Vue',
-          pinia: 'Pinia'
+					pinia: 'Pinia'
 				}
 			}
 		}

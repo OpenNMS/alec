@@ -8,10 +8,10 @@ import Apps from '@featherds/icon/navigation/Apps'
 
 import Vitals from '@featherds/icon/medical/Vitals'
 
-import { useRouter } from 'vue-router'
+import useRouter from '@/composables/useRouter'
 const router = useRouter()
 const handleClickContinue = () => {
-	router.push({ path: '/setup' })
+	router.push({ name: 'configuration' })
 }
 </script>
 

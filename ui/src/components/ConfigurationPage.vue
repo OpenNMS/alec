@@ -2,15 +2,15 @@
 import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
 import { FeatherButton } from '@featherds/button'
 import { FeatherCheckbox } from '@featherds/checkbox'
-import { useRouter } from 'vue-router'
 import { ref } from 'vue'
+import useRouter from '@/composables/useRouter'
 const router = useRouter()
 
 const hellinger = ref(false)
 const engine = ref()
 
 const handleClickContinue = () => {
-	router.push({ path: '/situations' })
+	router.push({ name: 'situations' })
 }
 </script>
 

@@ -31,11 +31,11 @@ const props = defineProps({
 				<span v-html="props.alarmInfo.description"></span>
 				<p>
 					<strong>Last Event: </strong
-					>{{ new Date(props.alarmInfo.lastEvent.time).toGMTString() }}
+					>{{ new Date(props.alarmInfo.lastEvent.time).toUTCString() }}
 				</p>
 				<p>
 					<strong>First Event: </strong
-					>{{ new Date(props.alarmInfo.lastEvent.createTime).toGMTString() }}
+					>{{ new Date(props.alarmInfo.lastEvent.createTime).toUTCString() }}
 				</p>
 				<p>
 					<strong>Reduction key: </strong>{{ props.alarmInfo.reductionKey }}

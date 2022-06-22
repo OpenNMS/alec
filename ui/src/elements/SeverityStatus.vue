@@ -11,6 +11,7 @@ const props = defineProps({
 
 <template>
 	<span
+		v-if="props?.severity"
 		class="severity-status"
 		:style="{
 			color: SEVERITY_COLOR[props?.severity?.toLowerCase()],

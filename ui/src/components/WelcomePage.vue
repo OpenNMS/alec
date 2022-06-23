@@ -101,7 +101,7 @@ const handleClickContinue = () => {
 	justify-content: space-between;
 }
 .list div {
-	width: 16%;
+	width: 20%;
 	max-width: 230px;
 	border: 1px solid #dfdfdf;
 	padding: 20px 15px;
@@ -109,11 +109,11 @@ const handleClickContinue = () => {
 }
 
 .icon {
-	height: 32px;
-	width: 32px;
-	display: block;
+	height: 52px !important;
+	width: 52px !important;
+	display: block !important;
 	margin: auto;
-	color: #4b5ad6;
+	color: #4b5ad6 !important;
 	margin-bottom: 20px;
 	border: 1px solid #4b5ad6;
 	border-radius: 50px;

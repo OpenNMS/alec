@@ -39,10 +39,10 @@ public interface ALECRest {
     Response getFileLastVersion(@PathParam("key") String key);
 
     @GET
-    @Path("/db/agreement/{key}")
+    @Path("/db/{key}")
     Response getDB(@PathParam("key") String key);
 
     @POST
-    @Path("/db/agreement/{key}")
+    @Path("/db/{key}")
     Response storeDB(@PathParam("key") String key, String body);
 }

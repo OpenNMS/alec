@@ -25,7 +25,7 @@ export type TSituation = {
 	parameters: []
 	x733ProbableCause: number
 	ifIndex: number
-	relatedAlarms?: TRelatedAlarms[]
+	relatedAlarms: TRelatedAlarm[]
 	affectedNodeCount: number
 }
 
@@ -47,11 +47,22 @@ export type TEvent = {
 	uei: string
 }
 
-export type TRelatedAlarms = {
+export type TRelatedAlarm = {
 	id: number
 	type: number
 	severity: string
 	reductionKey: string
 	description: string
+	logMessage: string
+}
+
+export type TAlarm = {
+	id: string
+	severity: string
+	nodeId: number
+	nodeLabel: string
+	uei: string
+	count: number
+	lastEventTime: number
 	logMessage: string
 }

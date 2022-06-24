@@ -12,11 +12,10 @@ export const useSituationsStore = defineStore('situationsStore', {
 	}),
 	actions: {
 		async getSituations() {
-			getSituations().then((result) => {
-				if (result) {
-					this.situations = processAlarmList(result.alarm)
-				}
-			})
+			const result = await getSituations()
+			if (result) {
+				this.situations = processAlarmList(result.alarm)
+			}
 		}
 	}
 })

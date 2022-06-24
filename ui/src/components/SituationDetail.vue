@@ -6,12 +6,11 @@ import {
 	FeatherTabContainer,
 	FeatherTabPanel
 } from '@featherds/tabs'
-const props = defineProps({
-	alarmInfo: {
-		required: false,
-		type: Object
-	}
-})
+import { TSituation } from '@/types/TSituation'
+
+const props = defineProps<{
+	alarmInfo: TSituation
+}>()
 </script>
 
 <template>
@@ -40,9 +39,7 @@ const props = defineProps({
 				<p>
 					<strong>Reduction key: </strong>{{ props.alarmInfo.reductionKey }}
 				</p>
-				<AlarmsCountBySeverity
-					:relatedAlarms="props.alarmInfo?.relatedAlarms"
-				/>
+				<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo.relatedAlarms" />
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel">Topology</FeatherTabPanel>
 			<FeatherTabPanel class="panel">Metrics</FeatherTabPanel>

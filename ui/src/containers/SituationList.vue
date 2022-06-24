@@ -9,7 +9,7 @@ const state = reactive({
 	selectedSituationIndex: 0
 })
 const situationSelected = (id: string) => {
-	state.selectedSituationIndex = situationStore.$state.situations.findIndex(
+	state.selectedSituationIndex = situationStore.situations.findIndex(
 		(s) => s.id === id
 	)
 }
@@ -20,10 +20,7 @@ const situationSelected = (id: string) => {
 		<h2>Situation List</h2>
 		<div class="container">
 			<div class="situation-list">
-				<div
-					v-for="alarmInfo in situationStore.$state.situations"
-					:key="alarmInfo.id"
-				>
+				<div v-for="alarmInfo in situationStore.situations" :key="alarmInfo.id">
 					<SituationCard
 						:alarm-info="alarmInfo"
 						@situation-selected="situationSelected"
@@ -31,9 +28,7 @@ const situationSelected = (id: string) => {
 				</div>
 			</div>
 			<SituationDetail
-				:alarm-info="
-					situationStore.$state.situations[state.selectedSituationIndex]
-				"
+				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
 			/>
 		</div>
 	</div>

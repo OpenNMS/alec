@@ -2,13 +2,11 @@
 import { SEVERITY_COLOR } from '@/helpers/constants'
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
+import { TSituation } from '@/types/TSituation'
 
-const props = defineProps({
-	alarmInfo: {
-		required: false,
-		type: Object
-	}
-})
+const props = defineProps<{
+	alarmInfo: TSituation
+}>()
 
 const severity = SEVERITY_COLOR[props.alarmInfo?.severity?.toLowerCase()]
 const emit = defineEmits(['situation-selected'])

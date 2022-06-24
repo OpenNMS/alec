@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { groupBy } from 'lodash'
 import { SEVERITY_COLOR } from '@/helpers/constants'
+import { TRelatedAlarm } from '@/types/TSituation'
 
-const props = defineProps({
-	relatedAlarms: {
-		required: false,
-		type: Object
-	}
-})
+const props = defineProps<{
+	relatedAlarms: TRelatedAlarm[]
+}>()
 </script>
 
 <template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { groupBy } from 'lodash'
-import { SEVERITY_COLOR } from '@/helpers/constants'
 import { TRelatedAlarm } from '@/types/TSituation'
 
 const props = defineProps<{
@@ -12,7 +11,7 @@ const props = defineProps<{
 	<div class="alarms-list">
 		<div
 			class="alarm-count"
-			:style="{ color: SEVERITY_COLOR[key.toString().toLowerCase()] }"
+			:class="[`${key.toString().toLowerCase()}-color`]"
 			v-for="(list, key) in groupBy(props?.relatedAlarms, 'severity')"
 			:key="key"
 		>
@@ -21,7 +20,9 @@ const props = defineProps<{
 	</div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/variables.scss';
+
 .alarms-list {
 	display: flex;
 	flex-direction: row;

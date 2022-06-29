@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.Optional;
 
 public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
@@ -44,40 +42,37 @@ public class ALECRestImpl implements ALECRest {
                 "=============================================", parameter.toString());
         try {
             ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
-            Optional<ServiceReference<?>> optionalServiceReference = Arrays.stream(refs).findFirst();
-            if (optionalServiceReference.isPresent()) {
-                Driver driver = (Driver) bundleContext.getService(optionalServiceReference.get());
-
-                refs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
-                for (ServiceReference<?> ref : refs) {
-                    EngineFactory factory = (EngineFactory) bundleContext.getService(ref);
-                    String engineName = factory.getName();
-                    if (engineName.equalsIgnoreCase(parameter.getEngine())) {
-                        switch (engineName) {
-                            case "dbscan":
-                                DBScanEngineFactory dbScanEngineFactory = (DBScanEngineFactory) bundleContext.getService(ref);
-                                dbScanEngineFactory.setAlpha(parameter.getAlpha());
-                                dbScanEngineFactory.setBeta(parameter.getBeta());
-                                dbScanEngineFactory.setEpsilon(parameter.getEpsilon());
-                                dbScanEngineFactory.setDistanceMeasureFactory(parameter.getDistanceMeasure());
-                                dbScanEngineFactory.createEngine(driver.getMetrics());
-                                driver.setEngineFactory(dbScanEngineFactory);
-                                return Response.ok().build();
-                            case "cluster":
-                            default:
-                                ClusterEngineFactory clusterEngineFactory = (ClusterEngineFactory) bundleContext.getService(ref);
-                                clusterEngineFactory.createEngine(driver.getMetrics());
-                                driver.setEngineFactory(clusterEngineFactory);
-                                return Response.ok().build();
-                        }
+            Driver driver = (Driver) bundleContext.getService(refs[0]);
+            refs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
+            for (ServiceReference<?> ref : refs) {
+                EngineFactory factory = (EngineFactory) bundleContext.getService(ref);
+                String engineName = factory.getName();
+                if (engineName.equalsIgnoreCase(parameter.getEngine())) {
+                    switch (engineName) {
+                        case "cluster":
+                            ClusterEngineFactory clusterEngineFactory = (ClusterEngineFactory) bundleContext.getService(ref);
+                            clusterEngineFactory.createEngine(driver.getMetrics());
+                            driver.setEngineFactory(clusterEngineFactory);
+                            break;
+                        case "dbscan":
+                        default:
+                            DBScanEngineFactory dbScanEngineFactory = (DBScanEngineFactory) bundleContext.getService(ref);
+                            dbScanEngineFactory.setAlpha(parameter.getAlpha());
+                            dbScanEngineFactory.setBeta(parameter.getBeta());
+                            dbScanEngineFactory.setEpsilon(parameter.getEpsilon());
+                            dbScanEngineFactory.setDistanceMeasureFactory(parameter.getDistanceMeasure());
+                            dbScanEngineFactory.createEngine(driver.getMetrics());
+                            driver.setEngineFactory(dbScanEngineFactory);
+                            break;
                     }
                 }
-                return Response.serverError().entity("No Engine found !!").build();
-            } else {
-                return Response.serverError().entity("No Driver found !!").build();
             }
+
         } catch (InvalidSyntaxException e) {
-            return Response.serverError().entity(e.getMessage()).build();
+            throw new RuntimeException(e);
         }
+
+        return Response.ok().build();
     }
+
 }

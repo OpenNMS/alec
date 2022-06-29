@@ -7,22 +7,29 @@
             <cm:property name="epsilon" value="100"/>
             <cm:property name="alpha" value="144.47117699"/>
             <cm:property name="beta" value="0.55257784"/>
+            <cm:property name="distanceMeasure" value="alarmInSpaceAndTimeDistanceMeasureFactory"/>
+            <cm:property name="engine" value="dbScanEngineFactory"/>
         </cm:default-properties>
     </cm:property-placeholder>
+
+    <bean id="hellingerDistanceMeasureFactory" class="org.opennms.alec.engine.dbscan.HellingerDistanceMeasureFactory"/>
+    <bean id="alarmInSpaceAndTimeDistanceMeasureFactory" class="org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory"/>
 
     <!-- Create and expose the engine factory -->
     <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="10">
         <bean class="org.opennms.alec.engine.dbscan.DBScanEngineFactory">
-            <property name="epsilon" value="${epsilon}"/>
-            <property name="alpha" value="${alpha}"/>
-            <property name="beta" value="${beta}"/>
+            <argument ref="blueprintBundleContext"/>
+            <argument value="${epsilon}"/>
+            <argument value="${alpha}"/>
+            <argument value="${beta}"/>
+            <argument value="${distanceMeasure}"/>
         </bean>
     </service>
-    <service interface="org.opennms.alec.engine.api.DistanceMeasureFactory" ranking="10">
-        <bean class="org.opennms.alec.engine.dbscan.HellingerDistanceMeasureFactory"/>
+    <service id="hellingerDistanceMeasure" interface="org.opennms.alec.engine.api.DistanceMeasureFactory">
+        <ref component-id="hellingerDistanceMeasureFactory"/>
     </service>
-    <service interface="org.opennms.alec.engine.api.DistanceMeasureFactory" ranking="10">
-        <bean class="org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory"/>
+    <service id="alarmInSpaceAndTimeDistanceMeasure" interface="org.opennms.alec.engine.api.DistanceMeasureFactory">
+        <ref component-id="alarmInSpaceAndTimeDistanceMeasureFactory"/>
     </service>
 
 </blueprint>

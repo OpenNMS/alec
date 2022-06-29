@@ -28,16 +28,37 @@
 
 package org.opennms.alec.engine.dbscan;
 
+import com.codahale.metrics.MetricRegistry;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
-
-import com.codahale.metrics.MetricRegistry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DBScanEngineFactory implements EngineFactory {
 
-    private double epsilon = DBScanEngine.DEFAULT_EPSILON;
-    private double alpha = DBScanEngine.DEFAULT_ALPHA;
-    private double beta = DBScanEngine.DEFAULT_BETA;
+    private static final Logger LOG = LoggerFactory.getLogger(DBScanEngineFactory.class);
+
+    private double epsilon;// = DBScanEngine.DEFAULT_EPSILON;
+    private double alpha;// = DBScanEngine.DEFAULT_ALPHA;
+    private double beta;// = DBScanEngine.DEFAULT_BETA;
+    private String distanceMeasureFactory;
+    private BundleContext bundleContext;
+
+    public DBScanEngineFactory(double epsilon, double alpha, double beta, BundleContext bundleContext, String distanceMeasureFactory) {
+        this.epsilon = epsilon;
+        this.alpha = alpha;
+        this.beta = beta;
+        this.bundleContext = bundleContext;
+        this.distanceMeasureFactory = distanceMeasureFactory;
+    }
+
+    public DBScanEngineFactory() {
+
+    }
 
     @Override
     public String getName() {
@@ -46,7 +67,20 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
-        return new DBScanEngine(metrics, epsilon, alpha, beta);
+        try {
+            ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
+            for (ServiceReference<?> ref : refs) {
+                DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(ref);
+                if (factory.getName().equalsIgnoreCase(distanceMeasureFactory)) {
+                    return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        LOG.error("Wrong distance measure configuration, we'll use default");
+        return new DBScanEngine(metrics, epsilon, alpha, beta, new AlarmInSpaceAndTimeDistanceMeasureFactory());
     }
 
     public double getEpsilon() {
@@ -71,5 +105,9 @@ public class DBScanEngineFactory implements EngineFactory {
 
     public void setBeta(double beta) {
         this.beta = beta;
+    }
+
+    public void setDistanceMeasureFactory(String distanceMeasureFactory) {
+        this.distanceMeasureFactory = distanceMeasureFactory;
     }
 }

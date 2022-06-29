@@ -28,25 +28,23 @@
 
 package org.opennms.alec.engine.dbscan;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.codahale.metrics.MetricRegistry;
+import edu.uci.ics.jung.graph.Graph;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
+import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
-import org.opennms.alec.engine.api.DistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-
-import edu.uci.ics.jung.graph.Graph;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Clustering based correlation
@@ -75,7 +73,6 @@ public class DBScanEngine extends AbstractClusterEngine {
     public static final double  DEFAULT_EPSILON = 100d;
     public static final double DEFAULT_ALPHA = 144.47117699d;
     public static final double DEFAULT_BETA = 0.55257784d;
-
     private final double epsilon;
     private DistanceMeasure distanceMeasure;
     public DBScanEngine(MetricRegistry metrics) {
@@ -84,6 +81,11 @@ public class DBScanEngine extends AbstractClusterEngine {
 
     public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta, DistanceMeasureFactory distanceMeasureFactory) {
         super(metrics);
+        LOG.debug(
+                "\n=======================================================================================================================================\n" +
+                "DBScanEngine\nalpha: {}\nbeta: {}\nepsilon: {}\ndistanceMeasure: {}\n" +
+                "=======================================================================================================================================", epsilon, alpha, beta, distanceMeasureFactory.getName());
+
         this.epsilon = epsilon;
         distanceMeasure = distanceMeasureFactory.createDistanceMeasure(this, alpha, beta);
     }

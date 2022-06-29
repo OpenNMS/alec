@@ -28,28 +28,9 @@
 
 package org.opennms.alec.driver.main;
 
-import static com.codahale.metrics.MetricRegistry.name;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.datasource.api.AlarmDatasource;
-import org.opennms.alec.datasource.api.AlarmFeedback;
-import org.opennms.alec.datasource.api.AlarmFeedbackDatasource;
-import org.opennms.alec.datasource.api.InventoryDatasource;
-import org.opennms.alec.datasource.api.InventoryObject;
-import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.datasource.api.SituationHandler;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
+import org.opennms.alec.datasource.api.*;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
@@ -62,8 +43,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.jmx.JmxReporter;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.codahale.metrics.MetricRegistry.name;
 
 public class Driver implements EngineRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
@@ -72,8 +57,6 @@ public class Driver implements EngineRegistry {
     private final AlarmFeedbackDatasource alarmFeedbackDatasource;
     private final InventoryDatasource inventoryDatasource;
     private final SituationDatasource situationDatasource;
-
-    private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
     private final SituationProcessor situationProcessor;
@@ -83,6 +66,7 @@ public class Driver implements EngineRegistry {
     private Thread initThread;
     private Engine engine;
     private Timer timer;
+    private EngineFactory engineFactory;
 
     // Health
     private final MetricRegistry metrics;
@@ -268,5 +252,13 @@ public class Driver implements EngineRegistry {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public void setEngineFactory(EngineFactory engineFactory) {
+        this.engineFactory = engineFactory;
+    }
+
+    public MetricRegistry getMetrics() {
+        return metrics;
     }
 }

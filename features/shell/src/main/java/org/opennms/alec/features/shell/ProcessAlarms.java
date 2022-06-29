@@ -28,15 +28,6 @@
 
 package org.opennms.alec.features.shell;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.xml.bind.JAXBException;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -51,6 +42,14 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Situations.
@@ -103,7 +102,7 @@ public class ProcessAlarms implements Action {
         EngineFactory engineFactory = getEngineFactory();
         final DistanceMeasureFactory distanceMeasureFactory = getDistanceMeasureFactory();
         if("dbscan".equals(engineFactory.getName())){
-            ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactory(distanceMeasureFactory);
+            ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactory(distanceMeasureFactory.getName());
             ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
             ((DBScanEngineFactory) engineFactory).setAlpha(alpha);
             ((DBScanEngineFactory) engineFactory).setBeta(beta);

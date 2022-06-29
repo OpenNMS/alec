@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import {
 	FeatherTab,
 	FeatherTabContainer,
 	FeatherTabPanel
 } from '@featherds/tabs'
+import { FeatherSortHeader, SORT } from '@featherds/table'
 import { TSituation } from '@/types/TSituation'
 
 const props = defineProps<{
@@ -23,7 +23,7 @@ const props = defineProps<{
 			</template>
 			<FeatherTabPanel class="panel">
 				<div class="id">
-					Situation - {{ props.alarmInfo?.id }}
+					<span>Situation - {{ props.alarmInfo?.id }}</span>
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
 
@@ -39,7 +39,36 @@ const props = defineProps<{
 				<p>
 					<strong>Reduction key: </strong>{{ props.alarmInfo.reductionKey }}
 				</p>
-				<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo.relatedAlarms" />
+				<div>
+					<table class="tc1 tr2 tc4 tr6" :class="{ condensed: true }">
+						<thead>
+							<tr>
+								<FeatherSortHeader
+									scope="col"
+									property="Id"
+									:sort="SORT.ASCENDING"
+								>
+									ID
+								</FeatherSortHeader>
+								<th scope="col">Severity</th>
+								<th scope="col">Node</th>
+								<th scope="col">Log msg</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr
+								:class="[`${alarm.severity.toLowerCase()}-bg`]"
+								v-for="alarm in props?.alarmInfo?.relatedAlarms"
+								:key="alarm.id"
+							>
+								<td>{{ alarm.id }}</td>
+								<td>{{ alarm.severity }}</td>
+								<td>{{ alarm.nodeLabel }}</td>
+								<td>{{ alarm.logMessage }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel">Topology</FeatherTabPanel>
 			<FeatherTabPanel class="panel">Metrics</FeatherTabPanel>
@@ -49,6 +78,7 @@ const props = defineProps<{
 
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
+@import '@featherds/table/scss/table';
 
 .detail {
 	width: 100%;
@@ -64,5 +94,20 @@ const props = defineProps<{
 	font-weight: 600;
 	font-size: 22px;
 	margin-bottom: 20px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+table {
+	width: 100%;
+	@include table();
+	@include row-select();
+	&.hover {
+		@include row-hover();
+	}
+	&.condensed {
+		@include table-condensed();
+	}
 }
 </style>

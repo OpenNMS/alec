@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { SEVERITY_COLOR } from '@/helpers/constants'
-
 const props = defineProps({
 	severity: {
 		required: false,
@@ -13,10 +11,7 @@ const props = defineProps({
 	<span
 		v-if="props?.severity"
 		class="severity-status"
-		:style="{
-			color: SEVERITY_COLOR[props?.severity?.toLowerCase()],
-			borderColor: SEVERITY_COLOR[props?.severity?.toLowerCase()]
-		}"
+		:class="[`${props.severity.toLowerCase()}-color`]"
 		>{{ props.severity }}</span
 	>
 </template>

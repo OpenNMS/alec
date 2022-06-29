@@ -1,8 +1,103 @@
 @import '@featherds/styles/themes/variables';
 
 $border-grey: #dfdfdf;
-$severity-normal: $success;
-$severity-warning: $warning;
-$severity-minor: $warning;
-$severity-major: $warning;
-$severity-critical: $error;
+
+$severity-alarm-critical-text: black;
+$severity-alarm-critical-bg: #f5cdcd;
+$severity-alarm-critical-border: #cc0000;
+
+$severity-alarm-major-text: black;
+$severity-alarm-major-bg: #ffd7cd;
+$severity-alarm-major-border: #ff3300;
+
+$severity-alarm-minor-text: black;
+$severity-alarm-minor-bg: #ffebcd;
+$severity-alarm-minor-border: #ff9900;
+
+$severity-alarm-warning-text: black;
+$severity-alarm-warning-bg: #fff5cd;
+$severity-alarm-warning-border: #ffcc00;
+
+$severity-alarm-indeterminate-text: black;
+$severity-alarm-indeterminate-bg: #ebebcd;
+$severity-alarm-indeterminate-border: #999000;
+
+$severity-alarm-normal-text: black;
+$severity-alarm-normal-bg: #d7e1cd;
+$severity-alarm-normal-border: #336600;
+
+$severity-alarm-cleared-text: black;
+$severity-alarm-cleared-bg: #eeeeee;
+$severity-alarm-cleared-border: #999999;
+
+.critical-bg {
+	background-color: $severity-alarm-critical-bg;
+	&.dark {
+		background-color: $severity-alarm-critical-border;
+	}
+}
+
+.major-bg {
+	background-color: $severity-alarm-major-bg;
+	&.dark {
+		background-color: $severity-alarm-major-border;
+	}
+}
+
+.minor-bg {
+	background-color: $severity-alarm-minor-bg;
+	&.dark {
+		background-color: $severity-alarm-minor-border;
+	}
+}
+
+.indeterminate-bg {
+	background-color: $severity-alarm-indeterminate-bg;
+	&.dark {
+		background-color: $severity-alarm-indeterminate-border;
+	}
+}
+
+.normal-bg {
+	background-color: $severity-alarm-normal-bg;
+	&.dark {
+		background-color: $severity-alarm-normal-border;
+	}
+}
+
+.cleared-bg {
+	background-color: $severity-alarm-cleared-bg;
+	&.dark {
+		background-color: $severity-alarm-cleared-border;
+	}
+}
+
+.critical-color {
+	border-color: $severity-alarm-critical-border;
+	color: $severity-alarm-critical-border;
+}
+
+.major-color {
+	border-color: $severity-alarm-major-border;
+	color: $severity-alarm-major-border;
+}
+
+.minor-color {
+	border-color: $severity-alarm-minor-border;
+	color: $severity-alarm-minor-border;
+}
+
+.indeterminate-color {
+	border-color: $severity-alarm-indeterminate-border;
+	color: $severity-alarm-indeterminate-border;
+}
+
+.normal-color {
+	border-color: $severity-alarm-normal-border;
+	color: $severity-alarm-normal-border;
+}
+
+.cleared-color {
+	border-color: $severity-alarm-cleared-border;
+	color: $severity-alarm-cleared-border;
+}

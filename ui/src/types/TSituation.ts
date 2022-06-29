@@ -54,6 +54,7 @@ export type TRelatedAlarm = {
 	reductionKey: string
 	description: string
 	logMessage: string
+	nodeLabel: string
 }
 
 export type TAlarm = {

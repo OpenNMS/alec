@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SEVERITY_COLOR } from '@/helpers/constants'
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import { TSituation } from '@/types/TSituation'
@@ -8,7 +7,6 @@ const props = defineProps<{
 	alarmInfo: TSituation
 }>()
 
-const severity = SEVERITY_COLOR[props.alarmInfo?.severity?.toLowerCase()]
 const emit = defineEmits(['situation-selected'])
 const handleSituationSelected = () => {
 	emit('situation-selected', props.alarmInfo?.id)
@@ -17,7 +15,10 @@ const handleSituationSelected = () => {
 
 <template>
 	<div v-on:click="handleSituationSelected" class="card">
-		<div class="severity-line"></div>
+		<div
+			class="severity-line"
+			:class="[`${props.alarmInfo?.severity?.toLowerCase()}-bg dark`]"
+		></div>
 		<div class="content">
 			<div class="title-row">
 				<span class="title">Situation {{ props.alarmInfo?.id }} </span>
@@ -57,7 +58,6 @@ const handleSituationSelected = () => {
 
 .severity-line {
 	width: 8px;
-	background-color: v-bind('severity');
 }
 
 .content {

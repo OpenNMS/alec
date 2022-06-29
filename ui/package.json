@@ -14,8 +14,8 @@
   },
   "scripts": {
     "dev": "vite --config vite.config.dev.ts",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview --port 5002"
+    "build": "vue-tsc --noEmit && vite build && cp dist/* ../features/ui/src/main/resources/ui-ext/ ",
+    "preview": "vite build --mode development && vite preview --port 5002"
   },
   "dependencies": {
     "axios": "^0.26.1",

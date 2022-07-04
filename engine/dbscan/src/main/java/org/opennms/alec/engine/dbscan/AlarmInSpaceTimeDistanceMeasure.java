@@ -84,4 +84,19 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
     public double compute(double timeA, double timeB, double firstTimeA, double firstTimeB, double spatialDistance) {
         return 0;
     }
+
+    @Override
+    public double getAlpha() {
+        return alpha;
+    }
+
+    @Override
+    public double getBeta() {
+        return beta;
+    }
+
+    @Override
+    public String getName() {
+        return "alarminspacetime";
+    }
 }

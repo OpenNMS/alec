@@ -46,7 +46,6 @@ public class HellingerDistanceMeasure implements DistanceMeasure {
         this.spatialDistanceCalculator = Objects.requireNonNull(SpatialDistanceCalculator);
         this.alpha = alpha;
         this.beta = beta;
-        System.out.printf("Running hellinger...");
     }
 
     @Override
@@ -109,4 +108,18 @@ public class HellingerDistanceMeasure implements DistanceMeasure {
         return hellinger;
     }
 
+    @Override
+    public double getAlpha() {
+        return alpha;
+    }
+
+    @Override
+    public double getBeta() {
+        return beta;
+    }
+
+    @Override
+    public String getName() {
+        return "hellinger";
+    }
 }

@@ -31,4 +31,10 @@ package org.opennms.alec.engine.api;
 public interface DistanceMeasure extends org.apache.commons.math3.ml.distance.DistanceMeasure {
 
     double compute(double timeA, double timeB, double firstTimeA, double firstTimeB, double spatialDistance);
+
+    double getAlpha();
+
+    double getBeta();
+
+    String getName();
 }

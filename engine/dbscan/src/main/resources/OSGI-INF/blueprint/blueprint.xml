@@ -8,11 +8,9 @@
             <cm:property name="alpha" value="144.47117699"/>
             <cm:property name="beta" value="0.55257784"/>
             <cm:property name="distanceMeasure" value="alarmInSpaceAndTimeDistanceMeasureFactory"/>
-            <cm:property name="engine" value="dbScanEngineFactory"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="hellingerDistanceMeasureFactory" class="org.opennms.alec.engine.dbscan.HellingerDistanceMeasureFactory"/>
     <bean id="alarmInSpaceAndTimeDistanceMeasureFactory" class="org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory"/>
 
     <!-- Create and expose the engine factory -->
@@ -24,9 +22,6 @@
             <argument value="${beta}"/>
             <argument value="${distanceMeasure}"/>
         </bean>
-    </service>
-    <service id="hellingerDistanceMeasure" interface="org.opennms.alec.engine.api.DistanceMeasureFactory">
-        <ref component-id="hellingerDistanceMeasureFactory"/>
     </service>
     <service id="alarmInSpaceAndTimeDistanceMeasure" interface="org.opennms.alec.engine.api.DistanceMeasureFactory">
         <ref component-id="alarmInSpaceAndTimeDistanceMeasureFactory"/>

@@ -28,15 +28,15 @@
 
 package org.opennms.alec.engine.dbscan;
 
+import static org.opennms.alec.datasource.api.InventoryObject.DEFAULT_WEIGHT;
+
+import java.util.Objects;
+
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
-
-import static org.opennms.alec.datasource.api.InventoryObject.DEFAULT_WEIGHT;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
     private static final Logger LOG = LoggerFactory.getLogger(AlarmInSpaceTimeDistanceMeasure.class);
@@ -76,12 +76,23 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         return distance;
     }
 
+    @Override
     public double compute(double timeA, double timeB, double spatialDistance) {
         return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * spatialDistance / DEFAULT_WEIGHT);
     }
 
     @Override
-    public double compute(double timeA, double timeB, double firstTimeA, double firstTimeB, double spatialDistance) {
-        return 0;
+    public double getAlpha() {
+        return alpha;
+    }
+
+    @Override
+    public double getBeta() {
+        return beta;
+    }
+
+    @Override
+    public String getName() {
+        return "alarminspacetime";
     }
 }

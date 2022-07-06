@@ -28,8 +28,11 @@
 
 package org.opennms.alec.engine.dbscan;
 
-import com.codahale.metrics.MetricRegistry;
-import edu.uci.ics.jung.graph.Graph;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 import org.opennms.alec.engine.api.DistanceMeasure;
@@ -41,10 +44,9 @@ import org.opennms.alec.engine.cluster.CEVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.codahale.metrics.MetricRegistry;
+
+import edu.uci.ics.jung.graph.Graph;
 
 /**
  * Clustering based correlation
@@ -92,6 +94,7 @@ public class DBScanEngine extends AbstractClusterEngine {
 
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
+        LOG.debug("start DBSCan clustering:\nDistanceMeasure: {}\nAlpha: {}\nBeta{}\nEpsilon: {}", distanceMeasure.getName(), distanceMeasure.getAlpha(), distanceMeasure.getBeta(), epsilon);
         // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
         // OPTIMIZATION: Can we avoid doing this every tick?
         final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
@@ -111,8 +114,8 @@ public class DBScanEngine extends AbstractClusterEngine {
     }
 
     @Override
-    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
-        return distanceMeasure.compute(t1, t2, firstTimeA, firstTimeB, distance);
+    public double getDistanceBetween(double t1, double t2, double distance) {
+        return distanceMeasure.compute(t1, t2, distance);
     }
 
     public DistanceMeasure getDistanceMeasure() {

@@ -8,7 +8,6 @@
             <cm:property name="alpha" value="144.47117699"/>
             <cm:property name="beta" value="0.55257784"/>
             <cm:property name="distanceMeasure" value="alarmInSpaceAndTimeDistanceMeasureFactory"/>
-            <cm:property name="engine" value="dbScanEngineFactory"/>
         </cm:default-properties>
     </cm:property-placeholder>
 

@@ -366,7 +366,7 @@ public class JaxbUtils {
             alarm.setInventoryObjectId(apiAlarm.getInventoryObjectId());
             alarm.setInventoryObjectType(apiAlarm.getInventoryObjectType());
             alarm.setLastSeverity(toSeverity(apiAlarm.getSeverity()));
-            alarm.setFirstEventTime(apiAlarm.getTime());
+            alarm.setFirstEventTime(apiAlarm.getFirstTime());
             alarm.setLastEventTime(apiAlarm.getTime());
 
             // Add a single "event" to the alarm

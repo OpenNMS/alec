@@ -65,9 +65,9 @@ public class DBScanEngineFactory implements EngineFactory {
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
         try {
-            ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
-            for (ServiceReference<?> ref : refs) {
-                DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(ref);
+            ServiceReference<?>[] distanceMeasureRefs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
+            for (ServiceReference<?> distanceMeasureRef : distanceMeasureRefs) {
+                DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(distanceMeasureRef);
                 if (factory.getName().equalsIgnoreCase(distanceMeasureFactory)) {
                     return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
                 }

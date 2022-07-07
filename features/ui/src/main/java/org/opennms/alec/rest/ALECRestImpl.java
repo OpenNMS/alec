@@ -13,12 +13,10 @@ import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ALECRestImpl implements ALECRest {
@@ -65,32 +63,25 @@ public class ALECRestImpl implements ALECRest {
                 "Got payload: {}\n" +
                 "=============================================", parameter.toString());
         try {
-            ServiceReference<?>[] refs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
-            Optional<ServiceReference<?>> optionalServiceReference = Arrays.stream(refs).findFirst();
-            if (optionalServiceReference.isPresent()) {
-                Driver driver = (Driver) bundleContext.getService(optionalServiceReference.get());
+            //Retrieve Driver, only one driver is registered
+            ServiceReference<?>[] engineRegistryRefs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
+            Optional<ServiceReference<?>> engineRegistryRef = Arrays.stream(engineRegistryRefs).findFirst();
+            if (engineRegistryRef.isPresent()) {
+                Driver driver = (Driver) bundleContext.getService(engineRegistryRef.get());
 
-                refs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
-                for (ServiceReference<?> ref : refs) {
-                    EngineFactory factory = (EngineFactory) bundleContext.getService(ref);
-                    String engineName = factory.getName();
-                    if (engineName.equalsIgnoreCase(parameter.getEngine())) {
-                        switch (engineName) {
+                //Retrieve Engines list
+                ServiceReference<?>[] engineFactoryRefs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
+                for (ServiceReference<?> engineFactoryRef : engineFactoryRefs) {
+                    EngineFactory factory = (EngineFactory) bundleContext.getService(engineFactoryRef);
+                    if (parameter.getEngine().equals(factory.getName())) {
+                        switch (parameter.getEngine()) {
                             case "dbscan":
-                                DBScanEngineFactory dbScanEngineFactory = (DBScanEngineFactory) bundleContext.getService(ref);
-                                dbScanEngineFactory.setAlpha(parameter.getAlpha());
-                                dbScanEngineFactory.setBeta(parameter.getBeta());
-                                dbScanEngineFactory.setEpsilon(parameter.getEpsilon());
-                                dbScanEngineFactory.setDistanceMeasureFactory(parameter.getDistanceMeasure());
-                                dbScanEngineFactory.createEngine(driver.getMetrics());
-                                driver.setEngineFactory(dbScanEngineFactory);
+                                configureDBScan(parameter, driver, engineFactoryRef);
                                 dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
                                 return Response.ok().build();
                             case "cluster":
                             default:
-                                ClusterEngineFactory clusterEngineFactory = (ClusterEngineFactory) bundleContext.getService(ref);
-                                clusterEngineFactory.createEngine(driver.getMetrics());
-                                driver.setEngineFactory(clusterEngineFactory);
+                                configureCluster(driver, engineFactoryRef);
                                 dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
                                 return Response.ok().build();
                         }
@@ -98,11 +89,32 @@ public class ALECRestImpl implements ALECRest {
                 }
                 return Response.serverError().entity("No Engine found !!").build();
             } else {
-                return Response.serverError().entity("No Engine registered !!").build();
+                return Response.serverError().entity("No Driver found !!").build();
             }
-        } catch (InvalidSyntaxException | JsonProcessingException e) {
-            return Response.serverError().entity(e.getMessage()).build();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e.fillInStackTrace());
+            return Response.serverError().entity("something went wrong").build();
         }
+    }
+
+    private void configureCluster(Driver driver, ServiceReference<?> engineFactoryRef) {
+        ClusterEngineFactory clusterEngineFactory = (ClusterEngineFactory) bundleContext.getService(engineFactoryRef);
+        clusterEngineFactory.createEngine(driver.getMetrics());
+        driver.setEngineFactory(clusterEngineFactory);
+        driver.destroy();
+        driver.initAsync();
+    }
+
+    private void configureDBScan(Parameter parameter, Driver driver, ServiceReference<?> engineFactoryRef) {
+        DBScanEngineFactory dbScanEngineFactory = (DBScanEngineFactory) bundleContext.getService(engineFactoryRef);
+        dbScanEngineFactory.setAlpha(parameter.getAlpha());
+        dbScanEngineFactory.setBeta(parameter.getBeta());
+        dbScanEngineFactory.setEpsilon(parameter.getEpsilon());
+        dbScanEngineFactory.setDistanceMeasureFactory(parameter.getDistanceMeasure());
+        dbScanEngineFactory.createEngine(driver.getMetrics());
+        driver.setEngineFactory(dbScanEngineFactory);
+        driver.destroy();
+        driver.initAsync();
     }
 
     private Response getResponse(Optional<String> value) {

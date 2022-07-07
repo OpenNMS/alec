@@ -93,7 +93,7 @@ public class DBScanEngine extends AbstractClusterEngine {
 
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
-        LOG.debug("start DBSCan clustering:\nDistanceMeasure: {}\nAlpha: {}\nBeta{}\nEpsilon: {}", distanceMeasure.getName(), distanceMeasure.getAlpha(), distanceMeasure.getBeta(), epsilon);
+        LOG.debug("start DBSCan clustering:\nDistanceMeasure: {}\nAlpha: {}\nBeta: {}\nEpsilon: {}", distanceMeasure.getName(), distanceMeasure.getAlpha(), distanceMeasure.getBeta(), epsilon);
         // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
         // OPTIMIZATION: Can we avoid doing this every tick?
         final List<AlarmInSpaceTime> alarms = g.getVertices().stream()

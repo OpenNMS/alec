@@ -28,7 +28,5 @@ public interface ALECRest {
 
     @POST
     @Path("/parameter")
-    @Produces({MediaType.APPLICATION_JSON})
-    @Consumes({MediaType.APPLICATION_JSON})
     Response setParameter(Parameter parameter);
 }

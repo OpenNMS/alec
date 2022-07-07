@@ -98,7 +98,7 @@ public class ALECRestImpl implements ALECRest {
                 }
                 return Response.serverError().entity("No Engine found !!").build();
             } else {
-                return Response.serverError().entity("No Driver found !!").build();
+                return Response.serverError().entity("No Engine registered !!").build();
             }
         } catch (InvalidSyntaxException | JsonProcessingException e) {
             return Response.serverError().entity(e.getMessage()).build();

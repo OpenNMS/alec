@@ -57,10 +57,6 @@ public class DBScanEngineFactory implements EngineFactory {
         this.distanceMeasureFactory = distanceMeasureFactory;
     }
 
-    public DBScanEngineFactory() {
-
-    }
-
     @Override
     public String getName() {
         return "dbscan";

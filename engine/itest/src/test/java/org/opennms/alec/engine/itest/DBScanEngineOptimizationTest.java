@@ -65,6 +65,7 @@ import org.opennms.alec.features.score.api.ScoreMetric;
 import org.opennms.alec.features.score.api.ScoreReport;
 import org.opennms.alec.features.score.api.ScoringStrategy;
 import org.opennms.alec.features.score.impl.PeerScoringStrategy;
+import org.osgi.framework.BundleContext;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -155,7 +156,7 @@ public class DBScanEngineOptimizationTest {
 
         @Override
         public double value(double[] point) {
-            DBScanEngineFactory factory = new DBScanEngineFactory();
+            DBScanEngineFactory factory = new DBScanEngineFactory(1l,2l,3l, (BundleContext)null, "");
             factory.setAlpha(point[0]);
             factory.setBeta(point[1]);
 

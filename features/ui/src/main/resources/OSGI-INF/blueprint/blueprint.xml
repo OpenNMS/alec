@@ -25,4 +25,5 @@
     <reference id="dataSource" interface="javax.sql.DataSource"/>
     <bean id="dataStore" class="org.opennms.alec.data.DataStore">
         <argument ref="dataSource"/>
-    </bean></blueprint>
+    </bean>
+</blueprint>

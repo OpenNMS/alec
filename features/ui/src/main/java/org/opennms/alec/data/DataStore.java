@@ -159,10 +159,6 @@ public class DataStore {
         });
     }
 
-    public String getName() {
-        return null;
-    }
-
     private <U> U withStatement(ConnectionToStatement connectionToStatement, StatementToResult<U> statementToResult) {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connectionToStatement.getStatement(connection)) {

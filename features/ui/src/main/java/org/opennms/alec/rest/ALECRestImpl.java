@@ -3,7 +3,6 @@ package org.opennms.alec.rest;
 import java.util.Arrays;
 import java.util.Optional;
 
-import javax.sql.DataSource;
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.data.DataStore;
@@ -24,11 +23,6 @@ public class ALECRestImpl implements ALECRest {
 
     private final DataStore dataStore;
     private final BundleContext bundleContext;
-
-
-    public ALECRestImpl(DataSource dataSource, BundleContext bundleContext) {
-        this(new DataStore(dataSource), bundleContext);
-    }
 
     public ALECRestImpl(DataStore dataStore, BundleContext bundleContext) {
         this.dataStore = dataStore;
@@ -76,12 +70,12 @@ public class ALECRestImpl implements ALECRest {
                     if (parameter.getEngine().equals(factory.getName())) {
                         switch (parameter.getEngine()) {
                             case "dbscan":
-                                configureDBScan(parameter, driver, engineFactoryRef);
+                                configureDBScan(parameter, driver, (DBScanEngineFactory) factory);
                                 dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
                                 return Response.ok().build();
                             case "cluster":
                             default:
-                                configureCluster(driver, engineFactoryRef);
+                                configureCluster(driver, (ClusterEngineFactory) factory);
                                 dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
                                 return Response.ok().build();
                         }
@@ -97,16 +91,14 @@ public class ALECRestImpl implements ALECRest {
         }
     }
 
-    private void configureCluster(Driver driver, ServiceReference<?> engineFactoryRef) {
-        ClusterEngineFactory clusterEngineFactory = (ClusterEngineFactory) bundleContext.getService(engineFactoryRef);
+    private void configureCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {
         clusterEngineFactory.createEngine(driver.getMetrics());
         driver.setEngineFactory(clusterEngineFactory);
         driver.destroy();
         driver.initAsync();
     }
 
-    private void configureDBScan(Parameter parameter, Driver driver, ServiceReference<?> engineFactoryRef) {
-        DBScanEngineFactory dbScanEngineFactory = (DBScanEngineFactory) bundleContext.getService(engineFactoryRef);
+    private void configureDBScan(Parameter parameter, Driver driver, DBScanEngineFactory dbScanEngineFactory) {
         dbScanEngineFactory.setAlpha(parameter.getAlpha());
         dbScanEngineFactory.setBeta(parameter.getBeta());
         dbScanEngineFactory.setEpsilon(parameter.getEpsilon());

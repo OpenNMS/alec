@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -32,14 +32,14 @@ import org.osgi.framework.ServiceReference;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class ALECRestImplTest {
+public class ALECRestImplTest {
     @Mock
     DataStore dataStore;
     @Mock
     BundleContext bundleContext;
 
     @Test
-    void testPing() {
+    public void testPing() {
         ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
         try (Response result = underTest.ping()) {
             assertThat(Response.Status.OK.getStatusCode(), is(result.getStatus()));
@@ -48,7 +48,7 @@ class ALECRestImplTest {
     }
 
     @Test
-    void testGetDB() {
+    public void testGetDB() {
         ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
         when(dataStore.get(anyString(), anyString())).thenReturn(Optional.of("123"));
 
@@ -61,7 +61,7 @@ class ALECRestImplTest {
     }
 
     @Test
-    void testStoreDB() {
+    public void testStoreDB() {
         ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
         when(dataStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
 
@@ -74,7 +74,7 @@ class ALECRestImplTest {
     }
 
     @Test
-    void testSetParameter() throws InvalidSyntaxException {
+    public void testSetParameter() throws InvalidSyntaxException {
         ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);

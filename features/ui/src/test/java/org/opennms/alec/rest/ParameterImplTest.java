@@ -20,7 +20,7 @@ public class ParameterImplTest {
     @Test
     public void serializeSimpleString() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        Parameter personName = ParameterBuilderImpl.newBuilder()
+        Parameter personName = ParameterImpl.newBuilder()
                 .alpha(1d)
                 .beta(2d)
                 .epsilon(3d)

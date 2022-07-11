@@ -57,6 +57,10 @@ public class DBScanEngineFactory implements EngineFactory {
         this.distanceMeasureFactory = distanceMeasureFactory;
     }
 
+    public DBScanEngineFactory() {
+        this(DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, null, "");
+    }
+
     @Override
     public String getName() {
         return "dbscan";
@@ -64,19 +68,21 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
-        try {
-            ServiceReference<?>[] distanceMeasureRefs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
-            for (ServiceReference<?> distanceMeasureRef : distanceMeasureRefs) {
-                DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(distanceMeasureRef);
-                if (factory.getName().equalsIgnoreCase(distanceMeasureFactory)) {
-                    return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
+        if(bundleContext != null) {
+            try {
+                ServiceReference<?>[] distanceMeasureRefs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
+                for (ServiceReference<?> distanceMeasureRef : distanceMeasureRefs) {
+                    DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(distanceMeasureRef);
+                    if (factory.getName().equalsIgnoreCase(distanceMeasureFactory)) {
+                        return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
+                    }
                 }
+            } catch (InvalidSyntaxException e) {
+                throw new RuntimeException(e);
             }
-        } catch (InvalidSyntaxException e) {
-            throw new RuntimeException(e);
-        }
 
-        LOG.error("Wrong distance measure configuration, we'll use default");
+            LOG.error("Wrong distance measure configuration, we'll use default");
+        }
         return new DBScanEngine(metrics, epsilon, alpha, beta, new AlarmInSpaceAndTimeDistanceMeasureFactory());
     }
 

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-@JsonDeserialize(builder = ParameterBuilderImpl.Builder.class)
-public class ParameterBuilderImpl implements Parameter {
+@JsonDeserialize(builder = ParameterImpl.Builder.class)
+public class ParameterImpl implements Parameter {
 
     private final Double alpha;
     private final Double beta;
@@ -15,7 +15,7 @@ public class ParameterBuilderImpl implements Parameter {
     private final String distanceMeasure;
     private final String engine;
 
-    private ParameterBuilderImpl(Builder builder) {
+    private ParameterImpl(Builder builder) {
         alpha = builder.alpha;
         beta = builder.beta;
         epsilon = builder.epsilon;
@@ -99,14 +99,14 @@ public class ParameterBuilderImpl implements Parameter {
             return this;
         }
 
-        public ParameterBuilderImpl build() {
-            return new ParameterBuilderImpl(this);
+        public ParameterImpl build() {
+            return new ParameterImpl(this);
         }
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ParameterBuilderImpl.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ParameterImpl.class.getSimpleName() + "[", "]")
                 .add("alpha=" + alpha)
                 .add("beta=" + beta)
                 .add("epsilon=" + epsilon)

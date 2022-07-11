@@ -54,6 +54,7 @@ import org.opennms.alec.driver.test.MockInventoryType;
 import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -66,8 +67,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-//                TODO mock BundleContext
-//                { new DBScanEngineFactory(1l,2l,3l, (BundleContext)null, "") },
+                { new DBScanEngineFactory() },
                 { new ClusterEngineFactory() }
         });
     }

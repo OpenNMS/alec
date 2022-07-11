@@ -66,6 +66,7 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Sets;
@@ -79,8 +80,7 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-//                TODO mock BundleContext
-//                { new DBScanEngineFactory(1l,2l,3l, null, "") },
+                { new DBScanEngineFactory() },
                 { new ClusterEngineFactory() }
         });
     }
@@ -135,7 +135,7 @@ public class Level1EngineComplianceTest {
      */
     @Test
     @Ignore("doesn't work with clusterEngine ?")
-    //TODO fix test
+//    TODO fix test
     public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)

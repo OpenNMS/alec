@@ -106,7 +106,7 @@ public class ALECRestImplTest {
         });
         when(dbScanEngineFactory.getName()).thenReturn("dbscan");
 
-        try (Response result = underTest.setParameter(ParameterBuilderImpl.newBuilder().alpha(1d).beta(2d).epsilon(3d).distanceMeasure("distanceMeasure").engine("dbscan").build())) {
+        try (Response result = underTest.setParameter(ParameterImpl.newBuilder().alpha(1d).beta(2d).epsilon(3d).distanceMeasure("distanceMeasure").engine("dbscan").build())) {
             assertThat(Response.Status.OK.getStatusCode(), is(result.getStatus()));
         }
         verify(dataStore, times(1)).put(anyString(), anyString(), anyString());

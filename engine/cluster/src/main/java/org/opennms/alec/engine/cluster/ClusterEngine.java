@@ -61,7 +61,6 @@ public class ClusterEngine extends AbstractClusterEngine {
      */
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
-        LOG.debug("start clustering:\nDistanceMeasure: alarminspace");
         // Build a cluster for each vertex
         final List<Cluster<AlarmInSpaceTime>> clusters = new LinkedList<>();
         for (CEVertex v : g.getVertices()) {

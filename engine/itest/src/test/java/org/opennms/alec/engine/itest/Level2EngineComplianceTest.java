@@ -40,7 +40,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -87,35 +86,36 @@ public class Level2EngineComplianceTest {
     }
 
     @Test
-    @Ignore("doesn't work with clusterEngine ?")
-    //TODO fix test
     public void canCorrelateAlarmsAcrossObjects() {
-        final List<InventoryObject> inventory = ImmutableList.copyOf(new MockInventoryBuilder()
-                .withInventoryObject(MockInventoryType.DEVICE, "n1")
-                .withInventoryObject(MockInventoryType.CARD, "n1-c1", MockInventoryType.DEVICE, "n1")
-                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.CARD, "n1-c1", 25)
-                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2", MockInventoryType.CARD, "n1-c1", 25)
-                .getInventory());
+        //this test doesn't work with cluster engine
+        if(!"cluster".equals(factory.getName())) {
+            final List<InventoryObject> inventory = ImmutableList.copyOf(new MockInventoryBuilder()
+                    .withInventoryObject(MockInventoryType.DEVICE, "n1")
+                    .withInventoryObject(MockInventoryType.CARD, "n1-c1", MockInventoryType.DEVICE, "n1")
+                    .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1", MockInventoryType.CARD, "n1-c1", 25)
+                    .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2", MockInventoryType.CARD, "n1-c1", 25)
+                    .getInventory());
 
-        final List<Alarm> alarms = new ArrayList<>();
-        alarms.addAll(new MockAlarmBuilder()
-                .withId("a1")
-                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
-                .withEvent(1525579974000L, Severity.MAJOR)
-                .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
-                .build());
-        alarms.addAll(new MockAlarmBuilder()
-                .withId("a2")
-                .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
-                .withEvent(1525579974000L, Severity.MINOR)
-                .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
-                .build());
+            final List<Alarm> alarms = new ArrayList<>();
+            alarms.addAll(new MockAlarmBuilder()
+                    .withId("a1")
+                    .withInventoryObject(MockInventoryType.PORT, "n1-c1-p1")
+                    .withEvent(1525579974000L, Severity.MAJOR)
+                    .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
+                    .build());
+            alarms.addAll(new MockAlarmBuilder()
+                    .withId("a2")
+                    .withInventoryObject(MockInventoryType.PORT, "n1-c1-p2")
+                    .withEvent(1525579974000L, Severity.MINOR)
+                    .withEvent(1525580004000L, Severity.CLEARED) // 30 seconds since last event
+                    .build());
 
-        final List<Situation> situations = driver.run(alarms, inventory);
-        // A single situation should have been created
-        assertThat(situations, hasSize(1));
-        // It should contain all of the given alarms
-        assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("a1", "a2"));
+            final List<Situation> situations = driver.run(alarms, inventory);
+            // A single situation should have been created
+            assertThat(situations, hasSize(1));
+            // It should contain all of the given alarms
+            assertThat(getAlarmIdsInSituation(situations.get(0)), containsInAnyOrder("a1", "a2"));
+        }
     }
 
     @Test

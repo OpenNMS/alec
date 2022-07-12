@@ -14,7 +14,7 @@
     <!-- Build and expose the JAX-RS annotated webhook handler.
      This will automatically mount the endpoint over the REST API. -->
     <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
-        <argument ref="dataSource"/>
+        <argument ref="dataStore"/>
         <argument ref="blueprintBundleContext"/>
     </bean>
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">

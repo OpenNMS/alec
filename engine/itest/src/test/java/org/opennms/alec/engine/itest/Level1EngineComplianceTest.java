@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -134,46 +133,46 @@ public class Level1EngineComplianceTest {
      * TODO: Ensure that 2+ situations are created instead of 1
      */
     @Test
-    @Ignore("doesn't work with clusterEngine ?")
-//    TODO fix test
     public void canGenerateDeterministicResults() throws ExecutionException, InterruptedException {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)
         // * They will generate 1 or more situations
-        final List<Alarm> alarms = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            MockAlarmBuilder builder = new MockAlarmBuilder()
-                    .withId("" + i)
-                    .withInventoryObject(""+ i % 2, "" + i % 5);
-            for (int j = 0; j < 100; j++) {
-                builder.withEvent((i+1)*(j+1),  j % 2 == 0 ? Severity.MINOR : Severity.CLEARED);
+        if(!"cluster".equals(factory.getName())) {
+            final List<Alarm> alarms = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                MockAlarmBuilder builder = new MockAlarmBuilder()
+                        .withId("" + i)
+                        .withInventoryObject("" + i % 2, "" + i % 5);
+                for (int j = 0; j < 100; j++) {
+                    builder.withEvent((i + 1) * (j + 1), j % 2 == 0 ? Severity.MINOR : Severity.CLEARED);
+                }
+                alarms.addAll(builder.build());
             }
-            alarms.addAll(builder.build());
-        }
 
-        final List<Situation> initialSituations = driver.run(alarms);
-        // Expect 1+ situations
-        assertThat(initialSituations, hasSize(greaterThanOrEqualTo(1)));
+            final List<Situation> initialSituations = driver.run(alarms);
+            // Expect 1+ situations
+            assertThat(initialSituations, hasSize(greaterThanOrEqualTo(1)));
 
-        // Now rerun the driver several times in series, and expect the same results
-        final int K = 20;
-        for (int k = 0; k < K; k++) {
-            final List<Situation> subsequentSituations = driver.run(alarms);
-            compareSituations(initialSituations, subsequentSituations);
+            // Now rerun the driver several times in series, and expect the same results
+            final int K = 20;
+            for (int k = 0; k < K; k++) {
+                final List<Situation> subsequentSituations = driver.run(alarms);
+                compareSituations(initialSituations, subsequentSituations);
 
-            Set<Situation> initialSituationsInSet = Sets.newHashSet(initialSituations);
-            Set<Situation> generatedSituationsInSet = Sets.newHashSet(subsequentSituations);
-        }
+                Set<Situation> initialSituationsInSet = Sets.newHashSet(initialSituations);
+                Set<Situation> generatedSituationsInSet = Sets.newHashSet(subsequentSituations);
+            }
 
-        // Rerun the driver again over serveral threads and expect the same results
-        final ExecutorService executor = Executors.newFixedThreadPool(10);
-        final List<CompletableFuture<List<Situation>>> situationFutures = new ArrayList<>();
-        for (int k = 0; k < K; k++) {
-            situationFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
-        }
-        CompletableFuture.allOf(situationFutures.toArray(new CompletableFuture[0])).get();
-        for (CompletableFuture<List<Situation>> situationFuture : situationFutures) {
-            compareSituations(initialSituations, situationFuture.get());
+            // Rerun the driver again over serveral threads and expect the same results
+            final ExecutorService executor = Executors.newFixedThreadPool(10);
+            final List<CompletableFuture<List<Situation>>> situationFutures = new ArrayList<>();
+            for (int k = 0; k < K; k++) {
+                situationFutures.add(CompletableFuture.supplyAsync(() -> driver.run(alarms), executor));
+            }
+            CompletableFuture.allOf(situationFutures.toArray(new CompletableFuture[0])).get();
+            for (CompletableFuture<List<Situation>> situationFuture : situationFutures) {
+                compareSituations(initialSituations, situationFuture.get());
+            }
         }
     }
 

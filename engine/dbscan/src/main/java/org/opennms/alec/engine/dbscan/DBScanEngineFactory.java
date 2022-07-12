@@ -43,9 +43,9 @@ public class DBScanEngineFactory implements EngineFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBScanEngineFactory.class);
 
-    private double epsilon;// = DBScanEngine.DEFAULT_EPSILON;
-    private double alpha;// = DBScanEngine.DEFAULT_ALPHA;
-    private double beta;// = DBScanEngine.DEFAULT_BETA;
+    private double epsilon;
+    private double alpha;
+    private double beta;
     private String distanceMeasureFactory;
     private BundleContext bundleContext;
 
@@ -81,7 +81,7 @@ public class DBScanEngineFactory implements EngineFactory {
                 throw new RuntimeException(e);
             }
 
-            LOG.error("Wrong distance measure configuration, we'll use default");
+            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactory, AlarmInSpaceAndTimeDistanceMeasureFactory.class.getCanonicalName());
         }
         return new DBScanEngine(metrics, epsilon, alpha, beta, new AlarmInSpaceAndTimeDistanceMeasureFactory());
     }

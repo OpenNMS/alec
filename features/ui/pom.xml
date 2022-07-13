@@ -83,8 +83,14 @@
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <version>${jersey-common.version}</version>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey-client.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-test-blueprint</artifactId>
+            <version>${camel-test-blueprint.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

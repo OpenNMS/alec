@@ -21,8 +21,6 @@ public class ParameterImplTest {
     public void serializeSimpleString() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Parameter personName = ParameterImpl.newBuilder()
-                .key("key")
-                .value("value")
                 .alpha(1d)
                 .beta(2d)
                 .epsilon(3d)
@@ -32,22 +30,20 @@ public class ParameterImplTest {
         String json = mapper.writeValueAsString(personName);
         LOG.info("Serializing a plain String: {}", json);
 
-        assertThat(json, equalTo("{\"key\":\"key\",\"value\":\"value\",\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"distanceMeasure\":\"test\",\"engine\":\"dbscan\"}"));
+        assertThat(json, equalTo("{\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"distanceMeasure\":\"test\",\"engine\":\"dbscan\"}"));
     }
 
     @Test
     public void deserializeSimpleStringBuilder() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        String json = "{\"key\":\"key\",\"value\":\"value\",\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"distanceMeasure\":\"test\",\"engine\":\"dbscan\"}";
+        String json = "{\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"distanceMeasure\":\"test\",\"engine\":\"dbscan\"}";
         Parameter parameter = mapper.readValue(json, Parameter.class);
         LOG.info("Deserialize parameter: {}", parameter.toString());
 
-        assertThat(parameter.getKey(), equalTo("key"));
-        assertThat(parameter.getValue(), equalTo("value"));
-        assertThat(parameter.getAlpha(), equalTo(1d));
-        assertThat(parameter.getBeta(), equalTo(2d));
-        assertThat(parameter.getEpsilon(), equalTo(3d));
-        assertThat(parameter.getDistanceMeasure(), equalTo("test"));
-        assertThat(parameter.getEngine(), equalTo("dbscan"));
+        assertThat(1d, equalTo(parameter.getAlpha()));
+        assertThat(2d, equalTo(parameter.getBeta()));
+        assertThat(3d, equalTo(parameter.getEpsilon()));
+        assertThat("test", equalTo(parameter.getDistanceMeasure()));
+        assertThat("dbscan", equalTo(parameter.getEngine()));
     }
 }

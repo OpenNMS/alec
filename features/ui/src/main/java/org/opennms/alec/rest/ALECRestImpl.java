@@ -1,16 +1,18 @@
 package org.opennms.alec.rest;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.DataStore;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.features.distributed.kvstore.api.JsonStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -20,12 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
+    public static final String ALEC_CONFIG = "ALEC_CONFIG";
 
-    private final DataStore dataStore;
+    private final JsonStore jsonStore;
     private final BundleContext bundleContext;
 
-    public ALECRestImpl(DataStore dataStore, BundleContext bundleContext) {
-        this.dataStore = dataStore;
+    public ALECRestImpl(JsonStore jsonStore, BundleContext bundleContext) {
+        this.jsonStore = jsonStore;
         this.bundleContext = bundleContext;
     }
 
@@ -35,29 +38,28 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response getDB(String key) {
-        if (key.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        LOG.debug("Get DB {}", key);
-        Optional<String> value = dataStore.get(key, "1");
-        return getResponse(value);
+    public Response getConfigurations() {
+        LOG.debug("Get Configurations");
+        Map<KeyEnum, String> rets = new HashMap();
+        KeyEnum.stream().forEach(keyEnum -> rets.put(keyEnum, jsonStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("")));
+        return Response.ok().entity(rets).build();
     }
 
     @Override
-    public Response storeDB(String key, String body) {
-        Long ret = dataStore.put(key, body, "1");
-        return Response.ok().entity(ret).build();
+    public Response getConfiguration(KeyValue keyValue) {
+        LOG.debug("Get Configuration {}", keyValue.getKey());
+        return Response.ok().entity(jsonStore.get(keyValue.getKey().toString(), ALEC_CONFIG).orElse("")).build();
     }
 
     @Override
-    public Response setParameter(Parameter parameter) {
+    public Response setConfiguration(KeyValue keyValue) {
 
         LOG.debug("\n=============================================\n" +
-                "Got payload: {}\n" +
-                "=============================================", parameter.toString());
-        if(parameter.getEngine() != null) {
-            try {
+                "Set Configuration: {}\n" +
+                "=============================================", keyValue.toString());
+        try {
+            if (KeyEnum.ENGINE.equals(keyValue.getKey())) {
+                Parameter parameter = new ObjectMapper().readValue(keyValue.getValue(), Parameter.class);
                 //Retrieve Driver, only one driver is registered
                 ServiceReference<?>[] engineRegistryRefs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
                 Optional<ServiceReference<?>> engineRegistryRef = Arrays.stream(engineRegistryRefs).findFirst();
@@ -66,33 +68,36 @@ public class ALECRestImpl implements ALECRest {
 
                     //Retrieve Engines list
                     ServiceReference<?>[] engineFactoryRefs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
+                    boolean ret = false;
                     for (ServiceReference<?> engineFactoryRef : engineFactoryRefs) {
                         EngineFactory factory = (EngineFactory) bundleContext.getService(engineFactoryRef);
                         if (parameter.getEngine().equals(factory.getName())) {
                             switch (parameter.getEngine()) {
                                 case "dbscan":
                                     configureDBScan(parameter, driver, (DBScanEngineFactory) factory);
-                                    dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
-                                    return Response.ok().build();
+                                    ret = true;
+                                    break;
                                 case "cluster":
                                 default:
                                     configureCluster(driver, (ClusterEngineFactory) factory);
-                                    dataStore.put("engineParameter", new ObjectMapper().writeValueAsString(parameter), "1");
-                                    return Response.ok().build();
+                                    ret = true;
                             }
                         }
                     }
-                    return Response.serverError().entity("No Engine found !!").build();
+                    if(!ret) {
+                        return Response.serverError().entity("No Engine found !!").build();
+                    }
                 } else {
                     return Response.serverError().entity("No Driver found !!").build();
                 }
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e.fillInStackTrace());
-                return Response.serverError().entity("something went wrong").build();
             }
-        }
 
-        return Response.ok().build();
+            //Store keyValue
+            return Response.ok().entity(jsonStore.put(keyValue.getKey().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e.fillInStackTrace());
+            return Response.serverError().entity("something went wrong").build();
+        }
     }
 
     private void configureCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {

@@ -92,6 +92,7 @@
         <tensorflow.version>1.13.1</tensorflow.version>
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
+        <opennms.version>31.0.0-SNAPSHOT</opennms.version>
     </properties>
 
     <dependencyManagement>

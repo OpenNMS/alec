@@ -14,7 +14,7 @@
     <!-- Build and expose the JAX-RS annotated webhook handler.
      This will automatically mount the endpoint over the REST API. -->
     <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
-        <argument ref="dataStore"/>
+        <argument ref="jsonStore"/>
         <argument ref="blueprintBundleContext"/>
     </bean>
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
@@ -22,8 +22,5 @@
             <entry key="application-path" value="/rest" />
         </service-properties>
     </service>
-    <reference id="dataSource" interface="javax.sql.DataSource"/>
-    <bean id="dataStore" class="org.opennms.alec.data.DataStore">
-        <argument ref="dataSource"/>
-    </bean>
+    <reference id="jsonStore" interface="org.opennms.features.distributed.kvstore.api.JsonStore"/>
 </blueprint>

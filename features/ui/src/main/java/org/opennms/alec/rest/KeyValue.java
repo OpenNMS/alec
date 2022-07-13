@@ -26,39 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec;
+package org.opennms.alec.rest;
 
-import java.util.Dictionary;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import javax.sql.DataSource;
-
-import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
-import org.apache.camel.util.KeyValueHolder;
-import org.junit.Test;
-import org.opennms.features.distributed.kvstore.api.JsonStore;
-
-public class BlueprintContextTest extends CamelBlueprintTestSupport {
-
-    @Override
-    protected String getBlueprintDescriptor() {
-        return "/OSGI-INF/blueprint/blueprint.xml" + "," +
-                "/OSGI-INF/blueprint/blueprint-empty-camel-context.xml";
-    }
-
-    @Override
-    protected String getBundleFilter() {
-        return "(!(Bundle-SymbolicName=org.glassfish.hk2.osgi-resource-locator))";
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
-        JsonStore jsonStore = new MockJsonStore();
-        services.put(DataSource.class.getName(), asService(jsonStore, null));
-    }
-
-    @Test
-    public void testBlueprintContext() {
-    }
+@JsonDeserialize(builder = KeyValueImpl.Builder.class)
+public interface KeyValue {
+    KeyEnum getKey();
+    String getValue();
 }

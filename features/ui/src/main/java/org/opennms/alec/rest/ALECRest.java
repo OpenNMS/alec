@@ -4,7 +4,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,14 +18,15 @@ public interface ALECRest {
     Response ping();
 
     @GET
-    @Path("/db/{key}")
-    Response getDB(@PathParam("key") String key);
+    @Path("/configurations")
+    Response getConfigurations();
+
+    @GET
+    @Path("/configuration")
+    Response getConfiguration(KeyValue keyValue);
 
     @POST
-    @Path("/db/{key}")
-    Response storeDB(@PathParam("key") String key, String body);
+    @Path("/configuration")
+    Response setConfiguration(KeyValue keyValue);
 
-    @POST
-    @Path("/parameter")
-    Response setParameter(Parameter parameter);
 }

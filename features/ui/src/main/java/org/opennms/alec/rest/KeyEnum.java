@@ -26,39 +26,32 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec;
+package org.opennms.alec.rest;
 
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.stream.Stream;
 
-import javax.sql.DataSource;
+public enum KeyEnum {
+    ENGINE("ENGINE"),
+    AGREEMENT("AGREEMENT");
 
-import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
-import org.apache.camel.util.KeyValueHolder;
-import org.junit.Test;
-import org.opennms.features.distributed.kvstore.api.JsonStore;
+    private final String key;
 
-public class BlueprintContextTest extends CamelBlueprintTestSupport {
-
-    @Override
-    protected String getBlueprintDescriptor() {
-        return "/OSGI-INF/blueprint/blueprint.xml" + "," +
-                "/OSGI-INF/blueprint/blueprint-empty-camel-context.xml";
+    /**
+     * @param key
+     */
+    KeyEnum(final String key) {
+        this.key = key;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Enum#toString()
+     */
     @Override
-    protected String getBundleFilter() {
-        return "(!(Bundle-SymbolicName=org.glassfish.hk2.osgi-resource-locator))";
+    public String toString() {
+        return key;
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
-        JsonStore jsonStore = new MockJsonStore();
-        services.put(DataSource.class.getName(), asService(jsonStore, null));
-    }
-
-    @Test
-    public void testBlueprintContext() {
+    public static Stream<KeyEnum> stream() {
+        return Stream.of(KeyEnum.values());
     }
 }

@@ -66,6 +66,11 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.features.distributed</groupId>
+            <artifactId>org.opennms.features.distributed.kv-store.api</artifactId>
+            <version>${opennms.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

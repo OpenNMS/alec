@@ -3,14 +3,10 @@ package org.opennms.alec.rest;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-@JsonDeserialize(builder = ParameterImpl.Builder.class)
 public class ParameterImpl implements Parameter {
 
-    private final String key;
-    private final String value;
     private final Double alpha;
     private final Double beta;
     private final Double epsilon;
@@ -18,8 +14,6 @@ public class ParameterImpl implements Parameter {
     private final String engine;
 
     private ParameterImpl(Builder builder) {
-        key = builder.key;
-        value = builder.value;
         alpha = builder.alpha;
         beta = builder.beta;
         epsilon = builder.epsilon;
@@ -33,24 +27,12 @@ public class ParameterImpl implements Parameter {
 
     public static Builder newBuilder(Parameter copy) {
         Builder builder = new Builder();
-        builder.key = copy.getKey();
-        builder.value = copy.getValue();
         builder.alpha = copy.getAlpha();
         builder.beta = copy.getBeta();
         builder.epsilon = copy.getEpsilon();
         builder.distanceMeasure = copy.getDistanceMeasure();
         builder.engine = copy.getEngine();
         return builder;
-    }
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
     }
 
     @Override
@@ -81,8 +63,6 @@ public class ParameterImpl implements Parameter {
     @JsonPOJOBuilder(withPrefix = "")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private String key;
-        private String value;
         private Double alpha;
         private Double beta;
         private Double epsilon;
@@ -92,9 +72,7 @@ public class ParameterImpl implements Parameter {
         private Builder() {
         }
 
-        public Builder(String key, String value, Double alpha, Double beta, Double epsilon, String distanceMeasure, String engine) {
-            this.key = key;
-            this.value = value;
+        public Builder(Double alpha, Double beta, Double epsilon, String distanceMeasure, String engine) {
             this.alpha = alpha;
             this.beta = beta;
             this.epsilon = epsilon;
@@ -130,23 +108,11 @@ public class ParameterImpl implements Parameter {
         public ParameterImpl build() {
             return new ParameterImpl(this);
         }
-
-        public Builder key(String val) {
-            key = val;
-            return this;
-        }
-
-        public Builder value(String val) {
-            value = val;
-            return this;
-        }
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", ParameterImpl.class.getSimpleName() + "[", "]")
-                .add("key='" + key + "'")
-                .add("value='" + value + "'")
                 .add("alpha=" + alpha)
                 .add("beta=" + beta)
                 .add("epsilon=" + epsilon)

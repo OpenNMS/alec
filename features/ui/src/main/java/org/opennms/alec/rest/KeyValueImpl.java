@@ -26,59 +26,62 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec;
+package org.opennms.alec.rest;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-import javax.sql.DataSource;
+public class KeyValueImpl implements KeyValue {
+    private KeyEnum keyEnum;
+    private String value;
 
-public class MockDataSource implements DataSource {
-    @Override
-    public Connection getConnection() throws SQLException {
-        return null;
+    private KeyValueImpl(Builder builder) {
+        keyEnum = builder.keyEnum;
+        value = builder.value;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(KeyValue copy) {
+        Builder builder = new Builder();
+        builder.keyEnum = copy.getKey();
+        builder.value = copy.getValue();
+        return builder;
     }
 
     @Override
-    public Connection getConnection(String username, String password) throws SQLException {
-        return null;
+    public KeyEnum getKey() {
+        return keyEnum;
     }
 
     @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return null;
+    public String getValue() {
+        return value;
     }
 
-    @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
+    @JsonPOJOBuilder(withPrefix = "")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class Builder {
+        private KeyEnum keyEnum;
+        private String value;
 
-    }
+        private Builder() {
+        }
 
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
+        public Builder key(KeyEnum val) {
+            keyEnum = val;
+            return this;
+        }
 
-    }
+        public Builder value(String val) {
+            value = val;
+            return this;
+        }
 
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return null;
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return null;
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return false;
+        public KeyValueImpl build() {
+            return new KeyValueImpl(this);
+        }
     }
 }

@@ -58,7 +58,7 @@ public class DBScanEngineFactory implements EngineFactory {
     }
 
     public DBScanEngineFactory() {
-        this(DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, null, "");
+        this(DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, null, DBScanEngine.DEFAULT_DISTANCE_MEASURE);
     }
 
     @Override
@@ -112,5 +112,9 @@ public class DBScanEngineFactory implements EngineFactory {
 
     public void setDistanceMeasureFactory(String distanceMeasureFactory) {
         this.distanceMeasureFactory = distanceMeasureFactory;
+    }
+
+    public String getDistanceMeasureFactory() {
+        return distanceMeasureFactory;
     }
 }

@@ -28,58 +28,12 @@
 
 package org.opennms.alec.rest;
 
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.List;
 
-public class KeyValueImpl implements KeyValue {
-    private KeyEnum keyEnum;
-    private String value;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-    private KeyValueImpl(Builder builder) {
-        keyEnum = builder.keyEnum;
-        value = builder.value;
-    }
-
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public static Builder newBuilder(KeyValue copy) {
-        Builder builder = new Builder();
-        builder.keyEnum = copy.getKey();
-        builder.value = copy.getValue();
-        return builder;
-    }
-
-    @Override
-    public KeyEnum getKey() {
-        return keyEnum;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @JsonPOJOBuilder(withPrefix = "")
-    public static final class Builder {
-        private KeyEnum keyEnum;
-        private String value;
-
-        private Builder() {
-        }
-
-        public Builder key(KeyEnum val) {
-            keyEnum = val;
-            return this;
-        }
-
-        public Builder value(String val) {
-            value = val;
-            return this;
-        }
-
-        public KeyValueImpl build() {
-            return new KeyValueImpl(this);
-        }
-    }
+@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
+public interface Configuration {
+    List<KeyValue> getKeyValues();
+    EngineParameter getEngineParameter();
 }

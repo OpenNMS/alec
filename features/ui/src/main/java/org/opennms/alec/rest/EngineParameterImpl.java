@@ -1,11 +1,13 @@
 package org.opennms.alec.rest;
 
+import java.util.Optional;
 import java.util.StringJoiner;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.opennms.alec.engine.dbscan.DBScanEngine;
+
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-public class ParameterImpl implements Parameter {
+public class EngineParameterImpl implements EngineParameter {
 
     private final Double alpha;
     private final Double beta;
@@ -13,7 +15,7 @@ public class ParameterImpl implements Parameter {
     private final String distanceMeasure;
     private final String engine;
 
-    private ParameterImpl(Builder builder) {
+    private EngineParameterImpl(Builder builder) {
         alpha = builder.alpha;
         beta = builder.beta;
         epsilon = builder.epsilon;
@@ -25,7 +27,7 @@ public class ParameterImpl implements Parameter {
         return new Builder();
     }
 
-    public static Builder newBuilder(Parameter copy) {
+    public static Builder newBuilder(EngineParameter copy) {
         Builder builder = new Builder();
         builder.alpha = copy.getAlpha();
         builder.beta = copy.getBeta();
@@ -37,22 +39,38 @@ public class ParameterImpl implements Parameter {
 
     @Override
     public Double getAlpha() {
-        return alpha;
+        if(Optional.ofNullable(alpha).isPresent()) {
+            return alpha;
+        } else {
+            return DBScanEngine.DEFAULT_ALPHA;
+        }
     }
 
     @Override
     public Double getBeta() {
-        return beta;
+        if(Optional.ofNullable(beta).isPresent()) {
+            return beta;
+        } else {
+            return DBScanEngine.DEFAULT_BETA;
+        }
     }
 
     @Override
     public Double getEpsilon() {
-        return epsilon;
+        if(Optional.ofNullable(epsilon).isPresent()) {
+            return epsilon;
+        } else {
+            return DBScanEngine.DEFAULT_EPSILON;
+        }
     }
 
     @Override
     public String getDistanceMeasure() {
-        return distanceMeasure;
+        if(Optional.ofNullable(distanceMeasure).isPresent()) {
+            return distanceMeasure;
+        } else {
+            return DBScanEngine.DEFAULT_DISTANCE_MEASURE;
+        }
     }
 
     @Override
@@ -61,7 +79,6 @@ public class ParameterImpl implements Parameter {
     }
 
     @JsonPOJOBuilder(withPrefix = "")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private Double alpha;
         private Double beta;
@@ -105,14 +122,14 @@ public class ParameterImpl implements Parameter {
             return this;
         }
 
-        public ParameterImpl build() {
-            return new ParameterImpl(this);
+        public EngineParameterImpl build() {
+            return new EngineParameterImpl(this);
         }
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ParameterImpl.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", EngineParameterImpl.class.getSimpleName() + "[", "]")
                 .add("alpha=" + alpha)
                 .add("beta=" + beta)
                 .add("epsilon=" + epsilon)

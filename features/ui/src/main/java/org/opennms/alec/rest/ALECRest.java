@@ -23,10 +23,17 @@ public interface ALECRest {
 
     @GET
     @Path("/configuration")
-    Response getConfiguration(KeyValue keyValue);
+    Response getConfiguration(KeyEnum keyEnum);
 
     @POST
     @Path("/configuration")
     Response setConfiguration(KeyValue keyValue);
 
+    @POST
+    @Path("/engine/configuration")
+    Response setEngineConfiguration(EngineParameter engineParameter);
+
+    @GET
+    @Path("/engine/configuration")
+    Response getEngineConfiguration();
 }

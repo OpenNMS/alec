@@ -51,7 +51,6 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
         return "(!(Bundle-SymbolicName=org.glassfish.hk2.osgi-resource-locator))";
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
         JsonStore jsonStore = new MockJsonStore();

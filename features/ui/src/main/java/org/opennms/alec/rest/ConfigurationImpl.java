@@ -28,58 +28,67 @@
 
 package org.opennms.alec.rest;
 
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.ArrayList;
+import java.util.List;
 
-public class KeyValueImpl implements KeyValue {
-    private KeyEnum keyEnum;
-    private String value;
+public class ConfigurationImpl implements Configuration {
 
-    private KeyValueImpl(Builder builder) {
-        keyEnum = builder.keyEnum;
-        value = builder.value;
+    private List<KeyValue> keyValues;
+    private EngineParameter engineParameter;
+
+    private ConfigurationImpl(Builder builder) {
+        keyValues = builder.keyValues;
+        engineParameter = builder.engineParameter;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public static Builder newBuilder(KeyValue copy) {
+    public static Builder newBuilder(ConfigurationImpl copy) {
         Builder builder = new Builder();
-        builder.keyEnum = copy.getKey();
-        builder.value = copy.getValue();
+        builder.keyValues = copy.getKeyValues();
+        builder.engineParameter = copy.getEngineParameter();
         return builder;
     }
 
     @Override
-    public KeyEnum getKey() {
-        return keyEnum;
+    public List<KeyValue> getKeyValues() {
+        return keyValues;
     }
 
     @Override
-    public String getValue() {
-        return value;
+    public EngineParameter getEngineParameter() {
+        return engineParameter;
     }
 
-    @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
-        private KeyEnum keyEnum;
-        private String value;
+        private List<KeyValue> keyValues;
+        private EngineParameter engineParameter;
 
         private Builder() {
         }
 
-        public Builder key(KeyEnum val) {
-            keyEnum = val;
+        public Builder keyValue(KeyValue keyValue) {
+            if (keyValues == null) {
+                keyValues = new ArrayList<>();
+            }
+            keyValues.add(keyValue);
             return this;
         }
 
-        public Builder value(String val) {
-            value = val;
+        public Builder keyValues(List<KeyValue> val) {
+            keyValues = val;
             return this;
         }
 
-        public KeyValueImpl build() {
-            return new KeyValueImpl(this);
+        public Builder engineParameter(EngineParameter val) {
+            engineParameter = val;
+            return this;
+        }
+
+        public ConfigurationImpl build() {
+            return new ConfigurationImpl(this);
         }
     }
 }

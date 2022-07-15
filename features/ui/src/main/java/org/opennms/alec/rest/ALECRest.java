@@ -36,4 +36,14 @@ public interface ALECRest {
     @GET
     @Path("/engine/configuration")
     Response getEngineConfiguration();
+
+    @POST
+    @Path("/situations")
+    Response storeSituations();
+
+    @GET
+    @Path("/situations")
+    Response getSituations();
+
+
 }

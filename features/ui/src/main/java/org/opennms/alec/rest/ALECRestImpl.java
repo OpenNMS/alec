@@ -1,11 +1,15 @@
 package org.opennms.alec.rest;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.data.DataStore;
+import org.opennms.alec.data.JacksonSituation;
+import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
@@ -17,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ALECRestImpl implements ALECRest {
@@ -24,11 +29,13 @@ public class ALECRestImpl implements ALECRest {
     public static final String ALEC_CONFIG = "ALEC_CONFIG";
 
     private final DataStore dataStore;
+    private final SituationDatasource situationDatasource;
     private final BundleContext bundleContext;
     private final ObjectMapper objectMapper;
 
-    public ALECRestImpl(DataStore dataStore, BundleContext bundleContext) {
+    public ALECRestImpl(DataStore dataStore, SituationDatasource situationDatasource, BundleContext bundleContext) {
         this.dataStore = dataStore;
+        this.situationDatasource = situationDatasource;
         this.bundleContext = bundleContext;
         objectMapper = new ObjectMapper();
     }
@@ -126,6 +133,26 @@ public class ALECRestImpl implements ALECRest {
         }
     }
 
+    @Override
+    public Response storeSituations() {
+        try {
+            List<Situation> situationList = situationDatasource.getSituations();
+            String situations = objectMapper.writeValueAsString(situationList);
+            return Response.ok(dataStore.put(KeyEnum.SITUATION.toString(), situations, ALEC_CONFIG)).build();
+        } catch (JsonProcessingException e) {
+            return somethingWentWrong(e);
+        }
+    }
+
+    @Override
+    public Response getSituations() {
+        try {
+            return Response.ok().entity(objectMapper.readValue((String) dataStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG).orElse(""), new TypeReference<List<JacksonSituation>>(){})).build();
+        } catch (JsonProcessingException e) {
+            return somethingWentWrong(e);
+        }
+    }
+
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
         return Response.ok()
                 .entity(dataStore.put(KeyEnum.ENGINE.toString(),
@@ -166,6 +193,6 @@ public class ALECRestImpl implements ALECRest {
 
     private Response somethingWentWrong(Exception e) {
         LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity("something went wrong").build();
+        return Response.serverError().entity("something went wrong: " + e.getMessage()).build();
     }
 }

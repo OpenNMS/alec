@@ -28,6 +28,7 @@
 
 package org.opennms.alec;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ import javax.sql.DataSource;
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.KeyValueHolder;
 import org.junit.Test;
+import org.opennms.alec.datasource.api.SituationDatasource;
+import org.opennms.alec.datasource.common.StaticSituationDatasource;
 
 public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
@@ -53,7 +56,9 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
     @Override
     protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
         DataSource dataSource = new MockDataSource();
+        SituationDatasource situationDatasource = new StaticSituationDatasource(Collections.EMPTY_LIST);
         services.put(DataSource.class.getName(), asService(dataSource, null));
+        services.put(SituationDatasource.class.getName(), asService(situationDatasource, null));
     }
 
     @Test

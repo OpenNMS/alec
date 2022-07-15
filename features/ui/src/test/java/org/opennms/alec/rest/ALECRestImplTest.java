@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.data.DataStore;
+import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
@@ -46,6 +47,8 @@ public class ALECRestImplTest {
     @Mock
     DataStore dataStore;
     @Mock
+    SituationDatasource situationDatasource;
+    @Mock
     BundleContext bundleContext;
 
     private ObjectMapper objectMapper;
@@ -57,7 +60,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testPing() {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         try (Response result = underTest.ping()) {
             assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
             assertThat(result.getEntity(), equalTo("pong!!"));
@@ -66,9 +69,10 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
         when(dataStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of("true"));
+        when(dataStore.get(eq(KeyEnum.SITUATION.toString()), anyString())).thenReturn(Optional.of("situations"));
 
         try (Response result = underTest.getConfigurations()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
@@ -78,17 +82,19 @@ public class ALECRestImplTest {
             assertThat(configuration.getEngineParameter().getEpsilon(), equalTo(3d));
             assertThat(configuration.getEngineParameter().getDistanceMeasure(), equalTo("distanceMeasure"));
             assertThat(configuration.getEngineParameter().getEngine(), equalTo("dbscan"));
-            assertThat(configuration.getKeyValues().size(), is(1));
+            assertThat(configuration.getKeyValues().size(), is(2));
             assertThat(configuration.getKeyValues().get(0).getKey(), equalTo(KeyEnum.AGREEMENT));
             assertThat(configuration.getKeyValues().get(0).getValue(), equalTo("true"));
+            assertThat(configuration.getKeyValues().get(1).getKey(), equalTo(KeyEnum.SITUATION));
+            assertThat(configuration.getKeyValues().get(1).getValue(), equalTo("situations"));
         }
-        verify(dataStore, times(2)).get(anyString(), anyString());
+        verify(dataStore, times(3)).get(anyString(), anyString());
         verifyNoMoreInteractions(dataStore);
     }
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
@@ -106,7 +112,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -152,7 +158,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);

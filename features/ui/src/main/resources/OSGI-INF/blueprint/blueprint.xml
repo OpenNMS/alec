@@ -15,6 +15,7 @@
      This will automatically mount the endpoint over the REST API. -->
     <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
         <argument ref="dataStore"/>
+        <argument ref="directAlarmDatasource"/>
         <argument ref="blueprintBundleContext"/>
     </bean>
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
@@ -23,8 +24,11 @@
         </service-properties>
     </service>
 
-    <reference id="dataSource" interface="javax.sql.DataSource"/>
     <bean id="dataStore" class="org.opennms.alec.data.DataStore">
         <argument ref="dataSource"/>
     </bean>
+
+    <reference id="dataSource" interface="javax.sql.DataSource"/>
+    <reference id="directAlarmDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource"/>
+
 </blueprint>

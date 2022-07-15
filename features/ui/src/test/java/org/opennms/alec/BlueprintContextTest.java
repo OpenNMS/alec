@@ -36,7 +36,6 @@ import javax.sql.DataSource;
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.KeyValueHolder;
 import org.junit.Test;
-import org.opennms.features.distributed.kvstore.api.JsonStore;
 
 public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
@@ -53,8 +52,8 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
     @Override
     protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
-        JsonStore jsonStore = new MockJsonStore();
-        services.put(DataSource.class.getName(), asService(jsonStore, null));
+        DataSource dataSource = new MockDataSource();
+        services.put(DataSource.class.getName(), asService(dataSource, null));
     }
 
     @Test

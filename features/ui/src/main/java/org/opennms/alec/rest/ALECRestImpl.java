@@ -5,12 +5,12 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.DataStore;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.features.distributed.kvstore.api.JsonStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -23,12 +23,12 @@ public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
     public static final String ALEC_CONFIG = "ALEC_CONFIG";
 
-    private final JsonStore jsonStore;
+    private final DataStore dataStore;
     private final BundleContext bundleContext;
     private final ObjectMapper objectMapper;
 
-    public ALECRestImpl(JsonStore jsonStore, BundleContext bundleContext) {
-        this.jsonStore = jsonStore;
+    public ALECRestImpl(DataStore dataStore, BundleContext bundleContext) {
+        this.dataStore = dataStore;
         this.bundleContext = bundleContext;
         objectMapper = new ObjectMapper();
     }
@@ -43,7 +43,7 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("Get Configurations");
         ConfigurationImpl.Builder configuration = ConfigurationImpl.newBuilder();
         KeyEnum.stream().forEach(keyEnum -> {
-            String value = jsonStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
+            String value = (String) dataStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
             switch (keyEnum) {
                 case ENGINE:
                     try {
@@ -63,7 +63,7 @@ public class ALECRestImpl implements ALECRest {
     @Override
     public Response getConfiguration(KeyEnum keyEnum) {
         LOG.debug("Get Configuration {}", keyEnum);
-        String value = jsonStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
+        String value = (String) dataStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
         switch (keyEnum) {
             case ENGINE:
                 try {
@@ -82,7 +82,7 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("\n=============================================\n" +
                 "Set Configuration: {}\n" +
                 "=============================================", keyValue.toString());
-        return Response.ok().entity(jsonStore.put(keyValue.getKey().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
+        return Response.ok().entity(dataStore.put(keyValue.getKey().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
     }
 
     @Override
@@ -120,7 +120,7 @@ public class ALECRestImpl implements ALECRest {
     @Override
     public Response getEngineConfiguration() {
         try {
-            return Response.ok().entity(objectMapper.readValue(jsonStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG).orElse(""), EngineParameter.class)).build();
+            return Response.ok().entity(objectMapper.readValue((String) dataStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG).orElse(""), EngineParameter.class)).build();
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
@@ -128,7 +128,7 @@ public class ALECRestImpl implements ALECRest {
 
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
         return Response.ok()
-                .entity(jsonStore.put(KeyEnum.ENGINE.toString(),
+                .entity(dataStore.put(KeyEnum.ENGINE.toString(),
                         objectMapper.writeValueAsString(engineParameter),
                         ALEC_CONFIG))
                 .build();

@@ -28,154 +28,168 @@
 
 package org.opennms.alec.data;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.OptionalLong;
+import java.util.concurrent.CompletableFuture;
 
 import javax.sql.DataSource;
 
-public class DataStore {
-    private static final String TABLE_NAME = "alec";
+import org.opennms.integration.api.v1.distributed.KeyValueStore;
+
+public class DataStore implements KeyValueStore<String> {
+
     private static final String VALUE_COLUMN = "value";
     private static final String KEY_COLUMN = "key";
-    private static final String VERSION = "version";
+    private static final String CONTEXT_COLUMN = "context";
     private static final String LAST_UPDATED_COLUMN = "last_updated";
     private static final String EXPIRES_AT_COLUMN = "expires_at";
-    private static final String CONSTRAINT_PK = "alec_pkey";
 
     private final DataSource dataSource;
 
     public DataStore(DataSource dataSource) {
-        this.dataSource = Objects.requireNonNull(dataSource);
+        this.dataSource = dataSource;
     }
 
-    /**
-     * Check the result set to see if it has already expired due to TTL but has not been cleaned up yet. In this case we
-     * will want to treat the record as though it does not exist (it should be automatically cleaned up in the future).
-     */
-    private static boolean isExpired(ResultSet resultSet) throws SQLException {
-        long now = System.currentTimeMillis();
-        Timestamp expiresAt = resultSet.getTimestamp(EXPIRES_AT_COLUMN);
-
-        return expiresAt != null && expiresAt.getTime() < now;
-    }
-
-    private PreparedStatement getSelectStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format("SELECT %s, %s FROM %s WHERE %s = ? AND %s = ?",
-                VALUE_COLUMN, EXPIRES_AT_COLUMN, TABLE_NAME, KEY_COLUMN, VERSION));
-    }
-
-    private PreparedStatement getUpsertStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format(
-                "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?) " +
-                        "ON CONFLICT ON CONSTRAINT " + CONSTRAINT_PK +
-                        " DO UPDATE SET %s = ?, %s = ?, %s = ?",
-                TABLE_NAME, KEY_COLUMN, VERSION, LAST_UPDATED_COLUMN,
-                EXPIRES_AT_COLUMN, VALUE_COLUMN, LAST_UPDATED_COLUMN, EXPIRES_AT_COLUMN, VALUE_COLUMN
-        ));
-    }
-
-    private PreparedStatement getLastUpdatedStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format("SELECT %s, %s FROM %s WHERE %s = ? AND %s = ?",
-                LAST_UPDATED_COLUMN, EXPIRES_AT_COLUMN, TABLE_NAME, KEY_COLUMN, VERSION));
-    }
-
-    private PreparedStatement getEnumerateStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format("SELECT %s, %s, %s FROM %s WHERE %s = ?",
-                KEY_COLUMN, VALUE_COLUMN, EXPIRES_AT_COLUMN, TABLE_NAME, VERSION));
-    }
-
-    private PreparedStatement getDeleteStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format("DELETE FROM %s WHERE %s = ? AND %s = ?",
-                TABLE_NAME, KEY_COLUMN, VERSION));
-    }
-
-    private PreparedStatement getTruncateStatement(Connection connection) throws SQLException {
-        return connection.prepareStatement(String.format("DELETE FROM %s WHERE %s = ?",
-                TABLE_NAME, VERSION));
-    }
-
-    public long put(String key, String value, String version) {
-        return put(key, value, version, null);
-    }
-
-    public long put(String key, String value, String version, Integer ttlInSeconds) {
+    @Override
+    public long put(String key, String value, String context) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
 
         long now = System.currentTimeMillis();
 
-        withStatement(this::getUpsertStatement, upsertStatement -> {
-            // The below sets the prepared values for both the INSERT and UPDATE cases hence some values being
-            // repeated
+        try {
+            PreparedStatement upsertStatement = dataSource.getConnection().prepareStatement(String.format(
+                    "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?::JSON) ON " +
+                            "CONFLICT ON CONSTRAINT " + getPkConstraintName() + " DO UPDATE SET %s = ?, %s = ?, %s = ?::JSON",
+                            getTableName(), KEY_COLUMN, CONTEXT_COLUMN, LAST_UPDATED_COLUMN,
+                    EXPIRES_AT_COLUMN, VALUE_COLUMN, LAST_UPDATED_COLUMN, EXPIRES_AT_COLUMN, VALUE_COLUMN));
+
             upsertStatement.setString(1, key);
-            upsertStatement.setString(2, version);
+            upsertStatement.setString(2, context);
             upsertStatement.setTimestamp(3, new java.sql.Timestamp(now));
-            upsertStatement.setTimestamp(6, new java.sql.Timestamp(now));
-
-            if (ttlInSeconds != null) {
-                long expireTime = now + TimeUnit.MILLISECONDS.convert(ttlInSeconds, TimeUnit.SECONDS);
-                upsertStatement.setTimestamp(4, new java.sql.Timestamp(expireTime));
-                upsertStatement.setTimestamp(7, new java.sql.Timestamp(expireTime));
-            } else {
-                upsertStatement.setNull(4, Types.DATE);
-                upsertStatement.setNull(7, Types.DATE);
-            }
-
+            upsertStatement.setNull(4, Types.DATE);
             upsertStatement.setObject(5, value);
+            upsertStatement.setTimestamp(6, new java.sql.Timestamp(now));
+            upsertStatement.setNull(7, Types.DATE);
             upsertStatement.setObject(8, value);
-            return upsertStatement.execute();
-        });
+            upsertStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         return now;
     }
 
-    public Optional<String> get(String key, String version) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(version);
+    @Override
+    public long put(String s, String s2, String s1, Integer integer) {
+        return 0;
+    }
 
-        return withStatement(this::getSelectStatement, selectStatement -> {
+    @Override
+    public Optional get(String key, String context) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(context);
+        try {
+            PreparedStatement selectStatement = dataSource.getConnection().prepareStatement(String.format(
+                    "SELECT %s, %s FROM %s WHERE %s = ? AND %s = ?",
+                    VALUE_COLUMN, EXPIRES_AT_COLUMN, getTableName(), KEY_COLUMN, CONTEXT_COLUMN));
+
             selectStatement.setString(1, key);
-            selectStatement.setString(2, version);
+            selectStatement.setString(2, context);
 
             try (ResultSet resultSet = selectStatement.executeQuery()) {
                 if (!resultSet.next()) {
                     return Optional.empty();
                 }
 
-                // Return an empty result if we find an expired record
-                if (isExpired(resultSet)) {
-                    return Optional.empty();
-                }
-
                 return Optional.of(resultSet.getString(VALUE_COLUMN));
-            }
-        });
-    }
-
-    private <U> U withStatement(ConnectionToStatement connectionToStatement, StatementToResult<U> statementToResult) {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connectionToStatement.getStatement(connection)) {
-                return statementToResult.getResult(statement);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @FunctionalInterface
-    private interface StatementToResult<T> {
-        T getResult(PreparedStatement statement) throws SQLException;
+    private String getPkConstraintName() {
+        return "pk_kvstore_jsonb";
     }
 
-    @FunctionalInterface
-    private interface ConnectionToStatement {
-        PreparedStatement getStatement(Connection connection) throws SQLException;
+    private String getTableName() {
+        return "kvstore_jsonb";
+    }
+
+    @Override
+    public Optional<String> getIfStale(String s, String s1, long l) {
+        return Optional.empty();
+    }
+
+    @Override
+    public OptionalLong getLastUpdated(String s, String s1) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> enumerateContext(String s) {
+        return null;
+    }
+
+    @Override
+    public void delete(String s, String s1) {
+
+    }
+
+    @Override
+    public void truncateContext(String s) {
+
+    }
+
+    @Override
+    public CompletableFuture<Long> putAsync(String s, String s2, String s1) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Long> putAsync(String s, String s2, String s1, Integer integer) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Optional<String>> getAsync(String s, String s1) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Optional<String>> getIfStaleAsync(String s, String s1, long l) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<OptionalLong> getLastUpdatedAsync(String s, String s1) {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Map<String, String>> enumerateContextAsync(String s) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Void> deleteAsync(String s, String s1) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Void> truncateContextAsync(String s) {
+        return null;
     }
 }

@@ -26,12 +26,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.alec.data.DataStore;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.features.distributed.kvstore.api.JsonStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 public class ALECRestImplTest {
     @Mock
-    JsonStore jsonStore;
+    DataStore dataStore;
     @Mock
     BundleContext bundleContext;
 
@@ -57,7 +57,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testPing() {
-        ALECRestImpl underTest = new ALECRestImpl(jsonStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
         try (Response result = underTest.ping()) {
             assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
             assertThat(result.getEntity(), equalTo("pong!!"));
@@ -66,9 +66,9 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(jsonStore, bundleContext);
-        when(jsonStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
-        when(jsonStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of("true"));
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
+        when(dataStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of("true"));
 
         try (Response result = underTest.getConfigurations()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
@@ -82,14 +82,14 @@ public class ALECRestImplTest {
             assertThat(configuration.getKeyValues().get(0).getKey(), equalTo(KeyEnum.AGREEMENT));
             assertThat(configuration.getKeyValues().get(0).getValue(), equalTo("true"));
         }
-        verify(jsonStore, times(2)).get(anyString(), anyString());
-        verifyNoMoreInteractions(jsonStore);
+        verify(dataStore, times(2)).get(anyString(), anyString());
+        verifyNoMoreInteractions(dataStore);
     }
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(jsonStore, bundleContext);
-        when(jsonStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
@@ -100,13 +100,13 @@ public class ALECRestImplTest {
             assertThat("distanceMeasure", equalTo(engineParameter.getDistanceMeasure()));
             assertThat("dbscan", equalTo(engineParameter.getEngine()));
         }
-        verify(jsonStore, times(1)).get(anyString(), anyString());
-        verifyNoMoreInteractions(jsonStore);
+        verify(dataStore, times(1)).get(anyString(), anyString());
+        verifyNoMoreInteractions(dataStore);
     }
 
     @Test
     public void testSetEngineConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(jsonStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -119,7 +119,7 @@ public class ALECRestImplTest {
 
         ArgumentCaptor  argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-        when(jsonStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
+        when(dataStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
         when(bundleContext.getAllServiceReferences(anyString(), isNull())).thenAnswer(invocation -> {
             if(EngineRegistry.class.getCanonicalName().equals(invocation.getArgument(0))){
                 return driverServiceReferences;
@@ -142,17 +142,17 @@ public class ALECRestImplTest {
         try (Response result = underTest.setEngineConfiguration(getParameter().build())) {
             assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
         }
-        verify(jsonStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
+        verify(dataStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
         verify(bundleContext, times(2)).getAllServiceReferences(anyString(), isNull());
         verify(bundleContext, times(2)).getService(any(ServiceReference.class));
-        verifyNoMoreInteractions(bundleContext, jsonStore, driverServiceReference, engineServiceReference);
+        verifyNoMoreInteractions(bundleContext, dataStore, driverServiceReference, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().build())));
     }
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(jsonStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -165,7 +165,7 @@ public class ALECRestImplTest {
 
         ArgumentCaptor  argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-        when(jsonStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
+        when(dataStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
         when(bundleContext.getAllServiceReferences(anyString(), isNull())).thenAnswer(invocation -> {
             if(EngineRegistry.class.getCanonicalName().equals(invocation.getArgument(0))){
                 return driverServiceReferences;
@@ -188,10 +188,10 @@ public class ALECRestImplTest {
         try (Response result = underTest.setEngineConfiguration(getParameter().alpha(null).build())) {
             assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
         }
-        verify(jsonStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
+        verify(dataStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
         verify(bundleContext, times(2)).getAllServiceReferences(anyString(), isNull());
         verify(bundleContext, times(2)).getService(any(ServiceReference.class));
-        verifyNoMoreInteractions(bundleContext, jsonStore, driverServiceReference, engineServiceReference);
+        verifyNoMoreInteractions(bundleContext, dataStore, driverServiceReference, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().alpha(DBScanEngine.DEFAULT_ALPHA).build())));
     }

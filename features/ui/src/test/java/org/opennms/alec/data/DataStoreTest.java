@@ -2,7 +2,7 @@ package org.opennms.alec.data;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
@@ -21,20 +21,18 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class DataStoreTest {
+public class DataStoreTest {
     @Mock
     DataSource dataSource;
     @Mock
@@ -43,19 +41,18 @@ class DataStoreTest {
     private PreparedStatement prepareStatement;
     @Mock
     private ResultSet resultSet;
-    @InjectMocks
-    DataStore dataStore;
 
-    @BeforeEach
-    void setUp() throws SQLException {
+    @Before
+    public void setUp() throws Exception {
         when(dataSource.getConnection()).thenReturn(connection);
     }
 
     @Test
-    void testPut() throws SQLException {
+    public void testPut() throws SQLException {
+        DataStore underTest = new DataStore(dataSource);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         when(dataSource.getConnection().prepareStatement(anyString())).thenReturn(prepareStatement);
-        long result = dataStore.put("key", "value", "ALEC_CONFIG");
+        long result = underTest.put("key", "value", "ALEC_CONFIG");
         assertThat(result > 0L, is(true));
         verify(dataSource.getConnection()).prepareStatement(captor.capture());
         assertThat(captor.getValue(), equalTo("INSERT INTO kvstore_jsonb (key, context, last_updated, expires_at, value) VALUES (?, ?, ?, ?, ?::JSON) ON CONFLICT ON CONSTRAINT pk_kvstore_jsonb DO UPDATE SET last_updated = ?, expires_at = ?, value = ?::JSON"));
@@ -72,13 +69,14 @@ class DataStoreTest {
     }
 
     @Test
-    void testGet() throws SQLException {
+    public void testGet() throws SQLException {
+        DataStore underTest = new DataStore(dataSource);
         when(connection.prepareStatement(anyString())).thenReturn(prepareStatement);
         when(prepareStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getString(anyString())).thenReturn("test");
 
-        Optional<String> result = dataStore.get("key", "version");
-        Assertions.assertEquals(Optional.of("test"), result);
+        Optional<String> result = underTest.get("key", "version");
+        assertThat(Optional.of("test"), equalTo(result));
     }
 }

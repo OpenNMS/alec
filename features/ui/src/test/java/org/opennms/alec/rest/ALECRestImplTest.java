@@ -52,15 +52,16 @@ public class ALECRestImplTest {
     BundleContext bundleContext;
 
     private ObjectMapper objectMapper;
+    private ALECRestImpl underTest;
 
     @Before
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
+        underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
     }
 
     @Test
     public void testPing() {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         try (Response result = underTest.ping()) {
             assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
             assertThat(result.getEntity(), equalTo("pong!!"));
@@ -69,7 +70,6 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
         when(dataStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of("true"));
         when(dataStore.get(eq(KeyEnum.SITUATION.toString()), anyString())).thenReturn(Optional.of("situations"));
@@ -82,19 +82,18 @@ public class ALECRestImplTest {
             assertThat(configuration.getEngineParameter().getEpsilon(), equalTo(3d));
             assertThat(configuration.getEngineParameter().getDistanceMeasure(), equalTo("distanceMeasure"));
             assertThat(configuration.getEngineParameter().getEngine(), equalTo("dbscan"));
-            assertThat(configuration.getKeyValues().size(), is(2));
+            assertThat(configuration.getKeyValues().size(), is(4));
             assertThat(configuration.getKeyValues().get(0).getKey(), equalTo(KeyEnum.AGREEMENT));
             assertThat(configuration.getKeyValues().get(0).getValue(), equalTo("true"));
             assertThat(configuration.getKeyValues().get(1).getKey(), equalTo(KeyEnum.SITUATION));
             assertThat(configuration.getKeyValues().get(1).getValue(), equalTo("situations"));
         }
-        verify(dataStore, times(3)).get(anyString(), anyString());
+        verify(dataStore, times(5)).get(anyString(), anyString());
         verifyNoMoreInteractions(dataStore);
     }
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
         when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
@@ -112,8 +111,6 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
-
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
 
@@ -158,8 +155,6 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, situationDatasource, bundleContext);
-
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
 

@@ -1,5 +1,6 @@
 package org.opennms.alec.rest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -147,10 +148,58 @@ public class ALECRestImpl implements ALECRest {
     @Override
     public Response getSituations() {
         try {
-            return Response.ok().entity(objectMapper.readValue((String) dataStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG).orElse(""), new TypeReference<List<JacksonSituation>>(){})).build();
+            Optional optional = dataStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
+            if(optional.isEmpty()){
+                return Response.noContent().build();
+            }
+            return Response.ok().entity(objectMapper.readValue((String) optional.orElse(""), new TypeReference<List<JacksonSituation>>(){})).build();
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
+    }
+
+    @Override
+    public Response refusedSituation(String id, String body) {
+        List<Situation> refusedSituations = new ArrayList<> ();
+        Optional<Situation> refusedSituation = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+
+        if(refusedSituation.isPresent()){
+            try {
+                Optional alreadyRefusedSituations = dataStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
+                if(alreadyRefusedSituations.isPresent()) {
+                    List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyRefusedSituations.get(), new TypeReference<List<JacksonSituation>>() {});
+                    refusedSituations.addAll(jacksonSituations);
+                }
+                refusedSituations.add(refusedSituation.get());
+                return Response.ok(dataStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(refusedSituations), ALEC_CONFIG)).build();
+            } catch (JsonProcessingException e) {
+                return somethingWentWrong(e);
+            }
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
+    }
+
+    @Override
+    public Response acceptedSituation(String id, String body) {
+        List<Situation> acceptedSituations = new ArrayList<> ();
+        Optional<Situation> acceptedSituation = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+
+        if(acceptedSituation.isPresent()){
+            try {
+                Optional alreadyAcceptedSituations = dataStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
+                if(alreadyAcceptedSituations.isPresent()) {
+                    List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyAcceptedSituations.get(), new TypeReference<>() {});
+                    acceptedSituations.addAll(jacksonSituations);
+                }
+                acceptedSituations.add(acceptedSituation.get());
+                return Response.ok(dataStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALEC_CONFIG)).build();
+            } catch (JsonProcessingException e) {
+                return somethingWentWrong(e);
+            }
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
     }
 
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {

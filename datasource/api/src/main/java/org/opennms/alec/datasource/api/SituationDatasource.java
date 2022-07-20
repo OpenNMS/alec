@@ -34,6 +34,8 @@ public interface SituationDatasource {
 
     List<Situation> getSituations();
 
+    List<Situation> getSituationsWithAlarmId();
+
     void forwardSituation(Situation situation) throws Exception;
 
     void registerHandler(SituationHandler handler);

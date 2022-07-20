@@ -45,13 +45,13 @@ public class KeyValueImpl implements KeyValue {
 
     public static Builder newBuilder(KeyValue copy) {
         Builder builder = new Builder();
-        builder.keyEnum = copy.getKey();
+        builder.keyEnum = copy.getKeyEnum();
         builder.value = copy.getValue();
         return builder;
     }
 
     @Override
-    public KeyEnum getKey() {
+    public KeyEnum getKeyEnum() {
         return keyEnum;
     }
 
@@ -68,7 +68,7 @@ public class KeyValueImpl implements KeyValue {
         private Builder() {
         }
 
-        public Builder key(KeyEnum val) {
+        public Builder keyEnum(KeyEnum val) {
             keyEnum = val;
             return this;
         }

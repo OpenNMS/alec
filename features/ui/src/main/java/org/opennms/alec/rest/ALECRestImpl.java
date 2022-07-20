@@ -54,7 +54,7 @@ public class ALECRestImpl implements ALECRest {
                     break;
                 case AGREEMENT:
                 default:
-                    configuration.keyValue(KeyValueImpl.newBuilder().key(keyEnum).value(value).build());
+                    configuration.keyValue(KeyValueImpl.newBuilder().keyEnum(keyEnum).value(value).build());
             }
         });
         return Response.ok().entity(configuration.build()).build();
@@ -82,7 +82,7 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("\n=============================================\n" +
                 "Set Configuration: {}\n" +
                 "=============================================", keyValue.toString());
-        return Response.ok().entity(dataStore.put(keyValue.getKey().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
+        return Response.ok().entity(dataStore.put(keyValue.getKeyEnum().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
     }
 
     @Override

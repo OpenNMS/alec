@@ -28,10 +28,12 @@
 
 package org.opennms.alec.rest;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = KeyValueImpl.Builder.class)
+@JsonPropertyOrder({ "keyEnum", "value" })
 public interface KeyValue {
-    KeyEnum getKey();
+    KeyEnum getKeyEnum();
     String getValue();
 }

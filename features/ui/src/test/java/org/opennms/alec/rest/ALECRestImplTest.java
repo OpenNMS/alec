@@ -79,7 +79,7 @@ public class ALECRestImplTest {
             assertThat(configuration.getEngineParameter().getDistanceMeasure(), equalTo("distanceMeasure"));
             assertThat(configuration.getEngineParameter().getEngine(), equalTo("dbscan"));
             assertThat(configuration.getKeyValues().size(), is(1));
-            assertThat(configuration.getKeyValues().get(0).getKey(), equalTo(KeyEnum.AGREEMENT));
+            assertThat(configuration.getKeyValues().get(0).getKeyEnum(), equalTo(KeyEnum.AGREEMENT));
             assertThat(configuration.getKeyValues().get(0).getValue(), equalTo("true"));
         }
         verify(dataStore, times(2)).get(anyString(), anyString());
@@ -211,7 +211,7 @@ public class ALECRestImplTest {
 
     private KeyValueImpl.Builder getKeyValueAgreement() throws JsonProcessingException {
         return KeyValueImpl.newBuilder()
-                .key(KeyEnum.AGREEMENT)
+                .keyEnum(KeyEnum.AGREEMENT)
                 .value("true");
     }
 }

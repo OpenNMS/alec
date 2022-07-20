@@ -52,11 +52,11 @@ public class DataStoreTest {
         DataStore underTest = new DataStore(dataSource);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         when(dataSource.getConnection().prepareStatement(anyString())).thenReturn(prepareStatement);
-        long result = underTest.put("key", "value", "ALEC_CONFIG");
+        long result = underTest.put("keyEnum", "value", "ALEC_CONFIG");
         assertThat(result > 0L, is(true));
         verify(dataSource.getConnection()).prepareStatement(captor.capture());
         assertThat(captor.getValue(), equalTo("INSERT INTO kvstore_jsonb (key, context, last_updated, expires_at, value) VALUES (?, ?, ?, ?, ?::JSON) ON CONFLICT ON CONSTRAINT pk_kvstore_jsonb DO UPDATE SET last_updated = ?, expires_at = ?, value = ?::JSON"));
-        verify(prepareStatement, times(1)).setString(eq(1), eq("key"));
+        verify(prepareStatement, times(1)).setString(eq(1), eq("keyEnum"));
         verify(prepareStatement, times(1)).setString(eq(2), eq("ALEC_CONFIG"));
         verify(prepareStatement, times(1)).setTimestamp(eq(3), any(Timestamp.class));
         verify(prepareStatement, times(1)).setNull(eq(4), eq(Types.DATE));
@@ -76,7 +76,7 @@ public class DataStoreTest {
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getString(anyString())).thenReturn("test");
 
-        Optional<String> result = underTest.get("key", "version");
+        Optional<String> result = underTest.get("keyEnum", "version");
         assertThat(Optional.of("test"), equalTo(result));
     }
 }

@@ -69,8 +69,14 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response getConfiguration(KeyEnum keyEnum) {
-        LOG.debug("Get Configuration {}", keyEnum);
+    public Response getConfiguration(String key) {
+        LOG.debug("Get Configuration {}", key);
+        KeyEnum keyEnum;
+        try {
+            keyEnum = KeyEnum.valueOf(key.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return somethingWentWrong(e);
+        }
         String value = (String) dataStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
         switch (keyEnum) {
             case ENGINE:

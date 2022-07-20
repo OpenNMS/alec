@@ -23,8 +23,8 @@ public interface ALECRest {
     Response getConfigurations();
 
     @GET
-    @Path("/configuration")
-    Response getConfiguration(KeyEnum keyEnum);
+    @Path("/configuration/{key}")
+    Response getConfiguration(@PathParam("key") String key);
 
     @POST
     @Path("/configuration")

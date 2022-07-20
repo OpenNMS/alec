@@ -116,8 +116,8 @@ public class DBScanEngine extends AbstractClusterEngine {
     }
 
     @Override
-    public double getDistanceBetween(double t1, double t2, double distance) {
-        return distanceMeasure.compute(t1, t2, distance);
+    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
+        return distanceMeasure.compute(t1, t2, firstTimeA, firstTimeB, distance);
     }
 
     public DistanceMeasure getDistanceMeasure() {

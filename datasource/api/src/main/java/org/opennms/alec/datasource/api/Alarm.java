@@ -32,6 +32,8 @@ public interface Alarm {
 
     String getId();
 
+    long getFirstTime();
+
     long getTime();
 
     boolean isClear();

@@ -269,6 +269,11 @@ public class Driver implements EngineRegistry {
         }
     }
 
+    @Override
+    public EngineRegistry getEngineRegistry() {
+        return this;
+    }
+
     public void setEngineFactory(EngineFactory engineFactory) {
         this.engineFactory = engineFactory;
     }

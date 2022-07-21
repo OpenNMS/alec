@@ -15,6 +15,7 @@
     <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
         <argument ref="blueprintBundleContext"/>
         <argument ref="keyValueStore"/>
+        <argument ref="driver"/>
     </bean>
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
         <service-properties>
@@ -24,5 +25,7 @@
 
     <!--Key-value store -->
     <reference id="keyValueStore" interface="org.opennms.integration.api.v1.distributed.KeyValueStore" availability="optional"/>
+
+    <reference id="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 
 </blueprint>

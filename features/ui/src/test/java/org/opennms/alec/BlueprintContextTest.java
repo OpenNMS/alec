@@ -36,6 +36,7 @@ import java.util.Map;
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.KeyValueHolder;
 import org.junit.Test;
+import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 
 public class BlueprintContextTest extends CamelBlueprintTestSupport {
@@ -56,6 +57,9 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
         KeyValueStore<String> keyValueStore = mock(KeyValueStore.class);
         services.put(KeyValueStore.class.getName(), asService(keyValueStore, null));
+
+        EngineRegistry engineRegistry = mock(EngineRegistry.class);
+        services.put(EngineRegistry.class.getName(), asService(engineRegistry, null));
     }
 
     @Test

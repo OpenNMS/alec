@@ -1,7 +1,5 @@
 package org.opennms.alec.rest;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
@@ -32,11 +30,12 @@ public class ALECRestImpl implements ALECRest {
     private final BundleContext bundleContext;
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
+    private final Driver driver;
 
-    public ALECRestImpl(BundleContext bundleContext, KeyValueStore<String> kvStore) {
+    public ALECRestImpl(BundleContext bundleContext, KeyValueStore<String> kvStore, EngineRegistry engineRegistry) {
         this.bundleContext = bundleContext;
         this.kvStore = kvStore;
-
+        this.driver = (Driver) engineRegistry.getEngineRegistry();
         objectMapper = new ObjectMapper();
     }
 
@@ -75,29 +74,21 @@ public class ALECRestImpl implements ALECRest {
     public Response setEngineConfiguration(EngineParameter engineParameter) {
         LOG.debug("Set engine configuration: {}", engineParameter);
         try {
-            //Retrieve Driver, only one driver is registered
-            ServiceReference<?>[] engineRegistryRefs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
-            Optional<ServiceReference<?>> engineRegistryRef = Arrays.stream(engineRegistryRefs).findFirst();
-            if (engineRegistryRef.isPresent()) {
-                Driver driver = (Driver) bundleContext.getService(engineRegistryRef.get());
-
-                //Retrieve Engines list
-                ServiceReference<?>[] engineFactoryRefs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
-                for (ServiceReference<?> engineFactoryRef : engineFactoryRefs) {
-                    EngineFactory factory = (EngineFactory) bundleContext.getService(engineFactoryRef);
-                    if (engineParameter.getEngine().equals(factory.getName())) {
-                        switch (engineParameter.getEngine()) {
-                            case "dbscan":
-                                return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory));
-                            case "cluster":
-                            default:
-                                return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory));
-                        }
+            //Retrieve Engines list
+            ServiceReference<?>[] engineFactoryRefs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
+            for (ServiceReference<?> engineFactoryRef : engineFactoryRefs) {
+                EngineFactory factory = (EngineFactory) bundleContext.getService(engineFactoryRef);
+                if (engineParameter.getEngine().equals(factory.getName())) {
+                    switch (engineParameter.getEngine()) {
+                        case "dbscan":
+                            return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory));
+                        case "cluster":
+                        default:
+                            return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory));
                     }
                 }
-                return Response.serverError().entity("No Engine found !!").build();
             }
-            return Response.serverError().entity("No Driver found !!").build();
+            return Response.serverError().entity("No Engine found !!").build();
         } catch (Exception e) {
             return somethingWentWrong(e);
         }

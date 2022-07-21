@@ -165,7 +165,7 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response refusedSituation(String id, String body) {
+    public Response refusedSituation(String id) {
         List<Situation> refusedSituations = new ArrayList<> ();
         Optional<Situation> refusedSituation = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
@@ -187,7 +187,7 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response acceptedSituation(String id, String body) {
+    public Response acceptedSituation(String id) {
         List<Situation> acceptedSituations = new ArrayList<> ();
         Optional<Situation> acceptedSituation = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 

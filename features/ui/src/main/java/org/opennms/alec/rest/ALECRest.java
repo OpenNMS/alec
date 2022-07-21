@@ -48,9 +48,9 @@ public interface ALECRest {
 
     @POST
     @Path("situation/refused/{id}")
-    Response refusedSituation(@PathParam("id") String id, String body);
+    Response refusedSituation(@PathParam("id") String id);
 
     @POST
     @Path("situation/accepted/{id}")
-    Response acceptedSituation(@PathParam("id") String id, String body);
+    Response acceptedSituation(@PathParam("id") String id);
 }

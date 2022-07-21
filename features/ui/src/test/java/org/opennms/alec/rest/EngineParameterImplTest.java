@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.jackson.EngineParameter;
+import org.opennms.alec.jackson.EngineParameterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,7 @@ public class EngineParameterImplTest {
     private ObjectMapper objectMapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         objectMapper = new ObjectMapper();
     }
 

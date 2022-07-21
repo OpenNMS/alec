@@ -1,4 +1,4 @@
-package org.opennms.alec.rest;
+package org.opennms.alec.jackson;
 
 import java.util.Optional;
 import java.util.StringJoiner;

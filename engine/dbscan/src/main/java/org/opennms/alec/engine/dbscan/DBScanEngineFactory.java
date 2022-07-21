@@ -46,15 +46,15 @@ public class DBScanEngineFactory implements EngineFactory {
     private double epsilon;
     private double alpha;
     private double beta;
-    private String distanceMeasureFactory;
-    private BundleContext bundleContext;
+    private String distanceMeasureFactoryName;
+    private final BundleContext bundleContext;
 
-    public DBScanEngineFactory(double epsilon, double alpha, double beta, BundleContext bundleContext, String distanceMeasureFactory) {
+    public DBScanEngineFactory(double epsilon, double alpha, double beta, BundleContext bundleContext, String distanceMeasureFactoryName) {
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.beta = beta;
         this.bundleContext = bundleContext;
-        this.distanceMeasureFactory = distanceMeasureFactory;
+        this.distanceMeasureFactoryName = distanceMeasureFactoryName;
     }
 
     public DBScanEngineFactory() {
@@ -73,7 +73,7 @@ public class DBScanEngineFactory implements EngineFactory {
                 ServiceReference<?>[] distanceMeasureRefs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
                 for (ServiceReference<?> distanceMeasureRef : distanceMeasureRefs) {
                     DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(distanceMeasureRef);
-                    if (factory.getName().equalsIgnoreCase(distanceMeasureFactory)) {
+                    if (factory.getName().equalsIgnoreCase(distanceMeasureFactoryName)) {
                         return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
                     }
                 }
@@ -81,7 +81,7 @@ public class DBScanEngineFactory implements EngineFactory {
                 throw new RuntimeException(e);
             }
 
-            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactory, AlarmInSpaceAndTimeDistanceMeasureFactory.class.getCanonicalName());
+            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, AlarmInSpaceAndTimeDistanceMeasureFactory.class.getCanonicalName());
         }
         return new DBScanEngine(metrics, epsilon, alpha, beta, new AlarmInSpaceAndTimeDistanceMeasureFactory());
     }
@@ -110,11 +110,11 @@ public class DBScanEngineFactory implements EngineFactory {
         this.beta = beta;
     }
 
-    public void setDistanceMeasureFactory(String distanceMeasureFactory) {
-        this.distanceMeasureFactory = distanceMeasureFactory;
+    public void setDistanceMeasureFactoryName(String distanceMeasureFactoryName) {
+        this.distanceMeasureFactoryName = distanceMeasureFactoryName;
     }
 
-    public String getDistanceMeasureFactory() {
-        return distanceMeasureFactory;
+    public String getDistanceMeasureFactoryName() {
+        return distanceMeasureFactoryName;
     }
 }

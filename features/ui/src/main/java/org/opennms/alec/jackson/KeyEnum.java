@@ -26,14 +26,32 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.rest;
+package org.opennms.alec.jackson;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.stream.Stream;
 
-@JsonDeserialize(builder = KeyValueImpl.Builder.class)
-@JsonPropertyOrder({ "keyEnum", "value" })
-public interface KeyValue {
-    KeyEnum getKeyEnum();
-    String getValue();
+public enum KeyEnum {
+    ENGINE("ENGINE"),
+    AGREEMENT("AGREEMENT");
+
+    private final String key;
+
+    /**
+     * @param key
+     */
+    KeyEnum(final String key) {
+        this.key = key;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+        return key;
+    }
+
+    public static Stream<KeyEnum> stream() {
+        return Stream.of(KeyEnum.values());
+    }
 }

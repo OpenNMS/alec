@@ -26,18 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.rest;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.opennms.alec.jackson;
 
 public class ConfigurationImpl implements Configuration {
 
-    private List<KeyValue> keyValues;
-    private EngineParameter engineParameter;
+    private final Agreement agreement;
+    private final EngineParameter engineParameter;
 
     private ConfigurationImpl(Builder builder) {
-        keyValues = builder.keyValues;
+        agreement = builder.agreement;
         engineParameter = builder.engineParameter;
     }
 
@@ -47,14 +44,14 @@ public class ConfigurationImpl implements Configuration {
 
     public static Builder newBuilder(ConfigurationImpl copy) {
         Builder builder = new Builder();
-        builder.keyValues = copy.getKeyValues();
+        builder.agreement = copy.getAgreement();
         builder.engineParameter = copy.getEngineParameter();
         return builder;
     }
 
     @Override
-    public List<KeyValue> getKeyValues() {
-        return keyValues;
+    public Agreement getAgreement() {
+        return agreement;
     }
 
     @Override
@@ -63,22 +60,14 @@ public class ConfigurationImpl implements Configuration {
     }
 
     public static final class Builder {
-        private List<KeyValue> keyValues;
+        private Agreement agreement;
         private EngineParameter engineParameter;
 
         private Builder() {
         }
 
-        public Builder keyValue(KeyValue keyValue) {
-            if (keyValues == null) {
-                keyValues = new ArrayList<>();
-            }
-            keyValues.add(keyValue);
-            return this;
-        }
-
-        public Builder keyValues(List<KeyValue> val) {
-            keyValues = val;
+        public Builder agreement(Agreement val) {
+            agreement = val;
             return this;
         }
 

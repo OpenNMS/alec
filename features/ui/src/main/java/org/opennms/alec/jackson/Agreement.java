@@ -26,14 +26,11 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.rest;
-
-import java.util.List;
+package org.opennms.alec.jackson;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
-public interface Configuration {
-    List<KeyValue> getKeyValues();
-    EngineParameter getEngineParameter();
+@JsonDeserialize(builder = AgreementImpl.Builder.class)
+public interface Agreement {
+    boolean isAgreed();
 }

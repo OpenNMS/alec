@@ -26,32 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.rest;
+package org.opennms.alec.jackson;
 
-import java.util.stream.Stream;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public enum KeyEnum {
-    ENGINE("ENGINE"),
-    AGREEMENT("AGREEMENT");
-
-    private final String key;
-
-    /**
-     * @param key
-     */
-    KeyEnum(final String key) {
-        this.key = key;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return key;
-    }
-
-    public static Stream<KeyEnum> stream() {
-        return Stream.of(KeyEnum.values());
-    }
+@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
+public interface Configuration {
+    Agreement getAgreement();
+    EngineParameter getEngineParameter();
 }

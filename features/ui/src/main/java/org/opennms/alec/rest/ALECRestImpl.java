@@ -2,15 +2,21 @@ package org.opennms.alec.rest;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.DataStore;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.jackson.Agreement;
+import org.opennms.alec.jackson.ConfigurationImpl;
+import org.opennms.alec.jackson.EngineParameter;
+import org.opennms.alec.jackson.EngineParameterImpl;
+import org.opennms.alec.jackson.KeyEnum;
+import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
@@ -23,13 +29,14 @@ public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
     public static final String ALEC_CONFIG = "ALEC_CONFIG";
 
-    private final DataStore dataStore;
     private final BundleContext bundleContext;
     private final ObjectMapper objectMapper;
+    private final KeyValueStore<String> kvStore;
 
-    public ALECRestImpl(DataStore dataStore, BundleContext bundleContext) {
-        this.dataStore = dataStore;
+    public ALECRestImpl(BundleContext bundleContext, KeyValueStore<String> kvStore) {
         this.bundleContext = bundleContext;
+        this.kvStore = kvStore;
+
         objectMapper = new ObjectMapper();
     }
 
@@ -43,7 +50,7 @@ public class ALECRestImpl implements ALECRest {
         LOG.debug("Get Configurations");
         ConfigurationImpl.Builder configuration = ConfigurationImpl.newBuilder();
         KeyEnum.stream().forEach(keyEnum -> {
-            String value = (String) dataStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
+            String value = kvStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
             switch (keyEnum) {
                 case ENGINE:
                     try {
@@ -53,40 +60,20 @@ public class ALECRestImpl implements ALECRest {
                     }
                     break;
                 case AGREEMENT:
-                default:
-                    configuration.keyValue(KeyValueImpl.newBuilder().keyEnum(keyEnum).value(value).build());
+                    try {
+                        configuration.agreement(objectMapper.readValue(value, Agreement.class));
+                    } catch (JsonProcessingException e) {
+                        configuration.agreement(null);
+                    }
+                    break;
             }
         });
         return Response.ok().entity(configuration.build()).build();
     }
 
     @Override
-    public Response getConfiguration(KeyEnum keyEnum) {
-        LOG.debug("Get Configuration {}", keyEnum);
-        String value = (String) dataStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
-        switch (keyEnum) {
-            case ENGINE:
-                try {
-                    return Response.ok().entity(objectMapper.readValue(value, EngineParameter.class)).build();
-                } catch (JsonProcessingException e) {
-                    return somethingWentWrong(e);
-                }
-            case AGREEMENT:
-            default:
-                return Response.ok().entity(value).build();
-        }
-    }
-
-    @Override
-    public Response setConfiguration(KeyValue keyValue) {
-        LOG.debug("\n=============================================\n" +
-                "Set Configuration: {}\n" +
-                "=============================================", keyValue.toString());
-        return Response.ok().entity(dataStore.put(keyValue.getKeyEnum().toString(), keyValue.getValue(), ALEC_CONFIG)).build();
-    }
-
-    @Override
     public Response setEngineConfiguration(EngineParameter engineParameter) {
+        LOG.debug("Set engine configuration: {}", engineParameter);
         try {
             //Retrieve Driver, only one driver is registered
             ServiceReference<?>[] engineRegistryRefs = bundleContext.getAllServiceReferences(EngineRegistry.class.getCanonicalName(), null);
@@ -104,8 +91,7 @@ public class ALECRestImpl implements ALECRest {
                                 return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory));
                             case "cluster":
                             default:
-                                configureCluster(driver, (ClusterEngineFactory) factory);
-                                return storeEngineParameter(engineParameter);
+                                return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory));
                         }
                     }
                 }
@@ -119,19 +105,43 @@ public class ALECRestImpl implements ALECRest {
 
     @Override
     public Response getEngineConfiguration() {
+        LOG.debug("Get engine configuration");
         try {
-            return Response.ok().entity(objectMapper.readValue((String) dataStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG).orElse(""), EngineParameter.class)).build();
+            return Response.ok().entity(objectMapper.readValue(kvStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG).orElse(""), EngineParameter.class)).build();
+        } catch (JsonProcessingException e) {
+            return somethingWentWrong(e);
+        }
+    }
+
+    @Override
+    public Response setAgreementConfiguration(Agreement agreement) {
+        LOG.debug("Set agreement configuration: {}", agreement);
+        CompletableFuture<Long> future;
+        try {
+            future = kvStore.putAsync(KeyEnum.AGREEMENT.toString(),
+                    objectMapper.writeValueAsString(agreement),
+                    ALEC_CONFIG);
+        } catch (JsonProcessingException e) {
+            return somethingWentWrong(e);
+        }
+        return Response.ok(future.join()).build();
+    }
+
+    @Override
+    public Response getAgreementConfiguration() {
+        LOG.debug("Get agreement configuration");
+        try {
+            return Response.ok().entity(objectMapper.readValue(kvStore.get(KeyEnum.AGREEMENT.toString(), ALEC_CONFIG).orElse(""), Agreement.class)).build();
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
     }
 
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
-        return Response.ok()
-                .entity(dataStore.put(KeyEnum.ENGINE.toString(),
-                        objectMapper.writeValueAsString(engineParameter),
-                        ALEC_CONFIG))
-                .build();
+        CompletableFuture<Long> future = kvStore.putAsync(KeyEnum.ENGINE.toString(),
+                objectMapper.writeValueAsString(engineParameter),
+                ALEC_CONFIG);
+        return Response.ok(future.join()).build();
     }
 
     private EngineParameter configureCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {
@@ -149,7 +159,7 @@ public class ALECRestImpl implements ALECRest {
         dbScanEngineFactory.setAlpha(engineParameter.getAlpha());
         dbScanEngineFactory.setBeta(engineParameter.getBeta());
         dbScanEngineFactory.setEpsilon(engineParameter.getEpsilon());
-        dbScanEngineFactory.setDistanceMeasureFactory(engineParameter.getDistanceMeasure());
+        dbScanEngineFactory.setDistanceMeasureFactoryName(engineParameter.getDistanceMeasure());
         dbScanEngineFactory.createEngine(driver.getMetrics());
         driver.setEngineFactory(dbScanEngineFactory);
         driver.destroy();
@@ -159,13 +169,13 @@ public class ALECRestImpl implements ALECRest {
                 .alpha(dbScanEngineFactory.getAlpha())
                 .beta(dbScanEngineFactory.getBeta())
                 .epsilon(dbScanEngineFactory.getEpsilon())
-                .distanceMeasure(dbScanEngineFactory.getDistanceMeasureFactory())
+                .distanceMeasure(dbScanEngineFactory.getDistanceMeasureFactoryName())
                 .engine(dbScanEngineFactory.getName())
                 .build();
     }
 
-    private Response somethingWentWrong(Exception e) {
+    private Response somethingWentWrong(Throwable e) {
         LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity("something went wrong").build();
+        return Response.serverError().entity("something went wrong: " + e.getMessage()).build();
     }
 }

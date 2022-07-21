@@ -1,7 +1,6 @@
 package org.opennms.alec.rest;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,6 +14,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
@@ -26,12 +26,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opennms.alec.data.DataStore;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.jackson.Agreement;
+import org.opennms.alec.jackson.AgreementImpl;
+import org.opennms.alec.jackson.Configuration;
+import org.opennms.alec.jackson.EngineParameter;
+import org.opennms.alec.jackson.EngineParameterImpl;
+import org.opennms.alec.jackson.KeyEnum;
+import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -44,31 +50,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 public class ALECRestImplTest {
     @Mock
-    DataStore dataStore;
-    @Mock
     BundleContext bundleContext;
+    @Mock
+    KeyValueStore<String> kvStore;
+    @Mock
+    private CompletableFuture<Long> future;
 
     private ObjectMapper objectMapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         objectMapper = new ObjectMapper();
     }
 
     @Test
     public void testPing() {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
         try (Response result = underTest.ping()) {
-            assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
+            assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             assertThat(result.getEntity(), equalTo("pong!!"));
         }
     }
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
-        when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
-        when(dataStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of("true"));
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
+        when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
+        when(kvStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of(getAgreementAsString(getAgreement().build())));
 
         try (Response result = underTest.getConfigurations()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
@@ -78,18 +86,16 @@ public class ALECRestImplTest {
             assertThat(configuration.getEngineParameter().getEpsilon(), equalTo(3d));
             assertThat(configuration.getEngineParameter().getDistanceMeasure(), equalTo("distanceMeasure"));
             assertThat(configuration.getEngineParameter().getEngine(), equalTo("dbscan"));
-            assertThat(configuration.getKeyValues().size(), is(1));
-            assertThat(configuration.getKeyValues().get(0).getKeyEnum(), equalTo(KeyEnum.AGREEMENT));
-            assertThat(configuration.getKeyValues().get(0).getValue(), equalTo("true"));
+            assertThat(configuration.getAgreement().isAgreed(), equalTo(Boolean.TRUE));
         }
-        verify(dataStore, times(2)).get(anyString(), anyString());
-        verifyNoMoreInteractions(dataStore);
+        verify(kvStore, times(2)).get(anyString(), anyString());
+        verifyNoMoreInteractions(kvStore);
     }
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
-        when(dataStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
+        when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
@@ -100,13 +106,13 @@ public class ALECRestImplTest {
             assertThat("distanceMeasure", equalTo(engineParameter.getDistanceMeasure()));
             assertThat("dbscan", equalTo(engineParameter.getEngine()));
         }
-        verify(dataStore, times(1)).get(anyString(), anyString());
-        verifyNoMoreInteractions(dataStore);
+        verify(kvStore, times(1)).get(anyString(), anyString());
+        verifyNoMoreInteractions(kvStore);
     }
 
     @Test
     public void testSetEngineConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -117,9 +123,10 @@ public class ALECRestImplTest {
         Driver driver = mock(Driver.class);
         DBScanEngineFactory dbScanEngineFactory = spy(DBScanEngineFactory.class);
 
-        ArgumentCaptor  argumentCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-        when(dataStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
+        when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
+        when(future.join()).thenReturn(1L);
         when(bundleContext.getAllServiceReferences(anyString(), isNull())).thenAnswer(invocation -> {
             if(EngineRegistry.class.getCanonicalName().equals(invocation.getArgument(0))){
                 return driverServiceReferences;
@@ -140,19 +147,19 @@ public class ALECRestImplTest {
         when(driver.getMetrics()).thenReturn(new MetricRegistry());
 
         try (Response result = underTest.setEngineConfiguration(getParameter().build())) {
-            assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
+            assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         }
-        verify(dataStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
+        verify(kvStore, times(1)).putAsync(eq(KeyEnum.ENGINE.toString()), argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
         verify(bundleContext, times(2)).getAllServiceReferences(anyString(), isNull());
         verify(bundleContext, times(2)).getService(any(ServiceReference.class));
-        verifyNoMoreInteractions(bundleContext, dataStore, driverServiceReference, engineServiceReference);
+        verifyNoMoreInteractions(kvStore, bundleContext, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().build())));
     }
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws InvalidSyntaxException, JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(dataStore, bundleContext);
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
 
         ServiceReference<?> driverServiceReference = mock(ServiceReference.class);
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -163,9 +170,10 @@ public class ALECRestImplTest {
         Driver driver = mock(Driver.class);
         DBScanEngineFactory dbScanEngineFactory = spy(DBScanEngineFactory.class);
 
-        ArgumentCaptor  argumentCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
 
-        when(dataStore.put(anyString(), anyString(), anyString())).thenReturn(0L);
+        when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
+        when(future.join()).thenReturn(1L);
         when(bundleContext.getAllServiceReferences(anyString(), isNull())).thenAnswer(invocation -> {
             if(EngineRegistry.class.getCanonicalName().equals(invocation.getArgument(0))){
                 return driverServiceReferences;
@@ -186,14 +194,39 @@ public class ALECRestImplTest {
         when(driver.getMetrics()).thenReturn(new MetricRegistry());
 
         try (Response result = underTest.setEngineConfiguration(getParameter().alpha(null).build())) {
-            assertThat(Response.Status.OK.getStatusCode(), equalTo(result.getStatus()));
+            assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         }
-        verify(dataStore, times(1)).put(eq(KeyEnum.ENGINE.toString()), (String) argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
+        verify(kvStore, times(1)).putAsync(eq(KeyEnum.ENGINE.toString()), argumentCaptor.capture(), eq(ALECRestImpl.ALEC_CONFIG));
         verify(bundleContext, times(2)).getAllServiceReferences(anyString(), isNull());
         verify(bundleContext, times(2)).getService(any(ServiceReference.class));
-        verifyNoMoreInteractions(bundleContext, dataStore, driverServiceReference, engineServiceReference);
+        verifyNoMoreInteractions(kvStore, bundleContext, driverServiceReference, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().alpha(DBScanEngine.DEFAULT_ALPHA).build())));
+    }
+
+    @Test
+    public void testSetAgreementConfiguration() {
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
+
+        when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
+        when(future.join()).thenReturn(1L);
+
+        try (Response result = underTest.setAgreementConfiguration(getAgreement().build())) {
+            assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
+        }
+    }
+
+    @Test
+    public void testGetAgreementConfiguration() throws JsonProcessingException {
+        ALECRestImpl underTest = new ALECRestImpl(bundleContext, kvStore);
+
+        when(kvStore.get(anyString(), anyString())).thenReturn(Optional.ofNullable(getAgreementAsString(getAgreement().build())));
+
+        try (Response result = underTest.getAgreementConfiguration()) {
+            assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
+            Agreement agreement = (Agreement)  result.getEntity();
+            assertThat(Boolean.TRUE, equalTo(agreement.isAgreed()));
+        }
     }
 
     private EngineParameterImpl.Builder getParameter() {
@@ -205,13 +238,16 @@ public class ALECRestImplTest {
                 .engine("dbscan");
     }
 
+    private AgreementImpl.Builder getAgreement() {
+        return AgreementImpl.newBuilder()
+                .agreed(true);
+    }
+
     private String getParameterAsString(EngineParameter engineParameter) throws JsonProcessingException {
         return objectMapper.writeValueAsString(engineParameter);
     }
 
-    private KeyValueImpl.Builder getKeyValueAgreement() throws JsonProcessingException {
-        return KeyValueImpl.newBuilder()
-                .keyEnum(KeyEnum.AGREEMENT)
-                .value("true");
+    private String getAgreementAsString(Agreement agreement) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(agreement);
     }
 }

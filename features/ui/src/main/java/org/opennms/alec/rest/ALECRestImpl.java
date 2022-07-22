@@ -177,7 +177,8 @@ public class ALECRestImpl implements ALECRest {
                     refusedSituations.addAll(jacksonSituations);
                 }
                 refusedSituations.add(refusedSituation.get());
-                return Response.ok(dataStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(refusedSituations), ALEC_CONFIG)).build();
+                long ret = dataStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(refusedSituations), ALEC_CONFIG);
+                return Response.ok().entity(ret).build();
             } catch (JsonProcessingException e) {
                 return somethingWentWrong(e);
             }
@@ -199,7 +200,8 @@ public class ALECRestImpl implements ALECRest {
                     acceptedSituations.addAll(jacksonSituations);
                 }
                 acceptedSituations.add(acceptedSituation.get());
-                return Response.ok(dataStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALEC_CONFIG)).build();
+                long ret = dataStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALEC_CONFIG);
+                return Response.ok().entity(ret).build();
             } catch (JsonProcessingException e) {
                 return somethingWentWrong(e);
             }

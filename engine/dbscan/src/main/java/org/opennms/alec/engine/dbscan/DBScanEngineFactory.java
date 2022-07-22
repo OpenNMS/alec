@@ -28,12 +28,12 @@
 
 package org.opennms.alec.engine.dbscan;
 
+import java.util.Map;
+import java.util.Optional;
+
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,18 +47,18 @@ public class DBScanEngineFactory implements EngineFactory {
     private double alpha;
     private double beta;
     private String distanceMeasureFactoryName;
-    private final BundleContext bundleContext;
+    private final AlarmInSpaceAndTimeDistanceMeasureFactory alarmInSpaceAndTimeDistanceMeasureFactory;
+    private final Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap;
 
-    public DBScanEngineFactory(double epsilon, double alpha, double beta, BundleContext bundleContext, String distanceMeasureFactoryName) {
+    public DBScanEngineFactory(double alpha, double beta, double epsilon, String distanceMeasureFactoryName,
+                               AlarmInSpaceAndTimeDistanceMeasureFactory alarmInSpaceAndTimeDistanceMeasureFactory,
+                               Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap) {
         this.epsilon = epsilon;
         this.alpha = alpha;
         this.beta = beta;
-        this.bundleContext = bundleContext;
         this.distanceMeasureFactoryName = distanceMeasureFactoryName;
-    }
-
-    public DBScanEngineFactory() {
-        this(DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, null, DBScanEngine.DEFAULT_DISTANCE_MEASURE);
+        this.alarmInSpaceAndTimeDistanceMeasureFactory = alarmInSpaceAndTimeDistanceMeasureFactory;
+        this.distanceMeasureFactoryMap = distanceMeasureFactoryMap;
     }
 
     @Override
@@ -68,22 +68,23 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
-        if(bundleContext != null) {
-            try {
-                ServiceReference<?>[] distanceMeasureRefs = bundleContext.getAllServiceReferences(DistanceMeasureFactory.class.getCanonicalName(), null);
-                for (ServiceReference<?> distanceMeasureRef : distanceMeasureRefs) {
-                    DistanceMeasureFactory factory = (DistanceMeasureFactory) bundleContext.getService(distanceMeasureRef);
-                    if (factory.getName().equalsIgnoreCase(distanceMeasureFactoryName)) {
-                        return new DBScanEngine(metrics, epsilon, alpha, beta, factory);
-                    }
-                }
-            } catch (InvalidSyntaxException e) {
-                throw new RuntimeException(e);
-            }
-
-            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, AlarmInSpaceAndTimeDistanceMeasureFactory.class.getCanonicalName());
+        Optional<DistanceMeasureFactory> factory = distanceMeasureFactoryMap.entrySet()
+                .stream()
+                .filter(e -> distanceMeasureFactoryName.equals(e.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst();
+        if(factory.isPresent()) {
+            return new DBScanEngine(metrics, epsilon, alpha, beta, factory.get());
+        } else {
+            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, alarmInSpaceAndTimeDistanceMeasureFactory.getName());
+            this.distanceMeasureFactoryName = alarmInSpaceAndTimeDistanceMeasureFactory.getName();
+            return new DBScanEngine(metrics, epsilon, alpha, beta, alarmInSpaceAndTimeDistanceMeasureFactory);
         }
-        return new DBScanEngine(metrics, epsilon, alpha, beta, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+    }
+
+    @Override
+    public EngineFactory getEngineFactory() {
+        return this;
     }
 
     public double getEpsilon() {

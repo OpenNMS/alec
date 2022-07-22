@@ -1,5 +1,7 @@
 package org.opennms.alec.rest;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
@@ -15,8 +17,6 @@ import org.opennms.alec.jackson.EngineParameter;
 import org.opennms.alec.jackson.EngineParameterImpl;
 import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,15 +27,15 @@ public class ALECRestImpl implements ALECRest {
     private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
     public static final String ALEC_CONFIG = "ALEC_CONFIG";
 
-    private final BundleContext bundleContext;
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
+    private final List<EngineFactory> engineFactories;
     private final Driver driver;
 
-    public ALECRestImpl(BundleContext bundleContext, KeyValueStore<String> kvStore, EngineRegistry engineRegistry) {
-        this.bundleContext = bundleContext;
+    public ALECRestImpl(KeyValueStore<String> kvStore, EngineRegistry engineRegistry, List<EngineFactory> engineFactories) {
         this.kvStore = kvStore;
         this.driver = (Driver) engineRegistry.getEngineRegistry();
+        this.engineFactories = engineFactories;
         objectMapper = new ObjectMapper();
     }
 
@@ -74,18 +74,17 @@ public class ALECRestImpl implements ALECRest {
     public Response setEngineConfiguration(EngineParameter engineParameter) {
         LOG.debug("Set engine configuration: {}", engineParameter);
         try {
-            //Retrieve Engines list
-            ServiceReference<?>[] engineFactoryRefs = bundleContext.getAllServiceReferences(EngineFactory.class.getCanonicalName(), null);
-            for (ServiceReference<?> engineFactoryRef : engineFactoryRefs) {
-                EngineFactory factory = (EngineFactory) bundleContext.getService(engineFactoryRef);
-                if (engineParameter.getEngine().equals(factory.getName())) {
-                    switch (engineParameter.getEngine()) {
-                        case "dbscan":
-                            return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory));
-                        case "cluster":
-                        default:
-                            return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory));
-                    }
+            String engineName = engineParameter.getEngineName();
+            Optional<EngineFactory> factory = engineFactories.stream()
+                    .filter(engineFactory -> engineName.equals(engineFactory.getName()))
+                    .findFirst();
+            if(factory.isPresent()) {
+                switch (engineName) {
+                    case "dbscan":
+                        return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory.get().getEngineFactory()));
+                    case "cluster":
+                    default:
+                        return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory.get().getEngineFactory()));
                 }
             }
             return Response.serverError().entity("No Engine found !!").build();
@@ -136,13 +135,12 @@ public class ALECRestImpl implements ALECRest {
     }
 
     private EngineParameter configureCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {
-        clusterEngineFactory.createEngine(driver.getMetrics());
         driver.setEngineFactory(clusterEngineFactory);
         driver.destroy();
         driver.initAsync();
 
         return EngineParameterImpl.newBuilder()
-                .engine(clusterEngineFactory.getName())
+                .engineName(clusterEngineFactory.getName())
                 .build();
     }
 
@@ -150,8 +148,7 @@ public class ALECRestImpl implements ALECRest {
         dbScanEngineFactory.setAlpha(engineParameter.getAlpha());
         dbScanEngineFactory.setBeta(engineParameter.getBeta());
         dbScanEngineFactory.setEpsilon(engineParameter.getEpsilon());
-        dbScanEngineFactory.setDistanceMeasureFactoryName(engineParameter.getDistanceMeasure());
-        dbScanEngineFactory.createEngine(driver.getMetrics());
+        dbScanEngineFactory.setDistanceMeasureFactoryName(engineParameter.getDistanceMeasureName());
         driver.setEngineFactory(dbScanEngineFactory);
         driver.destroy();
         driver.initAsync();
@@ -160,8 +157,8 @@ public class ALECRestImpl implements ALECRest {
                 .alpha(dbScanEngineFactory.getAlpha())
                 .beta(dbScanEngineFactory.getBeta())
                 .epsilon(dbScanEngineFactory.getEpsilon())
-                .distanceMeasure(dbScanEngineFactory.getDistanceMeasureFactoryName())
-                .engine(dbScanEngineFactory.getName())
+                .distanceMeasureName(dbScanEngineFactory.getDistanceMeasureFactoryName())
+                .engineName(dbScanEngineFactory.getName())
                 .build();
     }
 

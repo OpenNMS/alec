@@ -13,10 +13,11 @@
     <!-- Build and expose the JAX-RS annotated webhook handler.
      This will automatically mount the endpoint over the REST API. -->
     <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
-        <argument ref="blueprintBundleContext"/>
         <argument ref="keyValueStore"/>
         <argument ref="driver"/>
+        <argument ref="engineFactories"/>
     </bean>
+
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
         <service-properties>
             <entry key="application-path" value="/rest" />
@@ -28,4 +29,6 @@
 
     <reference id="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 
+    <!--engines list    -->
+    <reference-list id="engineFactories" interface="org.opennms.alec.engine.api.EngineFactory"/>
 </blueprint>

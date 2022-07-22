@@ -77,9 +77,6 @@ public class DBScanEngine extends AbstractClusterEngine {
     public static final String DEFAULT_DISTANCE_MEASURE = "alarminspaceandtimedistance";
     private final double epsilon;
     private final DistanceMeasure distanceMeasure;
-    public DBScanEngine(MetricRegistry metrics) {
-        this(metrics, DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
-    }
 
     public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta, DistanceMeasureFactory distanceMeasureFactory) {
         super(metrics);

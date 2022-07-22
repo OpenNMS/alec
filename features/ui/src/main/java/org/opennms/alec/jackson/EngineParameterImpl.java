@@ -12,15 +12,15 @@ public class EngineParameterImpl implements EngineParameter {
     private final Double alpha;
     private final Double beta;
     private final Double epsilon;
-    private final String distanceMeasure;
-    private final String engine;
+    private final String distanceMeasureName;
+    private final String engineName;
 
     private EngineParameterImpl(Builder builder) {
         alpha = builder.alpha;
         beta = builder.beta;
         epsilon = builder.epsilon;
-        distanceMeasure = builder.distanceMeasure;
-        engine = builder.engine;
+        distanceMeasureName = builder.distanceMeasureName;
+        engineName = builder.engineName;
     }
 
     public static Builder newBuilder() {
@@ -32,8 +32,8 @@ public class EngineParameterImpl implements EngineParameter {
         builder.alpha = copy.getAlpha();
         builder.beta = copy.getBeta();
         builder.epsilon = copy.getEpsilon();
-        builder.distanceMeasure = copy.getDistanceMeasure();
-        builder.engine = copy.getEngine();
+        builder.distanceMeasureName = copy.getDistanceMeasureName();
+        builder.engineName = copy.getEngineName();
         return builder;
     }
 
@@ -65,17 +65,17 @@ public class EngineParameterImpl implements EngineParameter {
     }
 
     @Override
-    public String getDistanceMeasure() {
-        if(Optional.ofNullable(distanceMeasure).isPresent()) {
-            return distanceMeasure;
+    public String getDistanceMeasureName() {
+        if(Optional.ofNullable(distanceMeasureName).isPresent()) {
+            return distanceMeasureName;
         } else {
             return DBScanEngine.DEFAULT_DISTANCE_MEASURE;
         }
     }
 
     @Override
-    public String getEngine() {
-        return engine;
+    public String getEngineName() {
+        return engineName;
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -83,18 +83,18 @@ public class EngineParameterImpl implements EngineParameter {
         private Double alpha;
         private Double beta;
         private Double epsilon;
-        private String distanceMeasure;
-        private String engine;
+        private String distanceMeasureName;
+        private String engineName;
 
         private Builder() {
         }
 
-        public Builder(Double alpha, Double beta, Double epsilon, String distanceMeasure, String engine) {
+        public Builder(Double alpha, Double beta, Double epsilon, String distanceMeasureName, String engineName) {
             this.alpha = alpha;
             this.beta = beta;
             this.epsilon = epsilon;
-            this.distanceMeasure = distanceMeasure;
-            this.engine = engine;
+            this.distanceMeasureName = distanceMeasureName;
+            this.engineName = engineName;
         }
 
         public Builder alpha(Double val) {
@@ -112,13 +112,13 @@ public class EngineParameterImpl implements EngineParameter {
             return this;
         }
 
-        public Builder distanceMeasure(String val) {
-            distanceMeasure = val;
+        public Builder distanceMeasureName(String val) {
+            distanceMeasureName = val;
             return this;
         }
 
-        public Builder engine(String val) {
-            engine = val;
+        public Builder engineName(String val) {
+            engineName = val;
             return this;
         }
 
@@ -133,8 +133,8 @@ public class EngineParameterImpl implements EngineParameter {
                 .add("alpha=" + alpha)
                 .add("beta=" + beta)
                 .add("epsilon=" + epsilon)
-                .add("distanceMeasure='" + distanceMeasure + "'")
-                .add("engine='" + engine + "'")
+                .add("distanceMeasureName='" + distanceMeasureName + "'")
+                .add("engineName='" + engineName + "'")
                 .toString();
     }
 }

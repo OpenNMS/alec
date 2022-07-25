@@ -28,14 +28,16 @@
 
 package org.opennms.alec;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.Dictionary;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.KeyValueHolder;
 import org.junit.Test;
+import org.opennms.alec.engine.api.EngineRegistry;
+import org.opennms.integration.api.v1.distributed.KeyValueStore;
 
 public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
@@ -52,8 +54,12 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
     @Override
     protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
-        DataSource dataSource = new MockDataSource();
-        services.put(DataSource.class.getName(), asService(dataSource, null));
+
+        KeyValueStore<String> keyValueStore = mock(KeyValueStore.class);
+        services.put(KeyValueStore.class.getName(), asService(keyValueStore, null));
+
+        EngineRegistry engineRegistry = mock(EngineRegistry.class);
+        services.put(EngineRegistry.class.getName(), asService(engineRegistry, null));
     }
 
     @Test

@@ -8,6 +8,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.jackson.Agreement;
+import org.opennms.alec.jackson.EngineParameter;
+
 @Path("alec")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
@@ -21,14 +24,6 @@ public interface ALECRest {
     @Path("/configurations")
     Response getConfigurations();
 
-    @GET
-    @Path("/configuration")
-    Response getConfiguration(KeyEnum keyEnum);
-
-    @POST
-    @Path("/configuration")
-    Response setConfiguration(KeyValue keyValue);
-
     @POST
     @Path("/engine/configuration")
     Response setEngineConfiguration(EngineParameter engineParameter);
@@ -36,4 +31,12 @@ public interface ALECRest {
     @GET
     @Path("/engine/configuration")
     Response getEngineConfiguration();
+
+    @POST
+    @Path("/agreement/configuration")
+    Response setAgreementConfiguration(Agreement agreement);
+
+    @GET
+    @Path("/agreement/configuration")
+    Response getAgreementConfiguration();
 }

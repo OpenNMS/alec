@@ -17,11 +17,16 @@
     <!-- Create and expose the engine factory -->
     <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="10">
         <bean class="org.opennms.alec.engine.dbscan.DBScanEngineFactory">
-            <argument ref="blueprintBundleContext"/>
-            <argument value="${epsilon}"/>
             <argument value="${alpha}"/>
             <argument value="${beta}"/>
+            <argument value="${epsilon}"/>
             <argument value="${distanceMeasure}"/>
+            <argument ref="alarmInSpaceAndTimeDistanceMeasureFactory"/>
+            <argument>
+                <map>
+                    <entry key="alarminspaceandtimedistance" value-ref="alarmInSpaceAndTimeDistanceMeasureFactory"/>
+                </map>
+            </argument>
         </bean>
     </service>
     <service id="hellingerDistanceMeasure" interface="org.opennms.alec.engine.api.DistanceMeasureFactory">

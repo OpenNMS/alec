@@ -45,4 +45,9 @@ public class ClusterEngineFactory implements EngineFactory {
         return new ClusterEngine(metrics);
     }
 
+    @Override
+    public EngineFactory getEngineFactory() {
+        return this;
+    }
+
 }

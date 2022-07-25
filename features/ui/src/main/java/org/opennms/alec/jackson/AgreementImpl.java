@@ -26,60 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.rest;
+package org.opennms.alec.jackson;
 
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class KeyValueImpl implements KeyValue {
-    private KeyEnum keyEnum;
-    private String value;
+public class AgreementImpl implements Agreement {
+    private final boolean agreed;
 
-    private KeyValueImpl(Builder builder) {
-        keyEnum = builder.keyEnum;
-        value = builder.value;
+    private AgreementImpl(Builder builder) {
+        agreed = builder.agreed;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public static Builder newBuilder(KeyValue copy) {
+    public static Builder newBuilder(AgreementImpl copy) {
         Builder builder = new Builder();
-        builder.keyEnum = copy.getKeyEnum();
-        builder.value = copy.getValue();
+        builder.agreed = copy.isAgreed();
         return builder;
     }
 
     @Override
-    public KeyEnum getKeyEnum() {
-        return keyEnum;
+    public boolean isAgreed() {
+        return agreed;
     }
 
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
-        private KeyEnum keyEnum;
-        private String value;
+        @JsonProperty("agreed")
+        private boolean agreed;
 
         private Builder() {
         }
 
-        public Builder keyEnum(KeyEnum val) {
-            keyEnum = val;
+        public Builder agreed(boolean val) {
+            agreed = val;
             return this;
         }
 
-        public Builder value(String val) {
-            value = val;
-            return this;
-        }
-
-        public KeyValueImpl build() {
-            return new KeyValueImpl(this);
+        public AgreementImpl build() {
+            return new AgreementImpl(this);
         }
     }
 }

@@ -40,6 +40,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -65,6 +66,8 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
 import com.codahale.metrics.MetricRegistry;
@@ -79,7 +82,7 @@ public class Level1EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new DBScanEngineFactory() },
+                { new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, DBScanEngine.DEFAULT_EPSILON, "", new AlarmInSpaceAndTimeDistanceMeasureFactory(), Collections.EMPTY_MAP) },
                 { new ClusterEngineFactory() }
         });
     }
@@ -137,7 +140,7 @@ public class Level1EngineComplianceTest {
         // Generate some noisy alarms. We need to ensure that these:
         // * Are the same from one test run to another (i.e. no random value)
         // * They will generate 1 or more situations
-        if(!"cluster".equals(factory.getName())) {
+        if (!"cluster".equals(factory.getName())) {
             final List<Alarm> alarms = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
                 MockAlarmBuilder builder = new MockAlarmBuilder()

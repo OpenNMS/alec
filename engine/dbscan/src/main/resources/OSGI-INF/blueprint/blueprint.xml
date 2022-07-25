@@ -25,6 +25,7 @@
             <argument>
                 <map>
                     <entry key="alarminspaceandtimedistance" value-ref="alarmInSpaceAndTimeDistanceMeasureFactory"/>
+                    <entry key="hellinger" value-ref="hellingerDistanceMeasureFactory"/>
                 </map>
             </argument>
         </bean>

@@ -395,6 +395,16 @@
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jakarta.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opennms.alec.features</groupId>
+                <artifactId>org.opennms.alec.features.ui</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opennms.alec.engine</groupId>
+                <artifactId>org.opennms.alec.engine.jackson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

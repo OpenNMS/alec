@@ -35,9 +35,11 @@ import com.codahale.metrics.MetricRegistry;
 
 public class ClusterEngineFactory implements EngineFactory {
 
+    public static final String CLUSTER = "cluster";
+
     @Override
     public String getName() {
-        return "cluster";
+        return CLUSTER;
     }
 
     @Override

@@ -7,10 +7,13 @@
     <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
 
     <!-- Engine -->
-    <reference id="engineFactory" interface="org.opennms.alec.engine.api.EngineFactory" />
+    <reference-list id="engineFactories" interface="org.opennms.alec.engine.api.EngineFactory" />
 
     <!-- Situation Processor -->
     <reference id="situationProcessorFactory" interface="org.opennms.alec.processor.api.SituationProcessorFactory"/>
+
+    <!--Key-value store -->
+    <reference id="keyValueStore" interface="org.opennms.integration.api.v1.distributed.KeyValueStore" availability="optional"/>
 
     <bean id="driver" class="org.opennms.alec.driver.main.Driver" init-method="init" destroy-method="destroy">
         <argument ref="blueprintBundleContext"/>
@@ -18,8 +21,9 @@
         <argument ref="alarmFeedbackDatasource"/>
         <argument ref="inventoryDatasource"/>
         <argument ref="situationDatasource"/>
-        <argument ref="engineFactory"/>
+        <argument ref="engineFactories"/>
         <argument ref="situationProcessorFactory"/>
+        <argument ref="keyValueStore"/>
     </bean>
     <service ref="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 

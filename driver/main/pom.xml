@@ -48,7 +48,15 @@
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jmx</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.jackson</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -70,5 +78,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

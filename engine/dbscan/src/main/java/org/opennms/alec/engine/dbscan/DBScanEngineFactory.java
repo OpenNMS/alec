@@ -42,6 +42,7 @@ import com.codahale.metrics.MetricRegistry;
 public class DBScanEngineFactory implements EngineFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBScanEngineFactory.class);
+    public static final String DBSCAN = "dbscan";
 
     private double epsilon;
     private double alpha;
@@ -63,7 +64,7 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public String getName() {
-        return "dbscan";
+        return DBSCAN;
     }
 
     @Override

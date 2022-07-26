@@ -101,11 +101,16 @@
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning/${project.version}</bundle>
     </feature>
 
+    <feature name="alec-engine-jackson" description="ALEC :: Engine :: Jackson" version="${project.version}">
+        <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.jackson/${project.version}</bundle>
+    </feature>
+
     <!-- Drivers -->
 
     <feature name="alec-driver-main" description="ALEC :: Driver :: Main" version="${project.version}">
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <feature version="${project.version}">alec-engine-api</feature>
+        <feature version="${project.version}">alec-engine-jackson</feature>
         <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.main/${project.version}</bundle>
     </feature>

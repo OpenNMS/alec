@@ -1,4 +1,4 @@
-package org.opennms.alec.rest;
+package org.opennms.alec.engine.jackson;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -7,9 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
-import org.opennms.alec.jackson.EngineParameter;
-import org.opennms.alec.jackson.EngineParameterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +16,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(JUnit4.class)
-public class EngineParameterImplTest {
+public class JacksonEngineParameterTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EngineParameterImplTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JacksonEngineParameterTest.class);
     private ObjectMapper objectMapper;
 
     @Before
@@ -29,7 +28,7 @@ public class EngineParameterImplTest {
 
     @Test
     public void serializeSimpleString() throws JsonProcessingException {
-        EngineParameter parameter = EngineParameterImpl.newBuilder()
+        EngineParameter parameter = JacksonEngineParameter.newBuilder()
                 .alpha(1d)
                 .beta(2d)
                 .epsilon(3d)
@@ -45,7 +44,7 @@ public class EngineParameterImplTest {
     @Test
     public void deserializeSimpleStringBuilder() throws JsonProcessingException {
         String json = "{\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"distanceMeasureName\":\"test\",\"engineName\":\"dbscan\"}";
-        EngineParameter engineParameter = objectMapper.readValue(json, EngineParameter.class);
+        EngineParameter engineParameter = objectMapper.readValue(json, JacksonEngineParameter.class);
         LOG.info("Deserialize parameter: {}", engineParameter.toString());
 
         assertThat(1d, equalTo(engineParameter.getAlpha()));
@@ -58,7 +57,7 @@ public class EngineParameterImplTest {
     @Test
     public void deserializeDefaultStringBuilder() throws JsonProcessingException {
         String json = "{\"engineName\":\"dbscan\"}";
-        EngineParameter engineParameter = objectMapper.readValue(json, EngineParameter.class);
+        EngineParameter engineParameter = objectMapper.readValue(json, JacksonEngineParameter.class);
         LOG.info("Deserialize parameter: {}", engineParameter.toString());
 
         assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));

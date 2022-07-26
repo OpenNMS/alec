@@ -28,6 +28,8 @@
 
 package org.opennms.alec.jackson;
 
+import org.opennms.alec.engine.api.EngineParameter;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = ConfigurationImpl.Builder.class)

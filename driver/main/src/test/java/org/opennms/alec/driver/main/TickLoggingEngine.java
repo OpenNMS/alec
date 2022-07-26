@@ -32,17 +32,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.math3.ml.clustering.Cluster;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmFeedback;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationHandler;
-import org.opennms.alec.engine.api.Engine;
+import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
+import org.opennms.alec.engine.cluster.CEEdge;
+import org.opennms.alec.engine.cluster.CEVertex;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableList;
 
-public class TickLoggingEngine implements Engine {
+import edu.uci.ics.jung.graph.Graph;
+
+public class TickLoggingEngine extends AbstractClusterEngine {
     private final List<Long> ticks = new ArrayList<>();
+
+    public TickLoggingEngine(MetricRegistry metrics) {
+        super(metrics);
+    }
 
     @Override
     public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
@@ -98,6 +109,11 @@ public class TickLoggingEngine implements Engine {
     @Override
     public void deleteSituation(String situationId) {
 
+    }
+
+    @Override
+    public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
+        return null;
     }
 
     public synchronized List<Long> getTicks() {

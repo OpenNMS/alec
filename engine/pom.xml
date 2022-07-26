@@ -15,5 +15,6 @@
         <module>dbscan</module>
         <module>deeplearning</module>
         <module>itest</module>
+        <module>jackson</module>
     </modules>
 </project>

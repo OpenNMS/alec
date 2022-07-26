@@ -28,6 +28,8 @@
 
 package org.opennms.alec.jackson;
 
+import org.opennms.alec.engine.api.EngineParameter;
+
 public class ConfigurationImpl implements Configuration {
 
     private final Agreement agreement;

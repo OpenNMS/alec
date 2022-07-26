@@ -33,9 +33,12 @@ import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
 public class AlarmInSpaceAndTimeDistanceMeasureFactory implements DistanceMeasureFactory {
+
+    public static final String ALARMINSPACEANDTIMEDISTANCE = "alarminspaceandtimedistance";
+
     @Override
     public String getName() {
-        return "alarminspaceandtimedistance";
+        return ALARMINSPACEANDTIMEDISTANCE;
     }
 
     @Override

@@ -35,11 +35,13 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
@@ -52,11 +54,16 @@ import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.api.EngineRegistry;
+import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.processor.api.SituationConfirmer;
 import org.opennms.alec.processor.api.SituationProcessor;
 import org.opennms.alec.processor.api.SituationProcessorFactory;
+import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -64,6 +71,8 @@ import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jmx.JmxReporter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Driver implements EngineRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
@@ -81,6 +90,7 @@ public class Driver implements EngineRegistry {
     private Thread initThread;
     private Engine engine;
     private Timer timer;
+    private final List<EngineFactory> engineFactories;
     private EngineFactory engineFactory;
 
     // Health
@@ -89,26 +99,34 @@ public class Driver implements EngineRegistry {
     private final com.codahale.metrics.Timer ticks;
     private long tickResolutionMs = 0;
     private DriverState state = DriverState.CREATED;
+    private final KeyValueStore<String> kvStore;
+    private final ObjectMapper objectMapper;
+    private EngineParameter engineParameter;
 
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
                   AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
-                  SituationDatasource situationDatasource, EngineFactory engineFactory,
-                  SituationProcessorFactory situationProcessorFactory) {
+                  SituationDatasource situationDatasource, List<EngineFactory> engineFactories,
+                  SituationProcessorFactory situationProcessorFactory, KeyValueStore kvStore) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.alarmFeedbackDatasource = Objects.requireNonNull(alarmFeedbackDatasource);
         this.inventoryDatasource = Objects.requireNonNull(inventoryDatasource);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
-        this.engineFactory = Objects.requireNonNull(engineFactory);
+        this.engineFactories = Objects.requireNonNull(engineFactories);
+        objectMapper = new ObjectMapper();
         this.situationProcessor =
                 Objects.requireNonNull(situationProcessorFactory).getInstance();
+        this.kvStore = kvStore;
         confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
-
         metrics = new MetricRegistry();
         jmxReporter = JmxReporter.forRegistry(metrics)
-                .inDomain(name(Driver.class, engineFactory.getName()))
+                .inDomain(name(Driver.class, engineFactories.stream().map(EngineFactory::getName).collect(Collectors.joining())))
                 .build();
         ticks = metrics.timer(name("ticks"));
+        //Retrieve engine stored configuration if any
+        engineParameter = retrieveEngineStoredParameter();
+        //configure engine parameter
+        setEngineParameter(engineParameter);
     }
 
     public void init() {
@@ -213,6 +231,65 @@ public class Driver implements EngineRegistry {
         return future;
     }
 
+    private EngineParameter retrieveEngineStoredParameter() {
+        LOG.debug("Retrieving engine stored parameter...");
+        Optional<String> engineConfiguration = kvStore.get("ENGINE", "ALEC_CONFIG");
+        EngineParameter engineParameterDefault = JacksonEngineParameter.newBuilder().buildDefault();
+        if (engineConfiguration.isPresent()) {
+            try {
+                return objectMapper.readValue(engineConfiguration.get(), JacksonEngineParameter.class);
+            } catch (JsonProcessingException e) {
+                LOG.warn("Retrieving engine stored parameter failed with exception. Using default {}", engineParameterDefault, e);
+                return engineParameterDefault;
+            }
+        } else {
+            LOG.debug("No engine stored parameter found using default: {}", engineParameterDefault);
+            return engineParameterDefault;
+        }
+    }
+
+    public EngineParameter setEngineParameter(EngineParameter engineParameter) {
+        LOG.debug("Set engine configuration: {}", engineParameter);
+        String engineName = engineParameter.getEngineName();
+        Optional<EngineFactory> factory = engineFactories.stream()
+                .filter(engineFactory -> engineName.equals(engineFactory.getName()))
+                .findFirst();
+        if (factory.isPresent()) {
+            switch (engineName) {
+                case DBScanEngineFactory.DBSCAN:
+                    configureDBScan(engineParameter, (DBScanEngineFactory) factory.get().getEngineFactory());
+                    break;
+                case ClusterEngineFactory.CLUSTER:
+                    configureCluster((ClusterEngineFactory) factory.get().getEngineFactory());
+                    break;
+            }
+        } else {
+            EngineFactory defaultEngineFactory = engineFactories.stream().findFirst().orElseThrow();
+            LOG.warn("Engine ({}) not found, we'll use {}", engineName, defaultEngineFactory);
+            setEngineFactory(defaultEngineFactory);
+        }
+        return getEngineCurrentParameter();
+    }
+
+    public EngineParameter getEngineCurrentParameter() {
+        switch (engineFactory.getName()) {
+            case DBScanEngineFactory.DBSCAN:
+                return JacksonEngineParameter.newBuilder()
+                        .alpha(engineParameter.getAlpha())
+                        .beta(engineParameter.getBeta())
+                        .epsilon(engineParameter.getEpsilon())
+                        .distanceMeasureName(engineParameter.getDistanceMeasureName())
+                        .engineName(engineParameter.getEngineName())
+                        .build();
+            case ClusterEngineFactory.CLUSTER:
+                return JacksonEngineParameter.newBuilder()
+                        .engineName(engineParameter.getEngineName())
+                        .build();
+            default:
+                return JacksonEngineParameter.newBuilder().buildDefault();
+        }
+    }
+
     public void destroy() {
         state = DriverState.DESTROYING;
         situationDatasource.unregisterHandler(deletingSituationHandler);
@@ -280,5 +357,17 @@ public class Driver implements EngineRegistry {
 
     public MetricRegistry getMetrics() {
         return metrics;
+    }
+
+    private void configureCluster(ClusterEngineFactory clusterEngineFactory) {
+        setEngineFactory(clusterEngineFactory);
+    }
+
+    private void configureDBScan(EngineParameter engineParameter, DBScanEngineFactory dbScanEngineFactory) {
+        dbScanEngineFactory.setAlpha(engineParameter.getAlpha());
+        dbScanEngineFactory.setBeta(engineParameter.getBeta());
+        dbScanEngineFactory.setEpsilon(engineParameter.getEpsilon());
+        dbScanEngineFactory.setDistanceMeasureFactoryName(engineParameter.getDistanceMeasureName());
+        setEngineFactory(dbScanEngineFactory);
     }
 }

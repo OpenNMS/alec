@@ -50,7 +50,6 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         this.beta = beta;
     }
 
-    @Override
     public double compute(double[] a, double[] b) throws DimensionMismatchException {
         final double timeA = a[0];
         final double timeB = b[0];

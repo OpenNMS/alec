@@ -68,12 +68,8 @@ public class DBScanEngineFactory implements EngineFactory {
 
     @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
-        Optional<DistanceMeasureFactory> factory = distanceMeasureFactoryMap.entrySet()
-                .stream()
-                .filter(e -> distanceMeasureFactoryName.equals(e.getKey()))
-                .map(Map.Entry::getValue)
-                .findFirst();
-        if(factory.isPresent()) {
+        Optional<DistanceMeasureFactory> factory = Optional.ofNullable(distanceMeasureFactoryMap.get(distanceMeasureFactoryName));
+        if (factory.isPresent()) {
             return new DBScanEngine(metrics, epsilon, alpha, beta, factory.get());
         } else {
             LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, alarmInSpaceAndTimeDistanceMeasureFactory.getName());

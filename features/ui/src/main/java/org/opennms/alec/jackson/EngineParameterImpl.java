@@ -39,38 +39,26 @@ public class EngineParameterImpl implements EngineParameter {
 
     @Override
     public Double getAlpha() {
-        if(Optional.ofNullable(alpha).isPresent()) {
-            return alpha;
-        } else {
-            return DBScanEngine.DEFAULT_ALPHA;
-        }
+        return Optional.ofNullable(alpha)
+                .orElse(DBScanEngine.DEFAULT_ALPHA);
     }
 
     @Override
     public Double getBeta() {
-        if(Optional.ofNullable(beta).isPresent()) {
-            return beta;
-        } else {
-            return DBScanEngine.DEFAULT_BETA;
-        }
+        return Optional.ofNullable(beta)
+                .orElse(DBScanEngine.DEFAULT_BETA);
     }
 
     @Override
     public Double getEpsilon() {
-        if(Optional.ofNullable(epsilon).isPresent()) {
-            return epsilon;
-        } else {
-            return DBScanEngine.DEFAULT_EPSILON;
-        }
+        return Optional.ofNullable(epsilon)
+                .orElse(DBScanEngine.DEFAULT_EPSILON);
     }
 
     @Override
     public String getDistanceMeasureName() {
-        if(Optional.ofNullable(distanceMeasureName).isPresent()) {
-            return distanceMeasureName;
-        } else {
-            return DBScanEngine.DEFAULT_DISTANCE_MEASURE;
-        }
+        return Optional.ofNullable(distanceMeasureName)
+                .orElse(DBScanEngine.DEFAULT_DISTANCE_MEASURE);
     }
 
     @Override

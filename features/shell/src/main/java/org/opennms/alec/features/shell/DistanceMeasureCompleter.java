@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2018 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.api;
+package org.opennms.alec.features.shell;
 
-import java.util.Collection;
 
-public interface EngineRegistry {
+import java.util.List;
 
-    Collection<Engine> getEngines();
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 
-    EngineRegistry getEngineRegistry();
+@Service
+public class DistanceMeasureCompleter implements Completer {
+
+    @Reference
+    private List<DistanceMeasureFactory> distanceMeasureFactories;
+
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> candidates) {
+        StringsCompleter delegate = new StringsCompleter();
+        distanceMeasureFactories.forEach(f -> delegate.getStrings().add(f.getName()));
+        return delegate.complete(session, commandLine, candidates);
+    }
+
 }

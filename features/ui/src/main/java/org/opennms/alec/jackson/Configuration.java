@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.api;
+package org.opennms.alec.jackson;
 
-import java.util.Collection;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public interface EngineRegistry {
-
-    Collection<Engine> getEngines();
-
-    EngineRegistry getEngineRegistry();
+@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
+public interface Configuration {
+    Agreement getAgreement();
+    EngineParameter getEngineParameter();
 }

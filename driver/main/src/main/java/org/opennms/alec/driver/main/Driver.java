@@ -72,8 +72,6 @@ public class Driver implements EngineRegistry {
     private final AlarmFeedbackDatasource alarmFeedbackDatasource;
     private final InventoryDatasource inventoryDatasource;
     private final SituationDatasource situationDatasource;
-
-    private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
     private final SituationProcessor situationProcessor;
@@ -83,6 +81,7 @@ public class Driver implements EngineRegistry {
     private Thread initThread;
     private Engine engine;
     private Timer timer;
+    private EngineFactory engineFactory;
 
     // Health
     private final MetricRegistry metrics;
@@ -268,5 +267,18 @@ public class Driver implements EngineRegistry {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public EngineRegistry getEngineRegistry() {
+        return this;
+    }
+
+    public void setEngineFactory(EngineFactory engineFactory) {
+        this.engineFactory = engineFactory;
+    }
+
+    public MetricRegistry getMetrics() {
+        return metrics;
     }
 }

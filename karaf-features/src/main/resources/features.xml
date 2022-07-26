@@ -178,6 +178,7 @@
         <feature version="${project.version}">alec-features-score</feature>
         <feature version="${project.version}">alec-datasource-jaxb</feature>
         <feature version="${project.version}">alec-features-graph-common</feature>
+        <feature version="${project.version}">alec-engine-dbscan</feature>
         <feature dependency="true">shell</feature>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.test/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.shell/${project.version}</bundle>

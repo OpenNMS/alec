@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,20 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.api;
+package org.opennms.alec.engine.dbscan;
 
-import java.util.Collection;
+import org.opennms.alec.engine.api.DistanceMeasure;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
+import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
-public interface EngineRegistry {
+public class AlarmInSpaceAndTimeDistanceMeasureFactory implements DistanceMeasureFactory {
+    @Override
+    public String getName() {
+        return "alarminspaceandtimedistance";
+    }
 
-    Collection<Engine> getEngines();
-
-    EngineRegistry getEngineRegistry();
+    @Override
+    public DistanceMeasure createDistanceMeasure(Object spatialDistanceCalculator, double alpha, double beta) {
+        return new AlarmInSpaceTimeDistanceMeasure((SpatialDistanceCalculator) spatialDistanceCalculator, alpha, beta);
+    }
 }

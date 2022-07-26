@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,13 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.api;
+package org.opennms.alec.jackson;
 
-import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public interface EngineRegistry {
+public class AgreementImpl implements Agreement {
+    private final boolean agreed;
 
-    Collection<Engine> getEngines();
+    private AgreementImpl(Builder builder) {
+        agreed = builder.agreed;
+    }
 
-    EngineRegistry getEngineRegistry();
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(AgreementImpl copy) {
+        Builder builder = new Builder();
+        builder.agreed = copy.isAgreed();
+        return builder;
+    }
+
+    @Override
+    public boolean isAgreed() {
+        return agreed;
+    }
+
+    public static final class Builder {
+        @JsonProperty("agreed")
+        private boolean agreed;
+
+        private Builder() {
+        }
+
+        public Builder agreed(boolean val) {
+            agreed = val;
+            return this;
+        }
+
+        public AgreementImpl build() {
+            return new AgreementImpl(this);
+        }
+    }
 }

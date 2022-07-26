@@ -36,4 +36,6 @@ public interface EngineFactory {
 
     Engine createEngine(MetricRegistry metrics);
 
+    EngineFactory getEngineFactory();
+
 }

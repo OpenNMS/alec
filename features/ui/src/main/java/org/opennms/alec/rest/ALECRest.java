@@ -8,16 +8,35 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.jackson.Agreement;
+import org.opennms.alec.jackson.EngineParameter;
+
 @Path("alec")
+@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON})
 public interface ALECRest {
 
     @GET
     @Path("/ping")
     Response ping();
 
+    @GET
+    @Path("/configurations")
+    Response getConfigurations();
+
     @POST
-    @Path("/hook")
-    @Produces({MediaType.APPLICATION_JSON})
-    @Consumes({MediaType.APPLICATION_JSON})
-    Response handleWebhook(String body);
+    @Path("/engine/configuration")
+    Response setEngineConfiguration(EngineParameter engineParameter);
+
+    @GET
+    @Path("/engine/configuration")
+    Response getEngineConfiguration();
+
+    @POST
+    @Path("/agreement/configuration")
+    Response setAgreementConfiguration(Agreement agreement);
+
+    @GET
+    @Path("/agreement/configuration")
+    Response getAgreementConfiguration();
 }

@@ -90,6 +90,8 @@
         <spring.kafka.version>2.8.6</spring.kafka.version>
         <string.similarity.version>1.1.0</string.similarity.version>
         <tensorflow.version>1.13.1</tensorflow.version>
+        <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
+        <jersey-client.version>2.36</jersey-client.version>
     </properties>
 
     <dependencyManagement>

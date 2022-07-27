@@ -97,7 +97,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
         when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
         when(kvStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of(getAgreementAsString(getAgreement().build())));
 
@@ -117,12 +117,12 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
         when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-            EngineParameter engineParameter = (EngineParameter)  result.getEntity();
+            EngineParameter engineParameter = (EngineParameter) result.getEntity();
             assertThat(1d, equalTo(engineParameter.getAlpha()));
             assertThat(2d, equalTo(engineParameter.getBeta()));
             assertThat(3d, equalTo(engineParameter.getEpsilon()));
@@ -135,7 +135,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetDbScanEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
 
@@ -179,7 +179,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -198,7 +198,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetAgreementConfiguration() {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
 
         when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
         when(future.join()).thenReturn(1L);
@@ -210,13 +210,13 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetAgreementConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);;
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.ofNullable(getAgreementAsString(getAgreement().build())));
 
         try (Response result = underTest.getAgreementConfiguration()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
-            Agreement agreement = (Agreement)  result.getEntity();
+            Agreement agreement = (Agreement) result.getEntity();
             assertThat(Boolean.TRUE, equalTo(agreement.isAgreed()));
         }
     }

@@ -7,8 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonPropertyOrder({"engineName", "distanceMeasureName", "alpha", "beta", "epsilon"})
 public interface EngineParameter {
     Double getAlpha();
+
     Double getBeta();
+
     Double getEpsilon();
+
     String getDistanceMeasureName();
+
     String getEngineName();
 }

@@ -152,11 +152,12 @@ public class ALECRestImpl implements ALECRest {
     @Override
     public Response getSituations() {
         try {
-            Optional optional = kvStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
-            if(optional.isEmpty()){
+            Optional<String> optional = kvStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
+            if (optional.isEmpty()) {
                 return Response.noContent().build();
             }
-            return Response.ok().entity(objectMapper.readValue((String) optional.orElse(""), new TypeReference<List<JacksonSituation>>(){})).build();
+            return Response.ok().entity(objectMapper.readValue(optional.orElse(""), new TypeReference<List<JacksonSituation>>() {
+            })).build();
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
@@ -167,11 +168,12 @@ public class ALECRestImpl implements ALECRest {
         List<Situation> situations = new ArrayList<>();
         Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-        if(situationOptional.isPresent()){
+        if (situationOptional.isPresent()) {
             try {
-                Optional alreadyRefusedSituations = kvStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
-                if(alreadyRefusedSituations.isPresent()) {
-                    List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyRefusedSituations.get(), new TypeReference<List<JacksonSituation>>() {});
+                Optional<String> alreadyRefusedSituations = kvStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
+                if (alreadyRefusedSituations.isPresent()) {
+                    List<JacksonSituation> jacksonSituations = objectMapper.readValue(alreadyRefusedSituations.get(), new TypeReference<>() {
+                    });
                     situations.addAll(jacksonSituations);
                 }
                 Situation situation = situationOptional.get();
@@ -188,14 +190,15 @@ public class ALECRestImpl implements ALECRest {
 
     @Override
     public Response acceptedSituation(String id) {
-        List<Situation> situations = new ArrayList<> ();
+        List<Situation> situations = new ArrayList<>();
         Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-        if(situationOptional.isPresent()){
+        if (situationOptional.isPresent()) {
             try {
-                Optional alreadyAcceptedSituations = kvStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
-                if(alreadyAcceptedSituations.isPresent()) {
-                    List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyAcceptedSituations.get(), new TypeReference<>() {});
+                Optional<String> alreadyAcceptedSituations = kvStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
+                if (alreadyAcceptedSituations.isPresent()) {
+                    List<JacksonSituation> jacksonSituations = objectMapper.readValue(alreadyAcceptedSituations.get(), new TypeReference<>() {
+                    });
                     situations.addAll(jacksonSituations);
                 }
                 Situation situation = situationOptional.get();

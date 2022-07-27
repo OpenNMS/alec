@@ -111,7 +111,7 @@ public class ALECRestImplTest {
             assertThat(configuration.getEngineParameter().getEngineName(), equalTo("dbscan"));
             assertThat(configuration.getAgreement().isAgreed(), equalTo(Boolean.TRUE));
         }
-        verify(kvStore, times(2)).get(anyString(), anyString());
+        verify(kvStore, times(5)).get(anyString(), anyString());
         verifyNoMoreInteractions(kvStore);
     }
 

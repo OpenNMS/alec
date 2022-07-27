@@ -43,7 +43,7 @@ public class JacksonSituationTest {
         String json = objectMapper.writeValueAsString(situation);
         LOG.info("Serializing a plain String: {}", json);
 
-        assertThat(json, equalTo("{\"id\":\"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\",\"creationTime\":1,\"resourceKeys\":[],\"alarms\":[],\"severity\":\"MINOR\",\"diagnosticText\":\"diagnosticText\"}"));
+        assertThat("{\"id\":\"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\",\"creationTime\":1,\"resourceKeys\":[],\"alarms\":[],\"severity\":\"MINOR\",\"diagnosticText\":\"diagnosticText\",\"status\":null}", equalTo(json));
     }
 
     @Test

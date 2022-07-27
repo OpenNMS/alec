@@ -35,11 +35,8 @@ import java.util.Objects;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
-    private static final Logger LOG = LoggerFactory.getLogger(AlarmInSpaceTimeDistanceMeasure.class);
     private final SpatialDistanceCalculator spatialDistanceCalculator;
     private final double alpha;
     private final double beta;
@@ -50,12 +47,13 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         this.beta = beta;
     }
 
+    @Override
     public double compute(double[] a, double[] b) throws DimensionMismatchException {
         final double timeA = a[0];
         final double timeB = b[0];
 
-        final long vertexIdA = (long)a[1];
-        final long vertexIdB = (long)b[1];
+        final long vertexIdA = (long) a[1];
+        final long vertexIdB = (long) b[1];
 
         double spatialDistance = 0;
         if (vertexIdA != vertexIdB) {
@@ -67,16 +65,12 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
         }
 
         final double distance = compute(timeA, timeB, spatialDistance);
-        /* Too noisy - even for trace
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("v1: {}, v2: {}, d({},{},{}) = {}", vertexIdA, vertexIdB, timeA, timeB, spatialDistance, distance);
-        }
-        */
+
         return distance;
     }
 
     public double compute(double timeA, double timeB, double spatialDistance) {
-        return alpha * ( beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1-beta) * spatialDistance / DEFAULT_WEIGHT);
+        return alpha * (beta * (Math.abs(timeA - timeB) / 1000d / 60d) + (1 - beta) * spatialDistance / DEFAULT_WEIGHT);
     }
 
     @Override

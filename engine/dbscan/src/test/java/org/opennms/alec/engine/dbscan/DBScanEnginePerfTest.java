@@ -89,6 +89,38 @@ public class DBScanEnginePerfTest {
     }
 
     @Test
+    public void canRunDBScanOnLargeGraphsHellinger() {
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
+        dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList());
+        final int K = 500;
+        for (int k = 0; k < K; k++) {
+            dbScanEngine.onInventoryAdded(Collections.singletonList(ImmutableInventoryObject.newBuilder()
+                    .setType(MockInventoryType.COMPONENT.getType())
+                    .setId(Integer.toString(k))
+                    .build()));
+        }
+
+        for (int j = 1; j <= 3; j++) {
+            // Reset the alarms before every tick
+            for (int k = 0; k < K; k++) {
+                dbScanEngine.onAlarmCreatedOrUpdated(ImmutableAlarm.newBuilder()
+                        .setFirstTime(0)
+                        .setTime(1)
+                        .setId(Integer.toString(k))
+                        .setInventoryObjectType(MockInventoryType.COMPONENT.getType())
+                        .setInventoryObjectId(Integer.toString(k))
+                        .build());
+            }
+
+            long start = System.currentTimeMillis();
+            dbScanEngine.tick(dbScanEngine.getTickResolutionMs() * j);
+            long delta = System.currentTimeMillis() - start;
+            System.out.printf("%d ms for %d vertices.\n", delta, K);
+        }
+    }
+
+    @Test
     @Ignore("For manual testing")
     public void canNotRunOOM() {
         final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());

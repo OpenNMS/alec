@@ -139,31 +139,6 @@ public class ALECRestImpl implements ALECRest {
     }
 
     @Override
-    public Response storeSituations() {
-        try {
-            List<Situation> situationList = situationDatasource.getSituations();
-            String situations = objectMapper.writeValueAsString(situationList);
-            return Response.ok(kvStore.put(KeyEnum.SITUATION.toString(), situations, ALEC_CONFIG)).build();
-        } catch (JsonProcessingException e) {
-            return somethingWentWrong(e);
-        }
-    }
-
-    @Override
-    public Response getSituations() {
-        try {
-            Optional<String> optional = kvStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
-            if (optional.isEmpty()) {
-                return Response.noContent().build();
-            }
-            return Response.ok().entity(objectMapper.readValue(optional.orElse(""), new TypeReference<List<JacksonSituation>>() {
-            })).build();
-        } catch (JsonProcessingException e) {
-            return somethingWentWrong(e);
-        }
-    }
-
-    @Override
     public Response refusedSituation(String id) {
         List<Situation> situations = new ArrayList<>();
         Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();

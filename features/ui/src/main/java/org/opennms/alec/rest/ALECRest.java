@@ -42,14 +42,6 @@ public interface ALECRest {
     Response getAgreementConfiguration();
 
     @POST
-    @Path("/situations")
-    Response storeSituations();
-
-    @GET
-    @Path("/situations")
-    Response getSituations();
-
-    @POST
     @Path("situation/refused/{id}")
     Response refusedSituation(@PathParam("id") String id);
 

@@ -8,7 +8,9 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.data.JacksonSituation;
+import org.opennms.alec.data.Status;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
@@ -35,11 +37,16 @@ public class ALECRestImpl implements ALECRest {
     private final KeyValueStore<String> kvStore;
     private final List<EngineFactory> engineFactories;
     private final Driver driver;
+    private final SituationDatasource situationDatasource;
 
-    public ALECRestImpl(KeyValueStore<String> kvStore, EngineRegistry engineRegistry, List<EngineFactory> engineFactories) {
+    public ALECRestImpl(KeyValueStore<String> kvStore,
+                        EngineRegistry engineRegistry,
+                        List<EngineFactory> engineFactories,
+                        SituationDatasource situationDatasource) {
         this.kvStore = kvStore;
         this.driver = (Driver) engineRegistry.getEngineRegistry();
         this.engineFactories = engineFactories;
+        this.situationDatasource = situationDatasource;
         objectMapper = new ObjectMapper();
     }
 
@@ -136,7 +143,7 @@ public class ALECRestImpl implements ALECRest {
         try {
             List<Situation> situationList = situationDatasource.getSituations();
             String situations = objectMapper.writeValueAsString(situationList);
-            return Response.ok(dataStore.put(KeyEnum.SITUATION.toString(), situations, ALEC_CONFIG)).build();
+            return Response.ok(kvStore.put(KeyEnum.SITUATION.toString(), situations, ALEC_CONFIG)).build();
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
@@ -145,7 +152,7 @@ public class ALECRestImpl implements ALECRest {
     @Override
     public Response getSituations() {
         try {
-            Optional optional = dataStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
+            Optional optional = kvStore.get(KeyEnum.SITUATION.toString(), ALEC_CONFIG);
             if(optional.isEmpty()){
                 return Response.noContent().build();
             }
@@ -162,13 +169,13 @@ public class ALECRestImpl implements ALECRest {
 
         if(refusedSituation.isPresent()){
             try {
-                Optional alreadyRefusedSituations = dataStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
+                Optional alreadyRefusedSituations = kvStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
                 if(alreadyRefusedSituations.isPresent()) {
                     List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyRefusedSituations.get(), new TypeReference<List<JacksonSituation>>() {});
                     refusedSituations.addAll(jacksonSituations);
                 }
                 refusedSituations.add(refusedSituation.get());
-                long ret = dataStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(refusedSituations), ALEC_CONFIG);
+                long ret = kvStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(refusedSituations), ALEC_CONFIG);
                 return Response.ok().entity(ret).build();
             } catch (JsonProcessingException e) {
                 return somethingWentWrong(e);
@@ -180,18 +187,21 @@ public class ALECRestImpl implements ALECRest {
 
     @Override
     public Response acceptedSituation(String id) {
-        List<Situation> acceptedSituations = new ArrayList<> ();
-        Optional<Situation> acceptedSituation = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        List<Situation> situations = new ArrayList<> ();
+        Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-        if(acceptedSituation.isPresent()){
+        if(situationOptional.isPresent()){
             try {
-                Optional alreadyAcceptedSituations = dataStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
+                Optional alreadyAcceptedSituations = kvStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
                 if(alreadyAcceptedSituations.isPresent()) {
                     List<JacksonSituation> jacksonSituations = objectMapper.readValue((String) alreadyAcceptedSituations.get(), new TypeReference<>() {});
-                    acceptedSituations.addAll(jacksonSituations);
+                    situations.addAll(jacksonSituations);
                 }
-                acceptedSituations.add(acceptedSituation.get());
-                long ret = dataStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALEC_CONFIG);
+
+                Situation situation = situationOptional.get();
+                JacksonSituation.newBuilder(situation).status(Status.ACCEPTED).build();
+                situations.add(situation);
+                long ret = kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(situations), ALEC_CONFIG);
                 return Response.ok().entity(ret).build();
             } catch (JsonProcessingException e) {
                 return somethingWentWrong(e);

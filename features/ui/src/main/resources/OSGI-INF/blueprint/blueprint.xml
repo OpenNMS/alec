@@ -16,6 +16,7 @@
         <argument ref="keyValueStore"/>
         <argument ref="driver"/>
         <argument ref="engineFactories"/>
+        <argument ref="situationDatasource"/>
     </bean>
 
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
@@ -31,4 +32,8 @@
 
     <!--engines list    -->
     <reference-list id="engineFactories" interface="org.opennms.alec.engine.api.EngineFactory"/>
+
+    <!--situation datasource    -->
+    <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
+
 </blueprint>

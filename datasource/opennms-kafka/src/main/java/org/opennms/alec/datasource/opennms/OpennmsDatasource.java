@@ -537,7 +537,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     @Override
     public List<Situation> getSituationsWithAlarmId() {
-        return null;
+        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
     }
 
     private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable() throws InterruptedException {

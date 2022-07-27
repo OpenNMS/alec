@@ -26,35 +26,11 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.jackson;
+package org.opennms.alec.data;
 
-import java.util.stream.Stream;
-
-public enum KeyEnum {
-    ENGINE("ENGINE"),
-    AGREEMENT("AGREEMENT"),
-    SITUATION("SITUATION"),
-    REFUSED_SITUATION("REFUSED_SITUATION"),
-    ACCEPTED_SITUATION("ACCEPTED_SITUATION");
-
-    private final String key;
-
-    /**
-     * @param key
-     */
-    KeyEnum(final String key) {
-        this.key = key;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return key;
-    }
-
-    public static Stream<KeyEnum> stream() {
-        return Stream.of(KeyEnum.values());
-    }
+public enum Status {
+    ACCEPTED,
+    REJECTED,
+    CREATED,
+    MODIFIED
 }

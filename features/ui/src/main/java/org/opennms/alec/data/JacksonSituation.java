@@ -48,6 +48,7 @@ public class JacksonSituation implements Situation {
     private final Set<Alarm> alarms;
     private final Severity severity;
     private final String diagnosticText;
+    private final Status status;
 
     private JacksonSituation(Builder builder) {
         id = builder.id;
@@ -56,10 +57,23 @@ public class JacksonSituation implements Situation {
         alarms = builder.alarms;
         severity = builder.severity;
         diagnosticText = builder.diagnosticText;
+        status = builder.status;
     }
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static Builder newBuilder(JacksonSituation copy) {
+        Builder builder = new Builder();
+        builder.id = copy.getId();
+        builder.creationTime = copy.getCreationTime();
+        builder.resourceKeys = copy.getResourceKeys();
+        builder.alarms = copy.getAlarms();
+        builder.severity = copy.getSeverity();
+        builder.diagnosticText = copy.getDiagnosticText();
+        builder.status = copy.getStatus();
+        return builder;
     }
 
     public static Builder newBuilder(Situation copy) {
@@ -103,6 +117,10 @@ public class JacksonSituation implements Situation {
         return diagnosticText;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
         private String id;
@@ -114,6 +132,7 @@ public class JacksonSituation implements Situation {
         @JsonDeserialize(as = Severity.class)
         private Severity severity;
         private String diagnosticText;
+        private Status status;
 
         private Builder() {
         }
@@ -146,6 +165,11 @@ public class JacksonSituation implements Situation {
 
         public Builder diagnosticText(String val) {
             diagnosticText = val;
+            return this;
+        }
+
+        public Builder status(Status val) {
+            status = val;
             return this;
         }
 

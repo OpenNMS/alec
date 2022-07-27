@@ -26,43 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec;
+package org.opennms.alec.jackson;
 
-import static org.mockito.Mockito.mock;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Dictionary;
-import java.util.Map;
+public class AgreementImpl implements Agreement {
+    private final boolean agreed;
 
-import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
-import org.apache.camel.util.KeyValueHolder;
-import org.junit.Test;
-import org.opennms.alec.engine.api.EngineRegistry;
-import org.opennms.integration.api.v1.distributed.KeyValueStore;
+    private AgreementImpl(Builder builder) {
+        agreed = builder.agreed;
+    }
 
-public class BlueprintContextTest extends CamelBlueprintTestSupport {
+    public static Builder newBuilder() {
+        return new Builder();
+    }
 
-    @Override
-    protected String getBlueprintDescriptor() {
-        return "/OSGI-INF/blueprint/blueprint.xml" + "," +
-                "/OSGI-INF/blueprint/blueprint-empty-camel-context.xml";
+    public static Builder newBuilder(AgreementImpl copy) {
+        Builder builder = new Builder();
+        builder.agreed = copy.isAgreed();
+        return builder;
     }
 
     @Override
-    protected String getBundleFilter() {
-        return "(!(Bundle-SymbolicName=org.glassfish.hk2.osgi-resource-locator))";
+    public boolean isAgreed() {
+        return agreed;
     }
 
-    @Override
-    protected void addServicesOnStartup(Map<String, KeyValueHolder<Object, Dictionary>> services) {
+    public static final class Builder {
+        @JsonProperty("agreed")
+        private boolean agreed;
 
-        KeyValueStore<String> keyValueStore = mock(KeyValueStore.class);
-        services.put(KeyValueStore.class.getName(), asService(keyValueStore, null));
+        private Builder() {
+        }
 
-        EngineRegistry engineRegistry = mock(EngineRegistry.class);
-        services.put(EngineRegistry.class.getName(), asService(engineRegistry, null));
-    }
+        public Builder agreed(boolean val) {
+            agreed = val;
+            return this;
+        }
 
-    @Test
-    public void testBlueprintContext() {
+        public AgreementImpl build() {
+            return new AgreementImpl(this);
+        }
     }
 }

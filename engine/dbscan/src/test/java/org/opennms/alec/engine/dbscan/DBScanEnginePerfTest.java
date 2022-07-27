@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,10 +47,8 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.driver.test.MockInventoryBuilder;
 import org.opennms.alec.driver.test.MockInventoryType;
-import org.opennms.alec.engine.api.Engine;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Stopwatch;
 
 public class DBScanEnginePerfTest {
 
@@ -62,7 +59,7 @@ public class DBScanEnginePerfTest {
      */
     @Test
     public void canRunDBScanOnLargeGraphs() {
-        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry());
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
         dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
@@ -94,7 +91,7 @@ public class DBScanEnginePerfTest {
     @Test
     @Ignore("For manual testing")
     public void canNotRunOOM() {
-        final DBScanEngine engine = new DBScanEngine(new MetricRegistry());
+        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         engine.registerSituationHandler(mock(SituationHandler.class));

@@ -34,6 +34,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -53,6 +54,8 @@ import org.opennms.alec.driver.test.MockInventoryType;
 import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 
 import com.google.common.collect.ImmutableList;
@@ -66,7 +69,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new DBScanEngineFactory() },
+                { new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, DBScanEngine.DEFAULT_EPSILON, "", new AlarmInSpaceAndTimeDistanceMeasureFactory(), Collections.EMPTY_MAP) },
                 { new ClusterEngineFactory() }
         });
     }
@@ -88,7 +91,7 @@ public class Level2EngineComplianceTest {
     @Test
     public void canCorrelateAlarmsAcrossObjects() {
         //this test doesn't work with cluster engine
-        if(!"cluster".equals(factory.getName())) {
+        if (!"cluster".equals(factory.getName())) {
             final List<InventoryObject> inventory = ImmutableList.copyOf(new MockInventoryBuilder()
                     .withInventoryObject(MockInventoryType.DEVICE, "n1")
                     .withInventoryObject(MockInventoryType.CARD, "n1-c1", MockInventoryType.DEVICE, "n1")

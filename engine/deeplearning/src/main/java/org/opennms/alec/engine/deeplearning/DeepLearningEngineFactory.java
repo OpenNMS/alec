@@ -60,4 +60,9 @@ public class DeepLearningEngineFactory implements EngineFactory {
         return new DeepLearningEngine(metrics, bundleContext, conf);
     }
 
+    @Override
+    public EngineFactory getEngineFactory() {
+        return this;
+    }
+
 }

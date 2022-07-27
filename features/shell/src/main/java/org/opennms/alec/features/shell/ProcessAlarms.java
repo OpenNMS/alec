@@ -102,8 +102,8 @@ public class ProcessAlarms implements Action {
     public Object execute() throws Exception {
         EngineFactory engineFactory = getEngineFactory();
         final DistanceMeasureFactory distanceMeasureFactory = getDistanceMeasureFactory();
-        if("dbscan".equals(engineFactory.getName())){
-            ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactory(distanceMeasureFactory.getName());
+        if ("dbscan".equals(engineFactory.getName())) {
+            ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactoryName(distanceMeasureFactory.getName());
             ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
             ((DBScanEngineFactory) engineFactory).setAlpha(alpha);
             ((DBScanEngineFactory) engineFactory).setBeta(beta);

@@ -193,6 +193,11 @@ public class Vectorize implements Action {
         public Engine createEngine(MetricRegistry metrics) {
             return engine;
         }
+
+        @Override
+        public EngineFactory getEngineFactory() {
+            return this;
+        }
     }
 
     private void streamVectors(List<InventoryObject> inventory, List<Alarm> alarms, Set<Situation> situations, Consumer<OutputVector> consumer) {

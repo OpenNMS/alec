@@ -76,17 +76,11 @@ public class DBScanEngine extends AbstractClusterEngine {
     public static final double DEFAULT_BETA = 0.55257784d;
     public static final String DEFAULT_DISTANCE_MEASURE = "alarminspaceandtimedistance";
     private final double epsilon;
-    private DistanceMeasure distanceMeasure;
-    public DBScanEngine(MetricRegistry metrics) {
-        this(metrics, DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
-    }
+    private final DistanceMeasure distanceMeasure;
 
     public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta, DistanceMeasureFactory distanceMeasureFactory) {
         super(metrics);
-        LOG.debug(
-                "\n=======================================================================================================================================\n" +
-                "DBScanEngine configuration\nalpha: {}\nbeta: {}\nepsilon: {}\ndistanceMeasure: {}\n" +
-                "=======================================================================================================================================",
+        LOG.debug("DBScanEngine configuration alpha: {} beta: {} epsilon: {} distanceMeasure: {}",
                 alpha, beta, epsilon, distanceMeasureFactory.getName());
 
         this.epsilon = epsilon;
@@ -95,7 +89,7 @@ public class DBScanEngine extends AbstractClusterEngine {
 
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
-        LOG.debug("start DBSCan clustering:\nDistanceMeasure: {}\nAlpha: {}\nBeta: {}\nEpsilon: {}",
+        LOG.debug("start DBSCan clustering: DistanceMeasure: {} Alpha: {} Beta: {} Epsilon: {}",
                 distanceMeasure.getName(), distanceMeasure.getAlpha(), distanceMeasure.getBeta(), epsilon);
         // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
         // OPTIMIZATION: Can we avoid doing this every tick?

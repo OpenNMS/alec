@@ -92,7 +92,12 @@ const handleClickContinue = () => {
 				</FeatherRadioGroup>
 			</div>
 		</div>
-		<FeatherButton primary class="continue-btn" @click="handleClickContinue">
+		<FeatherButton
+			data-test="continue-btn"
+			primary
+			class="continue-btn"
+			@click="handleClickContinue"
+		>
 			Continue
 		</FeatherButton>
 	</div>

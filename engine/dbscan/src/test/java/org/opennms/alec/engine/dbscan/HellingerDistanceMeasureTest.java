@@ -51,12 +51,12 @@ public class HellingerDistanceMeasureTest {
         double firstTimeA = 1d;
         double firstTimeB = 2d;
 
-        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, DBScanEngine.DEFAULT_EPSILON);
+        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, HellingerDistanceMeasure.DEFAULT_EPSILON);
         System.out.println("timeDeltaSecs,spatialDistance,distance,ok");
         for (double y = minSpatialDistance; y < maxSpatialDistance; y += spatialDistanceStep) {
             for (double x = minTimeDeltaMs; x <= maxTimeDeltaMs; x += timeDeltaMsStep) {
                 double val = eval(x,y, firstTimeA, firstTimeB);
-                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= DBScanEngine.DEFAULT_EPSILON);
+                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= HellingerDistanceMeasure.DEFAULT_EPSILON);
             }
         }
     }

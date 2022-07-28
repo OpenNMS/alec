@@ -37,6 +37,8 @@ import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
+    public static final double  DEFAULT_EPSILON = 100d;
+
     private final SpatialDistanceCalculator spatialDistanceCalculator;
     private final double alpha;
     private final double beta;

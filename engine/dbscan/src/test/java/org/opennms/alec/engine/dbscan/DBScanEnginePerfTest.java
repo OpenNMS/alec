@@ -59,7 +59,7 @@ public class DBScanEnginePerfTest {
      */
     @Test
     public void canRunDBScanOnLargeGraphs() {
-        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
         dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
@@ -90,7 +90,7 @@ public class DBScanEnginePerfTest {
 
     @Test
     public void canRunDBScanOnLargeGraphsHellinger() {
-        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
         dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
@@ -123,7 +123,72 @@ public class DBScanEnginePerfTest {
     @Test
     @Ignore("For manual testing")
     public void canNotRunOOM() {
-        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+        engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+                Collections.emptyList());
+        engine.registerSituationHandler(mock(SituationHandler.class));
+
+        // With a 1GB heap these values would cause the cluster engine to run OOM before we swapped to using a soft
+        // reference backed implementation of Dijkstra's algorithm after ~50 seconds
+        //
+        // With the new impl this test passes after ~50 seconds
+        int numVertices = 3000;
+        int numAlarmsToAddPerIteration = 100;
+
+        // Create inventory for numVertices
+        MockInventoryBuilder mockInventoryBuilder = new MockInventoryBuilder();
+        List<Integer> existingInventoryIds = new ArrayList<>();
+
+        // Add a root inventory element
+        existingInventoryIds.add(0);
+        mockInventoryBuilder.withInventoryObject(MockInventoryType.COMPONENT, "0");
+
+        Random random = new Random(1);
+        // Add the rest of the inventory
+        for (int i = 1; i < numVertices; i++) {
+            int parent = existingInventoryIds.get(random.nextInt(existingInventoryIds.size()));
+            mockInventoryBuilder.withInventoryObject(MockInventoryType.COMPONENT, Integer.toString(i),
+                    MockInventoryType.COMPONENT, Integer.toString(parent));
+            existingInventoryIds.add(i);
+        }
+
+        // Add the inventory to the engine
+        Collection<InventoryObject> inventory = mockInventoryBuilder.getInventory();
+        engine.onInventoryAdded(inventory);
+
+        long tickTime = System.currentTimeMillis();
+        long tickInterval = TimeUnit.MINUTES.toMillis(6);
+
+        int alarmedVertex = 0;
+        while (alarmedVertex < numVertices) {
+            List<Alarm> alarmsAdded = new ArrayList<>();
+            for (int i = 0; i < numAlarmsToAddPerIteration; i++) {
+                int id = existingInventoryIds.get(alarmedVertex++);
+                Alarm alarmToAdd = ImmutableAlarm.newBuilder()
+                        .setInventoryObjectType(MockInventoryType.COMPONENT.getType())
+                        .setInventoryObjectId(Integer.toString(id))
+                        .setId("test.id." + Integer.toString(id))
+                        .setTime(tickTime)
+                        .build();
+                alarmsAdded.add(alarmToAdd);
+                engine.onAlarmCreatedOrUpdated(alarmToAdd);
+            }
+
+            engine.onTick(tickTime);
+
+            // Clear the alarms we just added and tick by a big enough interval that they are GC'd so we end up with a
+            // fresh set of alarms on the next iteration
+            alarmsAdded.forEach(alarm -> engine.onAlarmCleared(ImmutableAlarm.newBuilderFrom(alarm)
+                    .setSeverity(Severity.CLEARED)
+                    .build()));
+            tickTime += tickInterval;
+        }
+    }
+
+    @Test
+    @Ignore("For manual testing")
+    public void canNotRunOOMHellinger() {
+        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         engine.registerSituationHandler(mock(SituationHandler.class));

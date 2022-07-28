@@ -37,6 +37,8 @@ import org.opennms.alec.engine.api.DistanceMeasure;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
 public class HellingerDistanceMeasure implements DistanceMeasure {
+    public static final double  DEFAULT_EPSILON = 75d;
+
     private final SpatialDistanceCalculator spatialDistanceCalculator;
     private final double alpha;
     private final double beta;

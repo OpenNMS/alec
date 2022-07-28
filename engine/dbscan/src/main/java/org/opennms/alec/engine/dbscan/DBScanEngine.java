@@ -71,7 +71,6 @@ import edu.uci.ics.jung.graph.Graph;
 public class DBScanEngine extends AbstractClusterEngine {
     private static final Logger LOG = LoggerFactory.getLogger(DBScanEngine.class);
 
-    public static final double  DEFAULT_EPSILON = 100d;
     public static final double DEFAULT_ALPHA = 144.47117699d;
     public static final double DEFAULT_BETA = 0.55257784d;
     public static final String DEFAULT_DISTANCE_MEASURE = "alarminspaceandtimedistance";

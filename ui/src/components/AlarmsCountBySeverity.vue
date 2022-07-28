@@ -28,9 +28,10 @@ const props = defineProps<{
 	flex-direction: row;
 }
 .alarm-count {
-	padding: 5px 10px;
+	padding: 2px 10px;
 	border: 1px solid;
 	border-radius: 50px;
 	margin-right: 10px;
+	margin-top: 10px;
 }
 </style>

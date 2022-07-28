@@ -40,6 +40,7 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
@@ -50,7 +51,7 @@ import com.google.common.collect.Lists;
 
 public class MockGraphProvider implements GraphProvider {
 
-    final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), DBScanEngine.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+    final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
 
     public MockGraphProvider() {
         final InventoryObject io1 = ImmutableInventoryObject.newBuilder()

@@ -76,7 +76,7 @@ public class ApiMapper {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
         alarmBuilder
                 .setId(alarm.getReductionKey())
-                .setFirstTime(alarm.getFirstEventTime() != null ? alarm.getFirstEventTime().getTime() : 0l)
+                .setFirstTime(alarm.getFirstEventTime().getTime())
                 .setTime(alarm.getLastEventTime().getTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setInventoryObjectId(alarm.getManagedObjectInstance())

@@ -63,6 +63,7 @@ public class ApiMapperTest {
                 .build();
         org.opennms.integration.api.v1.model.Alarm apiAlarm = ImmutableAlarm.newBuilder()
                 .setId(43)
+                .setFirstEventTime(new Date(0))
                 .setReductionKey("boo:1")
                 .setLastEventTime(new Date(0))
                 .setManagedObjectType(ManagedObjectType.SnmpInterface.getName())

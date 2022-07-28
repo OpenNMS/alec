@@ -78,7 +78,7 @@ public class ALECRestImpl implements ALECRest {
             Optional<EngineFactory> factory = engineFactories.stream()
                     .filter(engineFactory -> engineName.equals(engineFactory.getName()))
                     .findFirst();
-            if(factory.isPresent()) {
+            if (factory.isPresent()) {
                 switch (engineName) {
                     case "dbscan":
                         return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory.get().getEngineFactory()));

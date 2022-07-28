@@ -33,5 +33,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize(builder = ConfigurationImpl.Builder.class)
 public interface Configuration {
     Agreement getAgreement();
+
     EngineParameter getEngineParameter();
 }

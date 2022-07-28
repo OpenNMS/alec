@@ -48,6 +48,11 @@ public class StaticSituationDatasource implements SituationDatasource {
     }
 
     @Override
+    public List<Situation> getSituationsWithAlarmId() {
+        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
+    }
+
+    @Override
     public void forwardSituation(Situation situation) {
         // pass
     }

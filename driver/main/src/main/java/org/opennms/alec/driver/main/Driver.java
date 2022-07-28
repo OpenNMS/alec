@@ -101,12 +101,12 @@ public class Driver implements EngineRegistry {
     private DriverState state = DriverState.CREATED;
     private final KeyValueStore<String> kvStore;
     private final ObjectMapper objectMapper;
-    private EngineParameter engineParameter;
+    private final EngineParameter engineParameter;
 
     public Driver(BundleContext bundleContext, AlarmDatasource alarmDatasource,
                   AlarmFeedbackDatasource alarmFeedbackDatasource, InventoryDatasource inventoryDatasource,
                   SituationDatasource situationDatasource, List<EngineFactory> engineFactories,
-                  SituationProcessorFactory situationProcessorFactory, KeyValueStore kvStore) {
+                  SituationProcessorFactory situationProcessorFactory, KeyValueStore<String> kvStore) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.alarmFeedbackDatasource = Objects.requireNonNull(alarmFeedbackDatasource);

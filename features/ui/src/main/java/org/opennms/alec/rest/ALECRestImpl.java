@@ -1,7 +1,5 @@
 package org.opennms.alec.rest;
 
-import java.util.concurrent.CompletableFuture;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +7,10 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.JacksonSituation;
+import org.opennms.alec.data.Status;
+import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.api.EngineRegistry;
@@ -17,26 +19,8 @@ import org.opennms.alec.jackson.Agreement;
 import org.opennms.alec.jackson.ConfigurationImpl;
 import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
-import org.opennms.alec.data.JacksonSituation;
-import org.opennms.alec.data.Status;
-import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.driver.main.Driver;
-import org.opennms.alec.engine.api.EngineFactory;
-import org.opennms.alec.engine.api.EngineRegistry;
-import org.opennms.alec.engine.cluster.ClusterEngineFactory;
-import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.ConfigurationImpl;
-import org.opennms.alec.jackson.EngineParameter;
-import org.opennms.alec.jackson.EngineParameterImpl;
-import org.opennms.alec.jackson.KeyEnum;
-import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -49,27 +33,13 @@ public class ALECRestImpl implements ALECRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final Driver driver;
-
-    public ALECRestImpl(KeyValueStore<String> kvStore, EngineRegistry engineRegistry) {
-        this.kvStore = kvStore;
-        this.driver = (Driver) engineRegistry.getEngineRegistry();
-        objectMapper = new ObjectMapper();
-    }
-    public static final String ALEC_CONFIG = "ALEC_CONFIG";
-
-    private final ObjectMapper objectMapper;
-    private final KeyValueStore<String> kvStore;
-    private final List<EngineFactory> engineFactories;
-    private final Driver driver;
     private final SituationDatasource situationDatasource;
 
     public ALECRestImpl(KeyValueStore<String> kvStore,
                         EngineRegistry engineRegistry,
-                        List<EngineFactory> engineFactories,
                         SituationDatasource situationDatasource) {
         this.kvStore = kvStore;
         this.driver = (Driver) engineRegistry.getEngineRegistry();
-        this.engineFactories = engineFactories;
         this.situationDatasource = situationDatasource;
         objectMapper = new ObjectMapper();
     }
@@ -113,7 +83,8 @@ public class ALECRestImpl implements ALECRest {
             driver.destroy();
             driver.initAsync();
 
-            return Response.ok(storeEngineParameter(ret)).build();
+            storeEngineParameter(ret);
+            return Response.ok(ret).build();
         } catch (Exception e) {
             return somethingWentWrong(e);
         }
@@ -208,18 +179,11 @@ public class ALECRestImpl implements ALECRest {
         return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
     }
 
-    private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
+    private Long storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
         CompletableFuture<Long> future = kvStore.putAsync(KeyEnum.ENGINE.toString(),
                 objectMapper.writeValueAsString(engineParameter),
                 ALEC_CONFIG);
-        return Response.ok(future.join()).build();
-    }
-
-    private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
-        CompletableFuture<Long> future = kvStore.putAsync(KeyEnum.ENGINE.toString(),
-                objectMapper.writeValueAsString(engineParameter),
-                ALEC_CONFIG);
-        return Response.ok(future.join()).build();
+        return future.join();
     }
 
     private Response somethingWentWrong(Throwable e) {

@@ -10,6 +10,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,6 +23,25 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.alec.datasource.api.SituationDatasource;
+import org.opennms.alec.driver.main.Driver;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
+import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineRegistry;
+import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.jackson.Agreement;
+import org.opennms.alec.jackson.AgreementImpl;
+import org.opennms.alec.jackson.Configuration;
+import org.opennms.alec.jackson.EngineParameter;
+import org.opennms.alec.jackson.EngineParameterImpl;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,8 +70,15 @@ public class ALECRestImplTest {
     private Driver driver;
     @Mock
     private EngineRegistry engineRegistry;
+    @Mock
+    private SituationDatasource situationDatasource;
+    @Spy
+    private ClusterEngineFactory clusterEngineFactory;
 
+    private DBScanEngineFactory dbScanEngineFactory;
     private ObjectMapper objectMapper;
+    private List<EngineFactory> engineFactories;
+    private Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap;
 
     @Before
     public void setUp() {

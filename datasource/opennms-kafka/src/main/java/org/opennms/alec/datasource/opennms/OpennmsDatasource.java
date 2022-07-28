@@ -81,6 +81,9 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.HandlerRegistry;
+import org.opennms.alec.datasource.opennms.events.Event;
+import org.opennms.alec.datasource.opennms.events.JaxbUtils;
+import org.opennms.alec.datasource.opennms.events.Log;
 import org.opennms.alec.datasource.opennms.processors.AlarmFeedbackTableProcessor;
 import org.opennms.alec.datasource.opennms.processors.AlarmTableProcessor;
 import org.opennms.alec.datasource.opennms.processors.InventoryTableProcessor;
@@ -94,9 +97,6 @@ import org.opennms.alec.datasource.opennms.serialization.NodeDeserializer;
 import org.opennms.alec.datasource.opennms.serialization.OpennmsSerdes;
 import org.opennms.alec.datasource.opennms.serialization.ProtobufDeserializer;
 import org.opennms.alec.datasource.opennms.serialization.TopologyEdgeDeserializer;
-import org.opennms.alec.datasource.opennms.events.Event;
-import org.opennms.alec.datasource.opennms.events.JaxbUtils;
-import org.opennms.alec.datasource.opennms.events.Log;
 import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -533,6 +533,11 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             throw new RuntimeException(e);
         }
         return situations;
+    }
+
+    @Override
+    public List<Situation> getSituationsWithAlarmId() {
+        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
     }
 
     private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable() throws InterruptedException {

@@ -127,6 +127,17 @@ public class ApiMapper {
                 .findFirst();
     }
 
+    public Situation toSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm) {
+        final String situationId = Integer.toString(alarm.getId());
+
+        return ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(a -> this.toAlarm(a)).collect(Collectors.toSet()))
+                .build();
+    }
+
     public InMemoryEvent toEvent(Situation situation) {
         final ImmutableInMemoryEvent.Builder eventBuilder = ImmutableInMemoryEvent.newBuilder();
         eventBuilder.setUei(SITUATION_UEI).setSource("alec");

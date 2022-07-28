@@ -36,3 +36,4 @@ dependency-reduced-pom.xml
 
 # Ignore any copied KAR files produced for the smoke tests
 *.kar
+yarn-error.log

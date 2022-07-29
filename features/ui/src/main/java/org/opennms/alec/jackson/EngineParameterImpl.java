@@ -3,7 +3,9 @@ package org.opennms.alec.jackson;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
 
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
@@ -51,8 +53,17 @@ public class EngineParameterImpl implements EngineParameter {
 
     @Override
     public Double getEpsilon() {
-        return Optional.ofNullable(epsilon)
-                .orElse(DBScanEngine.DEFAULT_EPSILON);
+        if(Optional.ofNullable(epsilon).isEmpty()){
+            switch (getDistanceMeasureName()) {
+                case "hellinger":
+                    return HellingerDistanceMeasure.DEFAULT_EPSILON;
+                case "alarminspacetime":
+                default:
+                    return AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON;
+            }
+        } else {
+            return epsilon;
+        }
     }
 
     @Override

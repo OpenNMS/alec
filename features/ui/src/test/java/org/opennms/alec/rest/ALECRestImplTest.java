@@ -35,6 +35,7 @@ import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 import org.opennms.alec.jackson.Agreement;
@@ -78,7 +79,7 @@ public class ALECRestImplTest {
         }};
         dbScanEngineFactory = new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA,
                 DBScanEngine.DEFAULT_BETA,
-                DBScanEngine.DEFAULT_EPSILON,
+                AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON,
                 DBScanEngine.DEFAULT_DISTANCE_MEASURE,
                 new AlarmInSpaceAndTimeDistanceMeasureFactory(),
                 distanceMeasureFactoryMap);
@@ -172,7 +173,7 @@ public class ALECRestImplTest {
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter()
                 .alpha(DBScanEngine.DEFAULT_ALPHA)
                 .beta(DBScanEngine.DEFAULT_BETA)
-                .epsilon(DBScanEngine.DEFAULT_EPSILON)
+                .epsilon(AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON)
                 .engineName("cluster")
                 .distanceMeasureName("alarminspaceandtimedistance").build())));
     }

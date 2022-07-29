@@ -48,6 +48,6 @@ admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
-It's okay of there are no situations, vertices or edges on the graph at this point.
+It's okay if there are no situations, vertices or edges on the graph at this point.
 
 Continue to xref:verifying.adoc[Verifying your install] for more details.

@@ -26,15 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.api;
+package org.opennms.alec.engine.dbscan;
 
-public interface DistanceMeasure extends org.apache.commons.math3.ml.distance.DistanceMeasure {
+import org.opennms.alec.engine.api.DistanceMeasure;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
+import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
-    double compute(double timeA, double timeB, double firstTimeA, double firstTimeB, double spatialDistance);
+public class HellingerDistanceMeasureFactory implements DistanceMeasureFactory {
 
-    double getAlpha();
+    @Override
+    public String getName() {
+        return "hellinger";
+    }
 
-    double getBeta();
-
-    String getName();
+    @Override
+    public DistanceMeasure createDistanceMeasure(Object spatialDistanceCalculator, double alpha, double beta) {
+        return new HellingerDistanceMeasure((SpatialDistanceCalculator) spatialDistanceCalculator, alpha, beta);
+    }
 }

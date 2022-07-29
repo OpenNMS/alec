@@ -766,21 +766,23 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      * @param distance spatial distance between alarm1 and alarm2
      * @return effective distance between alarm1 and alarm2
      */
-    public double getDistanceBetween(double t1, double t2, double distance) {
+    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
         return Math.abs(t2 - t1) + distance;
     }
 
     private Alarm getClosestNeighborInSituation(Alarm alarm, List<Alarm> candidates) {
         final long vertexIdA = getVertexIdForAlarm(alarm);
         final double timeA = alarm.getTime();
+        final double firstTimeA = alarm.getFirstTime();
 
         return candidates.stream()
                 .map(candidate -> {
                     final double timeB = candidate.getTime();
+                    final double firstTimeB = candidate.getFirstTime();
                     final long vertexIdB = getVertexIdForAlarm(candidate);
                     final double spatialDistance = vertexIdA == vertexIdB ? 0 : getSpatialDistanceBetween(vertexIdA,
                             vertexIdB);
-                    final double distance = getDistanceBetween(timeA, timeB, spatialDistance);
+                    final double distance = getDistanceBetween(timeA, timeB, firstTimeA, firstTimeB, spatialDistance);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
                 .min(Comparator.comparingDouble(CandidateAlarmWithDistance::getDistance)

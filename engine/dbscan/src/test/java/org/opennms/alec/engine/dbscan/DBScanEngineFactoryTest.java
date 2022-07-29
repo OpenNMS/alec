@@ -20,14 +20,30 @@ import com.codahale.metrics.MetricRegistry;
 public class DBScanEngineFactoryTest {
 
     @Test
-    public void createEngineTest() {
+    public void createEngineWithSpaceTimeTest() {
         Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap = new HashMap<>(){{
             put("alarminspaceandtimedistance", new AlarmInSpaceAndTimeDistanceMeasureFactory());
         }};
         DBScanEngineFactory underTest = new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA,
                 DBScanEngine.DEFAULT_BETA,
-                DBScanEngine.DEFAULT_EPSILON,
+                AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON,
                 "alarminspaceandtimedistance",
+                null,
+                distanceMeasureFactoryMap);
+        AbstractClusterEngine engine = underTest.createEngine(new MetricRegistry());
+        assertThat(engine, is(notNullValue()));
+    }
+
+    @Test
+    public void createEngineWithHellingerTest() {
+        Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap = new HashMap<>(){{
+            put("alarminspaceandtimedistance", new AlarmInSpaceAndTimeDistanceMeasureFactory());
+            put("hellinger", new HellingerDistanceMeasureFactory());
+        }};
+        DBScanEngineFactory underTest = new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA,
+                DBScanEngine.DEFAULT_BETA,
+                HellingerDistanceMeasure.DEFAULT_EPSILON,
+                "hellinger",
                 null,
                 distanceMeasureFactoryMap);
         AbstractClusterEngine engine = underTest.createEngine(new MetricRegistry());

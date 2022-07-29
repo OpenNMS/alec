@@ -38,6 +38,7 @@ import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
 public class HellingerDistanceMeasure implements DistanceMeasure {
     public static final double  DEFAULT_EPSILON = 75d;
+    public static final String HELLINGER = "hellinger";
 
     private final SpatialDistanceCalculator spatialDistanceCalculator;
     private final double alpha;
@@ -99,6 +100,6 @@ public class HellingerDistanceMeasure implements DistanceMeasure {
 
     @Override
     public String getName() {
-        return "hellinger";
+        return HELLINGER;
     }
 }

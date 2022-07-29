@@ -72,7 +72,7 @@ public class JacksonEngineParameterTest {
     @Test
     public void deserializeDefaultHellingerStringBuilder() throws JsonProcessingException {
         String json = "{\"engineName\":\"dbscan\",\"distanceMeasureName\":\"hellinger\"}";
-        EngineParameter engineParameter = objectMapper.readValue(json, EngineParameter.class);
+        EngineParameter engineParameter = objectMapper.readValue(json, JacksonEngineParameter.class);
         LOG.info("Deserialize parameter: {}", engineParameter.toString());
 
         assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));

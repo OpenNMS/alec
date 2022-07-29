@@ -63,9 +63,9 @@ public class JacksonEngineParameter implements EngineParameter {
     public Double getEpsilon() {
         if(Optional.ofNullable(epsilon).isEmpty()){
             switch (getDistanceMeasureName()) {
-                case "hellinger":
+                case HellingerDistanceMeasure.HELLINGER:
                     return HellingerDistanceMeasure.DEFAULT_EPSILON;
-                case "alarminspacetime":
+                case AlarmInSpaceTimeDistanceMeasure.ALARMINSPACETIME:
                 default:
                     return AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON;
             }

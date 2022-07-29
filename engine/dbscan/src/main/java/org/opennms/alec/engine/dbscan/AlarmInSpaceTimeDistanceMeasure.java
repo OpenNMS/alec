@@ -38,6 +38,7 @@ import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
 
 public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
     public static final double  DEFAULT_EPSILON = 100d;
+    public static final String ALARMINSPACETIME = "alarminspacetime";
 
     private final SpatialDistanceCalculator spatialDistanceCalculator;
     private final double alpha;
@@ -92,6 +93,6 @@ public class AlarmInSpaceTimeDistanceMeasure implements DistanceMeasure {
 
     @Override
     public String getName() {
-        return "alarminspacetime";
+        return ALARMINSPACETIME;
     }
 }

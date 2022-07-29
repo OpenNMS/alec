@@ -28,13 +28,15 @@ export const useUserStore = defineStore('userStore', {
 			const result = await getUserInfo()
 			if (result) {
 				this.firstTime = false
+				this.allowSave = result.agreed
 			}
 		},
 		async savePermission(allowSaveValue: boolean) {
 			this.allowSave = allowSaveValue
 			if (!allowSaveValue) {
 				//for true option will be saved on configuration page
-				await savePermission(allowSaveValue)
+				const result = await savePermission(allowSaveValue)
+				this.allowSave = result
 			}
 		}
 	}

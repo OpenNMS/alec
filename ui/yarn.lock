@@ -496,19 +496,7 @@
     "@featherds/styles" "^0.10.15"
     vue "^3.1.0-0"
 
-"@featherds/input@0.10.14":
-  version "0.10.14"
-  resolved "https://registry.yarnpkg.com/@featherds/input/-/input-0.10.14.tgz#857460f1025069cd4a2e0ea00a17c2b41d8cfd51"
-  integrity sha512-wJy1i+dSyZ8xY+s5gZUAl3Mhy2JQ97e9/rmsuhzfzBIAtBUJNsCNl8IZPowtoS+VYbD7fxBL/CJ5Kpu5iLUXyw==
-  dependencies:
-    "@featherds/icon" "^0.10.14"
-    "@featherds/input-helper" "^0.10.14"
-    "@featherds/ripple" "^0.10.14"
-    "@featherds/styles" "^0.10.14"
-    "@featherds/utils" "^0.10.14"
-    vue "^3.1.0-0"
-
-"@featherds/input@^0.10.14":
+"@featherds/input@0.10.15", "@featherds/input@^0.10.14":
   version "0.10.15"
   resolved "https://registry.yarnpkg.com/@featherds/input/-/input-0.10.15.tgz#bbc4ebdf72a29dd0e4473c416bd57cfe50eb655e"
   integrity sha512-x5WpDgGuoduzCvbnSJepawAMcHuf/+ymR7jxNSWnqbBenguQThI3ShkDgFpw1oI5B3NvQbJtWffepkxBV5/B+g==

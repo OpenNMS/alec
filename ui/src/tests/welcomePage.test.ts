@@ -9,15 +9,13 @@ const wrapper = mount(WelcomePage, {
 	global: {
 		plugins: [createTestingPinia()]
 	}
-} as any)
+} as any) as any
 
 test('Should redirect to situation list if not accept', async () => {
 	const router = useRouter()
 	const push = vi.spyOn(router, 'push')
 	const store = useUserStore()
 	store.userId = 'test'
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	//@ts-ignore
 	wrapper.vm.allowSave = false
 	const continueBtn = wrapper.find('[data-test="continue-btn"]')
 	await continueBtn.trigger('click')
@@ -31,8 +29,6 @@ test('Should redirect to confiration if accepts', async () => {
 	const push = vi.spyOn(router, 'push')
 	const store = useUserStore()
 	store.userId = 'test'
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	//@ts-ignore
 	wrapper.vm.allowSave = true
 	const continueBtn = wrapper.find('[data-test="continue-btn"]')
 	await continueBtn.trigger('click')

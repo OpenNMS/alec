@@ -7,10 +7,17 @@ import {
 } from '@featherds/tabs'
 import { FeatherSortHeader, SORT } from '@featherds/table'
 import { TSituation } from '@/types/TSituation'
-
+import { FeatherIcon } from '@featherds/icon'
+import CheckCircle from '@featherds/icon/action/CheckCircle'
+import Cancel from '@featherds/icon/action/Cancel'
+import { sendFeedbackAcceptSituation } from '@/services/AlecService'
+import { FeatherButton } from '@featherds/button'
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
+const handleFeedbackSituation = (action: string) => {
+	sendFeedbackAcceptSituation(props.alarmInfo?.id, action)
+}
 </script>
 
 <template>
@@ -26,18 +33,44 @@ const props = defineProps<{
 					<span>Situation - {{ props.alarmInfo?.id }}</span>
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
-
+				<div>
+					<FeatherButton
+						secondary
+						class="btn"
+						@click="() => handleFeedbackSituation('accepted')"
+					>
+						<FeatherIcon
+							:icon="CheckCircle"
+							aria-hidden="true"
+							class="icon accept"
+						/>
+						Accept Situation
+					</FeatherButton>
+					<FeatherButton
+						secondary
+						class="btn"
+						@click="() => handleFeedbackSituation('refused')"
+					>
+						<FeatherIcon
+							:icon="Cancel"
+							aria-hidden="true"
+							class="icon reject"
+						/>
+						Reject Situation
+					</FeatherButton>
+				</div>
 				<span v-html="props.alarmInfo.description"></span>
 				<p>
-					<strong>Last Event: </strong
-					>{{ new Date(props.alarmInfo.lastEvent.time).toUTCString() }}
+					<strong>Last Event:</strong>
+					{{ new Date(props.alarmInfo.lastEvent.time).toUTCString() }}
 				</p>
 				<p>
-					<strong>First Event: </strong
-					>{{ new Date(props.alarmInfo.lastEvent.createTime).toUTCString() }}
+					<strong>First Event:</strong>
+					{{ new Date(props.alarmInfo.lastEvent.createTime).toUTCString() }}
 				</p>
 				<p>
-					<strong>Reduction key: </strong>{{ props.alarmInfo.reductionKey }}
+					<strong>Reduction key:</strong>
+					{{ props.alarmInfo.reductionKey }}
 				</p>
 				<div>
 					<table class="tc1 tr2 tc4 tr6" :class="{ condensed: true }">
@@ -51,6 +84,7 @@ const props = defineProps<{
 									ID
 								</FeatherSortHeader>
 								<th scope="col">Severity</th>
+								<th scope="col">Count</th>
 								<th scope="col">Node</th>
 								<th scope="col">Log msg</th>
 							</tr>
@@ -63,6 +97,7 @@ const props = defineProps<{
 							>
 								<td>{{ alarm.id }}</td>
 								<td>{{ alarm.severity }}</td>
+								<td>{{ alarm.count }}</td>
 								<td>{{ alarm.nodeLabel }}</td>
 								<td>{{ alarm.logMessage }}</td>
 							</tr>
@@ -109,5 +144,14 @@ table {
 	&.condensed {
 		@include table-condensed();
 	}
+}
+
+.accept {
+	font-size: 16px;
+	color: green !important;
+}
+.reject {
+	font-size: 16px;
+	color: red !important;
 }
 </style>

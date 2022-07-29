@@ -55,6 +55,7 @@ export type TRelatedAlarm = {
 	description: string
 	logMessage: string
 	nodeLabel: string
+	count?: number
 }
 
 export type TAlarm = {

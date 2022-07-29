@@ -1,7 +1,7 @@
 import { ApiResponse } from '@/types/TSituation'
 import { v2 } from './axiosInstances'
 
-const situationEndpoint = '/alarms?_s=isSituation==true'
+const situationEndpoint = '/alarms'
 
 export const getSituations = async (): Promise<ApiResponse | false> => {
 	try {

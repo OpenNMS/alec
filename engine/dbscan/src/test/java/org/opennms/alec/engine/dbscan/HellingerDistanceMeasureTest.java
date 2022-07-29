@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 
-public class AlarmInSpaceTimeDistanceMeasureTest {
+public class HellingerDistanceMeasureTest {
 
     @Test
     public void canEvaluateDistanceFunction() {
@@ -48,20 +48,22 @@ public class AlarmInSpaceTimeDistanceMeasureTest {
         double minSpatialDistance = 0;
         double maxSpatialDistance = 5 * DEFAULT_WEIGHT;
         double spatialDistanceStep = maxSpatialDistance / 10;
+        double firstTimeA = 1d;
+        double firstTimeB = 2d;
 
-        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON);
+        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, HellingerDistanceMeasure.DEFAULT_EPSILON);
         System.out.println("timeDeltaSecs,spatialDistance,distance,ok");
         for (double y = minSpatialDistance; y < maxSpatialDistance; y += spatialDistanceStep) {
             for (double x = minTimeDeltaMs; x <= maxTimeDeltaMs; x += timeDeltaMsStep) {
-                double val = eval(x,y);
-                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON);
+                double val = eval(x,y, firstTimeA, firstTimeB);
+                System.out.printf("%.2f,%.2f,%.2f,%s\n", x / 1000, y, val, val <= HellingerDistanceMeasure.DEFAULT_EPSILON);
             }
         }
     }
 
-    double eval(double timeDeltaMs, double spatialDistance) {
+    double eval(double timeDeltaMs, double spatialDistance, double firstTimeA, double firstTimeB) {
         final AbstractClusterEngine clusterEngine = mock(AbstractClusterEngine.class);
-        final AlarmInSpaceTimeDistanceMeasure alarmInSpaceTimeDistanceMeasure = new AlarmInSpaceTimeDistanceMeasure(clusterEngine, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA);
-        return alarmInSpaceTimeDistanceMeasure.compute(0, timeDeltaMs, spatialDistance);
+        final HellingerDistanceMeasure hellingerDistanceMeasure = new HellingerDistanceMeasure(clusterEngine, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA);
+        return hellingerDistanceMeasure.compute(0, timeDeltaMs, firstTimeA, firstTimeB, spatialDistance);
     }
 }

@@ -71,6 +71,7 @@ public class JaxbUtilsTest {
         Alarm a1 = ImmutableAlarm.newBuilder()
                 .setId("1")
                 .setDescription("abc")
+                .setFirstTime(1l)
                 .setInventoryObjectId("io-id")
                 .setInventoryObjectType("io-type")
                 .setTime(0)

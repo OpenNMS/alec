@@ -7886,11 +7886,12 @@ var CONST = {
   HELLINGER_OPTION: "hellinger",
   SPACE_DISTANCE_OPTION: "alarminspaceandtimedistance"
 };
+const base = "/alec";
 const engineEndpoint = "/alec/engine/configuration";
-const endpoint = "/alec/agreement/configuration";
+const endpointAgreement = "/alec/agreement/configuration";
 const savePermission = async (allowSaveValue) => {
   try {
-    const resp = await rest.post(`${endpoint}`, {
+    const resp = await rest.post(`${endpointAgreement}`, {
       agreed: allowSaveValue
     });
     if (resp.status === 201) {
@@ -7903,7 +7904,7 @@ const savePermission = async (allowSaveValue) => {
 };
 const getUserInfo = async () => {
   try {
-    const resp = await rest.get(`${endpoint}`);
+    const resp = await rest.get(`${endpointAgreement}`);
     if (resp.status === 200) {
       return resp.data;
     }
@@ -7931,7 +7932,7 @@ const saveEngineParameter = async (engineName, hellinger) => {
 };
 const sendFeedbackAcceptSituation = async (id, action) => {
   try {
-    const resp = await rest.post(`${endpoint}/situation/${action}/${id}`, {
+    const resp = await rest.post(`${base}/situation/${action}/${id}`, {
       headers: {
         "Access-Control-Allow-Origin": "*"
       }

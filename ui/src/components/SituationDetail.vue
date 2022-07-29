@@ -12,6 +12,9 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import { FeatherButton } from '@featherds/button'
+import { useUserStore } from '@/store/useUserStore'
+const userStore = useUserStore()
+
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
@@ -33,7 +36,7 @@ const handleFeedbackSituation = (action: string) => {
 					<span>Situation - {{ props.alarmInfo?.id }}</span>
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
-				<div>
+				<div v-if="userStore.allowSave">
 					<FeatherButton
 						secondary
 						class="btn"

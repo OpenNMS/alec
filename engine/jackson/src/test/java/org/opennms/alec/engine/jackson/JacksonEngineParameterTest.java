@@ -8,7 +8,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.engine.api.EngineParameter;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +64,21 @@ public class JacksonEngineParameterTest {
 
         assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
         assertThat(DBScanEngine.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
-        assertThat(DBScanEngine.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
+        assertThat(AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
         assertThat(DBScanEngine.DEFAULT_DISTANCE_MEASURE, equalTo(engineParameter.getDistanceMeasureName()));
+        assertThat("dbscan", equalTo(engineParameter.getEngineName()));
+    }
+
+    @Test
+    public void deserializeDefaultHellingerStringBuilder() throws JsonProcessingException {
+        String json = "{\"engineName\":\"dbscan\",\"distanceMeasureName\":\"hellinger\"}";
+        EngineParameter engineParameter = objectMapper.readValue(json, EngineParameter.class);
+        LOG.info("Deserialize parameter: {}", engineParameter.toString());
+
+        assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
+        assertThat(DBScanEngine.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
+        assertThat(HellingerDistanceMeasure.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
+        assertThat("hellinger", equalTo(engineParameter.getDistanceMeasureName()));
         assertThat("dbscan", equalTo(engineParameter.getEngineName()));
     }
 }

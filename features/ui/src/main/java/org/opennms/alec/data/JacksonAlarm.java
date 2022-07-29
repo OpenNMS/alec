@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 public class JacksonAlarm implements Alarm {
 
     private final String id;
+    private final long firstTime;
     private final long time;
     private final boolean clear;
     private final Severity severity;
@@ -49,6 +50,7 @@ public class JacksonAlarm implements Alarm {
 
     private JacksonAlarm(Builder builder) {
         id = builder.id;
+        firstTime = builder.firstTime;
         time = builder.time;
         clear = builder.clear;
         severity = builder.severity;
@@ -66,6 +68,7 @@ public class JacksonAlarm implements Alarm {
     public static Builder newBuilder(Alarm copy) {
         Builder builder = new Builder();
         builder.id = copy.getId();
+        builder.firstTime = copy.getFirstTime();
         builder.time = copy.getTime();
         builder.clear = copy.isClear();
         builder.severity = copy.getSeverity();
@@ -80,6 +83,11 @@ public class JacksonAlarm implements Alarm {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public long getFirstTime() {
+        return firstTime;
     }
 
     @Override
@@ -125,6 +133,7 @@ public class JacksonAlarm implements Alarm {
     @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
         private String id;
+        private long firstTime;
         private long time;
         private boolean clear;
         private Severity severity;
@@ -139,6 +148,11 @@ public class JacksonAlarm implements Alarm {
 
         public Builder id(String val) {
             id = val;
+            return this;
+        }
+
+        public Builder firstTime(long val) {
+            firstTime = val;
             return this;
         }
 

@@ -4,12 +4,16 @@ import { FeatherButton } from '@featherds/button'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { ref } from 'vue'
 import useRouter from '@/composables/useRouter'
+import { savePermission, saveEngineParameter } from '@/services/AlecService'
+import CONST from '@/helpers/constants'
+import { useUserStore } from '@/store/useUserStore'
+const userStore = useUserStore()
 const router = useRouter()
-
 const hellinger = ref(false)
-const engine = ref()
-
+const engine = ref(CONST.ENGINE_DBSCAN)
 const handleClickContinue = () => {
+	savePermission(userStore.allowSave)
+	saveEngineParameter(engine.value, hellinger.value)
 	router.push({ name: 'situations' })
 }
 </script>
@@ -21,6 +25,16 @@ const handleClickContinue = () => {
 			ALEC relies on correlation engines to identify related alarm groupings
 			(situations). These engines are powered by machine learning techniques
 			that leverage alarms data to make informed decisions.
+			<br />
+			For detail information about proposed engines you can read
+			<strong>
+				<a
+					target="_blank"
+					href="https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+				>
+					here
+				</a>
+			</strong>
 		</p>
 		<div>
 			<FeatherRadioGroup
@@ -28,35 +42,43 @@ const handleClickContinue = () => {
 				:label="'Currently, ALEC provides two clustering based engines, please, select one (can be changed later):'"
 				v-model="engine"
 			>
-				<FeatherRadio class="radio" value="clustering"
-					><div class="radio-content">
-						<strong>Clustering</strong>
+				<FeatherRadio class="radio" :value="CONST.ENGINE_DBSCAN">
+					<div class="radio-content">
+						<strong class="title">Clustering</strong>
 						<div>
 							Groups data points (alarms) based on a distance measure. We
 							calculate alarms difference in time and add it to their distance
 							within their network topology
 						</div>
-						<img class="img" src="/src/assets/clustering.jpg" />
-						<FeatherCheckbox v-model="hellinger" class="checkbox"
-							><strong>With hellinger distance </strong><br /><span
-								class="description"
-								>(Uses the Hellinger Distance between alarms as a scaling
-								variable. It pushes alarms further apart if its value is high
-								and vice versa.)</span
-							></FeatherCheckbox
+						<img class="img" src="/src/assets/clustering.png" />
+						<FeatherCheckbox
+							v-model="hellinger"
+							:disabled="engine !== CONST.ENGINE_DBSCAN"
+							class="checkbox"
 						>
-					</div></FeatherRadio
-				>
-				<FeatherRadio class="radio" value="deeplearning"
-					><div class="radio-content">
-						<strong>Deep Learning</strong>
+							<div class="hellinger">
+								<strong>With hellinger distance</strong>
+								<br />
+								<span class="description">
+									(Uses the Hellinger Distance between alarms as a scaling
+									variable. It pushes alarms further apart if its value is high
+									and vice versa.)
+								</span>
+							</div>
+						</FeatherCheckbox>
+					</div>
+				</FeatherRadio>
+				<FeatherRadio class="radio" :value="CONST.ENGINE_DEEP_LEARNING">
+					<div class="radio-content">
+						<strong class="title">Deep Learning</strong>
 						<div>
 							A Neural Network network is consulted to assess if alarms are
 							related. Based on its evaluation, situations are built by
 							association.
 						</div>
-						<img class="img" src="/src/assets/deeplearning.png" /></div
-				></FeatherRadio>
+						<img class="img img2" src="/src/assets/deeplearning.png" />
+					</div>
+				</FeatherRadio>
 			</FeatherRadioGroup>
 		</div>
 		<FeatherButton primary class="btn" @click="() => handleClickContinue()">
@@ -83,26 +105,35 @@ const handleClickContinue = () => {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	min-height: 440px;
-	max-width: 400px;
+	min-height: 560px;
+	max-width: 450px;
+}
+.title {
+	font-size: 18px;
+	padding-bottom: 5px;
 }
 .img {
 	margin-top: 10px;
-	width: 300px;
 	height: auto;
+	width: 310px;
+	margin: 40px 0px;
 }
-
+.img2 {
+	margin-top: 50px;
+	width: 430px;
+}
 .checkbox {
 	margin-top: 25px;
 }
-
 .btn {
-	margin-top: 60px;
+	margin-top: 10px;
 	width: fit-content;
 	margin-left: auto;
 }
-
 .description {
 	font-size: 13px;
+}
+.hellinger {
+	height: 30px;
 }
 </style>

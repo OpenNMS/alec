@@ -237,6 +237,8 @@ public class Vectorize implements Action {
     private static Iterable<?> toRecordValues(OutputVector ov) {
         final InputVector v = ov.getInputVector();
         return Arrays.asList(
+                v.getAlarmAId(),
+                v.getAlarmBId(),
                 v.getTypeA(),
                 v.getTypeB(),
                 v.isSameInstance() ? 1 : 0,

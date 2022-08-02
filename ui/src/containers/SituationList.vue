@@ -6,13 +6,18 @@ import { reactive } from 'vue'
 const situationStore = useSituationsStore()
 situationStore.getSituations()
 const state = reactive({
-	selectedSituationIndex: 0
+	selectedSituationIndex: 0,
+	situationSelected: ''
 })
 const situationSelected = (id: string) => {
+	state.situationSelected = id
 	state.selectedSituationIndex = situationStore.situations.findIndex(
 		(s) => s.id === id
 	)
 }
+situationStore.$subscribe((mutation, storeState) => {
+	state.situationSelected = storeState.situations[0].id
+})
 </script>
 
 <template>
@@ -24,6 +29,7 @@ const situationSelected = (id: string) => {
 					<SituationCard
 						:alarm-info="alarmInfo"
 						@situation-selected="situationSelected"
+						:selected="state.situationSelected == alarmInfo.id"
 					/>
 				</div>
 			</div>
@@ -44,12 +50,12 @@ const situationSelected = (id: string) => {
 }
 h2 {
 	margin-top: 0;
+	margin-bottom: 15px !important;
 }
 .container {
 	display: flex;
 	flex-direction: row;
 }
-
 .situation-list {
 	display: flex;
 	flex-direction: column;

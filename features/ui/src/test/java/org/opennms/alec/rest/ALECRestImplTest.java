@@ -113,7 +113,19 @@ public class ALECRestImplTest {
     }
 
     @Test
-    public void testSetDbScanEngineConfiguration() {
+    public void testGetEngineConfigurationNoContent() throws JsonProcessingException {
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, situationDatasource);
+        when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.empty());
+
+        try (Response result = underTest.getEngineConfiguration()) {
+            assertThat(result.getStatus(), equalTo(Response.Status.NO_CONTENT.getStatusCode()));
+        }
+        verify(kvStore, times(1)).get(anyString(), anyString());
+        verifyNoMoreInteractions(kvStore);
+    }
+
+    @Test
+    public void testSetDbScanEngineConfiguration() throws JsonProcessingException {
         ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, situationDatasource);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
@@ -186,8 +198,20 @@ public class ALECRestImplTest {
         }
     }
 
+
+    @Test
+    public void testGetAgreementConfigurationNoContent() throws JsonProcessingException {
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+
+        when(kvStore.get(anyString(), anyString())).thenReturn(Optional.empty());
+
+        try (Response result = underTest.getAgreementConfiguration()) {
+            assertThat(result.getStatus(), equalTo(Response.Status.NO_CONTENT.getStatusCode()));
+        }
+    }
+
     private JacksonEngineParameter.Builder getParameter() {
-        return JacksonEngineParameter.newBuilder()
+        return EngineParameterImpl.newBuilder()
                 .alpha(1d)
                 .beta(2d)
                 .epsilon(3d)

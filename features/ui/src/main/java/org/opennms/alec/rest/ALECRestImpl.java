@@ -94,7 +94,12 @@ public class ALECRestImpl implements ALECRest {
     public Response getEngineConfiguration() {
         LOG.debug("Get engine configuration");
         try {
-            return Response.ok().entity(objectMapper.readValue(kvStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG).orElse(""), JacksonEngineParameter.class)).build();
+            Optional<String> engineConfiguration = kvStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG);
+            if (engineConfiguration.isPresent()) {
+                return Response.ok().entity(objectMapper.readValue(engineConfiguration.get(), JacksonEngineParameter.class)).build();
+            } else {
+                return Response.noContent().build();
+            }
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
@@ -124,7 +129,12 @@ public class ALECRestImpl implements ALECRest {
     public Response getAgreementConfiguration() {
         LOG.debug("Get agreement configuration");
         try {
-            return Response.ok().entity(objectMapper.readValue(kvStore.get(KeyEnum.AGREEMENT.toString(), ALEC_CONFIG).orElse(""), Agreement.class)).build();
+            Optional<String> agreementConfiguration = kvStore.get(KeyEnum.AGREEMENT.toString(), ALEC_CONFIG);
+            if (agreementConfiguration.isPresent()) {
+                return Response.ok().entity(objectMapper.readValue(agreementConfiguration.get(), Agreement.class)).build();
+            } else {
+                return Response.noContent().build();
+            }
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }

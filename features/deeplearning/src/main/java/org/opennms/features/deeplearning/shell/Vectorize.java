@@ -57,6 +57,7 @@ import org.opennms.alec.datasource.jaxb.JaxbUtils;
 import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
@@ -64,6 +65,7 @@ import org.opennms.alec.engine.cluster.CEVertex;
 import org.opennms.alec.engine.deeplearning.InputVector;
 import org.opennms.alec.engine.deeplearning.OutputVector;
 import org.opennms.alec.engine.deeplearning.Vectorizer;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -197,6 +199,16 @@ public class Vectorize implements Action {
         @Override
         public EngineFactory getEngineFactory() {
             return this;
+        }
+
+        @Override
+        public void configure(EngineParameter engineParameter) {
+
+        }
+
+        @Override
+        public EngineParameter getEngineParameter() {
+            return JacksonEngineParameter.newBuilder().engineName(getName()).build();
         }
     }
 

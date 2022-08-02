@@ -62,5 +62,10 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.jackson</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

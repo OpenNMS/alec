@@ -47,6 +47,7 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.driver.test.MockInventoryBuilder;
 import org.opennms.alec.driver.test.MockInventoryType;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -59,7 +60,7 @@ public class DBScanEnginePerfTest {
      */
     @Test
     public void canRunDBScanOnLargeGraphs() {
-        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
         dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
@@ -90,7 +91,7 @@ public class DBScanEnginePerfTest {
 
     @Test
     public void canRunDBScanOnLargeGraphsHellinger() {
-        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
+        final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
         dbScanEngine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         final int K = 500;
@@ -123,7 +124,7 @@ public class DBScanEnginePerfTest {
     @Test
     @Ignore("For manual testing")
     public void canNotRunOOM() {
-        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
+        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         engine.registerSituationHandler(mock(SituationHandler.class));
@@ -188,7 +189,7 @@ public class DBScanEnginePerfTest {
     @Test
     @Ignore("For manual testing")
     public void canNotRunOOMHellinger() {
-        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
+        final DBScanEngine engine = new DBScanEngine(new MetricRegistry(), HellingerDistanceMeasure.DEFAULT_EPSILON, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, new HellingerDistanceMeasureFactory());
         engine.init(Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList());
         engine.registerSituationHandler(mock(SituationHandler.class));

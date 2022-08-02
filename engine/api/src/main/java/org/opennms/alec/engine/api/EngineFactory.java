@@ -38,4 +38,8 @@ public interface EngineFactory {
 
     EngineFactory getEngineFactory();
 
+    void configure(EngineParameter engineParameter);
+
+    EngineParameter getEngineParameter();
+
 }

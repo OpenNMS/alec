@@ -32,21 +32,30 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.AlarmFeedbackDatasource;
 import org.opennms.alec.datasource.api.InventoryDatasource;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.engine.api.EngineFactory;
-import org.opennms.alec.engine.cluster.ClusterEngineFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 import org.opennms.alec.processor.api.SituationProcessor;
 import org.opennms.alec.processor.api.SituationProcessorFactory;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
@@ -54,26 +63,40 @@ import org.osgi.framework.BundleContext;
 
 import com.codahale.metrics.MetricRegistry;
 
+@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DriverTest {
+
+    @Mock
+    private BundleContext bundleContext;
+    @Mock
+    private AlarmDatasource alarmDatasource;
+    @Mock
+    private AlarmFeedbackDatasource alarmFeedbackDatasource;
+    @Mock
+    private InventoryDatasource inventoryDatasource;
+    @Mock
+    private SituationDatasource situationDatasource;
+    @Mock
+    private EngineFactory engineFactory;
+    @Mock
+    private KeyValueStore<String> kvStore;
+    @Mock
+    private SituationProcessorFactory situationProcessorFactory;
+
+    private List<EngineFactory> engineFactories;
+
+    @Before
+    public void setUp() throws Exception {
+        engineFactories = Arrays.asList(engineFactory);
+    }
 
     @Test
     public void canGenerateTicks() throws InterruptedException, ExecutionException {
-        // Mocks
-        BundleContext bundleContext = mock(BundleContext.class);
-        AlarmDatasource alarmDatasource = mock(AlarmDatasource.class);
-        AlarmFeedbackDatasource alarmFeedbackDatasource = mock(AlarmFeedbackDatasource.class);
-        InventoryDatasource inventoryDatasource = mock(InventoryDatasource.class);
-        SituationDatasource situationDatasource = mock(SituationDatasource.class);
-        EngineFactory engineFactory = mock(EngineFactory.class);
-        SituationProcessorFactory situationProcessorFactory = mock(SituationProcessorFactory.class);
+        when(engineFactory.getName()).thenReturn(JacksonEngineParameter.CLUSTER);
         when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
-        TickLoggingEngine tickLoggingEngine = new TickLoggingEngine(new MetricRegistry());
-        List<EngineFactory> engineFactories = List.of(engineFactory);
-        KeyValueStore<String> kvStore = mock(KeyValueStore.class);
-        when(engineFactory.getName()).thenReturn(ClusterEngineFactory.CLUSTER);
-        EngineFactory clusterEngineFactory = spy(ClusterEngineFactory.class);
-        when(engineFactory.getEngineFactory()).thenReturn(clusterEngineFactory);
-        doReturn(tickLoggingEngine).when(clusterEngineFactory).createEngine(any(MetricRegistry.class));
+        TickLoggingEngine tickLoggingEngine = new TickLoggingEngine();
+        when(engineFactory.createEngine(any(MetricRegistry.class))).thenReturn(tickLoggingEngine);
 
         // Create and initialize the driver
         Driver driver = new Driver(bundleContext, alarmDatasource, alarmFeedbackDatasource, inventoryDatasource,
@@ -88,5 +111,27 @@ public class DriverTest {
 
         // Clean-up
         driver.destroy();
+    }
+
+    @Test
+    public void retrieveParameterTest() throws ExecutionException, InterruptedException {
+        KeyValueStore<String> kvStore = mock(KeyValueStore.class);
+        when(kvStore.get(eq("ENGINE"), eq("ALEC_CONFIG"))).thenReturn(Optional.of("{\"engineName\":\"dbscan\",\"distanceMeasureName\":\"hellinger\"}"));
+        when(engineFactory.createEngine(any(MetricRegistry.class))).thenReturn(new DBScanEngine(
+                new MetricRegistry(),
+                JacksonEngineParameter.DEFAULT_ALARN_IN_SPACE_EPSILON,
+                JacksonEngineParameter.DEFAULT_ALPHA,
+                JacksonEngineParameter.DEFAULT_BETA,
+                new AlarmInSpaceAndTimeDistanceMeasureFactory()));
+        when(engineFactory.getName()).thenReturn("dbscan");
+
+        Driver driver = new Driver(bundleContext, alarmDatasource, alarmFeedbackDatasource, inventoryDatasource,
+                situationDatasource, engineFactories, situationProcessorFactory, kvStore);
+
+        driver.initAsync().get();
+
+        // Clean-up
+        driver.destroy();
+
     }
 }

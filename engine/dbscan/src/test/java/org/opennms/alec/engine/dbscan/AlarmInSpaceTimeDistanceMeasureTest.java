@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 public class AlarmInSpaceTimeDistanceMeasureTest {
 
@@ -49,7 +50,7 @@ public class AlarmInSpaceTimeDistanceMeasureTest {
         double maxSpatialDistance = 5 * DEFAULT_WEIGHT;
         double spatialDistanceStep = maxSpatialDistance / 10;
 
-        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON);
+        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON);
         System.out.println("timeDeltaSecs,spatialDistance,distance,ok");
         for (double y = minSpatialDistance; y < maxSpatialDistance; y += spatialDistanceStep) {
             for (double x = minTimeDeltaMs; x <= maxTimeDeltaMs; x += timeDeltaMsStep) {
@@ -61,7 +62,7 @@ public class AlarmInSpaceTimeDistanceMeasureTest {
 
     double eval(double timeDeltaMs, double spatialDistance) {
         final AbstractClusterEngine clusterEngine = mock(AbstractClusterEngine.class);
-        final AlarmInSpaceTimeDistanceMeasure alarmInSpaceTimeDistanceMeasure = new AlarmInSpaceTimeDistanceMeasure(clusterEngine, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA);
+        final AlarmInSpaceTimeDistanceMeasure alarmInSpaceTimeDistanceMeasure = new AlarmInSpaceTimeDistanceMeasure(clusterEngine, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA);
         return alarmInSpaceTimeDistanceMeasure.compute(0, timeDeltaMs, spatialDistance);
     }
 }

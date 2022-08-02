@@ -102,6 +102,7 @@ public class ALECRestImpl implements ALECRest {
 
     @Override
     public Response getEngineCurrentConfiguration() {
+        LOG.debug("Get current engine configuration");
         return Response.ok(driver.getEngineCurrentParameter()).build();
     }
 

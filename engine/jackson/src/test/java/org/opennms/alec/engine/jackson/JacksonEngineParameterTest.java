@@ -8,9 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.engine.api.EngineParameter;
-import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
-import org.opennms.alec.engine.dbscan.DBScanEngine;
-import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,10 +59,10 @@ public class JacksonEngineParameterTest {
         EngineParameter engineParameter = objectMapper.readValue(json, JacksonEngineParameter.class);
         LOG.info("Deserialize parameter: {}", engineParameter.toString());
 
-        assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
-        assertThat(DBScanEngine.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
-        assertThat(AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
-        assertThat(DBScanEngine.DEFAULT_DISTANCE_MEASURE, equalTo(engineParameter.getDistanceMeasureName()));
+        assertThat(JacksonEngineParameter.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
+        assertThat(JacksonEngineParameter.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
+        assertThat(JacksonEngineParameter.DEFAULT_ALARN_IN_SPACE_EPSILON, equalTo(engineParameter.getEpsilon()));
+        assertThat(JacksonEngineParameter.DEFAULT_DISTANCE_MEASURE, equalTo(engineParameter.getDistanceMeasureName()));
         assertThat("dbscan", equalTo(engineParameter.getEngineName()));
     }
 
@@ -75,9 +72,9 @@ public class JacksonEngineParameterTest {
         EngineParameter engineParameter = objectMapper.readValue(json, JacksonEngineParameter.class);
         LOG.info("Deserialize parameter: {}", engineParameter.toString());
 
-        assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
-        assertThat(DBScanEngine.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
-        assertThat(HellingerDistanceMeasure.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
+        assertThat(JacksonEngineParameter.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
+        assertThat(JacksonEngineParameter.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
+        assertThat(JacksonEngineParameter.DEFAULT_HELLINGER_EPSILON, equalTo(engineParameter.getEpsilon()));
         assertThat("hellinger", equalTo(engineParameter.getDistanceMeasureName()));
         assertThat("dbscan", equalTo(engineParameter.getEngineName()));
     }

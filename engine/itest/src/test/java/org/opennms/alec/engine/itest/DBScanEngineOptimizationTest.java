@@ -61,8 +61,8 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.jaxb.JaxbUtils;
 import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
-import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 import org.opennms.alec.features.score.api.ScoreMetric;
 import org.opennms.alec.features.score.api.ScoreReport;
 import org.opennms.alec.features.score.api.ScoringStrategy;
@@ -76,7 +76,7 @@ import com.google.common.collect.Sets;
 public class DBScanEngineOptimizationTest {
 
     // Min @ epsilon: 2831.72, hopWeight: 16.85, timeWeight: 0.69, score: 34.93 -- new double[]{2831.71849627, 16.84762927, 0.69470697};
-    private static final double[] BEST_PARAMS = new double[]{DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA};
+    private static final double[] BEST_PARAMS = new double[]{JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA};
 
     double[] currentParms = BEST_PARAMS;
     double[] bestParams = currentParms;

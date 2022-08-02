@@ -56,8 +56,8 @@ import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
-import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 import com.google.common.collect.ImmutableList;
 
@@ -70,7 +70,7 @@ public class Level2EngineComplianceTest {
     @Parameterized.Parameters(name = "{index}: engine({0})")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                { new DBScanEngineFactory(DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, "", new AlarmInSpaceAndTimeDistanceMeasureFactory(), Collections.EMPTY_MAP) },
+                { new DBScanEngineFactory(JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, "", new AlarmInSpaceAndTimeDistanceMeasureFactory(), Collections.EMPTY_MAP) },
                 { new ClusterEngineFactory() }
         });
     }

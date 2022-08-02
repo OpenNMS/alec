@@ -24,6 +24,10 @@
             <artifactId>org.opennms.alec.datasource.common</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.jackson</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>

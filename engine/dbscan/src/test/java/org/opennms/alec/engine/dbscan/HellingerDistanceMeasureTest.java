@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 public class HellingerDistanceMeasureTest {
 
@@ -51,7 +52,7 @@ public class HellingerDistanceMeasureTest {
         double firstTimeA = 1d;
         double firstTimeB = 2d;
 
-        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, HellingerDistanceMeasure.DEFAULT_EPSILON);
+        System.out.printf("Alpha: %.4f, Beta: %.4f, Epsilon: %.4f\n", JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA, HellingerDistanceMeasure.DEFAULT_EPSILON);
         System.out.println("timeDeltaSecs,spatialDistance,distance,ok");
         for (double y = minSpatialDistance; y < maxSpatialDistance; y += spatialDistanceStep) {
             for (double x = minTimeDeltaMs; x <= maxTimeDeltaMs; x += timeDeltaMsStep) {
@@ -63,7 +64,7 @@ public class HellingerDistanceMeasureTest {
 
     double eval(double timeDeltaMs, double spatialDistance, double firstTimeA, double firstTimeB) {
         final AbstractClusterEngine clusterEngine = mock(AbstractClusterEngine.class);
-        final HellingerDistanceMeasure hellingerDistanceMeasure = new HellingerDistanceMeasure(clusterEngine, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA);
+        final HellingerDistanceMeasure hellingerDistanceMeasure = new HellingerDistanceMeasure(clusterEngine, JacksonEngineParameter.DEFAULT_ALPHA, JacksonEngineParameter.DEFAULT_BETA);
         return hellingerDistanceMeasure.compute(0, timeDeltaMs, firstTimeA, firstTimeB, spatialDistance);
     }
 }

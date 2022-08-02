@@ -5,10 +5,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.opennms.alec.engine.api.EngineParameter;
-import org.opennms.alec.engine.cluster.ClusterEngineFactory;
-import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
-import org.opennms.alec.engine.dbscan.DBScanEngine;
-import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -18,6 +14,16 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 @JsonDeserialize(builder = JacksonEngineParameter.Builder.class)
 @JsonPropertyOrder({"engineName", "distanceMeasureName", "alpha", "beta", "epsilon"})
 public class JacksonEngineParameter implements EngineParameter {
+
+    public static final double DEFAULT_ALPHA = 144.47117699d;
+    public static final double DEFAULT_BETA = 0.55257784d;
+    public static final double DEFAULT_ALARN_IN_SPACE_EPSILON = 100d;
+    public static final double DEFAULT_HELLINGER_EPSILON = 75d;
+    public static final String HELLINGER = "hellinger";
+    public static final String ALARM_IN_SPACETIME = "alarminspaceandtimedistance";
+    public static final String CLUSTER = "cluster";
+    public static final String DEFAULT_DISTANCE_MEASURE = ALARM_IN_SPACETIME;
+
 
     private final Double alpha;
     private final Double beta;
@@ -50,24 +56,24 @@ public class JacksonEngineParameter implements EngineParameter {
     @Override
     public Double getAlpha() {
         return Optional.ofNullable(alpha)
-                .orElse(DBScanEngine.DEFAULT_ALPHA);
+                .orElse(DEFAULT_ALPHA);
     }
 
     @Override
     public Double getBeta() {
         return Optional.ofNullable(beta)
-                .orElse(DBScanEngine.DEFAULT_BETA);
+                .orElse(DEFAULT_BETA);
     }
 
     @Override
     public Double getEpsilon() {
         if(Optional.ofNullable(epsilon).isEmpty()){
             switch (getDistanceMeasureName()) {
-                case HellingerDistanceMeasure.HELLINGER:
-                    return HellingerDistanceMeasure.DEFAULT_EPSILON;
-                case AlarmInSpaceTimeDistanceMeasure.ALARMINSPACETIME:
+                case HELLINGER:
+                    return DEFAULT_HELLINGER_EPSILON;
+                case ALARM_IN_SPACETIME:
                 default:
-                    return AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON;
+                    return DEFAULT_ALARN_IN_SPACE_EPSILON;
             }
         } else {
             return epsilon;
@@ -77,7 +83,7 @@ public class JacksonEngineParameter implements EngineParameter {
     @Override
     public String getDistanceMeasureName() {
         return Optional.ofNullable(distanceMeasureName)
-                .orElse(DBScanEngine.DEFAULT_DISTANCE_MEASURE);
+                .orElse(DEFAULT_DISTANCE_MEASURE);
     }
 
     @Override
@@ -140,7 +146,7 @@ public class JacksonEngineParameter implements EngineParameter {
 
         public EngineParameter buildDefault() {
             return JacksonEngineParameter.newBuilder()
-                    .engineName(ClusterEngineFactory.CLUSTER)
+                    .engineName(CLUSTER)
                     .build();
         }
     }

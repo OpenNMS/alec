@@ -31,6 +31,8 @@ package org.opennms.alec.engine.deeplearning;
 import java.util.Objects;
 
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineParameter;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 import org.osgi.framework.BundleContext;
 
 import com.codahale.metrics.MetricRegistry;
@@ -63,6 +65,16 @@ public class DeepLearningEngineFactory implements EngineFactory {
     @Override
     public EngineFactory getEngineFactory() {
         return this;
+    }
+
+    @Override
+    public void configure(EngineParameter engineParameter) {
+
+    }
+
+    @Override
+    public EngineParameter getEngineParameter() {
+        return JacksonEngineParameter.newBuilder().engineName(getName()).build();
     }
 
 }

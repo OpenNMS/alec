@@ -33,7 +33,9 @@ import java.util.Optional;
 
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +84,25 @@ public class DBScanEngineFactory implements EngineFactory {
     @Override
     public EngineFactory getEngineFactory() {
         return this;
+    }
+
+    @Override
+    public void configure(EngineParameter engineParameter) {
+        setAlpha(engineParameter.getAlpha());
+        setBeta(engineParameter.getBeta());
+        setEpsilon(engineParameter.getEpsilon());
+        setDistanceMeasureFactoryName(engineParameter.getDistanceMeasureName());
+    }
+
+    @Override
+    public EngineParameter getEngineParameter() {
+        return JacksonEngineParameter.newBuilder()
+                .alpha(getAlpha())
+                .beta(getBeta())
+                .epsilon(getEpsilon())
+                .distanceMeasureName(getDistanceMeasureFactoryName())
+                .engineName(getName())
+                .build();
     }
 
     public double getEpsilon() {

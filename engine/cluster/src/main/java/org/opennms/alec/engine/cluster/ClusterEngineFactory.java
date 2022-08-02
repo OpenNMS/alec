@@ -29,6 +29,8 @@
 package org.opennms.alec.engine.cluster;
 
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.EngineParameter;
+import org.opennms.alec.engine.jackson.JacksonEngineParameter;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -52,4 +54,15 @@ public class ClusterEngineFactory implements EngineFactory {
         return this;
     }
 
+    @Override
+    public void configure(EngineParameter engineParameter) {
+
+    }
+
+    @Override
+    public EngineParameter getEngineParameter() {
+        return JacksonEngineParameter.newBuilder()
+                .engineName(getName())
+                .build();
+    }
 }

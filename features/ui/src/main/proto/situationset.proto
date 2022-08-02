@@ -1,0 +1,55 @@
+syntax = "proto3";
+option java_package = "org.opennms.alec.data.model";
+option java_outer_classname = "SituationSetProtos";
+
+message Alarm {
+  int64 alarm_id = 1;
+  int64 first_time_seen = 2;
+  int64 last_time_seen = 3;
+  int64 inventory_objet_id = 4;
+  string inventory_objet_type = 5;
+  string severity = 6;
+  string summary = 7;
+  string description = 8;
+  repeated string tags = 9;
+}
+
+message AlarmSet {
+  int64 timestamp = 1;
+  repeated Alarm alarms = 2;
+}
+
+message DistanceMeasure {
+  string name = 1;
+  double alpha = 2;
+  double beta = 3;
+  double epsilon = 4;
+}
+
+message Engine {
+  string name = 1;
+  DistanceMeasure distance_measure = 2;
+}
+
+message Situation {
+  int64 id = 1;
+  int64 creation_time = 2;
+  AlarmSet alarms = 3;
+  string severity = 4;
+  string diagnostic = 5;
+  repeated string tags = 6;
+  int64 last_modification_time = 7;
+  Engine engine = 8;
+
+  enum StatusType {
+    ACCEPTED = 0;
+    REJECTED = 1;
+    MODIFIED = 2;
+  }
+}
+
+message SituationSet {
+  int64 timestamp = 1;
+  repeated Situation situations = 2;
+}
+

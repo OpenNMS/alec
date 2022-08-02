@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.data;
+package org.opennms.alec.jackson;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;

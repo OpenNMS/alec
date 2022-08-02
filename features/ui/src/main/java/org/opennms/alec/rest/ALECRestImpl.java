@@ -7,7 +7,8 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.JacksonSituation;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.ConfigurationImpl;
 import org.opennms.alec.data.Status;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
@@ -15,8 +16,7 @@ import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.jackson.JacksonEngineParameter;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.ConfigurationImpl;
+import org.opennms.alec.jackson.JacksonSituation;
 import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;

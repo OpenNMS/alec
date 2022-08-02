@@ -22,19 +22,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.AgreementImpl;
+import org.opennms.alec.data.Configuration;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineParameter;
 import org.opennms.alec.engine.api.EngineRegistry;
-import org.opennms.alec.engine.cluster.ClusterEngineFactory;
-import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
-import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
-import org.opennms.alec.engine.dbscan.DBScanEngine;
-import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 import org.opennms.alec.engine.jackson.JacksonEngineParameter;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.AgreementImpl;
-import org.opennms.alec.jackson.Configuration;
 import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.osgi.framework.ServiceReference;
@@ -201,7 +196,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetAgreementConfigurationNoContent() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, situationDatasource);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.empty());
 
@@ -211,7 +206,7 @@ public class ALECRestImplTest {
     }
 
     private JacksonEngineParameter.Builder getParameter() {
-        return EngineParameterImpl.newBuilder()
+        return JacksonEngineParameter.newBuilder()
                 .alpha(1d)
                 .beta(2d)
                 .epsilon(3d)

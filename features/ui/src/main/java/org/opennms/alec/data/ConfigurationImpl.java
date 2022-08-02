@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.jackson;
+package org.opennms.alec.data;
 
 import org.opennms.alec.engine.api.EngineParameter;
 

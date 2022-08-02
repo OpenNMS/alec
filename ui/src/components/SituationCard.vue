@@ -2,11 +2,10 @@
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import { TSituation } from '@/types/TSituation'
-
 const props = defineProps<{
 	alarmInfo: TSituation
+	selected: boolean
 }>()
-
 const emit = defineEmits(['situation-selected'])
 const handleSituationSelected = () => {
 	emit('situation-selected', props.alarmInfo?.id)
@@ -14,55 +13,64 @@ const handleSituationSelected = () => {
 </script>
 
 <template>
-	<div v-on:click="handleSituationSelected" class="card">
+	<div
+		v-on:click="handleSituationSelected"
+		class="card"
+		v-bind:class="{ selected: props.selected }"
+	>
 		<div
 			class="severity-line"
 			:class="[`${props.alarmInfo?.severity?.toLowerCase()}-bg dark`]"
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<span class="title">Situation {{ props.alarmInfo?.id }} </span>
+				<div class="title">
+					{{ props.alarmInfo?.id }}
+				</div>
 				<SeverityStatus :severity="props.alarmInfo?.severity" />
 			</div>
-			<span v-html="props.alarmInfo?.description"></span>
-			<AlarmsCountBySeverity :relatedAlarms="props.alarmInfo?.relatedAlarms" />
+			<AlarmsCountBySeverity
+				:relatedAlarms="props.alarmInfo?.relatedAlarms"
+				size="normal"
+			/>
 		</div>
 	</div>
 </template>
-
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
-
 .card {
-	width: 500px;
+	width: 250px;
 	height: auto;
-	border: 1px solid $border-grey;
 	display: flex;
 	flex-direction: row;
 	background-color: #ffffff;
 	cursor: pointer;
+	border: 1px solid $border-grey;
 	&:hover {
-		border: 1px solid #4b5ad6;
+		border: 1px solid $dark-blue;
+	}
+	&.selected {
+		border: 1px solid $dark-blue;
 	}
 }
-
 .title-row {
 	display: flex;
 	justify-content: space-between;
+	margin-bottom: 15px;
 }
-
 .title {
 	font-size: 18px;
 	font-weight: 600;
+	word-break: break-all;
+	margin-right: 5px;
 }
-
 .severity-line {
-	width: 8px;
+	width: 4px;
 }
-
 .content {
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
+	width: 100%;
 }
 </style>

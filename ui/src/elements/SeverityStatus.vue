@@ -21,9 +21,11 @@ const props = defineProps({
 
 .severity-status {
 	border: 1px solid;
-	padding: 5px 10px;
+	padding: 0px 10px;
 	font-size: 13px;
 	border-radius: 50px;
 	font-weight: 600;
+	width: fit-content;
+	max-height: 27px;
 }
 </style>

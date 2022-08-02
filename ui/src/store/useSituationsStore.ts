@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { getSituations } from '@/services/AlarmService'
-import { TAlarm, TRelatedAlarm, TSituation } from '@/types/TSituation'
-import { mapKeys } from 'lodash'
+import { TRelatedAlarm, TSituation } from '@/types/TSituation'
+import { Dictionary, mapKeys } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
-	alarms: Record<string, TAlarm>
+	alarms: Dictionary<TSituation>
 }
 
 export const useSituationsStore = defineStore('situationsStore', {

@@ -28,6 +28,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.AgreementImpl;
+import org.opennms.alec.data.Configuration;
+import org.opennms.alec.data.EngineParameter;
+import org.opennms.alec.data.EngineParameterImpl;
+import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
@@ -38,12 +44,6 @@ import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.AgreementImpl;
-import org.opennms.alec.jackson.Configuration;
-import org.opennms.alec.jackson.EngineParameter;
-import org.opennms.alec.jackson.EngineParameterImpl;
-import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.osgi.framework.ServiceReference;
 
@@ -89,7 +89,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testPing() {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
         try (Response result = underTest.ping()) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             assertThat(result.getEntity(), equalTo("pong!!"));
@@ -98,7 +98,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetConfigurations() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
         when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
         when(kvStore.get(eq(KeyEnum.AGREEMENT.toString()), anyString())).thenReturn(Optional.of(getAgreementAsString(getAgreement().build())));
 
@@ -118,7 +118,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
         when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.of(getParameterAsString(getParameter().build())));
 
         try (Response result = underTest.getEngineConfiguration()) {
@@ -136,7 +136,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetEngineConfigurationNoContent() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
         when(kvStore.get(eq(KeyEnum.ENGINE.toString()), anyString())).thenReturn(Optional.empty());
 
         try (Response result = underTest.getEngineConfiguration()) {
@@ -148,7 +148,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetDbScanEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
 
@@ -168,7 +168,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetClusterEngineConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -192,7 +192,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetEngineAlphaNullConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         ServiceReference<?> engineServiceReference = mock(ServiceReference.class);
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
@@ -211,7 +211,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testSetAgreementConfiguration() {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
         when(future.join()).thenReturn(1L);
@@ -223,7 +223,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetAgreementConfiguration() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.ofNullable(getAgreementAsString(getAgreement().build())));
 
@@ -236,7 +236,7 @@ public class ALECRestImplTest {
 
     @Test
     public void testGetAgreementConfigurationNoContent() throws JsonProcessingException {
-        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories, situationDatasource);
+        ALECRestImpl underTest = new ALECRestImpl(kvStore, engineRegistry, engineFactories);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.empty());
 

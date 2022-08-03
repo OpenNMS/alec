@@ -26,35 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.jackson;
+package org.opennms.alec.data;
 
-import java.util.stream.Stream;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum KeyEnum {
-    ENGINE("ENGINE"),
-    AGREEMENT("AGREEMENT"),
-    SITUATION("SITUATION"),
-    REFUSED_SITUATION("REFUSED_SITUATION"),
-    ACCEPTED_SITUATION("ACCEPTED_SITUATION");
+public class AgreementImpl implements Agreement {
+    private final boolean agreed;
 
-    private final String key;
-
-    /**
-     * @param key
-     */
-    KeyEnum(final String key) {
-        this.key = key;
+    private AgreementImpl(Builder builder) {
+        agreed = builder.agreed;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Enum#toString()
-     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(AgreementImpl copy) {
+        Builder builder = new Builder();
+        builder.agreed = copy.isAgreed();
+        return builder;
+    }
+
     @Override
-    public String toString() {
-        return key;
+    public boolean isAgreed() {
+        return agreed;
     }
 
-    public static Stream<KeyEnum> stream() {
-        return Stream.of(KeyEnum.values());
+    public static final class Builder {
+        @JsonProperty("agreed")
+        private boolean agreed;
+
+        private Builder() {
+        }
+
+        public Builder agreed(boolean val) {
+            agreed = val;
+            return this;
+        }
+
+        public AgreementImpl build() {
+            return new AgreementImpl(this);
+        }
     }
 }

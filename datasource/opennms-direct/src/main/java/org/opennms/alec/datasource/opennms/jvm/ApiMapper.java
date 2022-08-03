@@ -105,6 +105,15 @@ public class ApiMapper {
             LOG.warn("Could not find situationId on alarm: {}. Using the alarm id instead.", alarm.getId());
             situationId = Integer.toString(alarm.getId());
         }
+        return getSituation(alarm, situationId);
+    }
+
+    public Situation toSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm) {
+        final String situationId = Integer.toString(alarm.getId());
+        return getSituation(alarm, situationId);
+    }
+
+    private Situation getSituation(org.opennms.integration.api.v1.model.Alarm alarm, String situationId) {
         final String situationStatus;
         final Optional<String> situationStatusFromAlarm = getSituationParamFromAlarm(alarm, SITUATION_STATUS_PARM_NAME);
         situationStatus = situationStatusFromAlarm.orElseGet(Status.CREATED::toString);
@@ -132,17 +141,6 @@ public class ApiMapper {
         return parms.stream()
                 .map(EventParameter::getValue)
                 .findFirst();
-    }
-
-    public Situation toSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm) {
-        final String situationId = Integer.toString(alarm.getId());
-
-        return ImmutableSituation.newBuilder()
-                .setId(situationId)
-                .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
-                .setSeverity(toSeverity(alarm.getSeverity()))
-                .setAlarms(alarm.getRelatedAlarms().stream().map(a -> this.toAlarm(a)).collect(Collectors.toSet()))
-                .build();
     }
 
     public InMemoryEvent toEvent(Situation situation) {

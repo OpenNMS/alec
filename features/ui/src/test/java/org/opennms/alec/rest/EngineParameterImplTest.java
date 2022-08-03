@@ -7,11 +7,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.opennms.alec.data.EngineParameter;
+import org.opennms.alec.data.EngineParameterImpl;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
-import org.opennms.alec.jackson.EngineParameter;
-import org.opennms.alec.jackson.EngineParameterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

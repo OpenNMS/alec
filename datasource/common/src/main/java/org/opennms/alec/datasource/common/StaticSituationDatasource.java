@@ -49,7 +49,7 @@ public class StaticSituationDatasource implements SituationDatasource {
 
     @Override
     public List<Situation> getSituationsWithAlarmId() {
-        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
+        return situations;
     }
 
     @Override

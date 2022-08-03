@@ -26,11 +26,12 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.data;
+package org.opennms.alec.jackson;
 
 import java.util.List;
 import java.util.Set;
 
+import org.opennms.alec.data.Status;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.api.Severity;

@@ -16,10 +16,20 @@
         <argument ref="keyValueStore"/>
         <argument ref="driver"/>
         <argument ref="engineFactories"/>
+    </bean>
+
+    <bean id="situationImpl" class="org.opennms.alec.rest.SituationRestImpl">
+        <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
     </bean>
 
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
+        <service-properties>
+            <entry key="application-path" value="/rest" />
+        </service-properties>
+    </service>
+
+    <service interface="org.opennms.alec.rest.SituationRest" ref="situationImpl">
         <service-properties>
             <entry key="application-path" value="/rest" />
         </service-properties>

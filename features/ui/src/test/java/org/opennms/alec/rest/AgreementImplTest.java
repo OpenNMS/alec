@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.AgreementImpl;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.AgreementImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.jackson.JacksonSituation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

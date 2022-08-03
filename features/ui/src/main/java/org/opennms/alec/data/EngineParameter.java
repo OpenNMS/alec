@@ -1,4 +1,4 @@
-package org.opennms.alec.jackson;
+package org.opennms.alec.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

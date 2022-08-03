@@ -29,6 +29,10 @@ const handleAlarmFilters = (selected: string) => {
 		)
 	}
 }
+watch(props, () => {
+	selectedFilters.value = ['all']
+	alarms.value = props.relatedAlarms
+})
 </script>
 
 <template>
@@ -88,7 +92,7 @@ const handleAlarmFilters = (selected: string) => {
 
 .clicked {
 	border: 2px solid $dark-blue;
-	background-color: rgb(239, 239, 239);
+	background-color: rgb(212, 212, 212);
 }
 .alarm-list {
 	display: flex;

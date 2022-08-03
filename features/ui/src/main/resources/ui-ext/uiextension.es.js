@@ -25,30 +25,30 @@ var _export_sfc$j = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$t = {};
+const _sfc_main$u = {};
 const _resolveComponent = window["Vue"].resolveComponent;
 const _createVNode$7 = window["Vue"].createVNode;
-const _openBlock$b = window["Vue"].openBlock;
-const _createElementBlock$a = window["Vue"].createElementBlock;
+const _openBlock$c = window["Vue"].openBlock;
+const _createElementBlock$b = window["Vue"].createElementBlock;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
 const _hoisted_1$n = { class: "main" };
 function _sfc_render$f(_ctx, _cache) {
   const _component_router_view = _resolveComponent("router-view");
-  return _openBlock$b(), _createElementBlock$a("div", _hoisted_1$n, [
+  return _openBlock$c(), _createElementBlock$b("div", _hoisted_1$n, [
     _createVNode$7(_component_router_view)
   ]);
 }
-var MainContainer = /* @__PURE__ */ _export_sfc$j(_sfc_main$t, [["render", _sfc_render$f], ["__scopeId", "data-v-94da7af6"]]);
+var MainContainer = /* @__PURE__ */ _export_sfc$j(_sfc_main$u, [["render", _sfc_render$f], ["__scopeId", "data-v-94da7af6"]]);
 var App_vue_vue_type_style_index_0_lang = "";
-const _defineComponent$a = window["Vue"].defineComponent;
-const _openBlock$a = window["Vue"].openBlock;
+const _defineComponent$b = window["Vue"].defineComponent;
+const _openBlock$b = window["Vue"].openBlock;
 const _createBlock$1 = window["Vue"].createBlock;
-const _sfc_main$s = /* @__PURE__ */ _defineComponent$a({
+const _sfc_main$t = /* @__PURE__ */ _defineComponent$b({
   __name: "App",
   setup(__props) {
     return (_ctx, _cache) => {
-      return _openBlock$a(), _createBlock$1(MainContainer);
+      return _openBlock$b(), _createBlock$1(MainContainer);
     };
   }
 });
@@ -6729,13 +6729,13 @@ const useSituationsStore = defineStore$1("situationsStore", {
   }
 });
 var SeverityStatus_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$9 = window["Vue"].defineComponent;
+const _defineComponent$a = window["Vue"].defineComponent;
 const _toDisplayString$6 = window["Vue"].toDisplayString;
-const _normalizeClass$4 = window["Vue"].normalizeClass;
-const _openBlock$9 = window["Vue"].openBlock;
-const _createElementBlock$9 = window["Vue"].createElementBlock;
-const _createCommentVNode$3 = window["Vue"].createCommentVNode;
-const _sfc_main$r = /* @__PURE__ */ _defineComponent$9({
+const _normalizeClass$5 = window["Vue"].normalizeClass;
+const _openBlock$a = window["Vue"].openBlock;
+const _createElementBlock$a = window["Vue"].createElementBlock;
+const _createCommentVNode$4 = window["Vue"].createCommentVNode;
+const _sfc_main$s = /* @__PURE__ */ _defineComponent$a({
   __name: "SeverityStatus",
   props: {
     severity: {
@@ -6746,27 +6746,27 @@ const _sfc_main$r = /* @__PURE__ */ _defineComponent$9({
   setup(__props) {
     const props2 = __props;
     return (_ctx, _cache) => {
-      return (props2 == null ? void 0 : props2.severity) ? (_openBlock$9(), _createElementBlock$9("span", {
+      return (props2 == null ? void 0 : props2.severity) ? (_openBlock$a(), _createElementBlock$a("span", {
         key: 0,
-        class: _normalizeClass$4(["severity-status", [`${props2.severity.toLowerCase()}-color`]])
-      }, _toDisplayString$6(props2.severity), 3)) : _createCommentVNode$3("", true);
+        class: _normalizeClass$5(["severity-status", [`${props2.severity.toLowerCase()}-color`]])
+      }, _toDisplayString$6(props2.severity), 3)) : _createCommentVNode$4("", true);
     };
   }
 });
-var SeverityStatus = /* @__PURE__ */ _export_sfc$j(_sfc_main$r, [["__scopeId", "data-v-5c297c57"]]);
+var SeverityStatus = /* @__PURE__ */ _export_sfc$j(_sfc_main$s, [["__scopeId", "data-v-7efa35fc"]]);
 var AlarmsCountBySeverity_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$8 = window["Vue"].defineComponent;
+const _defineComponent$9 = window["Vue"].defineComponent;
 const _unref$6 = window["Vue"].unref;
 const _renderList$2 = window["Vue"].renderList;
 const _Fragment$2 = window["Vue"].Fragment;
-const _openBlock$8 = window["Vue"].openBlock;
-const _createElementBlock$8 = window["Vue"].createElementBlock;
+const _openBlock$9 = window["Vue"].openBlock;
+const _createElementBlock$9 = window["Vue"].createElementBlock;
 const _toDisplayString$5 = window["Vue"].toDisplayString;
-const _normalizeClass$3 = window["Vue"].normalizeClass;
+const _normalizeClass$4 = window["Vue"].normalizeClass;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
 const _hoisted_1$m = { class: "alarms-list" };
-const _sfc_main$q = /* @__PURE__ */ _defineComponent$8({
+const _sfc_main$r = /* @__PURE__ */ _defineComponent$9({
   __name: "AlarmsCountBySeverity",
   props: {
     relatedAlarms: null,
@@ -6775,10 +6775,10 @@ const _sfc_main$q = /* @__PURE__ */ _defineComponent$8({
   setup(__props) {
     const props2 = __props;
     return (_ctx, _cache) => {
-      return _openBlock$8(), _createElementBlock$8("div", _hoisted_1$m, [
-        (_openBlock$8(true), _createElementBlock$8(_Fragment$2, null, _renderList$2(_unref$6(lodash.exports.groupBy)(props2 == null ? void 0 : props2.relatedAlarms, "severity"), (list, key) => {
-          return _openBlock$8(), _createElementBlock$8("div", {
-            class: _normalizeClass$3(["alarm-count", [`${key.toString().toLowerCase()}-color`, props2.size]]),
+      return _openBlock$9(), _createElementBlock$9("div", _hoisted_1$m, [
+        (_openBlock$9(true), _createElementBlock$9(_Fragment$2, null, _renderList$2(_unref$6(lodash.exports.groupBy)(props2 == null ? void 0 : props2.relatedAlarms, "severity"), (list, key) => {
+          return _openBlock$9(), _createElementBlock$9("div", {
+            class: _normalizeClass$4(["alarm-count", [`${key.toString().toLowerCase()}-color`, props2.size]]),
             key
           }, _toDisplayString$5(list.length), 3);
         }), 128))
@@ -6786,21 +6786,21 @@ const _sfc_main$q = /* @__PURE__ */ _defineComponent$8({
     };
   }
 });
-var AlarmsCountBySeverity = /* @__PURE__ */ _export_sfc$j(_sfc_main$q, [["__scopeId", "data-v-e3cfa67c"]]);
+var AlarmsCountBySeverity = /* @__PURE__ */ _export_sfc$j(_sfc_main$r, [["__scopeId", "data-v-0b69e4b4"]]);
 var SituationCard_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$7 = window["Vue"].defineComponent;
-const _normalizeClass$2 = window["Vue"].normalizeClass;
+const _defineComponent$8 = window["Vue"].defineComponent;
+const _normalizeClass$3 = window["Vue"].normalizeClass;
 const _createElementVNode$7 = window["Vue"].createElementVNode;
 const _toDisplayString$4 = window["Vue"].toDisplayString;
 const _createVNode$6 = window["Vue"].createVNode;
-const _openBlock$7 = window["Vue"].openBlock;
-const _createElementBlock$7 = window["Vue"].createElementBlock;
+const _openBlock$8 = window["Vue"].openBlock;
+const _createElementBlock$8 = window["Vue"].createElementBlock;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
 const _hoisted_1$l = { class: "content" };
 const _hoisted_2$l = { class: "title-row" };
 const _hoisted_3$g = { class: "title" };
-const _sfc_main$p = /* @__PURE__ */ _defineComponent$7({
+const _sfc_main$q = /* @__PURE__ */ _defineComponent$8({
   __name: "SituationCard",
   props: {
     alarmInfo: null,
@@ -6815,16 +6815,16 @@ const _sfc_main$p = /* @__PURE__ */ _defineComponent$7({
     };
     return (_ctx, _cache) => {
       var _a, _b, _c, _d, _e;
-      return _openBlock$7(), _createElementBlock$7("div", {
+      return _openBlock$8(), _createElementBlock$8("div", {
         onClick: handleSituationSelected,
-        class: _normalizeClass$2(["card", { selected: props2.selected }])
+        class: _normalizeClass$3(["card", { selected: props2.selected }])
       }, [
         _createElementVNode$7("div", {
-          class: _normalizeClass$2(["severity-line", [`${(_b = (_a = props2.alarmInfo) == null ? void 0 : _a.severity) == null ? void 0 : _b.toLowerCase()}-bg dark`]])
+          class: _normalizeClass$3(["severity-line", [`${(_b = (_a = props2.alarmInfo) == null ? void 0 : _a.severity) == null ? void 0 : _b.toLowerCase()}-bg dark`]])
         }, null, 2),
         _createElementVNode$7("div", _hoisted_1$l, [
           _createElementVNode$7("div", _hoisted_2$l, [
-            _createElementVNode$7("div", _hoisted_3$g, _toDisplayString$4((_c = props2.alarmInfo) == null ? void 0 : _c.id), 1),
+            _createElementVNode$7("div", _hoisted_3$g, "[ " + _toDisplayString$4((_c = props2.alarmInfo) == null ? void 0 : _c.id) + " ]", 1),
             _createVNode$6(SeverityStatus, {
               severity: (_d = props2.alarmInfo) == null ? void 0 : _d.severity
             }, null, 8, ["severity"])
@@ -6838,19 +6838,19 @@ const _sfc_main$p = /* @__PURE__ */ _defineComponent$7({
     };
   }
 });
-var SituationCard = /* @__PURE__ */ _export_sfc$j(_sfc_main$p, [["__scopeId", "data-v-0ff196b9"]]);
+var SituationCard = /* @__PURE__ */ _export_sfc$j(_sfc_main$q, [["__scopeId", "data-v-64b64114"]]);
 var DateBox_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$6 = window["Vue"].defineComponent;
+const _defineComponent$7 = window["Vue"].defineComponent;
 const _toDisplayString$3 = window["Vue"].toDisplayString;
 const _createElementVNode$6 = window["Vue"].createElementVNode;
-const _openBlock$6 = window["Vue"].openBlock;
-const _createElementBlock$6 = window["Vue"].createElementBlock;
+const _openBlock$7 = window["Vue"].openBlock;
+const _createElementBlock$7 = window["Vue"].createElementBlock;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
 const _hoisted_1$k = { class: "box" };
 const _hoisted_2$k = { class: "label" };
 const _hoisted_3$f = { class: "date" };
-const _sfc_main$o = /* @__PURE__ */ _defineComponent$6({
+const _sfc_main$p = /* @__PURE__ */ _defineComponent$7({
   __name: "DateBox",
   props: {
     label: null,
@@ -6863,16 +6863,16 @@ const _sfc_main$o = /* @__PURE__ */ _defineComponent$6({
       return `${date.getMonth() + 1}/${date.getDate()} ${date.getUTCHours()}:${date.getMinutes()}:${date.getSeconds()}`;
     };
     return (_ctx, _cache) => {
-      return _openBlock$6(), _createElementBlock$6("div", _hoisted_1$k, [
+      return _openBlock$7(), _createElementBlock$7("div", _hoisted_1$k, [
         _createElementVNode$6("div", _hoisted_2$k, _toDisplayString$3(props2.label), 1),
         _createElementVNode$6("div", _hoisted_3$f, _toDisplayString$3(simplifyDate2(props2.date)), 1)
       ]);
     };
   }
 });
-var DateBox = /* @__PURE__ */ _export_sfc$j(_sfc_main$o, [["__scopeId", "data-v-088e895a"]]);
+var DateBox = /* @__PURE__ */ _export_sfc$j(_sfc_main$p, [["__scopeId", "data-v-088e895a"]]);
 var style$9 = "";
-const ref$a = window["Vue"].ref;
+const ref$b = window["Vue"].ref;
 const inject$6 = window["Vue"].inject;
 const computed$9 = window["Vue"].computed;
 const onMounted$1 = window["Vue"].onMounted;
@@ -6889,10 +6889,10 @@ const stockProps$2 = {
   }
 };
 const useTab = (props2) => {
-  const selected = ref$a(false);
-  const tab = ref$a();
-  const _controls = ref$a(props2.controls);
-  const _id = ref$a(props2.id);
+  const selected = ref$b(false);
+  const tab = ref$b();
+  const _controls = ref$b(props2.controls);
+  const _id = ref$b(props2.id);
   const focus = () => {
     if (tab.value) {
       tab.value.focus();
@@ -6983,7 +6983,7 @@ const props$9 = {
     default: false
   }
 };
-const _sfc_main$n = defineComponent$8({
+const _sfc_main$o = defineComponent$8({
   props: props$9,
   data() {
     return {
@@ -7064,7 +7064,7 @@ const _sfc_main$n = defineComponent$8({
     this.parent.removeEventListener("click", this.onClick);
   }
 });
-var FeatherRipple = /* @__PURE__ */ _export_sfc$i(_sfc_main$n, [["__scopeId", "data-v-18e2a5db"]]);
+var FeatherRipple = /* @__PURE__ */ _export_sfc$i(_sfc_main$o, [["__scopeId", "data-v-18e2a5db"]]);
 const getSafeId$1 = function(str) {
   str = str || "feather";
   const random = Math.floor(Math.random() * 1e9);
@@ -7085,9 +7085,9 @@ const KEYCODES$1 = {
   BACKSPACE: 8,
   DELETE: 46
 };
-const ref$9 = window["Vue"].ref;
+const ref$a = window["Vue"].ref;
 const toRef$4 = window["Vue"].toRef;
-const watch$3 = window["Vue"].watch;
+const watch$4 = window["Vue"].watch;
 const provide$3 = window["Vue"].provide;
 const model = {
   prop: "modelValue",
@@ -7108,9 +7108,9 @@ const stockProps$1 = {
 };
 const useTabContainer = (props2, context) => {
   const value = toRef$4(props2, "modelValue");
-  const localSelected = ref$9(props2.modelValue);
-  const pairs = ref$9([]);
-  watch$3(value, (v) => {
+  const localSelected = ref$a(props2.modelValue);
+  const pairs = ref$a([]);
+  watch$4(value, (v) => {
     activateIndex(v);
   });
   const handleClick = (evt) => {
@@ -7242,7 +7242,7 @@ const useTabContainer = (props2, context) => {
     pairs
   };
 };
-const ref$8 = window["Vue"].ref;
+const ref$9 = window["Vue"].ref;
 const inject$5 = window["Vue"].inject;
 const computed$8 = window["Vue"].computed;
 const onMounted = window["Vue"].onMounted;
@@ -7255,10 +7255,10 @@ const stockProps = {
   }
 };
 const useTabPanel = (props2) => {
-  const selected = ref$8(false);
-  const panel = ref$8();
-  const _tab = ref$8(props2.tab);
-  const _id = ref$8(props2.id);
+  const selected = ref$9(false);
+  const panel = ref$9();
+  const _tab = ref$9(props2.tab);
+  const _id = ref$9(props2.id);
   const register = inject$5("registerPanel");
   onMounted(() => {
     if (register) {
@@ -7427,7 +7427,7 @@ function _sfc_render$1$4(_ctx, _cache, $props, $setup, $data, $options) {
 }
 var FeatherTabContainer = /* @__PURE__ */ _export_sfc$h(_sfc_main$1$4, [["render", _sfc_render$1$4], ["__scopeId", "data-v-27adffb9"]]);
 const props$8 = stockProps;
-const _sfc_main$m = defineComponent$7({
+const _sfc_main$n = defineComponent$7({
   props: props$8,
   setup(props2) {
     return useTabPanel(props2);
@@ -7440,7 +7440,7 @@ function _sfc_render$e(_ctx, _cache, $props, $setup, $data, $options) {
     [vShow$1, _ctx.selected]
   ]);
 }
-var FeatherTabPanel = /* @__PURE__ */ _export_sfc$h(_sfc_main$m, [["render", _sfc_render$e]]);
+var FeatherTabPanel = /* @__PURE__ */ _export_sfc$h(_sfc_main$n, [["render", _sfc_render$e]]);
 var style$7 = "";
 var __defProp$6 = Object.defineProperty;
 var __getOwnPropSymbols$6 = Object.getOwnPropertySymbols;
@@ -7482,7 +7482,7 @@ const props$7 = {
     required: false
   }
 };
-const _sfc_main$l = defineComponent$6({
+const _sfc_main$m = defineComponent$6({
   props: props$7,
   render() {
     const attrs = this.$attrs;
@@ -7516,7 +7516,7 @@ const _sfc_main$l = defineComponent$6({
     }, _attrs));
   }
 });
-var FeatherIcon$1 = /* @__PURE__ */ _export_sfc$g(_sfc_main$l, [["__scopeId", "data-v-52cbf270"]]);
+var FeatherIcon$1 = /* @__PURE__ */ _export_sfc$g(_sfc_main$m, [["__scopeId", "data-v-52cbf270"]]);
 const openBlock$d = window["Vue"].openBlock;
 const createElementBlock$d = window["Vue"].createElementBlock;
 const createElementVNode$9 = window["Vue"].createElementVNode;
@@ -7527,7 +7527,7 @@ var _export_sfc$f = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$k = {};
+const _sfc_main$l = {};
 const _hoisted_1$i = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
@@ -7539,7 +7539,7 @@ const _hoisted_3$e = [
 function _sfc_render$d(_ctx, _cache) {
   return openBlock$d(), createElementBlock$d("svg", _hoisted_1$i, _hoisted_3$e);
 }
-var CheckCircle = /* @__PURE__ */ _export_sfc$f(_sfc_main$k, [["render", _sfc_render$d]]);
+var CheckCircle = /* @__PURE__ */ _export_sfc$f(_sfc_main$l, [["render", _sfc_render$d]]);
 const openBlock$c = window["Vue"].openBlock;
 const createElementBlock$c = window["Vue"].createElementBlock;
 const createElementVNode$8 = window["Vue"].createElementVNode;
@@ -7550,7 +7550,7 @@ var _export_sfc$e = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$j = {};
+const _sfc_main$k = {};
 const _hoisted_1$h = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
@@ -7562,7 +7562,7 @@ const _hoisted_3$d = [
 function _sfc_render$c(_ctx, _cache) {
   return openBlock$c(), createElementBlock$c("svg", _hoisted_1$h, _hoisted_3$d);
 }
-var Cancel$2 = /* @__PURE__ */ _export_sfc$e(_sfc_main$j, [["render", _sfc_render$c]]);
+var Cancel$2 = /* @__PURE__ */ _export_sfc$e(_sfc_main$k, [["render", _sfc_render$c]]);
 var CONST = {
   ENGINE_DBSCAN: "dbscan",
   ENGINE_DEEP_LEARNING: "cluster",
@@ -7685,7 +7685,7 @@ const props$6 = {
     required: false
   }
 };
-const _sfc_main$i = defineComponent$5({
+const _sfc_main$j = defineComponent$5({
   props: props$6,
   render() {
     const attrs = this.$attrs;
@@ -7719,7 +7719,7 @@ const _sfc_main$i = defineComponent$5({
     }, _attrs));
   }
 });
-var FeatherIcon = /* @__PURE__ */ _export_sfc$d(_sfc_main$i, [["__scopeId", "data-v-52cbf270"]]);
+var FeatherIcon = /* @__PURE__ */ _export_sfc$d(_sfc_main$j, [["__scopeId", "data-v-52cbf270"]]);
 const openBlock$b = window["Vue"].openBlock;
 const createElementBlock$b = window["Vue"].createElementBlock;
 const createElementVNode$7 = window["Vue"].createElementVNode;
@@ -7730,7 +7730,7 @@ var _export_sfc$c = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$h = {};
+const _sfc_main$i = {};
 const _hoisted_1$g = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
@@ -7742,7 +7742,7 @@ const _hoisted_3$c = [
 function _sfc_render$b(_ctx, _cache) {
   return openBlock$b(), createElementBlock$b("svg", _hoisted_1$g, _hoisted_3$c);
 }
-var Cancel$1 = /* @__PURE__ */ _export_sfc$c(_sfc_main$h, [["render", _sfc_render$b]]);
+var Cancel$1 = /* @__PURE__ */ _export_sfc$c(_sfc_main$i, [["render", _sfc_render$b]]);
 const computed$6 = window["Vue"].computed;
 const useSelection = (current, radios, select) => {
   const notDisabled = computed$6(() => {
@@ -7783,7 +7783,7 @@ var _export_sfc$b = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$g = {};
+const _sfc_main$h = {};
 const _hoisted_1$f = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
@@ -7795,7 +7795,7 @@ const _hoisted_3$b = [
 function _sfc_render$a(_ctx, _cache) {
   return openBlock$a(), createElementBlock$a("svg", _hoisted_1$f, _hoisted_3$b);
 }
-var Cancel = /* @__PURE__ */ _export_sfc$b(_sfc_main$g, [["render", _sfc_render$a]]);
+var Cancel = /* @__PURE__ */ _export_sfc$b(_sfc_main$h, [["render", _sfc_render$a]]);
 const openBlock$9 = window["Vue"].openBlock;
 const createElementBlock$9 = window["Vue"].createElementBlock;
 const createElementVNode$5 = window["Vue"].createElementVNode;
@@ -7806,7 +7806,7 @@ var _export_sfc$a = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$f = {};
+const _sfc_main$g = {};
 const _hoisted_1$e = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
@@ -7826,15 +7826,15 @@ const _hoisted_4$8 = /* @__PURE__ */ createElementVNode$5("rect", {
   height: "2",
   rx: "0.65"
 }, null, -1);
-const _hoisted_5$6 = [
+const _hoisted_5$7 = [
   _hoisted_2$e,
   _hoisted_3$a,
   _hoisted_4$8
 ];
 function _sfc_render$9(_ctx, _cache) {
-  return openBlock$9(), createElementBlock$9("svg", _hoisted_1$e, _hoisted_5$6);
+  return openBlock$9(), createElementBlock$9("svg", _hoisted_1$e, _hoisted_5$7);
 }
-var Warning = /* @__PURE__ */ _export_sfc$a(_sfc_main$f, [["render", _sfc_render$9]]);
+var Warning = /* @__PURE__ */ _export_sfc$a(_sfc_main$g, [["render", _sfc_render$9]]);
 var __defProp$4 = Object.defineProperty;
 var __defProps$4 = Object.defineProperties;
 var __getOwnPropDescs$4 = Object.getOwnPropertyDescriptors;
@@ -7870,10 +7870,10 @@ const renderSlot$3 = window["Vue"].renderSlot;
 const createCommentVNode$3 = window["Vue"].createCommentVNode;
 const withDirectives = window["Vue"].withDirectives;
 const vShow = window["Vue"].vShow;
-const ref$7 = window["Vue"].ref;
+const ref$8 = window["Vue"].ref;
 const toRef$3 = window["Vue"].toRef;
 const nextTick = window["Vue"].nextTick;
-const watch$2 = window["Vue"].watch;
+const watch$3 = window["Vue"].watch;
 window["Vue"].createTextVNode;
 window["Vue"].Fragment;
 window["Vue"].renderList;
@@ -8149,7 +8149,7 @@ const props$5 = {
 defineComponent$4({
   props: props$5,
   setup(props2) {
-    const formErrors = inject$4("featherFormErrors", ref$7([]));
+    const formErrors = inject$4("featherFormErrors", ref$8([]));
     const propErrors = toRef$3(props2, "errorList");
     const errors = computed$5(() => {
       var _a;
@@ -8162,7 +8162,7 @@ defineComponent$4({
     const removeAsteriks = (str) => {
       return str.replace(/ \*$/, "");
     };
-    const heading = ref$7();
+    const heading = ref$8();
     const getFullMessage = (v) => {
       return `${removeAsteriks(v.label)} - ${v.message}`;
     };
@@ -8172,7 +8172,7 @@ defineComponent$4({
       }
       return props2.headingText(errors.value);
     });
-    watch$2(mainError, (v) => {
+    watch$3(mainError, (v) => {
       if (v.length) {
         nextTick(() => heading.value.focus());
       }
@@ -8190,7 +8190,7 @@ defineComponent$4({
 const useValidation = (inputId, value, label, schema, errorFromInput) => {
   const form = inject$4("featherForm", false);
   if (schema && form && inputId.value) {
-    const errorMessage = ref$7("");
+    const errorMessage = ref$8("");
     provide$2("validationErrorMessage", errorMessage);
     const validate = () => {
       if (errorFromInput && isRef(errorFromInput) && errorFromInput.value) {
@@ -8218,11 +8218,11 @@ const useValidation = (inputId, value, label, schema, errorFromInput) => {
       }
     };
     if (errorFromInput && isRef(errorFromInput)) {
-      watch$2(errorFromInput, () => {
+      watch$3(errorFromInput, () => {
         form.runValidation();
       });
     }
-    watch$2(inputId, (curr, old) => {
+    watch$3(inputId, (curr, old) => {
       if (curr && form) {
         form.register(curr, validate);
       }
@@ -8262,16 +8262,16 @@ const InputSubTextProps = {
 const useInputSubText = (u) => {
   provide$2("subTextOptions", u);
 };
-const ref$6 = window["Vue"].ref;
-const watch$1 = window["Vue"].watch;
+const ref$7 = window["Vue"].ref;
+const watch$2 = window["Vue"].watch;
 const watchEffect = window["Vue"].watchEffect;
 const computed$4 = window["Vue"].computed;
 const provide$1 = window["Vue"].provide;
 const useRadioGroup = (modelValue, emit, label, schema, errorFromInput) => {
-  const radios = ref$6([]);
-  const currentSelected = ref$6();
-  const firstElement = ref$6();
-  const firstElementId = ref$6();
+  const radios = ref$7([]);
+  const currentSelected = ref$7();
+  const firstElement = ref$7();
+  const firstElementId = ref$7();
   watchEffect(() => {
     if (!radios.value.length) {
       return;
@@ -8287,7 +8287,7 @@ const useRadioGroup = (modelValue, emit, label, schema, errorFromInput) => {
       firstElement.value.first = true;
     }
   });
-  watch$1(currentSelected, (nv, ov) => {
+  watch$2(currentSelected, (nv, ov) => {
     if (ov) {
       ov.checked = false;
     }
@@ -8385,7 +8385,7 @@ var __spreadProps$3 = (a, b) => __defProps$3(a, __getOwnPropDescs$3(b));
 const defineComponent$3 = window["Vue"].defineComponent;
 const inject$3 = window["Vue"].inject;
 const computed$3 = window["Vue"].computed;
-const ref$5 = window["Vue"].ref;
+const ref$6 = window["Vue"].ref;
 const resolveComponent$2 = window["Vue"].resolveComponent;
 const openBlock$7 = window["Vue"].openBlock;
 const createElementBlock$7 = window["Vue"].createElementBlock;
@@ -8429,7 +8429,7 @@ const _sfc_main$8$1 = defineComponent$3({
     const isCondensed = computed$3(() => {
       return groupCondensed || props2.condensed;
     });
-    const focused = ref$5(false);
+    const focused = ref$6(false);
     const handleFocus = () => {
       focused.value = true;
     };
@@ -8749,8 +8749,8 @@ const _sfc_main$2$1 = defineComponent$3({
     }
   },
   setup(props2) {
-    const first = ref$5(false);
-    const checked = ref$5(false);
+    const first = ref$6(false);
+    const checked = ref$6(false);
     const labelId = computed$3(() => getSafeId("chip-label-id"));
     const tabindex = computed$3(() => {
       if (first.value) {
@@ -8758,7 +8758,7 @@ const _sfc_main$2$1 = defineComponent$3({
       }
       return checked.value ? 0 : -1;
     });
-    const input = ref$5();
+    const input = ref$6();
     const focus = () => {
       input.value.$el.focus();
     };
@@ -8894,7 +8894,7 @@ const props$4 = {
     default: false
   }
 };
-const _sfc_main$e = defineComponent$3({
+const _sfc_main$f = defineComponent$3({
   model: {
     prop: "modelValue",
     event: "update:modelValue"
@@ -8911,7 +8911,7 @@ const _sfc_main$e = defineComponent$3({
       };
       return __spreadProps$3(__spreadValues$3({
         attrs: attrs2
-      }, useRadioGroup(modelValue, context.emit, props2.label, {}, ref$5(""))), {
+      }, useRadioGroup(modelValue, context.emit, props2.label, {}, ref$6(""))), {
         single
       });
     }
@@ -8934,36 +8934,34 @@ function _sfc_render$8(_ctx, _cache, $props, $setup, $data, $options) {
     renderSlot$2(_ctx.$slots, "default", {}, void 0, true)
   ], 16, _hoisted_1$d);
 }
-var FeatherChipList = /* @__PURE__ */ _export_sfc$8(_sfc_main$e, [["render", _sfc_render$8], ["__scopeId", "data-v-1e06f41d"]]);
+var FeatherChipList = /* @__PURE__ */ _export_sfc$8(_sfc_main$f, [["render", _sfc_render$8], ["__scopeId", "data-v-1e06f41d"]]);
 const simplifyDate = (value) => {
   const date = new Date(value);
   return `${date.getMonth() + 1}/${date.getDate()} ${date.getUTCHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 };
 var AlarmDetail_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$5 = window["Vue"].defineComponent;
+const _defineComponent$6 = window["Vue"].defineComponent;
 const _unref$5 = window["Vue"].unref;
 const _toDisplayString$2 = window["Vue"].toDisplayString;
 const _createElementVNode$5 = window["Vue"].createElementVNode;
 const _createTextVNode$4 = window["Vue"].createTextVNode;
 const _createVNode$5 = window["Vue"].createVNode;
-const _openBlock$5 = window["Vue"].openBlock;
-const _createElementBlock$5 = window["Vue"].createElementBlock;
-const _createCommentVNode$2 = window["Vue"].createCommentVNode;
+const _openBlock$6 = window["Vue"].openBlock;
+const _createElementBlock$6 = window["Vue"].createElementBlock;
+const _createCommentVNode$3 = window["Vue"].createCommentVNode;
 const _pushScopeId$5 = window["Vue"].pushScopeId;
 const _popScopeId$5 = window["Vue"].popScopeId;
-const _withScopeId$7 = (n) => (_pushScopeId$5("data-v-88fba17a"), n = n(), _popScopeId$5(), n);
+const _withScopeId$7 = (n) => (_pushScopeId$5("data-v-8e5b2d24"), n = n(), _popScopeId$5(), n);
 const _hoisted_1$c = {
   key: 0,
   class: "card"
 };
-const _hoisted_2$c = { class: "title" };
-const _hoisted_3$9 = { class: "row" };
+const _hoisted_2$c = { class: "row" };
+const _hoisted_3$9 = { class: "title" };
 const _hoisted_4$7 = /* @__PURE__ */ _withScopeId$7(() => /* @__PURE__ */ _createElementVNode$5("strong", null, "First Event", -1));
-const _hoisted_5$5 = /* @__PURE__ */ _withScopeId$7(() => /* @__PURE__ */ _createElementVNode$5("strong", null, "Last Event", -1));
-const _hoisted_6$3 = { class: "row" };
-const _hoisted_7$4 = /* @__PURE__ */ _withScopeId$7(() => /* @__PURE__ */ _createElementVNode$5("strong", null, "Reduction Key:", -1));
-const _hoisted_8$4 = ["innerHTML"];
-const _sfc_main$d = /* @__PURE__ */ _defineComponent$5({
+const _hoisted_5$6 = /* @__PURE__ */ _withScopeId$7(() => /* @__PURE__ */ _createElementVNode$5("strong", null, "Last Event", -1));
+const _hoisted_6$3 = ["innerHTML"];
+const _sfc_main$e = /* @__PURE__ */ _defineComponent$6({
   __name: "AlarmDetail",
   props: {
     id: null
@@ -8974,35 +8972,56 @@ const _sfc_main$d = /* @__PURE__ */ _defineComponent$5({
     const alarm = situationStore.alarms[props2.id];
     return (_ctx, _cache) => {
       var _a;
-      return _unref$5(alarm) ? (_openBlock$5(), _createElementBlock$5("div", _hoisted_1$c, [
-        _createElementVNode$5("div", _hoisted_2$c, "[" + _toDisplayString$2(_unref$5(alarm).id) + "]", 1),
-        _createElementVNode$5("div", _hoisted_3$9, [
+      return _unref$5(alarm) ? (_openBlock$6(), _createElementBlock$6("div", _hoisted_1$c, [
+        _createElementVNode$5("div", _hoisted_2$c, [
+          _createElementVNode$5("div", _hoisted_3$9, "[" + _toDisplayString$2(_unref$5(alarm).id) + "]", 1),
           _createElementVNode$5("div", null, [
             _hoisted_4$7,
             _createTextVNode$4(" - " + _toDisplayString$2(_unref$5(simplifyDate)(_unref$5(alarm).firstEventTime)), 1)
           ]),
           _createElementVNode$5("div", null, [
-            _hoisted_5$5,
+            _hoisted_5$6,
             _createTextVNode$4(" - " + _toDisplayString$2(_unref$5(simplifyDate)(_unref$5(alarm).lastEvent.createTime)), 1)
+          ]),
+          _createElementVNode$5("div", null, [
+            _createVNode$5(SeverityStatus, {
+              severity: (_a = _unref$5(alarm)) == null ? void 0 : _a.severity
+            }, null, 8, ["severity"])
           ])
-        ]),
-        _createElementVNode$5("div", _hoisted_6$3, [
-          _createVNode$5(SeverityStatus, {
-            severity: (_a = _unref$5(alarm)) == null ? void 0 : _a.severity
-          }, null, 8, ["severity"])
-        ]),
-        _createElementVNode$5("div", null, [
-          _hoisted_7$4,
-          _createTextVNode$4(" " + _toDisplayString$2(_unref$5(alarm).reductionKey), 1)
         ]),
         _createElementVNode$5("div", {
           innerHTML: _unref$5(alarm).description
-        }, null, 8, _hoisted_8$4)
-      ])) : _createCommentVNode$2("", true);
+        }, null, 8, _hoisted_6$3)
+      ])) : _createCommentVNode$3("", true);
     };
   }
 });
-var AlarmDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$d, [["__scopeId", "data-v-88fba17a"]]);
+var AlarmDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$e, [["__scopeId", "data-v-8e5b2d24"]]);
+var StatusColor_vue_vue_type_style_index_0_scoped_true_lang = "";
+const _defineComponent$5 = window["Vue"].defineComponent;
+const _normalizeClass$2 = window["Vue"].normalizeClass;
+const _openBlock$5 = window["Vue"].openBlock;
+const _createElementBlock$5 = window["Vue"].createElementBlock;
+const _createCommentVNode$2 = window["Vue"].createCommentVNode;
+const _sfc_main$d = /* @__PURE__ */ _defineComponent$5({
+  __name: "StatusColor",
+  props: {
+    severity: {
+      required: false,
+      type: String
+    }
+  },
+  setup(__props) {
+    const props2 = __props;
+    return (_ctx, _cache) => {
+      return (props2 == null ? void 0 : props2.severity) ? (_openBlock$5(), _createElementBlock$5("span", {
+        key: 0,
+        class: _normalizeClass$2(["circle", [`${props2.severity.toLowerCase()}-bg dark`]])
+      }, null, 2)) : _createCommentVNode$2("", true);
+    };
+  }
+});
+var StatusColor = /* @__PURE__ */ _export_sfc$j(_sfc_main$d, [["__scopeId", "data-v-f8050610"]]);
 var AlarmFilters_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$4 = window["Vue"].defineComponent;
 const _createElementVNode$4 = window["Vue"].createElementVNode;
@@ -9019,15 +9038,13 @@ const _toDisplayString$1 = window["Vue"].toDisplayString;
 const _createBlock = window["Vue"].createBlock;
 const _pushScopeId$4 = window["Vue"].pushScopeId;
 const _popScopeId$4 = window["Vue"].popScopeId;
-const _withScopeId$6 = (n) => (_pushScopeId$4("data-v-45e00478"), n = n(), _popScopeId$4(), n);
-const _hoisted_1$b = /* @__PURE__ */ _withScopeId$6(() => /* @__PURE__ */ _createElementVNode$4("div", { class: "id" }, [
-  /* @__PURE__ */ _createElementVNode$4("div", null, "Alarms")
-], -1));
-const _hoisted_2$b = /* @__PURE__ */ _createTextVNode$3(" Show All ");
-const _hoisted_3$8 = { class: "section" };
-const _hoisted_4$6 = { class: "alarm-list" };
-const ref$4 = window["Vue"].ref;
-const computed$2 = window["Vue"].computed;
+const _withScopeId$6 = (n) => (_pushScopeId$4("data-v-6714d327"), n = n(), _popScopeId$4(), n);
+const _hoisted_1$b = /* @__PURE__ */ _withScopeId$6(() => /* @__PURE__ */ _createElementVNode$4("div", { class: "title" }, "Alarms", -1));
+const _hoisted_2$b = { class: "alarm-filters-container" };
+const _hoisted_3$8 = /* @__PURE__ */ _createTextVNode$3(" ALL ");
+const _hoisted_4$6 = { class: "section" };
+const _hoisted_5$5 = { class: "alarm-list" };
+const ref$5 = window["Vue"].ref;
 const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
   __name: "AlarmFilters",
   props: {
@@ -9035,9 +9052,9 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
   },
   setup(__props) {
     const props2 = __props;
-    const alarmFilters = computed$2(() => lodash.exports.keys(lodash.exports.groupBy(props2.relatedAlarms, "severity")));
-    const selectedFilters = ref$4(["all"]);
-    const alarms = ref$4(props2.relatedAlarms);
+    const alarmFilters = computed(() => lodash.exports.keys(lodash.exports.groupBy(props2.relatedAlarms, "severity")));
+    const selectedFilters = ref$5(["all"]);
+    const alarms = ref$5(props2.relatedAlarms);
     const handleAlarmFilters = (selected) => {
       selectedFilters.value = selectedFilters.value.filter((f) => f !== "all");
       if (selectedFilters.value.includes(selected)) {
@@ -9052,58 +9069,65 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
         alarms.value = props2.relatedAlarms.filter((a) => selectedFilters.value.includes(a.severity));
       }
     };
+    watch(props2, () => {
+      selectedFilters.value = ["all"];
+      alarms.value = props2.relatedAlarms;
+    });
     return (_ctx, _cache) => {
       return _openBlock$4(), _createElementBlock$4(_Fragment$1, null, [
         _hoisted_1$b,
-        (_openBlock$4(), _createBlock(_unref$4(FeatherChipList), {
-          key: selectedFilters.value.toString(),
-          condensed: "",
-          class: "alarm-filters",
-          label: "Random list for condensed visual testing"
-        }, {
-          default: _withCtx$3(() => [
-            _createVNode$4(_unref$4(_sfc_main$1$2), {
-              class: _normalizeClass$1({ clicked: selectedFilters.value.includes("all") }),
-              onClick: _cache[0] || (_cache[0] = ($event) => handleAlarmFilters("all"))
-            }, {
-              default: _withCtx$3(() => [
-                _hoisted_2$b
-              ]),
-              _: 1
-            }, 8, ["class"]),
-            (_openBlock$4(true), _createElementBlock$4(_Fragment$1, null, _renderList$1(_unref$4(alarmFilters), (severity) => {
-              return _openBlock$4(), _createBlock(_unref$4(_sfc_main$1$2), {
-                class: _normalizeClass$1({ clicked: selectedFilters.value.includes(severity) }),
-                key: severity,
-                onClick: ($event) => handleAlarmFilters(severity)
+        _createElementVNode$4("div", _hoisted_2$b, [
+          (_openBlock$4(), _createBlock(_unref$4(FeatherChipList), {
+            key: selectedFilters.value.toString(),
+            condensed: "",
+            class: "alarm-filters",
+            label: "Random list for condensed visual testing"
+          }, {
+            default: _withCtx$3(() => [
+              _createVNode$4(_unref$4(_sfc_main$1$2), {
+                class: _normalizeClass$1({ clicked: selectedFilters.value.includes("all") }),
+                onClick: _cache[0] || (_cache[0] = ($event) => handleAlarmFilters("all"))
               }, {
                 default: _withCtx$3(() => [
-                  _createTextVNode$3(_toDisplayString$1(severity), 1)
+                  _hoisted_3$8
                 ]),
-                _: 2
-              }, 1032, ["class", "onClick"]);
-            }), 128))
-          ]),
-          _: 1
-        })),
-        _createElementVNode$4("div", _hoisted_3$8, [
+                _: 1
+              }, 8, ["class"]),
+              (_openBlock$4(true), _createElementBlock$4(_Fragment$1, null, _renderList$1(_unref$4(alarmFilters), (severity) => {
+                return _openBlock$4(), _createBlock(_unref$4(_sfc_main$1$2), {
+                  class: _normalizeClass$1({ clicked: selectedFilters.value.includes(severity) }),
+                  key: severity,
+                  onClick: ($event) => handleAlarmFilters(severity)
+                }, {
+                  default: _withCtx$3(() => [
+                    _createVNode$4(StatusColor, { severity }, null, 8, ["severity"]),
+                    _createTextVNode$3(_toDisplayString$1(severity), 1)
+                  ]),
+                  _: 2
+                }, 1032, ["class", "onClick"]);
+              }), 128))
+            ]),
+            _: 1
+          })),
           _createElementVNode$4("div", _hoisted_4$6, [
-            (_openBlock$4(true), _createElementBlock$4(_Fragment$1, null, _renderList$1(alarms.value, (alarmInfo) => {
-              return _openBlock$4(), _createElementBlock$4("div", {
-                key: alarmInfo.id
-              }, [
-                _createVNode$4(AlarmDetail, {
-                  id: alarmInfo.id
-                }, null, 8, ["id"])
-              ]);
-            }), 128))
+            _createElementVNode$4("div", _hoisted_5$5, [
+              (_openBlock$4(true), _createElementBlock$4(_Fragment$1, null, _renderList$1(alarms.value, (alarmInfo) => {
+                return _openBlock$4(), _createElementBlock$4("div", {
+                  key: alarmInfo.id
+                }, [
+                  _createVNode$4(AlarmDetail, {
+                    id: alarmInfo.id
+                  }, null, 8, ["id"])
+                ]);
+              }), 128))
+            ])
           ])
         ])
       ], 64);
     };
   }
 });
-var AlarmFilters = /* @__PURE__ */ _export_sfc$j(_sfc_main$c, [["__scopeId", "data-v-45e00478"]]);
+var AlarmFilters = /* @__PURE__ */ _export_sfc$j(_sfc_main$c, [["__scopeId", "data-v-6714d327"]]);
 var style$3 = "";
 var __defProp$2 = Object.defineProperty;
 var __defProps$2 = Object.defineProperties;
@@ -9253,15 +9277,15 @@ const _createTextVNode$2 = window["Vue"].createTextVNode;
 const _unref$3 = window["Vue"].unref;
 const _withCtx$2 = window["Vue"].withCtx;
 const _createVNode$3 = window["Vue"].createVNode;
-const _createElementVNode$3 = window["Vue"].createElementVNode;
 const _normalizeClass = window["Vue"].normalizeClass;
-const _toDisplayString = window["Vue"].toDisplayString;
 const _openBlock$3 = window["Vue"].openBlock;
 const _createElementBlock$3 = window["Vue"].createElementBlock;
 const _createCommentVNode$1 = window["Vue"].createCommentVNode;
+const _createElementVNode$3 = window["Vue"].createElementVNode;
+const _toDisplayString = window["Vue"].toDisplayString;
 const _pushScopeId$3 = window["Vue"].pushScopeId;
 const _popScopeId$3 = window["Vue"].popScopeId;
-const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-1e915abf"), n = n(), _popScopeId$3(), n);
+const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-fd8b1380"), n = n(), _popScopeId$3(), n);
 const _hoisted_1$a = {
   key: 0,
   class: "detail"
@@ -9269,18 +9293,18 @@ const _hoisted_1$a = {
 const _hoisted_2$a = /* @__PURE__ */ _createTextVNode$2("Details");
 const _hoisted_3$7 = { class: "section" };
 const _hoisted_4$5 = { class: "btn-row" };
-const _hoisted_5$4 = /* @__PURE__ */ _createTextVNode$2(" Accept ");
-const _hoisted_6$2 = /* @__PURE__ */ _createTextVNode$2(" Reject ");
-const _hoisted_7$3 = { class: "situation-detail" };
-const _hoisted_8$3 = { class: "situation-info" };
-const _hoisted_9$2 = { class: "id" };
-const _hoisted_10$2 = ["innerHTML"];
-const _hoisted_11$2 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("strong", null, "Reduction key:", -1));
-const _hoisted_12$1 = { class: "boxes" };
-const _hoisted_13$1 = { class: "parameters" };
-const _hoisted_14$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("div", { class: "separator" }, null, -1));
-const _hoisted_15$1 = { class: "section" };
-const onUpdated = window["Vue"].onUpdated;
+const _hoisted_5$4 = { key: 0 };
+const _hoisted_6$2 = { key: 1 };
+const _hoisted_7$3 = { key: 0 };
+const _hoisted_8$3 = { key: 1 };
+const _hoisted_9$2 = { class: "situation-detail" };
+const _hoisted_10$2 = { class: "situation-info" };
+const _hoisted_11$2 = { class: "id" };
+const _hoisted_12$1 = ["innerHTML"];
+const _hoisted_13$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("strong", null, "Reduction key:", -1));
+const _hoisted_14$1 = { class: "boxes" };
+const _hoisted_15$1 = { class: "parameters" };
+const _hoisted_16$1 = { class: "section" };
 const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
   __name: "SituationDetail",
   props: {
@@ -9288,12 +9312,12 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
   },
   setup(__props) {
     const props2 = __props;
+    const status = ref("");
     const handleFeedbackSituation = (action) => {
       var _a;
       sendFeedbackAcceptSituation((_a = props2.alarmInfo) == null ? void 0 : _a.id, action);
+      status.value = action;
     };
-    onUpdated(() => {
-    });
     return (_ctx, _cache) => {
       return props2.alarmInfo ? (_openBlock$3(), _createElementBlock$3("div", _hoisted_1$a, [
         _createVNode$3(_unref$3(FeatherTabContainer), null, {
@@ -9313,40 +9337,40 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                   _createElementVNode$3("div", _hoisted_3$7, [
                     _createElementVNode$3("div", _hoisted_4$5, [
                       _createVNode$3(_unref$3(FeatherButton), {
-                        class: "btn",
+                        class: _normalizeClass(["btn", { accepted: status.value == "accepted" }]),
                         onClick: _cache[0] || (_cache[0] = () => handleFeedbackSituation("accepted"))
                       }, {
                         default: _withCtx$2(() => [
                           _createVNode$3(_unref$3(FeatherIcon$1), {
                             icon: _unref$3(CheckCircle),
                             "aria-hidden": "true",
-                            class: "icon accept"
-                          }, null, 8, ["icon"]),
-                          _hoisted_5$4
+                            class: _normalizeClass(["icon accept", { accepted: status.value == "accepted" }])
+                          }, null, 8, ["icon", "class"]),
+                          status.value == "accepted" ? (_openBlock$3(), _createElementBlock$3("span", _hoisted_5$4, " ACCEPTED")) : (_openBlock$3(), _createElementBlock$3("span", _hoisted_6$2, " ACCEPT"))
                         ]),
                         _: 1
-                      }),
+                      }, 8, ["class"]),
                       _createVNode$3(_unref$3(FeatherButton), {
-                        class: "btn",
+                        class: _normalizeClass(["btn", { rejected: status.value == "refused" }]),
                         onClick: _cache[1] || (_cache[1] = () => handleFeedbackSituation("refused"))
                       }, {
                         default: _withCtx$2(() => [
                           _createVNode$3(_unref$3(FeatherIcon$1), {
                             icon: _unref$3(Cancel$2),
                             "aria-hidden": "true",
-                            class: "icon reject"
-                          }, null, 8, ["icon"]),
-                          _hoisted_6$2
+                            class: _normalizeClass(["icon reject", { rejected: status.value == "refused" }])
+                          }, null, 8, ["icon", "class"]),
+                          status.value == "refused" ? (_openBlock$3(), _createElementBlock$3("span", _hoisted_7$3, " REJECTED")) : (_openBlock$3(), _createElementBlock$3("span", _hoisted_8$3, " REJECT"))
                         ]),
                         _: 1
-                      })
+                      }, 8, ["class"])
                     ]),
-                    _createElementVNode$3("div", _hoisted_7$3, [
+                    _createElementVNode$3("div", _hoisted_9$2, [
                       _createElementVNode$3("div", {
                         class: _normalizeClass(["severity-line", [`${(_b = (_a = props2.alarmInfo) == null ? void 0 : _a.severity) == null ? void 0 : _b.toLowerCase()}-bg dark`]])
                       }, null, 2),
-                      _createElementVNode$3("div", _hoisted_8$3, [
-                        _createElementVNode$3("div", _hoisted_9$2, [
+                      _createElementVNode$3("div", _hoisted_10$2, [
+                        _createElementVNode$3("div", _hoisted_11$2, [
                           _createElementVNode$3("div", null, "Situation " + _toDisplayString((_c = props2.alarmInfo) == null ? void 0 : _c.id), 1),
                           _createVNode$3(SeverityStatus, {
                             severity: (_d = props2.alarmInfo) == null ? void 0 : _d.severity
@@ -9354,12 +9378,12 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                         ]),
                         _createElementVNode$3("span", {
                           innerHTML: props2.alarmInfo.description
-                        }, null, 8, _hoisted_10$2),
+                        }, null, 8, _hoisted_12$1),
                         _createElementVNode$3("p", null, [
-                          _hoisted_11$2,
+                          _hoisted_13$1,
                           _createTextVNode$2(" " + _toDisplayString(props2.alarmInfo.reductionKey), 1)
                         ]),
-                        _createElementVNode$3("div", _hoisted_12$1, [
+                        _createElementVNode$3("div", _hoisted_14$1, [
                           _createVNode$3(DateBox, {
                             label: "First Event",
                             date: new Date(props2.alarmInfo.firstEventTime).toUTCString()
@@ -9370,7 +9394,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                           }, null, 8, ["date"])
                         ])
                       ]),
-                      _createElementVNode$3("div", _hoisted_13$1, [
+                      _createElementVNode$3("div", _hoisted_15$1, [
                         _createVNode$3(AlarmsCountBySeverity, {
                           relatedAlarms: (_e = props2.alarmInfo) == null ? void 0 : _e.relatedAlarms,
                           size: "large"
@@ -9378,8 +9402,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                       ])
                     ])
                   ]),
-                  _hoisted_14$1,
-                  _createElementVNode$3("div", _hoisted_15$1, [
+                  _createElementVNode$3("div", _hoisted_16$1, [
                     _createVNode$3(AlarmFilters, {
                       "related-alarms": props2.alarmInfo.relatedAlarms
                     }, null, 8, ["related-alarms"])
@@ -9395,7 +9418,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
     };
   }
 });
-var SituationDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$a, [["__scopeId", "data-v-1e915abf"]]);
+var SituationDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$a, [["__scopeId", "data-v-fd8b1380"]]);
 var SituationList_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$2 = window["Vue"].defineComponent;
 const _createElementVNode$2 = window["Vue"].createElementVNode;
@@ -9407,7 +9430,7 @@ const _createElementBlock$2 = window["Vue"].createElementBlock;
 const _createVNode$2 = window["Vue"].createVNode;
 const _pushScopeId$2 = window["Vue"].pushScopeId;
 const _popScopeId$2 = window["Vue"].popScopeId;
-const _withScopeId$4 = (n) => (_pushScopeId$2("data-v-3a279038"), n = n(), _popScopeId$2(), n);
+const _withScopeId$4 = (n) => (_pushScopeId$2("data-v-1106c4c2"), n = n(), _popScopeId$2(), n);
 const _hoisted_1$9 = { class: "list-main" };
 const _hoisted_2$9 = /* @__PURE__ */ _withScopeId$4(() => /* @__PURE__ */ _createElementVNode$2("h2", null, "Situation List", -1));
 const _hoisted_3$6 = { class: "container" };
@@ -9454,7 +9477,7 @@ const _sfc_main$9 = /* @__PURE__ */ _defineComponent$2({
     };
   }
 });
-var SituationList = /* @__PURE__ */ _export_sfc$j(_sfc_main$9, [["__scopeId", "data-v-3a279038"]]);
+var SituationList = /* @__PURE__ */ _export_sfc$j(_sfc_main$9, [["__scopeId", "data-v-1106c4c2"]]);
 var style$2 = "";
 var __defProp$1 = Object.defineProperty;
 var __defProps$1 = Object.defineProperties;
@@ -9476,10 +9499,10 @@ var __spreadValues$1 = (a, b) => {
 };
 var __spreadProps$1 = (a, b) => __defProps$1(a, __getOwnPropDescs$1(b));
 const defineComponent$1 = window["Vue"].defineComponent;
-const ref$3 = window["Vue"].ref;
-const computed$1 = window["Vue"].computed;
+const ref$4 = window["Vue"].ref;
+const computed$2 = window["Vue"].computed;
 const reactive = window["Vue"].reactive;
-const watch = window["Vue"].watch;
+const watch$1 = window["Vue"].watch;
 const inject$1 = window["Vue"].inject;
 const resolveComponent$1 = window["Vue"].resolveComponent;
 const openBlock$6 = window["Vue"].openBlock;
@@ -9514,11 +9537,11 @@ const props$1$1 = {
 const _sfc_main$1$1 = defineComponent$1({
   props: props$1$1,
   setup(props2) {
-    const input = ref$3();
+    const input = ref$4();
     const focus = () => {
       input.value.focus();
     };
-    const id = computed$1(() => {
+    const id = computed$2(() => {
       return getSafeId("feather-radio-button");
     });
     const vm = reactive({
@@ -9529,17 +9552,17 @@ const _sfc_main$1$1 = defineComponent$1({
       checked: false,
       id: id.value
     });
-    const labelId = computed$1(() => getSafeId("radio-label-id"));
-    const tabindex = computed$1(() => {
+    const labelId = computed$2(() => getSafeId("radio-label-id"));
+    const tabindex = computed$2(() => {
       if (vm.first) {
         return 0;
       }
       return vm.checked ? 0 : -1;
     });
-    watch(() => props2.disabled, (v) => {
+    watch$1(() => props2.disabled, (v) => {
       vm.disabled = v;
     }, { immediate: true });
-    watch(() => props2.value, (v) => {
+    watch$1(() => props2.value, (v) => {
       vm.value = v;
     }, { immediate: true });
     const register = inject$1("register", (_radio) => {
@@ -9651,10 +9674,10 @@ const _sfc_main$8 = defineComponent$1({
     useInputSubText(props2);
     const error = toRef$1(props2, "error");
     const modelValue = toRef$1(props2, "modelValue");
-    const descriptionId = computed$1(() => {
+    const descriptionId = computed$2(() => {
       return getSafeId("feather-input-description");
     });
-    const attrs = computed$1(() => {
+    const attrs = computed$2(() => {
       const _attrs = __spreadProps$1(__spreadValues$1({}, context.attrs), {
         class: "",
         "aria-describedby": descriptionId.value
@@ -9898,13 +9921,13 @@ const _hoisted_15 = /* @__PURE__ */ _withScopeId$2(() => /* @__PURE__ */ _create
 const _hoisted_16 = /* @__PURE__ */ _createTextVNode$1("Yes");
 const _hoisted_17 = /* @__PURE__ */ _createTextVNode$1("No");
 const _hoisted_18 = /* @__PURE__ */ _createTextVNode$1(" Continue ");
-const ref$2 = window["Vue"].ref;
+const ref$3 = window["Vue"].ref;
 const _sfc_main$2 = /* @__PURE__ */ _defineComponent$1({
   __name: "WelcomePage",
   setup(__props) {
     const userStore = useUserStore();
     const router2 = useRouter();
-    const allowSave = ref$2(true);
+    const allowSave = ref$3(true);
     const handleClickContinue = () => {
       const allow = Boolean(allowSave.value);
       userStore.savePermission(allow);
@@ -10057,8 +10080,8 @@ const renderSlot = window["Vue"].renderSlot;
 const pushScopeId = window["Vue"].pushScopeId;
 const popScopeId = window["Vue"].popScopeId;
 const toRef = window["Vue"].toRef;
-const computed = window["Vue"].computed;
-const ref$1 = window["Vue"].ref;
+const computed$1 = window["Vue"].computed;
+const ref$2 = window["Vue"].ref;
 window["Vue"].mergeProps;
 window["Vue"].toDisplayString;
 window["Vue"].createVNode;
@@ -10247,16 +10270,16 @@ defineComponent({
   setup(props2, context) {
     useInputSubText(props2);
     const error = toRef(props2, "error");
-    const groupId = computed(() => {
+    const groupId = computed$1(() => {
       return getSafeId("feather-checkbox-group");
     });
-    const descriptionId = computed(() => {
+    const descriptionId = computed$1(() => {
       return getSafeId("feather-input-description");
     });
-    const labelId = computed(() => {
+    const labelId = computed$1(() => {
       return getSafeId("feather-input-label");
     });
-    const attrs = computed(() => {
+    const attrs = computed$1(() => {
       const _attrs = JSON.parse(JSON.stringify(context.attrs));
       if (!_attrs["aria-invalid"]) {
         _attrs["aria-invalid"] = !!error.value;
@@ -10266,7 +10289,7 @@ defineComponent({
         "aria-describedby": descriptionId.value
       });
     });
-    const inputId = ref$1(groupId.value);
+    const inputId = ref$2(groupId.value);
     const { validate } = useValidation(inputId, toRef(props2, "modelValue"), props2.label, props2.schema, toRef(props2, "error"));
     const registerCheckbox = (id) => {
       if (id && inputId.value === groupId.value) {
@@ -10333,14 +10356,14 @@ const _hoisted_9 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ _createEle
   })
 ], -1));
 const _hoisted_10 = /* @__PURE__ */ _createTextVNode(" Continue ");
-const ref = window["Vue"].ref;
+const ref$1 = window["Vue"].ref;
 const _sfc_main = /* @__PURE__ */ _defineComponent({
   __name: "ConfigurationPage",
   setup(__props) {
     const userStore = useUserStore();
     const router2 = useRouter();
-    const hellinger = ref(false);
-    const engine = ref(CONST.ENGINE_DBSCAN);
+    const hellinger = ref$1(false);
+    const engine = ref$1(CONST.ENGINE_DBSCAN);
     const handleClickContinue = () => {
       savePermission(userStore.allowSave);
       saveEngineParameter(engine.value, hellinger.value);
@@ -10477,4 +10500,4 @@ var style = "";
 var openLight = "";
 window["Vue"].createApp;
 window["Pinia"].createPinia;
-window["uiextension"] = _sfc_main$s;
+window["uiextension"] = _sfc_main$t;

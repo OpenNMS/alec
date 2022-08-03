@@ -13,15 +13,7 @@ import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import AlarmFilters from '@/components/AlarmFilters.vue'
-import AlarmDetail from '@/components/AlarmDetail.vue'
 import { FeatherButton } from '@featherds/button'
-import { FeatherChipList, FeatherChip } from '@featherds/chips'
-import { reactive, onUpdated } from 'vue'
-import { groupBy, keys } from 'lodash'
-/*const state = reactive({
-	alarmFilters: [],
-	selectedFilters: ['all']
-})*/
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
@@ -30,23 +22,6 @@ const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.alarmInfo?.id, action)
 	status.value = action
 }
-/*
-const handleAlarmFilters = (selected: string) => {
-	if (state.selectedFilters.includes(selected)) {
-		state.selectedFilters = state.selectedFilters.filter((f) => f !== selected)
-		if (state.selectedFilters.length == 0) {
-			state.selectedFilters.push('all')
-		}
-	} else {
-		state.selectedFilters = state.selectedFilters.filter((f) => f !== 'all')
-		state.selectedFilters.push(selected)
-	}
-	console.log(state.selectedFilters)
-}
-*/
-onUpdated(() => {
-	//	state.alarmFilters = keys(groupBy(props.alarmInfo?.relatedAlarms, 'severity'))
-})
 </script>
 
 <template>
@@ -125,14 +100,6 @@ onUpdated(() => {
 				</div>
 				<div class="section">
 					<AlarmFilters :related-alarms="props.alarmInfo.relatedAlarms" />
-					<!--<div class="alarm-list">
-						<div
-							v-for="alarmInfo in props.alarmInfo.relatedAlarms"
-							:key="alarmInfo.id"
-						>
-							<AlarmDetail :id="alarmInfo.id" />
-						</div>
-					</div>-->
 				</div>
 			</FeatherTabPanel>
 			<!-- <FeatherTabPanel class="panel">Topology</FeatherTabPanel>
@@ -182,26 +149,10 @@ onUpdated(() => {
 	}
 }
 .parameters {
-	width: 18%;
-	align-self: center;
-	justify-content: center;
+	width: 15%;
 	display: flex;
-	flex-wrap: wrap;
-	> div {
-		margin-bottom: 15px;
-	}
+	padding-left: 20px;
 	border-left: 1px solid $border-grey;
-}
-table {
-	width: 100%;
-	@include table();
-	@include row-select();
-	&.hover {
-		@include row-hover();
-	}
-	&.condensed {
-		@include table-condensed();
-	}
 }
 .accept {
 	font-size: 16px;

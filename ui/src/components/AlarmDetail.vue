@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import { TAlarm } from '@/types/TSituation'
 import { simplifyDate } from '@/helpers/utils'
 import { useSituationsStore } from '@/store/useSituationsStore'
 

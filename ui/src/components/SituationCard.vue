@@ -24,9 +24,7 @@ const handleSituationSelected = () => {
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<div class="title">
-					{{ props.alarmInfo?.id }}
-				</div>
+				<div class="title">[ {{ props.alarmInfo?.id }} ]</div>
 				<SeverityStatus :severity="props.alarmInfo?.severity" />
 			</div>
 			<AlarmsCountBySeverity

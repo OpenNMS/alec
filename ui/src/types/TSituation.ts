@@ -12,7 +12,7 @@ export type TSituation = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime: number
+	lastEventTime: Date
 	logMessage: string
 	location: string
 	reductionKey: string
@@ -56,6 +56,8 @@ export type TRelatedAlarm = {
 	logMessage: string
 	nodeLabel: string
 	count?: number
+	firstEventTime?: Date
+	lastEventTime?: Date
 }
 
 export type TAlarm = {
@@ -65,6 +67,7 @@ export type TAlarm = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime: number
+	lastEventTime?: Date
 	logMessage: string
+	firstEventTime?: Date
 }

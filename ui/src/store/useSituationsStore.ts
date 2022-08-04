@@ -26,6 +26,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 				situations.forEach((sit) => {
 					sit.relatedAlarms.forEach((alarm: TRelatedAlarm) => {
 						alarm.count = this.alarms[alarm.id]?.count
+						alarm.firstEventTime = this.alarms[alarm.id]?.firstEventTime
+						alarm.lastEventTime = this.alarms[alarm.id]?.lastEventTime
 					})
 				})
 				this.situations = situations

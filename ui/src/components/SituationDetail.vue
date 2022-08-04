@@ -12,6 +12,8 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import { FeatherButton } from '@featherds/button'
+import SituationMetrics from '@/components/SituationMetrics.vue'
+
 import { useUserStore } from '@/store/useUserStore'
 const userStore = useUserStore()
 
@@ -28,7 +30,6 @@ const handleFeedbackSituation = (action: string) => {
 		<FeatherTabContainer>
 			<template v-slot:tabs>
 				<FeatherTab>Details</FeatherTab>
-				<FeatherTab>Topology</FeatherTab>
 				<FeatherTab>Metrics</FeatherTab>
 			</template>
 			<FeatherTabPanel class="panel">
@@ -108,8 +109,9 @@ const handleFeedbackSituation = (action: string) => {
 					</table>
 				</div>
 			</FeatherTabPanel>
-			<FeatherTabPanel class="panel">Topology</FeatherTabPanel>
-			<FeatherTabPanel class="panel">Metrics</FeatherTabPanel>
+			<FeatherTabPanel class="panel"
+				><SituationMetrics :situation="props?.alarmInfo"
+			/></FeatherTabPanel>
 		</FeatherTabContainer>
 	</div>
 </template>

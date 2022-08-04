@@ -7087,7 +7087,7 @@ const KEYCODES$1 = {
 };
 const ref$a = window["Vue"].ref;
 const toRef$4 = window["Vue"].toRef;
-const watch$4 = window["Vue"].watch;
+const watch$5 = window["Vue"].watch;
 const provide$3 = window["Vue"].provide;
 const model = {
   prop: "modelValue",
@@ -7110,7 +7110,7 @@ const useTabContainer = (props2, context) => {
   const value = toRef$4(props2, "modelValue");
   const localSelected = ref$a(props2.modelValue);
   const pairs = ref$a([]);
-  watch$4(value, (v) => {
+  watch$5(value, (v) => {
     activateIndex(v);
   });
   const handleClick = (evt) => {
@@ -7873,7 +7873,7 @@ const vShow = window["Vue"].vShow;
 const ref$8 = window["Vue"].ref;
 const toRef$3 = window["Vue"].toRef;
 const nextTick = window["Vue"].nextTick;
-const watch$3 = window["Vue"].watch;
+const watch$4 = window["Vue"].watch;
 window["Vue"].createTextVNode;
 window["Vue"].Fragment;
 window["Vue"].renderList;
@@ -8172,7 +8172,7 @@ defineComponent$4({
       }
       return props2.headingText(errors.value);
     });
-    watch$3(mainError, (v) => {
+    watch$4(mainError, (v) => {
       if (v.length) {
         nextTick(() => heading.value.focus());
       }
@@ -8218,11 +8218,11 @@ const useValidation = (inputId, value, label, schema, errorFromInput) => {
       }
     };
     if (errorFromInput && isRef(errorFromInput)) {
-      watch$3(errorFromInput, () => {
+      watch$4(errorFromInput, () => {
         form.runValidation();
       });
     }
-    watch$3(inputId, (curr, old) => {
+    watch$4(inputId, (curr, old) => {
       if (curr && form) {
         form.register(curr, validate);
       }
@@ -8263,7 +8263,7 @@ const useInputSubText = (u) => {
   provide$2("subTextOptions", u);
 };
 const ref$7 = window["Vue"].ref;
-const watch$2 = window["Vue"].watch;
+const watch$3 = window["Vue"].watch;
 const watchEffect = window["Vue"].watchEffect;
 const computed$4 = window["Vue"].computed;
 const provide$1 = window["Vue"].provide;
@@ -8287,7 +8287,7 @@ const useRadioGroup = (modelValue, emit, label, schema, errorFromInput) => {
       firstElement.value.first = true;
     }
   });
-  watch$2(currentSelected, (nv, ov) => {
+  watch$3(currentSelected, (nv, ov) => {
     if (ov) {
       ov.checked = false;
     }
@@ -9038,13 +9038,15 @@ const _toDisplayString$1 = window["Vue"].toDisplayString;
 const _createBlock = window["Vue"].createBlock;
 const _pushScopeId$4 = window["Vue"].pushScopeId;
 const _popScopeId$4 = window["Vue"].popScopeId;
-const _withScopeId$6 = (n) => (_pushScopeId$4("data-v-6714d327"), n = n(), _popScopeId$4(), n);
+const _withScopeId$6 = (n) => (_pushScopeId$4("data-v-2fdba2aa"), n = n(), _popScopeId$4(), n);
 const _hoisted_1$b = /* @__PURE__ */ _withScopeId$6(() => /* @__PURE__ */ _createElementVNode$4("div", { class: "title" }, "Alarms", -1));
 const _hoisted_2$b = { class: "alarm-filters-container" };
 const _hoisted_3$8 = /* @__PURE__ */ _createTextVNode$3(" ALL ");
 const _hoisted_4$6 = { class: "section" };
 const _hoisted_5$5 = { class: "alarm-list" };
 const ref$5 = window["Vue"].ref;
+const watch$2 = window["Vue"].watch;
+const computed$2 = window["Vue"].computed;
 const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
   __name: "AlarmFilters",
   props: {
@@ -9052,7 +9054,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
   },
   setup(__props) {
     const props2 = __props;
-    const alarmFilters = computed(() => lodash.exports.keys(lodash.exports.groupBy(props2.relatedAlarms, "severity")));
+    const alarmFilters = computed$2(() => lodash.exports.keys(lodash.exports.groupBy(props2.relatedAlarms, "severity")));
     const selectedFilters = ref$5(["all"]);
     const alarms = ref$5(props2.relatedAlarms);
     const handleAlarmFilters = (selected) => {
@@ -9069,7 +9071,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
         alarms.value = props2.relatedAlarms.filter((a) => selectedFilters.value.includes(a.severity));
       }
     };
-    watch(props2, () => {
+    watch$2(props2, () => {
       selectedFilters.value = ["all"];
       alarms.value = props2.relatedAlarms;
     });
@@ -9127,7 +9129,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$4({
     };
   }
 });
-var AlarmFilters = /* @__PURE__ */ _export_sfc$j(_sfc_main$c, [["__scopeId", "data-v-6714d327"]]);
+var AlarmFilters = /* @__PURE__ */ _export_sfc$j(_sfc_main$c, [["__scopeId", "data-v-2fdba2aa"]]);
 var style$3 = "";
 var __defProp$2 = Object.defineProperty;
 var __defProps$2 = Object.defineProperties;
@@ -9271,6 +9273,50 @@ const _sfc_main$b = defineComponent$2({
   }
 });
 var FeatherButton = /* @__PURE__ */ _export_sfc$7(_sfc_main$b, [["__scopeId", "data-v-70f0846d"]]);
+const endpointRole = "/whoami";
+const getUserRole = async () => {
+  try {
+    const resp = await rest.get(endpointRole);
+    if (resp.status === 200) {
+      return resp.data;
+    }
+    return false;
+  } catch (err) {
+    return false;
+  }
+};
+const defineStore = window["Pinia"].defineStore;
+const useUserStore = defineStore("userStore", {
+  state: () => ({
+    isAdmin: false,
+    userId: null,
+    firstTime: true,
+    allowSave: true
+  }),
+  actions: {
+    async getUserRole() {
+      const result = await getUserRole();
+      if (result) {
+        this.isAdmin = result.roles.includes("ROLE_ADMIN");
+        this.userId = result.id;
+      }
+    },
+    async getAlecInfo() {
+      const result = await getUserInfo();
+      if (result) {
+        this.firstTime = false;
+        this.allowSave = result.agreed;
+      }
+    },
+    async savePermission(allowSaveValue) {
+      this.allowSave = allowSaveValue;
+      if (!allowSaveValue) {
+        const result = await savePermission(allowSaveValue);
+        this.allowSave = result;
+      }
+    }
+  }
+});
 var SituationDetail_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$3 = window["Vue"].defineComponent;
 const _createTextVNode$2 = window["Vue"].createTextVNode;
@@ -9285,14 +9331,17 @@ const _createElementVNode$3 = window["Vue"].createElementVNode;
 const _toDisplayString = window["Vue"].toDisplayString;
 const _pushScopeId$3 = window["Vue"].pushScopeId;
 const _popScopeId$3 = window["Vue"].popScopeId;
-const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-fd8b1380"), n = n(), _popScopeId$3(), n);
+const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-0c6a44ee"), n = n(), _popScopeId$3(), n);
 const _hoisted_1$a = {
   key: 0,
   class: "detail"
 };
 const _hoisted_2$a = /* @__PURE__ */ _createTextVNode$2("Details");
 const _hoisted_3$7 = { class: "section" };
-const _hoisted_4$5 = { class: "btn-row" };
+const _hoisted_4$5 = {
+  key: 0,
+  class: "btn-row"
+};
 const _hoisted_5$4 = { key: 0 };
 const _hoisted_6$2 = { key: 1 };
 const _hoisted_7$3 = { key: 0 };
@@ -9305,6 +9354,8 @@ const _hoisted_13$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _crea
 const _hoisted_14$1 = { class: "boxes" };
 const _hoisted_15$1 = { class: "parameters" };
 const _hoisted_16$1 = { class: "section" };
+const ref$4 = window["Vue"].ref;
+const watch$1 = window["Vue"].watch;
 const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
   __name: "SituationDetail",
   props: {
@@ -9312,12 +9363,16 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
   },
   setup(__props) {
     const props2 = __props;
-    const status = ref("");
+    const userStore = useUserStore();
+    const status = ref$4("");
     const handleFeedbackSituation = (action) => {
       var _a;
       sendFeedbackAcceptSituation((_a = props2.alarmInfo) == null ? void 0 : _a.id, action);
       status.value = action;
     };
+    watch$1(props2, () => {
+      status.value = "";
+    });
     return (_ctx, _cache) => {
       return props2.alarmInfo ? (_openBlock$3(), _createElementBlock$3("div", _hoisted_1$a, [
         _createVNode$3(_unref$3(FeatherTabContainer), null, {
@@ -9335,7 +9390,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                 var _a, _b, _c, _d, _e;
                 return [
                   _createElementVNode$3("div", _hoisted_3$7, [
-                    _createElementVNode$3("div", _hoisted_4$5, [
+                    _unref$3(userStore).allowSave ? (_openBlock$3(), _createElementBlock$3("div", _hoisted_4$5, [
                       _createVNode$3(_unref$3(FeatherButton), {
                         class: _normalizeClass(["btn", { accepted: status.value == "accepted" }]),
                         onClick: _cache[0] || (_cache[0] = () => handleFeedbackSituation("accepted"))
@@ -9364,7 +9419,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
                         ]),
                         _: 1
                       }, 8, ["class"])
-                    ]),
+                    ])) : _createCommentVNode$1("", true),
                     _createElementVNode$3("div", _hoisted_9$2, [
                       _createElementVNode$3("div", {
                         class: _normalizeClass(["severity-line", [`${(_b = (_a = props2.alarmInfo) == null ? void 0 : _a.severity) == null ? void 0 : _b.toLowerCase()}-bg dark`]])
@@ -9418,7 +9473,7 @@ const _sfc_main$a = /* @__PURE__ */ _defineComponent$3({
     };
   }
 });
-var SituationDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$a, [["__scopeId", "data-v-fd8b1380"]]);
+var SituationDetail = /* @__PURE__ */ _export_sfc$j(_sfc_main$a, [["__scopeId", "data-v-0c6a44ee"]]);
 var SituationList_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$2 = window["Vue"].defineComponent;
 const _createElementVNode$2 = window["Vue"].createElementVNode;
@@ -9499,10 +9554,10 @@ var __spreadValues$1 = (a, b) => {
 };
 var __spreadProps$1 = (a, b) => __defProps$1(a, __getOwnPropDescs$1(b));
 const defineComponent$1 = window["Vue"].defineComponent;
-const ref$4 = window["Vue"].ref;
-const computed$2 = window["Vue"].computed;
+const ref$3 = window["Vue"].ref;
+const computed$1 = window["Vue"].computed;
 const reactive = window["Vue"].reactive;
-const watch$1 = window["Vue"].watch;
+const watch = window["Vue"].watch;
 const inject$1 = window["Vue"].inject;
 const resolveComponent$1 = window["Vue"].resolveComponent;
 const openBlock$6 = window["Vue"].openBlock;
@@ -9537,11 +9592,11 @@ const props$1$1 = {
 const _sfc_main$1$1 = defineComponent$1({
   props: props$1$1,
   setup(props2) {
-    const input = ref$4();
+    const input = ref$3();
     const focus = () => {
       input.value.focus();
     };
-    const id = computed$2(() => {
+    const id = computed$1(() => {
       return getSafeId("feather-radio-button");
     });
     const vm = reactive({
@@ -9552,17 +9607,17 @@ const _sfc_main$1$1 = defineComponent$1({
       checked: false,
       id: id.value
     });
-    const labelId = computed$2(() => getSafeId("radio-label-id"));
-    const tabindex = computed$2(() => {
+    const labelId = computed$1(() => getSafeId("radio-label-id"));
+    const tabindex = computed$1(() => {
       if (vm.first) {
         return 0;
       }
       return vm.checked ? 0 : -1;
     });
-    watch$1(() => props2.disabled, (v) => {
+    watch(() => props2.disabled, (v) => {
       vm.disabled = v;
     }, { immediate: true });
-    watch$1(() => props2.value, (v) => {
+    watch(() => props2.value, (v) => {
       vm.value = v;
     }, { immediate: true });
     const register = inject$1("register", (_radio) => {
@@ -9674,10 +9729,10 @@ const _sfc_main$8 = defineComponent$1({
     useInputSubText(props2);
     const error = toRef$1(props2, "error");
     const modelValue = toRef$1(props2, "modelValue");
-    const descriptionId = computed$2(() => {
+    const descriptionId = computed$1(() => {
       return getSafeId("feather-input-description");
     });
-    const attrs = computed$2(() => {
+    const attrs = computed$1(() => {
       const _attrs = __spreadProps$1(__spreadValues$1({}, context.attrs), {
         class: "",
         "aria-describedby": descriptionId.value
@@ -9838,50 +9893,6 @@ var Vitals = /* @__PURE__ */ _export_sfc$1(_sfc_main$3, [["render", _sfc_render]
 const useRouter = () => {
   return window.VRouter || router;
 };
-const endpointRole = "/whoami";
-const getUserRole = async () => {
-  try {
-    const resp = await rest.get(endpointRole);
-    if (resp.status === 200) {
-      return resp.data;
-    }
-    return false;
-  } catch (err) {
-    return false;
-  }
-};
-const defineStore = window["Pinia"].defineStore;
-const useUserStore = defineStore("userStore", {
-  state: () => ({
-    isAdmin: false,
-    userId: null,
-    firstTime: true,
-    allowSave: true
-  }),
-  actions: {
-    async getUserRole() {
-      const result = await getUserRole();
-      if (result) {
-        this.isAdmin = result.roles.includes("ROLE_ADMIN");
-        this.userId = result.id;
-      }
-    },
-    async getAlecInfo() {
-      const result = await getUserInfo();
-      if (result) {
-        this.firstTime = false;
-        this.allowSave = result.agreed;
-      }
-    },
-    async savePermission(allowSaveValue) {
-      this.allowSave = allowSaveValue;
-      if (!allowSaveValue) {
-        const result = await savePermission(allowSaveValue);
-        this.allowSave = result;
-      }
-    }
-  }
-});
 var WelcomePage_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$1 = window["Vue"].defineComponent;
 const _createElementVNode$1 = window["Vue"].createElementVNode;
@@ -9921,13 +9932,13 @@ const _hoisted_15 = /* @__PURE__ */ _withScopeId$2(() => /* @__PURE__ */ _create
 const _hoisted_16 = /* @__PURE__ */ _createTextVNode$1("Yes");
 const _hoisted_17 = /* @__PURE__ */ _createTextVNode$1("No");
 const _hoisted_18 = /* @__PURE__ */ _createTextVNode$1(" Continue ");
-const ref$3 = window["Vue"].ref;
+const ref$2 = window["Vue"].ref;
 const _sfc_main$2 = /* @__PURE__ */ _defineComponent$1({
   __name: "WelcomePage",
   setup(__props) {
     const userStore = useUserStore();
     const router2 = useRouter();
-    const allowSave = ref$3(true);
+    const allowSave = ref$2(true);
     const handleClickContinue = () => {
       const allow = Boolean(allowSave.value);
       userStore.savePermission(allow);
@@ -10080,8 +10091,8 @@ const renderSlot = window["Vue"].renderSlot;
 const pushScopeId = window["Vue"].pushScopeId;
 const popScopeId = window["Vue"].popScopeId;
 const toRef = window["Vue"].toRef;
-const computed$1 = window["Vue"].computed;
-const ref$2 = window["Vue"].ref;
+const computed = window["Vue"].computed;
+const ref$1 = window["Vue"].ref;
 window["Vue"].mergeProps;
 window["Vue"].toDisplayString;
 window["Vue"].createVNode;
@@ -10270,16 +10281,16 @@ defineComponent({
   setup(props2, context) {
     useInputSubText(props2);
     const error = toRef(props2, "error");
-    const groupId = computed$1(() => {
+    const groupId = computed(() => {
       return getSafeId("feather-checkbox-group");
     });
-    const descriptionId = computed$1(() => {
+    const descriptionId = computed(() => {
       return getSafeId("feather-input-description");
     });
-    const labelId = computed$1(() => {
+    const labelId = computed(() => {
       return getSafeId("feather-input-label");
     });
-    const attrs = computed$1(() => {
+    const attrs = computed(() => {
       const _attrs = JSON.parse(JSON.stringify(context.attrs));
       if (!_attrs["aria-invalid"]) {
         _attrs["aria-invalid"] = !!error.value;
@@ -10289,7 +10300,7 @@ defineComponent({
         "aria-describedby": descriptionId.value
       });
     });
-    const inputId = ref$2(groupId.value);
+    const inputId = ref$1(groupId.value);
     const { validate } = useValidation(inputId, toRef(props2, "modelValue"), props2.label, props2.schema, toRef(props2, "error"));
     const registerCheckbox = (id) => {
       if (id && inputId.value === groupId.value) {
@@ -10356,14 +10367,14 @@ const _hoisted_9 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ _createEle
   })
 ], -1));
 const _hoisted_10 = /* @__PURE__ */ _createTextVNode(" Continue ");
-const ref$1 = window["Vue"].ref;
+const ref = window["Vue"].ref;
 const _sfc_main = /* @__PURE__ */ _defineComponent({
   __name: "ConfigurationPage",
   setup(__props) {
     const userStore = useUserStore();
     const router2 = useRouter();
-    const hellinger = ref$1(false);
-    const engine = ref$1(CONST.ENGINE_DBSCAN);
+    const hellinger = ref(false);
+    const engine = ref(CONST.ENGINE_DBSCAN);
     const handleClickContinue = () => {
       savePermission(userStore.allowSave);
       saveEngineParameter(engine.value, hellinger.value);

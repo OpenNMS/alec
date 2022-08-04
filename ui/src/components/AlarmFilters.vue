@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { TRelatedAlarm } from '@/types/TSituation'
 import { FeatherChipList, FeatherChip } from '@featherds/chips'
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { groupBy, keys } from 'lodash'
 import AlarmDetail from '@/components/AlarmDetail.vue'
 import StatusColor from '@/elements/StatusColor.vue'
@@ -91,8 +91,8 @@ watch(props, () => {
 }
 
 .clicked {
-	border: 2px solid $dark-blue;
-	background-color: rgb(212, 212, 212);
+	border: 2px solid $dark-blue !important;
+	background-color: rgb(212, 212, 212) !important;
 }
 .alarm-list {
 	display: flex;

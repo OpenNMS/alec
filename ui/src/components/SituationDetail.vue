@@ -14,6 +14,11 @@ import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
+import { ref, watch } from 'vue'
+import { useUserStore } from '@/store/useUserStore'
+
+const userStore = useUserStore()
+
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
@@ -22,6 +27,9 @@ const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.alarmInfo?.id, action)
 	status.value = action
 }
+watch(props, () => {
+	status.value = ''
+})
 </script>
 
 <template>
@@ -34,7 +42,7 @@ const handleFeedbackSituation = (action: string) => {
 			</template>
 			<FeatherTabPanel class="panel">
 				<div class="section">
-					<div class="btn-row">
+					<div v-if="userStore.allowSave" class="btn-row">
 						<FeatherButton
 							class="btn"
 							:class="{ accepted: status == 'accepted' }"
@@ -149,7 +157,7 @@ const handleFeedbackSituation = (action: string) => {
 	}
 }
 .parameters {
-	width: 15%;
+	width: 20%;
 	display: flex;
 	padding-left: 20px;
 	border-left: 1px solid $border-grey;

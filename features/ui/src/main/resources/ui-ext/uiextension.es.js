@@ -25,30 +25,30 @@ var _export_sfc$l = (sfc, props2) => {
   }
   return target;
 };
-const _sfc_main$s = {};
+const _sfc_main$t = {};
 const _resolveComponent = window["Vue"].resolveComponent;
 const _createVNode$5 = window["Vue"].createVNode;
-const _openBlock$8 = window["Vue"].openBlock;
-const _createElementBlock$7 = window["Vue"].createElementBlock;
+const _openBlock$9 = window["Vue"].openBlock;
+const _createElementBlock$8 = window["Vue"].createElementBlock;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
-const _hoisted_1$m = { class: "main" };
+const _hoisted_1$n = { class: "main" };
 function _sfc_render$g(_ctx, _cache) {
   const _component_router_view = _resolveComponent("router-view");
-  return _openBlock$8(), _createElementBlock$7("div", _hoisted_1$m, [
+  return _openBlock$9(), _createElementBlock$8("div", _hoisted_1$n, [
     _createVNode$5(_component_router_view)
   ]);
 }
-var MainContainer = /* @__PURE__ */ _export_sfc$l(_sfc_main$s, [["render", _sfc_render$g], ["__scopeId", "data-v-94da7af6"]]);
+var MainContainer = /* @__PURE__ */ _export_sfc$l(_sfc_main$t, [["render", _sfc_render$g], ["__scopeId", "data-v-94da7af6"]]);
 var App_vue_vue_type_style_index_0_lang = "";
-const _defineComponent$7 = window["Vue"].defineComponent;
-const _openBlock$7 = window["Vue"].openBlock;
+const _defineComponent$8 = window["Vue"].defineComponent;
+const _openBlock$8 = window["Vue"].openBlock;
 const _createBlock = window["Vue"].createBlock;
-const _sfc_main$r = /* @__PURE__ */ _defineComponent$7({
+const _sfc_main$s = /* @__PURE__ */ _defineComponent$8({
   __name: "App",
   setup(__props) {
     return (_ctx, _cache) => {
-      return _openBlock$7(), _createBlock(MainContainer);
+      return _openBlock$8(), _createBlock(MainContainer);
     };
   }
 });
@@ -6719,8 +6719,10 @@ const useSituationsStore = defineStore$1("situationsStore", {
         const situations = result.alarm.filter((a) => a.relatedAlarms && a.relatedAlarms.length > 0);
         situations.forEach((sit) => {
           sit.relatedAlarms.forEach((alarm) => {
-            var _a;
+            var _a, _b, _c;
             alarm.count = (_a = this.alarms[alarm.id]) == null ? void 0 : _a.count;
+            alarm.firstEventTime = (_b = this.alarms[alarm.id]) == null ? void 0 : _b.firstEventTime;
+            alarm.lastEventTime = (_c = this.alarms[alarm.id]) == null ? void 0 : _c.lastEventTime;
           });
         });
         this.situations = situations;
@@ -6729,13 +6731,13 @@ const useSituationsStore = defineStore$1("situationsStore", {
   }
 });
 var SeverityStatus_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$6 = window["Vue"].defineComponent;
-const _toDisplayString$3 = window["Vue"].toDisplayString;
+const _defineComponent$7 = window["Vue"].defineComponent;
+const _toDisplayString$4 = window["Vue"].toDisplayString;
 const _normalizeClass$3 = window["Vue"].normalizeClass;
-const _openBlock$6 = window["Vue"].openBlock;
-const _createElementBlock$6 = window["Vue"].createElementBlock;
+const _openBlock$7 = window["Vue"].openBlock;
+const _createElementBlock$7 = window["Vue"].createElementBlock;
 const _createCommentVNode$2 = window["Vue"].createCommentVNode;
-const _sfc_main$q = /* @__PURE__ */ _defineComponent$6({
+const _sfc_main$r = /* @__PURE__ */ _defineComponent$7({
   __name: "SeverityStatus",
   props: {
     severity: {
@@ -6746,27 +6748,27 @@ const _sfc_main$q = /* @__PURE__ */ _defineComponent$6({
   setup(__props) {
     const props2 = __props;
     return (_ctx, _cache) => {
-      return (props2 == null ? void 0 : props2.severity) ? (_openBlock$6(), _createElementBlock$6("span", {
+      return (props2 == null ? void 0 : props2.severity) ? (_openBlock$7(), _createElementBlock$7("span", {
         key: 0,
         class: _normalizeClass$3(["severity-status", [`${props2.severity.toLowerCase()}-color`]])
-      }, _toDisplayString$3(props2.severity), 3)) : _createCommentVNode$2("", true);
+      }, _toDisplayString$4(props2.severity), 3)) : _createCommentVNode$2("", true);
     };
   }
 });
-var SeverityStatus = /* @__PURE__ */ _export_sfc$l(_sfc_main$q, [["__scopeId", "data-v-166787c9"]]);
+var SeverityStatus = /* @__PURE__ */ _export_sfc$l(_sfc_main$r, [["__scopeId", "data-v-166787c9"]]);
 var AlarmsCountBySeverity_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$5 = window["Vue"].defineComponent;
+const _defineComponent$6 = window["Vue"].defineComponent;
 const _unref$4 = window["Vue"].unref;
 const _renderList$2 = window["Vue"].renderList;
 const _Fragment$2 = window["Vue"].Fragment;
-const _openBlock$5 = window["Vue"].openBlock;
-const _createElementBlock$5 = window["Vue"].createElementBlock;
-const _toDisplayString$2 = window["Vue"].toDisplayString;
+const _openBlock$6 = window["Vue"].openBlock;
+const _createElementBlock$6 = window["Vue"].createElementBlock;
+const _toDisplayString$3 = window["Vue"].toDisplayString;
 const _normalizeClass$2 = window["Vue"].normalizeClass;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
-const _hoisted_1$l = { class: "alarms-list" };
-const _sfc_main$p = /* @__PURE__ */ _defineComponent$5({
+const _hoisted_1$m = { class: "alarms-list" };
+const _sfc_main$q = /* @__PURE__ */ _defineComponent$6({
   __name: "AlarmsCountBySeverity",
   props: {
     relatedAlarms: null
@@ -6774,33 +6776,33 @@ const _sfc_main$p = /* @__PURE__ */ _defineComponent$5({
   setup(__props) {
     const props2 = __props;
     return (_ctx, _cache) => {
-      return _openBlock$5(), _createElementBlock$5("div", _hoisted_1$l, [
-        (_openBlock$5(true), _createElementBlock$5(_Fragment$2, null, _renderList$2(_unref$4(lodash.exports.groupBy)(props2 == null ? void 0 : props2.relatedAlarms, "severity"), (list, key) => {
-          return _openBlock$5(), _createElementBlock$5("div", {
+      return _openBlock$6(), _createElementBlock$6("div", _hoisted_1$m, [
+        (_openBlock$6(true), _createElementBlock$6(_Fragment$2, null, _renderList$2(_unref$4(lodash.exports.groupBy)(props2 == null ? void 0 : props2.relatedAlarms, "severity"), (list, key) => {
+          return _openBlock$6(), _createElementBlock$6("div", {
             class: _normalizeClass$2(["alarm-count", [`${key.toString().toLowerCase()}-color`]]),
             key
-          }, _toDisplayString$2(list.length), 3);
+          }, _toDisplayString$3(list.length), 3);
         }), 128))
       ]);
     };
   }
 });
-var AlarmsCountBySeverity = /* @__PURE__ */ _export_sfc$l(_sfc_main$p, [["__scopeId", "data-v-4ac020ba"]]);
+var AlarmsCountBySeverity = /* @__PURE__ */ _export_sfc$l(_sfc_main$q, [["__scopeId", "data-v-4ac020ba"]]);
 var SituationCard_vue_vue_type_style_index_0_scoped_true_lang = "";
-const _defineComponent$4 = window["Vue"].defineComponent;
+const _defineComponent$5 = window["Vue"].defineComponent;
 const _normalizeClass$1 = window["Vue"].normalizeClass;
-const _createElementVNode$4 = window["Vue"].createElementVNode;
-const _toDisplayString$1 = window["Vue"].toDisplayString;
+const _createElementVNode$5 = window["Vue"].createElementVNode;
+const _toDisplayString$2 = window["Vue"].toDisplayString;
 const _createVNode$4 = window["Vue"].createVNode;
-const _openBlock$4 = window["Vue"].openBlock;
-const _createElementBlock$4 = window["Vue"].createElementBlock;
+const _openBlock$5 = window["Vue"].openBlock;
+const _createElementBlock$5 = window["Vue"].createElementBlock;
 window["Vue"].pushScopeId;
 window["Vue"].popScopeId;
-const _hoisted_1$k = { class: "content" };
-const _hoisted_2$k = { class: "title-row" };
+const _hoisted_1$l = { class: "content" };
+const _hoisted_2$l = { class: "title-row" };
 const _hoisted_3$g = { class: "title" };
 const _hoisted_4$9 = ["innerHTML"];
-const _sfc_main$o = /* @__PURE__ */ _defineComponent$4({
+const _sfc_main$p = /* @__PURE__ */ _defineComponent$5({
   __name: "SituationCard",
   props: {
     alarmInfo: null
@@ -6814,21 +6816,21 @@ const _sfc_main$o = /* @__PURE__ */ _defineComponent$4({
     };
     return (_ctx, _cache) => {
       var _a, _b, _c, _d, _e, _f;
-      return _openBlock$4(), _createElementBlock$4("div", {
+      return _openBlock$5(), _createElementBlock$5("div", {
         onClick: handleSituationSelected,
         class: "card"
       }, [
-        _createElementVNode$4("div", {
+        _createElementVNode$5("div", {
           class: _normalizeClass$1(["severity-line", [`${(_b = (_a = props2.alarmInfo) == null ? void 0 : _a.severity) == null ? void 0 : _b.toLowerCase()}-bg dark`]])
         }, null, 2),
-        _createElementVNode$4("div", _hoisted_1$k, [
-          _createElementVNode$4("div", _hoisted_2$k, [
-            _createElementVNode$4("span", _hoisted_3$g, "Situation " + _toDisplayString$1((_c = props2.alarmInfo) == null ? void 0 : _c.id), 1),
+        _createElementVNode$5("div", _hoisted_1$l, [
+          _createElementVNode$5("div", _hoisted_2$l, [
+            _createElementVNode$5("span", _hoisted_3$g, "Situation " + _toDisplayString$2((_c = props2.alarmInfo) == null ? void 0 : _c.id), 1),
             _createVNode$4(SeverityStatus, {
               severity: (_d = props2.alarmInfo) == null ? void 0 : _d.severity
             }, null, 8, ["severity"])
           ]),
-          _createElementVNode$4("span", {
+          _createElementVNode$5("span", {
             innerHTML: (_e = props2.alarmInfo) == null ? void 0 : _e.description
           }, null, 8, _hoisted_4$9),
           _createVNode$4(AlarmsCountBySeverity, {
@@ -6839,7 +6841,7 @@ const _sfc_main$o = /* @__PURE__ */ _defineComponent$4({
     };
   }
 });
-var SituationCard = /* @__PURE__ */ _export_sfc$l(_sfc_main$o, [["__scopeId", "data-v-ea7a5d62"]]);
+var SituationCard = /* @__PURE__ */ _export_sfc$l(_sfc_main$p, [["__scopeId", "data-v-ea7a5d62"]]);
 var style$9 = "";
 const ref$8 = window["Vue"].ref;
 const inject$5 = window["Vue"].inject;
@@ -6952,7 +6954,7 @@ const props$9 = {
     default: false
   }
 };
-const _sfc_main$n = defineComponent$8({
+const _sfc_main$o = defineComponent$8({
   props: props$9,
   data() {
     return {
@@ -7033,7 +7035,7 @@ const _sfc_main$n = defineComponent$8({
     this.parent.removeEventListener("click", this.onClick);
   }
 });
-var FeatherRipple = /* @__PURE__ */ _export_sfc$k(_sfc_main$n, [["__scopeId", "data-v-18e2a5db"]]);
+var FeatherRipple = /* @__PURE__ */ _export_sfc$k(_sfc_main$o, [["__scopeId", "data-v-18e2a5db"]]);
 const getSafeId$1 = function(str) {
   str = str || "feather";
   const random = Math.floor(Math.random() * 1e9);
@@ -7373,10 +7375,10 @@ const _sfc_main$1$3 = defineComponent$7({
     this.ro.disconnect();
   }
 });
-const _hoisted_1$j = { class: "feather-tab-container" };
-const _hoisted_2$j = { class: "tab-panels" };
+const _hoisted_1$k = { class: "feather-tab-container" };
+const _hoisted_2$k = { class: "tab-panels" };
 function _sfc_render$1$3(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock$g(), createElementBlock$g("div", _hoisted_1$j, [
+  return openBlock$g(), createElementBlock$g("div", _hoisted_1$k, [
     createElementVNode$c("div", {
       ref: "slider",
       class: "feather-tab-slider",
@@ -7389,14 +7391,14 @@ function _sfc_render$1$3(_ctx, _cache, $props, $setup, $data, $options) {
     createElementVNode$c("ul", mergeProps$1(_ctx.attrs, toHandlers(_ctx.listeners)), [
       renderSlot$4(_ctx.$slots, "tabs", {}, void 0, true)
     ], 16),
-    createElementVNode$c("div", _hoisted_2$j, [
+    createElementVNode$c("div", _hoisted_2$k, [
       renderSlot$4(_ctx.$slots, "default", {}, void 0, true)
     ])
   ]);
 }
 var FeatherTabContainer = /* @__PURE__ */ _export_sfc$j(_sfc_main$1$3, [["render", _sfc_render$1$3], ["__scopeId", "data-v-27adffb9"]]);
 const props$8 = stockProps;
-const _sfc_main$m = defineComponent$7({
+const _sfc_main$n = defineComponent$7({
   props: props$8,
   setup(props2) {
     return useTabPanel(props2);
@@ -7409,7 +7411,7 @@ function _sfc_render$f(_ctx, _cache, $props, $setup, $data, $options) {
     [vShow$1, _ctx.selected]
   ]);
 }
-var FeatherTabPanel = /* @__PURE__ */ _export_sfc$j(_sfc_main$m, [["render", _sfc_render$f]]);
+var FeatherTabPanel = /* @__PURE__ */ _export_sfc$j(_sfc_main$n, [["render", _sfc_render$f]]);
 var style$7 = "";
 var style$6 = "";
 var __defProp$6 = Object.defineProperty;
@@ -7452,7 +7454,7 @@ const props$7 = {
     required: false
   }
 };
-const _sfc_main$l = defineComponent$6({
+const _sfc_main$m = defineComponent$6({
   props: props$7,
   render() {
     const attrs = this.$attrs;
@@ -7486,11 +7488,34 @@ const _sfc_main$l = defineComponent$6({
     }, _attrs));
   }
 });
-var FeatherIcon$1 = /* @__PURE__ */ _export_sfc$i(_sfc_main$l, [["__scopeId", "data-v-52cbf270"]]);
+var FeatherIcon$1 = /* @__PURE__ */ _export_sfc$i(_sfc_main$m, [["__scopeId", "data-v-52cbf270"]]);
 const openBlock$f = window["Vue"].openBlock;
 const createElementBlock$f = window["Vue"].createElementBlock;
 const createElementVNode$b = window["Vue"].createElementVNode;
 var _export_sfc$h = (sfc, props2) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props2) {
+    target[key] = val;
+  }
+  return target;
+};
+const _sfc_main$l = {};
+const _hoisted_1$j = {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24"
+};
+const _hoisted_2$j = /* @__PURE__ */ createElementVNode$b("path", { d: "M17.3,14.71a1,1,0,0,0,0-1.41L12,8,6.7,13.3a1,1,0,1,0,1.41,1.41L12,10.83l3.89,3.88A1,1,0,0,0,17.3,14.71Z" }, null, -1);
+const _hoisted_3$f = [
+  _hoisted_2$j
+];
+function _sfc_render$e(_ctx, _cache) {
+  return openBlock$f(), createElementBlock$f("svg", _hoisted_1$j, _hoisted_3$f);
+}
+var ExpandLess = /* @__PURE__ */ _export_sfc$h(_sfc_main$l, [["render", _sfc_render$e]]);
+const openBlock$e = window["Vue"].openBlock;
+const createElementBlock$e = window["Vue"].createElementBlock;
+const createElementVNode$a = window["Vue"].createElementVNode;
+var _export_sfc$g = (sfc, props2) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props2) {
     target[key] = val;
@@ -7502,18 +7527,18 @@ const _hoisted_1$i = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
 };
-const _hoisted_2$i = /* @__PURE__ */ createElementVNode$b("path", { d: "M17.3,14.71a1,1,0,0,0,0-1.41L12,8,6.7,13.3a1,1,0,1,0,1.41,1.41L12,10.83l3.89,3.88A1,1,0,0,0,17.3,14.71Z" }, null, -1);
-const _hoisted_3$f = [
+const _hoisted_2$i = /* @__PURE__ */ createElementVNode$a("path", { d: "M6.7,9.29a1,1,0,0,0,0,1.41L12,16l5.3-5.3a1,1,0,0,0-1.41-1.41L12,13.17,8.11,9.29A1,1,0,0,0,6.7,9.29Z" }, null, -1);
+const _hoisted_3$e = [
   _hoisted_2$i
 ];
-function _sfc_render$e(_ctx, _cache) {
-  return openBlock$f(), createElementBlock$f("svg", _hoisted_1$i, _hoisted_3$f);
+function _sfc_render$d(_ctx, _cache) {
+  return openBlock$e(), createElementBlock$e("svg", _hoisted_1$i, _hoisted_3$e);
 }
-var ExpandLess = /* @__PURE__ */ _export_sfc$h(_sfc_main$k, [["render", _sfc_render$e]]);
-const openBlock$e = window["Vue"].openBlock;
-const createElementBlock$e = window["Vue"].createElementBlock;
-const createElementVNode$a = window["Vue"].createElementVNode;
-var _export_sfc$g = (sfc, props2) => {
+var ExpandMore = /* @__PURE__ */ _export_sfc$g(_sfc_main$k, [["render", _sfc_render$d]]);
+const openBlock$d = window["Vue"].openBlock;
+const createElementBlock$d = window["Vue"].createElementBlock;
+const createElementVNode$9 = window["Vue"].createElementVNode;
+var _export_sfc$f = (sfc, props2) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props2) {
     target[key] = val;
@@ -7525,39 +7550,16 @@ const _hoisted_1$h = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
 };
-const _hoisted_2$h = /* @__PURE__ */ createElementVNode$a("path", { d: "M6.7,9.29a1,1,0,0,0,0,1.41L12,16l5.3-5.3a1,1,0,0,0-1.41-1.41L12,13.17,8.11,9.29A1,1,0,0,0,6.7,9.29Z" }, null, -1);
-const _hoisted_3$e = [
-  _hoisted_2$h
-];
-function _sfc_render$d(_ctx, _cache) {
-  return openBlock$e(), createElementBlock$e("svg", _hoisted_1$h, _hoisted_3$e);
-}
-var ExpandMore = /* @__PURE__ */ _export_sfc$g(_sfc_main$j, [["render", _sfc_render$d]]);
-const openBlock$d = window["Vue"].openBlock;
-const createElementBlock$d = window["Vue"].createElementBlock;
-const createElementVNode$9 = window["Vue"].createElementVNode;
-var _export_sfc$f = (sfc, props2) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props2) {
-    target[key] = val;
-  }
-  return target;
-};
-const _sfc_main$i = {};
-const _hoisted_1$g = {
-  xmlns: "http://www.w3.org/2000/svg",
-  viewBox: "0 0 24 24"
-};
-const _hoisted_2$g = /* @__PURE__ */ createElementVNode$9("path", { d: "M9.53,8.29,12,5.84l2.46,2.45a1,1,0,0,0,1.41-1.41L12,3,8.12,6.88A1,1,0,0,0,9.53,8.29Z" }, null, -1);
+const _hoisted_2$h = /* @__PURE__ */ createElementVNode$9("path", { d: "M9.53,8.29,12,5.84l2.46,2.45a1,1,0,0,0,1.41-1.41L12,3,8.12,6.88A1,1,0,0,0,9.53,8.29Z" }, null, -1);
 const _hoisted_3$d = /* @__PURE__ */ createElementVNode$9("path", { d: "M15.88,15.72a1,1,0,0,0-1.41,0L12,18.17,9.54,15.71a1,1,0,1,0-1.41,1.41L12,21l3.88-3.87A1,1,0,0,0,15.88,15.72Z" }, null, -1);
 const _hoisted_4$8 = [
-  _hoisted_2$g,
+  _hoisted_2$h,
   _hoisted_3$d
 ];
 function _sfc_render$c(_ctx, _cache) {
-  return openBlock$d(), createElementBlock$d("svg", _hoisted_1$g, _hoisted_4$8);
+  return openBlock$d(), createElementBlock$d("svg", _hoisted_1$h, _hoisted_4$8);
 }
-var UnfoldMore = /* @__PURE__ */ _export_sfc$f(_sfc_main$i, [["render", _sfc_render$c]]);
+var UnfoldMore = /* @__PURE__ */ _export_sfc$f(_sfc_main$j, [["render", _sfc_render$c]]);
 const getSafeId = function(str) {
   str = str || "feather";
   const random = Math.floor(Math.random() * 1e9);
@@ -7636,7 +7638,7 @@ const props$6 = {
     }
   }
 };
-const _sfc_main$h = defineComponent$5({
+const _sfc_main$i = defineComponent$5({
   emits: ["sort-changed"],
   props: props$6,
   setup(props2) {
@@ -7711,8 +7713,8 @@ const _sfc_main$h = defineComponent$5({
     }
   }
 });
-const _hoisted_1$f = ["aria-sort"];
-const _hoisted_2$f = ["aria-describedby"];
+const _hoisted_1$g = ["aria-sort"];
+const _hoisted_2$g = ["aria-describedby"];
 const _hoisted_3$c = { class: "sort-cell-label" };
 const _hoisted_4$7 = { class: "description" };
 const _hoisted_5$6 = ["id"];
@@ -7753,11 +7755,11 @@ function _sfc_render$b(_ctx, _cache, $props, $setup, $data, $options) {
         createVNode$2(_component_FeatherIcon, { icon: _ctx.sortIcon }, null, 8, ["icon"]),
         createVNode$2(_component_FeatherRipple, { center: "" })
       ])
-    ], 8, _hoisted_2$f),
+    ], 8, _hoisted_2$g),
     createElementVNode$8("span", _hoisted_7$4, null, 512)
-  ], 8, _hoisted_1$f);
+  ], 8, _hoisted_1$g);
 }
-var FeatherSortHeader = /* @__PURE__ */ _export_sfc$e(_sfc_main$h, [["render", _sfc_render$b], ["__scopeId", "data-v-7aabd191"]]);
+var FeatherSortHeader = /* @__PURE__ */ _export_sfc$e(_sfc_main$i, [["render", _sfc_render$b], ["__scopeId", "data-v-7aabd191"]]);
 var style$5 = "";
 var __defProp$4 = Object.defineProperty;
 var __getOwnPropSymbols$4 = Object.getOwnPropertySymbols;
@@ -7799,7 +7801,7 @@ const props$5 = {
     required: false
   }
 };
-const _sfc_main$g = defineComponent$4({
+const _sfc_main$h = defineComponent$4({
   props: props$5,
   render() {
     const attrs = this.$attrs;
@@ -7833,11 +7835,34 @@ const _sfc_main$g = defineComponent$4({
     }, _attrs));
   }
 });
-var FeatherIcon = /* @__PURE__ */ _export_sfc$d(_sfc_main$g, [["__scopeId", "data-v-52cbf270"]]);
+var FeatherIcon = /* @__PURE__ */ _export_sfc$d(_sfc_main$h, [["__scopeId", "data-v-52cbf270"]]);
 const openBlock$b = window["Vue"].openBlock;
 const createElementBlock$b = window["Vue"].createElementBlock;
 const createElementVNode$7 = window["Vue"].createElementVNode;
 var _export_sfc$c = (sfc, props2) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props2) {
+    target[key] = val;
+  }
+  return target;
+};
+const _sfc_main$g = {};
+const _hoisted_1$f = {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24"
+};
+const _hoisted_2$f = /* @__PURE__ */ createElementVNode$7("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM15.36,8.64l-4.95,4.95-2.3-2.3a1,1,0,0,0-1.41,0h0a1,1,0,0,0,0,1.41l3,3a1,1,0,0,0,1.41,0l5.66-5.66a1,1,0,0,0,0-1.41h0A1,1,0,0,0,15.36,8.64Z" }, null, -1);
+const _hoisted_3$b = [
+  _hoisted_2$f
+];
+function _sfc_render$a(_ctx, _cache) {
+  return openBlock$b(), createElementBlock$b("svg", _hoisted_1$f, _hoisted_3$b);
+}
+var CheckCircle = /* @__PURE__ */ _export_sfc$c(_sfc_main$g, [["render", _sfc_render$a]]);
+const openBlock$a = window["Vue"].openBlock;
+const createElementBlock$a = window["Vue"].createElementBlock;
+const createElementVNode$6 = window["Vue"].createElementVNode;
+var _export_sfc$b = (sfc, props2) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props2) {
     target[key] = val;
@@ -7849,37 +7874,14 @@ const _hoisted_1$e = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
 };
-const _hoisted_2$e = /* @__PURE__ */ createElementVNode$7("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM15.36,8.64l-4.95,4.95-2.3-2.3a1,1,0,0,0-1.41,0h0a1,1,0,0,0,0,1.41l3,3a1,1,0,0,0,1.41,0l5.66-5.66a1,1,0,0,0,0-1.41h0A1,1,0,0,0,15.36,8.64Z" }, null, -1);
-const _hoisted_3$b = [
+const _hoisted_2$e = /* @__PURE__ */ createElementVNode$6("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM14.59,8,12,10.59,9.41,8A1,1,0,0,0,8,8H8A1,1,0,0,0,8,9.41L10.59,12,8,14.59A1,1,0,0,0,8,16H8a1,1,0,0,0,1.41,0L12,13.41,14.59,16A1,1,0,0,0,16,16h0a1,1,0,0,0,0-1.41L13.41,12,16,9.41A1,1,0,0,0,16,8h0A1,1,0,0,0,14.59,8Z" }, null, -1);
+const _hoisted_3$a = [
   _hoisted_2$e
 ];
-function _sfc_render$a(_ctx, _cache) {
-  return openBlock$b(), createElementBlock$b("svg", _hoisted_1$e, _hoisted_3$b);
-}
-var CheckCircle = /* @__PURE__ */ _export_sfc$c(_sfc_main$f, [["render", _sfc_render$a]]);
-const openBlock$a = window["Vue"].openBlock;
-const createElementBlock$a = window["Vue"].createElementBlock;
-const createElementVNode$6 = window["Vue"].createElementVNode;
-var _export_sfc$b = (sfc, props2) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props2) {
-    target[key] = val;
-  }
-  return target;
-};
-const _sfc_main$e = {};
-const _hoisted_1$d = {
-  xmlns: "http://www.w3.org/2000/svg",
-  viewBox: "0 0 24 24"
-};
-const _hoisted_2$d = /* @__PURE__ */ createElementVNode$6("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20ZM14.59,8,12,10.59,9.41,8A1,1,0,0,0,8,8H8A1,1,0,0,0,8,9.41L10.59,12,8,14.59A1,1,0,0,0,8,16H8a1,1,0,0,0,1.41,0L12,13.41,14.59,16A1,1,0,0,0,16,16h0a1,1,0,0,0,0-1.41L13.41,12,16,9.41A1,1,0,0,0,16,8h0A1,1,0,0,0,14.59,8Z" }, null, -1);
-const _hoisted_3$a = [
-  _hoisted_2$d
-];
 function _sfc_render$9(_ctx, _cache) {
-  return openBlock$a(), createElementBlock$a("svg", _hoisted_1$d, _hoisted_3$a);
+  return openBlock$a(), createElementBlock$a("svg", _hoisted_1$e, _hoisted_3$a);
 }
-var Cancel$1 = /* @__PURE__ */ _export_sfc$b(_sfc_main$e, [["render", _sfc_render$9]]);
+var Cancel$1 = /* @__PURE__ */ _export_sfc$b(_sfc_main$f, [["render", _sfc_render$9]]);
 var CONST = {
   ENGINE_DBSCAN: "dbscan",
   ENGINE_DEEP_LEARNING: "cluster",
@@ -8004,7 +8006,7 @@ const props$4 = {
     default: false
   }
 };
-const _sfc_main$d = defineComponent$3({
+const _sfc_main$e = defineComponent$3({
   inheritAttrs: false,
   props: props$4,
   setup() {
@@ -8087,7 +8089,77 @@ const _sfc_main$d = defineComponent$3({
     ]);
   }
 });
-var FeatherButton = /* @__PURE__ */ _export_sfc$a(_sfc_main$d, [["__scopeId", "data-v-70f0846d"]]);
+var FeatherButton = /* @__PURE__ */ _export_sfc$a(_sfc_main$e, [["__scopeId", "data-v-70f0846d"]]);
+var SituationMetrics_vue_vue_type_style_index_0_scoped_true_lang = "";
+const _defineComponent$4 = window["Vue"].defineComponent;
+const _toDisplayString$1 = window["Vue"].toDisplayString;
+const _createElementVNode$4 = window["Vue"].createElementVNode;
+const _openBlock$4 = window["Vue"].openBlock;
+const _createElementBlock$4 = window["Vue"].createElementBlock;
+window["Vue"].pushScopeId;
+window["Vue"].popScopeId;
+const _hoisted_1$d = { class: "metrics" };
+const _hoisted_2$d = { class: "id" };
+const _sfc_main$d = /* @__PURE__ */ _defineComponent$4({
+  __name: "SituationMetrics",
+  props: {
+    situation: null
+  },
+  setup(__props) {
+    const props2 = __props;
+    console.log(props2);
+    return (_ctx, _cache) => {
+      return _openBlock$4(), _createElementBlock$4("div", _hoisted_1$d, [
+        _createElementVNode$4("div", _hoisted_2$d, "Situation - [ " + _toDisplayString$1(props2.situation.id) + " ]", 1)
+      ]);
+    };
+  }
+});
+var SituationMetrics = /* @__PURE__ */ _export_sfc$l(_sfc_main$d, [["__scopeId", "data-v-10721efc"]]);
+const endpointRole = "/whoami";
+const getUserRole = async () => {
+  try {
+    const resp = await rest.get(endpointRole);
+    if (resp.status === 200) {
+      return resp.data;
+    }
+    return false;
+  } catch (err) {
+    return false;
+  }
+};
+const defineStore = window["Pinia"].defineStore;
+const useUserStore = defineStore("userStore", {
+  state: () => ({
+    isAdmin: false,
+    userId: null,
+    firstTime: true,
+    allowSave: true
+  }),
+  actions: {
+    async getUserRole() {
+      const result = await getUserRole();
+      if (result) {
+        this.isAdmin = result.roles.includes("ROLE_ADMIN");
+        this.userId = result.id;
+      }
+    },
+    async getAlecInfo() {
+      const result = await getUserInfo();
+      if (result) {
+        this.firstTime = false;
+        this.allowSave = result.agreed;
+      }
+    },
+    async savePermission(allowSaveValue) {
+      this.allowSave = allowSaveValue;
+      if (!allowSaveValue) {
+        const result = await savePermission(allowSaveValue);
+        this.allowSave = result;
+      }
+    }
+  }
+});
 var SituationDetail_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$3 = window["Vue"].defineComponent;
 const _createTextVNode$2 = window["Vue"].createTextVNode;
@@ -8096,23 +8168,23 @@ const _withCtx$2 = window["Vue"].withCtx;
 const _createVNode$3 = window["Vue"].createVNode;
 const _toDisplayString = window["Vue"].toDisplayString;
 const _createElementVNode$3 = window["Vue"].createElementVNode;
-const _renderList$1 = window["Vue"].renderList;
-const _Fragment$1 = window["Vue"].Fragment;
 const _openBlock$3 = window["Vue"].openBlock;
 const _createElementBlock$3 = window["Vue"].createElementBlock;
-const _normalizeClass = window["Vue"].normalizeClass;
 const _createCommentVNode$1 = window["Vue"].createCommentVNode;
+const _renderList$1 = window["Vue"].renderList;
+const _Fragment$1 = window["Vue"].Fragment;
+const _normalizeClass = window["Vue"].normalizeClass;
 const _pushScopeId$3 = window["Vue"].pushScopeId;
 const _popScopeId$3 = window["Vue"].popScopeId;
-const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-3f1e9d19"), n = n(), _popScopeId$3(), n);
+const _withScopeId$5 = (n) => (_pushScopeId$3("data-v-4243933c"), n = n(), _popScopeId$3(), n);
 const _hoisted_1$c = {
   key: 0,
   class: "detail"
 };
 const _hoisted_2$c = /* @__PURE__ */ _createTextVNode$2("Details");
-const _hoisted_3$9 = /* @__PURE__ */ _createTextVNode$2("Topology");
-const _hoisted_4$6 = /* @__PURE__ */ _createTextVNode$2("Metrics");
-const _hoisted_5$5 = { class: "id" };
+const _hoisted_3$9 = /* @__PURE__ */ _createTextVNode$2("Metrics");
+const _hoisted_4$6 = { class: "id" };
+const _hoisted_5$5 = { key: 0 };
 const _hoisted_6$2 = /* @__PURE__ */ _createTextVNode$2(" Accept Situation ");
 const _hoisted_7$3 = /* @__PURE__ */ _createTextVNode$2(" Reject Situation ");
 const _hoisted_8$3 = ["innerHTML"];
@@ -8124,8 +8196,6 @@ const _hoisted_13$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _crea
 const _hoisted_14$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("th", { scope: "col" }, "Count", -1));
 const _hoisted_15$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("th", { scope: "col" }, "Node", -1));
 const _hoisted_16$1 = /* @__PURE__ */ _withScopeId$5(() => /* @__PURE__ */ _createElementVNode$3("th", { scope: "col" }, "Log msg", -1));
-const _hoisted_17$1 = /* @__PURE__ */ _createTextVNode$2("Topology");
-const _hoisted_18$1 = /* @__PURE__ */ _createTextVNode$2("Metrics");
 const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
   __name: "SituationDetail",
   props: {
@@ -8133,6 +8203,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
   },
   setup(__props) {
     const props2 = __props;
+    const userStore = useUserStore();
     const handleFeedbackSituation = (action) => {
       var _a;
       sendFeedbackAcceptSituation((_a = props2.alarmInfo) == null ? void 0 : _a.id, action);
@@ -8152,12 +8223,6 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
                 _hoisted_3$9
               ]),
               _: 1
-            }),
-            _createVNode$3(_unref$3(FeatherTab), null, {
-              default: _withCtx$2(() => [
-                _hoisted_4$6
-              ]),
-              _: 1
             })
           ]),
           default: _withCtx$2(() => [
@@ -8165,13 +8230,13 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
               default: _withCtx$2(() => {
                 var _a, _b, _c;
                 return [
-                  _createElementVNode$3("div", _hoisted_5$5, [
+                  _createElementVNode$3("div", _hoisted_4$6, [
                     _createElementVNode$3("span", null, "Situation - " + _toDisplayString((_a = props2.alarmInfo) == null ? void 0 : _a.id), 1),
                     _createVNode$3(SeverityStatus, {
                       severity: (_b = props2.alarmInfo) == null ? void 0 : _b.severity
                     }, null, 8, ["severity"])
                   ]),
-                  _createElementVNode$3("div", null, [
+                  _unref$3(userStore).allowSave ? (_openBlock$3(), _createElementBlock$3("div", _hoisted_5$5, [
                     _createVNode$3(_unref$3(FeatherButton), {
                       secondary: "",
                       class: "btn",
@@ -8202,7 +8267,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
                       ]),
                       _: 1
                     })
-                  ]),
+                  ])) : _createCommentVNode$1("", true),
                   _createElementVNode$3("span", {
                     innerHTML: props2.alarmInfo.description
                   }, null, 8, _hoisted_8$3),
@@ -8262,13 +8327,9 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
             }),
             _createVNode$3(_unref$3(FeatherTabPanel), { class: "panel" }, {
               default: _withCtx$2(() => [
-                _hoisted_17$1
-              ]),
-              _: 1
-            }),
-            _createVNode$3(_unref$3(FeatherTabPanel), { class: "panel" }, {
-              default: _withCtx$2(() => [
-                _hoisted_18$1
+                _createVNode$3(SituationMetrics, {
+                  situation: props2 == null ? void 0 : props2.alarmInfo
+                }, null, 8, ["situation"])
               ]),
               _: 1
             })
@@ -8279,7 +8340,7 @@ const _sfc_main$c = /* @__PURE__ */ _defineComponent$3({
     };
   }
 });
-var SituationDetail = /* @__PURE__ */ _export_sfc$l(_sfc_main$c, [["__scopeId", "data-v-3f1e9d19"]]);
+var SituationDetail = /* @__PURE__ */ _export_sfc$l(_sfc_main$c, [["__scopeId", "data-v-4243933c"]]);
 var SituationList_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$2 = window["Vue"].defineComponent;
 const _createElementVNode$2 = window["Vue"].createElementVNode;
@@ -9313,48 +9374,6 @@ var Vitals = /* @__PURE__ */ _export_sfc$1(_sfc_main$3, [["render", _sfc_render]
 const useRouter = () => {
   return window.VRouter || router;
 };
-const endpointRole = "/whoami";
-const getUserRole = async () => {
-  try {
-    const resp = await rest.get(endpointRole);
-    if (resp.status === 200) {
-      return resp.data;
-    }
-    return false;
-  } catch (err) {
-    return false;
-  }
-};
-const defineStore = window["Pinia"].defineStore;
-const useUserStore = defineStore("userStore", {
-  state: () => ({
-    isAdmin: false,
-    userId: null,
-    firstTime: true,
-    allowSave: true
-  }),
-  actions: {
-    async getUserRole() {
-      const result = await getUserRole();
-      if (result) {
-        this.isAdmin = result.roles.includes("ROLE_ADMIN");
-        this.userId = result.id;
-      }
-    },
-    async getAlecInfo() {
-      const result = await getUserInfo();
-      if (result) {
-        this.firstTime = false;
-      }
-    },
-    async savePermission(allowSaveValue) {
-      this.allowSave = allowSaveValue;
-      if (!allowSaveValue) {
-        await savePermission(allowSaveValue);
-      }
-    }
-  }
-});
 var WelcomePage_vue_vue_type_style_index_0_scoped_true_lang = "";
 const _defineComponent$1 = window["Vue"].defineComponent;
 const _createElementVNode$1 = window["Vue"].createElementVNode;
@@ -9973,4 +9992,4 @@ var style = "";
 var openLight = "";
 window["Vue"].createApp;
 window["Pinia"].createPinia;
-window["uiextension"] = _sfc_main$r;
+window["uiextension"] = _sfc_main$s;

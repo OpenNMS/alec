@@ -16,7 +16,7 @@ const handleSituationSelected = () => {
 	<div
 		v-on:click="handleSituationSelected"
 		class="card"
-		v-bind:class="{ selected: props.selected }"
+		:class="{ selected: props.selected }"
 	>
 		<div
 			class="severity-line"

@@ -1,20 +1,15 @@
 <script setup lang="ts">
+import { format } from 'date-fns'
 const props = defineProps<{
 	label: string
 	date: string
 }>()
-const simplifyDate = (value: string) => {
-	const date = new Date(value)
-	return `${
-		date.getMonth() + 1
-	}/${date.getDate()} ${date.getUTCHours()}:${date.getMinutes()}:${date.getSeconds()}`
-}
 </script>
 
 <template>
 	<div class="box">
 		<div class="label">{{ props.label }}</div>
-		<div class="date">{{ simplifyDate(props.date) }}</div>
+		<div class="date">{{ format(new Date(props.date), 'd/M HH:mm:ss') }}</div>
 	</div>
 </template>
 

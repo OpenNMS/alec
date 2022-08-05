@@ -27,6 +27,7 @@ export type TSituation = {
 	ifIndex: number
 	relatedAlarms: TRelatedAlarm[]
 	affectedNodeCount: number
+	status?: string
 }
 
 export type TEvent = {
@@ -70,4 +71,9 @@ export type TAlarm = {
 	lastEventTime?: Date
 	logMessage: string
 	firstEventTime?: Date
+}
+
+export type TSituationSaved = {
+	id: string
+	status: string
 }

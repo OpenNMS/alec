@@ -24,7 +24,7 @@ const handleFeedbackSituation = (action: string) => {
 	status.value = action
 }
 watch(props, () => {
-	status.value = ''
+	status.value = props.alarmInfo.status || ''
 })
 </script>
 
@@ -33,30 +33,30 @@ watch(props, () => {
 		<div v-if="userStore.allowSave" class="btn-row">
 			<FeatherButton
 				class="btn"
-				:class="{ accepted: status == 'accepted' }"
-				@click="() => handleFeedbackSituation('accepted')"
+				:class="{ accepted: status == 'ACCEPTED' }"
+				@click="() => handleFeedbackSituation('ACCEPTED')"
 			>
 				<FeatherIcon
 					:icon="CheckCircle"
 					aria-hidden="true"
 					class="icon accept"
-					:class="{ accepted: status == 'accepted' }"
+					:class="{ accepted: status == 'ACCEPTED' }"
 				/>
-				<span v-if="status == 'accepted'"> ACCEPTED</span>
+				<span v-if="status == 'ACCEPTED'"> ACCEPTED</span>
 				<span v-else> ACCEPT</span>
 			</FeatherButton>
 			<FeatherButton
 				class="btn"
-				:class="{ rejected: status == 'refused' }"
-				@click="() => handleFeedbackSituation('refused')"
+				:class="{ rejected: status == 'REJECTED' }"
+				@click="() => handleFeedbackSituation('REJECTED')"
 			>
 				<FeatherIcon
 					:icon="Cancel"
 					aria-hidden="true"
 					class="icon reject"
-					:class="{ rejected: status == 'refused' }"
+					:class="{ rejected: status == 'REJECTED' }"
 				/>
-				<span v-if="status == 'refused'"> REJECTED</span>
+				<span v-if="status == 'REJECTED'"> REJECTED</span>
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>
@@ -70,6 +70,7 @@ watch(props, () => {
 					<div>Situation {{ props.alarmInfo?.id }}</div>
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
+
 				<span v-html="props.alarmInfo.description"></span>
 				<p></p>
 				<div class="boxes">

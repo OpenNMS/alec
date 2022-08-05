@@ -1,8 +1,9 @@
-import { rest } from './axiosInstances'
+import { rest, v2 } from './axiosInstances'
 import CONST from '@/helpers/constants'
 const base = '/alec'
 const engineEndpoint = '/alec/engine/configuration'
 const endpointAgreement = '/alec/agreement/configuration'
+const situationStatusEndpoint = '/alec/situation/statusList'
 
 export const savePermission = async (allowSaveValue: boolean) => {
 	try {
@@ -70,6 +71,18 @@ export const sendFeedbackAcceptSituation = async (
 			return true
 		}
 		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const getSituationsStatus = async () => {
+	try {
+		const resp = await rest.get(situationStatusEndpoint)
+		if (resp.status === 200) {
+			return resp.data
+		}
+		return resp.data
 	} catch (err) {
 		return false
 	}

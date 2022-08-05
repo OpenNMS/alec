@@ -11,6 +11,7 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
+import { format } from 'date-fns'
 
 const userStore = useUserStore()
 
@@ -77,11 +78,15 @@ watch(props, () => {
 				<div class="boxes">
 					<DateBox
 						label="First Event"
-						:date="new Date(props.alarmInfo.firstEventTime).toUTCString()"
+						:date="
+							format(new Date(props.alarmInfo.firstEventTime), 'd/M HH:mm:ss')
+						"
 					/>
 					<DateBox
 						label="Last Event"
-						:date="new Date(props.alarmInfo.lastEvent.time).toUTCString()"
+						:date="
+							format(new Date(props.alarmInfo.lastEvent.time), 'd/M HH:mm:ss')
+						"
 					/>
 				</div>
 			</div>

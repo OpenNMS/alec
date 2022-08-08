@@ -30,7 +30,7 @@ export type TSituation = {
 }
 
 export type TEvent = {
-	createTime: number
+	createTime: Date
 	description: string
 	display: string
 	id: number
@@ -60,6 +60,20 @@ export type TRelatedAlarm = {
 	lastEventTime?: Date
 }
 
+export type TLastEvent = {
+	id: number
+	uei: string
+	time: Date
+	source: string
+	createTime: Date
+	description: string
+	logMessage: string
+	severity: string
+	log: string
+	display: string
+	location: string
+}
+
 export type TAlarm = {
 	id: string
 	severity: string
@@ -67,7 +81,9 @@ export type TAlarm = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime?: Date
+	lastEventTime: Date
 	logMessage: string
-	firstEventTime?: Date
+	firstEventTime: Date
+	lastEvent: TLastEvent
+	reductionKey: string
 }

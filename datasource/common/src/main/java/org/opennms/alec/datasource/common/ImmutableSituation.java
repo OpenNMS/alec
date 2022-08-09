@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 
 /**
  * An implementation of {@link Situation} that enforces deep immutability.
@@ -55,6 +57,7 @@ public final class ImmutableSituation implements Situation {
     private final Map<String, Alarm> alarms;
     private final Set<Alarm> alarmsFromMap;
     private final String diagnosticText;
+    private final Status status;
 
     private ImmutableSituation(Builder builder) {
         this.id = builder.id;
@@ -66,6 +69,7 @@ public final class ImmutableSituation implements Situation {
                 Collections.unmodifiableMap(copyAlarms(builder.alarms));
         this.alarmsFromMap = Collections.unmodifiableSet(new HashSet<>(alarms.values()));
         this.diagnosticText = builder.diagnosticText;
+        this.status = builder.status;
     }
 
     public static final class Builder {
@@ -75,6 +79,7 @@ public final class ImmutableSituation implements Situation {
         private List<ResourceKey> resourceKeys;
         private Map<String, Alarm> alarms;
         private String diagnosticText;
+        private Status status;
 
         private Builder() {
         }
@@ -90,6 +95,7 @@ public final class ImmutableSituation implements Situation {
                     .collect(Collectors.toMap(Alarm::getId, alarm -> alarm,
                             (Alarm oldAlarm, Alarm newAlarm) -> newAlarm, LinkedHashMap::new));
             this.diagnosticText = situation.getDiagnosticText();
+            this.status = situation.getStatus();
         }
 
         public Builder setId(String id) {
@@ -152,6 +158,11 @@ public final class ImmutableSituation implements Situation {
 
         public Builder setDiagnosticText(String diagnosticText) {
             this.diagnosticText = diagnosticText;
+            return this;
+        }
+
+        public Builder setStatus(Status status) {
+            this.status = status;
             return this;
         }
 
@@ -230,6 +241,11 @@ public final class ImmutableSituation implements Situation {
     }
 
     @Override
+    public Status getStatus() {
+        return Optional.ofNullable(status).orElse(Status.CREATED);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -243,7 +259,7 @@ public final class ImmutableSituation implements Situation {
 
     @Override
     public int hashCode() {
-        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText);
+        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText, status);
     }
 
     @Override
@@ -255,6 +271,7 @@ public final class ImmutableSituation implements Situation {
                 ", resourceKeys=" + resourceKeys +
                 ", alarms=" + alarms +
                 ", diagnosticText='" + diagnosticText + '\'' +
+                ", status='" + status.toString() + '\'' +
                 '}';
     }
 }

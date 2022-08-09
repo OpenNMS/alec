@@ -29,12 +29,14 @@
 package org.opennms.alec.data;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -62,18 +64,6 @@ public class JacksonSituation implements Situation {
 
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    public static Builder newBuilder(JacksonSituation copy) {
-        Builder builder = new Builder();
-        builder.id = copy.getId();
-        builder.creationTime = copy.getCreationTime();
-        builder.resourceKeys = copy.getResourceKeys();
-        builder.alarms = copy.getAlarms();
-        builder.severity = copy.getSeverity();
-        builder.diagnosticText = copy.getDiagnosticText();
-        builder.status = copy.getStatus();
-        return builder;
     }
 
     public static Builder newBuilder(Situation copy) {
@@ -117,8 +107,9 @@ public class JacksonSituation implements Situation {
         return diagnosticText;
     }
 
+    @Override
     public Status getStatus() {
-        return status;
+        return Optional.ofNullable(status).orElse(Status.CREATED);
     }
 
     @JsonPOJOBuilder(withPrefix = "")

@@ -56,4 +56,6 @@ public interface Situation {
      */
     String getDiagnosticText();
 
+    Status getStatus();
+
 }

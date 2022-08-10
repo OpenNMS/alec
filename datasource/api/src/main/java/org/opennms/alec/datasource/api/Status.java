@@ -26,11 +26,34 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.data;
+package org.opennms.alec.datasource.api;
+
+import java.util.stream.Stream;
 
 public enum Status {
-    ACCEPTED,
-    REJECTED,
-    CREATED,
-    MODIFIED
+    ACCEPTED("ACCEPTED"),
+    REJECTED("REJECTED"),
+    CREATED("CREATED"),
+    MODIFIED("MODIFIED");
+
+    private final String status;
+
+    /**
+     * @param status
+     */
+    Status(final String status) {
+        this.status = status;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Enum#toString()
+     */
+    @Override
+    public String toString() {
+        return status;
+    }
+
+    public static Stream<Status> stream() {
+        return Stream.of(Status.values());
+    }
 }

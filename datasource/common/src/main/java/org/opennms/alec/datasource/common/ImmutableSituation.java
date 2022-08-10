@@ -254,7 +254,8 @@ public final class ImmutableSituation implements Situation {
                 severity == that.severity &&
                 Objects.equals(resourceKeys, that.resourceKeys) &&
                 Objects.equals(alarms, that.alarms) &&
-                Objects.equals(diagnosticText, that.diagnosticText);
+                Objects.equals(diagnosticText, that.diagnosticText) &&
+                Objects.equals(status, that.status);
     }
 
     @Override

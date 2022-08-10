@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +44,17 @@ public class JacksonSituationTest {
         String json = objectMapper.writeValueAsString(situation);
         LOG.info("Serializing a plain String: {}", json);
 
-        assertThat("{\"id\":\"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\",\"creationTime\":1,\"resourceKeys\":[],\"alarms\":[],\"severity\":\"MINOR\",\"diagnosticText\":\"diagnosticText\",\"status\":null}", equalTo(json));
+        assertThat("{\"id\":\"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\",\"creationTime\":1,\"resourceKeys\":[],\"alarms\":[],\"severity\":\"MINOR\",\"diagnosticText\":\"diagnosticText\",\"status\":\"CREATED\"}", equalTo(json));
     }
 
     @Test
     public void deserializeSimpleStringBuilder() throws JsonProcessingException {
-        String json = "[{\"id\": \"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\", \"alarms\": [{\"id\": \"uei.opennms.org/provisioner/provisioningAdapterFailed::Dynamic Reverse DNS provisioning failed: null\", \"time\": 1657824496658, \"clear\": false, \"nodeId\": 2, \"summary\": \"\\n            <p>A provisioning adapter failed for host.</p>\\n        \", \"severity\": \"MAJOR\", \"description\": \"A provisioning adapter failed for host  with the following condition: Dynamic Reverse DNS provisioning failed: null.<p>\", \"inventoryObjectId\": \"test:1655254874584\", \"inventoryObjectType\": \"node\"}, {\"id\": \"uei.opennms.org/provisioner/provisioningAdapterFailed::Dynamic DNS provisioning failed: org.xbill.DNS.TextParseException: '': empty name\", \"time\": 1657824496622, \"clear\": false, \"nodeId\": 2, \"summary\": \"\\n            <p>A provisioning adapter failed for host.</p>\\n        \", \"severity\": \"MAJOR\", \"description\": \"A provisioning adapter failed for host  with the following condition: Dynamic DNS provisioning failed: org.xbill.DNS.TextParseException: '': empty name.<p>\", \"inventoryObjectId\": \"test:1655254874584\", \"inventoryObjectType\": \"node\"}], \"severity\": \"CRITICAL\", \"creationTime\": 1657740131523, \"resourceKeys\": [], \"diagnosticText\": null}]";
+        String json = "[{\"id\":\"dc9c45d2-140b-4b36-a992-fe59c7b65bf6\",\"creationTime\":1,\"resourceKeys\":[],\"alarms\":[],\"severity\":\"MINOR\",\"diagnosticText\":\"diagnosticText\",\"status\":\"CREATED\"}]";
         List<JacksonSituation> situations = objectMapper.readValue(json, new TypeReference<>() {
         });
         LOG.info("Deserialize situation: {}", situations.toString());
+        assertThat(situations.size(), equalTo(1));
+        assertThat(situations.get(0).getStatus(), equalTo(Status.CREATED));
     }
 
 }

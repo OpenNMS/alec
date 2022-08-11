@@ -53,7 +53,7 @@ public class SituationList implements Action {
     private SituationDatasource situationDatasource;
 
     @Override
-    public Object execute() {
+    public Object execute() throws InterruptedException {
         printSituations(situationDatasource.getSituations());
         return null;
     }

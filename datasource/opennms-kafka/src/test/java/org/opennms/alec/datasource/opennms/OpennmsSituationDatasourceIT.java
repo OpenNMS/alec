@@ -91,7 +91,7 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
     }
 
     @Test(timeout=60000)
-    public void canRetrieveSituations() throws IOException {
+    public void canRetrieveSituations() throws IOException, InterruptedException {
         datasource.init();
         assertThat(datasource.getSituations(), hasSize(0));
 
@@ -106,7 +106,7 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
     }
 
     @Test
-    public void testDeleteIsCalled() throws IOException {
+    public void testDeleteIsCalled() throws IOException, InterruptedException {
         datasource.init();
         Engine mockEngine = mock(Engine.class);
         datasource.registerHandler(DeletingSituationHandler.newInstance(mockEngine));

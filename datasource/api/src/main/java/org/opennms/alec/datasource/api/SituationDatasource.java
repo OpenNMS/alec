@@ -32,9 +32,9 @@ import java.util.List;
 
 public interface SituationDatasource {
 
-    List<Situation> getSituations();
+    List<Situation> getSituations() throws InterruptedException;
 
-    List<Situation> getSituationsWithAlarmId();
+    List<Situation> getSituationsWithAlarmId() throws InterruptedException;
 
     void forwardSituation(Situation situation) throws Exception;
 

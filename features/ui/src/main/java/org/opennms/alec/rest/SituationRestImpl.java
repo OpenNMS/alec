@@ -65,23 +65,24 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response rejected(String id) {
-        Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        Optional<Situation> situationOptional;
+        try {
+            situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-        if (situationOptional.isPresent()) {
-            Situation situation = situationOptional.get();
-            //check status
-            if (Status.REJECTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already rejected", id);
-                return Response.accepted("Situation " + id + " already rejected").build();
-            }
-
-            try {
+            if (situationOptional.isPresent()) {
+                Situation situation = situationOptional.get();
+                //check status
+                if (Status.REJECTED.equals(situation.getStatus())) {
+                    LOG.debug("Situation {} already rejected", id);
+                    return Response.accepted("Situation " + id + " already rejected").build();
+                }
+                //Update situation
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.REJECTED).build());
                 storeMLSituations();
                 return Response.ok().build();
-            } catch (Exception e) {
-                return somethingWentWrong(e);
             }
+        } catch (Exception e) {
+            return somethingWentWrong(e);
         }
 
         return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
@@ -89,24 +90,25 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response accepted(String id) {
-        Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        Optional<Situation> situationOptional;
+        try {
+            situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-        if (situationOptional.isPresent()) {
-            Situation situation = situationOptional.get();
-            //check status
-            if (Status.ACCEPTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already accepted", id);
-                return Response.accepted("Situation " + id + " already accepted").build();
-            }
+            if (situationOptional.isPresent()) {
+                Situation situation = situationOptional.get();
+                //check status
+                if (Status.ACCEPTED.equals(situation.getStatus())) {
+                    LOG.debug("Situation {} already accepted", id);
+                    return Response.accepted("Situation " + id + " already accepted").build();
+                }
 
-            //Update situation
-            try {
+                //Update situation
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.ACCEPTED).build());
                 storeMLSituations();
                 return Response.ok().build();
-            } catch (Exception e) {
-                return somethingWentWrong(e);
             }
+        } catch (Exception e) {
+            return somethingWentWrong(e);
         }
 
         return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
@@ -114,22 +116,22 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response getSituationStatusList() {
-        List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
-                .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
-                .collect(Collectors.toList());
-        List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
-                .filter(s -> Status.REJECTED.equals(s.getStatus()))
-                .collect(Collectors.toList());
-        List<SituationStatus> situationStatusList = new ArrayList<>();
-
         try {
+            List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
+                    .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
+                    .collect(Collectors.toList());
+            List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
+                    .filter(s -> Status.REJECTED.equals(s.getStatus()))
+                    .collect(Collectors.toList());
+            List<SituationStatus> situationStatusList = new ArrayList<>();
+
             setSituationList(acceptedSituations, situationStatusList);
             setSituationList(rejectedSituations, situationStatusList);
-        } catch (RuntimeException e) {
+
+            return Response.ok(situationStatusList).build();
+        } catch (Exception e) {
             return somethingWentWrong(e);
         }
-
-        return Response.ok(situationStatusList).build();
     }
 
     private void setSituationList(List<Situation> situations, List<SituationStatus> situationStatusList) {
@@ -139,7 +141,7 @@ public class SituationRestImpl implements SituationRest {
                 .build()));
     }
 
-    private void storeMLSituations() throws JsonProcessingException {
+    private void storeMLSituations() throws JsonProcessingException, InterruptedException {
         List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());

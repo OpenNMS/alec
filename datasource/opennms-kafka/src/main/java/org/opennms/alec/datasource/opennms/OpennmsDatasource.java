@@ -35,7 +35,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -517,44 +516,36 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     }
 
     @Override
-    public List<Situation> getSituations() {
+    public List<Situation> getSituations() throws InterruptedException {
         final List<Situation> situations = new ArrayList<>();
-        try {
-            waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
-                final Situation situation;
-                try {
-                    situation = OpennmsMapper.toSituation(entry.value);
-                } catch (Exception e) {
-                    LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
-                    return;
-                }
-                situations.add(situation);
-            });
-        } catch (InterruptedException e) {
-            LOG.error("An error occurred while waiting for situation store", e);
-            return Collections.emptyList();
-        }
+        waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
+            final Situation situation;
+            try {
+                situation = OpennmsMapper.toSituation(entry.value);
+            } catch (Exception e) {
+                LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
+                return;
+            }
+            situations.add(situation);
+        });
+
         return situations;
     }
 
     @Override
-    public List<Situation> getSituationsWithAlarmId() {
+    public List<Situation> getSituationsWithAlarmId() throws InterruptedException {
         final List<Situation> situations = new ArrayList<>();
-        try {
-            waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
-                final Situation situation;
-                try {
-                    situation = OpennmsMapper.toSituationWithAlarmId(entry.value);
-                } catch (Exception e) {
-                    LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
-                    return;
-                }
-                situations.add(situation);
-            });
-        } catch (InterruptedException e) {
-            LOG.error("An error occurred while waiting for situation store", e);
-            return Collections.emptyList();
-        }
+        waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
+            final Situation situation;
+            try {
+                situation = OpennmsMapper.toSituationWithAlarmId(entry.value);
+            } catch (Exception e) {
+                LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
+                return;
+            }
+            situations.add(situation);
+        });
+
         return situations;
     }
 

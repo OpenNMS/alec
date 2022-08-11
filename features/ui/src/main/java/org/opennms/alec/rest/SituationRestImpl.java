@@ -64,67 +64,72 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response rejected(String id) {
+    public Response rejected(String id) throws InterruptedException {
         Optional<Situation> situationOptional;
-        try {
-            situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-            if (situationOptional.isPresent()) {
-                Situation situation = situationOptional.get();
-                //check status
-                if (Status.REJECTED.equals(situation.getStatus())) {
-                    LOG.debug("Situation {} already rejected", id);
-                    return Response.accepted("Situation " + id + " already rejected").build();
-                }
-                //Update situation
+        if (situationOptional.isPresent()) {
+            Situation situation = situationOptional.get();
+            //check status
+            if (Status.REJECTED.equals(situation.getStatus())) {
+                LOG.debug("Situation {} already rejected", id);
+                return Response.accepted("Situation " + id + " already rejected").build();
+            }
+
+            try {
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.REJECTED).build());
                 storeMLSituations();
                 return Response.ok().build();
+            } catch (InterruptedException e) {
+                throw e;
             }
-        } catch (Exception e) {
-            return somethingWentWrong(e);
+            catch (Exception e) {
+                return somethingWentWrong(e);
+            }
         }
 
         return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
     }
 
     @Override
-    public Response accepted(String id) {
+    public Response accepted(String id) throws InterruptedException {
         Optional<Situation> situationOptional;
-        try {
-            situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
 
-            if (situationOptional.isPresent()) {
-                Situation situation = situationOptional.get();
-                //check status
-                if (Status.ACCEPTED.equals(situation.getStatus())) {
-                    LOG.debug("Situation {} already accepted", id);
-                    return Response.accepted("Situation " + id + " already accepted").build();
-                }
+        if (situationOptional.isPresent()) {
+            Situation situation = situationOptional.get();
+            //check status
+            if (Status.ACCEPTED.equals(situation.getStatus())) {
+                LOG.debug("Situation {} already accepted", id);
+                return Response.accepted("Situation " + id + " already accepted").build();
+            }
 
-                //Update situation
+            //Update situation
+            try {
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.ACCEPTED).build());
                 storeMLSituations();
                 return Response.ok().build();
+            } catch (InterruptedException e) {
+                throw e;
             }
-        } catch (Exception e) {
-            return somethingWentWrong(e);
+            catch (Exception e) {
+                return somethingWentWrong(e);
+            }
         }
 
         return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
     }
 
     @Override
-    public Response getSituationStatusList() {
+    public Response getSituationStatusList() throws InterruptedException {
+        List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
+                .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
+                .collect(Collectors.toList());
+        List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
+                .filter(s -> Status.REJECTED.equals(s.getStatus()))
+                .collect(Collectors.toList());
+        List<SituationStatus> situationStatusList = new ArrayList<>();
         try {
-            List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
-                    .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
-                    .collect(Collectors.toList());
-            List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
-                    .filter(s -> Status.REJECTED.equals(s.getStatus()))
-                    .collect(Collectors.toList());
-            List<SituationStatus> situationStatusList = new ArrayList<>();
-
             setSituationList(acceptedSituations, situationStatusList);
             setSituationList(rejectedSituations, situationStatusList);
 

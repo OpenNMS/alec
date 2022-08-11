@@ -43,13 +43,13 @@ import javax.ws.rs.core.Response;
 public interface SituationRest {
     @POST
     @Path("rejected/{id}")
-    Response rejected(@PathParam("id") String id);
+    Response rejected(@PathParam("id") String id) throws InterruptedException;
 
     @POST
     @Path("accepted/{id}")
-    Response accepted(@PathParam("id") String id);
+    Response accepted(@PathParam("id") String id) throws InterruptedException;
 
     @GET
     @Path("statusList")
-    Response getSituationStatusList();
+    Response getSituationStatusList() throws InterruptedException;
 }

@@ -35,6 +35,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -530,7 +531,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 situations.add(situation);
             });
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            LOG.error("An error occurred while waiting for situation store", e);
+            return Collections.emptyList();
         }
         return situations;
     }
@@ -550,7 +552,8 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
                 situations.add(situation);
             });
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            LOG.error("An error occurred while waiting for situation store", e);
+            return Collections.emptyList();
         }
         return situations;
     }

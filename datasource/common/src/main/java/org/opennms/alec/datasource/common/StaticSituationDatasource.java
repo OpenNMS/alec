@@ -49,7 +49,7 @@ public class StaticSituationDatasource implements SituationDatasource {
 
     @Override
     public List<Situation> getSituationsWithAlarmId() {
-        return situations;
+        return getSituations();
     }
 
     @Override

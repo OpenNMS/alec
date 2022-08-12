@@ -516,28 +516,37 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     }
 
     @Override
-    public List<Situation> getSituations() {
+    public List<Situation> getSituations() throws InterruptedException {
         final List<Situation> situations = new ArrayList<>();
-        try {
-            waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
-                final Situation situation;
-                try {
-                    situation = OpennmsMapper.toSituation(entry.value);
-                } catch (Exception e) {
-                    LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
-                    return;
-                }
-                situations.add(situation);
-            });
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
+            final Situation situation;
+            try {
+                situation = OpennmsMapper.toSituation(entry.value);
+            } catch (Exception e) {
+                LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
+                return;
+            }
+            situations.add(situation);
+        });
+
         return situations;
     }
 
     @Override
-    public List<Situation> getSituationsWithAlarmId() {
-        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
+    public List<Situation> getSituationsWithAlarmId() throws InterruptedException {
+        final List<Situation> situations = new ArrayList<>();
+        waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
+            final Situation situation;
+            try {
+                situation = OpennmsMapper.toSituationWithAlarmId(entry.value);
+            } catch (Exception e) {
+                LOG.warn("An error occurred while mapping a situation. It will be ignored. Situation: {}", entry.value, e);
+                return;
+            }
+            situations.add(situation);
+        });
+
+        return situations;
     }
 
     private ReadOnlyKeyValueStore<String, OpennmsModelProtos.Alarm> waitUntilSituationStoreIsQueryable() throws InterruptedException {

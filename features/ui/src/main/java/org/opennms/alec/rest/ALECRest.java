@@ -4,13 +4,12 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.EngineParameter;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.EngineParameter;
 
 @Path("alec")
 @Produces({MediaType.APPLICATION_JSON})
@@ -40,12 +39,4 @@ public interface ALECRest {
     @GET
     @Path("/agreement/configuration")
     Response getAgreementConfiguration();
-
-    @POST
-    @Path("situation/refused/{id}")
-    Response refusedSituation(@PathParam("id") String id);
-
-    @POST
-    @Path("situation/accepted/{id}")
-    Response acceptedSituation(@PathParam("id") String id);
 }

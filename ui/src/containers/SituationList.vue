@@ -46,7 +46,7 @@ situationStore.$subscribe((mutation, storeState) => {
 	background-color: #ffffff;
 	padding: 30px;
 	border: 1px solid $border-grey;
-	min-height: 580px;
+	min-height: 800px;
 }
 h2 {
 	margin-top: 0;

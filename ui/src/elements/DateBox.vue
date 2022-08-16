@@ -2,14 +2,16 @@
 import { format } from 'date-fns'
 const props = defineProps<{
 	label: string
-	date: string
+	date: number
 }>()
 </script>
 
 <template>
 	<div class="box">
 		<div class="label">{{ props.label }}</div>
-		<div class="date">{{ format(new Date(props.date), 'd/M HH:mm:ss') }}</div>
+		<div class="date">
+			{{ format(new Date(props.date), 'd/M HH:mm:ss') }}
+		</div>
 	</div>
 </template>
 

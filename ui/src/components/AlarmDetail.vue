@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import { simplifyDate } from '@/helpers/utils'
 import { useSituationsStore } from '@/store/useSituationsStore'
-
+import { format } from 'date-fns'
 const situationStore = useSituationsStore()
 const props = defineProps<{
 	id: number
@@ -17,11 +16,11 @@ const alarm = situationStore.alarms[props.id]
 
 			<div>
 				<strong>First Event</strong>
-				- {{ simplifyDate(alarm.firstEventTime) }}
+				- {{ format(new Date(alarm.firstEventTime), 'd/M HH:mm:ss') }}
 			</div>
 			<div>
 				<strong>Last Event</strong>
-				- {{ simplifyDate(alarm.lastEvent.createTime) }}
+				- {{ format(new Date(alarm.lastEvent.createTime), 'd/M HH:mm:ss') }}
 			</div>
 			<div>
 				<SeverityStatus :severity="alarm?.severity" />

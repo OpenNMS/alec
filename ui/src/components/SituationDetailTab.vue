@@ -76,18 +76,8 @@ watch(props, () => {
 					{{ props.alarmInfo.reductionKey }}
 				</p>
 				<div class="boxes">
-					<DateBox
-						label="First Event"
-						:date="
-							format(new Date(props.alarmInfo.firstEventTime), 'd/M HH:mm:ss')
-						"
-					/>
-					<DateBox
-						label="Last Event"
-						:date="
-							format(new Date(props.alarmInfo.lastEvent.time), 'd/M HH:mm:ss')
-						"
-					/>
+					<DateBox label="First Event" :date="props.alarmInfo.firstEventTime" />
+					<DateBox label="Last Event" :date="props.alarmInfo.lastEvent.time" />
 				</div>
 			</div>
 			<div class="parameters">

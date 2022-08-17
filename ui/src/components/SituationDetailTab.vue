@@ -11,7 +11,6 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
-import { format } from 'date-fns'
 
 const userStore = useUserStore()
 

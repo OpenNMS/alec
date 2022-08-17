@@ -5,7 +5,11 @@ import { minBy, maxBy, groupBy, sortBy, reverse } from 'lodash'
 import { format } from 'date-fns'
 import { FeatherTooltip } from '@featherds/tooltip'
 import { FeatherSelect } from '@featherds/select'
-const MAX_WIDTH = 1000
+import { FeatherIcon } from '@featherds/icon'
+import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
+import Remove from '@featherds/icon/action/Remove'
+const DEFAULT_MAX_WIDTH = 1000
+let maxWidth = ref(DEFAULT_MAX_WIDTH)
 const options = [
 	{ id: 1, name: 'Creation Time' },
 	{ id: 2, name: 'Severity' },
@@ -23,7 +27,7 @@ const minStart = ref(
 const maxEnd = ref(
 	maxBy(props.situation.relatedAlarms, 'lastEventTime').lastEventTime
 )
-const proportion = ref(MAX_WIDTH / (maxEnd.value - minStart.value))
+const proportion = ref(maxWidth.value / (maxEnd.value - minStart.value))
 
 watch(props, () => {
 	minStart.value = minBy(
@@ -34,39 +38,11 @@ watch(props, () => {
 		props.situation.relatedAlarms,
 		'lastEventTime'
 	).lastEventTime
-	proportion.value = MAX_WIDTH / (maxEnd.value - minStart.value)
-
+	maxWidth.value = DEFAULT_MAX_WIDTH
+	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
 	relatedAlarms.value = props.situation.relatedAlarms
 	sortedOption.value = options[0]
 })
-
-//const step = Math.ceil((maxEnd - minStart) / 1000)
-/*console.log(
-	Array(10)
-		.fill(1)
-		.map((i, index) =>
-			format(
-				new Date((index * Math.ceil(maxEnd - minStart)) / 10 + minStart),
-				'd/M HH:mm:ss'
-			)
-		)
-)
-const steps = Array(10)
-	.fill(1)
-	.map((i, index) =>
-		format(
-			new Date((index * Math.ceil(maxEnd - minStart)) / 10 + minStart),
-			'd/M HH:mm:ss'
-		)
-	)
-*/
-/*const steps = sortedUniq(
-	flatten(
-		props.situation.relatedAlarms
-			.map((a) => pick(a, ['firstEventTime', 'lastEventTime']))
-			.map((item) => values(item))
-	)
-)*/
 
 const getWidth = (alarmStart, alarmEnd) => {
 	return (alarmEnd - alarmStart) * proportion.value
@@ -82,7 +58,8 @@ const sortChanged = (sortObj) => {
 	}
 	if (sortObj.id === 2) {
 		const alarmGrouped = groupBy(relatedAlarms.value, 'severity')
-		const alarms = alarmGrouped['CRITICAL']
+		const alarms = []
+			.concat(alarmGrouped['CRITICAL'])
 			.concat(alarmGrouped['MAJOR'])
 			.concat(alarmGrouped['MINOR'])
 			.concat(alarmGrouped['WARNING'])
@@ -99,6 +76,16 @@ const sortChanged = (sortObj) => {
 		relatedAlarms.value = sorted
 	}
 }
+
+const handleClickZoomIn = () => {
+	maxWidth.value += 100
+	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
+}
+
+const handleClickZoomOut = () => {
+	maxWidth.value -= 100
+	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
+}
 </script>
 
 <template>
@@ -113,14 +100,31 @@ const sortChanged = (sortObj) => {
 		</div>
 		<div class="section">
 			<h4>Alarms</h4>
-			<FeatherSelect
-				class="select"
-				label="Sort by:"
-				:options="options"
-				v-model="sortedOption"
-				text-prop="name"
-				@update:modelValue="sortChanged"
-			/>
+			<div class="action-btns">
+				<FeatherSelect
+					class="select"
+					label="Sort by:"
+					:options="options"
+					v-model="sortedOption"
+					text-prop="name"
+					@update:modelValue="sortChanged"
+				/>
+				<div class="zoom">
+					Zoom
+					<div>
+						<FeatherIcon
+							:icon="AddCircleAlt"
+							class="zoom-icon"
+							@click="handleClickZoomIn"
+						/>
+						<FeatherIcon
+							:icon="Remove"
+							class="zoom-icon"
+							@click="handleClickZoomOut"
+						/>
+					</div>
+				</div>
+			</div>
 			<div class="alarms">
 				<div class="times">
 					<div>
@@ -271,12 +275,38 @@ const sortChanged = (sortObj) => {
 .times {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
 	border-bottom: 1px solid #b7b7b7;
 	margin-bottom: 15px;
+	margin-left: 10%;
+	justify-content: space-between;
 }
 
 .select {
 	width: 15%;
+}
+
+.action-btns {
+	display: flex;
+	flex-direction: row;
+	> div {
+		margin-right: 20px;
+	}
+}
+
+.zoom {
+	border: 1px solid #57575ce6;
+	padding: 6px 15px;
+	border-radius: 5px;
+	width: 140px;
+	display: flex;
+	justify-content: space-between;
+	max-height: 40px;
+}
+
+.zoom-icon {
+	font-size: 24px;
+	margin-left: 5px;
+	color: rgb(21, 26, 69);
+	cursor: pointer;
 }
 </style>

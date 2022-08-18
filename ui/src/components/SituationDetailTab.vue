@@ -11,16 +11,20 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
+import { useSituationsStore } from '@/store/useSituationsStore'
 
+const situationStore = useSituationsStore()
 const userStore = useUserStore()
 
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
 const status = ref('')
+
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.alarmInfo?.id, action.toLowerCase())
 	status.value = action
+	situationStore.getSituations()
 }
 watch(props, () => {
 	status.value = props.alarmInfo.status || ''

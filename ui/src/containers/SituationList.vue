@@ -15,6 +15,7 @@ const situationSelected = (id: string) => {
 		(s) => s.id === id
 	)
 }
+
 situationStore.$subscribe((mutation, storeState) => {
 	state.situationSelected = storeState.situations[0]?.id
 })

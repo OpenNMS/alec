@@ -76,8 +76,22 @@ public class ApiMapper {
 
     public Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+        toAlarm(alarm, alarmBuilder);
+        alarmBuilder.setId(alarm.getReductionKey());
+
+        return alarmBuilder.build();
+    }
+
+    public Alarm toAlarmWithId(org.opennms.integration.api.v1.model.Alarm alarm) {
+        ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+        toAlarm(alarm, alarmBuilder);
+        alarmBuilder.setId(String.valueOf(alarm.getId()));
+
+        return alarmBuilder.build();
+    }
+
+    private void toAlarm(org.opennms.integration.api.v1.model.Alarm alarm, ImmutableAlarm.Builder alarmBuilder) {
         alarmBuilder
-                .setId(alarm.getReductionKey())
                 .setFirstTime(alarm.getFirstEventTime().getTime())
                 .setTime(alarm.getLastEventTime().getTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
@@ -92,8 +106,6 @@ public class ApiMapper {
             LOG.error("Failure overriding inventory for alarm [{}] : {}", alarm, e.getCause().getMessage());
             LOG.error("Failure overriding inventory for alarm", e);
         }
-
-        return alarmBuilder.build();
     }
 
     public Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
@@ -102,7 +114,7 @@ public class ApiMapper {
         if (situationIdFromAlarm.isPresent()) {
             situationId = situationIdFromAlarm.get();
         } else {
-            LOG.warn("Could not find situationId on alarm: {}. Using the alarm id instead.", alarm.getId());
+            LOG.warn("Could not find situationId on alarm: {}. Using the alarm reductionKey instead.", alarm.getId());
             situationId = Integer.toString(alarm.getId());
         }
         return getSituation(alarm, situationId);
@@ -110,7 +122,7 @@ public class ApiMapper {
 
     public Situation toSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm) {
         final String situationId = Integer.toString(alarm.getId());
-        return getSituation(alarm, situationId);
+        return getSituationWithAlarmId(alarm, situationId);
     }
 
     private Situation getSituation(org.opennms.integration.api.v1.model.Alarm alarm, String situationId) {
@@ -122,7 +134,21 @@ public class ApiMapper {
                 .setId(situationId)
                 .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
                 .setSeverity(toSeverity(alarm.getSeverity()))
-                .setAlarms(alarm.getRelatedAlarms().stream().map(a -> this.toAlarm(a)).collect(Collectors.toSet()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarm).collect(Collectors.toSet()))
+                .setStatus(Status.valueOf(situationStatus))
+                .build();
+    }
+
+    private Situation getSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm, String situationId) {
+        final String situationStatus;
+        final Optional<String> situationStatusFromAlarm = getSituationParamFromAlarm(alarm, SITUATION_STATUS_PARM_NAME);
+        situationStatus = situationStatusFromAlarm.orElseGet(Status.CREATED::toString);
+
+        return ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarmWithId).collect(Collectors.toSet()))
                 .setStatus(Status.valueOf(situationStatus))
                 .build();
     }
@@ -206,8 +232,9 @@ public class ApiMapper {
                 return org.opennms.integration.api.v1.model.Severity.NORMAL;
             case CLEARED:
                 return org.opennms.integration.api.v1.model.Severity.CLEARED;
+            default:
+                return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
         }
-        return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
     }
 
     public Severity toSeverity(org.opennms.integration.api.v1.model.Severity severity) {
@@ -227,8 +254,9 @@ public class ApiMapper {
                 return Severity.MAJOR;
             case CRITICAL:
                 return Severity.CRITICAL;
+            default:
+                return Severity.INDETERMINATE;
         }
-        return Severity.INDETERMINATE;
     }
 
     public List<InventoryObject> toInventory(Node node) {

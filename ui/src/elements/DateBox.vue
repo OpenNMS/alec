@@ -2,7 +2,7 @@
 import { format } from 'date-fns'
 const props = defineProps<{
 	label: string
-	date: string | number
+	date: string | number | Date
 }>()
 </script>
 

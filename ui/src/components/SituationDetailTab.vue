@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 const status = ref('')
 const handleFeedbackSituation = (action: string) => {
-	sendFeedbackAcceptSituation(props.alarmInfo?.id, action)
+	sendFeedbackAcceptSituation(props.alarmInfo?.id, action.toLowerCase())
 	status.value = action
 }
 watch(props, () => {

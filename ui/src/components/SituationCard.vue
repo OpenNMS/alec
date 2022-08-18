@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherIcon } from '@featherds/icon'

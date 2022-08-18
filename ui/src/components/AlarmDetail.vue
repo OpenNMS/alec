@@ -6,7 +6,10 @@ const situationStore = useSituationsStore()
 const props = defineProps<{
 	id: number
 }>()
-const alarm = situationStore.alarms[props.id]
+const alarm = ref(situationStore.alarms[props.id])
+watch(props, () => {
+	alarm.value = situationStore.alarms[props.id]
+})
 </script>
 
 <template>

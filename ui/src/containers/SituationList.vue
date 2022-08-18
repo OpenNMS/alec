@@ -16,7 +16,7 @@ const situationSelected = (id: string) => {
 	)
 }
 situationStore.$subscribe((mutation, storeState) => {
-	state.situationSelected = storeState.situations[0].id
+	state.situationSelected = storeState.situations[0]?.id
 })
 </script>
 

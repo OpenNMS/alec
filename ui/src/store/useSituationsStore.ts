@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getSituations } from '@/services/AlarmService'
+import { getAlarms, getSituations } from '@/services/AlarmService'
 import { getSituationsStatus } from '@/services/AlecService'
 import { TRelatedAlarm, TSituation, TSituationSaved } from '@/types/TSituation'
 import { Dictionary, mapKeys, first } from 'lodash'
@@ -16,15 +16,17 @@ export const useSituationsStore = defineStore('situationsStore', {
 	}),
 	actions: {
 		async getSituations() {
-			const result = await getSituations()
+			const situationResult = await getSituations()
+			const alarmResult = await getAlarms()
+
 			const statusList = await getSituationsStatus()
-			if (result) {
-				this.alarms = mapKeys(result.alarm, (value) => {
+			if (situationResult && alarmResult) {
+				const situations = situationResult.alarm
+				const alarms = alarmResult.alarm
+
+				this.alarms = mapKeys(alarms, (value) => {
 					return value.id
 				})
-				const situations = result.alarm.filter(
-					(a) => a.relatedAlarms && a.relatedAlarms.length > 0
-				)
 				situations.forEach((sit) => {
 					sit.relatedAlarms.forEach((alarm: TRelatedAlarm) => {
 						alarm.count = this.alarms[alarm.id]?.count

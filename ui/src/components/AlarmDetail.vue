@@ -13,21 +13,18 @@ const alarm = situationStore.alarms[props.id]
 	<div class="card" v-if="alarm">
 		<div class="row">
 			<div class="title">[{{ alarm.id }}]</div>
-
-			<div>
-				<strong>First Event</strong>
-				- {{ format(new Date(alarm.firstEventTime), 'd/M HH:mm:ss') }}
-			</div>
-			<div>
-				<strong>Last Event</strong>
-				- {{ format(new Date(alarm.lastEvent.createTime), 'd/M HH:mm:ss') }}
-			</div>
-			<div>
-				<SeverityStatus :severity="alarm?.severity" />
-			</div>
+			<SeverityStatus :severity="alarm?.severity" />
 		</div>
 
 		<div v-html="alarm.description"></div>
+		<div>
+			<strong>First Event</strong>
+			- {{ format(new Date(alarm.firstEventTime), 'd/M HH:mm:ss') }}
+		</div>
+		<div>
+			<strong>Last Event</strong>
+			- {{ format(new Date(alarm.lastEvent.createTime), 'd/M HH:mm:ss') }}
+		</div>
 	</div>
 </template>
 <style lang="scss" scoped>
@@ -35,6 +32,8 @@ const alarm = situationStore.alarms[props.id]
 .card {
 	padding: 15px;
 	border: 1px solid $border-grey;
+	display: flex;
+	flex-direction: column;
 }
 .row {
 	display: flex;

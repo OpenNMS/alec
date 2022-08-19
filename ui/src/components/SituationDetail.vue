@@ -122,7 +122,7 @@ const handleFeedbackSituation = (action: string) => {
 
 .detail {
 	width: 100%;
-	background-color: #ffffff;
+	/*background-color: #ffffff;*/
 	margin-left: 20px;
 	border: 1px solid $border-grey;
 }

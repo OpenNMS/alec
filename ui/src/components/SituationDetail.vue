@@ -34,7 +34,7 @@ const props = defineProps<{
 @import '@featherds/table/scss/table';
 .detail {
 	width: 100%;
-	background-color: #ffffff;
+	/*background-color: #ffffff;*/
 	margin-left: 20px;
 }
 </style>

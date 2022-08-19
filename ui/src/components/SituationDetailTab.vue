@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import DateBox from '@/elements/DateBox.vue'
+import InformationBox from '@/elements/InformationBox.vue'
 import { TSituation } from '@/types/TSituation'
 import { FeatherIcon } from '@featherds/icon'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
@@ -11,6 +11,7 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
+import { format } from 'date-fns'
 
 const userStore = useUserStore()
 
@@ -70,13 +71,24 @@ watch(props, () => {
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
 				<span v-html="props.alarmInfo.description"></span>
-				<p>
-					<strong>Reduction key:</strong>
-					{{ props.alarmInfo.reductionKey }}
-				</p>
+				<p></p>
 				<div class="boxes">
-					<DateBox label="First Event" :date="props.alarmInfo.firstEventTime" />
-					<DateBox label="Last Event" :date="props.alarmInfo.lastEvent.time" />
+					<InformationBox
+						label="First Event"
+						:info="
+							format(new Date(props.alarmInfo.firstEventTime), 'd/M HH:mm:ss')
+						"
+					/>
+					<InformationBox
+						label="Last Event"
+						:info="
+							format(new Date(props.alarmInfo.lastEvent.time), 'd/M HH:mm:ss')
+						"
+					/>
+					<InformationBox
+						label="Reduction key"
+						:info="props.alarmInfo.reductionKey"
+					/>
 				</div>
 			</div>
 			<div class="parameters">
@@ -95,13 +107,12 @@ watch(props, () => {
 @import '@/styles/variables.scss';
 @import '@featherds/table/scss/table';
 
-.section {
-	padding: 10px;
-	background-color: $dark-blue;
-	margin-bottom: 20px;
-}
 .btn-row {
-	padding-bottom: 15px;
+	padding: 15px;
+	border: 1px solid $border-grey;
+	margin-bottom: 20px;
+	background-color: #ffffff;
+	margin-top: 10px;
 }
 .severity-line {
 	width: 4px;
@@ -113,7 +124,7 @@ watch(props, () => {
 }
 .id {
 	font-weight: 600;
-	font-size: 20px;
+	font-size: 21px;
 	margin-bottom: 14px;
 	display: flex;
 	flex-direction: row;
@@ -145,6 +156,8 @@ watch(props, () => {
 	flex-direction: row;
 	background-color: #ffffff;
 	padding: 15px;
+	border: 1px solid $border-grey;
+	margin-bottom: 20px;
 }
 .alarm-list {
 	margin-top: 20px;

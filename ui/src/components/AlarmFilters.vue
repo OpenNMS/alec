@@ -36,8 +36,8 @@ watch(props, () => {
 </script>
 
 <template>
-	<div class="title">Alarms</div>
-	<div class="alarm-filters-container">
+	<div class="container">
+		<div class="title">Alarms</div>
 		<FeatherChipList
 			:key="selectedFilters.toString()"
 			condensed
@@ -72,22 +72,20 @@ watch(props, () => {
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
 @import '@featherds/table/scss/table';
-
+.container {
+	border: 1px solid $border-grey;
+	padding: 15px;
+	background-color: #ffffff;
+}
 .section {
 	padding-top: 20px;
 }
 
 .title {
-	color: #ffffff;
-	font-size: 24px;
+	font-size: 21px;
 	font-weight: 600;
 	padding: 5px;
-	padding-bottom: 15px;
-}
-
-.alarm-filters-container {
-	background-color: #ffffff;
-	padding: 20px;
+	padding-bottom: 10px;
 }
 
 .clicked {
@@ -100,8 +98,8 @@ watch(props, () => {
 	justify-content: space-between;
 	flex-wrap: wrap;
 	> div {
-		width: 100%;
 		margin-bottom: 20px;
+		width: 300px;
 	}
 	> div:last-child {
 		margin-bottom: 0;

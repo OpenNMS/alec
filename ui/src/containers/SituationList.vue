@@ -43,9 +43,9 @@ situationStore.$subscribe((mutation, storeState) => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 .list-main {
-	background-color: #ffffff;
-	padding: 30px;
-	border: 1px solid $border-grey;
+	/*background-color: #ffffff;
+	border: 1px solid $border-grey; 
+	padding: 20px; */
 	min-height: 800px;
 }
 h2 {
@@ -59,6 +59,9 @@ h2 {
 .situation-list {
 	display: flex;
 	flex-direction: column;
+	background-color: #ffffff;
+	padding: 15px;
+	border: 1px solid $border-grey;
 	> div {
 		margin-bottom: 20px;
 	}

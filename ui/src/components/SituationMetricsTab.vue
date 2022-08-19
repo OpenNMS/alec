@@ -7,6 +7,7 @@ import { FeatherTooltip } from '@featherds/tooltip'
 import { FeatherSelect } from '@featherds/select'
 import { FeatherIcon } from '@featherds/icon'
 import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
+
 import Remove from '@featherds/icon/action/Remove'
 const DEFAULT_MAX_WIDTH = 1000
 let maxWidth = ref(DEFAULT_MAX_WIDTH)
@@ -98,7 +99,7 @@ const handleClickZoomOut = () => {
 				{{ formatDistanceStrict(new Date(maxEnd), new Date(minStart)) }}
 			</div>
 		</div>
-		<div class="section">
+		<div class="alarm-list">
 			<h4>Alarms</h4>
 			<div class="action-btns">
 				<FeatherSelect
@@ -205,13 +206,17 @@ const handleClickZoomOut = () => {
 	background: #909090;
 }
 .metrics {
-	background-color: $dark-blue;
-	padding: 10px;
+	background-color: #ffffff;
+	padding: 20px;
+	border: 1px solid $border-grey;
+	margin-top: 10px;
 }
 
 .section {
 	background-color: #ffffff;
-	padding: 20px;
+	border-bottom: 1px solid $border-grey;
+	margin-bottom: 20px;
+	padding-bottom: 20px;
 }
 
 .id {

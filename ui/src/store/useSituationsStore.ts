@@ -22,7 +22,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 			const statusList = await getSituationsStatus()
 			if (situationResult && alarmResult) {
 				const situations = situationResult.alarm
-				const alarms = alarmResult.alarm
+				const alarms = alarmResult
 
 				this.alarms = mapKeys(alarms, (value) => {
 					return value.id

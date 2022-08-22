@@ -2,15 +2,15 @@
 import { TSituation } from '@/types/TSituation'
 import { formatDistanceStrict } from 'date-fns'
 import { minBy, maxBy, groupBy, sortBy, reverse } from 'lodash'
-import { format } from 'date-fns'
-import { FeatherTooltip } from '@featherds/tooltip'
 import { FeatherSelect } from '@featherds/select'
 import { FeatherIcon } from '@featherds/icon'
 import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
-
+import TimeLine from '@/components/Timeline.vue'
 import Remove from '@featherds/icon/action/Remove'
+import { formatDate } from '@/helpers/utils'
 const DEFAULT_MAX_WIDTH = 1000
 let maxWidth = ref(DEFAULT_MAX_WIDTH)
+
 const options = [
 	{ id: 1, name: 'Creation Time' },
 	{ id: 2, name: 'Severity' },
@@ -23,10 +23,12 @@ const props = defineProps<{
 
 const relatedAlarms = ref(props.situation.relatedAlarms)
 const minStart = ref(
-	minBy(props.situation.relatedAlarms, 'firstEventTime').firstEventTime
+	minBy(props.situation.relatedAlarms, 'firstEventTime').firstEventTime ||
+		new Date()
 )
 const maxEnd = ref(
-	maxBy(props.situation.relatedAlarms, 'lastEventTime').lastEventTime
+	maxBy(props.situation.relatedAlarms, 'lastEventTime').lastEventTime ||
+		new Date()
 )
 const proportion = ref(maxWidth.value / (maxEnd.value - minStart.value))
 
@@ -45,18 +47,12 @@ watch(props, () => {
 	sortedOption.value = options[0]
 })
 
-const getWidth = (alarmStart, alarmEnd) => {
-	return (alarmEnd - alarmStart) * proportion.value
-}
-
-const getOffset = (alarmStart) => {
-	return (alarmStart - minStart.value) * proportion.value
-}
-
 const sortChanged = (sortObj) => {
+	//by creationTime (comes by default)
 	if (sortObj.id === 1) {
 		relatedAlarms.value = props.situation.relatedAlarms
 	}
+	//by severity
 	if (sortObj.id === 2) {
 		const alarmGrouped = groupBy(relatedAlarms.value, 'severity')
 		const alarms = []
@@ -66,6 +62,7 @@ const sortChanged = (sortObj) => {
 			.concat(alarmGrouped['WARNING'])
 		relatedAlarms.value = alarms.filter((a) => a)
 	}
+	//by duration
 	if (sortObj.id === 3) {
 		const sorted = reverse(
 			sortBy(
@@ -73,7 +70,6 @@ const sortChanged = (sortObj) => {
 				(a) => a.lastEventTime - a.firstEventTime
 			)
 		)
-
 		relatedAlarms.value = sorted
 	}
 }
@@ -129,10 +125,10 @@ const handleClickZoomOut = () => {
 			<div class="alarms">
 				<div class="times">
 					<div>
-						{{ format(new Date(minStart), 'd/M HH:mm:ss') }}
+						{{ formatDate(minStart) }}
 					</div>
 					<div>
-						{{ format(new Date(maxEnd), 'd/M HH:mm:ss') }}
+						{{ formatDate(maxEnd) }}
 					</div>
 				</div>
 				<div class="container">
@@ -151,40 +147,12 @@ const handleClickZoomOut = () => {
 							v-for="alarm in relatedAlarms"
 							:key="alarm.id"
 						>
-							<FeatherTooltip
-								:title="format(new Date(alarm.firstEventTime), 'd/M HH:mm:ss')"
-								v-slot="{ attrs, on }"
-							>
-								<div
-									class="circle"
-									v-bind="attrs"
-									v-on="on"
-									:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
-									:style="{
-										marginLeft: getOffset(alarm.firstEventTime) + 'px'
-									}"
-								></div>
-							</FeatherTooltip>
-
-							<div
-								class="line"
-								:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
-								:style="{
-									width:
-										getWidth(alarm.firstEventTime, alarm.lastEventTime) + 'px'
-								}"
-							></div>
-							<FeatherTooltip
-								:title="format(new Date(alarm.lastEventTime), 'd/M HH:mm:ss')"
-								v-slot="{ attrs, on }"
-							>
-								<div
-									class="circle"
-									v-bind="attrs"
-									v-on="on"
-									:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
-								></div>
-							</FeatherTooltip>
+							<TimeLine
+								:alarm="alarm"
+								:proportion="proportion"
+								:min-start="parseInt(minStart)"
+								:max-end="parseInt(maxEnd)"
+							/>
 						</div>
 					</div>
 				</div>
@@ -263,18 +231,6 @@ const handleClickZoomOut = () => {
 	align-items: center;
 	margin-bottom: 15px;
 	padding-top: 5px;
-}
-
-.line {
-	height: 2px;
-	background-color: red;
-}
-
-.circle {
-	width: 14px;
-	height: 14px;
-	border-radius: 25px;
-	cursor: pointer;
 }
 
 .times {

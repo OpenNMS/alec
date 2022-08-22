@@ -19,7 +19,7 @@ const userStore = useUserStore()
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
-const status = ref('')
+const status = ref(props.alarmInfo.status)
 
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.alarmInfo?.id, action.toLowerCase())

@@ -122,7 +122,7 @@ public class ApiMapper {
                 .setId(situationId)
                 .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
                 .setSeverity(toSeverity(alarm.getSeverity()))
-                .setAlarms(alarm.getRelatedAlarms().stream().map(a -> this.toAlarm(a)).collect(Collectors.toSet()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarm).collect(Collectors.toSet()))
                 .setStatus(Status.valueOf(situationStatus))
                 .build();
     }
@@ -206,8 +206,9 @@ public class ApiMapper {
                 return org.opennms.integration.api.v1.model.Severity.NORMAL;
             case CLEARED:
                 return org.opennms.integration.api.v1.model.Severity.CLEARED;
+            default:
+                return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
         }
-        return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
     }
 
     public Severity toSeverity(org.opennms.integration.api.v1.model.Severity severity) {
@@ -227,8 +228,9 @@ public class ApiMapper {
                 return Severity.MAJOR;
             case CRITICAL:
                 return Severity.CRITICAL;
+            default:
+                return Severity.INDETERMINATE;
         }
-        return Severity.INDETERMINATE;
     }
 
     public List<InventoryObject> toInventory(Node node) {

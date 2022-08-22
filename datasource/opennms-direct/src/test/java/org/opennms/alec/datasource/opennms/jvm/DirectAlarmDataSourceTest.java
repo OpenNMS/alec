@@ -28,10 +28,11 @@
 
 package org.opennms.alec.datasource.opennms.jvm;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Before;
@@ -50,10 +51,11 @@ public class DirectAlarmDataSourceTest {
     private final ApiMapper mockMapper = new ApiMapper(inventoryService);
     private final EventForwarder mockEventForwarder = mock(EventForwarder.class);
     private final DirectAlarmDatasource dac = new DirectAlarmDatasource(mockAlarmDao, mockEventForwarder, mockMapper);
+    private final Alarm alarm = mock(Alarm.class);
 
     @Before
     public void setup() {
-       when(mockAlarmDao.getAlarms()).thenReturn(new ArrayList<>());
+       when(mockAlarmDao.getAlarms()).thenReturn(Arrays.asList(alarm));
        dac.init();
     }
 
@@ -76,5 +78,30 @@ public class DirectAlarmDataSourceTest {
         when(alarm1.getFirstEventTime()).thenReturn(new Date());
         when(alarm1.getLastEventTime()).thenReturn(new Date());
         dac.handleNewOrUpdatedAlarm(alarm1);
+        assertTrue(true);
+    }
+
+    @Test
+    public void testGetSituation() throws InterruptedException {
+        when(alarm.getId()).thenReturn(1);
+        when(alarm.isSituation()).thenReturn(true);
+        when(alarm.getReductionKey()).thenReturn("key");
+        when(alarm.getManagedObjectInstance()).thenReturn("test:1");
+        when(alarm.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
+        when(alarm.getFirstEventTime()).thenReturn(new Date());
+        when(alarm.getLastEventTime()).thenReturn(new Date());
+        assertTrue(dac.getSituation(1).isPresent());
+    }
+
+    @Test
+    public void testGetSituationNotFound() throws InterruptedException {
+        when(alarm.getId()).thenReturn(1);
+        when(alarm.isSituation()).thenReturn(true);
+        when(alarm.getReductionKey()).thenReturn("key");
+        when(alarm.getManagedObjectInstance()).thenReturn("test:1");
+        when(alarm.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
+        when(alarm.getFirstEventTime()).thenReturn(new Date());
+        when(alarm.getLastEventTime()).thenReturn(new Date());
+        assertTrue(dac.getSituation(2).isEmpty());
     }
 }

@@ -2,6 +2,7 @@
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import { simplifyDate } from '@/helpers/utils'
 import { useSituationsStore } from '@/store/useSituationsStore'
+import { ref, watch } from 'vue'
 
 const situationStore = useSituationsStore()
 const props = defineProps<{

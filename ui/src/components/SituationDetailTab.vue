@@ -46,7 +46,7 @@ watch(props, () => {
 					class="icon accept"
 					:class="{ accepted: status == ACCEPTED }"
 				/>
-				<span v-if="status == ACCEPTED"> ACCEPTED</span>
+				<span v-if="status == ACCEPTED"> {{ ACCEPTED }}</span>
 				<span v-else> ACCEPT</span>
 			</FeatherButton>
 			<FeatherButton
@@ -60,7 +60,7 @@ watch(props, () => {
 					class="icon reject"
 					:class="{ rejected: status == REJECTED }"
 				/>
-				<span v-if="status == REJECTED"> REJECTED</span>
+				<span v-if="status == REJECTED"> {{ REJECTED }}</span>
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>
@@ -140,6 +140,7 @@ watch(props, () => {
 }
 .accept {
 	font-size: 16px;
+	margin-right: 3px;
 	color: green !important;
 }
 .reject {

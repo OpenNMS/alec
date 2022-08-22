@@ -66,7 +66,7 @@ public class SituationRestImpl implements SituationRest {
     @Override
     public Response rejected(String id) throws InterruptedException {
         Optional<Situation> situationOptional;
-        situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        situationOptional = situationDatasource.getSituation(Integer.parseInt(id));
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
@@ -82,8 +82,7 @@ public class SituationRestImpl implements SituationRest {
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 throw e;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return somethingWentWrong(e);
             }
         }
@@ -94,7 +93,7 @@ public class SituationRestImpl implements SituationRest {
     @Override
     public Response accepted(String id) throws InterruptedException {
         Optional<Situation> situationOptional;
-        situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
+        situationOptional = situationDatasource.getSituation(Integer.parseInt(id));
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
@@ -111,8 +110,7 @@ public class SituationRestImpl implements SituationRest {
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 throw e;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 return somethingWentWrong(e);
             }
         }
@@ -122,10 +120,10 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response getSituationStatusList() throws InterruptedException {
-        List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
+        List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
-        List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
+        List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
         List<SituationStatus> situationStatusList = new ArrayList<>();
@@ -147,10 +145,10 @@ public class SituationRestImpl implements SituationRest {
     }
 
     private void storeMLSituations() throws JsonProcessingException, InterruptedException {
-        List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
+        List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
-        List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
+        List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
 

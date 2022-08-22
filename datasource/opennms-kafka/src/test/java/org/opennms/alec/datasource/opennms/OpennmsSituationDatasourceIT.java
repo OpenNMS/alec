@@ -97,12 +97,45 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
 
         OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
                 .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).build()).build())
                 .setLastEventTime(1)
                 .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
                 .build();
         producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
 
         await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituations(), hasSize(1));
+    }
+
+    @Test(timeout=60000)
+    public void canRetrieveSituation() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getSituations(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).setValue("1").build()).build())
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituation(1).isPresent());
+    }
+
+    @Test(timeout=60000)
+    public void situationNotFound() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getSituations(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).setValue("1").build()).build())
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituation(2).isEmpty());
     }
 
     @Test

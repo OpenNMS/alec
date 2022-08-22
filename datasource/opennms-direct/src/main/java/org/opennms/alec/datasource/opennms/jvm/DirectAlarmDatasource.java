@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -120,9 +121,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
             // Handle Updates
             final Set<Integer> commonAlarmIds = Sets.newHashSet(Sets.intersection(alarmIdsInSnapshot, alarmIdsInMap));
-            commonAlarmIds.forEach(id -> {
-                callbacks.add(handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(id)));
-            });
+            commonAlarmIds.forEach(id -> callbacks.add(handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(id))));
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -153,20 +152,20 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
 
         if (!alarm.isSituation()) {
             if (existingAlarm == null && !isCleared(alarm)) {
-                return (a) -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
+                return a -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
                 // if there was no existing alarm, and the new one is cleared, don't bother issuing the callback
             } else if (existingAlarm != null) {
                 if (!isCleared(alarm)) {
-                    return (a) -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
+                    return a -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
                 } else {
-                    return (a) ->  alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
+                    return a ->  alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
                 }
             }
         } else {
             final Situation oceSituation = mapper.toSituation(alarm);
-            return (a) ->  situationHandlers.forEach(h -> h.onSituation(oceSituation));
+            return a ->  situationHandlers.forEach(h -> h.onSituation(oceSituation));
         }
-        return (a) -> {};
+        return a -> {};
     }
 
     @Override
@@ -188,13 +187,13 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         if (existingAlarm != null) {
             if (!existingAlarm.isSituation()) {
                 final Alarm oceAlarm = mapper.toAlarm(existingAlarm);
-                return (a) -> alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
+                return a -> alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
             } else {
                 final Situation oceSituation = mapper.toSituation(existingAlarm);
-                return (a) -> situationHandlers.forEach(h -> h.onSituation(oceSituation));
+                return a -> situationHandlers.forEach(h -> h.onSituation(oceSituation));
             }
         }
-        return (a) -> {};
+        return a -> {};
     }
 
     @Override
@@ -267,6 +266,22 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
                     .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
                     .map(mapper::toSituationWithAlarmId)
                     .collect(Collectors.toList());
+        } finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Optional<Situation> getSituation(int id) throws InterruptedException {
+        waitForInit();
+
+        rwLock.readLock().lock();
+        try {
+            return alarmsById.values().stream()
+                    .filter(alarm -> id == alarm.getId())
+                    .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
+                    .map(mapper::toSituation)
+                    .findFirst();
         } finally {
             rwLock.readLock().unlock();
         }

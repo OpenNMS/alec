@@ -12,7 +12,8 @@ import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
 import { useSituationsStore } from '@/store/useSituationsStore'
-
+const ACCEPTED = 'ACCEPTED'
+const REJECTED = 'REJECTED'
 const situationStore = useSituationsStore()
 const userStore = useUserStore()
 
@@ -36,30 +37,30 @@ watch(props, () => {
 		<div v-if="userStore.allowSave" class="btn-row">
 			<FeatherButton
 				class="btn"
-				:class="{ accepted: status == 'ACCEPTED' }"
-				@click="() => handleFeedbackSituation('ACCEPTED')"
+				:class="{ accepted: status == ACCEPTED }"
+				@click="() => handleFeedbackSituation(ACCEPTED)"
 			>
 				<FeatherIcon
 					:icon="CheckCircle"
 					aria-hidden="true"
 					class="icon accept"
-					:class="{ accepted: status == 'ACCEPTED' }"
+					:class="{ accepted: status == ACCEPTED }"
 				/>
-				<span v-if="status == 'ACCEPTED'"> ACCEPTED</span>
+				<span v-if="status == ACCEPTED"> ACCEPTED</span>
 				<span v-else> ACCEPT</span>
 			</FeatherButton>
 			<FeatherButton
 				class="btn"
-				:class="{ rejected: status == 'REJECTED' }"
-				@click="() => handleFeedbackSituation('REJECTED')"
+				:class="{ rejected: status == REJECTED }"
+				@click="() => handleFeedbackSituation(REJECTED)"
 			>
 				<FeatherIcon
 					:icon="Cancel"
 					aria-hidden="true"
 					class="icon reject"
-					:class="{ rejected: status == 'REJECTED' }"
+					:class="{ rejected: status == REJECTED }"
 				/>
-				<span v-if="status == 'REJECTED'"> REJECTED</span>
+				<span v-if="status == REJECTED"> REJECTED</span>
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>

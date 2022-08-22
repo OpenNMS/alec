@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory, Router } from 'vue-router'
 import SituationList from '@/containers/SituationList.vue'
 import WelcomePage from '@/components/WelcomePage.vue'
+import ErrorPage from '@/components/ErrorPage.vue'
+
 import ConfigurationPage from '@/components/ConfigurationPage.vue'
 import { useUserStore } from '@/store/useUserStore'
 
@@ -8,9 +10,13 @@ const checkUser = async () => {
 	const r = (window as any).VRouter || router
 	const userStore = useUserStore()
 	if (!userStore.userId) {
-		await userStore.getUserRole()
+		const resultRole = await userStore.getUserRole()
 		await userStore.getAlecInfo()
-		r.push({ name: 'home' })
+		if (resultRole) {
+			r.push({ name: 'home' })
+		} else {
+			r.push({ name: 'error' })
+		}
 	}
 }
 
@@ -48,6 +54,11 @@ const routes = [
 		name: 'situations',
 		beforeEnter: () => checkUser(),
 		component: SituationList
+	},
+	{
+		path: '/error',
+		name: 'error',
+		component: ErrorPage
 	}
 ]
 

@@ -39,6 +39,7 @@ import org.opennms.alec.datasource.api.InventoryObjectPeerRef;
 import org.opennms.alec.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
@@ -116,6 +117,26 @@ public class OpennmsMapper {
                     .filter( p -> SituationToEvent.SITUATION_ID_PARM_NAME.equals(p.getName()))
                     .findFirst()
                     .ifPresent(p -> situationBuilder.setId(p.getValue()));
+            lastEvent.getParameterList().stream()
+                    .filter( p -> SituationToEvent.SITUATION_STATUS_PARM_NAME.equals(p.getName()))
+                    .findFirst()
+                    .ifPresent(p -> situationBuilder.setStatus(Status.valueOf(p.getValue())));
+        }
+        situationBuilder.setSeverity(toSeverity(alarm.getSeverity()));
+        alarm.getRelatedAlarmList().forEach(relatedAlarm -> situationBuilder.addAlarm(toAlarm(relatedAlarm)));
+        return situationBuilder.build();
+    }
+
+    public static Situation toSituationWithAlarmId(OpennmsModelProtos.Alarm alarm) {
+        final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
+                .setCreationTime(alarm.getFirstEventTime())
+                .setId(String.valueOf(alarm.getId()));
+        final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
+        if (lastEvent != null) {
+            lastEvent.getParameterList().stream()
+                    .filter( p -> SituationToEvent.SITUATION_STATUS_PARM_NAME.equals(p.getName()))
+                    .findFirst()
+                    .ifPresent(p -> situationBuilder.setStatus(Status.valueOf(p.getValue())));
         }
         situationBuilder.setSeverity(toSeverity(alarm.getSeverity()));
         alarm.getRelatedAlarmList().forEach(relatedAlarm -> situationBuilder.addAlarm(toAlarm(relatedAlarm)));

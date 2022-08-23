@@ -26,11 +26,30 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.jackson;
+package org.opennms.alec.rest;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-@JsonDeserialize(builder = AgreementImpl.Builder.class)
-public interface Agreement {
-    boolean isAgreed();
+@Path("alec/situation")
+@Produces({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON})
+public interface SituationRest {
+    @POST
+    @Path("rejected/{id}")
+    Response rejected(@PathParam("id") String id) throws InterruptedException;
+
+    @POST
+    @Path("accepted/{id}")
+    Response accepted(@PathParam("id") String id) throws InterruptedException;
+
+    @GET
+    @Path("statusList")
+    Response getSituationStatusList() throws InterruptedException;
 }

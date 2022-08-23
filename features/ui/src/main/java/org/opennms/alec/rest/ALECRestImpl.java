@@ -1,32 +1,26 @@
 package org.opennms.alec.rest;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.JacksonSituation;
-import org.opennms.alec.data.Status;
-import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.datasource.api.SituationDatasource;
+import org.opennms.alec.data.Agreement;
+import org.opennms.alec.data.ConfigurationImpl;
+import org.opennms.alec.data.EngineParameter;
+import org.opennms.alec.data.EngineParameterImpl;
+import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.driver.main.Driver;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.alec.jackson.Agreement;
-import org.opennms.alec.jackson.ConfigurationImpl;
-import org.opennms.alec.jackson.EngineParameter;
-import org.opennms.alec.jackson.EngineParameterImpl;
-import org.opennms.alec.jackson.KeyEnum;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ALECRestImpl implements ALECRest {
@@ -37,16 +31,13 @@ public class ALECRestImpl implements ALECRest {
     private final KeyValueStore<String> kvStore;
     private final List<EngineFactory> engineFactories;
     private final Driver driver;
-    private final SituationDatasource situationDatasource;
 
     public ALECRestImpl(KeyValueStore<String> kvStore,
                         EngineRegistry engineRegistry,
-                        List<EngineFactory> engineFactories,
-                        SituationDatasource situationDatasource) {
+                        List<EngineFactory> engineFactories) {
         this.kvStore = kvStore;
         this.driver = (Driver) engineRegistry.getEngineRegistry();
         this.engineFactories = engineFactories;
-        this.situationDatasource = situationDatasource;
         objectMapper = new ObjectMapper();
     }
 
@@ -146,56 +137,6 @@ public class ALECRestImpl implements ALECRest {
         } catch (JsonProcessingException e) {
             return somethingWentWrong(e);
         }
-    }
-
-    @Override
-    public Response refusedSituation(String id) {
-        List<Situation> situations = new ArrayList<>();
-        Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
-
-        if (situationOptional.isPresent()) {
-            try {
-                Optional<String> alreadyRefusedSituations = kvStore.get(KeyEnum.REFUSED_SITUATION.toString(), ALEC_CONFIG);
-                if (alreadyRefusedSituations.isPresent()) {
-                    List<JacksonSituation> jacksonSituations = objectMapper.readValue(alreadyRefusedSituations.get(), new TypeReference<>() {
-                    });
-                    situations.addAll(jacksonSituations);
-                }
-                Situation situation = situationOptional.get();
-                situations.add(JacksonSituation.newBuilder(situation).status(Status.REJECTED).build());
-                long ret = kvStore.put(KeyEnum.REFUSED_SITUATION.toString(), objectMapper.writeValueAsString(situations), ALEC_CONFIG);
-                return Response.ok().entity(ret).build();
-            } catch (JsonProcessingException e) {
-                return somethingWentWrong(e);
-            }
-        }
-
-        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
-    }
-
-    @Override
-    public Response acceptedSituation(String id) {
-        List<Situation> situations = new ArrayList<>();
-        Optional<Situation> situationOptional = situationDatasource.getSituationsWithAlarmId().stream().filter(situation -> id.equals(situation.getId())).findAny();
-
-        if (situationOptional.isPresent()) {
-            try {
-                Optional<String> alreadyAcceptedSituations = kvStore.get(KeyEnum.ACCEPTED_SITUATION.toString(), ALEC_CONFIG);
-                if (alreadyAcceptedSituations.isPresent()) {
-                    List<JacksonSituation> jacksonSituations = objectMapper.readValue(alreadyAcceptedSituations.get(), new TypeReference<>() {
-                    });
-                    situations.addAll(jacksonSituations);
-                }
-                Situation situation = situationOptional.get();
-                situations.add(JacksonSituation.newBuilder(situation).status(Status.ACCEPTED).build());
-                long ret = kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(situations), ALEC_CONFIG);
-                return Response.ok().entity(ret).build();
-            } catch (JsonProcessingException e) {
-                return somethingWentWrong(e);
-            }
-        }
-
-        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
     }
 
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {

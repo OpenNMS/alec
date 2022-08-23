@@ -26,13 +26,46 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.jackson;
+package org.opennms.alec.data;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
-public interface Configuration {
-    Agreement getAgreement();
+public class AgreementImpl implements Agreement {
+    private final boolean agreed;
 
-    EngineParameter getEngineParameter();
+    private AgreementImpl(Builder builder) {
+        agreed = builder.agreed;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(AgreementImpl copy) {
+        Builder builder = new Builder();
+        builder.agreed = copy.isAgreed();
+        return builder;
+    }
+
+    @Override
+    public boolean isAgreed() {
+        return agreed;
+    }
+
+    public static final class Builder {
+        @JsonProperty("agreed")
+        private boolean agreed;
+
+        private Builder() {
+        }
+
+        public Builder agreed(boolean val) {
+            agreed = val;
+            return this;
+        }
+
+        public AgreementImpl build() {
+            return new AgreementImpl(this);
+        }
+    }
 }

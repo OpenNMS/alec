@@ -28,9 +28,11 @@
 
 package org.opennms.alec.data;
 
-public enum Status {
-    ACCEPTED,
-    REJECTED,
-    CREATED,
-    MODIFIED
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(builder = ConfigurationImpl.Builder.class)
+public interface Configuration {
+    Agreement getAgreement();
+
+    EngineParameter getEngineParameter();
 }

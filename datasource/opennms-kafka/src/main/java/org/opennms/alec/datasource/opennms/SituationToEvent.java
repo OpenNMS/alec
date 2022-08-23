@@ -40,6 +40,7 @@ import org.opennms.alec.datasource.opennms.events.Event;
 public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
+    public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
 
     public static Event toEvent(Situation situation, Event.TimeFormat timeFormat) {
         final Event e = Event.withDateFormat(timeFormat);

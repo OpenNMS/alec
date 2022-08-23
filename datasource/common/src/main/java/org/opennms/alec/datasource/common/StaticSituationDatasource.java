@@ -30,6 +30,7 @@ package org.opennms.alec.datasource.common;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
@@ -49,7 +50,12 @@ public class StaticSituationDatasource implements SituationDatasource {
 
     @Override
     public List<Situation> getSituationsWithAlarmId() {
-        throw new UnsupportedOperationException("getSituationsWithAlarmId isn't implemented");
+        return getSituations();
+    }
+
+    @Override
+    public Optional<Situation> getSituation(int id) throws InterruptedException {
+        return situations.stream().filter(situation -> String.valueOf(id).equals(situation.getId())).findFirst();
     }
 
     @Override
@@ -59,10 +65,12 @@ public class StaticSituationDatasource implements SituationDatasource {
 
     @Override
     public void registerHandler(SituationHandler handler) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void unregisterHandler(SituationHandler handler) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

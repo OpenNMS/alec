@@ -2,12 +2,16 @@
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import { simplifyDate } from '@/helpers/utils'
 import { useSituationsStore } from '@/store/useSituationsStore'
+import { ref, watch } from 'vue'
 
 const situationStore = useSituationsStore()
 const props = defineProps<{
 	id: number
 }>()
-const alarm = situationStore.alarms[props.id]
+const alarm = ref(situationStore.alarms[props.id])
+watch(props, () => {
+	alarm.value = situationStore.alarms[props.id]
+})
 </script>
 
 <template>

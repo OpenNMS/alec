@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import SeverityStatus from '@/elements/SeverityStatus.vue'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
+import CheckCircle from '@featherds/icon/action/CheckCircle'
+import { FeatherIcon } from '@featherds/icon'
+
 import { TSituation } from '@/types/TSituation'
 const props = defineProps<{
 	alarmInfo: TSituation
@@ -25,7 +27,13 @@ const handleSituationSelected = () => {
 		<div class="content">
 			<div class="title-row">
 				<div class="title">[ {{ props.alarmInfo?.id }} ]</div>
-				<SeverityStatus :severity="props.alarmInfo?.severity" />
+				<div v-if="props.alarmInfo.status == 'ACCEPTED'" class="accepted">
+					<FeatherIcon
+						:icon="CheckCircle"
+						aria-hidden="true"
+						class="icon accepted"
+					/>
+				</div>
 			</div>
 			<AlarmsCountBySeverity
 				:relatedAlarms="props.alarmInfo?.relatedAlarms"
@@ -70,5 +78,10 @@ const handleSituationSelected = () => {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+}
+
+.accepted {
+	font-size: 25px;
+	color: green;
 }
 </style>

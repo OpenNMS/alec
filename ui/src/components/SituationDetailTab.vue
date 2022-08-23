@@ -11,20 +11,24 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
-import { format } from 'date-fns'
-
+import { useSituationsStore } from '@/store/useSituationsStore'
+const ACCEPTED = 'ACCEPTED'
+const REJECTED = 'REJECTED'
+const situationStore = useSituationsStore()
 const userStore = useUserStore()
 
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
-const status = ref('')
+const status = ref(props.alarmInfo.status)
+
 const handleFeedbackSituation = (action: string) => {
-	sendFeedbackAcceptSituation(props.alarmInfo?.id, action)
+	sendFeedbackAcceptSituation(props.alarmInfo?.id, action.toLowerCase())
 	status.value = action
+	situationStore.getSituations()
 }
 watch(props, () => {
-	status.value = ''
+	status.value = props.alarmInfo.status || ''
 })
 </script>
 
@@ -33,30 +37,30 @@ watch(props, () => {
 		<div v-if="userStore.allowSave" class="btn-row">
 			<FeatherButton
 				class="btn"
-				:class="{ accepted: status == 'accepted' }"
-				@click="() => handleFeedbackSituation('accepted')"
+				:class="{ accepted: status == ACCEPTED }"
+				@click="() => handleFeedbackSituation(ACCEPTED)"
 			>
 				<FeatherIcon
 					:icon="CheckCircle"
 					aria-hidden="true"
 					class="icon accept"
-					:class="{ accepted: status == 'accepted' }"
+					:class="{ accepted: status == ACCEPTED }"
 				/>
-				<span v-if="status == 'accepted'"> ACCEPTED</span>
+				<span v-if="status == ACCEPTED"> {{ ACCEPTED }}</span>
 				<span v-else> ACCEPT</span>
 			</FeatherButton>
 			<FeatherButton
 				class="btn"
-				:class="{ rejected: status == 'refused' }"
-				@click="() => handleFeedbackSituation('refused')"
+				:class="{ rejected: status == REJECTED }"
+				@click="() => handleFeedbackSituation(REJECTED)"
 			>
 				<FeatherIcon
 					:icon="Cancel"
 					aria-hidden="true"
 					class="icon reject"
-					:class="{ rejected: status == 'refused' }"
+					:class="{ rejected: status == REJECTED }"
 				/>
-				<span v-if="status == 'refused'"> REJECTED</span>
+				<span v-if="status == REJECTED"> {{ REJECTED }}</span>
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>
@@ -70,24 +74,15 @@ watch(props, () => {
 					<div>Situation {{ props.alarmInfo?.id }}</div>
 					<SeverityStatus :severity="props.alarmInfo?.severity" />
 				</div>
+
 				<span v-html="props.alarmInfo.description"></span>
 				<p>
 					<strong>Reduction key:</strong>
 					{{ props.alarmInfo.reductionKey }}
 				</p>
 				<div class="boxes">
-					<DateBox
-						label="First Event"
-						:date="
-							format(new Date(props.alarmInfo.firstEventTime), 'd/M HH:mm:ss')
-						"
-					/>
-					<DateBox
-						label="Last Event"
-						:date="
-							format(new Date(props.alarmInfo.lastEvent.time), 'd/M HH:mm:ss')
-						"
-					/>
+					<DateBox label="First Event" :date="props.alarmInfo.firstEventTime" />
+					<DateBox label="Last Event" :date="props.alarmInfo.lastEvent.time" />
 				</div>
 			</div>
 			<div class="parameters">
@@ -145,6 +140,7 @@ watch(props, () => {
 }
 .accept {
 	font-size: 16px;
+	margin-right: 3px;
 	color: green !important;
 }
 .reject {

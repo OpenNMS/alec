@@ -52,4 +52,7 @@ public interface SituationRest {
     @GET
     @Path("statusList")
     Response getSituationStatusList() throws InterruptedException;
+
+    @GET
+    Response getSituationList() throws InterruptedException;
 }

@@ -15,7 +15,7 @@ watch(props, () => {
 <template>
 	<div class="card" v-if="alarm">
 		<div class="row">
-			<div class="title">[{{ alarm.id }}]</div>
+			<div class="title">{{ alarm.nodeLabel }} [{{ alarm.id }}]</div>
 			<SeverityStatus :severity="alarm?.severity" />
 		</div>
 

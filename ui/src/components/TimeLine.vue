@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { TAlarm } from '@/types/TSituation'
-import { format } from 'date-fns'
 import { FeatherTooltip } from '@featherds/tooltip'
-import CONST from '@/helpers/constants'
 import { formatDate } from '@/helpers/utils'
 
 const props = defineProps<{

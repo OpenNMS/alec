@@ -86,74 +86,70 @@ const handleClickZoomOut = () => {
 </script>
 
 <template>
-	<div class="metrics">
-		<div class="section">
-			<div class="id">Situation - [ {{ props.situation.id }} ]</div>
+	<div class="section detail">
+		<div
+			class="severity-line"
+			:class="[`${props.situation?.severity?.toLowerCase()}-bg dark`]"
+		></div>
+		<div>
+			<div class="id">Situation {{ props.situation.id }}</div>
 
 			<div>
 				Duration:
 				{{ formatDistanceStrict(new Date(maxEnd), new Date(minStart)) }}
 			</div>
 		</div>
-		<div class="alarm-list">
-			<h4>Alarms</h4>
-			<div class="action-btns">
-				<FeatherSelect
-					class="select"
-					label="Sort by:"
-					:options="options"
-					v-model="sortedOption"
-					text-prop="name"
-					@update:modelValue="sortChanged"
-				/>
-				<div class="zoom">
-					Zoom
-					<div>
-						<FeatherIcon
-							:icon="AddCircleAlt"
-							class="zoom-icon"
-							@click="handleClickZoomIn"
-						/>
-						<FeatherIcon
-							:icon="Remove"
-							class="zoom-icon"
-							@click="handleClickZoomOut"
-						/>
-					</div>
+	</div>
+	<div class="section">
+		<div class="id">Alarms</div>
+		<div class="action-btns">
+			<FeatherSelect
+				class="select"
+				label="Sort by:"
+				:options="options"
+				v-model="sortedOption"
+				text-prop="name"
+				@update:modelValue="sortChanged"
+			/>
+			<div class="zoom">
+				Zoom
+				<div>
+					<FeatherIcon
+						:icon="AddCircleAlt"
+						class="zoom-icon"
+						@click="handleClickZoomIn"
+					/>
+					<FeatherIcon
+						:icon="Remove"
+						class="zoom-icon"
+						@click="handleClickZoomOut"
+					/>
 				</div>
 			</div>
-			<div class="alarms">
-				<div class="times">
-					<div>
-						{{ formatDate(minStart) }}
-					</div>
-					<div>
-						{{ formatDate(maxEnd) }}
+		</div>
+		<div class="alarms">
+			<div class="times">
+				<div>
+					{{ formatDate(minStart) }}
+				</div>
+				<div>
+					{{ formatDate(maxEnd) }}
+				</div>
+			</div>
+			<div class="container">
+				<div class="ids">
+					<div class="alarm-id" v-for="alarm in relatedAlarms" :key="alarm.id">
+						{{ alarm.nodeLabel }} [ {{ alarm.id }} ]
 					</div>
 				</div>
-				<div class="container">
-					<div class="ids">
-						<div
-							class="alarm-id"
-							v-for="alarm in relatedAlarms"
-							:key="alarm.id"
-						>
-							[ {{ alarm.id }} ]
-						</div>
-					</div>
-					<div class="timeline-container">
-						<div
-							class="timeline"
-							v-for="alarm in relatedAlarms"
-							:key="alarm.id"
-						>
-							<TimeLine
-								:alarm="alarm"
-								:proportion="proportion"
-								:min-start="parseInt(minStart)"
-								:max-end="parseInt(maxEnd)"
-							/>
-						</div>
+				<div class="timeline-container">
+					<div class="timeline" v-for="alarm in relatedAlarms" :key="alarm.id">
+						<TimeLine
+							:alarm="alarm"
+							:proportion="proportion"
+							:min-start="parseInt(minStart)"
+							:max-end="parseInt(maxEnd)"
+						/>
 					</div>
 				</div>
 			</div>
@@ -173,23 +169,28 @@ const handleClickZoomOut = () => {
 ::-webkit-scrollbar-thumb {
 	background: #909090;
 }
-.metrics {
-	background-color: #ffffff;
-	padding: 20px;
-	border: 1px solid $border-grey;
-	margin-top: 10px;
-}
 
+.severity-line {
+	width: 4px;
+	margin-right: 10px;
+}
 .section {
 	background-color: #ffffff;
-	border-bottom: 1px solid $border-grey;
+	border: 1px solid $border-grey;
+	margin-top: 10px;
+	padding: 15px;
+}
+
+.detail {
+	@extend .section;
 	margin-bottom: 20px;
-	padding-bottom: 20px;
+	display: flex;
+	flex-direction: row;
 }
 
 .id {
 	font-weight: 600;
-	font-size: 22px;
+	font-size: 21px;
 	margin-bottom: 5px;
 	display: flex;
 	flex-direction: row;
@@ -202,7 +203,7 @@ const handleClickZoomOut = () => {
 }
 .alarm-id {
 	font-size: 17px;
-	margin-bottom: 9px;
+	margin-bottom: 12px;
 }
 .container {
 	display: flex;
@@ -215,7 +216,7 @@ const handleClickZoomOut = () => {
 .ids {
 	display: flex;
 	flex-direction: column;
-	width: 10%;
+	width: 15%;
 }
 .timeline-container {
 	flex-direction: column;
@@ -229,7 +230,7 @@ const handleClickZoomOut = () => {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	margin-bottom: 15px;
+	margin-bottom: 17px;
 	padding-top: 5px;
 }
 
@@ -238,7 +239,7 @@ const handleClickZoomOut = () => {
 	flex-direction: row;
 	border-bottom: 1px solid #b7b7b7;
 	margin-bottom: 15px;
-	margin-left: 10%;
+	margin-left: 15%;
 	justify-content: space-between;
 }
 
@@ -249,6 +250,7 @@ const handleClickZoomOut = () => {
 .action-btns {
 	display: flex;
 	flex-direction: row;
+	padding-top: 10px;
 	> div {
 		margin-right: 20px;
 	}

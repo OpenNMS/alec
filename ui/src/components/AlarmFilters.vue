@@ -77,9 +77,6 @@ watch(props, () => {
 	padding: 15px;
 	background-color: #ffffff;
 }
-.section {
-	padding-top: 20px;
-}
 
 .title {
 	font-size: 21px;
@@ -95,11 +92,11 @@ watch(props, () => {
 .alarm-list {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
 	flex-wrap: wrap;
 	> div {
-		margin-bottom: 20px;
+		margin-top: 20px;
 		width: 300px;
+		margin-right: 15px;
 	}
 	> div:last-child {
 		margin-bottom: 0;

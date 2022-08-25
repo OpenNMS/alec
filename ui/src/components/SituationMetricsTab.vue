@@ -2,7 +2,7 @@
 import { TSituation } from '@/types/TSituation'
 import { formatDistanceStrict } from 'date-fns'
 import { minBy, maxBy, groupBy, sortBy, reverse } from 'lodash'
-import { FeatherSelect } from '@featherds/select'
+import { FeatherSelect, ISelectItemType } from '@featherds/select'
 import { FeatherIcon } from '@featherds/icon'
 import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
 import TimeLine from '@/components/Timeline.vue'
@@ -23,11 +23,11 @@ const props = defineProps<{
 
 const relatedAlarms = ref(props.situation.relatedAlarms)
 const minStart = ref(
-	minBy(props.situation.relatedAlarms, 'firstEventTime').firstEventTime ||
+	minBy(props.situation?.relatedAlarms, 'firstEventTime')?.firstEventTime ||
 		new Date()
 )
 const maxEnd = ref(
-	maxBy(props.situation.relatedAlarms, 'lastEventTime').lastEventTime ||
+	maxBy(props.situation?.relatedAlarms, 'lastEventTime')?.lastEventTime ||
 		new Date()
 )
 const proportion = ref(maxWidth.value / (maxEnd.value - minStart.value))
@@ -47,7 +47,7 @@ watch(props, () => {
 	sortedOption.value = options[0]
 })
 
-const sortChanged = (sortObj) => {
+const sortChanged = (sortObj: ISelectItemType) => {
 	//by creationTime (comes by default)
 	if (sortObj.id === 1) {
 		relatedAlarms.value = props.situation.relatedAlarms
@@ -55,11 +55,12 @@ const sortChanged = (sortObj) => {
 	//by severity
 	if (sortObj.id === 2) {
 		const alarmGrouped = groupBy(relatedAlarms.value, 'severity')
-		const alarms = []
-			.concat(alarmGrouped['CRITICAL'])
-			.concat(alarmGrouped['MAJOR'])
-			.concat(alarmGrouped['MINOR'])
-			.concat(alarmGrouped['WARNING'])
+		const alarms = [
+			...alarmGrouped['CRITICAL'],
+			...alarmGrouped['MAJOR'],
+			...alarmGrouped['MINOR'],
+			...alarmGrouped['WARNING']
+		]
 		relatedAlarms.value = alarms.filter((a) => a)
 	}
 	//by duration

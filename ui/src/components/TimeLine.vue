@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { TAlarm } from '@/types/TSituation'
+import { TRelatedAlarm } from '@/types/TSituation'
 import { FeatherTooltip } from '@featherds/tooltip'
 import { formatDate } from '@/helpers/utils'
 
 const props = defineProps<{
-	alarm: TAlarm
+	alarm: TRelatedAlarm
 	proportion: number
 	minStart: number
 	maxEnd: number
 }>()
 
-const getWidth = (alarmStart: number, alarmEnd: number): number => {
-	return (alarmEnd - alarmStart) * props.proportion
+const getWidth = (
+	alarmStart: Date | undefined,
+	alarmEnd: Date | undefined
+): number => {
+	return alarmStart && alarmEnd
+		? (Number(alarmEnd) - Number(alarmStart)) * props.proportion
+		: 0
 }
 
-const getOffset = (alarmStart: number): number => {
-	return (alarmStart - props.minStart) * props.proportion
+const getOffset = (alarmStart: Date | undefined): number => {
+	return alarmStart
+		? (Number(alarmStart) - Number(props.minStart)) * props.proportion
+		: 0
 }
 </script>
 

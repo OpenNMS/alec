@@ -53,4 +53,9 @@ public interface Alarm {
      */
     Long getNodeId();
 
+    String getNodeLocation();
+
+    String getNodeLabel();
+
+    String getReductionKey();
 }

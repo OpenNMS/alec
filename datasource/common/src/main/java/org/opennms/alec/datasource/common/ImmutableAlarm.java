@@ -29,6 +29,7 @@
 package org.opennms.alec.datasource.common;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
@@ -265,19 +266,19 @@ public final class ImmutableAlarm implements Alarm {
 
     @Override
     public String toString() {
-        return "ImmutableAlarm{" +
-                "id='" + id + '\'' +
-                ", firstTime=" + firstTime +
-                ", time=" + time +
-                ", severity=" + severity +
-                ", inventoryObjectId='" + inventoryObjectId + '\'' +
-                ", inventoryObjectType='" + inventoryObjectType + '\'' +
-                ", summary='" + summary + '\'' +
-                ", description='" + description + '\'' +
-                ", nodeId=" + nodeId + '\'' +
-                ", nodeLabel=" + nodeLabel + '\'' +
-                ", nodeLocation=" + nodeLocation + '\'' +
-                ", reductionKey=" + reductionKey +
-                '}';
+        return new StringJoiner(", ", ImmutableAlarm.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("firstTime=" + firstTime)
+                .add("time=" + time)
+                .add("severity=" + severity)
+                .add("inventoryObjectId='" + inventoryObjectId + "'")
+                .add("inventoryObjectType='" + inventoryObjectType + "'")
+                .add("summary='" + summary + "'")
+                .add("description='" + description + "'")
+                .add("nodeId=" + nodeId)
+                .add("nodeLocation='" + nodeLocation + "'")
+                .add("nodeLabel='" + nodeLabel + "'")
+                .add("reductionKey='" + reductionKey + "'")
+                .toString();
     }
 }

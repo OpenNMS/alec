@@ -2,13 +2,16 @@
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+import { cloneDeep } from 'lodash'
+
 const situationStore = useSituationsStore()
 situationStore.getSituations()
 const state = reactive({
 	selectedSituationIndex: 0,
 	situationSelected: ''
 })
+const situations = ref(situationStore.situations)
 const situationSelected = (id: string) => {
 	state.situationSelected = id
 	state.selectedSituationIndex = situationStore.situations.findIndex(
@@ -16,7 +19,18 @@ const situationSelected = (id: string) => {
 	)
 }
 
+const situationStatusChanged = (status: string, id: string) => {
+	const auxSituations = situations.value
+	auxSituations.forEach((sit) => {
+		if (sit.id === id) {
+			sit.status = status
+		}
+	})
+	situations.value = cloneDeep(auxSituations)
+}
+
 situationStore.$subscribe((mutation, storeState) => {
+	situations.value = situationStore.situations
 	state.situationSelected = storeState.situations[0]?.id
 })
 </script>
@@ -26,16 +40,17 @@ situationStore.$subscribe((mutation, storeState) => {
 		<h2>Situation List</h2>
 		<div class="container">
 			<div class="situation-list">
-				<div v-for="alarmInfo in situationStore.situations" :key="alarmInfo.id">
+				<div v-for="situationInfo in situations" :key="situationInfo.id">
 					<SituationCard
-						:alarm-info="alarmInfo"
+						:situation-info="situationInfo"
 						@situation-selected="situationSelected"
-						:selected="state.situationSelected == alarmInfo.id"
+						:selected="state.situationSelected == situationInfo.id"
 					/>
 				</div>
 			</div>
 			<SituationDetail
 				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
+				@situation-status-changed="situationStatusChanged"
 			/>
 		</div>
 	</div>
@@ -44,9 +59,6 @@ situationStore.$subscribe((mutation, storeState) => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 .list-main {
-	/*background-color: #ffffff;
-	border: 1px solid $border-grey; 
-	padding: 20px; */
 	min-height: 800px;
 }
 h2 {

@@ -11,14 +11,13 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
-import { useSituationsStore } from '@/store/useSituationsStore'
 import { formatDate } from '@/helpers/utils'
 import CONST from '@/helpers/constants'
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
-const situationStore = useSituationsStore()
 const userStore = useUserStore()
+const emit = defineEmits(['situation-status-changed'])
 
 const props = defineProps<{
 	situationInfo: TSituation
@@ -28,8 +27,7 @@ const status = ref(props.situationInfo.status)
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
 	status.value = action
-	situationStore.$reset()
-	situationStore.getSituations()
+	emit('situation-status-changed', action, props.situationInfo?.id)
 }
 watch(props, () => {
 	status.value = props.situationInfo.status || ''
@@ -69,7 +67,7 @@ watch(props, () => {
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>
-		<div class="situation-detail">
+		<div v-if="props.situationInfo" class="situation-detail">
 			<div
 				class="severity-line"
 				:class="[`${props.situationInfo?.severity?.toLowerCase()}-bg dark`]"
@@ -105,7 +103,7 @@ watch(props, () => {
 			</div>
 		</div>
 	</div>
-	<div class="section">
+	<div v-if="props.situationInfo.alarms.length > 0" class="section">
 		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>
 </template>

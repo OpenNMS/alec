@@ -8,7 +8,8 @@ import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
 import TimeLine from '@/components/Timeline.vue'
 import Remove from '@featherds/icon/action/Remove'
 import { formatDate } from '@/helpers/utils'
-const DEFAULT_MAX_WIDTH = 1000
+import { ref, watch } from 'vue'
+const DEFAULT_MAX_WIDTH = 800
 let maxWidth = ref(DEFAULT_MAX_WIDTH)
 
 const options = [
@@ -21,29 +22,34 @@ const props = defineProps<{
 	situation: TSituation
 }>()
 
+const getProportion = () => {
+	return maxWidth.value / (Number(maxEnd.value) - Number(minStart.value))
+}
+
 const relatedAlarms = ref(props.situation.alarms)
 const minStart = ref(
 	minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
 )
 const maxEnd = ref(maxBy(props.situation?.alarms, 'time')?.time || new Date())
-const proportion = ref(maxWidth.value / (maxEnd.value - minStart.value))
+const proportion = ref(getProportion())
 
 watch(props, () => {
-	minStart.value = minBy(props.situation.alarms, 'firstTime').firstTime
-	maxEnd.value = maxBy(props.situation.alarms, 'time').time
+	minStart.value =
+		minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
+	maxEnd.value = maxBy(props.situation?.alarms, 'time')?.time || new Date()
 	maxWidth.value = DEFAULT_MAX_WIDTH
-	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
+	proportion.value = getProportion()
 	relatedAlarms.value = props.situation.alarms
 	sortedOption.value = options[0]
 })
 
-const sortChanged = (sortObj: ISelectItemType) => {
+const sortChanged = (sortObj: ISelectItemType | undefined) => {
 	//by creationTime (comes by default)
-	if (sortObj.id === 1) {
+	if (sortObj?.id === 1) {
 		relatedAlarms.value = props.situation.alarms
 	}
 	//by severity
-	if (sortObj.id === 2) {
+	if (sortObj?.id === 2) {
 		const alarmGrouped = groupBy(relatedAlarms.value, 'severity')
 		const alarms = [
 			...(alarmGrouped['CRITICAL'] || []),
@@ -54,9 +60,12 @@ const sortChanged = (sortObj: ISelectItemType) => {
 		relatedAlarms.value = alarms.filter((a) => a)
 	}
 	//by duration
-	if (sortObj.id === 3) {
+	if (sortObj?.id === 3) {
 		const sorted = reverse(
-			sortBy(props.situation.alarms, (a) => a.time - a.firstTime)
+			sortBy(
+				props.situation.alarms,
+				(a) => Number(a.time) - Number(a.firstTime)
+			)
 		)
 		relatedAlarms.value = sorted
 	}
@@ -64,12 +73,12 @@ const sortChanged = (sortObj: ISelectItemType) => {
 
 const handleClickZoomIn = () => {
 	maxWidth.value += 100
-	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
+	proportion.value = getProportion()
 }
 
 const handleClickZoomOut = () => {
 	maxWidth.value -= 100
-	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
+	proportion.value = getProportion()
 }
 </script>
 
@@ -88,7 +97,7 @@ const handleClickZoomOut = () => {
 			</div>
 		</div>
 	</div>
-	<div class="section">
+	<div v-if="relatedAlarms.length > 0" class="section">
 		<div class="id">Alarms</div>
 		<div class="action-btns">
 			<FeatherSelect
@@ -135,8 +144,8 @@ const handleClickZoomOut = () => {
 						<TimeLine
 							:alarm="alarm"
 							:proportion="proportion"
-							:min-start="parseInt(minStart)"
-							:max-end="parseInt(maxEnd)"
+							:min-start="minStart"
+							:max-end="maxEnd"
 						/>
 					</div>
 				</div>
@@ -210,7 +219,7 @@ const handleClickZoomOut = () => {
 	flex-direction: column;
 	display: flex;
 	overflow-x: auto;
-	width: 1100px;
+	width: 900px;
 	flex-wrap: wrap;
 }
 

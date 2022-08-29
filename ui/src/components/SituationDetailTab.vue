@@ -12,23 +12,28 @@ import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
 import { useSituationsStore } from '@/store/useSituationsStore'
-const ACCEPTED = 'ACCEPTED'
-const REJECTED = 'REJECTED'
+import CONST from '@/helpers/constants'
+const ACCEPTED = CONST.ACCEPTED
+const REJECTED = CONST.REJECTED
+
 const situationStore = useSituationsStore()
 const userStore = useUserStore()
 
 const props = defineProps<{
-	alarmInfo: TSituation
+	situationInfo: TSituation
 }>()
-const status = ref(props.alarmInfo.status)
+const status = ref(props.situationInfo.status)
 
 const handleFeedbackSituation = (action: string) => {
-	sendFeedbackAcceptSituation(props.alarmInfo?.id, action.toLowerCase())
-	status.value = action
-	situationStore.getSituations()
+	if (props.situationInfo.status !== REJECTED) {
+		sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
+		status.value = action
+		situationStore.$reset()
+		situationStore.getSituations()
+	}
 }
 watch(props, () => {
-	status.value = props.alarmInfo.status || ''
+	status.value = props.situationInfo.status || ''
 })
 </script>
 
@@ -67,34 +72,42 @@ watch(props, () => {
 		<div class="situation-detail">
 			<div
 				class="severity-line"
-				:class="[`${props.alarmInfo?.severity?.toLowerCase()}-bg dark`]"
+				:class="[`${props.situationInfo?.severity?.toLowerCase()}-bg dark`]"
 			></div>
 			<div class="situation-info">
 				<div class="id">
-					<div>Situation {{ props.alarmInfo?.id }}</div>
-					<SeverityStatus :severity="props.alarmInfo?.severity" />
+					<div>Situation {{ props.situationInfo?.id }}</div>
+					<SeverityStatus :severity="props.situationInfo?.severity" />
 				</div>
 
-				<span v-html="props.alarmInfo.description"></span>
-				<p>
+				<span v-html="props.situationInfo.description"></span>
+				<p v-if="props.situationInfo.reductionKey">
 					<strong>Reduction key:</strong>
-					{{ props.alarmInfo.reductionKey }}
+					{{ props.situationInfo.reductionKey }}
 				</p>
 				<div class="boxes">
-					<DateBox label="First Event" :date="props.alarmInfo.firstEventTime" />
-					<DateBox label="Last Event" :date="props.alarmInfo.lastEvent.time" />
+					<DateBox
+						v-if="props.situationInfo.creationTime"
+						label="First Event"
+						:date="props.situationInfo.creationTime"
+					/>
+					<DateBox
+						v-if="props.situationInfo.lastTime"
+						label="Last Event"
+						:date="props.situationInfo.lastTime"
+					/>
 				</div>
 			</div>
 			<div class="parameters">
 				<AlarmsCountBySeverity
-					:relatedAlarms="props.alarmInfo?.relatedAlarms"
+					:alarms="props.situationInfo?.alarms"
 					size="large"
 				/>
 			</div>
 		</div>
 	</div>
 	<div class="section">
-		<AlarmFilters :related-alarms="props.alarmInfo.relatedAlarms" />
+		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>
 </template>
 <style scoped lang="scss">

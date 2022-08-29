@@ -2,8 +2,12 @@
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherIcon } from '@featherds/icon'
-
+import Cancel from '@featherds/icon/action/Cancel'
 import { TSituation } from '@/types/TSituation'
+import CONST from '@/helpers/constants'
+const ACCEPTED = CONST.ACCEPTED
+const REJECTED = CONST.REJECTED
+
 const props = defineProps<{
 	alarmInfo: TSituation
 	selected: boolean
@@ -18,7 +22,10 @@ const handleSituationSelected = () => {
 	<div
 		v-on:click="handleSituationSelected"
 		class="card"
-		:class="{ selected: props.selected }"
+		:class="{
+			selected: props.selected,
+			rejected: props.alarmInfo.status == REJECTED
+		}"
 	>
 		<div
 			class="severity-line"
@@ -27,18 +34,22 @@ const handleSituationSelected = () => {
 		<div class="content">
 			<div class="title-row">
 				<div class="title">[ {{ props.alarmInfo?.id }} ]</div>
-				<div v-if="props.alarmInfo.status == 'ACCEPTED'" class="accepted">
+				<div v-if="props.alarmInfo.status == ACCEPTED" class="accepted">
 					<FeatherIcon
 						:icon="CheckCircle"
 						aria-hidden="true"
 						class="icon accepted"
 					/>
 				</div>
+				<div v-if="props.alarmInfo.status == REJECTED" class="rejected">
+					<FeatherIcon
+						:icon="Cancel"
+						aria-hidden="true"
+						class="icon rejected"
+					/>
+				</div>
 			</div>
-			<AlarmsCountBySeverity
-				:relatedAlarms="props.alarmInfo?.relatedAlarms"
-				size="normal"
-			/>
+			<AlarmsCountBySeverity :alarms="props.alarmInfo?.alarms" size="normal" />
 		</div>
 	</div>
 </template>
@@ -57,6 +68,11 @@ const handleSituationSelected = () => {
 	}
 	&.selected {
 		border: 1px solid $dark-blue;
+	}
+
+	&.rejected {
+		background-color: #f3f3f3;
+		opacity: 0.4;
 	}
 }
 .title-row {
@@ -83,5 +99,10 @@ const handleSituationSelected = () => {
 .accepted {
 	font-size: 25px;
 	color: green;
+}
+
+.rejected {
+	font-size: 25px;
+	color: red;
 }
 </style>

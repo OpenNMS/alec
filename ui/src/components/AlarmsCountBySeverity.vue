@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { groupBy } from 'lodash'
-import { TRelatedAlarm } from '@/types/TSituation'
+import { TAlarm } from '@/types/TSituation'
 const props = defineProps<{
-	relatedAlarms: TRelatedAlarm[]
+	alarms: TAlarm[]
 	size: 'normal' | 'large'
 }>()
 </script>
@@ -12,7 +12,7 @@ const props = defineProps<{
 		<div
 			class="alarm-count"
 			:class="[`${key.toString().toLowerCase()}-color`, props.size]"
-			v-for="(list, key) in groupBy(props?.relatedAlarms, 'severity')"
+			v-for="(list, key) in groupBy(props?.alarms, 'severity')"
 			:key="key"
 		>
 			{{ list.length }}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import DateBox from '@/elements/DateBox.vue'
+import InformationBox from '@/elements/InformationBox.vue'
 import { TSituation } from '@/types/TSituation'
 import { FeatherIcon } from '@featherds/icon'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
@@ -11,13 +11,13 @@ import AlarmFilters from '@/components/AlarmFilters.vue'
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
-import { useSituationsStore } from '@/store/useSituationsStore'
+import { formatDate } from '@/helpers/utils'
 import CONST from '@/helpers/constants'
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
-const situationStore = useSituationsStore()
 const userStore = useUserStore()
+const emit = defineEmits(['situation-status-changed'])
 
 const props = defineProps<{
 	situationInfo: TSituation
@@ -25,12 +25,9 @@ const props = defineProps<{
 const status = ref(props.situationInfo.status)
 
 const handleFeedbackSituation = (action: string) => {
-	if (props.situationInfo.status !== REJECTED) {
-		sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
-		status.value = action
-		situationStore.$reset()
-		situationStore.getSituations()
-	}
+	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
+	status.value = action
+	emit('situation-status-changed', action, props.situationInfo?.id)
 }
 watch(props, () => {
 	status.value = props.situationInfo.status || ''
@@ -41,6 +38,7 @@ watch(props, () => {
 	<div class="section">
 		<div v-if="userStore.allowSave" class="btn-row">
 			<FeatherButton
+				v-if="status !== REJECTED"
 				class="btn"
 				:class="{ accepted: status == ACCEPTED }"
 				@click="() => handleFeedbackSituation(ACCEPTED)"
@@ -69,7 +67,7 @@ watch(props, () => {
 				<span v-else> REJECT</span>
 			</FeatherButton>
 		</div>
-		<div class="situation-detail">
+		<div v-if="props.situationInfo" class="situation-detail">
 			<div
 				class="severity-line"
 				:class="[`${props.situationInfo?.severity?.toLowerCase()}-bg dark`]"
@@ -81,20 +79,19 @@ watch(props, () => {
 				</div>
 
 				<span v-html="props.situationInfo.description"></span>
-				<p v-if="props.situationInfo.reductionKey">
-					<strong>Reduction key:</strong>
-					{{ props.situationInfo.reductionKey }}
-				</p>
+				<p></p>
 				<div class="boxes">
-					<DateBox
-						v-if="props.situationInfo.creationTime"
+					<InformationBox
 						label="First Event"
-						:date="props.situationInfo.creationTime"
+						:info="formatDate(props.situationInfo.creationTime)"
 					/>
-					<DateBox
-						v-if="props.situationInfo.lastTime"
+					<InformationBox
 						label="Last Event"
-						:date="props.situationInfo.lastTime"
+						:info="formatDate(props.situationInfo.lastTime)"
+					/>
+					<InformationBox
+						label="Reduction key"
+						:info="props.situationInfo.reductionKey"
 					/>
 				</div>
 			</div>
@@ -106,7 +103,7 @@ watch(props, () => {
 			</div>
 		</div>
 	</div>
-	<div class="section">
+	<div v-if="props.situationInfo.alarms.length > 0" class="section">
 		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>
 </template>
@@ -114,13 +111,12 @@ watch(props, () => {
 @import '@/styles/variables.scss';
 @import '@featherds/table/scss/table';
 
-.section {
-	padding: 10px;
-	background-color: $dark-blue;
-	margin-bottom: 20px;
-}
 .btn-row {
-	padding-bottom: 15px;
+	padding: 15px;
+	border: 1px solid $border-grey;
+	margin-bottom: 20px;
+	background-color: #ffffff;
+	margin-top: 10px;
 }
 .severity-line {
 	width: 4px;
@@ -132,7 +128,7 @@ watch(props, () => {
 }
 .id {
 	font-weight: 600;
-	font-size: 20px;
+	font-size: 21px;
 	margin-bottom: 14px;
 	display: flex;
 	flex-direction: row;
@@ -165,6 +161,8 @@ watch(props, () => {
 	flex-direction: row;
 	background-color: #ffffff;
 	padding: 15px;
+	border: 1px solid $border-grey;
+	margin-bottom: 20px;
 }
 .alarm-list {
 	margin-top: 20px;
@@ -187,6 +185,8 @@ watch(props, () => {
 }
 .rejected {
 	background-color: red !important;
+	margin-right: 3px;
+
 	color: #ffffff !important;
 }
 </style>

@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { format } from 'date-fns'
 const props = defineProps<{
 	label: string
-	date: string | number | Date
+	info: string | number | Date
 }>()
 </script>
 
 <template>
 	<div class="box">
 		<div class="label">{{ props.label }}</div>
-		<div class="date">{{ format(new Date(props.date), 'd/M HH:mm:ss') }}</div>
+		<div class="date">
+			{{ props.info }}
+		</div>
 	</div>
 </template>
 

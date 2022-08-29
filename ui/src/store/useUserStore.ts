@@ -23,6 +23,7 @@ export const useUserStore = defineStore('userStore', {
 				this.isAdmin = result.roles.includes('ROLE_ADMIN')
 				this.userId = result.id
 			}
+			return result
 		},
 		async getAlecInfo() {
 			const result = await getUserInfo()

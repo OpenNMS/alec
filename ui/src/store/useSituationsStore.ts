@@ -13,6 +13,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 	}),
 	actions: {
 		async getSituations() {
+			this.situations = []
 			const situations = await getSituations()
 			if (situations) {
 				const groupByStatus = groupBy(situations, 'status')

@@ -6,9 +6,15 @@ import {
 } from '@featherds/tabs'
 import { TSituation } from '@/types/TSituation'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
+import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
+const emit = defineEmits(['situation-status-changed'])
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
+
+const situationStatusChanged = (status: string, id: string) => {
+	emit('situation-status-changed', status, id)
+}
 </script>
 
 <template>
@@ -16,14 +22,17 @@ const props = defineProps<{
 		<FeatherTabContainer>
 			<template v-slot:tabs>
 				<FeatherTab>Details</FeatherTab>
-				<!-- <FeatherTab>Topology</FeatherTab>
-				<FeatherTab>Metrics</FeatherTab> -->
+				<FeatherTab>Metrics</FeatherTab>
 			</template>
 			<FeatherTabPanel class="panel">
-				<SituationDetailTab :situation-info="props.alarmInfo" />
+				<SituationDetailTab
+					:situation-info="props.alarmInfo"
+					@situation-status-changed="situationStatusChanged"
+				/>
 			</FeatherTabPanel>
-			<!-- <FeatherTabPanel class="panel">Topology</FeatherTabPanel>
-			<FeatherTabPanel class="panel">Metrics</FeatherTabPanel> -->
+			<FeatherTabPanel class="panel"
+				><SituationMetricsTab :situation="props?.alarmInfo" />
+			</FeatherTabPanel>
 		</FeatherTabContainer>
 	</div>
 </template>
@@ -32,7 +41,6 @@ const props = defineProps<{
 @import '@featherds/table/scss/table';
 .detail {
 	width: 100%;
-	background-color: #ffffff;
 	margin-left: 20px;
 }
 </style>

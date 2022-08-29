@@ -1,6 +1,16 @@
-export const simplifyDate = (value: string | Date) => {
-	const date = new Date(value)
-	return `${
-		date.getMonth() + 1
-	}/${date.getDate()} ${date.getUTCHours()}:${date.getMinutes()}:${date.getSeconds()}`
+import { format } from 'date-fns'
+import CONST from '@/helpers/constants'
+
+const formatDate = (date: Date | string | number | undefined) => {
+	let formattedDate = ''
+	if (date) {
+		try {
+			formattedDate = format(new Date(date), CONST.DATE_FORMAT)
+		} catch (e) {
+			console.log('error date', date)
+		}
+	}
+	return formattedDate
 }
+
+export { formatDate }

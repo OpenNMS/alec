@@ -137,6 +137,12 @@ public class SituationRestImpl implements SituationRest {
         }
     }
 
+    @Override
+    public Response getSituationList() throws InterruptedException {
+        List<Situation> situations = situationDatasource.getSituationsWithAlarmId();
+        return Response.ok(situations).build();
+    }
+
     private void setSituationList(List<Situation> situations, List<SituationStatus> situationStatusList) {
         situations.forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
                 .id(o.getId())

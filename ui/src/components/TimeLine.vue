@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { TRelatedAlarm } from '@/types/TSituation'
+import { TAlarm } from '@/types/TSituation'
 import { FeatherTooltip } from '@featherds/tooltip'
 import { formatDate } from '@/helpers/utils'
 
 const props = defineProps<{
-	alarm: TRelatedAlarm
+	alarm: TAlarm
 	proportion: number
 	minStart: number
 	maxEnd: number
@@ -27,17 +27,14 @@ const getOffset = (alarmStart: Date | undefined): number => {
 </script>
 
 <template>
-	<FeatherTooltip
-		:title="formatDate(alarm.firstEventTime)"
-		v-slot="{ attrs, on }"
-	>
+	<FeatherTooltip :title="formatDate(alarm.firstTime)" v-slot="{ attrs, on }">
 		<div
 			class="circle"
 			v-bind="attrs"
 			v-on="on"
 			:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
 			:style="{
-				marginLeft: getOffset(alarm.firstEventTime) + 'px'
+				marginLeft: getOffset(alarm.firstTime) + 'px'
 			}"
 		></div>
 	</FeatherTooltip>
@@ -46,13 +43,10 @@ const getOffset = (alarmStart: Date | undefined): number => {
 		class="line"
 		:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
 		:style="{
-			width: getWidth(alarm.firstEventTime, alarm.lastEventTime) + 'px'
+			width: getWidth(alarm.firstTime, alarm.time) + 'px'
 		}"
 	></div>
-	<FeatherTooltip
-		:title="formatDate(alarm.lastEventTime)"
-		v-slot="{ attrs, on }"
-	>
+	<FeatherTooltip :title="formatDate(alarm.time)" v-slot="{ attrs, on }">
 		<div
 			class="circle"
 			v-bind="attrs"

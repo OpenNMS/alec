@@ -76,8 +76,22 @@ public class ApiMapper {
 
     public Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+        toAlarm(alarm, alarmBuilder);
+        alarmBuilder.setId(alarm.getReductionKey());
+
+        return alarmBuilder.build();
+    }
+
+    public Alarm toAlarmWithId(org.opennms.integration.api.v1.model.Alarm alarm) {
+        ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
+        toAlarm(alarm, alarmBuilder);
+        alarmBuilder.setId(String.valueOf(alarm.getId()));
+
+        return alarmBuilder.build();
+    }
+
+    private void toAlarm(org.opennms.integration.api.v1.model.Alarm alarm, ImmutableAlarm.Builder alarmBuilder) {
         alarmBuilder
-                .setId(alarm.getReductionKey())
                 .setFirstTime(alarm.getFirstEventTime().getTime())
                 .setTime(alarm.getLastEventTime().getTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
@@ -85,15 +99,17 @@ public class ApiMapper {
                 .setInventoryObjectType(alarm.getManagedObjectType())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
-                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null);
+                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null)
+                .setNodeLabel(alarm.getNode() != null ? alarm.getNode().getLabel() : null)
+                .setNodeLocation(alarm.getNode() != null ? alarm.getNode().getLocation() : null)
+                .setReductionKey(alarm.getReductionKey());
+
         try {
             inventoryService.overrideTypeAndInstance(alarmBuilder, alarm);
         } catch (ScriptedInventoryException e) {
             LOG.error("Failure overriding inventory for alarm [{}] : {}", alarm, e.getCause().getMessage());
             LOG.error("Failure overriding inventory for alarm", e);
         }
-
-        return alarmBuilder.build();
     }
 
     public Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
@@ -102,7 +118,7 @@ public class ApiMapper {
         if (situationIdFromAlarm.isPresent()) {
             situationId = situationIdFromAlarm.get();
         } else {
-            LOG.warn("Could not find situationId on alarm: {}. Using the alarm id instead.", alarm.getId());
+            LOG.warn("Could not find situationId on alarm: {}. Using the alarm reductionKey instead.", alarm.getId());
             situationId = Integer.toString(alarm.getId());
         }
         return getSituation(alarm, situationId);
@@ -110,7 +126,7 @@ public class ApiMapper {
 
     public Situation toSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm) {
         final String situationId = Integer.toString(alarm.getId());
-        return getSituation(alarm, situationId);
+        return getSituationWithAlarmId(alarm, situationId);
     }
 
     private Situation getSituation(org.opennms.integration.api.v1.model.Alarm alarm, String situationId) {
@@ -124,6 +140,28 @@ public class ApiMapper {
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarm).collect(Collectors.toSet()))
                 .setStatus(Status.valueOf(situationStatus))
+                .setReductionKey(alarm.getReductionKey())
+                .setLastTime(alarm.getLastEventTime().toInstant().toEpochMilli())
+                .setUei(alarm.getLastEvent() != null ? alarm.getLastEvent().getUei() : null)
+                .setDescription(alarm.getDescription())
+                .build();
+    }
+
+    private Situation getSituationWithAlarmId(org.opennms.integration.api.v1.model.Alarm alarm, String situationId) {
+        final String situationStatus;
+        final Optional<String> situationStatusFromAlarm = getSituationParamFromAlarm(alarm, SITUATION_STATUS_PARM_NAME);
+        situationStatus = situationStatusFromAlarm.orElseGet(Status.CREATED::toString);
+
+        return ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
+                .setSeverity(toSeverity(alarm.getSeverity()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarmWithId).collect(Collectors.toSet()))
+                .setStatus(Status.valueOf(situationStatus))
+                .setReductionKey(alarm.getReductionKey())
+                .setLastTime(alarm.getLastEventTime().toInstant().toEpochMilli())
+                .setUei(alarm.getLastEvent() != null ? alarm.getLastEvent().getUei() : null)
+                .setDescription(alarm.getDescription())
                 .build();
     }
 

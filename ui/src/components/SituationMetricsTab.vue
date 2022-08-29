@@ -21,55 +21,42 @@ const props = defineProps<{
 	situation: TSituation
 }>()
 
-const relatedAlarms = ref(props.situation.relatedAlarms)
+const relatedAlarms = ref(props.situation.alarms)
 const minStart = ref(
-	minBy(props.situation?.relatedAlarms, 'firstEventTime')?.firstEventTime ||
-		new Date()
+	minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
 )
-const maxEnd = ref(
-	maxBy(props.situation?.relatedAlarms, 'lastEventTime')?.lastEventTime ||
-		new Date()
-)
+const maxEnd = ref(maxBy(props.situation?.alarms, 'time')?.time || new Date())
 const proportion = ref(maxWidth.value / (maxEnd.value - minStart.value))
 
 watch(props, () => {
-	minStart.value = minBy(
-		props.situation.relatedAlarms,
-		'firstEventTime'
-	).firstEventTime
-	maxEnd.value = maxBy(
-		props.situation.relatedAlarms,
-		'lastEventTime'
-	).lastEventTime
+	minStart.value = minBy(props.situation.alarms, 'firstTime').firstTime
+	maxEnd.value = maxBy(props.situation.alarms, 'time').time
 	maxWidth.value = DEFAULT_MAX_WIDTH
 	proportion.value = maxWidth.value / (maxEnd.value - minStart.value)
-	relatedAlarms.value = props.situation.relatedAlarms
+	relatedAlarms.value = props.situation.alarms
 	sortedOption.value = options[0]
 })
 
 const sortChanged = (sortObj: ISelectItemType) => {
 	//by creationTime (comes by default)
 	if (sortObj.id === 1) {
-		relatedAlarms.value = props.situation.relatedAlarms
+		relatedAlarms.value = props.situation.alarms
 	}
 	//by severity
 	if (sortObj.id === 2) {
 		const alarmGrouped = groupBy(relatedAlarms.value, 'severity')
 		const alarms = [
-			...alarmGrouped['CRITICAL'],
-			...alarmGrouped['MAJOR'],
-			...alarmGrouped['MINOR'],
-			...alarmGrouped['WARNING']
+			...(alarmGrouped['CRITICAL'] || []),
+			...(alarmGrouped['MAJOR'] || []),
+			...(alarmGrouped['MINOR'] || []),
+			...(alarmGrouped['WARNING'] || [])
 		]
 		relatedAlarms.value = alarms.filter((a) => a)
 	}
 	//by duration
 	if (sortObj.id === 3) {
 		const sorted = reverse(
-			sortBy(
-				props.situation.relatedAlarms,
-				(a) => a.lastEventTime - a.firstEventTime
-			)
+			sortBy(props.situation.alarms, (a) => a.time - a.firstTime)
 		)
 		relatedAlarms.value = sorted
 	}
@@ -203,7 +190,7 @@ const handleClickZoomOut = () => {
 	flex-direction: column;
 }
 .alarm-id {
-	font-size: 17px;
+	font-size: 15px;
 	margin-bottom: 12px;
 }
 .container {

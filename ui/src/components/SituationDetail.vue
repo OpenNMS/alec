@@ -21,7 +21,7 @@ const props = defineProps<{
 				<FeatherTab>Metrics</FeatherTab>
 			</template>
 			<FeatherTabPanel class="panel">
-				<SituationDetailTab :alarm-info="props.alarmInfo" />
+				<SituationDetailTab :situation-info="props.alarmInfo" />
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel"
 				><SituationMetricsTab :situation="props?.alarmInfo" />

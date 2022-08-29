@@ -29,6 +29,7 @@
 package org.opennms.alec.datasource.common;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
@@ -46,6 +47,9 @@ public final class ImmutableAlarm implements Alarm {
     private final String summary;
     private final String description;
     private final Long nodeId;
+    private final String nodeLocation;
+    private final String nodeLabel;
+    private final String reductionKey;
 
     private ImmutableAlarm(Builder builder) {
         this.id = builder.id;
@@ -57,6 +61,9 @@ public final class ImmutableAlarm implements Alarm {
         this.summary = builder.summary;
         this.description = builder.description;
         this.nodeId = builder.nodeId;
+        this.nodeLabel = builder.nodeLabel;
+        this.nodeLocation = builder.nodeLocation;
+        this.reductionKey = builder.reductionKey;
     }
 
     public static final class Builder {
@@ -69,6 +76,9 @@ public final class ImmutableAlarm implements Alarm {
         private String summary;
         private String description;
         private Long nodeId;
+        private String nodeLabel;
+        private String nodeLocation;
+        private String reductionKey;
 
         private Builder() {
             firstTime = System.currentTimeMillis();
@@ -85,6 +95,9 @@ public final class ImmutableAlarm implements Alarm {
             this.summary = alarm.getSummary();
             this.description = alarm.getDescription();
             this.nodeId = alarm.getNodeId();
+            this.nodeLabel = alarm.getNodeLabel();
+            this.nodeLocation = alarm.getNodeLocation();
+            this.reductionKey = alarm.getReductionKey();
         }
 
         public Builder setId(String id) {
@@ -127,8 +140,24 @@ public final class ImmutableAlarm implements Alarm {
             return this;
         }
 
-        public void setNodeId(Long nodeId) {
+        public Builder setNodeId(Long nodeId) {
             this.nodeId = nodeId;
+            return this;
+        }
+
+        public Builder setNodeLabel(String nodeLabel) {
+            this.nodeLabel = nodeLabel;
+            return this;
+        }
+
+        public Builder setNodeLocation(String nodeLocation) {
+            this.nodeLocation = nodeLocation;
+            return this;
+        }
+
+        public Builder setReductionKey(String reductionKey) {
+            this.reductionKey = reductionKey;
+            return this;
         }
 
         public ImmutableAlarm build() {
@@ -197,6 +226,21 @@ public final class ImmutableAlarm implements Alarm {
     }
 
     @Override
+    public String getNodeLabel() {
+        return nodeLabel;
+    }
+
+    @Override
+    public String getNodeLocation() {
+        return nodeLocation;
+    }
+
+    @Override
+    public String getReductionKey() {
+        return reductionKey;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -209,26 +253,32 @@ public final class ImmutableAlarm implements Alarm {
                 Objects.equals(inventoryObjectType, that.inventoryObjectType) &&
                 Objects.equals(summary, that.summary) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(nodeId, that.nodeId);
+                Objects.equals(nodeId, that.nodeId) &&
+                Objects.equals(nodeLabel, that.nodeLabel) &&
+                Objects.equals(nodeLocation, that.nodeLocation) &&
+                Objects.equals(reductionKey, that.reductionKey);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description, nodeId);
+        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description, nodeId, nodeLabel, nodeLocation, reductionKey);
     }
 
     @Override
     public String toString() {
-        return "ImmutableAlarm{" +
-                "id='" + id + '\'' +
-                ", firstTime=" + firstTime +
-                ", time=" + time +
-                ", severity=" + severity +
-                ", inventoryObjectId='" + inventoryObjectId + '\'' +
-                ", inventoryObjectType='" + inventoryObjectType + '\'' +
-                ", summary='" + summary + '\'' +
-                ", description='" + description + '\'' +
-                ", nodeId=" + nodeId +
-                '}';
+        return new StringJoiner(", ", ImmutableAlarm.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("firstTime=" + firstTime)
+                .add("time=" + time)
+                .add("severity=" + severity)
+                .add("inventoryObjectId='" + inventoryObjectId + "'")
+                .add("inventoryObjectType='" + inventoryObjectType + "'")
+                .add("summary='" + summary + "'")
+                .add("description='" + description + "'")
+                .add("nodeId=" + nodeId)
+                .add("nodeLocation='" + nodeLocation + "'")
+                .add("nodeLabel='" + nodeLabel + "'")
+                .add("reductionKey='" + reductionKey + "'")
+                .toString();
     }
 }

@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { TRelatedAlarm } from '@/types/TSituation'
+import { TAlarm } from '@/types/TSituation'
 import { FeatherChipList, FeatherChip } from '@featherds/chips'
 import { ref, watch, computed } from 'vue'
 import { groupBy, keys } from 'lodash'
 import AlarmDetail from '@/components/AlarmDetail.vue'
 import StatusColor from '@/elements/StatusColor.vue'
 const props = defineProps<{
-	relatedAlarms: TRelatedAlarm[]
+	alarms: TAlarm[]
 }>()
-const alarmFilters = computed(() =>
-	keys(groupBy(props.relatedAlarms, 'severity'))
-)
+const alarmFilters = computed(() => keys(groupBy(props.alarms, 'severity')))
 const selectedFilters = ref(['all'])
-const alarms = ref<TRelatedAlarm[]>(props.relatedAlarms)
+const alarms = ref<TAlarm[]>(props.alarms)
 const handleAlarmFilters = (selected: string) => {
 	selectedFilters.value = selectedFilters.value.filter((f) => f !== 'all')
 	if (selectedFilters.value.includes(selected)) {
@@ -22,16 +20,16 @@ const handleAlarmFilters = (selected: string) => {
 	}
 	if (selected === 'all' || selectedFilters.value.length === 0) {
 		selectedFilters.value = ['all']
-		alarms.value = props.relatedAlarms
+		alarms.value = props.alarms
 	} else {
-		alarms.value = props.relatedAlarms.filter((a) =>
+		alarms.value = props.alarms.filter((a) =>
 			selectedFilters.value.includes(a.severity)
 		)
 	}
 }
 watch(props, () => {
 	selectedFilters.value = ['all']
-	alarms.value = props.relatedAlarms
+	alarms.value = props.alarms
 })
 </script>
 
@@ -62,7 +60,7 @@ watch(props, () => {
 		<div class="section">
 			<div class="alarm-list">
 				<div v-for="alarmInfo in alarms" :key="alarmInfo.id">
-					<AlarmDetail :id="alarmInfo.id" />
+					<AlarmDetail :alarm="alarmInfo" />
 				</div>
 			</div>
 		</div>

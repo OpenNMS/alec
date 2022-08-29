@@ -99,7 +99,11 @@ public class ApiMapper {
                 .setInventoryObjectType(alarm.getManagedObjectType())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
-                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null);
+                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null)
+                .setNodeLabel(alarm.getNode() != null ? alarm.getNode().getLabel() : null)
+                .setNodeLocation(alarm.getNode() != null ? alarm.getNode().getLocation() : null)
+                .setReductionKey(alarm.getReductionKey());
+
         try {
             inventoryService.overrideTypeAndInstance(alarmBuilder, alarm);
         } catch (ScriptedInventoryException e) {
@@ -136,6 +140,10 @@ public class ApiMapper {
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarm).collect(Collectors.toSet()))
                 .setStatus(Status.valueOf(situationStatus))
+                .setReductionKey(alarm.getReductionKey())
+                .setLastTime(alarm.getLastEventTime().toInstant().toEpochMilli())
+                .setUei(alarm.getLastEvent() != null ? alarm.getLastEvent().getUei() : null)
+                .setDescription(alarm.getDescription())
                 .build();
     }
 
@@ -150,6 +158,10 @@ public class ApiMapper {
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarmWithId).collect(Collectors.toSet()))
                 .setStatus(Status.valueOf(situationStatus))
+                .setReductionKey(alarm.getReductionKey())
+                .setLastTime(alarm.getLastEventTime().toInstant().toEpochMilli())
+                .setUei(alarm.getLastEvent() != null ? alarm.getLastEvent().getUei() : null)
+                .setDescription(alarm.getDescription())
                 .build();
     }
 

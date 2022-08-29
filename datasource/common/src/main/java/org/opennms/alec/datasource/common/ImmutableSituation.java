@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,10 @@ public final class ImmutableSituation implements Situation {
     private final Set<Alarm> alarmsFromMap;
     private final String diagnosticText;
     private final Status status;
+    private final String reductionKey;
+    private final Long lastTime;
+    private final String uei;
+    private final String description;
 
     private ImmutableSituation(Builder builder) {
         this.id = builder.id;
@@ -70,6 +75,10 @@ public final class ImmutableSituation implements Situation {
         this.alarmsFromMap = Collections.unmodifiableSet(new HashSet<>(alarms.values()));
         this.diagnosticText = builder.diagnosticText;
         this.status = builder.status;
+        this.reductionKey = builder.reductionKey;
+        this.lastTime = builder.lastTime;
+        this.uei = builder.uei;
+        this.description = builder.description;
     }
 
     public static final class Builder {
@@ -80,6 +89,10 @@ public final class ImmutableSituation implements Situation {
         private Map<String, Alarm> alarms;
         private String diagnosticText;
         private Status status;
+        private String reductionKey;
+        private Long lastTime;
+        private String uei;
+        private String description;
 
         private Builder() {
         }
@@ -96,6 +109,10 @@ public final class ImmutableSituation implements Situation {
                             (Alarm oldAlarm, Alarm newAlarm) -> newAlarm, LinkedHashMap::new));
             this.diagnosticText = situation.getDiagnosticText();
             this.status = situation.getStatus();
+            this.reductionKey = situation.getReductionKey();
+            this.lastTime = situation.getLastTime();
+            this.uei = situation.getUei();
+            this.description = situation.getDescription();
         }
 
         public Builder setId(String id) {
@@ -163,6 +180,26 @@ public final class ImmutableSituation implements Situation {
 
         public Builder setStatus(Status status) {
             this.status = status;
+            return this;
+        }
+
+        public Builder setReductionKey(String reductionKey) {
+            this.reductionKey = reductionKey;
+            return this;
+        }
+
+        public Builder setLastTime(Long lastTime) {
+            this.lastTime = lastTime;
+            return this;
+        }
+
+        public Builder setUei(String uei) {
+            this.uei = uei;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
             return this;
         }
 
@@ -246,6 +283,26 @@ public final class ImmutableSituation implements Situation {
     }
 
     @Override
+    public String getReductionKey() {
+        return reductionKey;
+    }
+
+    @Override
+    public Long getLastTime() {
+        return lastTime;
+    }
+
+    @Override
+    public String getUei() {
+        return uei;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -255,24 +312,33 @@ public final class ImmutableSituation implements Situation {
                 Objects.equals(resourceKeys, that.resourceKeys) &&
                 Objects.equals(alarms, that.alarms) &&
                 Objects.equals(diagnosticText, that.diagnosticText) &&
-                Objects.equals(status, that.status);
+                Objects.equals(status, that.status) &&
+                Objects.equals(reductionKey, that.reductionKey) &&
+                Objects.equals(lastTime, that.lastTime) &&
+                Objects.equals(uei, that.uei) &&
+                Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText, status);
+        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText, status, reductionKey, lastTime, uei, description);
     }
 
     @Override
     public String toString() {
-        return "ImmutableSituation{" +
-                "id='" + id + '\'' +
-                ", creationTime=" + creationTime +
-                ", severity=" + severity +
-                ", resourceKeys=" + resourceKeys +
-                ", alarms=" + alarms +
-                ", diagnosticText='" + diagnosticText + '\'' +
-                ", status='" + status.toString() + '\'' +
-                '}';
+        return new StringJoiner(", ", ImmutableSituation.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("creationTime=" + creationTime)
+                .add("severity=" + severity)
+                .add("resourceKeys=" + resourceKeys)
+                .add("alarms=" + alarms)
+                .add("alarmsFromMap=" + alarmsFromMap)
+                .add("diagnosticText='" + diagnosticText + "'")
+                .add("status=" + status)
+                .add("reductionKey='" + reductionKey + "'")
+                .add("lastTime=" + lastTime)
+                .add("uei='" + uei + "'")
+                .add("description='" + description + "'")
+                .toString();
     }
 }

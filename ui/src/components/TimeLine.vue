@@ -6,8 +6,8 @@ import { formatDate } from '@/helpers/utils'
 const props = defineProps<{
 	alarm: TRelatedAlarm
 	proportion: number
-	minStart: number
-	maxEnd: number
+	minStart: number | Date
+	maxEnd: number | Date
 }>()
 
 const getWidth = (

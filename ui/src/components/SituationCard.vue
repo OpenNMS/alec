@@ -9,12 +9,12 @@ const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
 const props = defineProps<{
-	alarmInfo: TSituation
+	situationInfo: TSituation
 	selected: boolean
 }>()
 const emit = defineEmits(['situation-selected'])
 const handleSituationSelected = () => {
-	emit('situation-selected', props.alarmInfo?.id)
+	emit('situation-selected', props.situationInfo?.id)
 }
 </script>
 
@@ -24,24 +24,24 @@ const handleSituationSelected = () => {
 		class="card"
 		:class="{
 			selected: props.selected,
-			rejected: props.alarmInfo.status == REJECTED
+			rejected: props.situationInfo.status == REJECTED
 		}"
 	>
 		<div
 			class="severity-line"
-			:class="[`${props.alarmInfo?.severity?.toLowerCase()}-bg dark`]"
+			:class="[`${props.situationInfo?.severity?.toLowerCase()}-bg dark`]"
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<div class="title">[ {{ props.alarmInfo?.id }} ]</div>
-				<div v-if="props.alarmInfo.status == ACCEPTED" class="accepted">
+				<div class="title">[ {{ props.situationInfo?.id }} ]</div>
+				<div v-if="props.situationInfo.status == ACCEPTED" class="accepted">
 					<FeatherIcon
 						:icon="CheckCircle"
 						aria-hidden="true"
 						class="icon accepted"
 					/>
 				</div>
-				<div v-if="props.alarmInfo.status == REJECTED" class="rejected">
+				<div v-if="props.situationInfo.status == REJECTED" class="rejected">
 					<FeatherIcon
 						:icon="Cancel"
 						aria-hidden="true"
@@ -49,7 +49,10 @@ const handleSituationSelected = () => {
 					/>
 				</div>
 			</div>
-			<AlarmsCountBySeverity :alarms="props.alarmInfo?.alarms" size="normal" />
+			<AlarmsCountBySeverity
+				:alarms="props.situationInfo?.alarms"
+				size="normal"
+			/>
 		</div>
 	</div>
 </template>

@@ -87,10 +87,15 @@ watch(props, () => {
 				</p>
 				<div class="boxes">
 					<DateBox
+						v-if="props.situationInfo.creationTime"
 						label="First Event"
 						:date="props.situationInfo.creationTime"
 					/>
-					<!--<DateBox label="Last Event" :date="props.situationInfo.lastEvent.time" />-->
+					<DateBox
+						v-if="props.situationInfo.lastTime"
+						label="Last Event"
+						:date="props.situationInfo.lastTime"
+					/>
 				</div>
 			</div>
 			<div class="parameters">

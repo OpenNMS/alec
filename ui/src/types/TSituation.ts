@@ -12,7 +12,7 @@ export type TSituation = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime: number
+	lastTime: number
 	logMessage: string
 	location: string
 	reductionKey: string

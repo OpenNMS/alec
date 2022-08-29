@@ -58,4 +58,11 @@ public interface Situation {
 
     Status getStatus();
 
+    String getReductionKey();
+
+    Long getLastTime();
+
+    String getUei();
+
+    String getDescription();
 }

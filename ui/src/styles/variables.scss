@@ -52,6 +52,13 @@ $severity-alarm-cleared-border: #999999;
 	}
 }
 
+.warning-bg {
+	background-color: $severity-alarm-warning-bg;
+	&.dark {
+		background-color: $severity-alarm-warning-border;
+	}
+}
+
 .indeterminate-bg {
 	background-color: $severity-alarm-indeterminate-bg;
 	&.dark {
@@ -86,6 +93,11 @@ $severity-alarm-cleared-border: #999999;
 .minor-color {
 	border-color: $severity-alarm-minor-border;
 	color: $severity-alarm-minor-border;
+}
+
+.warning-color {
+	border-color: $severity-alarm-warning-border;
+	color: $severity-alarm-warning-border;
 }
 
 .indeterminate-color {

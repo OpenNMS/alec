@@ -29,6 +29,7 @@
 package org.opennms.alec.rest;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -120,34 +121,19 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response getSituationStatusList() throws InterruptedException {
-        List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
-                .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
-                .collect(Collectors.toList());
-        List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
-                .filter(s -> Status.REJECTED.equals(s.getStatus()))
-                .collect(Collectors.toList());
         List<SituationStatus> situationStatusList = new ArrayList<>();
-        try {
-            setSituationList(acceptedSituations, situationStatusList);
-            setSituationList(rejectedSituations, situationStatusList);
-
-            return Response.ok(situationStatusList).build();
-        } catch (Exception e) {
-            return somethingWentWrong(e);
-        }
+        situationDatasource.getSituationsWithAlarmId().forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
+                .id(o.getId())
+                .status(o.getStatus())
+                .build()));
+        List<SituationStatus> sorted = situationStatusList.stream().sorted(Comparator.comparing(SituationStatus::getStatus)).collect(Collectors.toList());
+        return Response.ok(sorted).build();
     }
 
     @Override
     public Response getSituationList() throws InterruptedException {
         List<Situation> situations = situationDatasource.getSituationsWithAlarmId();
         return Response.ok(situations).build();
-    }
-
-    private void setSituationList(List<Situation> situations, List<SituationStatus> situationStatusList) {
-        situations.forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
-                .id(o.getId())
-                .status(o.getStatus())
-                .build()));
     }
 
     private void storeMLSituations() throws JsonProcessingException, InterruptedException {

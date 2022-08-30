@@ -55,7 +55,10 @@ const sortChanged = (sortObj: ISelectItemType | undefined) => {
 			...(alarmGrouped['CRITICAL'] || []),
 			...(alarmGrouped['MAJOR'] || []),
 			...(alarmGrouped['MINOR'] || []),
-			...(alarmGrouped['WARNING'] || [])
+			...(alarmGrouped['WARNING'] || []),
+			...(alarmGrouped['NORMAL'] || []),
+			...(alarmGrouped['CLEARED'] || []),
+			...(alarmGrouped['INDETERMINATE'] || [])
 		]
 		relatedAlarms.value = alarms.filter((a) => a)
 	}
@@ -199,7 +202,7 @@ const handleClickZoomOut = () => {
 	flex-direction: column;
 }
 .alarm-id {
-	font-size: 15px;
+	font-size: 13px;
 	margin-bottom: 12px;
 }
 .container {
@@ -213,7 +216,7 @@ const handleClickZoomOut = () => {
 .ids {
 	display: flex;
 	flex-direction: column;
-	width: 15%;
+	width: 13%;
 }
 .timeline-container {
 	flex-direction: column;
@@ -236,7 +239,7 @@ const handleClickZoomOut = () => {
 	flex-direction: row;
 	border-bottom: 1px solid #b7b7b7;
 	margin-bottom: 15px;
-	margin-left: 15%;
+	margin-left: 13%;
 	justify-content: space-between;
 }
 

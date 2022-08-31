@@ -28,6 +28,7 @@
 
 package org.opennms.alec.rest;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,6 +40,8 @@ import javax.ws.rs.core.Response;
 import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.SituationStatusImpl;
+import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
@@ -56,25 +59,27 @@ public class SituationRestImpl implements SituationRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
+    private final AlarmDatasource alarmDatasource;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
-                             SituationDatasource situationDatasource) {
+                             SituationDatasource situationDatasource,
+                             AlarmDatasource alarmDatasource) {
         this.kvStore = kvStore;
         this.situationDatasource = situationDatasource;
+        this.alarmDatasource = alarmDatasource;
         objectMapper = new ObjectMapper();
     }
 
     @Override
     public Response rejected(String id) throws InterruptedException {
-        Optional<Situation> situationOptional;
-        situationOptional = situationDatasource.getSituation(Integer.parseInt(id));
+        Optional<Situation> situationOptional = getSituation(id);
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
             //check status
             if (Status.REJECTED.equals(situation.getStatus())) {
                 LOG.debug("Situation {} already rejected", id);
-                return Response.accepted("Situation " + id + " already rejected").build();
+                return Response.accepted(MessageFormat.format("Situation {0} already rejected", id)).build();
             }
 
             try {
@@ -88,20 +93,19 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", id)).build();
     }
 
     @Override
     public Response accepted(String id) throws InterruptedException {
-        Optional<Situation> situationOptional;
-        situationOptional = situationDatasource.getSituation(Integer.parseInt(id));
+        Optional<Situation> situationOptional = getSituation(id);
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
             //check status
             if (Status.ACCEPTED.equals(situation.getStatus())) {
                 LOG.debug("Situation {} already accepted", id);
-                return Response.accepted("Situation " + id + " already accepted").build();
+                return Response.accepted(MessageFormat.format("Situation {0} already accepted", id)).build();
             }
 
             //Update situation
@@ -116,7 +120,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity("Situation id: " + id + " not found").build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", id)).build();
     }
 
     @Override
@@ -136,6 +140,57 @@ public class SituationRestImpl implements SituationRest {
         return Response.ok(situations).build();
     }
 
+    @Override
+    public Response addAlarm(String situationId, String alarmId) throws InterruptedException {
+        Optional<Situation> situationOptional = getSituation(situationId);
+
+        if (situationOptional.isPresent()) {
+            Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
+            if (alarmOptional.isPresent()) {
+                Situation situation = situationOptional.get();
+                situation.getAlarms().add(alarmOptional.get());
+                situationDatasource.forwardSituation(situation);
+                try {
+                    storeMLSituations();
+                } catch (JsonProcessingException e) {
+                    return somethingWentWrong(e);
+                }
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
+            }
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", situationId)).build();
+        }
+    }
+
+    @Override
+    public Response removeAlarm(String situationId, String alarmId) throws InterruptedException {
+        Optional<Situation> situationOptional = getSituation(situationId);
+
+        if (situationOptional.isPresent()) {
+            Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
+            if (alarmOptional.isPresent()) {
+                Situation situation = situationOptional.get();
+                try {
+                    if (situation.getAlarms().remove(alarmOptional.get())) {
+                        situationDatasource.forwardSituation(situation);
+                        storeMLSituations();
+                        return Response.ok().build();
+                    } else {
+                        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} is not part of situation id: {1}", alarmId, situationId)).build();
+                    }
+                } catch (JsonProcessingException e) {
+                    return somethingWentWrong(e);
+                }
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
+            }
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", situationId)).build();
+        }
+    }
+
     private void storeMLSituations() throws JsonProcessingException, InterruptedException {
         List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
@@ -148,8 +203,14 @@ public class SituationRestImpl implements SituationRest {
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);
     }
 
+    private Optional<Situation> getSituation(String situationId) throws InterruptedException {
+        Optional<Situation> situationOptional;
+        situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
+        return situationOptional;
+    }
+
     private Response somethingWentWrong(Throwable e) {
         LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity("something went wrong: " + e.getMessage()).build();
+        return Response.serverError().entity(MessageFormat.format("something went wrong: {0}", e.getMessage())).build();
     }
 }

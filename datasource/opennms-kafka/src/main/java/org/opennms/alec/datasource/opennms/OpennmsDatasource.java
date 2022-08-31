@@ -131,6 +131,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     public static final String SITUATION_STORE = "situationStore";
     public static final String EDGE_STORE = "edgeStore";
     public static final String IGNORED_SITUATION = "An error occurred while mapping a situation. It will be ignored. Situation: {}";
+    public static final String IGNORED_ALARM = "An error occurred while mapping an alarm. It will be ignored. Alarm: {}";
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers = new HandlerRegistry<>();
@@ -413,6 +414,18 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             Thread.currentThread().interrupt();
         }
         return alarms;
+    }
+
+    @Override
+    public Optional<Alarm> getAlarm(int id) throws InterruptedException {
+
+        OpennmsModelProtos.Alarm alarm = waitUntilSituationStoreIsQueryable().get(String.format("%s::%d", SituationToEvent.SITUATION_UEI, id));
+        try {
+            return Optional.of(OpennmsMapper.toAlarm(alarm));
+        } catch (Exception e) {
+            LOG.warn(IGNORED_ALARM, alarm, e);
+            return Optional.empty();
+        }
     }
 
     @Override

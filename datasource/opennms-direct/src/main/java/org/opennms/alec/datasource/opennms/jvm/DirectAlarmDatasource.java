@@ -212,6 +212,21 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     }
 
     @Override
+    public Optional<Alarm> getAlarm(int id) {
+        waitForInit();
+
+        rwLock.readLock().lock();
+        try {
+            return alarmsById.values().stream()
+                    .filter(alarm -> id == alarm.getId())
+                    .map(mapper::toAlarm)
+                    .findFirst();
+        } finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    @Override
     public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
         rwLock.readLock().lock();
         try {

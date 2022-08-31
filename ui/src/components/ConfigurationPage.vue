@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
-import { FeatherButton } from '@featherds/button'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { ref } from 'vue'
+import {FeatherRadio, FeatherRadioGroup} from '@featherds/radio'
+import {FeatherButton} from '@featherds/button'
+import {FeatherCheckbox} from '@featherds/checkbox'
+import {ref} from 'vue'
 import useRouter from '@/composables/useRouter'
-import { savePermission, saveEngineParameter } from '@/services/AlecService'
+import {saveEngineParameter, savePermission} from '@/services/AlecService'
 import CONST from '@/helpers/constants'
-import { useUserStore } from '@/store/useUserStore'
+import {useUserStore} from '@/store/useUserStore'
+
 const userStore = useUserStore()
 const router = useRouter()
 const hellinger = ref(false)
@@ -30,7 +31,7 @@ const handleClickContinue = () => {
 			<strong>
 				<a
 					target="_blank"
-					href="https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+					href="https://docs.opennms.com/alec/2.1.0/engines/cluster.html"
 				>
 					here
 				</a>

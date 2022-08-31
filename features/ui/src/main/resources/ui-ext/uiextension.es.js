@@ -9474,7 +9474,7 @@ const aW = window.Vue.defineComponent, Je = window.Vue.createElementVNode, ts = 
   /* @__PURE__ */ Je("strong", null, [
     /* @__PURE__ */ Je("a", {
       target: "_blank",
-      href: "https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+      href: "https://docs.opennms.com/alec/2.1.0/engines/cluster.html"
     }, " here ")
   ])
 ], -1)), hW = { class: "radio-content" }, pW = /* @__PURE__ */ An(() => /* @__PURE__ */ Je("strong", { class: "title" }, "Clustering", -1)), mW = /* @__PURE__ */ An(() => /* @__PURE__ */ Je("div", null, " Groups data points (alarms) based on a distance measure. We calculate alarms difference in time and add it to their distance within their network topology ", -1)), VW = /* @__PURE__ */ An(() => /* @__PURE__ */ Je("img", {

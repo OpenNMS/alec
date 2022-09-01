@@ -109,6 +109,7 @@ const handleClickZoomOut = () => {
 				:options="options"
 				v-model="sortedOption"
 				text-prop="name"
+				data-test="select-sort"
 				@update:modelValue="sortChanged"
 			/>
 			<div class="zoom">

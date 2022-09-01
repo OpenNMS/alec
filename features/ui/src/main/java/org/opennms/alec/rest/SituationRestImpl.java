@@ -31,8 +31,10 @@ package org.opennms.alec.rest;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -147,15 +149,17 @@ public class SituationRestImpl implements SituationRest {
         if (situationOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
             if (alarmOptional.isPresent()) {
-                Situation situation = situationOptional.get();
-                situation.getAlarms().add(alarmOptional.get());
-                situationDatasource.forwardSituation(situation);
+                Situation oldSituation = situationOptional.get();
+                Set<Alarm> alarms = new HashSet<>(oldSituation.getAlarms());
                 try {
+                    alarms.add(alarmOptional.get());
+                    Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
+                    situationDatasource.forwardSituation(newSituation);
                     storeMLSituations();
-                } catch (JsonProcessingException e) {
+                    return Response.ok().build();
+                } catch (Exception e) {
                     return somethingWentWrong(e);
                 }
-                return Response.ok().build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
             }
@@ -171,16 +175,18 @@ public class SituationRestImpl implements SituationRest {
         if (situationOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
             if (alarmOptional.isPresent()) {
-                Situation situation = situationOptional.get();
+                Situation oldSituation = situationOptional.get();
+                Set<Alarm> alarms = oldSituation.getAlarms()
+                        .stream()
+                        .filter(alarm -> !alarmOptional.get().getReductionKey().equals(alarm.getReductionKey()))
+                        .collect(Collectors.toUnmodifiableSet());
                 try {
-                    if (situation.getAlarms().remove(alarmOptional.get())) {
-                        situationDatasource.forwardSituation(situation);
-                        storeMLSituations();
-                        return Response.ok().build();
-                    } else {
-                        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} is not part of situation id: {1}", alarmId, situationId)).build();
-                    }
-                } catch (JsonProcessingException e) {
+                    Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
+                    situationDatasource.forwardSituation(newSituation);
+                    storeMLSituations();
+                    return Response.ok().build();
+
+                } catch (Exception e) {
                     return somethingWentWrong(e);
                 }
             } else {

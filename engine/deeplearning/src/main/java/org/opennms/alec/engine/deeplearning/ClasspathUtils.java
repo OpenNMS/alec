@@ -52,6 +52,10 @@ import org.slf4j.LoggerFactory;
 class ClasspathUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathUtils.class);
 
+    private ClasspathUtils(){
+
+    }
+
     /**
      * Recursively copy a folder from a bundle to the filesystem.
      *
@@ -65,7 +69,7 @@ class ClasspathUtils {
         while (urls.hasMoreElements()) {
             final URL url = urls.nextElement();
             final String fileName = removeStart(url.getPath(), path);
-            if (fileName.endsWith("/")) {
+            if (fileName!= null && fileName.endsWith("/")) {
                 // This is a directory, skip it
                 continue;
             }

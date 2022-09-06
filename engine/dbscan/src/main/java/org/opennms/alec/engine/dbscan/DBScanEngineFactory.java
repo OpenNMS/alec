@@ -72,7 +72,7 @@ public class DBScanEngineFactory implements EngineFactory {
         if (factory.isPresent()) {
             return new DBScanEngine(metrics, epsilon, alpha, beta, factory.get());
         } else {
-            LOG.error("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, alarmInSpaceAndTimeDistanceMeasureFactory.getName());
+            LOG.error("Warn distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, alarmInSpaceAndTimeDistanceMeasureFactory.getName());
             this.distanceMeasureFactoryName = alarmInSpaceAndTimeDistanceMeasureFactory.getName();
             return new DBScanEngine(metrics, epsilon, alpha, beta, alarmInSpaceAndTimeDistanceMeasureFactory);
         }

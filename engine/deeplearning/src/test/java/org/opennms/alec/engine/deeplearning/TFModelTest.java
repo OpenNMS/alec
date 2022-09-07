@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.tensorflow.Tensor;
 
@@ -40,7 +41,12 @@ public class TFModelTest {
     /**
      * This also verifies that the default model can be loaded from the classpath.
      */
-    private final TFModel tfModel = new TFModel();
+    private TFModel tfModel;
+
+    @Before
+    public void setUp() throws Exception {
+        tfModel = new TFModel();
+    }
 
     @Test
     public void canConvertVectorToTensor() {
@@ -66,6 +72,7 @@ public class TFModelTest {
      * (milliseconds) it takes to compute.
      */
     @Test(timeout=30000)
+    @SuppressWarnings("java:S2699")
     public void canMeasureLatency() {
         InputVector inputVector = InputVector.builder()
                 .alarmAid("a1")

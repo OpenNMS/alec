@@ -7634,7 +7634,7 @@ const yk = "/whoami", bk = async () => {
       }
     }
   }
-}), Fk = window.Vue.defineComponent, Ue = window.Vue.unref, Ir = window.Vue.normalizeClass, zt = window.Vue.createVNode, Sl = window.Vue.toDisplayString, Gt = window.Vue.openBlock, an = window.Vue.createElementBlock, sa = window.Vue.createCommentVNode, Vf = window.Vue.withCtx, Sk = window.Vue.createBlock, Ht = window.Vue.createElementVNode, Wk = window.Vue.Fragment, Ak = window.Vue.pushScopeId, xk = window.Vue.popScopeId, Bk = (n) => (Ak("data-v-6fccf644"), n = n(), xk(), n), Ck = { class: "section" }, Dk = {
+}), Fk = window.Vue.defineComponent, Ue = window.Vue.unref, Ir = window.Vue.normalizeClass, zt = window.Vue.createVNode, Sl = window.Vue.toDisplayString, Gt = window.Vue.openBlock, an = window.Vue.createElementBlock, sa = window.Vue.createCommentVNode, Vf = window.Vue.withCtx, Sk = window.Vue.createBlock, Ht = window.Vue.createElementVNode, Wk = window.Vue.Fragment, Ak = window.Vue.pushScopeId, xk = window.Vue.popScopeId, Bk = (n) => (Ak("data-v-b1da26ca"), n = n(), xk(), n), Ck = { class: "section" }, Dk = {
   key: 0,
   class: "btn-row"
 }, Qk = { key: 0 }, Ok = { key: 1 }, zk = { key: 0 }, Gk = { key: 1 }, Yk = {
@@ -7664,6 +7664,7 @@ const yk = "/whoami", bk = async () => {
             h.value !== Ue(s) ? (Gt(), Sk(Ue(Fa), {
               key: 0,
               class: Ir(["btn", { accepted: h.value == Ue(l) }]),
+              "data-test": "btn-accept",
               onClick: N[0] || (N[0] = () => p(Ue(l)))
             }, {
               default: Vf(() => [
@@ -7738,7 +7739,7 @@ const yk = "/whoami", bk = async () => {
     };
   }
 });
-const ey = /* @__PURE__ */ Qe($k, [["__scopeId", "data-v-6fccf644"]]);
+const ey = /* @__PURE__ */ Qe($k, [["__scopeId", "data-v-b1da26ca"]]);
 const ty = window.Vue.openBlock, ny = window.Vue.createElementBlock, ry = window.Vue.createElementVNode;
 var iy = (n, a) => {
   const r = n.__vccOpts || n;
@@ -7977,15 +7978,15 @@ function Ky(n, a, r, l, s, f) {
     onClick: a[0] || (a[0] = (...h) => n.handleClick && n.handleClick(...h))
   }, qy, 2);
 }
-var $y = /* @__PURE__ */ Hy(Xy, [["render", Ky], ["__scopeId", "data-v-07e020f5"]]), eb = Object.defineProperty, tb = Object.defineProperties, nb = Object.getOwnPropertyDescriptors, Nf = Object.getOwnPropertySymbols, rb = Object.prototype.hasOwnProperty, ib = Object.prototype.propertyIsEnumerable, gf = (n, a, r) => a in n ? eb(n, a, { enumerable: !0, configurable: !0, writable: !0, value: r }) : n[a] = r, Mf = (n, a) => {
+var $y = /* @__PURE__ */ Hy(Xy, [["render", Ky], ["__scopeId", "data-v-07e020f5"]]), e2 = Object.defineProperty, t2 = Object.defineProperties, n2 = Object.getOwnPropertyDescriptors, Nf = Object.getOwnPropertySymbols, r2 = Object.prototype.hasOwnProperty, i2 = Object.prototype.propertyIsEnumerable, gf = (n, a, r) => a in n ? e2(n, a, { enumerable: !0, configurable: !0, writable: !0, value: r }) : n[a] = r, Mf = (n, a) => {
   for (var r in a || (a = {}))
-    rb.call(a, r) && gf(n, r, a[r]);
+    r2.call(a, r) && gf(n, r, a[r]);
   if (Nf)
     for (var r of Nf(a))
-      ib.call(a, r) && gf(n, r, a[r]);
+      i2.call(a, r) && gf(n, r, a[r]);
   return n;
-}, Zf = (n, a) => tb(n, nb(a));
-const Ms = window.Vue.defineComponent, Mn = window.Vue.h, ab = window.Vue.openBlock, ob = window.Vue.createElementBlock, lb = window.Vue.renderSlot;
+}, Zf = (n, a) => t2(n, n2(a));
+const Ms = window.Vue.defineComponent, Mn = window.Vue.h, a2 = window.Vue.openBlock, o2 = window.Vue.createElementBlock, l2 = window.Vue.renderSlot;
 window.Vue.resolveComponent;
 window.Vue.createBlock;
 window.Vue.withCtx;
@@ -7999,7 +8000,7 @@ var Oh = (n, a) => {
     r[l] = s;
   return r;
 };
-const sb = {
+const s2 = {
   asLi: {
     type: Boolean,
     default: !1
@@ -8016,9 +8017,9 @@ const sb = {
     type: Boolean,
     default: !1
   }
-}, cb = Ms({
+}, c2 = Ms({
   inheritAttrs: !1,
-  props: sb,
+  props: s2,
   render() {
     let n;
     this.$slots.icon && this.$slots.icon().findIndex((h) => h.children && h.children.length !== 0 || h.type && h.type.render) !== -1 && (n = Mn("span", { class: ["feather-list-item-icon"] }, {
@@ -8053,24 +8054,24 @@ const sb = {
     return Mn("li", {}, [f]);
   }
 });
-var Zs = /* @__PURE__ */ Oh(cb, [["__scopeId", "data-v-7c46b2b3"]]);
+var Zs = /* @__PURE__ */ Oh(c2, [["__scopeId", "data-v-7c46b2b3"]]);
 Ms({
   components: {
     FeatherListItem: Zs
   }
 });
-const ub = {}, db = { class: "feather-list" };
-function fb(n, a) {
-  return ab(), ob("ul", db, [
-    lb(n.$slots, "default", {}, void 0, !0)
+const u2 = {}, d2 = { class: "feather-list" };
+function f2(n, a) {
+  return a2(), o2("ul", d2, [
+    l2(n.$slots, "default", {}, void 0, !0)
   ]);
 }
-var hb = /* @__PURE__ */ Oh(ub, [["render", fb], ["__scopeId", "data-v-941a1d50"]]);
-const pb = {
+var h2 = /* @__PURE__ */ Oh(u2, [["render", f2], ["__scopeId", "data-v-941a1d50"]]);
+const p2 = {
   "update:modelValue": (n) => !0,
   click: (n) => !0,
   keydown: (n) => !0
-}, mb = {
+}, m2 = {
   disabled: {
     type: Boolean,
     default: !1
@@ -8085,8 +8086,8 @@ Ms({
     prop: "modelValue",
     event: "update:modelValue"
   },
-  emits: pb,
-  props: mb,
+  emits: p2,
+  props: m2,
   computed: {
     labelId() {
       return ve("switch-label");
@@ -8108,29 +8109,29 @@ Ms({
   },
   components: { SwitchRender: $y, FeatherListItem: Zs }
 });
-const Vb = function(n, a) {
+const V2 = function(n, a) {
   if (!n || !a)
     return;
   let r = n.getBoundingClientRect().height;
   const l = getComputedStyle(n);
   r += parseInt(l.getPropertyValue("margin-top"), 10), r += parseInt(l.getPropertyValue("margin-bottom"), 10), a.scrollTop = n.offsetTop - a.getBoundingClientRect().height + r;
 };
-var Tb = Object.defineProperty, vb = Object.defineProperties, wb = Object.getOwnPropertyDescriptors, Jf = Object.getOwnPropertySymbols, Ub = Object.prototype.hasOwnProperty, Rb = Object.prototype.propertyIsEnumerable, kf = (n, a, r) => a in n ? Tb(n, a, { enumerable: !0, configurable: !0, writable: !0, value: r }) : n[a] = r, Ll = (n, a) => {
+var T2 = Object.defineProperty, v2 = Object.defineProperties, w2 = Object.getOwnPropertyDescriptors, Jf = Object.getOwnPropertySymbols, U2 = Object.prototype.hasOwnProperty, R2 = Object.prototype.propertyIsEnumerable, kf = (n, a, r) => a in n ? T2(n, a, { enumerable: !0, configurable: !0, writable: !0, value: r }) : n[a] = r, Ll = (n, a) => {
   for (var r in a || (a = {}))
-    Ub.call(a, r) && kf(n, r, a[r]);
+    U2.call(a, r) && kf(n, r, a[r]);
   if (Jf)
     for (var r of Jf(a))
-      Rb.call(a, r) && kf(n, r, a[r]);
+      R2.call(a, r) && kf(n, r, a[r]);
   return n;
-}, Nb = (n, a) => vb(n, wb(a));
-const zh = window.Vue.defineComponent, bn = window.Vue.resolveComponent, Va = window.Vue.openBlock, yf = window.Vue.createBlock, Ta = window.Vue.mergeProps, En = window.Vue.withCtx, Gh = window.Vue.createElementBlock, gb = window.Vue.Fragment, Mb = window.Vue.renderList, Zb = window.Vue.createTextVNode, Jb = window.Vue.toDisplayString, kb = window.Vue.computed, bf = window.Vue.toRef, Hr = window.Vue.createVNode, Ef = window.Vue.toHandlers, yb = window.Vue.renderSlot, bb = window.Vue.normalizeClass, Eb = window.Vue.createElementVNode;
+}, N2 = (n, a) => v2(n, w2(a));
+const zh = window.Vue.defineComponent, bn = window.Vue.resolveComponent, Va = window.Vue.openBlock, yf = window.Vue.createBlock, Ta = window.Vue.mergeProps, En = window.Vue.withCtx, Gh = window.Vue.createElementBlock, g2 = window.Vue.Fragment, M2 = window.Vue.renderList, Z2 = window.Vue.createTextVNode, J2 = window.Vue.toDisplayString, k2 = window.Vue.computed, bf = window.Vue.toRef, Hr = window.Vue.createVNode, Ef = window.Vue.toHandlers, y2 = window.Vue.renderSlot, b2 = window.Vue.normalizeClass, E2 = window.Vue.createElementVNode;
 var Yh = (n, a) => {
   const r = n.__vccOpts || n;
   for (const [l, s] of a)
     r[l] = s;
   return r;
 };
-const Fb = zh({
+const F2 = zh({
   inheritAttrs: !0,
   emits: ["select"],
   props: {
@@ -8168,7 +8169,7 @@ const Fb = zh({
     activeIndex(n) {
       n > -1 && this.$nextTick(() => {
         const a = Array.prototype.slice.call(this.$el.querySelectorAll("li"))[n];
-        Vb(a, this.$refs.list.$el);
+        V2(a, this.$refs.list.$el);
       });
     }
   },
@@ -8184,18 +8185,18 @@ const Fb = zh({
     }
   },
   components: {
-    FeatherList: hb,
+    FeatherList: h2,
     FeatherListItem: Zs
   }
 });
-function Sb(n, a, r, l, s, f) {
+function S2(n, a, r, l, s, f) {
   const h = bn("FeatherListItem"), p = bn("FeatherList");
   return Va(), yf(p, Ta(n.listAttrs, {
     ref: "list",
     class: "feather-select-options-list"
   }), {
     default: En(() => [
-      (Va(!0), Gh(gb, null, Mb(n.options, (T, N) => (Va(), yf(h, {
+      (Va(!0), Gh(g2, null, M2(n.options, (T, N) => (Va(), yf(h, {
         key: T[n.textProp],
         "as-li": "",
         id: n.getId(N),
@@ -8207,7 +8208,7 @@ function Sb(n, a, r, l, s, f) {
         onClick: (g) => n.select(T)
       }, {
         default: En(() => [
-          Zb(Jb(T[n.textProp]), 1)
+          Z2(J2(T[n.textProp]), 1)
         ]),
         _: 2
       }, 1032, ["id", "aria-selected", "selected", "onClick"]))), 128))
@@ -8215,8 +8216,8 @@ function Sb(n, a, r, l, s, f) {
     _: 1
   }, 16);
 }
-var Wb = /* @__PURE__ */ Yh(Fb, [["render", Sb], ["__scopeId", "data-v-eae820da"]]);
-const Ab = Nb(Ll(Ll({}, yM), ws), {
+var W2 = /* @__PURE__ */ Yh(F2, [["render", S2], ["__scopeId", "data-v-eae820da"]]);
+const A2 = N2(Ll(Ll({}, yM), ws), {
   modelValue: {
     type: Object,
     required: !1
@@ -8233,18 +8234,18 @@ const Ab = Nb(Ll(Ll({}, yM), ws), {
     type: Object,
     required: !1
   }
-}), xb = {
+}), x2 = {
   "update:modelValue": (n) => !0
-}, Bb = zh({
+}, B2 = zh({
   model: {
     prop: "modelValue",
     event: "update:modelValue"
   },
-  emits: xb,
-  props: Ab,
+  emits: x2,
+  props: A2,
   setup(n, a) {
     Us(n), bM(n);
-    const r = kb(() => ve("feather-select-input")), { validate: l } = Ts(r, bf(n, "modelValue"), n.label, n.schema, bf(n, "error"));
+    const r = k2(() => ve("feather-select-input")), { validate: l } = Ts(r, bf(n, "modelValue"), n.label, n.schema, bf(n, "error"));
     return Ll({
       inputId: r,
       validate: l
@@ -8372,11 +8373,11 @@ const Ab = Nb(Ll(Ll({}, yM), ws), {
     InputWrapper: UM,
     InputSubText: Vs,
     FeatherMenu: Dy,
-    List: Wb,
+    List: W2,
     FeatherIcon: He
   }
 });
-function Cb(n, a, r, l, s, f) {
+function C2(n, a, r, l, s, f) {
   const h = bn("FeatherIcon"), p = bn("InputWrapper"), T = bn("List"), N = bn("FeatherMenu"), g = bn("InputSubText");
   return Va(), Gh("div", Ta(n.inherittedAttrs, { class: "feather-select-container" }), [
     Hr(N, {
@@ -8399,16 +8400,16 @@ function Cb(n, a, r, l, s, f) {
           class: ["feather-select-wrapper", { focused: n.hasFocus }]
         }), {
           pre: En(() => [
-            yb(n.$slots, "pre", {}, void 0, !0)
+            y2(n.$slots, "pre", {}, void 0, !0)
           ]),
           post: En(() => [
             Hr(h, {
-              class: bb(["feather-select-icon", { rotate: n.showMenu }]),
+              class: b2(["feather-select-icon", { rotate: n.showMenu }]),
               icon: n.icon
             }, null, 8, ["class", "icon"])
           ]),
           default: En(() => [
-            Eb("input", Ta(n.inputAttrs, {
+            E2("input", Ta(n.inputAttrs, {
               class: "feather-select-input",
               "data-ref-id": "feather-select-input"
             }, Ef(n.inputListeners), { ref: "input" }), null, 16)
@@ -8433,63 +8434,63 @@ function Cb(n, a, r, l, s, f) {
     Hr(g, { id: n.subTextId }, null, 8, ["id"])
   ], 16);
 }
-var Db = /* @__PURE__ */ Yh(Bb, [["render", Cb], ["__scopeId", "data-v-ecb32d90"]]);
-const Qb = window.Vue.openBlock, Ob = window.Vue.createElementBlock, Ih = window.Vue.createElementVNode;
-var zb = (n, a) => {
+var D2 = /* @__PURE__ */ Yh(B2, [["render", C2], ["__scopeId", "data-v-ecb32d90"]]);
+const Q2 = window.Vue.openBlock, O2 = window.Vue.createElementBlock, Ih = window.Vue.createElementVNode;
+var z2 = (n, a) => {
   const r = n.__vccOpts || n;
   for (const [l, s] of a)
     r[l] = s;
   return r;
 };
-const Gb = {}, Yb = {
+const G2 = {}, Y2 = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
-}, Ib = /* @__PURE__ */ Ih("path", { d: "M16,11H13V8a1,1,0,0,0-2,0v3H8a1,1,0,0,0,0,2h3v3a1,1,0,0,0,2,0V13h3a1,1,0,0,0,0-2Z" }, null, -1), Hb = /* @__PURE__ */ Ih("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" }, null, -1), Pb = [
-  Ib,
-  Hb
+}, I2 = /* @__PURE__ */ Ih("path", { d: "M16,11H13V8a1,1,0,0,0-2,0v3H8a1,1,0,0,0,0,2h3v3a1,1,0,0,0,2,0V13h3a1,1,0,0,0,0-2Z" }, null, -1), H2 = /* @__PURE__ */ Ih("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" }, null, -1), P2 = [
+  I2,
+  H2
 ];
-function jb(n, a) {
-  return Qb(), Ob("svg", Yb, Pb);
+function j2(n, a) {
+  return Q2(), O2("svg", Y2, P2);
 }
-var Xb = /* @__PURE__ */ zb(Gb, [["render", jb]]);
-const va = window.Vue.openBlock, ql = window.Vue.createElementBlock, Hh = window.Vue.createElementVNode, _b = window.Vue.defineComponent, Zn = window.Vue.ref, Lb = window.Vue.provide, Ff = window.Vue.computed, qb = window.Vue.onUnmounted, Sf = window.Vue.toRef, Kb = window.Vue.resolveComponent, $b = window.Vue.Fragment, e2 = window.Vue.createBlock, t2 = window.Vue.Teleport, Wf = window.Vue.createVNode, n2 = window.Vue.Transition, r2 = window.Vue.withCtx, i2 = window.Vue.normalizeClass, a2 = window.Vue.normalizeStyle, o2 = window.Vue.toDisplayString, l2 = window.Vue.createCommentVNode, s2 = window.Vue.renderSlot, Wl = window.Vue.nextTick;
+var X2 = /* @__PURE__ */ z2(G2, [["render", j2]]);
+const va = window.Vue.openBlock, ql = window.Vue.createElementBlock, Hh = window.Vue.createElementVNode, _2 = window.Vue.defineComponent, Zn = window.Vue.ref, L2 = window.Vue.provide, Ff = window.Vue.computed, q2 = window.Vue.onUnmounted, Sf = window.Vue.toRef, K2 = window.Vue.resolveComponent, $2 = window.Vue.Fragment, eb = window.Vue.createBlock, tb = window.Vue.Teleport, Wf = window.Vue.createVNode, nb = window.Vue.Transition, rb = window.Vue.withCtx, ib = window.Vue.normalizeClass, ab = window.Vue.normalizeStyle, ob = window.Vue.toDisplayString, lb = window.Vue.createCommentVNode, sb = window.Vue.renderSlot, Wl = window.Vue.nextTick;
 var Ph = (n, a) => {
   const r = n.__vccOpts || n;
   for (const [l, s] of a)
     r[l] = s;
   return r;
 };
-const c2 = {}, u2 = {
+const cb = {}, ub = {
   width: "32",
   height: "9",
   viewBox: "0 0 32 9",
   fill: "none",
   xmlns: "http://www.w3.org/2000/svg"
-}, d2 = /* @__PURE__ */ Hh("path", {
+}, db = /* @__PURE__ */ Hh("path", {
   "fill-rule": "evenodd",
   "clip-rule": "evenodd",
   d: "M8.01471 2.17157C7.26457 1.42143 6.24715 1 5.18629 1H0.5C0.223858 1 0 0.776142 0 0.5V0.5C0 0.223858 0.223858 0 0.5 0H31.5C31.7761 0 32 0.223858 32 0.5V0.5C32 0.776142 31.7761 1 31.5 1H27.1274C26.0666 1 25.0492 1.42143 24.299 2.17157L18.9853 7.4853C17.4232 9.04739 14.8905 9.04739 13.3284 7.48529L8.01471 2.17157Z",
   fill: "var(--feather-high-visibility-on-surface)"
-}, null, -1), f2 = [
-  d2
+}, null, -1), fb = [
+  db
 ];
-function h2(n, a) {
-  return va(), ql("svg", u2, f2);
+function hb(n, a) {
+  return va(), ql("svg", ub, fb);
 }
-var p2 = /* @__PURE__ */ Ph(c2, [["render", h2]]), Fe = /* @__PURE__ */ ((n) => (n.top = "top", n.bottom = "bottom", n.left = "left", n.right = "right", n))(Fe || {}), Pt = /* @__PURE__ */ ((n) => (n.center = "center", n.left = "left", n.right = "right", n))(Pt || {});
-const m2 = (n, a, r, l = 9) => {
+var pb = /* @__PURE__ */ Ph(cb, [["render", hb]]), Fe = /* @__PURE__ */ ((n) => (n.top = "top", n.bottom = "bottom", n.left = "left", n.right = "right", n))(Fe || {}), Pt = /* @__PURE__ */ ((n) => (n.center = "center", n.left = "left", n.right = "right", n))(Pt || {});
+const mb = (n, a, r, l = 9) => {
   const s = window.innerHeight - n.bottom, f = window.innerWidth - n.right, h = [];
   n.top >= a.height + l && h.push(Fe.top), s >= a.height + l && h.push(Fe.bottom);
   const p = [];
   f >= a.width + l && p.push(Fe.right), n.left >= a.width + l && p.push(Fe.left);
   let T = [...p, ...h];
   return (r === Fe.top || r === Fe.bottom) && (T = [...h, ...p]), T.indexOf(r) > -1 ? r : T.length ? T[0] : r;
-}, V2 = (n, a, r, l, s = 28) => {
+}, Vb = (n, a, r, l, s = 28) => {
   if (n === Fe.left || n === Fe.right)
     return Pt.center;
   const f = a.left + a.width / 2, h = window.innerWidth - a.right, p = [], T = f, N = h + a.width / 2, g = r.width - s, k = r.width / 2;
   return T >= k && N >= k && p.push(Pt.center), N >= g && p.push(Pt.left), T >= g && p.push(Pt.right), p.indexOf(l) > -1 ? l : p.length ? p[0] : l;
-}, T2 = {
+}, Tb = {
   title: {
     type: String,
     required: !0
@@ -8510,11 +8511,11 @@ const m2 = (n, a, r, l = 9) => {
     type: Number,
     default: 400
   }
-}, v2 = _b({
-  props: T2,
+}, vb = _2({
+  props: Tb,
   setup(n) {
     const a = Zn(!1), r = Zn(!1), l = ve("feather-tooltip-trigger"), s = ve("feather-tooltip"), f = "data-feather-tooltip";
-    Lb("feather-has-tooltip", !0);
+    L2("feather-has-tooltip", !0);
     let h = 0;
     const p = () => {
       Na(h), a.value || (h = Ra(C, n.enterDelay));
@@ -8532,7 +8533,7 @@ const m2 = (n, a, r, l = 9) => {
       blur: T,
       keydown: N
     }, b = Zn(document), B = Dh(b, () => D(!0));
-    qb(() => D(!0));
+    q2(() => D(!0));
     const F = () => document.getElementById(s), C = () => {
       r.value = !1, a.value = !0, Wl(() => {
         const de = F();
@@ -8549,7 +8550,7 @@ const m2 = (n, a, r, l = 9) => {
         return;
       }
       Wl(() => {
-        const pe = fe.getBoundingClientRect(), we = de.getBoundingClientRect(), ae = m2(pe, we, A.value, W), ke = V2(ae, pe, we, Q.value, H);
+        const pe = fe.getBoundingClientRect(), we = de.getBoundingClientRect(), ae = mb(pe, we, A.value, W), ke = Vb(ae, pe, we, Q.value, H);
         $.value = ke.toString(), L.value = ae.toString();
         let ye = 0, Oe = 0;
         if ((ae === Fe.left || ae === Fe.right) && (ye = pe.top + pe.height / 2 - we.height / 2, ae === Fe.left && (Oe = pe.left - we.width - W), ae === Fe.right && (Oe = pe.right)), ae === Fe.top || ae === Fe.bottom) {
@@ -8583,40 +8584,40 @@ const m2 = (n, a, r, l = 9) => {
     };
   },
   components: {
-    Pointer: p2
+    Pointer: pb
   }
-}), w2 = ["id"];
-function U2(n, a, r, l, s, f) {
-  const h = Kb("Pointer");
-  return va(), ql($b, null, [
-    (va(), e2(t2, { to: "body" }, [
-      Wf(n2, { css: n.animate }, {
-        default: r2(() => [
+}), wb = ["id"];
+function Ub(n, a, r, l, s, f) {
+  const h = K2("Pointer");
+  return va(), ql($2, null, [
+    (va(), eb(tb, { to: "body" }, [
+      Wf(nb, { css: n.animate }, {
+        default: rb(() => [
           n.show ? (va(), ql("div", {
             key: 0,
-            class: i2(["feather-tooltip-container", [n.alignmentClass, n.placementClass]]),
+            class: ib(["feather-tooltip-container", [n.alignmentClass, n.placementClass]]),
             ref: "tooltip",
-            style: a2({ left: n.left, top: n.top })
+            style: ab({ left: n.left, top: n.top })
           }, [
             Hh("div", {
               class: "tooltip",
               role: "tooltip",
               id: n.tooltipID
-            }, o2(n.title), 9, w2),
+            }, ob(n.title), 9, wb),
             Wf(h, { class: "tooltip-pointer" })
-          ], 6)) : l2("", !0)
+          ], 6)) : lb("", !0)
         ]),
         _: 1
       }, 8, ["css"])
     ])),
-    s2(n.$slots, "default", {
+    sb(n.$slots, "default", {
       attrs: n.attrs,
       on: n.listeners
     }, void 0, !0)
   ], 64);
 }
-var Af = /* @__PURE__ */ Ph(v2, [["render", U2], ["__scopeId", "data-v-3da6b22e"]]);
-const R2 = window.Vue.defineComponent, ca = window.Vue.unref, xf = window.Vue.toHandlers, Bf = window.Vue.mergeProps, Al = window.Vue.createElementVNode, Cf = window.Vue.withCtx, Df = window.Vue.createVNode, N2 = window.Vue.normalizeClass, g2 = window.Vue.normalizeStyle, M2 = window.Vue.Fragment, Z2 = window.Vue.openBlock, J2 = window.Vue.createElementBlock, k2 = /* @__PURE__ */ R2({
+var Af = /* @__PURE__ */ Ph(vb, [["render", Ub], ["__scopeId", "data-v-3da6b22e"]]);
+const Rb = window.Vue.defineComponent, ca = window.Vue.unref, xf = window.Vue.toHandlers, Bf = window.Vue.mergeProps, Al = window.Vue.createElementVNode, Cf = window.Vue.withCtx, Df = window.Vue.createVNode, Nb = window.Vue.normalizeClass, gb = window.Vue.normalizeStyle, Mb = window.Vue.Fragment, Zb = window.Vue.openBlock, Jb = window.Vue.createElementBlock, kb = /* @__PURE__ */ Rb({
   __name: "Timeline",
   props: {
     alarm: null,
@@ -8626,7 +8627,7 @@ const R2 = window.Vue.defineComponent, ca = window.Vue.unref, xf = window.Vue.to
   },
   setup(n) {
     const a = n, r = (s, f) => s && f ? (Number(f) - Number(s)) * a.proportion : 0, l = (s) => s ? (Number(s) - Number(a.minStart)) * a.proportion : 0;
-    return (s, f) => (Z2(), J2(M2, null, [
+    return (s, f) => (Zb(), Jb(Mb, null, [
       Df(ca(Af), {
         title: ca(dn)(n.alarm.firstTime)
       }, {
@@ -8641,8 +8642,8 @@ const R2 = window.Vue.defineComponent, ca = window.Vue.unref, xf = window.Vue.to
         _: 1
       }, 8, ["title"]),
       Al("div", {
-        class: N2(["line", [`${n.alarm.severity.toLowerCase()}-bg dark`]]),
-        style: g2({
+        class: Nb(["line", [`${n.alarm.severity.toLowerCase()}-bg dark`]]),
+        style: gb({
           width: r(n.alarm.firstTime, n.alarm.time) + "px"
         })
       }, null, 6),
@@ -8659,28 +8660,28 @@ const R2 = window.Vue.defineComponent, ca = window.Vue.unref, xf = window.Vue.to
     ], 64));
   }
 });
-const y2 = /* @__PURE__ */ Qe(k2, [["__scopeId", "data-v-c620fbda"]]), b2 = window.Vue.openBlock, E2 = window.Vue.createElementBlock, jh = window.Vue.createElementVNode;
-var F2 = (n, a) => {
+const yb = /* @__PURE__ */ Qe(kb, [["__scopeId", "data-v-c620fbda"]]), bb = window.Vue.openBlock, Eb = window.Vue.createElementBlock, jh = window.Vue.createElementVNode;
+var Fb = (n, a) => {
   const r = n.__vccOpts || n;
   for (const [l, s] of a)
     r[l] = s;
   return r;
 };
-const S2 = {}, W2 = {
+const Sb = {}, Wb = {
   xmlns: "http://www.w3.org/2000/svg",
   viewBox: "0 0 24 24"
-}, A2 = /* @__PURE__ */ jh("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" }, null, -1), x2 = /* @__PURE__ */ jh("path", { d: "M16,11H8a1,1,0,0,0,0,2h8a1,1,0,0,0,0-2Z" }, null, -1), B2 = [
-  A2,
-  x2
+}, Ab = /* @__PURE__ */ jh("path", { d: "M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" }, null, -1), xb = /* @__PURE__ */ jh("path", { d: "M16,11H8a1,1,0,0,0,0,2h8a1,1,0,0,0,0-2Z" }, null, -1), Bb = [
+  Ab,
+  xb
 ];
-function C2(n, a) {
-  return b2(), E2("svg", W2, B2);
+function Cb(n, a) {
+  return bb(), Eb("svg", Wb, Bb);
 }
-var D2 = /* @__PURE__ */ F2(S2, [["render", C2]]);
-const Q2 = window.Vue.defineComponent, O2 = window.Vue.normalizeClass, Ce = window.Vue.createElementVNode, nr = window.Vue.toDisplayString, on = window.Vue.unref, ua = window.Vue.createVNode, z2 = window.Vue.createTextVNode, Qf = window.Vue.renderList, xl = window.Vue.Fragment, rr = window.Vue.openBlock, ir = window.Vue.createElementBlock, G2 = window.Vue.createCommentVNode, Y2 = window.Vue.pushScopeId, I2 = window.Vue.popScopeId, H2 = (n) => (Y2("data-v-b0d9a66b"), n = n(), I2(), n), P2 = { class: "section detail" }, j2 = { class: "id" }, X2 = {
+var Db = /* @__PURE__ */ Fb(Sb, [["render", Cb]]);
+const Qb = window.Vue.defineComponent, Ob = window.Vue.normalizeClass, Ce = window.Vue.createElementVNode, nr = window.Vue.toDisplayString, on = window.Vue.unref, ua = window.Vue.createVNode, zb = window.Vue.createTextVNode, Qf = window.Vue.renderList, xl = window.Vue.Fragment, rr = window.Vue.openBlock, ir = window.Vue.createElementBlock, Gb = window.Vue.createCommentVNode, Yb = window.Vue.pushScopeId, Ib = window.Vue.popScopeId, Hb = (n) => (Yb("data-v-c231ad04"), n = n(), Ib(), n), Pb = { class: "section detail" }, jb = { class: "id" }, Xb = {
   key: 0,
   class: "section"
-}, _2 = /* @__PURE__ */ H2(() => /* @__PURE__ */ Ce("div", { class: "id" }, "Alarms", -1)), L2 = { class: "action-btns" }, q2 = { class: "zoom" }, K2 = /* @__PURE__ */ z2(" Zoom "), $2 = { class: "alarms" }, eE = { class: "times" }, tE = { class: "container" }, nE = { class: "ids" }, rE = { class: "timeline-container" }, ar = window.Vue.ref, iE = window.Vue.watch, aE = /* @__PURE__ */ Q2({
+}, _b = /* @__PURE__ */ Hb(() => /* @__PURE__ */ Ce("div", { class: "id" }, "Alarms", -1)), Lb = { class: "action-btns" }, qb = { class: "zoom" }, Kb = /* @__PURE__ */ zb(" Zoom "), $b = { class: "alarms" }, eE = { class: "times" }, tE = { class: "container" }, nE = { class: "ids" }, rE = { class: "timeline-container" }, ar = window.Vue.ref, iE = window.Vue.watch, aE = /* @__PURE__ */ Qb({
   __name: "SituationMetricsTab",
   props: {
     situation: null
@@ -8730,19 +8731,19 @@ const Q2 = window.Vue.defineComponent, O2 = window.Vue.normalizeClass, Ce = wind
     return (Q, W) => {
       var H, y;
       return rr(), ir(xl, null, [
-        Ce("div", P2, [
+        Ce("div", Pb, [
           Ce("div", {
-            class: O2(["severity-line", [`${(y = (H = a.situation) == null ? void 0 : H.severity) == null ? void 0 : y.toLowerCase()}-bg dark`]])
+            class: Ob(["severity-line", [`${(y = (H = a.situation) == null ? void 0 : H.severity) == null ? void 0 : y.toLowerCase()}-bg dark`]])
           }, null, 2),
           Ce("div", null, [
-            Ce("div", j2, "Situation " + nr(a.situation.id), 1),
+            Ce("div", jb, "Situation " + nr(a.situation.id), 1),
             Ce("div", null, " Duration: " + nr(on(xJ)(new Date(N.value), new Date(T.value))), 1)
           ])
         ]),
-        p.value.length > 0 ? (rr(), ir("div", X2, [
-          _2,
-          Ce("div", L2, [
-            ua(on(Db), {
+        p.value.length > 0 ? (rr(), ir("div", Xb, [
+          _b,
+          Ce("div", Lb, [
+            ua(on(D2), {
               class: "select",
               label: "Sort by:",
               options: s,
@@ -8751,25 +8752,26 @@ const Q2 = window.Vue.defineComponent, O2 = window.Vue.normalizeClass, Ce = wind
                 W[0] || (W[0] = (_) => f.value = _),
                 k
               ],
-              "text-prop": "name"
+              "text-prop": "name",
+              "data-test": "select-sort"
             }, null, 8, ["modelValue"]),
-            Ce("div", q2, [
-              K2,
+            Ce("div", qb, [
+              Kb,
               Ce("div", null, [
                 ua(on(He), {
-                  icon: on(Xb),
+                  icon: on(X2),
                   class: "zoom-icon",
                   onClick: b
                 }, null, 8, ["icon"]),
                 ua(on(He), {
-                  icon: on(D2),
+                  icon: on(Db),
                   class: "zoom-icon",
                   onClick: B
                 }, null, 8, ["icon"])
               ])
             ])
           ]),
-          Ce("div", $2, [
+          Ce("div", $b, [
             Ce("div", eE, [
               Ce("div", null, nr(on(dn)(T.value)), 1),
               Ce("div", null, nr(on(dn)(N.value)), 1)
@@ -8786,7 +8788,7 @@ const Q2 = window.Vue.defineComponent, O2 = window.Vue.normalizeClass, Ce = wind
                   class: "timeline",
                   key: _.id
                 }, [
-                  ua(y2, {
+                  ua(yb, {
                     alarm: _,
                     proportion: g.value,
                     "min-start": T.value,
@@ -8796,12 +8798,12 @@ const Q2 = window.Vue.defineComponent, O2 = window.Vue.normalizeClass, Ce = wind
               ])
             ])
           ])
-        ])) : G2("", !0)
+        ])) : Gb("", !0)
       ], 64);
     };
   }
 });
-const oE = /* @__PURE__ */ Qe(aE, [["__scopeId", "data-v-b0d9a66b"]]), lE = window.Vue.defineComponent, Xh = window.Vue.createTextVNode, Pr = window.Vue.unref, or = window.Vue.withCtx, Jn = window.Vue.createVNode, sE = window.Vue.openBlock, cE = window.Vue.createElementBlock, uE = window.Vue.createCommentVNode;
+const oE = /* @__PURE__ */ Qe(aE, [["__scopeId", "data-v-c231ad04"]]), lE = window.Vue.defineComponent, Xh = window.Vue.createTextVNode, Pr = window.Vue.unref, or = window.Vue.withCtx, Jn = window.Vue.createVNode, sE = window.Vue.openBlock, cE = window.Vue.createElementBlock, uE = window.Vue.createCommentVNode;
 window.Vue.pushScopeId;
 window.Vue.popScopeId;
 const dE = {

@@ -40,6 +40,7 @@ watch(props, () => {
 			<FeatherButton
 				v-if="status !== REJECTED"
 				class="btn"
+				data-test="btn-accept"
 				:class="{ accepted: status == ACCEPTED }"
 				@click="() => handleFeedbackSituation(ACCEPTED)"
 			>

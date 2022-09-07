@@ -52,30 +52,31 @@ import com.google.gson.stream.JsonReader;
 
 public class TFModel implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TFModel.class);
+    @SuppressWarnings("java:S1075")
     private static final String CLASSPATH_MODEL_PATH = "/tf_model";
 
     private static final Gson gson = new Gson();
 
-    private final Map<String,Integer> typeA_ioTypeToId = new HashMap<>();
-    private final Map<String,Integer> typeB_ioTypeToId = new HashMap<>();
+    private final Map<String,Integer> typeAIoTypeToId = new HashMap<>();
+    private final Map<String,Integer> typeBIoTypeToId = new HashMap<>();
 
     private final Session sess;
     private final Path tempDir;
 
-    public TFModel() {
+    public TFModel() throws DeepLearningException {
         this("");
     }
 
-    public TFModel(String modelPath) {
+    public TFModel(String modelPath) throws DeepLearningException {
         this(null, modelPath);
     }
 
-    public TFModel(BundleContext bundleContext, String modelPath) {
+    public TFModel(BundleContext bundleContext, String modelPath) throws DeepLearningException {
         final String effectiveModelPath;
         if (Strings.isNullOrEmpty(modelPath)) {
             LOG.info("No model path is set. Using default model from class-path.");
             try {
-                tempDir = Files.createTempDirectory("alec-tf");
+                tempDir = Files.createTempDirectory(Paths.get("/tmp/tensorflow"), "alec-tf");
                 effectiveModelPath = tempDir.toAbsolutePath().toString();
                 if (bundleContext != null) {
                     // If we're given a bundle context, use it
@@ -84,7 +85,7 @@ public class TFModel implements AutoCloseable {
                     ClasspathUtils.copyResourcesRecursively(getClass().getResource(CLASSPATH_MODEL_PATH), tempDir.toFile());
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new DeepLearningException(e);
             }
         } else {
             tempDir = null;
@@ -114,13 +115,14 @@ public class TFModel implements AutoCloseable {
                 .fetch("related/predictions_related/predictions_related")
                 .run();
 
-        Tensor result = outputTensors.get(0);
+        Tensor<?> result = outputTensors.get(0);
 
         boolean[] outputBuffer = new boolean[1];
         result.copyTo(outputBuffer);
         return outputBuffer[0];
     }
 
+    @SuppressWarnings("java:S1452")
     public List<Tensor<?>> toTensors(InputVector inputVector) {
         return Arrays.asList(
                 Tensor.create(new int[]{toTypeIdA(inputVector.getTypeA())}, Integer.class), // type_a
@@ -135,9 +137,9 @@ public class TFModel implements AutoCloseable {
         );
     }
 
-    private void loadModelHyperParameters(String modelPath) {
-        List<String> type_a_vocab = null;
-        List<String> type_b_vocab = null;
+    private void loadModelHyperParameters(String modelPath) throws DeepLearningException {
+        List<String> typeAVocab = null;
+        List<String> typeBVocab = null;
 
         try (FileReader fileReader = new FileReader(Paths.get(modelPath, "model_hyperparameters.json").toFile());
              JsonReader reader = new JsonReader(fileReader)
@@ -146,36 +148,36 @@ public class TFModel implements AutoCloseable {
             List<Map<String,Object>> inputFeatures = (List<Map<String,Object>>)result.get("input_features");
             for (Map<String,Object> inputFeature : inputFeatures) {
                 if ("type_a".equals(inputFeature.get("name"))) {
-                    type_a_vocab = (List<String>)inputFeature.get("vocab");
+                    typeAVocab = (List<String>)inputFeature.get("vocab");
                 } else if ("type_b".equals(inputFeature.get("name"))) {
-                    type_b_vocab = (List<String>)inputFeature.get("vocab");
+                    typeBVocab = (List<String>)inputFeature.get("vocab");
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load model hyper parameters.", e);
+            throw new DeepLearningException("Failed to load model hyper parameters.", e);
         }
 
-        if (type_a_vocab == null) {
+        if (typeAVocab == null) {
             throw new IllegalStateException("Failed to find vocabulary for type_a");
         }
-        if (type_b_vocab == null) {
+        if (typeBVocab == null) {
             throw new IllegalStateException("Failed to find vocabulary for type_b");
         }
 
-        for (int i = 0; i < type_a_vocab.size(); i++) {
-            typeA_ioTypeToId.put(type_a_vocab.get(i), i);
+        for (int i = 0; i < typeAVocab.size(); i++) {
+            typeAIoTypeToId.put(typeAVocab.get(i), i);
         }
-        for (int i = 0; i < type_b_vocab.size(); i++) {
-            typeB_ioTypeToId.put(type_b_vocab.get(i), i);
+        for (int i = 0; i < typeBVocab.size(); i++) {
+            typeBIoTypeToId.put(typeBVocab.get(i), i);
         }
     }
 
     private int toTypeIdA(String inventoryObjectType) {
-        return typeA_ioTypeToId.getOrDefault(inventoryObjectType, 0);
+        return typeAIoTypeToId.getOrDefault(inventoryObjectType, 0);
     }
 
     private int toTypeIdB(String inventoryObjectType) {
-        return typeB_ioTypeToId.getOrDefault(inventoryObjectType, 0);
+        return typeBIoTypeToId.getOrDefault(inventoryObjectType, 0);
     }
 
     @Override
@@ -185,7 +187,7 @@ public class TFModel implements AutoCloseable {
             try {
                 FileUtils.deleteDirectory(tempDir.toFile());
             } catch (IOException e) {
-                LOG.warn("Failed to clean up temporary directory: {}.", e);
+                LOG.warn(String.format("Failed to clean up temporary directory: %s.", tempDir), e);
             }
         }
     }

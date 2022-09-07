@@ -232,6 +232,7 @@ public class TestDriver {
         return graphProvider;
     }
 
+    @SuppressWarnings("java:S1602")
     private void exportGraph(GraphProvider graphProvider, long now) {
         if (graphProvider == null) {
             return;
@@ -318,7 +319,7 @@ public class TestDriver {
     }
 
     public static class DriverBuilder {
-        public static final String TMP = "/tmp";
+        public static final String TMP = "/tmp/testdriver";
         private EngineFactory engineFactory;
         private Boolean verbose;
 

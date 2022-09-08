@@ -33,25 +33,22 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opennms.alec.engine.deeplearning.TFModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Command(scope = "opennms-alec", name = "tensorflow-load-model", description = "Validate that the TensorFlow model at the given path can be loaded.")
 @Service
 public class LoadModel implements Action {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoadModel.class);
-
     @Argument(name="model path", required = true)
     private String modelPath;
 
     @Override
+    @SuppressWarnings({"java:S106","java:S1181"})
     public Object execute() {
         try (TFModel tfModel = new TFModel(modelPath)) {
-            LOG.info("Model successfully loaded: {}",  modelPath);
+            System.out.println("Model successfully loaded: " + modelPath);
         } catch (Throwable t) {
-            LOG.error("Failed to loaded model from path: {}", modelPath);
-            LOG.error(t.getMessage());
+            System.out.println("Failed to loaded model from path: " + modelPath);
+            t.printStackTrace();
         }
         return null;
     }

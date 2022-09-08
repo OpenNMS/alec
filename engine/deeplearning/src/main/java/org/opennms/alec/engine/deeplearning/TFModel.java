@@ -63,20 +63,21 @@ public class TFModel implements AutoCloseable {
     private final Session sess;
     private final Path tempDir;
 
-    public TFModel() throws DeepLearningException {
+    public TFModel() {
         this("");
     }
 
-    public TFModel(String modelPath) throws DeepLearningException {
+    public TFModel(String modelPath) {
         this(null, modelPath);
     }
 
-    public TFModel(BundleContext bundleContext, String modelPath) throws DeepLearningException {
+    @SuppressWarnings("java:S112")
+    public TFModel(BundleContext bundleContext, String modelPath) {
         final String effectiveModelPath;
         if (Strings.isNullOrEmpty(modelPath)) {
             LOG.info("No model path is set. Using default model from class-path.");
             try {
-                tempDir = Files.createTempDirectory(Paths.get("/tmp/tensorflow"), "alec-tf");
+                tempDir = Files.createTempDirectory(Paths.get(System.getProperty("java.io.tmpdir")), "alec-tf");
                 effectiveModelPath = tempDir.toAbsolutePath().toString();
                 if (bundleContext != null) {
                     // If we're given a bundle context, use it
@@ -85,7 +86,7 @@ public class TFModel implements AutoCloseable {
                     ClasspathUtils.copyResourcesRecursively(getClass().getResource(CLASSPATH_MODEL_PATH), tempDir.toFile());
                 }
             } catch (IOException e) {
-                throw new DeepLearningException(e);
+                throw new RuntimeException(e);
             }
         } else {
             tempDir = null;
@@ -137,7 +138,8 @@ public class TFModel implements AutoCloseable {
         );
     }
 
-    private void loadModelHyperParameters(String modelPath) throws DeepLearningException {
+    @SuppressWarnings("java:S112")
+    private void loadModelHyperParameters(String modelPath) {
         List<String> typeAVocab = null;
         List<String> typeBVocab = null;
 
@@ -154,7 +156,7 @@ public class TFModel implements AutoCloseable {
                 }
             }
         } catch (IOException e) {
-            throw new DeepLearningException("Failed to load model hyper parameters.", e);
+            throw new RuntimeException("Failed to load model hyper parameters.", e);
         }
 
         if (typeAVocab == null) {

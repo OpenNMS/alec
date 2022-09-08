@@ -56,15 +56,11 @@ import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.common.GraphMLConverterBuilder;
 import org.opennms.alec.features.graph.graphml.GraphML;
 import org.opennms.alec.features.graph.graphml.GraphMLWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
+@SuppressWarnings("java:S106")
 public class TestDriver {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TestDriver.class);
-
     private final EngineFactory engineFactory;
     private boolean verbose = false;
     private long graphExportIntervalMs = 0;
@@ -248,10 +244,10 @@ public class TestDriver {
                     .build().toGraphML();
         });
         try {
-            LOG.info("Saving graph snapshot to {}\n", destinationFile);
+            System.out.printf("Saving graph snapshot to %s%n", destinationFile);
             GraphMLWriter.write(graphML, destinationFile);
         } catch (Exception e) {
-            LOG.error("Failed to save graph to: {}\n", destinationFile);
+            System.out.printf("Failed to save graph to: %s%n", destinationFile);
             e.printStackTrace();
         }
     }
@@ -274,8 +270,8 @@ public class TestDriver {
         @Override
         public void onSituation(Situation situation) {
             if (verbose) {
-                LOG.info("Situation with id {} has {} alarms.\n",
-                                  situation.getId(), situation.getAlarms().size());
+                System.out.printf("Situation with id %s has %d alarms.%n",
+                        situation.getId(), situation.getAlarms().size());
             }
             situations.put(situation.getId() + ":" + situation.getSeverity(), situation);
         }
@@ -286,7 +282,7 @@ public class TestDriver {
             return;
         }
         double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
-        LOG.info("Tick at {} ({}) - {} complete - {} elapsed\n", new Date(tick), tick,
+        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed%n", new Date(tick), tick,
                 percentageComplete, getElaspsed(startTime));
     }
 
@@ -319,12 +315,11 @@ public class TestDriver {
     }
 
     public static class DriverBuilder {
-        public static final String TMP = "/tmp/testdriver";
         private EngineFactory engineFactory;
         private Boolean verbose;
 
         private long graphExportIntervalMs = 0;
-        private File graphOutputFolder = new File(TMP);
+        private File graphOutputFolder = new File(System.getProperty("java.io.tmpdir"));
 
         public DriverBuilder withEngineFactory(EngineFactory engineFactory) {
             this.engineFactory = engineFactory;

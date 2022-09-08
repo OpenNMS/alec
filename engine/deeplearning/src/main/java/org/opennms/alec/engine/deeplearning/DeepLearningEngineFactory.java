@@ -32,15 +32,10 @@ import java.util.Objects;
 
 import org.opennms.alec.engine.api.EngineFactory;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
 public class DeepLearningEngineFactory implements EngineFactory {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DeepLearningEngineFactory.class);
-
     private final BundleContext bundleContext;
     private final DeepLearningEngineConf conf;
 
@@ -61,12 +56,7 @@ public class DeepLearningEngineFactory implements EngineFactory {
 
     @Override
     public DeepLearningEngine createEngine(MetricRegistry metrics) {
-        try {
-            return new DeepLearningEngine(metrics, bundleContext, conf);
-        } catch (DeepLearningException e) {
-            LOG.error(e.getMessage());
-            return null;
-        }
+        return new DeepLearningEngine(metrics, bundleContext, conf);
     }
 
     @Override

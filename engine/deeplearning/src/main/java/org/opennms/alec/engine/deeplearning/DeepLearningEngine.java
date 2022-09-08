@@ -53,7 +53,7 @@ public class DeepLearningEngine extends AbstractClusterEngine {
     private final TFModel tfModel;
     private TFClusterer tfClusterer;
 
-    public DeepLearningEngine(MetricRegistry metrics, BundleContext bundleContext, DeepLearningEngineConf conf) throws DeepLearningException {
+    public DeepLearningEngine(MetricRegistry metrics, BundleContext bundleContext, DeepLearningEngineConf conf) {
         this(metrics, new TFModel(bundleContext, conf.getModelPath()), conf);
     }
 

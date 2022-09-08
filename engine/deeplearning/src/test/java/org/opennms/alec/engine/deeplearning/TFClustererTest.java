@@ -103,7 +103,7 @@ public class TFClustererTest {
     }
 
     @Test(timeout = 180000)
-    public void canPerformanceTestClusterer() throws DeepLearningException {
+    public void canPerformanceTestClusterer() {
         // Build a graph from the inventory
         GraphManager graphManager = new GraphManager();
         graphManager.addInventory(network);

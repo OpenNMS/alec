@@ -40,7 +40,7 @@ public class TFModelTest {
     /**
      * This also verifies that the default model can be loaded from the classpath.
      */
-    private TFModel tfModel = new TFModel();
+    private final TFModel tfModel = new TFModel();
 
     @Test
     public void canConvertVectorToTensor() {

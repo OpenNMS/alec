@@ -6,10 +6,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -26,8 +28,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.data.AlarmSetImpl;
 import org.opennms.alec.data.CreateSituationPayloadImpl;
+import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
@@ -35,7 +39,9 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.StaticAlarmDatasource;
 import org.opennms.alec.datasource.common.StaticSituationDatasource;
+import org.opennms.alec.grpc.GrpcConnectionConfig;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
+import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +49,12 @@ public class SituationRestImplTest {
 
     @Mock
     KeyValueStore<String> kvStore;
+
+    @Mock
+    RuntimeInfo runtimeInfo;
+
+    @Mock
+    GrpcConnectionConfig grpcConnectionConfig;
 
     private SituationDatasource situationDatasource;
 
@@ -52,9 +64,14 @@ public class SituationRestImplTest {
 
     @Before
     public void setUp() {
+        //we don't want to store testing data to the cloud
+        when(kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG)).thenReturn(Optional.of("{\"agreed\":false}"));
         getAlarmsAndSituations();
+        when(runtimeInfo.getSystemId()).thenReturn("42");
+        when(grpcConnectionConfig.getHost()).thenReturn("localhost");
+        when(grpcConnectionConfig.getPort()).thenReturn(80);
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms));
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
     }
 
     @After
@@ -94,7 +111,7 @@ public class SituationRestImplTest {
     @Test
     public void removeOneAlarm() throws InterruptedException {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("5")).build())) {
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(List.of("5")).build())) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(3));
@@ -210,26 +227,44 @@ public class SituationRestImplTest {
             assertThat(actual.getStatus(), equalTo(200));
             List<SituationStatus> situationList = (List<SituationStatus>) actual.getEntity();
             assertThat(situationList.size(), equalTo(2));
+            assertThat(situationList.get(0).getId(), equalTo("10"));
+            assertThat(situationList.get(1).getId(), equalTo("11"));
             verify(situationDatasource, times(1)).getSituations();
         }
     }
 
     private void getAlarmsAndSituations() {
-        for (int i = 0, j = 10; i < j; i++) {
-            alarms.add(ImmutableAlarm.newBuilder().setId(String.valueOf(i)).setLongId(i).setReductionKey(String.valueOf(i)).build());
+        for (int i = 0; i < 10; i++) {
+            alarms.add(ImmutableAlarm.newBuilder()
+                    .setId(String.valueOf(i))
+                    .setReductionKey("reduction:" + i)
+                    .setSeverity(Severity.NORMAL)
+                    .setDescription("description")
+                    .setSummary("summary")
+                    .setInventoryObjectId("inventoryObjectId")
+                    .setInventoryObjectType("inventoryObjectType")
+                    .setLongId(i).setReductionKey(String.valueOf(i)).build());
         }
 
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("10")
+                .setLongId(10)
                 .addAlarm(alarms.get(0))
                 .addAlarm(alarms.get(1))
+                .setSeverity(Severity.MAJOR)
+                .setLastTime(System.currentTimeMillis())
+                .setStatus(Status.CREATED)
                 .build());
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("11")
+                .setLongId(11)
                 .addAlarm(alarms.get(2))
                 .addAlarm(alarms.get(3))
                 .addAlarm(alarms.get(4))
                 .addAlarm(alarms.get(5))
+                .setSeverity(Severity.MAJOR)
+                .setLastTime(System.currentTimeMillis())
+                .setStatus(Status.CREATED)
                 .build());
     }
 }

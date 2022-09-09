@@ -92,6 +92,8 @@
         <tensorflow.version>1.13.1</tensorflow.version>
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
+        <grpc.version>1.49.0</grpc.version>
+        <protobuf-java.version>3.21.5</protobuf-java.version>
     </properties>
 
     <dependencyManagement>

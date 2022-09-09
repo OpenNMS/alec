@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -43,12 +44,16 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.grpc.SituationClient;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
@@ -143,6 +148,25 @@ public class SituationRestImpl implements SituationRest {
         List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
+
+
+        // Create a communication channel to the server, known as a Channel. Channels are thread-safe
+        // and reusable. It is common to create channels at the beginning of your application and reuse
+        // them until the application shuts down.
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(target)
+                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
+                // needing certificates.
+                .usePlaintext()
+                .build();
+        try {
+            SituationClient client = new SituationClient(channel);
+            client.sendSituations(acceptedSituations);
+        } finally {
+            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
+            // resources the channel should be shut down when it will no longer be used. If it may be used
+            // again leave it running.
+            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        }
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);

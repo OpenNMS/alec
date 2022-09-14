@@ -149,10 +149,10 @@ public class SituationRestImpl implements SituationRest {
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
 
-
         // Create a communication channel to the server, known as a Channel. Channels are thread-safe
         // and reusable. It is common to create channels at the beginning of your application and reuse
         // them until the application shuts down.
+        final String target = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
         ManagedChannel channel = ManagedChannelBuilder.forTarget(target)
                 // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
                 // needing certificates.

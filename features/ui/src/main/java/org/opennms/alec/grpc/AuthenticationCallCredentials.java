@@ -28,34 +28,45 @@
 
 package org.opennms.alec.grpc;
 
-import java.util.List;
+import java.util.concurrent.Executor;
 
-import org.opennms.alec.datasource.api.Situation;
-import org.opennms.aleccloud.AlecCollectionServiceGrpc;
-import org.opennms.aleccloud.SituationSetProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.grpc.CallCredentials;
+import io.grpc.Metadata;
+import io.grpc.Status;
 
-import io.grpc.Channel;
-import io.grpc.StatusRuntimeException;
+public class AuthenticationCallCredentials extends CallCredentials {
 
-public class SituationClient {
-    private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
+    public static final String BEARER = "Bearer";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final Metadata.Key<String> META_DATA_KEY =
+            Metadata.Key.of(AUTHORIZATION, Metadata.ASCII_STRING_MARSHALLER);
 
-    private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
+    private String token;
 
-    public SituationClient(Channel channel) {
-        blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
+    public AuthenticationCallCredentials(String token) {
+        this.token = token;
     }
 
-    public void sendSituations(List<Situation> situation) {
-        LOG.info("Will try to send {} ...", situation);
-        SituationSetProtos.SituationSet request = SituationSetProtos.SituationSet.newBuilder().build();
-        try {
-            blockingStub.withCallCredentials(new AuthenticationCallCredentials("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ.pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8"))
-                    .sendSituations(request);
-        } catch (StatusRuntimeException e) {
-            LOG.warn("RPC failed: {}", e.getStatus());
-        }
+    @Override
+    public void applyRequestMetadata(
+            RequestInfo requestInfo,
+            Executor executor,
+            MetadataApplier metadataApplier) {
+        executor.execute(() -> {
+            try {
+                Metadata headers = new Metadata();
+                headers.put(META_DATA_KEY, BEARER + " " + token);
+                metadataApplier.apply(headers);
+            } catch (Exception e) {
+                metadataApplier.fail(Status.UNAUTHENTICATED.withCause(e));
+            }
+        });
+
+    }
+
+    @Override
+    public void thisUsesUnstableApi() {
+        // yes this is unstable :(
     }
 }
+

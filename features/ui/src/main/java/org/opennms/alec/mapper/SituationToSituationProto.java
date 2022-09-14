@@ -31,9 +31,23 @@ package org.opennms.alec.mapper;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.aleccloud.SituationSetProtos;
 
+import com.google.protobuf.Timestamp;
+
 public class SituationToSituationProto {
 
-    SituationSetProtos.SituationSet toSituationSet(Situation situation) {
-        return SituationSetProtos.SituationSet.newBuilder().build();
+    AlarmToAlarmProto alarmMapper = new AlarmToAlarmProto();
+
+    org.opennms.aleccloud.SituationSetProtos.Situation toSituationSet(Situation situation) {
+        return SituationSetProtos.Situation.newBuilder()
+                .setAlarms(alarmMapper.toAlarms(situation.getAlarms()))
+                .setSeverity(situation.getSeverity().toString())
+                .setCreationTime(Timestamp.newBuilder().setSeconds(situation.getCreationTime()).build())
+                .setLastModificationTime(Timestamp.newBuilder().setSeconds(situation.getLastTime()).build())
+                .setDiagnostic(situation.getDiagnosticText())
+                .setId(Long.parseLong(situation.getId()))
+//                .setEngine(situation.)
+                .setStatus(SituationSetProtos.StatusType.valueOf(situation.getStatus().toString()))
+//                .setTags()
+                .build();
     }
 }

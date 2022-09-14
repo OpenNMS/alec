@@ -26,36 +26,36 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.grpc;
+package org.opennms.alec.mapper;
 
-import java.util.List;
+import java.util.Set;
 
-import org.opennms.alec.datasource.api.Situation;
-import org.opennms.aleccloud.AlecCollectionServiceGrpc;
+import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.aleccloud.SituationSetProtos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import io.grpc.Channel;
-import io.grpc.StatusRuntimeException;
+import com.google.protobuf.Timestamp;
 
-public class SituationClient {
-    private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
+public class AlarmToAlarmProto {
 
-    private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
-
-    public SituationClient(Channel channel) {
-        blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
+    public SituationSetProtos.Alarm toAlarm(Alarm alarm) {
+        return SituationSetProtos.Alarm.newBuilder()
+                .setAlarmId(Long.parseLong(alarm.getId()))
+                .setFirstTimeSeen(Timestamp.newBuilder().setSeconds(alarm.getFirstTime()).build())
+                .setLastTimeSeen(Timestamp.newBuilder().setSeconds(alarm.getTime()).build())
+                .setSeverity(alarm.getSeverity().toString())
+                .setDescription(alarm.getDescription())
+                .setSummary(alarm.getSummary())
+                .setInventoryObjectId(Long.parseLong(alarm.getInventoryObjectId()))
+                .setInventoryObjectType(alarm.getInventoryObjectType())
+//                .addAllTags()
+                .build();
     }
 
-    public void sendSituations(List<Situation> situation) {
-        LOG.info("Will try to send {} ...", situation);
-        SituationSetProtos.SituationSet request = SituationSetProtos.SituationSet.newBuilder().build();
-        try {
-            blockingStub.withCallCredentials(new AuthenticationCallCredentials("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ.pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8"))
-                    .sendSituations(request);
-        } catch (StatusRuntimeException e) {
-            LOG.warn("RPC failed: {}", e.getStatus());
+    public SituationSetProtos.AlarmSet toAlarms(Set<Alarm> alarms) {
+        SituationSetProtos.AlarmSet.Builder builder = SituationSetProtos.AlarmSet.newBuilder();
+        for (Alarm alarm : alarms) {
+            builder.addAlarms(toAlarm(alarm));
         }
+        return builder.build();
     }
 }

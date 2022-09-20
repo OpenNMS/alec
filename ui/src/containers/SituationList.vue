@@ -13,6 +13,7 @@ const state = reactive({
 })
 const situations = ref(situationStore.situations)
 const situationSelected = (id: string) => {
+	window.scrollTo(0, 0)
 	state.situationSelected = id
 	state.selectedSituationIndex = situationStore.situations.findIndex(
 		(s) => s.id === id

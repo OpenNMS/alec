@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useSituationsStore } from '@/store/useSituationsStore'
+import {useSituationsStore} from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
-import { reactive, ref } from 'vue'
-import { cloneDeep } from 'lodash'
+import {reactive, ref} from 'vue'
+import {cloneDeep} from 'lodash'
 
 const situationStore = useSituationsStore()
 situationStore.getSituations()
@@ -13,6 +13,7 @@ const state = reactive({
 })
 const situations = ref(situationStore.situations)
 const situationSelected = (id: string) => {
+	window.scrollTo(0, 0)
 	state.situationSelected = id
 	state.selectedSituationIndex = situationStore.situations.findIndex(
 		(s) => s.id === id

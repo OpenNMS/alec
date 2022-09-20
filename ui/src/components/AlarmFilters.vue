@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { TAlarm } from '@/types/TSituation'
-import { FeatherChipList, FeatherChip } from '@featherds/chips'
-import { ref, watch, computed } from 'vue'
-import { groupBy, keys } from 'lodash'
+import {TAlarm} from '@/types/TSituation'
+import {FeatherChip, FeatherChipList} from '@featherds/chips'
+import {computed, ref, watch} from 'vue'
+import {groupBy, keys} from 'lodash'
 import AlarmDetail from '@/components/AlarmDetail.vue'
 import StatusColor from '@/elements/StatusColor.vue'
+
 const props = defineProps<{
 	alarms: TAlarm[]
 }>()
@@ -38,6 +39,7 @@ watch(props, () => {
 		<div class="title">Alarms</div>
 		<FeatherChipList
 			:key="selectedFilters.toString()"
+			v-if="alarmFilters.length > 1"
 			condensed
 			class="alarm-filters"
 			label="Random list for condensed visual testing"
@@ -93,11 +95,7 @@ watch(props, () => {
 	flex-wrap: wrap;
 	> div {
 		margin-top: 20px;
-		width: 300px;
-		margin-right: 15px;
-	}
-	> div:last-child {
-		margin-bottom: 0;
+		width: 100%;
 	}
 }
 </style>

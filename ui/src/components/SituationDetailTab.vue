@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
 import InformationBox from '@/elements/InformationBox.vue'
-import { TSituation } from '@/types/TSituation'
-import { FeatherIcon } from '@featherds/icon'
+import {TSituation} from '@/types/TSituation'
+import {FeatherIcon} from '@featherds/icon'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import Cancel from '@featherds/icon/action/Cancel'
-import { sendFeedbackAcceptSituation } from '@/services/AlecService'
+import {sendFeedbackAcceptSituation} from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import AlarmFilters from '@/components/AlarmFilters.vue'
-import { FeatherButton } from '@featherds/button'
-import { ref, watch } from 'vue'
-import { useUserStore } from '@/store/useUserStore'
-import { formatDate } from '@/helpers/utils'
+import {FeatherButton} from '@featherds/button'
+import {ref, watch} from 'vue'
+import {useUserStore} from '@/store/useUserStore'
+import {formatDate} from '@/helpers/utils'
 import CONST from '@/helpers/constants'
+import {groupBy, size} from 'lodash'
+
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
@@ -75,7 +77,11 @@ watch(props, () => {
 			></div>
 			<div class="situation-info">
 				<div class="id">
-					<div>Situation {{ props.situationInfo?.id }}</div>
+					<div>
+						Situation - {{ props.situationInfo?.id }} - affecting
+						{{ size(groupBy(props.situationInfo?.alarms, 'nodeId')) }} node
+						having {{ props.situationInfo.alarms.length }} alarms
+					</div>
 					<SeverityStatus :severity="props.situationInfo?.severity" />
 				</div>
 
@@ -129,7 +135,7 @@ watch(props, () => {
 }
 .id {
 	font-weight: 600;
-	font-size: 21px;
+	font-size: 19px;
 	margin-bottom: 14px;
 	display: flex;
 	flex-direction: row;

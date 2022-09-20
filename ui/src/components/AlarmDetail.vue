@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import { formatDate } from '@/helpers/utils'
-import { TAlarm } from '@/types/TSituation'
+import {formatDate} from '@/helpers/utils'
+import {TAlarm} from '@/types/TSituation'
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -15,7 +15,7 @@ const props = defineProps<{
 			<SeverityStatus :severity="alarm?.severity" />
 		</div>
 
-		<div v-html="alarm.description"></div>
+		<div class="description" v-html="alarm.description"></div>
 		<div>
 			<strong>First Event</strong>
 			- {{ formatDate(alarm.firstTime) }}
@@ -45,5 +45,9 @@ const props = defineProps<{
 	font-weight: 600;
 	word-break: break-all;
 	margin-right: 5px;
+}
+
+.description {
+	word-break: break-word;
 }
 </style>

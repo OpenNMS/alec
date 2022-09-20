@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { TAlarm } from '@/types/TSituation'
-import { FeatherTooltip } from '@featherds/tooltip'
-import { formatDate } from '@/helpers/utils'
+import {TAlarm} from '@/types/TSituation'
+import {FeatherTooltip} from '@featherds/tooltip'
+import {formatDate} from '@/helpers/utils'
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -40,13 +40,18 @@ const getOffset = (alarmStart: Date | undefined): number => {
 	</FeatherTooltip>
 
 	<div
+		v-if="alarm.time !== alarm.firstTime"
 		class="line"
 		:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
 		:style="{
 			width: getWidth(alarm.firstTime, alarm.time) + 'px'
 		}"
 	></div>
-	<FeatherTooltip :title="formatDate(alarm.time)" v-slot="{ attrs, on }">
+	<FeatherTooltip
+		v-if="alarm.time !== alarm.firstTime"
+		:title="formatDate(alarm.time)"
+		v-slot="{ attrs, on }"
+	>
 		<div
 			class="circle"
 			v-bind="attrs"

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
-import { FeatherIcon } from '@featherds/icon'
+import {FeatherIcon} from '@featherds/icon'
+import {groupBy, size} from 'lodash'
 import Cancel from '@featherds/icon/action/Cancel'
-import { TSituation } from '@/types/TSituation'
+import {TSituation} from '@/types/TSituation'
 import CONST from '@/helpers/constants'
+
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
@@ -33,7 +34,7 @@ const handleSituationSelected = () => {
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<div class="title">[ {{ props.situationInfo?.id }} ]</div>
+				<div class="title">Situation [ {{ props.situationInfo?.id }} ]</div>
 				<div v-if="props.situationInfo.status == ACCEPTED" class="accepted">
 					<FeatherIcon
 						:icon="CheckCircle"
@@ -49,10 +50,13 @@ const handleSituationSelected = () => {
 					/>
 				</div>
 			</div>
-			<AlarmsCountBySeverity
-				:alarms="props.situationInfo?.alarms"
-				size="normal"
-			/>
+			<div class="count-info">
+				Alarms:
+				<span class="count">{{ props.situationInfo.alarms.length }}</span>
+				Nodes:<span class="count">
+					{{ size(groupBy(props.situationInfo.alarms, 'nodeId')) }}</span
+				>
+			</div>
 		</div>
 	</div>
 </template>
@@ -90,6 +94,7 @@ const handleSituationSelected = () => {
 	margin-right: 5px;
 }
 .severity-line {
+	min-width: 4px;
 	width: 4px;
 }
 .content {
@@ -98,14 +103,26 @@ const handleSituationSelected = () => {
 	flex-direction: column;
 	width: 100%;
 }
-
+.icon {
+	font-size: 24px;
+}
 .accepted {
-	font-size: 25px;
 	color: green;
 }
 
 .rejected {
-	font-size: 25px;
 	color: red;
+}
+
+.count-info {
+	display: flex;
+}
+
+.count {
+	font-size: 18px;
+	font-weight: 600;
+	padding-right: 8px;
+	padding-left: 3px;
+	color: #323647;
 }
 </style>

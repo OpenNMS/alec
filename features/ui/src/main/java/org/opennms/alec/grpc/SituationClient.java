@@ -52,7 +52,12 @@ public class SituationClient {
         LOG.info("Will try to send {} ...", situation);
         SituationSetProtos.SituationSet request = SituationSetProtos.SituationSet.newBuilder().build();
         try {
-            blockingStub.withCallCredentials(new AuthenticationCallCredentials("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ.pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8"))
+            blockingStub
+                    .withCallCredentials(
+                            new AuthenticationCallCredentials(
+                                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+                                            "eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+                                            "pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8"))
                     .sendSituations(request);
         } catch (StatusRuntimeException e) {
             LOG.warn("RPC failed: {}", e.getStatus());

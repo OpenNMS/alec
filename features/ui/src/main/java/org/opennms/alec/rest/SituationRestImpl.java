@@ -45,6 +45,7 @@ import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.grpc.SituationClient;
+import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,12 +62,36 @@ public class SituationRestImpl implements SituationRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
+    private final SituationToSituationProto mapper = new SituationToSituationProto();
+    private final SituationClient client;
+    private final ManagedChannel channel;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource) {
         this.kvStore = kvStore;
         this.situationDatasource = situationDatasource;
         objectMapper = new ObjectMapper();
+
+        // Create a communication channel to the server, known as a Channel. Channels are thread-safe
+        // and reusable. It is common to create channels at the beginning of your application and reuse
+        // them until the application shuts down.
+        final String target = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
+        channel = ManagedChannelBuilder.forTarget(target)
+                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
+                // needing certificates.
+                .usePlaintext()
+                .build();
+/*
+        try {
+*/
+        client = new SituationClient(channel, mapper);
+
+       /* } finally {
+            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
+            // resources the channel should be shut down when it will no longer be used. If it may be used
+            // again leave it running.
+            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        }*/
     }
 
     @Override
@@ -87,7 +112,7 @@ public class SituationRestImpl implements SituationRest {
                 storeMLSituations();
                 return Response.ok().build();
             } catch (InterruptedException e) {
-                throw e;
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 return somethingWentWrong(e);
             }
@@ -115,7 +140,7 @@ public class SituationRestImpl implements SituationRest {
                 storeMLSituations();
                 return Response.ok().build();
             } catch (InterruptedException e) {
-                throw e;
+                Thread.currentThread().interrupt();
             } catch (Exception e) {
                 return somethingWentWrong(e);
             }
@@ -149,23 +174,10 @@ public class SituationRestImpl implements SituationRest {
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
 
-        // Create a communication channel to the server, known as a Channel. Channels are thread-safe
-        // and reusable. It is common to create channels at the beginning of your application and reuse
-        // them until the application shuts down.
-        final String target = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(target)
-                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
-                // needing certificates.
-                .usePlaintext()
-                .build();
         try {
-            SituationClient client = new SituationClient(channel);
             client.sendSituations(acceptedSituations);
-        } finally {
-            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
-            // resources the channel should be shut down when it will no longer be used. If it may be used
-            // again leave it running.
-            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
@@ -175,5 +187,13 @@ public class SituationRestImpl implements SituationRest {
     private Response somethingWentWrong(Throwable e) {
         LOG.error(e.getMessage(), e.fillInStackTrace());
         return Response.serverError().entity("something went wrong: " + e.getMessage()).build();
+    }
+
+    public void destroy() {
+        try {
+            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

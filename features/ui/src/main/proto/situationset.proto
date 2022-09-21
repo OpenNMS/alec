@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 // option java_package = "org.opennms.alec.data.model";
-option java_package = "org.opennms.aleccloud";
+option java_package = "org.opennms.alec.grpc";
 
 option java_outer_classname = "SituationSetProtos";
 
@@ -16,7 +16,7 @@ message Alarm {
   int64 alarm_id = 1;
   google.protobuf.Timestamp first_time_seen = 2;
   google.protobuf.Timestamp last_time_seen = 3;
-  int64 inventory_object_id = 4;
+  string inventory_object_id = 4;
   string inventory_object_type = 5;
   string severity = 6;
   string summary = 7;

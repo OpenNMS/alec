@@ -31,8 +31,7 @@ package org.opennms.alec.grpc;
 import java.util.List;
 
 import org.opennms.alec.datasource.api.Situation;
-import org.opennms.aleccloud.AlecCollectionServiceGrpc;
-import org.opennms.aleccloud.SituationSetProtos;
+import org.opennms.alec.mapper.SituationToSituationProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,13 +43,16 @@ public class SituationClient {
 
     private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
 
-    public SituationClient(Channel channel) {
+    private final SituationToSituationProto mapper;
+
+    public SituationClient(Channel channel, SituationToSituationProto mapper) {
         blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
+        this.mapper = mapper;
     }
 
     public void sendSituations(List<Situation> situation) {
-        LOG.info("Will try to send {} ...", situation);
-        SituationSetProtos.SituationSet request = SituationSetProtos.SituationSet.newBuilder().build();
+        SituationSetProtos.SituationSet request = mapper.toSituationSet(situation);
+        LOG.info("Will try to send {} ...", request);
         try {
             blockingStub
                     .withCallCredentials(

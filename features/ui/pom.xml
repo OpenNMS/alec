@@ -11,13 +11,13 @@
     <packaging>bundle</packaging>
 
     <build>
-        <extensions>
+       <!-- <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
                 <version>1.7.0</version>
             </extension>
-        </extensions>
+        </extensions>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -31,14 +31,16 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf-java.version}:exe:${os.detected.classifier}</protocArtifact>
+                    &lt;!&ndash;use osx-x86_64 only for M1 otherwise  ${os.detected.classifier}&ndash;&gt;
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf-java.version}:exe:osx-x86_64</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    &lt;!&ndash;use osx-x86_64 only for M1 otherwise  ${os.detected.classifier}&ndash;&gt;
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:osx-x86_64</pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
@@ -48,7 +50,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 

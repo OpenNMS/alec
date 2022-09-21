@@ -31,7 +31,7 @@ package org.opennms.alec.mapper;
 import java.util.Set;
 
 import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.aleccloud.SituationSetProtos;
+import org.opennms.alec.grpc.SituationSetProtos;
 
 import com.google.protobuf.Timestamp;
 
@@ -45,7 +45,7 @@ public class AlarmToAlarmProto {
                 .setSeverity(alarm.getSeverity().toString())
                 .setDescription(alarm.getDescription())
                 .setSummary(alarm.getSummary())
-                .setInventoryObjectId(Long.parseLong(alarm.getInventoryObjectId()))
+                .setInventoryObjectId(alarm.getInventoryObjectId())
                 .setInventoryObjectType(alarm.getInventoryObjectType())
 //                .addAllTags()
                 .build();

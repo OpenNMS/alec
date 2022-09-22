@@ -11,24 +11,15 @@ import {
 const situationStore = useSituationsStore()
 situationStore.getSituations()
 
-const results = [
-	{ id: 1, name: 'apple' },
-	{ id: 2, name: 'orange' },
-	{ id: 3, name: 'mango' },
-	{ id: 4, name: 'banana' },
-	{ id: 5, name: 'pineapple' },
-	{ id: 6, name: 'kiwi' }
-]
-
 const state = reactive({
+	situations: [],
 	selectedSituationIndex: 0,
 	situationSelected: '',
 	nodes: [],
-	results: results,
-	value: undefined
+	results: [],
+	nodeSelectedValue: undefined
 })
 const loading = ref(false)
-const situations = ref(situationStore.situations)
 
 const situationSelected = (id: string) => {
 	window.scrollTo(0, 0)
@@ -39,16 +30,16 @@ const situationSelected = (id: string) => {
 }
 
 const situationStatusChanged = (status: string, id: string) => {
-	const auxSituations = situations.value
+	const auxSituations = state.situations
 	auxSituations.forEach((sit) => {
 		if (sit.id === id) {
 			sit.status = status
 		}
 	})
-	situations.value = cloneDeep(auxSituations)
+
+	state.situations = cloneDeep(auxSituations)
 }
 
-/*
 const setNodes = () => {
 	const nodesLabels = chain(situationStore.situations)
 		.map((s) => s.alarms)
@@ -63,22 +54,47 @@ const setNodes = () => {
 		}
 	})
 	state.nodes = nodes
+	state.results = nodes
 }
-*/
+
 situationStore.$subscribe((mutation, storeState) => {
-	situations.value = situationStore.situations
+	state.situations = situationStore.situations
 	state.situationSelected = storeState.situations[0]?.id
-	//setNodes()
+	setNodes()
 })
 
 const search = (q: string) => {
+	if (!q) {
+		state.nodeSelectedValue = undefined
+		return []
+	}
 	loading.value = true
-	state.results = results.map((x) => ({
-		_text: x
-	}))
+	state.results = state.nodes
+		.filter((x: any) => x.name.toLowerCase().indexOf(q) > -1)
+		.map((x) => ({
+			_text: x.name,
+			id: x.id
+		}))
 	loading.value = false
-	//state.results = state.results
-	//this.loading = false;
+}
+
+const filterByNode = () => {
+	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
+		const filtered = state.situations
+			.map((s) => {
+				const alarms = s.alarms.filter(
+					(a) => a.nodeLabel === state.nodeSelectedValue._text
+				)
+				if (alarms.length > 0) {
+					return s
+				}
+			})
+			.filter((s) => s)
+
+		state.situations = filtered
+	} else {
+		state.situations = situationStore.situations
+	}
 }
 </script>
 
@@ -90,16 +106,16 @@ const search = (q: string) => {
 				class="map-search"
 				label="Find by node"
 				:loading="loading"
-				v-model="state.value"
-				:results="results"
+				v-model="state.nodeSelectedValue"
+				:results="state.results"
 				type="single"
-				text-prop="name"
 				@search="search"
+				@update:modelValue="filterByNode"
 			></FeatherAutocomplete>
 		</div>
 		<div class="container">
 			<div class="situation-list">
-				<div v-for="situationInfo in situations" :key="situationInfo.id">
+				<div v-for="situationInfo in state.situations" :key="situationInfo.id">
 					<SituationCard
 						:situation-info="situationInfo"
 						@situation-selected="situationSelected"
@@ -152,8 +168,5 @@ h2 {
 .map-search {
 	z-index: 1000;
 	width: 400px !important;
-	:deep(.feather-input-border) {
-		background: var($surface);
-	}
 }
 </style>

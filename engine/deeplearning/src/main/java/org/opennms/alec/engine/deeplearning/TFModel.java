@@ -189,7 +189,7 @@ public class TFModel implements AutoCloseable {
             try {
                 FileUtils.deleteDirectory(tempDir.toFile());
             } catch (IOException e) {
-                LOG.warn(String.format("Failed to clean up temporary directory: %s.", tempDir), e);
+                LOG.warn("Failed to clean up temporary directory: {}, ", tempDir, e);
             }
         }
     }

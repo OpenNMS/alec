@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.grpc.SituationSetProtos;
 
-import com.google.protobuf.Timestamp;
-
 public class SituationToSituationProto {
     final AlarmToAlarmProto alarmMapper = new AlarmToAlarmProto();
 
@@ -44,8 +42,8 @@ public class SituationToSituationProto {
         return SituationSetProtos.Situation.newBuilder()
                 .setAlarms(alarmMapper.toAlarms(situation.getAlarms()))
                 .setSeverity(situation.getSeverity().toString())
-                .setCreationTime(Timestamp.newBuilder().setSeconds(situation.getCreationTime()).build())
-                .setLastModificationTime(Timestamp.newBuilder().setSeconds(situation.getLastTime()).build())
+                .setCreationTime(Utils.getTimestamp(situation.getCreationTime()))
+                .setLastModificationTime(Utils.getTimestamp(situation.getLastTime()))
                 .setDiagnostic(Optional.ofNullable(situation.getDiagnosticText()).orElse(""))
                 .setId(Long.parseLong(situation.getId()))
 //                .setEngine(situation.)
@@ -58,8 +56,14 @@ public class SituationToSituationProto {
         return SituationSetProtos.SituationSet.newBuilder().addAllSituations(
                 situations
                         .stream()
-                        .map(situation -> toSituation(situation))
+                        .map(this::toSituation)
                         .collect(Collectors.toUnmodifiableSet()))
+                .build();
+    }
+
+    public SituationSetProtos.SituationSet toSituationSet(Situation situation) {
+        return SituationSetProtos.SituationSet.newBuilder()
+                .addSituations(toSituation(situation))
                 .build();
     }
 }

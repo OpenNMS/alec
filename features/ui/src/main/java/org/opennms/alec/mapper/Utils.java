@@ -28,32 +28,18 @@
 
 package org.opennms.alec.mapper;
 
-import java.util.Set;
+import java.time.Instant;
 
-import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.grpc.SituationSetProtos;
+import com.google.protobuf.Timestamp;
 
-public class AlarmToAlarmProto {
+public class Utils {
 
-    public SituationSetProtos.Alarm toAlarm(Alarm alarm) {
-        return SituationSetProtos.Alarm.newBuilder()
-                .setAlarmId(Long.parseLong(alarm.getId()))
-                .setFirstTimeSeen(Utils.getTimestamp(alarm.getFirstTime()))
-                .setLastTimeSeen(Utils.getTimestamp(alarm.getTime()))
-                .setSeverity(alarm.getSeverity().toString())
-                .setDescription(alarm.getDescription())
-                .setSummary(alarm.getSummary())
-                .setInventoryObjectId(alarm.getInventoryObjectId())
-                .setInventoryObjectType(alarm.getInventoryObjectType())
-//                .addAllTags()
-                .build();
+    private Utils() {
+        throw new IllegalStateException("Utility class");
     }
 
-    public SituationSetProtos.AlarmSet toAlarms(Set<Alarm> alarms) {
-        SituationSetProtos.AlarmSet.Builder builder = SituationSetProtos.AlarmSet.newBuilder();
-        for (Alarm alarm : alarms) {
-            builder.addAlarms(toAlarm(alarm));
-        }
-        return builder.build();
+    public static Timestamp getTimestamp(long millis) {
+        Instant instant = Instant.ofEpochMilli(millis);
+        return Timestamp.newBuilder().setSeconds(instant.getEpochSecond()).setNanos(instant.getNano()).build();
     }
 }

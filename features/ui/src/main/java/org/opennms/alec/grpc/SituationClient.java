@@ -28,8 +28,6 @@
 
 package org.opennms.alec.grpc;
 
-import java.util.List;
-
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.mapper.SituationToSituationProto;
 import org.slf4j.Logger;
@@ -40,6 +38,9 @@ import io.grpc.StatusRuntimeException;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
+    public static final String TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
+            "eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+            "pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8";
 
     private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
 
@@ -50,19 +51,17 @@ public class SituationClient {
         this.mapper = mapper;
     }
 
-    public void sendSituations(List<Situation> situation) {
-        SituationSetProtos.SituationSet request = mapper.toSituationSet(situation);
-        LOG.info("Will try to send {} ...", request);
+    public void sendSituation(Situation situation) {
         try {
+            SituationSetProtos.SituationSet request = mapper.toSituationSet(situation);
+            LOG.debug("Will try to send {} ...", request);
             blockingStub
                     .withCallCredentials(
                             new AuthenticationCallCredentials(
-                                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-                                            "eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
-                                            "pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8"))
+                                    TOKEN))
                     .sendSituations(request);
         } catch (StatusRuntimeException e) {
-            LOG.warn("RPC failed: {}", e.getStatus());
+            LOG.error("RPC failed: {}", e.getStatus());
         }
     }
 }

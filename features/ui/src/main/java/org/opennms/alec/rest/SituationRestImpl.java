@@ -81,17 +81,7 @@ public class SituationRestImpl implements SituationRest {
                 // needing certificates.
                 .usePlaintext()
                 .build();
-/*
-        try {
-*/
         client = new SituationClient(channel, mapper);
-
-       /* } finally {
-            // ManagedChannels use resources like threads and TCP connections. To prevent leaking these
-            // resources the channel should be shut down when it will no longer be used. If it may be used
-            // again leave it running.
-            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-        }*/
     }
 
     @Override
@@ -109,7 +99,7 @@ public class SituationRestImpl implements SituationRest {
 
             try {
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.REJECTED).build());
-                storeMLSituations();
+                kvStoreSituationsByStatus();
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -125,9 +115,12 @@ public class SituationRestImpl implements SituationRest {
     public Response accepted(String id) throws InterruptedException {
         Optional<Situation> situationOptional;
         situationOptional = situationDatasource.getSituation(Integer.parseInt(id));
+        Optional<Situation> situationWithAlarmIdOptional;
+        situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(id));
 
-        if (situationOptional.isPresent()) {
+        if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
             Situation situation = situationOptional.get();
+            Situation situationWithAlarmId = situationWithAlarmIdOptional.get();
             //check status
             if (Status.ACCEPTED.equals(situation.getStatus())) {
                 LOG.debug("Situation {} already accepted", id);
@@ -137,7 +130,9 @@ public class SituationRestImpl implements SituationRest {
             //Update situation
             try {
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.ACCEPTED).build());
-                storeMLSituations();
+                kvStoreSituationsByStatus();
+                //Store accepted situation to the cloud
+                client.sendSituation(ImmutableSituation.newBuilderFrom(situationWithAlarmId).setStatus(Status.ACCEPTED).build());
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -166,19 +161,13 @@ public class SituationRestImpl implements SituationRest {
         return Response.ok(situations).build();
     }
 
-    private void storeMLSituations() throws JsonProcessingException, InterruptedException {
+    private void kvStoreSituationsByStatus() throws JsonProcessingException, InterruptedException {
         List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
         List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
-
-        try {
-            client.sendSituations(acceptedSituations);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);

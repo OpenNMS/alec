@@ -37,6 +37,8 @@ public interface SituationDatasource {
 
     List<Situation> getSituationsWithAlarmId() throws InterruptedException;
 
+    Optional<Situation> getSituationWithAlarmId(int id) throws InterruptedException;
+
     Optional<Situation> getSituation(int id) throws InterruptedException;
 
     void forwardSituation(Situation situation);

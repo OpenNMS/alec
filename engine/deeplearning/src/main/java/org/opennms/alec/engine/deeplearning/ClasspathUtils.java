@@ -28,16 +28,18 @@
 
 package org.opennms.alec.engine.deeplearning;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
@@ -50,7 +52,13 @@ import org.slf4j.LoggerFactory;
  * @author stack overflow
  */
 class ClasspathUtils {
+    public static final int THRESHOLD_ENTRIES = 10000;
+    public static final int THRESHOLD_SIZE = 1000000000;// 1 GB
+    public static final double THRESHOLD_RATIO = 10;
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathUtils.class);
+
+    private ClasspathUtils(){
+    }
 
     /**
      * Recursively copy a folder from a bundle to the filesystem.
@@ -65,7 +73,7 @@ class ClasspathUtils {
         while (urls.hasMoreElements()) {
             final URL url = urls.nextElement();
             final String fileName = removeStart(url.getPath(), path);
-            if (fileName.endsWith("/")) {
+            if (fileName!= null && fileName.endsWith("/")) {
                 // This is a directory, skip it
                 continue;
             }
@@ -97,19 +105,55 @@ class ClasspathUtils {
         }
     }
 
-    private static void copyJarResourcesRecursively(File destination, JarURLConnection jarConnection ) throws IOException {
+    private static void copyJarResourcesRecursively(File destination, JarURLConnection jarConnection) throws IOException {
+        int totalSizeArchive = 0;
+        int totalEntryArchive = 0;
+
         final JarFile jarFile = jarConnection.getJarFile();
-        for (JarEntry entry : Collections.list(jarFile.entries())) {
-            if (entry.getName().startsWith(jarConnection.getEntryName())) {
-                final String fileName = removeStart(entry.getName(), jarConnection.getEntryName());
-                if (!entry.isDirectory()) {
-                    try (InputStream entryInputStream = jarFile.getInputStream(entry)) {
-                        FileUtils.copyInputStreamToFile(entryInputStream, new File(destination, fileName));
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            ZipEntry ze = entries.nextElement();
+            try (InputStream in = new BufferedInputStream(jarFile.getInputStream(ze))) {
+                totalEntryArchive++;
+
+                int nBytes = -1;
+                byte[] buffer = new byte[2048];
+                double totalSizeEntry = 0;
+
+                final String fileName = removeStart(ze.getName(), jarConnection.getEntryName());
+                while ((nBytes = in.read(buffer)) > 0) {
+                    createDirectoryOrCopyFile(destination, jarFile, ze, fileName);
+
+                    totalSizeEntry += nBytes;
+                    totalSizeArchive += nBytes;
+
+                    double compressionRatio = totalSizeEntry / ze.getCompressedSize();
+                    if (compressionRatio > THRESHOLD_RATIO) {
+                        LOG.warn("ratio between compressed and uncompressed data is highly suspicious, looks like a Zip Bomb Attack");
+                        throw new ZipException("ratio between compressed and uncompressed data is highly suspicious, looks like a Zip Bomb Attack");
                     }
-                } else {
-                    FileUtils.forceMkdir(new File(destination, fileName));
                 }
             }
+
+            if (totalSizeArchive > THRESHOLD_SIZE) {
+                LOG.warn("the uncompressed data size is too much for the application resource capacity");
+                throw new ZipException("the uncompressed data size is too much for the application resource capacity");
+            }
+
+            if (totalEntryArchive > THRESHOLD_ENTRIES) {
+                LOG.warn("too much entries in this archive, can lead to inodes exhaustion of the system");
+                throw new ZipException("too much entries in this archive, can lead to inodes exhaustion of the system");
+            }
+        }
+    }
+
+    private static void createDirectoryOrCopyFile(File destination, JarFile jarFile, ZipEntry ze, String fileName) throws IOException {
+        if (!ze.isDirectory()) {
+            try (InputStream entryInputStream = jarFile.getInputStream(ze)) {
+                FileUtils.copyInputStreamToFile(entryInputStream, new File(destination, fileName));
+            }
+        } else {
+            FileUtils.forceMkdir(new File(destination, fileName));
         }
     }
 

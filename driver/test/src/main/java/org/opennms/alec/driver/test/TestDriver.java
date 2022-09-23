@@ -31,7 +31,7 @@ package org.opennms.alec.driver.test;
 import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,15 +42,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.AlarmFeedback;
-import org.opennms.alec.datasource.api.InventoryDatasource;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.engine.api.EngineFactory;
@@ -61,6 +59,7 @@ import org.opennms.alec.features.graph.graphml.GraphMLWriter;
 
 import com.codahale.metrics.MetricRegistry;
 
+@SuppressWarnings("java:S106")
 public class TestDriver {
     private final EngineFactory engineFactory;
     private boolean verbose = false;
@@ -153,13 +152,8 @@ public class TestDriver {
         engine.registerSituationHandler(session);
         engine.init(previousAlarms, previousAlarmFeedback, previousSituations, inventory);
 
-        final GraphProvider graphProvider;
-        if (engine instanceof GraphProvider) {
-            graphProvider = (GraphProvider)engine;
-        } else {
-            graphProvider = null;
-        }
-        final boolean shouldExportGraph = graphExportIntervalMs > 0 && graphProvider != null && graphOutputFolder != null;
+        final GraphProvider graphProvider = getGraphProvider(engine);
+        final boolean shouldExportGraph = isShouldExportGraph(graphProvider);
         long lastGraphGeneratedAt = 0;
 
         long tickResolutionMs = engine.getTickResolutionMs();
@@ -170,55 +164,78 @@ public class TestDriver {
             return Collections.emptyList();
         }
 
-        final long start = Math.max(alarms.stream()
+        Optional<Long> optionalStart = alarms.stream()
                 .min(Comparator.comparing(Alarm::getTime))
-                .map(e -> roundToTick(e.getTime(), tickResolutionMs))
-                .get() - tickResolutionMs, 0);
-        final long end = alarms.stream()
+                .map(e -> roundToTick(e.getTime(), tickResolutionMs));
+        Optional<Long> optionalEnd = alarms.stream()
                 .max(Comparator.comparing(Alarm::getTime))
-                .map(e -> roundToTick(e.getTime(), tickResolutionMs))
-                .get() + tickResolutionMs;
+                .map(e -> roundToTick(e.getTime(), tickResolutionMs));
 
-        final long startTime = System.currentTimeMillis();
-        long now;
-        for (now = start; now <= end; now += tickResolutionMs) {
-            // Find the alarms in the current window
-            for (Alarm alarm : alarmsByTick.getOrDefault(now, Collections.emptyList())) {
-                if (!alarm.isClear()) {
-                    engine.onAlarmCreatedOrUpdated(alarm);
-                } else {
-                    engine.onAlarmCleared(alarm);
+        if (optionalStart.isPresent() && optionalEnd.isPresent()) {
+            final long start = Math.max(optionalStart.get() - tickResolutionMs, 0);
+
+            final long end = optionalEnd.get() + tickResolutionMs;
+            final long startTime = System.currentTimeMillis();
+            long now;
+            for (now = start; now <= end; now += tickResolutionMs) {
+                // Find the alarms in the current window
+                setEngine(engine, alarmsByTick, now);
+                // Tick
+                engine.tick(now);
+                if (shouldExportGraph && (now - lastGraphGeneratedAt) > graphExportIntervalMs) {
+                    exportGraph(graphProvider, now);
+                    lastGraphGeneratedAt = now;
                 }
+                printTick(now, start, end, startTime);
             }
-            // Tick
+
+            // One last tick
+            now += tickResolutionMs;
             engine.tick(now);
-            if (shouldExportGraph && (now - lastGraphGeneratedAt) > graphExportIntervalMs) {
+            if (shouldExportGraph) {
                 exportGraph(graphProvider, now);
-                lastGraphGeneratedAt = now;
             }
-            printTick(now, start, end, startTime);
+
+            // Destroy
+            engine.destroy();
+
+            return new ArrayList<>(session.situations.values());
         }
-
-        // One last tick
-        now += tickResolutionMs;
-        engine.tick(now);
-        if (shouldExportGraph) {
-            exportGraph(graphProvider, now);
-        }
-
-        // Destroy
-        engine.destroy();
-
-        return new ArrayList<>(session.situations.values());
+        return Collections.emptyList();
     }
 
+    private static void setEngine(Engine engine, Map<Long, List<Alarm>> alarmsByTick, long now) {
+        for (Alarm alarm : alarmsByTick.getOrDefault(now, Collections.emptyList())) {
+            if (!alarm.isClear()) {
+                engine.onAlarmCreatedOrUpdated(alarm);
+            } else {
+                engine.onAlarmCleared(alarm);
+            }
+        }
+    }
+
+    private boolean isShouldExportGraph(GraphProvider graphProvider) {
+        return graphExportIntervalMs > 0 && graphProvider != null && graphOutputFolder != null;
+    }
+
+    private static GraphProvider getGraphProvider(Engine engine) {
+        final GraphProvider graphProvider;
+        if (engine instanceof GraphProvider) {
+            graphProvider = (GraphProvider) engine;
+        } else {
+            graphProvider = null;
+        }
+        return graphProvider;
+    }
+
+    @SuppressWarnings("java:S1602")
     private void exportGraph(GraphProvider graphProvider, long now) {
         if (graphProvider == null) {
             return;
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM_dd_yyyy_HH_mm_ss");
-        String dateFormatted = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneOffset.systemDefault()));
+        String dateFormatted = formatter.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneId.systemDefault()));
         File destinationFile = new File(graphOutputFolder, "graph_" + dateFormatted  + ".graphml");
         final GraphML graphML = graphProvider.withReadOnlyGraph(g -> {
             return new GraphMLConverterBuilder()
@@ -227,10 +244,10 @@ public class TestDriver {
                     .build().toGraphML();
         });
         try {
-            System.out.printf("Saving graph snapshot to %s\n", destinationFile);
+            System.out.printf("Saving graph snapshot to %s%n", destinationFile);
             GraphMLWriter.write(graphML, destinationFile);
         } catch (Exception e) {
-            System.out.printf("Failed to save graph to: %s\n", destinationFile);
+            System.out.printf("Failed to save graph to: %s%n", destinationFile);
             e.printStackTrace();
         }
     }
@@ -253,8 +270,8 @@ public class TestDriver {
         @Override
         public void onSituation(Situation situation) {
             if (verbose) {
-                System.out.printf("Situation with id %s has %d alarms.\n",
-                                  situation.getId(), situation.getAlarms().size());
+                System.out.printf("Situation with id %s has %d alarms.%n",
+                        situation.getId(), situation.getAlarms().size());
             }
             situations.put(situation.getId() + ":" + situation.getSeverity(), situation);
         }
@@ -265,13 +282,13 @@ public class TestDriver {
             return;
         }
         double percentageComplete = ((tick - firstTimestamp) / (double)(lastTimeStamp - firstTimestamp)) * 100d;
-        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed\n", new Date(tick), tick,
+        System.out.printf("Tick at %s (%d) - %.2f%% complete - %s elapsed%n", new Date(tick), tick,
                 percentageComplete, getElaspsed(startTime));
     }
 
     private static String getElaspsed(long start) {
         // Copied from https://stackoverflow.com/questions/6710094/how-to-format-an-elapsed-time-interval-in-hhmmss-sss-format-in-java
-        double t = System.currentTimeMillis() - start;
+        double t = System.currentTimeMillis() - (double)start;
         if(t < 1000d)
             return slf(t) + "ms";
         if(t < 60000d)
@@ -294,34 +311,15 @@ public class TestDriver {
     }
 
     private static String slf(double n) {
-        return String.valueOf(Double.valueOf(Math.floor(n)).longValue());
+        return String.valueOf(Math.floor(n));
     }
 
     public static class DriverBuilder {
-        private AlarmDatasource alarmDatasource;
-        private InventoryDatasource inventoryDatasource;
-
-        private SituationDatasource situationDatasource;
         private EngineFactory engineFactory;
         private Boolean verbose;
 
         private long graphExportIntervalMs = 0;
-        private File graphOutputFolder = new File("/tmp");
-
-        public DriverBuilder withAlarmDatasource(AlarmDatasource alarmDatasource) {
-            this.alarmDatasource = alarmDatasource;
-            return this;
-        }
-
-        public DriverBuilder withInventoryDatasource(InventoryDatasource inventoryDatasource) {
-            this.inventoryDatasource = inventoryDatasource;
-            return this;
-        }
-
-        public DriverBuilder withSituationDatasource(SituationDatasource situationDatasource) {
-            this.situationDatasource = situationDatasource;
-            return this;
-        }
+        private File graphOutputFolder = new File(System.getProperty("java.io.tmpdir"));
 
         public DriverBuilder withEngineFactory(EngineFactory engineFactory) {
             this.engineFactory = engineFactory;

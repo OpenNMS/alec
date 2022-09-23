@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
  * @author stack overflow
  */
 class ClasspathUtils {
-    public static final int THRESHOLD_ENTRIES = 10000;// 1 GB
-    public static final int THRESHOLD_SIZE = 1000000000;
+    public static final int THRESHOLD_ENTRIES = 10000;
+    public static final int THRESHOLD_SIZE = 1000000000;// 1 GB
     public static final double THRESHOLD_RATIO = 10;
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathUtils.class);
 
@@ -120,11 +120,10 @@ class ClasspathUtils {
                 byte[] buffer = new byte[2048];
                 double totalSizeEntry = 0;
 
+                final String fileName = removeStart(ze.getName(), jarConnection.getEntryName());
                 while ((nBytes = in.read(buffer)) > 0) {
-                    if (ze.getName().startsWith(jarConnection.getEntryName())) {
-                        final String fileName = removeStart(ze.getName(), jarConnection.getEntryName());
-                        createDirectoryOrCopyFile(destination, jarFile, ze, fileName);
-                    }
+                    createDirectoryOrCopyFile(destination, jarFile, ze, fileName);
+
                     totalSizeEntry += nBytes;
                     totalSizeArchive += nBytes;
 

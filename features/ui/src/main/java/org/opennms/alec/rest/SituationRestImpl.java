@@ -58,6 +58,7 @@ import io.grpc.ManagedChannelBuilder;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
+    public static final String TARGET = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
@@ -75,8 +76,7 @@ public class SituationRestImpl implements SituationRest {
         // Create a communication channel to the server, known as a Channel. Channels are thread-safe
         // and reusable. It is common to create channels at the beginning of your application and reuse
         // them until the application shuts down.
-        final String target = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
-        channel = ManagedChannelBuilder.forTarget(target)
+        channel = ManagedChannelBuilder.forTarget(TARGET)
                 // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
                 // needing certificates.
                 .usePlaintext()

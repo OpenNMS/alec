@@ -57,7 +57,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
-    public static final String SITUATION_ID_0_NOT_FOUND = "Situation id: {0} not found";
+    public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
+    public static final String ALARM_NOT_FOUND = "Alarm {0} not found";
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
@@ -96,7 +97,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, id)).build();
     }
 
     @Override
@@ -123,7 +124,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, id)).build();
     }
 
     @Override
@@ -150,15 +151,19 @@ public class SituationRestImpl implements SituationRest {
         if (situationOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
             if (alarmOptional.isPresent()) {
-                Situation oldSituation = situationOptional.get();
-                Set<Alarm> alarms = new HashSet<>(oldSituation.getAlarms());
-                alarms.add(alarmOptional.get());
-                return forwardAndStoreSituation(oldSituation, alarms);
+                if (alarmIsNotInAnotherSituation(alarmOptional.get().getReductionKey())) {
+                    Situation oldSituation = situationOptional.get();
+                    Set<Alarm> alarms = new HashSet<>(oldSituation.getAlarms());
+                    alarms.add(alarmOptional.get());
+                    return forwardAndStoreSituation(oldSituation, alarms);
+                } else {
+                    return Response.status(Response.Status.CONFLICT).entity(MessageFormat.format("Alarm {0} is already in a situation", alarmId)).build();
+                }
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, situationId)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
     }
 
@@ -176,11 +181,22 @@ public class SituationRestImpl implements SituationRest {
                         .collect(Collectors.toUnmodifiableSet());
                 return forwardAndStoreSituation(oldSituation, alarms);
             } else {
-                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, situationId)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
+    }
+
+    private boolean alarmIsNotInAnotherSituation(String reductionKey) throws InterruptedException {
+        for (Situation situation : situationDatasource.getSituations()) {
+            for (Alarm alarm : situation.getAlarms()) {
+                if (reductionKey.equals(alarm.getReductionKey())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private Response forwardAndStoreSituation(Situation oldSituation, Set<Alarm> alarms) throws InterruptedException {

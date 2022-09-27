@@ -140,7 +140,7 @@ const handleClickZoomOut = () => {
 			<div class="container">
 				<div class="ids">
 					<div class="alarm-id" v-for="alarm in relatedAlarms" :key="alarm.id">
-						{{ alarm.nodeLabel }} [ {{ alarm.id }} ]
+						{{ alarm.nodeLabel }} - {{ alarm.id }}
 					</div>
 				</div>
 				<div class="timeline-container">

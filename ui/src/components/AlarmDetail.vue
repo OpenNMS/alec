@@ -11,7 +11,7 @@ const props = defineProps<{
 <template>
 	<div class="card" v-if="props.alarm">
 		<div class="row">
-			<div class="title">{{ alarm.nodeLabel }} {{ alarm.id }}</div>
+			<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 			<SeverityStatus :severity="alarm?.severity" />
 		</div>
 

@@ -112,6 +112,7 @@ const filterByNode = () => {
 		totalSituations.value = filtered.length
 		state.situations = filtered
 	} else {
+		state.nodeSelectedValue = undefined
 		totalSituations.value = situationStore.situations.length
 		initPaging(state.allSituations)
 	}

@@ -28,6 +28,7 @@
 
 package org.opennms.alec;
 
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.mock;
 
 import java.util.Dictionary;
@@ -36,6 +37,7 @@ import java.util.Map;
 import org.apache.camel.test.blueprint.CamelBlueprintTestSupport;
 import org.apache.camel.util.KeyValueHolder;
 import org.junit.Test;
+import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
@@ -64,9 +66,14 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
         SituationDatasource situationDatasource = mock(SituationDatasource.class);
         services.put(SituationDatasource.class.getName(), asService(situationDatasource, null));
+
+        AlarmDatasource alarmDatasource = mock(AlarmDatasource.class);
+        services.put(AlarmDatasource.class.getName(), asService(alarmDatasource, null));
     }
 
     @Test
     public void testBlueprintContext() {
+        //no assertion just testing if the blueprint context is starting
+        assertThat(true, equalTo(true));
     }
 }

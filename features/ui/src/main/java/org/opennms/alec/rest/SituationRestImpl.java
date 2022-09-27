@@ -57,6 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
+    public static final String SITUATION_ID_0_NOT_FOUND = "Situation id: {0} not found";
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
@@ -95,7 +96,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, id)).build();
     }
 
     @Override
@@ -122,7 +123,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, id)).build();
     }
 
     @Override
@@ -157,6 +158,8 @@ public class SituationRestImpl implements SituationRest {
                     situationDatasource.forwardSituation(newSituation);
                     storeMLSituations();
                     return Response.ok().build();
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     return somethingWentWrong(e);
                 }
@@ -164,7 +167,7 @@ public class SituationRestImpl implements SituationRest {
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
             }
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", situationId)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, situationId)).build();
         }
     }
 
@@ -185,7 +188,8 @@ public class SituationRestImpl implements SituationRest {
                     situationDatasource.forwardSituation(newSituation);
                     storeMLSituations();
                     return Response.ok().build();
-
+                } catch (InterruptedException e) {
+                    throw e;
                 } catch (Exception e) {
                     return somethingWentWrong(e);
                 }
@@ -193,7 +197,7 @@ public class SituationRestImpl implements SituationRest {
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
             }
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Situation id: {0} not found", situationId)).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, situationId)).build();
         }
     }
 

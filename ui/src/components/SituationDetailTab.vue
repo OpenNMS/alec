@@ -97,7 +97,7 @@ watch(props, () => {
 						:info="formatDate(props.situationInfo.lastTime)"
 					/>
 					<InformationBox
-						label="Reduction key"
+						label="Reduction Key"
 						:info="props.situationInfo.reductionKey"
 					/>
 				</div>

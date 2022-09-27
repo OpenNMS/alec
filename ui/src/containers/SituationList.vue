@@ -3,13 +3,18 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
 import { reactive, ref } from 'vue'
-import { cloneDeep, map, flatten, groupBy, mapKeys, chain } from 'lodash'
-import {
-	FeatherAutocomplete,
-	IAutocompleteItemType
-} from '@featherds/autocomplete'
+import { cloneDeep, map, chain, chunk } from 'lodash'
+import { FeatherAutocomplete } from '@featherds/autocomplete'
+import { FeatherIcon } from '@featherds/icon'
+
+import FirstPage from '@featherds/icon/navigation/FirstPage'
+import LastPage from '@featherds/icon/navigation/LastPage'
+import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
+import ChevronRight from '@featherds/icon/navigation/ChevronRight'
+
 const situationStore = useSituationsStore()
 situationStore.getSituations()
+const PAGE_SIZE = 10
 
 const state = reactive({
 	situations: [],
@@ -17,9 +22,19 @@ const state = reactive({
 	situationSelected: '',
 	nodes: [],
 	results: [],
-	nodeSelectedValue: undefined
+	nodeSelectedValue: undefined,
+	allSituations: []
 })
 const loading = ref(false)
+const currentPage = ref(0)
+const totalPages = ref(1)
+const totalSituations = ref(0)
+
+const initPaging = (situations) => {
+	currentPage.value = 0
+	state.situations = situations[0]
+	totalPages.value = situations.length
+}
 
 const situationSelected = (id: string) => {
 	window.scrollTo(0, 0)
@@ -58,9 +73,12 @@ const setNodes = () => {
 }
 
 situationStore.$subscribe((mutation, storeState) => {
-	state.situations = situationStore.situations
 	state.situationSelected = storeState.situations[0]?.id
 	setNodes()
+	//TODO - replace with pagination from backend
+	totalSituations.value = situationStore.situations.length
+	state.allSituations = chunk(situationStore.situations, PAGE_SIZE)
+	initPaging(state.allSituations)
 })
 
 const search = (q: string) => {
@@ -80,7 +98,7 @@ const search = (q: string) => {
 
 const filterByNode = () => {
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
-		const filtered = state.situations
+		const filtered = situationStore.situations
 			.map((s) => {
 				const alarms = s.alarms.filter(
 					(a) => a.nodeLabel === state.nodeSelectedValue._text
@@ -91,9 +109,18 @@ const filterByNode = () => {
 			})
 			.filter((s) => s)
 
+		totalSituations.value = filtered.length
 		state.situations = filtered
 	} else {
-		state.situations = situationStore.situations
+		totalSituations.value = situationStore.situations.length
+		initPaging(state.allSituations)
+	}
+}
+
+const onGotoPage = (nextPage: number) => {
+	if (nextPage >= 0 && nextPage <= totalPages.value - 1) {
+		currentPage.value = nextPage
+		state.situations = state.allSituations[currentPage.value]
 	}
 }
 </script>
@@ -115,11 +142,45 @@ const filterByNode = () => {
 		</div>
 		<div class="container">
 			<div class="situation-list">
+				<div>
+					Result: {{ state.situations.length }} of
+					{{ totalSituations }}
+				</div>
 				<div v-for="situationInfo in state.situations" :key="situationInfo.id">
 					<SituationCard
 						:situation-info="situationInfo"
 						@situation-selected="situationSelected"
 						:selected="state.situationSelected == situationInfo.id"
+					/>
+				</div>
+				<div class="paginator" v-if="!state.nodeSelectedValue">
+					<FeatherIcon
+						:icon="FirstPage"
+						aria-hidden="true"
+						class="icon nav"
+						:class="{ disable: currentPage == 0 }"
+						@click="onGotoPage(0)"
+					/>
+					<FeatherIcon
+						:icon="ChevronLeft"
+						aria-hidden="true"
+						class="icon nav"
+						:class="{ disable: currentPage == 0 }"
+						@click="onGotoPage(currentPage - 1)"
+					/>
+					<FeatherIcon
+						:icon="ChevronRight"
+						aria-hidden="true"
+						class="icon nav"
+						:class="{ disable: currentPage == totalPages - 1 }"
+						@click="onGotoPage(currentPage + 1)"
+					/>
+					<FeatherIcon
+						:icon="LastPage"
+						aria-hidden="true"
+						class="icon nav"
+						:class="{ disable: currentPage == totalPages - 1 }"
+						@click="onGotoPage(totalPages - 1)"
 					/>
 				</div>
 			</div>
@@ -168,5 +229,25 @@ h2 {
 .map-search {
 	z-index: 1000;
 	width: 400px !important;
+}
+
+.paginator {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.nav {
+	font-size: 28px;
+	color: #0659a6;
+	cursor: pointer;
+	&:hover {
+		border: 1px solid #dfdfdf;
+		border-radius: 25px;
+		background-color: #dfdfdf;
+	}
+	&.disable {
+		color: #c6c6c6;
+	}
 }
 </style>

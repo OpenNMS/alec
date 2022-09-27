@@ -33,7 +33,7 @@ const handleSituationSelected = () => {
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<div class="title">Situation [ {{ props.situationInfo?.id }} ]</div>
+				<div class="title">Situation {{ props.situationInfo?.id }}</div>
 				<div v-if="props.situationInfo.status == ACCEPTED" class="accepted">
 					<FeatherIcon
 						:icon="CheckCircle"

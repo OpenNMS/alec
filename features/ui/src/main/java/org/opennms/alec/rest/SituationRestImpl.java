@@ -152,17 +152,8 @@ public class SituationRestImpl implements SituationRest {
             if (alarmOptional.isPresent()) {
                 Situation oldSituation = situationOptional.get();
                 Set<Alarm> alarms = new HashSet<>(oldSituation.getAlarms());
-                try {
-                    alarms.add(alarmOptional.get());
-                    Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
-                    situationDatasource.forwardSituation(newSituation);
-                    storeMLSituations();
-                    return Response.ok().build();
-                } catch (InterruptedException e) {
-                    throw e;
-                } catch (Exception e) {
-                    return somethingWentWrong(e);
-                }
+                alarms.add(alarmOptional.get());
+                return forwardAndStoreSituation(oldSituation, alarms);
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
             }
@@ -183,21 +174,25 @@ public class SituationRestImpl implements SituationRest {
                         .stream()
                         .filter(alarm -> !alarmOptional.get().getReductionKey().equals(alarm.getReductionKey()))
                         .collect(Collectors.toUnmodifiableSet());
-                try {
-                    Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
-                    situationDatasource.forwardSituation(newSituation);
-                    storeMLSituations();
-                    return Response.ok().build();
-                } catch (InterruptedException e) {
-                    throw e;
-                } catch (Exception e) {
-                    return somethingWentWrong(e);
-                }
+                return forwardAndStoreSituation(oldSituation, alarms);
             } else {
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format("Alarm id: {0} not found", alarmId)).build();
             }
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_ID_0_NOT_FOUND, situationId)).build();
+        }
+    }
+
+    private Response forwardAndStoreSituation(Situation oldSituation, Set<Alarm> alarms) throws InterruptedException {
+        try {
+            Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
+            situationDatasource.forwardSituation(newSituation);
+            storeMLSituations();
+            return Response.ok().build();
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (Exception e) {
+            return somethingWentWrong(e);
         }
     }
 

@@ -6,6 +6,7 @@ import { reactive, ref } from 'vue'
 import { cloneDeep, map, chain, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { FeatherIcon } from '@featherds/icon'
+import { TSituation } from '@/types/TSituation'
 
 import FirstPage from '@featherds/icon/navigation/FirstPage'
 import LastPage from '@featherds/icon/navigation/LastPage'
@@ -16,7 +17,16 @@ const situationStore = useSituationsStore()
 situationStore.getSituations()
 const PAGE_SIZE = 10
 
-const state = reactive({
+type TState = {
+	situations: TSituation[]
+	selectedSituationIndex: number
+	situationSelected: string
+	nodes: Record<string, string | number>[]
+	results: Record<string, string | number>[]
+	nodeSelectedValue: Record<string, string> | undefined
+	allSituations: Array<TSituation>[]
+}
+const state: TState = reactive({
 	situations: [],
 	selectedSituationIndex: 0,
 	situationSelected: '',
@@ -30,7 +40,7 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
 
-const initPaging = (situations) => {
+const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
 	state.situations = situations[0]
 	totalPages.value = situations.length
@@ -101,16 +111,18 @@ const filterByNode = () => {
 		const filtered = situationStore.situations
 			.map((s) => {
 				const alarms = s.alarms.filter(
-					(a) => a.nodeLabel === state.nodeSelectedValue._text
+					(a) => a.nodeLabel === state.nodeSelectedValue?._text
 				)
 				if (alarms.length > 0) {
 					return s
 				}
 			})
-			.filter((s) => s)
+			.filter((s) => s) as TSituation[]
 
-		totalSituations.value = filtered.length
-		state.situations = filtered
+		if (filtered) {
+			totalSituations.value = filtered.length
+			state.situations = filtered
+		}
 	} else {
 		state.nodeSelectedValue = undefined
 		totalSituations.value = situationStore.situations.length

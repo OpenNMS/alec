@@ -36,7 +36,6 @@ import org.osgi.framework.BundleContext;
 import com.codahale.metrics.MetricRegistry;
 
 public class DeepLearningEngineFactory implements EngineFactory {
-
     private final BundleContext bundleContext;
     private final DeepLearningEngineConf conf;
 

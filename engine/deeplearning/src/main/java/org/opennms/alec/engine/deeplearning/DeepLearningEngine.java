@@ -51,7 +51,6 @@ import edu.uci.ics.jung.graph.Graph;
 public class DeepLearningEngine extends AbstractClusterEngine {
     private final DeepLearningEngineConf conf;
     private final TFModel tfModel;
-    private Vectorizer vectorizer;
     private TFClusterer tfClusterer;
 
     public DeepLearningEngine(MetricRegistry metrics, BundleContext bundleContext, DeepLearningEngineConf conf) {
@@ -66,7 +65,7 @@ public class DeepLearningEngine extends AbstractClusterEngine {
 
     @Override
     public void onInit() {
-        vectorizer = new Vectorizer(getGraphManager(), this);
+        Vectorizer vectorizer = new Vectorizer(getGraphManager(), this);
         tfClusterer = new TFClusterer(tfModel, vectorizer, conf);
         tfClusterer.init();
     }

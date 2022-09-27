@@ -16,7 +16,8 @@
     "dev": "vite --config vite.config.dev.ts",
     "build": "vue-tsc --noEmit && vite build && cp dist/* ../features/ui/src/main/resources/ui-ext/ ",
     "preview": "vite build --mode development && vite preview --port 5002",
-    "test": "vitest run --config vite.config.testing.ts"
+    "test": "vitest run --config vite.config.testing.ts",
+    "coverage": "vitest run --config vite.config.testing.ts --coverage"
   },
   "dependencies": {
     "@featherds/radio": "^0.10.17",

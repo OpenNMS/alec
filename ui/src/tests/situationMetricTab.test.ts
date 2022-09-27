@@ -7,9 +7,9 @@ const situation = situationsMock[0]
 
 const wrapper = mount(SituationMetricTab, {
 	global: {
-		plugins: [createTestingPinia()],
-		props: { situation }
-	}
+		plugins: [createTestingPinia()]
+	},
+	props: { situation }
 } as any) as any
 
 test('Should sort by Severity', async () => {

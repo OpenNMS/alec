@@ -29,10 +29,13 @@
 package org.opennms.alec.datasource.api;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AlarmDatasource {
 
     List<Alarm> getAlarms();
+
+    Optional<Alarm> getAlarm(int id) throws InterruptedException;
 
     List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler);
 

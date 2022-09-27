@@ -104,4 +104,26 @@ public class DirectAlarmDataSourceTest {
         when(alarm.getLastEventTime()).thenReturn(new Date());
         assertTrue(dac.getSituation(2).isEmpty());
     }
+
+    @Test
+    public void testGetAlarm() throws InterruptedException {
+        when(alarm.getId()).thenReturn(1);
+        when(alarm.getReductionKey()).thenReturn("key");
+        when(alarm.getManagedObjectInstance()).thenReturn("test:1");
+        when(alarm.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
+        when(alarm.getFirstEventTime()).thenReturn(new Date());
+        when(alarm.getLastEventTime()).thenReturn(new Date());
+        assertTrue(dac.getAlarm(1).isPresent());
+    }
+
+    @Test
+    public void testGetAlarmNotFound() throws InterruptedException {
+        when(alarm.getId()).thenReturn(1);
+        when(alarm.getReductionKey()).thenReturn("key");
+        when(alarm.getManagedObjectInstance()).thenReturn("test:1");
+        when(alarm.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
+        when(alarm.getFirstEventTime()).thenReturn(new Date());
+        when(alarm.getLastEventTime()).thenReturn(new Date());
+        assertTrue(dac.getAlarm(2).isEmpty());
+    }
 }

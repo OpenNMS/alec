@@ -157,12 +157,15 @@ public class SituationRestImpl implements SituationRest {
                     alarms.add(alarmOptional.get());
                     return forwardAndStoreSituation(oldSituation, alarms);
                 } else {
+                    LOG.warn("Alarm {} is already in a situation, thus it will not be added to situation {}", alarmId, situationId);
                     return Response.status(Response.Status.CONFLICT).entity(MessageFormat.format("Alarm {0} is already in a situation", alarmId)).build();
                 }
             } else {
+                LOG.warn("Alarm {} not found, thus it will not be added to situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
+            LOG.warn("Situation {} not found, thus alarm {} will not be added to the situation", situationId, alarmId);
             return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
     }
@@ -181,9 +184,11 @@ public class SituationRestImpl implements SituationRest {
                         .collect(Collectors.toUnmodifiableSet());
                 return forwardAndStoreSituation(oldSituation, alarms);
             } else {
+                LOG.warn("Alarm {} not found, thus it will not be removed from situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
+            LOG.warn("Situation {} not found, thus alarm {} will not be removed from the situation", situationId, alarmId);
             return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
     }

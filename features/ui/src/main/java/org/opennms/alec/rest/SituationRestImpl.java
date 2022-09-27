@@ -75,15 +75,15 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response rejected(String id) throws InterruptedException {
-        Optional<Situation> situationOptional = getSituation(id);
+    public Response rejected(String situationId) throws InterruptedException {
+        Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
             //check status
             if (Status.REJECTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already rejected", id);
-                return Response.accepted(MessageFormat.format("Situation {0} already rejected", id)).build();
+                LOG.debug("Situation {} already rejected", situationId);
+                return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
             }
 
             try {
@@ -97,19 +97,19 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
     }
 
     @Override
-    public Response accepted(String id) throws InterruptedException {
-        Optional<Situation> situationOptional = getSituation(id);
+    public Response accepted(String situationId) throws InterruptedException {
+        Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
             Situation situation = situationOptional.get();
             //check status
             if (Status.ACCEPTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already accepted", id);
-                return Response.accepted(MessageFormat.format("Situation {0} already accepted", id)).build();
+                LOG.debug("Situation {} already accepted", situationId);
+                return Response.accepted(MessageFormat.format("Situation {0} already accepted", situationId)).build();
             }
 
             //Update situation
@@ -124,7 +124,7 @@ public class SituationRestImpl implements SituationRest {
             }
         }
 
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, id)).build();
+        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response addAlarm(String situationId, String alarmId) throws InterruptedException {
-        Optional<Situation> situationOptional = getSituation(situationId);
+        Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
@@ -169,7 +169,7 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response removeAlarm(String situationId, String alarmId) throws InterruptedException {
-        Optional<Situation> situationOptional = getSituation(situationId);
+        Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
@@ -222,12 +222,6 @@ public class SituationRestImpl implements SituationRest {
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);
-    }
-
-    private Optional<Situation> getSituation(String situationId) throws InterruptedException {
-        Optional<Situation> situationOptional;
-        situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
-        return situationOptional;
     }
 
     private Response somethingWentWrong(Throwable e) {

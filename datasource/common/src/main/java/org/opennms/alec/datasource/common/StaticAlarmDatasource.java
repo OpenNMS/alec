@@ -30,6 +30,7 @@ package org.opennms.alec.datasource.common;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
@@ -45,6 +46,11 @@ public class StaticAlarmDatasource implements AlarmDatasource {
     @Override
     public List<Alarm> getAlarms() {
         return alarms;
+    }
+
+    @Override
+    public Optional<Alarm> getAlarm(int id) throws InterruptedException {
+        return alarms.stream().filter(alarm -> String.valueOf(id).equals(alarm.getId())).findFirst();
     }
 
     @Override

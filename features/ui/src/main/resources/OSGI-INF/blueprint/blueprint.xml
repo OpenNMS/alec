@@ -21,6 +21,7 @@
     <bean id="situationImpl" class="org.opennms.alec.rest.SituationRestImpl" destroy-method="destroy">
         <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
+        <argument ref="alarmDatasource"/>
     </bean>
 
     <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
@@ -45,5 +46,8 @@
 
     <!--situation datasource    -->
     <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
+
+    <!--alarm datasource    -->
+    <reference id="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource" />
 
 </blueprint>

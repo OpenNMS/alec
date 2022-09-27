@@ -61,6 +61,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.StreamsException;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -131,6 +132,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     public static final String SITUATION_STORE = "situationStore";
     public static final String EDGE_STORE = "edgeStore";
     public static final String IGNORED_SITUATION = "An error occurred while mapping a situation. It will be ignored. Situation: {}";
+    public static final String IGNORED_ALARM = "An error occurred while mapping an alarm. It will be ignored. Alarm: {}";
 
     private final HandlerRegistry<AlarmHandler> alarmHandlers = new HandlerRegistry<>();
     private final HandlerRegistry<AlarmFeedbackHandler> alarmFeedbackHandlers = new HandlerRegistry<>();
@@ -192,8 +194,10 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         }
         streams.setStateListener(streamStateListener);
 
-        streams.setUncaughtExceptionHandler((t, e) ->
-                LOG.error(String.format("Stream error on thread: %s", t.getName()), e));
+        streams.setUncaughtExceptionHandler(exception -> {
+            LOG.error("Stream error on thread: {}", Thread.currentThread().getName(), exception);
+            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
+        });
         try {
             streams.start();
         } catch (StreamsException | IllegalStateException e) {
@@ -407,12 +411,17 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     @Override
     public List<Alarm> getAlarms() {
         final List<Alarm> alarms = new ArrayList<>();
-        try {
-            waitUntilAlarmStoreIsQueryable().all().forEachRemaining(entry -> alarms.add(OpennmsMapper.toAlarm(entry.value)));
+        try (KeyValueIterator<String, OpennmsModelProtos.Alarm> all = waitUntilAlarmStoreIsQueryable().all()) {
+            all.forEachRemaining(entry -> alarms.add(OpennmsMapper.toAlarm(entry.value)));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
         return alarms;
+    }
+
+    @Override
+    public Optional<Alarm> getAlarm(int id) {
+        return getAlarms().stream().filter(alarm -> String.valueOf(id).equals(alarm.getId())).findFirst();
     }
 
     @Override

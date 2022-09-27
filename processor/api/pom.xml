@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>processor-api</artifactId>
-    <name>ALEC :: Datasource :: API</name>
+    <name>ALEC :: Processor :: API</name>
     <packaging>bundle</packaging>
     <build>
         <plugins>

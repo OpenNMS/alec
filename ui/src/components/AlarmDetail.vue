@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import SeverityStatus from '@/elements/SeverityStatus.vue'
-import { useSituationsStore } from '@/store/useSituationsStore'
-import { format } from 'date-fns'
-const situationStore = useSituationsStore()
+import { formatDate } from '@/helpers/utils'
+import { TAlarm } from '@/types/TSituation'
+
 const props = defineProps<{
-	id: number
+	alarm: TAlarm
 }>()
-const alarm = ref(situationStore.alarms[props.id])
-watch(props, () => {
-	alarm.value = situationStore.alarms[props.id]
-})
 </script>
 
 <template>
-	<div class="card" v-if="alarm">
+	<div class="card" v-if="props.alarm">
 		<div class="row">
 			<div class="title">{{ alarm.nodeLabel }} [{{ alarm.id }}]</div>
 			<SeverityStatus :severity="alarm?.severity" />
@@ -22,11 +18,11 @@ watch(props, () => {
 		<div v-html="alarm.description"></div>
 		<div>
 			<strong>First Event</strong>
-			- {{ format(new Date(alarm.firstEventTime), 'd/M HH:mm:ss') }}
+			- {{ formatDate(alarm.firstTime) }}
 		</div>
 		<div>
 			<strong>Last Event</strong>
-			- {{ format(new Date(alarm.lastEvent.createTime), 'd/M HH:mm:ss') }}
+			- {{ formatDate(alarm.time) }}
 		</div>
 	</div>
 </template>

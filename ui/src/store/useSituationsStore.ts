@@ -1,46 +1,29 @@
 import { defineStore } from 'pinia'
-import { getAlarms, getSituations } from '@/services/AlarmService'
-import { getSituationsStatus } from '@/services/AlecService'
-import { TRelatedAlarm, TSituation, TSituationSaved } from '@/types/TSituation'
-import { Dictionary, mapKeys, first } from 'lodash'
+import { getSituations } from '@/services/AlecService'
+import { TSituation } from '@/types/TSituation'
+import { groupBy } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
-	alarms: Dictionary<TSituation>
 }
 
 export const useSituationsStore = defineStore('situationsStore', {
 	state: (): TState => ({
-		situations: [],
-		alarms: {}
+		situations: []
 	}),
 	actions: {
 		async getSituations() {
-			const situationResult = await getSituations()
-			const alarmResult = await getAlarms()
+			this.situations = []
+			const situations = await getSituations()
+			if (situations) {
+				const groupByStatus = groupBy(situations, 'status')
+				const situationOrdered = [
+					...(groupByStatus['CREATED'] || []),
+					...(groupByStatus['ACCEPTED'] || []),
+					...(groupByStatus['REJECTED'] || [])
+				]
 
-			const statusList = await getSituationsStatus()
-			if (situationResult && alarmResult) {
-				const situations = situationResult.alarm
-				const alarms = alarmResult
-
-				this.alarms = mapKeys(alarms, (value) => {
-					return value.id
-				})
-				situations.forEach((sit) => {
-					sit.relatedAlarms.forEach((alarm: TRelatedAlarm) => {
-						alarm.count = this.alarms[alarm.id]?.count
-						alarm.firstEventTime = this.alarms[alarm.id]?.firstEventTime
-						alarm.lastEventTime = this.alarms[alarm.id]?.lastEventTime
-					})
-					if (statusList.find((st: TSituationSaved) => st.id == sit.id)) {
-						const situationSaved: TSituationSaved | undefined = first(
-							statusList.filter((st: TSituationSaved) => st.id == sit.id)
-						)
-						sit.status = situationSaved?.status
-					}
-				})
-				this.situations = situations.filter((s) => s.status !== 'REJECTED')
+				this.situations = situationOrdered
 			}
 		}
 	}

@@ -66,6 +66,7 @@ public class TFModelTest {
      * (milliseconds) it takes to compute.
      */
     @Test(timeout=30000)
+    @SuppressWarnings("java:S2699")
     public void canMeasureLatency() {
         InputVector inputVector = InputVector.builder()
                 .alarmAid("a1")

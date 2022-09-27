@@ -12,11 +12,11 @@ export type TSituation = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime: Date
+	lastTime: number
 	logMessage: string
 	location: string
 	reductionKey: string
-	type: number
+	type?: number
 	firstEventTime: Date
 	description: string
 	suppressedUntil: Date
@@ -25,13 +25,14 @@ export type TSituation = {
 	parameters: []
 	x733ProbableCause: number
 	ifIndex: number
-	relatedAlarms: TRelatedAlarm[]
+	alarms: TAlarm[]
 	affectedNodeCount: number
 	status?: string
+	creationTime: Date
 }
 
 export type TEvent = {
-	createTime: number
+	createTime: Date
 	description: string
 	display: string
 	id: number
@@ -48,19 +49,6 @@ export type TEvent = {
 	uei: string
 }
 
-export type TRelatedAlarm = {
-	id: number
-	type: number
-	severity: string
-	reductionKey: string
-	description: string
-	logMessage: string
-	nodeLabel: string
-	count?: number
-	firstEventTime?: Date
-	lastEventTime?: Date
-}
-
 export type TAlarm = {
 	id: string
 	severity: string
@@ -68,9 +56,15 @@ export type TAlarm = {
 	nodeLabel: string
 	uei: string
 	count: number
-	lastEventTime?: Date
+	time: Date
 	logMessage: string
-	firstEventTime?: Date
+	firstTime: Date
+	reductionKey: string
+	inventoryObjectId: string
+	inventoryObjectType: string
+	summary: string
+	clear: boolean
+	description: string
 }
 
 export type TSituationSaved = {

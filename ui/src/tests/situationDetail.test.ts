@@ -7,9 +7,9 @@ const situation = situationsMock[0]
 
 const wrapper = mount(SituationDetailTab, {
 	global: {
-		plugins: [createTestingPinia()],
-		props: { situation }
-	}
+		plugins: [createTestingPinia()]
+	},
+	props: { situationInfo: situation }
 } as any) as any
 
 test('Should emit status and situation Id on click', async () => {

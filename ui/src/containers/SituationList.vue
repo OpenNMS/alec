@@ -2,16 +2,12 @@
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
+import SimplePagination from '@/components/SimplePagination.vue'
+
 import { reactive, ref } from 'vue'
 import { cloneDeep, map, chain, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
-import { FeatherIcon } from '@featherds/icon'
 import { TSituation } from '@/types/TSituation'
-
-import FirstPage from '@featherds/icon/navigation/FirstPage'
-import LastPage from '@featherds/icon/navigation/LastPage'
-import ChevronLeft from '@featherds/icon/navigation/ChevronLeft'
-import ChevronRight from '@featherds/icon/navigation/ChevronRight'
 
 const situationStore = useSituationsStore()
 situationStore.getSituations()
@@ -131,10 +127,8 @@ const filterByNode = () => {
 }
 
 const onGotoPage = (nextPage: number) => {
-	if (nextPage >= 0 && nextPage <= totalPages.value - 1) {
-		currentPage.value = nextPage
-		state.situations = state.allSituations[currentPage.value]
-	}
+	currentPage.value = nextPage
+	state.situations = state.allSituations[currentPage.value]
 }
 </script>
 
@@ -166,36 +160,12 @@ const onGotoPage = (nextPage: number) => {
 						:selected="state.situationSelected == situationInfo.id"
 					/>
 				</div>
-				<div class="paginator" v-if="!state.nodeSelectedValue">
-					<FeatherIcon
-						:icon="FirstPage"
-						aria-hidden="true"
-						class="icon nav"
-						:class="{ disable: currentPage == 0 }"
-						@click="onGotoPage(0)"
-					/>
-					<FeatherIcon
-						:icon="ChevronLeft"
-						aria-hidden="true"
-						class="icon nav"
-						:class="{ disable: currentPage == 0 }"
-						@click="onGotoPage(currentPage - 1)"
-					/>
-					<FeatherIcon
-						:icon="ChevronRight"
-						aria-hidden="true"
-						class="icon nav"
-						:class="{ disable: currentPage == totalPages - 1 }"
-						@click="onGotoPage(currentPage + 1)"
-					/>
-					<FeatherIcon
-						:icon="LastPage"
-						aria-hidden="true"
-						class="icon nav"
-						:class="{ disable: currentPage == totalPages - 1 }"
-						@click="onGotoPage(totalPages - 1)"
-					/>
-				</div>
+				<SimplePagination
+					v-if="!state.nodeSelectedValue"
+					@go-to-page="onGotoPage"
+					:currentPage="currentPage"
+					:totalPages="totalPages"
+				/>
 			</div>
 			<SituationDetail
 				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
@@ -242,25 +212,5 @@ h2 {
 .map-search {
 	z-index: 1000;
 	width: 400px !important;
-}
-
-.paginator {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-}
-
-.nav {
-	font-size: 28px;
-	color: #0659a6;
-	cursor: pointer;
-	&:hover {
-		border: 1px solid #dfdfdf;
-		border-radius: 25px;
-		background-color: #dfdfdf;
-	}
-	&.disable {
-		color: #c6c6c6;
-	}
 }
 </style>

@@ -34,8 +34,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -124,7 +124,7 @@ public class SituationRestImpl implements SituationRest {
     public Response accepted(String situationId) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
         Optional<Situation> situationWithAlarmIdOptional;
-        situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(id));
+        situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
             Situation situation = situationOptional.get();
@@ -233,7 +233,7 @@ public class SituationRestImpl implements SituationRest {
         try {
             Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
             situationDatasource.forwardSituation(newSituation);
-            storeMLSituations();
+            kvStoreSituationsByStatus();
             return Response.ok().build();
         } catch (InterruptedException e) {
             throw e;

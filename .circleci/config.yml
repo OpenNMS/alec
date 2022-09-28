@@ -409,7 +409,6 @@ jobs:
           - v5-dependencies-
       - sign-packages/setup-env:
           skip_if_forked_pr: true
-          gnupg_home: ~/tmp/gpg
       - run:
           name: Deploy the artifacts
           command: |

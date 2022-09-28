@@ -9,7 +9,7 @@ import TimeLine from '@/components/Timeline.vue'
 import Remove from '@featherds/icon/action/Remove'
 import { formatDate } from '@/helpers/utils'
 import { ref, watch } from 'vue'
-const DEFAULT_MAX_WIDTH = 800
+const DEFAULT_MAX_WIDTH = 700
 let maxWidth = ref(DEFAULT_MAX_WIDTH)
 
 const options = [
@@ -140,7 +140,7 @@ const handleClickZoomOut = () => {
 			<div class="container">
 				<div class="ids">
 					<div class="alarm-id" v-for="alarm in relatedAlarms" :key="alarm.id">
-						{{ alarm.nodeLabel }} [ {{ alarm.id }} ]
+						{{ alarm.nodeLabel }} - {{ alarm.id }}
 					</div>
 				</div>
 				<div class="timeline-container">
@@ -204,7 +204,11 @@ const handleClickZoomOut = () => {
 }
 .alarm-id {
 	font-size: 13px;
-	margin-bottom: 12px;
+	margin-bottom: 5px;
+	height: 45px;
+	max-height: 45px;
+	margin-top: auto;
+	word-break: break-word;
 }
 .container {
 	display: flex;
@@ -217,14 +221,15 @@ const handleClickZoomOut = () => {
 .ids {
 	display: flex;
 	flex-direction: column;
-	width: 13%;
+	width: 18%;
 }
 .timeline-container {
 	flex-direction: column;
 	display: flex;
 	overflow-x: auto;
-	width: 900px;
+	width: 800px;
 	flex-wrap: wrap;
+	padding-left: 10px;
 }
 
 .timeline {
@@ -233,6 +238,8 @@ const handleClickZoomOut = () => {
 	align-items: center;
 	margin-bottom: 17px;
 	padding-top: 5px;
+	height: 45px;
+	max-height: 45px;
 }
 
 .times {
@@ -240,7 +247,7 @@ const handleClickZoomOut = () => {
 	flex-direction: row;
 	border-bottom: 1px solid #b7b7b7;
 	margin-bottom: 15px;
-	margin-left: 13%;
+	margin-left: 20%;
 	justify-content: space-between;
 }
 

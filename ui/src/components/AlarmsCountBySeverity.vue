@@ -45,9 +45,9 @@ const props = defineProps<{
 		font-size: 20px;
 		line-height: 70px;
 		height: 70px;
-
 		min-width: 70px;
 		text-align: center;
+		border-width: 2px;
 		margin-bottom: 15px;
 	}
 }

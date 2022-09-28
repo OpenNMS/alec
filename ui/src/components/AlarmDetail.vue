@@ -11,11 +11,11 @@ const props = defineProps<{
 <template>
 	<div class="card" v-if="props.alarm">
 		<div class="row">
-			<div class="title">{{ alarm.nodeLabel }} [{{ alarm.id }}]</div>
+			<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 			<SeverityStatus :severity="alarm?.severity" />
 		</div>
 
-		<div v-html="alarm.description"></div>
+		<div class="description" v-html="alarm.description"></div>
 		<div>
 			<strong>First Event</strong>
 			- {{ formatDate(alarm.firstTime) }}
@@ -45,5 +45,9 @@ const props = defineProps<{
 	font-weight: 600;
 	word-break: break-all;
 	margin-right: 5px;
+}
+
+.description {
+	word-break: break-word;
 }
 </style>

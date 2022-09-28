@@ -38,6 +38,7 @@ watch(props, () => {
 		<div class="title">Alarms</div>
 		<FeatherChipList
 			:key="selectedFilters.toString()"
+			v-if="alarmFilters.length > 1"
 			condensed
 			class="alarm-filters"
 			label="Random list for condensed visual testing"
@@ -93,11 +94,7 @@ watch(props, () => {
 	flex-wrap: wrap;
 	> div {
 		margin-top: 20px;
-		width: 300px;
-		margin-right: 15px;
-	}
-	> div:last-child {
-		margin-bottom: 0;
+		width: 100%;
 	}
 }
 </style>

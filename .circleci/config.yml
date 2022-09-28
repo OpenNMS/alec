@@ -411,7 +411,7 @@ jobs:
       - run:
           name: Deploy the artifacts
           command: |
-            mvn -s .circleci.settings.xml -DskipTests deploy
+            mvn -s .circleci.settings.xml -DskipTests -Prelease deploy
 
   deploy-packages:
       executor: cloudsmith/default

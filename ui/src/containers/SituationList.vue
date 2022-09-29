@@ -148,7 +148,7 @@ const onGotoPage = (nextPage: number) => {
 			></FeatherAutocomplete>
 		</div>
 		<div class="container">
-			<div class="situation-list">
+			<div v-if="state.situations" class="situation-list">
 				<div>
 					Result: {{ state.situations.length }} of
 					{{ totalSituations }}

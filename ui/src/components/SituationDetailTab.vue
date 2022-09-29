@@ -126,7 +126,7 @@ watch(props, () => {
 	margin-top: 10px;
 }
 .severity-line {
-	width: 4px;
+	width: 5px;
 	margin-right: 10px;
 }
 .situation-info {

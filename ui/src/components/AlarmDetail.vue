@@ -7,9 +7,13 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import Remove from '@featherds/icon/action/Remove'
 import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
-import { sendAcknowledge } from '@/services/AlarmService'
+import { sendAcknowledge, sendAction } from '@/services/AlarmService'
+import CONST from '@/helpers/constants'
 
 import { FeatherIcon } from '@featherds/icon'
+import { useSituationsStore } from '@/store/useSituationsStore'
+
+const situationStore = useSituationsStore()
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -17,6 +21,14 @@ const props = defineProps<{
 
 const handleAcknowledgeAction = (isAck: boolean) => {
 	sendAcknowledge(props.alarm.id, isAck)
+}
+
+const handleAction = async (action: string) => {
+	const result = await sendAction(props.alarm.id, action)
+	if (result) {
+		console.log(result)
+		situationStore.getSituations()
+	}
 }
 </script>
 
@@ -59,17 +71,19 @@ const handleAcknowledgeAction = (isAck: boolean) => {
 				<span>Unacknowledge</span>
 			</FeatherButton>
 			<FeatherButton
+				v-if="alarm.severity != 'CRITICAL'"
 				secondary
 				class="acction-btn"
-				@click="() => handleAction()"
+				@click="() => handleAction(CONST.ESCALATE)"
 			>
 				<FeatherIcon :icon="KeyboardArrowUp" aria-hidden="true" class="icon" />
 				<span>Escalate</span>
 			</FeatherButton>
 			<FeatherButton
 				secondary
+				v-if="alarm.severity != 'NORMAL'"
 				class="acction-btn"
-				@click="() => handleAction()"
+				@click="() => handleAction(CONST.CLEAR)"
 			>
 				<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon" />
 				<span>Clear</span>
@@ -105,9 +119,8 @@ const handleAcknowledgeAction = (isAck: boolean) => {
 .action-btns-group {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 	> button {
-		margin-bottom: 10px;
+		margin-bottom: 12px;
 		min-width: 180px;
 		margin-left: 0 !important;
 	}

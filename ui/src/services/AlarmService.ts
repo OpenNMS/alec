@@ -22,10 +22,7 @@ export const sendAcknowledge = async (alarmId: number, isAck: boolean) => {
 	}
 }
 
-export const sendAction = async (
-	alarmId: number,
-	action: 'clear' | 'escalate'
-) => {
+export const sendAction = async (alarmId: number, action: string) => {
 	try {
 		const resp = await rest.put(
 			`/alarms/${alarmId}?${action}=true`,
@@ -38,7 +35,7 @@ export const sendAction = async (
 				}
 			}
 		)
-		if (resp.status === 302) {
+		if (resp.status === 204) {
 			return true
 		}
 		return false

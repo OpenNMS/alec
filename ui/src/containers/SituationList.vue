@@ -2,16 +2,46 @@
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SituationDetail from '@/components/SituationDetail.vue'
+import SimplePagination from '@/components/SimplePagination.vue'
+
 import { reactive, ref } from 'vue'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, map, chain, chunk } from 'lodash'
+import { FeatherAutocomplete } from '@featherds/autocomplete'
+import { TSituation } from '@/types/TSituation'
 
 const situationStore = useSituationsStore()
 situationStore.getSituations()
-const state = reactive({
+const PAGE_SIZE = 10
+
+type TState = {
+	situations: TSituation[]
+	selectedSituationIndex: number
+	situationSelected: string
+	nodes: Record<string, string | number>[]
+	results: Record<string, string | number>[]
+	nodeSelectedValue: Record<string, string> | undefined
+	allSituations: Array<TSituation>[]
+}
+const state: TState = reactive({
+	situations: [],
 	selectedSituationIndex: 0,
-	situationSelected: ''
+	situationSelected: '',
+	nodes: [],
+	results: [],
+	nodeSelectedValue: undefined,
+	allSituations: []
 })
-const situations = ref(situationStore.situations)
+const loading = ref(false)
+const currentPage = ref(0)
+const totalPages = ref(1)
+const totalSituations = ref(0)
+
+const initPaging = (situations: Array<TSituation[]>) => {
+	currentPage.value = 0
+	state.situations = situations[0]
+	totalPages.value = situations.length
+}
+
 const situationSelected = (id: string) => {
 	window.scrollTo(0, 0)
 	state.situationSelected = id
@@ -21,33 +51,121 @@ const situationSelected = (id: string) => {
 }
 
 const situationStatusChanged = (status: string, id: string) => {
-	const auxSituations = situations.value
+	const auxSituations = state.situations
 	auxSituations.forEach((sit) => {
 		if (sit.id === id) {
 			sit.status = status
 		}
 	})
-	situations.value = cloneDeep(auxSituations)
+
+	state.situations = cloneDeep(auxSituations)
+}
+
+const setNodes = () => {
+	const nodesLabels = chain(situationStore.situations)
+		.map((s) => s.alarms)
+		.flatten()
+		.groupBy('nodeLabel')
+		.keys()
+		.value()
+	const nodes = map(nodesLabels, (n, i) => {
+		return {
+			id: i,
+			name: n
+		}
+	})
+	state.nodes = nodes
+	state.results = nodes
 }
 
 situationStore.$subscribe((mutation, storeState) => {
-	situations.value = situationStore.situations
 	state.situationSelected = storeState.situations[0]?.id
+	setNodes()
+	//TODO - replace with pagination from backend
+	totalSituations.value = situationStore.situations.length
+	state.allSituations = chunk(situationStore.situations, PAGE_SIZE)
+	initPaging(state.allSituations)
 })
+
+const search = (q: string) => {
+	if (!q) {
+		state.nodeSelectedValue = undefined
+		return []
+	}
+	loading.value = true
+	state.results = state.nodes
+		.filter((x: any) => x.name.toLowerCase().indexOf(q) > -1)
+		.map((x) => ({
+			_text: x.name,
+			id: x.id
+		}))
+	loading.value = false
+}
+
+const filterByNode = () => {
+	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
+		const filtered = situationStore.situations
+			.map((s) => {
+				const alarms = s.alarms.filter(
+					(a) => a.nodeLabel === state.nodeSelectedValue?._text
+				)
+				if (alarms.length > 0) {
+					return s
+				}
+			})
+			.filter((s) => s) as TSituation[]
+
+		if (filtered) {
+			totalSituations.value = filtered.length
+			state.situations = filtered
+		}
+	} else {
+		state.nodeSelectedValue = undefined
+		totalSituations.value = situationStore.situations.length
+		initPaging(state.allSituations)
+	}
+}
+
+const onGotoPage = (nextPage: number) => {
+	currentPage.value = nextPage
+	state.situations = state.allSituations[currentPage.value]
+}
 </script>
 
 <template>
 	<div class="list-main">
 		<h2>Situation List</h2>
+		<div class="situation-filters">
+			<FeatherAutocomplete
+				class="map-search"
+				label="Find by node"
+				:loading="loading"
+				v-model="state.nodeSelectedValue"
+				:results="state.results"
+				type="single"
+				@search="search"
+				@update:modelValue="filterByNode"
+			></FeatherAutocomplete>
+		</div>
 		<div class="container">
 			<div class="situation-list">
-				<div v-for="situationInfo in situations" :key="situationInfo.id">
+				<div>
+					Result: {{ state.situations.length }} of
+					{{ totalSituations }}
+				</div>
+				<div v-for="situationInfo in state.situations" :key="situationInfo.id">
 					<SituationCard
 						:situation-info="situationInfo"
 						@situation-selected="situationSelected"
 						:selected="state.situationSelected == situationInfo.id"
 					/>
 				</div>
+				<SimplePagination
+					v-if="!state.nodeSelectedValue"
+					@go-to-page="onGotoPage"
+					:currentPage="currentPage"
+					:totalPages="totalPages"
+				/>
 			</div>
 			<SituationDetail
 				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
@@ -66,6 +184,13 @@ h2 {
 	margin-top: 0;
 	margin-bottom: 15px !important;
 }
+.situation-filters {
+	padding: 15px;
+	border: 1px solid #dfdfdf;
+	margin-bottom: 20px;
+	background-color: #ffffff;
+	margin-top: 10px;
+}
 .container {
 	display: flex;
 	flex-direction: row;
@@ -82,5 +207,10 @@ h2 {
 	> div:last-child {
 		margin-bottom: 0 !important;
 	}
+}
+
+.map-search {
+	z-index: 1000;
+	width: 400px !important;
 }
 </style>

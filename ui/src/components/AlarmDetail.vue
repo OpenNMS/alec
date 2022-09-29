@@ -4,19 +4,28 @@ import { formatDate } from '@/helpers/utils'
 import { TAlarm } from '@/types/TSituation'
 import { FeatherButton } from '@featherds/button'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
+import Remove from '@featherds/icon/action/Remove'
+import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
+import MarkComplete from '@featherds/icon/action/MarkComplete'
+import { sendAcknowledge } from '@/services/AlarmService'
+
 import { FeatherIcon } from '@featherds/icon'
 
 const props = defineProps<{
 	alarm: TAlarm
 }>()
+
+const handleAcknowledgeAction = (isAck: boolean) => {
+	sendAcknowledge(props.alarm.id, isAck)
+}
 </script>
 
 <template>
 	<div class="card" v-if="props.alarm">
 		<div>
 			<div class="row">
+				<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 				<SeverityStatus :severity="alarm?.severity" />
-				<div class="title">{{ alarm.nodeLabel }} [{{ alarm.id }}]</div>
 			</div>
 
 			<div class="description" v-html="alarm.description"></div>
@@ -24,31 +33,45 @@ const props = defineProps<{
 				<strong>First Event</strong>
 				- {{ formatDate(alarm.firstTime) }}
 			</div>
+
 			<div>
 				<strong>Last Event</strong>
 				- {{ formatDate(alarm.time) }}
 			</div>
 		</div>
-		<div class="action-btn">
+		<div class="action-btns-group">
 			<FeatherButton
-				class="btn"
-				@click="() => handleFeedbackSituation(ACCEPTED)"
+				v-if="!alarm.ackTime"
+				secondary
+				class="acction-btn"
+				@click="() => handleAcknowledgeAction(true)"
 			>
 				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon" />
-				<span>ACKNOWLEDGE</span>
+				<span>Acknowledge</span>
 			</FeatherButton>
 			<FeatherButton
-				class="btn"
-				@click="() => handleFeedbackSituation(ACCEPTED)"
+				v-if="alarm.ackTime"
+				secondary
+				class="acction-btn"
+				@click="() => handleAcknowledgeAction(false)"
 			>
-				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon" />
+				<FeatherIcon :icon="Remove" aria-hidden="true" class="icon" />
+				<span>Unacknowledge</span>
+			</FeatherButton>
+			<FeatherButton
+				secondary
+				class="acction-btn"
+				@click="() => handleAction()"
+			>
+				<FeatherIcon :icon="KeyboardArrowUp" aria-hidden="true" class="icon" />
 				<span>Escalate</span>
 			</FeatherButton>
 			<FeatherButton
-				class="btn"
-				@click="() => handleFeedbackSituation(ACCEPTED)"
+				secondary
+				class="acction-btn"
+				@click="() => handleAction()"
 			>
-				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon" />
+				<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon" />
 				<span>Clear</span>
 			</FeatherButton>
 		</div>
@@ -72,25 +95,32 @@ const props = defineProps<{
 	font-size: 18px;
 	font-weight: 600;
 	word-break: break-all;
-	margin-right: 5px;
+	margin-right: 10px;
 }
 
 .description {
 	word-break: break-word;
 }
 
-.action-btn {
+.action-btns-group {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	> button {
 		margin-bottom: 10px;
-		width: 160px;
+		min-width: 180px;
+		margin-left: 0 !important;
 	}
 	> button:last-child {
 		width: 160px;
 
 		margin-bottom: 0;
 	}
+}
+
+.icon {
+	font-size: 20px;
+	margin-right: 4px;
+	vertical-align: sub;
 }
 </style>

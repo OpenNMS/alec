@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherIcon } from '@featherds/icon'
-import { groupBy, size } from 'lodash'
+import { groupBy, keys } from 'lodash'
 import Cancel from '@featherds/icon/action/Cancel'
 import { TSituation } from '@/types/TSituation'
 import CONST from '@/helpers/constants'
@@ -33,7 +33,7 @@ const handleSituationSelected = () => {
 		></div>
 		<div class="content">
 			<div class="title-row">
-				<div class="title">Situation [ {{ props.situationInfo?.id }} ]</div>
+				<div class="title">Situation {{ props.situationInfo?.id }}</div>
 				<div v-if="props.situationInfo.status == ACCEPTED" class="accepted">
 					<FeatherIcon
 						:icon="CheckCircle"
@@ -51,10 +51,14 @@ const handleSituationSelected = () => {
 			</div>
 			<div class="count-info">
 				Alarms:
-				<span class="count">{{ props.situationInfo.alarms.length }}</span>
-				Nodes:<span class="count">
-					{{ size(groupBy(props.situationInfo.alarms, 'nodeId')) }}</span
-				>
+				<span class="info-title">{{ props.situationInfo.alarms.length }}</span>
+			</div>
+			<div
+				class="info-title"
+				v-for="node in keys(groupBy(props.situationInfo.alarms, 'nodeLabel'))"
+				:key="node"
+			>
+				- {{ node }}
 			</div>
 		</div>
 	</div>
@@ -62,7 +66,7 @@ const handleSituationSelected = () => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 .card {
-	width: 250px;
+	width: 270px;
 	height: auto;
 	display: flex;
 	flex-direction: row;
@@ -87,7 +91,7 @@ const handleSituationSelected = () => {
 	margin-bottom: 15px;
 }
 .title {
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 600;
 	word-break: break-all;
 	margin-right: 5px;
@@ -113,15 +117,16 @@ const handleSituationSelected = () => {
 	color: red;
 }
 
-.count-info {
-	display: flex;
-}
-
 .count {
 	font-size: 18px;
 	font-weight: 600;
 	padding-right: 8px;
 	padding-left: 3px;
 	color: #323647;
+}
+
+.info-title {
+	font-size: 14px;
+	font-weight: 600;
 }
 </style>

@@ -14,7 +14,7 @@ import { useUserStore } from '@/store/useUserStore'
 import { formatDate } from '@/helpers/utils'
 import CONST from '@/helpers/constants'
 import { groupBy, size } from 'lodash'
-
+import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
@@ -38,37 +38,40 @@ watch(props, () => {
 
 <template>
 	<div class="section">
-		<div v-if="userStore.allowSave" class="btn-row">
-			<FeatherButton
-				v-if="status !== REJECTED"
-				class="btn"
-				data-test="btn-accept"
-				:class="{ accepted: status == ACCEPTED }"
-				@click="() => handleFeedbackSituation(ACCEPTED)"
-			>
-				<FeatherIcon
-					:icon="CheckCircle"
-					aria-hidden="true"
-					class="icon accept"
+		<div class="action-section">
+			<div v-if="userStore.allowSave" class="btn-row">
+				<FeatherButton
+					v-if="status !== REJECTED"
+					class="btn"
+					data-test="btn-accept"
 					:class="{ accepted: status == ACCEPTED }"
-				/>
-				<span v-if="status == ACCEPTED"> {{ ACCEPTED }}</span>
-				<span v-else> ACCEPT</span>
-			</FeatherButton>
-			<FeatherButton
-				class="btn"
-				:class="{ rejected: status == REJECTED }"
-				@click="() => handleFeedbackSituation(REJECTED)"
-			>
-				<FeatherIcon
-					:icon="Cancel"
-					aria-hidden="true"
-					class="icon reject"
+					@click="() => handleFeedbackSituation(ACCEPTED)"
+				>
+					<FeatherIcon
+						:icon="CheckCircle"
+						aria-hidden="true"
+						class="icon accept"
+						:class="{ accepted: status == ACCEPTED }"
+					/>
+					<span v-if="status == ACCEPTED"> {{ ACCEPTED }}</span>
+					<span v-else> ACCEPT</span>
+				</FeatherButton>
+				<FeatherButton
+					class="btn"
 					:class="{ rejected: status == REJECTED }"
-				/>
-				<span v-if="status == REJECTED"> {{ REJECTED }}</span>
-				<span v-else> REJECT</span>
-			</FeatherButton>
+					@click="() => handleFeedbackSituation(REJECTED)"
+				>
+					<FeatherIcon
+						:icon="Cancel"
+						aria-hidden="true"
+						class="icon reject"
+						:class="{ rejected: status == REJECTED }"
+					/>
+					<span v-if="status == REJECTED"> {{ REJECTED }}</span>
+					<span v-else> REJECT</span>
+				</FeatherButton>
+			</div>
+			<AlarmActionBtns :alarm="props.situationInfo" :direction="'horizontal'" />
 		</div>
 		<div v-if="props.situationInfo" class="situation-detail">
 			<div
@@ -118,12 +121,19 @@ watch(props, () => {
 @import '@/styles/variables.scss';
 @import '@featherds/table/scss/table';
 
-.btn-row {
+.action-section {
 	padding: 15px;
 	border: 1px solid $border-grey;
 	margin-bottom: 20px;
 	background-color: #ffffff;
 	margin-top: 10px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.action-btns {
+	display: flex;
 }
 .severity-line {
 	width: 5px;

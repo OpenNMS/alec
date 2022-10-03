@@ -1,6 +1,9 @@
 import { rest } from './axiosInstances'
 
-export const sendAcknowledge = async (alarmId: number, isAck: boolean) => {
+export const sendAcknowledge = async (
+	alarmId: number | string,
+	isAck: boolean
+) => {
 	try {
 		const resp = await rest.put(
 			`/alarms/${alarmId}?ack=${isAck}`,
@@ -22,7 +25,7 @@ export const sendAcknowledge = async (alarmId: number, isAck: boolean) => {
 	}
 }
 
-export const sendAction = async (alarmId: number, action: string) => {
+export const sendAction = async (alarmId: number | string, action: string) => {
 	try {
 		const resp = await rest.put(
 			`/alarms/${alarmId}?${action}=true`,

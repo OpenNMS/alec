@@ -6,13 +6,13 @@ import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
 import CONST from '@/helpers/constants'
-import { TAlarm } from '@/types/TSituation'
+import { TAlarm, TSituation } from '@/types/TSituation'
 
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 
 const props = defineProps<{
-	alarm: TAlarm
+	alarm: TAlarm | TSituation
 	direction: 'horizontal' | 'vertical'
 }>()
 const situationStore = useSituationsStore()

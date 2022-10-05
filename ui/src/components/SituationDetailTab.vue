@@ -8,6 +8,8 @@ import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import AlarmFilters from '@/components/AlarmFilters.vue'
+import MemoBox from '@/components/MemoBox.vue'
+
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
@@ -86,7 +88,6 @@ watch(props, () => {
 				</div>
 
 				<span v-html="props.situationInfo.description"></span>
-				<p></p>
 				<div class="boxes">
 					<InformationBox
 						label="First Event"
@@ -109,7 +110,12 @@ watch(props, () => {
 				/>
 			</div>
 		</div>
+		<div class="section memo-boxes">
+			<MemoBox label="Sticky Memo" text="" />
+			<MemoBox label="Journal Memo" text="" />
+		</div>
 	</div>
+
 	<div v-if="props.situationInfo.alarms.length > 0" class="section">
 		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>
@@ -146,6 +152,16 @@ watch(props, () => {
 	flex-direction: row;
 	> div {
 		margin-right: 10px;
+	}
+}
+
+.memo-boxes {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+
+	> div {
+		width: 49%;
 	}
 }
 .parameters {

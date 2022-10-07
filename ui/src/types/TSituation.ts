@@ -11,8 +11,9 @@ export type TSituation = {
 	nodeId: number
 	nodeLabel: string
 	uei: string
+	relatedAlarms: TAlarm[]
 	count: number
-	lastTime: number
+	lastEventTime: number
 	logMessage: string
 	location: string
 	reductionKey: string
@@ -56,9 +57,9 @@ export type TAlarm = {
 	nodeLabel: string
 	uei: string
 	count: number
-	time: Date
+	lastEventTime: Date
 	logMessage: string
-	firstTime: Date
+	firstEventTime: Date
 	reductionKey: string
 	inventoryObjectId: string
 	inventoryObjectType: string
@@ -70,4 +71,9 @@ export type TAlarm = {
 export type TSituationSaved = {
 	id: string
 	status: string
+}
+
+export type TNode = {
+	id: number
+	label: string
 }

@@ -33,12 +33,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.CreateSituationPayload;
 import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.SituationStatusImpl;
@@ -46,8 +49,12 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
+import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.processor.api.SituationConfirmer;
+import org.opennms.alec.processor.api.SituationProcessor;
+import org.opennms.alec.processor.api.SituationProcessorFactory;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,22 +63,30 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SituationRestImpl implements SituationRest {
-    private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SituationRestImpl.class);
     public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
     public static final String ALARM_NOT_FOUND = "Alarm {0} not found";
+    public static final String NEED_2_ALARMS = "We need at least two alarms to create a situation, we found {} alarm";
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
     private final AlarmDatasource alarmDatasource;
+    private final SituationProcessor situationProcessor;
+    private final SituationHandler confirmingSituationHandler;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
-                             AlarmDatasource alarmDatasource) {
-        this.kvStore = kvStore;
-        this.situationDatasource = situationDatasource;
-        this.alarmDatasource = alarmDatasource;
+                             AlarmDatasource alarmDatasource,
+                             SituationProcessorFactory situationProcessorFactory) {
+        this.kvStore = Objects.requireNonNull(kvStore);
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
+        this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         objectMapper = new ObjectMapper();
+        situationProcessor = Objects.requireNonNull(situationProcessorFactory).getInstance();
+
+        confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
+        situationDatasource.registerHandler(confirmingSituationHandler);
     }
 
     @Override
@@ -82,7 +97,7 @@ public class SituationRestImpl implements SituationRest {
             Situation situation = situationOptional.get();
             //check status
             if (Status.REJECTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already rejected", situationId);
+                LOGGER.debug("Situation {} already rejected", situationId);
                 return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
             }
 
@@ -108,7 +123,7 @@ public class SituationRestImpl implements SituationRest {
             Situation situation = situationOptional.get();
             //check status
             if (Status.ACCEPTED.equals(situation.getStatus())) {
-                LOG.debug("Situation {} already accepted", situationId);
+                LOGGER.debug("Situation {} already accepted", situationId);
                 return Response.accepted(MessageFormat.format("Situation {0} already accepted", situationId)).build();
             }
 
@@ -157,15 +172,15 @@ public class SituationRestImpl implements SituationRest {
                     alarms.add(alarmOptional.get());
                     return forwardAndStoreSituation(oldSituation, alarms);
                 } else {
-                    LOG.warn("Alarm {} is already in a situation, thus it will not be added to situation {}", alarmId, situationId);
+                    LOGGER.warn("Alarm {} is already in a situation, thus it will not be added to situation {}", alarmId, situationId);
                     return Response.status(Response.Status.CONFLICT).entity(MessageFormat.format("Alarm {0} is already in a situation", alarmId)).build();
                 }
             } else {
-                LOG.warn("Alarm {} not found, thus it will not be added to situation {}", alarmId, situationId);
+                LOGGER.warn("Alarm {} not found, thus it will not be added to situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
-            LOG.warn("Situation {} not found, thus alarm {} will not be added to the situation", situationId, alarmId);
+            LOGGER.warn("Situation {} not found, thus alarm {} will not be added to the situation", situationId, alarmId);
             return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
     }
@@ -184,19 +199,53 @@ public class SituationRestImpl implements SituationRest {
                         .collect(Collectors.toUnmodifiableSet());
                 return forwardAndStoreSituation(oldSituation, alarms);
             } else {
-                LOG.warn("Alarm {} not found, thus it will not be removed from situation {}", alarmId, situationId);
+                LOGGER.warn("Alarm {} not found, thus it will not be removed from situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
             }
         } else {
-            LOG.warn("Situation {} not found, thus alarm {} will not be removed from the situation", situationId, alarmId);
+            LOGGER.warn("Situation {} not found, thus alarm {} will not be removed from the situation", situationId, alarmId);
             return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
         }
+    }
+
+    @Override
+    public Response createSituation(CreateSituationPayload createSituationPayload) {
+        List<String> alarmIdList = createSituationPayload.getAlarmIdList();
+        if (alarmIdList.size() <= 1) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS,  alarmIdList.size())).build();
+        }
+        Set<Alarm> alarms = new HashSet<>();
+        for (String id:alarmIdList) {
+            try {
+                Optional<Alarm> alarm = alarmDatasource.getAlarm(Integer.parseInt(id));
+                if (alarm.isPresent() && alarmIsNotInAnotherSituation(alarm.get().getReductionKey())) {
+                    alarms.add(alarm.get());
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return somethingWentWrong(e);
+            }
+        }
+        if (alarms.size() <= 1) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarms.size())).build();
+        }
+        final String situationId = UUID.randomUUID().toString();
+        Situation situation = ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(System.currentTimeMillis())
+                .setAlarms(alarms)
+                .setDiagnosticText(createSituationPayload.getDiagnosticText())
+                .setDescription(createSituationPayload.getDescription())
+                .build();
+        situationDatasource.forwardSituation(situation);
+        return Response.ok().build();
     }
 
     private boolean alarmIsNotInAnotherSituation(String reductionKey) throws InterruptedException {
         for (Situation situation : situationDatasource.getSituations()) {
             for (Alarm alarm : situation.getAlarms()) {
                 if (reductionKey.equals(alarm.getReductionKey())) {
+                    LOGGER.debug("Alarm {} is in another situation", alarm.getReductionKey());
                     return false;
                 }
             }
@@ -230,7 +279,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     private Response somethingWentWrong(Throwable e) {
-        LOG.error(e.getMessage(), e.fillInStackTrace());
+        LOGGER.error(e.getMessage(), e.fillInStackTrace());
         return Response.serverError().entity(MessageFormat.format("something went wrong: {0}", e.getMessage())).build();
     }
 }

@@ -18,7 +18,7 @@
         <argument ref="engineFactories"/>
     </bean>
 
-    <bean id="situationImpl" class="org.opennms.alec.rest.SituationRestImpl">
+    <bean id="situationImpl" class="org.opennms.alec.rest.SituationRestImpl" destroy-method="destroy">
         <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
         <argument ref="alarmDatasource"/>

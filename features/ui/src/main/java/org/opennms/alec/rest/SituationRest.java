@@ -39,6 +39,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.CreateSituationPayload;
+
 @Path("alec/situation")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
@@ -65,4 +67,7 @@ public interface SituationRest {
     @DELETE
     @Path("{situationId}/alarm/{alarmId}")
     Response removeAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId) throws InterruptedException;
+
+    @POST
+    Response createSituation(CreateSituationPayload createSituationPayload);
 }

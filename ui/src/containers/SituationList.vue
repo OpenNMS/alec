@@ -5,12 +5,14 @@ import SituationDetail from '@/components/SituationDetail.vue'
 import SimplePagination from '@/components/SimplePagination.vue'
 
 import { reactive, ref } from 'vue'
-import { cloneDeep, map, chain, chunk } from 'lodash'
+import { cloneDeep, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
 
 const situationStore = useSituationsStore()
 situationStore.getSituations()
+situationStore.getNodes()
+
 const PAGE_SIZE = 10
 
 type TState = {
@@ -62,26 +64,13 @@ const situationStatusChanged = (status: string, id: string) => {
 }
 
 const setNodes = () => {
-	const nodesLabels = chain(situationStore.situations)
-		.map((s) => s.alarms)
-		.flatten()
-		.groupBy('nodeLabel')
-		.keys()
-		.value()
-	const nodes = map(nodesLabels, (n, i) => {
-		return {
-			id: i,
-			name: n
-		}
-	})
-	state.nodes = nodes
-	state.results = nodes
+	state.nodes = situationStore.nodes
+	state.results = situationStore.nodes
 }
 
 situationStore.$subscribe((mutation, storeState) => {
 	state.situationSelected = storeState.situations[0]?.id
 	setNodes()
-	//TODO - replace with pagination from backend
 	totalSituations.value = situationStore.situations.length
 	state.allSituations = chunk(situationStore.situations, PAGE_SIZE)
 	initPaging(state.allSituations)
@@ -94,9 +83,9 @@ const search = (q: string) => {
 	}
 	loading.value = true
 	state.results = state.nodes
-		.filter((x: any) => x.name.toLowerCase().indexOf(q) > -1)
+		.filter((x: any) => x.label.toLowerCase().indexOf(q) > -1)
 		.map((x) => ({
-			_text: x.name,
+			_text: x.label,
 			id: x.id
 		}))
 	loading.value = false
@@ -147,18 +136,21 @@ const onGotoPage = (nextPage: number) => {
 				@update:modelValue="filterByNode"
 			></FeatherAutocomplete>
 		</div>
-		<div class="container">
+		<div
+			class="container"
+			v-if="state.situations && state.situations.length > 0"
+		>
 			<div class="situation-list">
-				<div>
-					Result: {{ state.situations.length }} of
-					{{ totalSituations }}
-				</div>
+				<div>{{ totalSituations }} Situations</div>
 				<div v-for="situationInfo in state.situations" :key="situationInfo.id">
 					<SituationCard
 						:situation-info="situationInfo"
 						@situation-selected="situationSelected"
 						:selected="state.situationSelected == situationInfo.id"
 					/>
+				</div>
+				<div v-if="!state.nodeSelectedValue">
+					Page: {{ currentPage + 1 }} of {{ totalPages }}
 				</div>
 				<SimplePagination
 					v-if="!state.nodeSelectedValue"
@@ -171,6 +163,12 @@ const onGotoPage = (nextPage: number) => {
 				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
 				@situation-status-changed="situationStatusChanged"
 			/>
+		</div>
+		<div
+			v-if="!state.situations || state.situations.length == 0"
+			class="container"
+		>
+			No results found
 		</div>
 	</div>
 </template>

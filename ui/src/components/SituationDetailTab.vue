@@ -80,7 +80,9 @@ watch(props, () => {
 					<div>
 						Situation - {{ props.situationInfo?.id }} - affecting
 						{{ size(groupBy(props.situationInfo?.alarms, 'nodeId')) }} node
-						having {{ props.situationInfo.alarms.length }} alarms
+						<span v-if="props.situationInfo.alarms"
+							>having {{ props.situationInfo.alarms.length }} alarms
+						</span>
 					</div>
 					<SeverityStatus :severity="props.situationInfo?.severity" />
 				</div>
@@ -90,11 +92,11 @@ watch(props, () => {
 				<div class="boxes">
 					<InformationBox
 						label="First Event"
-						:info="formatDate(props.situationInfo.creationTime)"
+						:info="formatDate(props.situationInfo.firstEventTime)"
 					/>
 					<InformationBox
 						label="Last Event"
-						:info="formatDate(props.situationInfo.lastTime)"
+						:info="formatDate(props.situationInfo.lastEventTime)"
 					/>
 					<InformationBox
 						label="Reduction Key"
@@ -110,7 +112,9 @@ watch(props, () => {
 			</div>
 		</div>
 	</div>
-	<div v-if="props.situationInfo.alarms.length > 0" class="section">
+	<div
+		v-if="props.situationInfo.alarms && props.situationInfo.alarms.length > 0"
+	>
 		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>
 </template>

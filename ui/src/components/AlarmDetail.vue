@@ -18,11 +18,11 @@ const props = defineProps<{
 		<div class="description" v-html="alarm.description"></div>
 		<div>
 			<strong>First Event</strong>
-			- {{ formatDate(alarm.firstTime) }}
+			- {{ formatDate(alarm.firstEventTime) }}
 		</div>
 		<div>
 			<strong>Last Event</strong>
-			- {{ formatDate(alarm.time) }}
+			- {{ formatDate(alarm.lastEventTime) }}
 		</div>
 	</div>
 </template>

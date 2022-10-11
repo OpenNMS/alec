@@ -28,15 +28,19 @@ const getProportion = () => {
 
 const relatedAlarms = ref(props.situation.alarms)
 const minStart = ref(
-	minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
+	minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime || new Date()
 )
-const maxEnd = ref(maxBy(props.situation?.alarms, 'time')?.time || new Date())
+const maxEnd = ref(
+	maxBy(props.situation?.alarms, 'lastEventTime')?.lastEventTime || new Date()
+)
 const proportion = ref(getProportion())
 
 watch(props, () => {
 	minStart.value =
-		minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
-	maxEnd.value = maxBy(props.situation?.alarms, 'time')?.time || new Date()
+		minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime ||
+		new Date()
+	maxEnd.value =
+		maxBy(props.situation?.alarms, 'lastEventTime')?.lastEventTime || new Date()
 	maxWidth.value = DEFAULT_MAX_WIDTH
 	proportion.value = getProportion()
 	relatedAlarms.value = props.situation.alarms
@@ -67,7 +71,7 @@ const sortChanged = (sortObj: ISelectItemType | undefined) => {
 		const sorted = reverse(
 			sortBy(
 				props.situation.alarms,
-				(a) => Number(a.time) - Number(a.firstTime)
+				(a) => Number(a.lastEventTime) - Number(a.firstEventTime)
 			)
 		)
 		relatedAlarms.value = sorted
@@ -100,7 +104,7 @@ const handleClickZoomOut = () => {
 			</div>
 		</div>
 	</div>
-	<div v-if="relatedAlarms.length > 0" class="section">
+	<div v-if="relatedAlarms && relatedAlarms.length > 0" class="section">
 		<div class="id">Alarms</div>
 		<div class="action-btns">
 			<FeatherSelect

@@ -136,8 +136,11 @@ const onGotoPage = (nextPage: number) => {
 				@update:modelValue="filterByNode"
 			></FeatherAutocomplete>
 		</div>
-		<div class="container">
-			<div v-if="state.situations" class="situation-list">
+		<div
+			class="container"
+			v-if="state.situations && state.situations.length > 0"
+		>
+			<div class="situation-list">
 				<div>
 					Result: {{ state.situations.length }} of
 					{{ totalSituations }}

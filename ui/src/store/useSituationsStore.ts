@@ -47,7 +47,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 						(rs: TSituationSaved) => rs.id == s.id
 					)
 					s.alarms = alarms
-					s.status = sitStatus ? sitStatus[0].status : 'CREATED'
+					s.status = sitStatus & sitStatus[0] ? sitStatus[0].status : 'CREATED'
 					return s
 				})
 

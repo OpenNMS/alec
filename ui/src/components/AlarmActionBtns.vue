@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FeatherButton } from '@featherds/button'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
-import Remove from '@featherds/icon/action/Remove'
+import Cancel from '@featherds/icon/action/Cancel'
 import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
@@ -17,7 +17,10 @@ const props = defineProps<{
 }>()
 const situationStore = useSituationsStore()
 const handleAcknowledgeAction = (isAck: boolean) => {
-	sendAcknowledge(props.alarm.id, isAck)
+	const result = sendAcknowledge(props.alarm.id, isAck)
+	if (result) {
+		situationStore.getSituations()
+	}
 }
 
 const handleAction = async (action: string) => {
@@ -37,16 +40,15 @@ const handleAction = async (action: string) => {
 			class="acction-btn"
 			@click="() => handleAcknowledgeAction(true)"
 		>
-			<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon" />
+			<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
 			<span>Acknowledge</span>
 		</FeatherButton>
 		<FeatherButton
 			v-if="alarm.ackTime"
-			secondary
 			class="acction-btn"
 			@click="() => handleAcknowledgeAction(false)"
 		>
-			<FeatherIcon :icon="Remove" aria-hidden="true" class="icon" />
+			<FeatherIcon :icon="Cancel" aria-hidden="true" class="icon unack" />
 			<span>Unacknowledge</span>
 		</FeatherButton>
 		<FeatherButton
@@ -54,7 +56,11 @@ const handleAction = async (action: string) => {
 			class="acction-btn"
 			@click="() => handleAction(CONST.ESCALATE)"
 		>
-			<FeatherIcon :icon="KeyboardArrowUp" aria-hidden="true" class="icon" />
+			<FeatherIcon
+				:icon="KeyboardArrowUp"
+				aria-hidden="true"
+				class="icon escalate"
+			/>
 			<span>Escalate</span>
 		</FeatherButton>
 		<FeatherButton
@@ -62,7 +68,7 @@ const handleAction = async (action: string) => {
 			class="acction-btn"
 			@click="() => handleAction(CONST.CLEAR)"
 		>
-			<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon" />
+			<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon clear" />
 			<span>Clear</span>
 		</FeatherButton>
 	</div>
@@ -97,8 +103,22 @@ const handleAction = async (action: string) => {
 }
 
 .icon {
-	font-size: 20px;
+	font-size: 18px;
 	margin-right: 4px;
 	vertical-align: sub;
+
+	&.ack {
+		color: green;
+	}
+	&.unack {
+		color: red;
+	}
+	&.escalate {
+		color: #cc0000;
+		font-size: 20px;
+	}
+	&.clear {
+		color: blue;
+	}
 }
 </style>

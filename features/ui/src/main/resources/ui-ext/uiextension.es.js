@@ -4662,7 +4662,7 @@ const fR = "/alarms?_s=", hR = async () => {
       if (this.totalSituations = t.totalCount, t) {
         const l = t.alarm.map((p) => {
           const V = p.relatedAlarms.map(
-            (R) => r[parseInt(R.id)]
+            (R) => r[parseInt(R.id, 10)]
           ), U = a.filter(
             (R) => R.id == p.id
           );
@@ -7678,16 +7678,13 @@ const AJ = "/whoami", CJ = async () => {
       }
     }
   }
-}), BJ = window.Vue.defineComponent, we = window.Vue.unref, fi = window.Vue.normalizeClass, $t = window.Vue.createVNode, hi = window.Vue.toDisplayString, It = window.Vue.openBlock, en = window.Vue.createElementBlock, pi = window.Vue.createCommentVNode, nh = window.Vue.withCtx, DJ = window.Vue.createBlock, rn = window.Vue.createElementVNode, IJ = window.Vue.createTextVNode, OJ = window.Vue.Fragment, QJ = window.Vue.pushScopeId, zJ = window.Vue.popScopeId, GJ = (t) => (QJ("data-v-90d1b6f4"), t = t(), zJ(), t), YJ = { class: "section" }, _J = {
+}), BJ = window.Vue.defineComponent, we = window.Vue.unref, fi = window.Vue.normalizeClass, $t = window.Vue.createVNode, hi = window.Vue.toDisplayString, It = window.Vue.openBlock, en = window.Vue.createElementBlock, pi = window.Vue.createCommentVNode, nh = window.Vue.withCtx, DJ = window.Vue.createBlock, rn = window.Vue.createElementVNode, IJ = window.Vue.createTextVNode, OJ = window.Vue.Fragment, QJ = window.Vue.pushScopeId, zJ = window.Vue.popScopeId, GJ = (t) => (QJ("data-v-ccf3b481"), t = t(), zJ(), t), YJ = { class: "section" }, _J = {
   key: 0,
   class: "btn-row"
 }, PJ = { key: 0 }, HJ = { key: 1 }, jJ = { key: 0 }, XJ = { key: 1 }, LJ = {
   key: 1,
   class: "situation-detail"
-}, qJ = { class: "situation-info" }, KJ = { class: "id" }, $J = { key: 0 }, eb = ["innerHTML"], tb = /* @__PURE__ */ GJ(() => /* @__PURE__ */ rn("p", null, null, -1)), nb = { class: "boxes" }, rb = { class: "parameters" }, ib = {
-  key: 0,
-  class: "section"
-}, ob = window.Vue.ref, ab = window.Vue.watch, sb = /* @__PURE__ */ BJ({
+}, qJ = { class: "situation-info" }, KJ = { class: "id" }, $J = { key: 0 }, eb = ["innerHTML"], tb = /* @__PURE__ */ GJ(() => /* @__PURE__ */ rn("p", null, null, -1)), nb = { class: "boxes" }, rb = { class: "parameters" }, ib = { key: 0 }, ob = window.Vue.ref, ab = window.Vue.watch, sb = /* @__PURE__ */ BJ({
   __name: "SituationDetailTab",
   props: {
     situationInfo: null
@@ -7786,7 +7783,7 @@ const AJ = "/whoami", CJ = async () => {
     };
   }
 });
-const lb = /* @__PURE__ */ Be(sb, [["__scopeId", "data-v-90d1b6f4"]]);
+const lb = /* @__PURE__ */ Be(sb, [["__scopeId", "data-v-ccf3b481"]]);
 const cb = window.Vue.openBlock, ub = window.Vue.createElementBlock, db = window.Vue.createElementVNode;
 var fb = (t, i) => {
   const r = t.__vccOpts || t;
@@ -8725,7 +8722,7 @@ function QE(t, i) {
   return WE(), AE("svg", BE, OE);
 }
 var zE = /* @__PURE__ */ CE(xE, [["render", QE]]);
-const GE = window.Vue.defineComponent, YE = window.Vue.normalizeClass, Ge = window.Vue.createElementVNode, vr = window.Vue.toDisplayString, wn = window.Vue.unref, Do = window.Vue.createVNode, _E = window.Vue.createTextVNode, yh = window.Vue.renderList, Ul = window.Vue.Fragment, Tr = window.Vue.openBlock, Ur = window.Vue.createElementBlock, PE = window.Vue.createCommentVNode, HE = window.Vue.pushScopeId, jE = window.Vue.popScopeId, XE = (t) => (HE("data-v-721138cb"), t = t(), jE(), t), LE = { class: "section detail" }, qE = { class: "id" }, KE = {
+const GE = window.Vue.defineComponent, YE = window.Vue.normalizeClass, Ge = window.Vue.createElementVNode, vr = window.Vue.toDisplayString, wn = window.Vue.unref, Do = window.Vue.createVNode, _E = window.Vue.createTextVNode, yh = window.Vue.renderList, Ul = window.Vue.Fragment, Tr = window.Vue.openBlock, Ur = window.Vue.createElementBlock, PE = window.Vue.createCommentVNode, HE = window.Vue.pushScopeId, jE = window.Vue.popScopeId, XE = (t) => (HE("data-v-40347655"), t = t(), jE(), t), LE = { class: "section detail" }, qE = { class: "id" }, KE = {
   key: 0,
   class: "section"
 }, $E = /* @__PURE__ */ XE(() => /* @__PURE__ */ Ge("div", { class: "id" }, "Alarms", -1)), eS = { class: "action-btns" }, tS = { class: "zoom" }, nS = /* @__PURE__ */ _E(" Zoom "), rS = { class: "alarms" }, iS = { class: "times" }, oS = { class: "container" }, aS = { class: "ids" }, sS = { class: "timeline-container" }, gr = window.Vue.ref, lS = window.Vue.watch, cS = /* @__PURE__ */ GE({
@@ -8744,7 +8741,7 @@ const GE = window.Vue.defineComponent, YE = window.Vue.normalizeClass, Ge = wind
     ], u = gr(l[0]), f = () => a.value / (Number(U.value) - Number(V.value)), p = gr(i.situation.alarms), V = gr(
       ((S = Re.exports.minBy((W = i.situation) == null ? void 0 : W.alarms, "firstEventTime")) == null ? void 0 : S.firstEventTime) || new Date()
     ), U = gr(
-      ((F = Re.exports.maxBy((E = i.situation) == null ? void 0 : E.alarms, "tlastEventTimeime")) == null ? void 0 : F.lastEventTime) || new Date()
+      ((F = Re.exports.maxBy((E = i.situation) == null ? void 0 : E.alarms, "lastEventTime")) == null ? void 0 : F.lastEventTime) || new Date()
     ), R = gr(f());
     lS(i, () => {
       var D, C, G, J;
@@ -8852,7 +8849,7 @@ const GE = window.Vue.defineComponent, YE = window.Vue.normalizeClass, Ge = wind
     };
   }
 });
-const uS = /* @__PURE__ */ Be(cS, [["__scopeId", "data-v-721138cb"]]), dS = window.Vue.defineComponent, zp = window.Vue.createTextVNode, Vi = window.Vue.unref, Rr = window.Vue.withCtx, Bn = window.Vue.createVNode, fS = window.Vue.openBlock, hS = window.Vue.createElementBlock, pS = window.Vue.createCommentVNode;
+const uS = /* @__PURE__ */ Be(cS, [["__scopeId", "data-v-40347655"]]), dS = window.Vue.defineComponent, zp = window.Vue.createTextVNode, Vi = window.Vue.unref, Rr = window.Vue.withCtx, Bn = window.Vue.createVNode, fS = window.Vue.openBlock, hS = window.Vue.createElementBlock, pS = window.Vue.createCommentVNode;
 window.Vue.pushScopeId;
 window.Vue.popScopeId;
 const mS = {
@@ -10171,7 +10168,7 @@ function bW(t, i, r, a, l, u) {
   ], 16);
 }
 var EW = /* @__PURE__ */ Hn(NW, [["render", bW], ["__scopeId", "data-v-43a7e951"]]);
-const SW = window.Vue.defineComponent, $o = window.Vue.createElementVNode, Eh = window.Vue.unref, Ml = window.Vue.createVNode, yl = window.Vue.toDisplayString, FW = window.Vue.renderList, WW = window.Vue.Fragment, Dn = window.Vue.openBlock, Mr = window.Vue.createElementBlock, Go = window.Vue.createCommentVNode, AW = window.Vue.createBlock, CW = window.Vue.pushScopeId, xW = window.Vue.popScopeId, BW = (t) => (CW("data-v-0f1bc03a"), t = t(), xW(), t), DW = { class: "list-main" }, IW = /* @__PURE__ */ BW(() => /* @__PURE__ */ $o("h2", null, "Situation List", -1)), OW = { class: "situation-filters" }, QW = {
+const SW = window.Vue.defineComponent, $o = window.Vue.createElementVNode, Eh = window.Vue.unref, Ml = window.Vue.createVNode, yl = window.Vue.toDisplayString, FW = window.Vue.renderList, WW = window.Vue.Fragment, Dn = window.Vue.openBlock, Mr = window.Vue.createElementBlock, Go = window.Vue.createCommentVNode, AW = window.Vue.createBlock, CW = window.Vue.pushScopeId, xW = window.Vue.popScopeId, BW = (t) => (CW("data-v-30472ac9"), t = t(), xW(), t), DW = { class: "list-main" }, IW = /* @__PURE__ */ BW(() => /* @__PURE__ */ $o("h2", null, "Situation List", -1)), OW = { class: "situation-filters" }, QW = {
   key: 0,
   class: "container"
 }, zW = { class: "situation-list" }, GW = { key: 0 }, YW = {
@@ -10202,7 +10199,7 @@ const SW = window.Vue.defineComponent, $o = window.Vue.createElementVNode, Eh = 
         D.id === E && (D.status = S);
       }), a.situations = Re.exports.cloneDeep(F);
     }, M = () => {
-      a.nodes = i.nodes, a.results = i.nodes, console.log(a.nodes);
+      a.nodes = i.nodes, a.results = i.nodes;
     };
     i.$subscribe((S, E) => {
       var F;
@@ -10278,7 +10275,7 @@ const SW = window.Vue.defineComponent, $o = window.Vue.createElementVNode, Eh = 
     ]));
   }
 });
-const HW = /* @__PURE__ */ Be(PW, [["__scopeId", "data-v-0f1bc03a"]]);
+const HW = /* @__PURE__ */ Be(PW, [["__scopeId", "data-v-30472ac9"]]);
 var jW = Object.defineProperty, XW = Object.defineProperties, LW = Object.getOwnPropertyDescriptors, Sh = Object.getOwnPropertySymbols, qW = Object.prototype.hasOwnProperty, KW = Object.prototype.propertyIsEnumerable, Fh = (t, i, r) => i in t ? jW(t, i, { enumerable: !0, configurable: !0, writable: !0, value: r }) : t[i] = r, ea = (t, i) => {
   for (var r in i || (i = {}))
     qW.call(i, r) && Fh(t, r, i[r]);

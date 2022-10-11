@@ -66,7 +66,6 @@ const situationStatusChanged = (status: string, id: string) => {
 const setNodes = () => {
 	state.nodes = situationStore.nodes
 	state.results = situationStore.nodes
-	console.log(state.nodes)
 }
 
 situationStore.$subscribe((mutation, storeState) => {

@@ -31,8 +31,7 @@ const minStart = ref(
 	minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime || new Date()
 )
 const maxEnd = ref(
-	maxBy(props.situation?.alarms, 'tlastEventTimeime')?.lastEventTime ||
-		new Date()
+	maxBy(props.situation?.alarms, 'lastEventTime')?.lastEventTime || new Date()
 )
 const proportion = ref(getProportion())
 

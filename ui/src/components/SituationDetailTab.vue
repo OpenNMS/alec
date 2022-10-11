@@ -114,7 +114,6 @@ watch(props, () => {
 	</div>
 	<div
 		v-if="props.situationInfo.alarms && props.situationInfo.alarms.length > 0"
-		class="section"
 	>
 		<AlarmFilters :alarms="props.situationInfo.alarms" />
 	</div>

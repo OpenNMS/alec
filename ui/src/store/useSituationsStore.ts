@@ -43,7 +43,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 			if (result) {
 				const situations = result.alarm.map((s: TSituation) => {
 					const alarms = s.relatedAlarms.map(
-						(a: TAlarm) => allAlarms[parseInt(a.id)]
+						(a: TAlarm) => allAlarms[parseInt(a.id, 10)]
 					)
 					const sitStatus = resultStatus.filter(
 						(rs: TSituationSaved) => rs.id == s.id

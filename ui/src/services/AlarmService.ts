@@ -6,7 +6,7 @@ const situationListEndpoint = '/alarms?_s='
 export const sendAcknowledge = async (
 	alarmId: number | string,
 	isAck: boolean
-) => {
+): Promise<boolean> => {
 	try {
 		const resp = await rest.put(
 			`/alarms/${alarmId}?ack=${isAck}`,

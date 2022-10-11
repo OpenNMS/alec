@@ -16,8 +16,8 @@ const props = defineProps<{
 	direction: 'horizontal' | 'vertical'
 }>()
 const situationStore = useSituationsStore()
-const handleAcknowledgeAction = (isAck: boolean) => {
-	const result = sendAcknowledge(props.alarm.id, isAck)
+const handleAcknowledgeAction = async (isAck: boolean) => {
+	const result = await sendAcknowledge(props.alarm.id, isAck)
 	if (result) {
 		situationStore.getSituations()
 	}

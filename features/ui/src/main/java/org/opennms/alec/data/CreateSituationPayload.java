@@ -30,6 +30,9 @@ package org.opennms.alec.data;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(builder = CreateSituationPayloadImpl.Builder.class)
 public interface CreateSituationPayload {
     List<String> getAlarmIdList();
 

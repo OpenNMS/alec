@@ -49,12 +49,8 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
-import org.opennms.alec.processor.api.SituationConfirmer;
-import org.opennms.alec.processor.api.SituationProcessor;
-import org.opennms.alec.processor.api.SituationProcessorFactory;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,21 +68,14 @@ public class SituationRestImpl implements SituationRest {
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
     private final AlarmDatasource alarmDatasource;
-    private final SituationProcessor situationProcessor;
-    private final SituationHandler confirmingSituationHandler;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
-                             AlarmDatasource alarmDatasource,
-                             SituationProcessorFactory situationProcessorFactory) {
+                             AlarmDatasource alarmDatasource) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         objectMapper = new ObjectMapper();
-        situationProcessor = Objects.requireNonNull(situationProcessorFactory).getInstance();
-
-        confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
-        situationDatasource.registerHandler(confirmingSituationHandler);
     }
 
     @Override

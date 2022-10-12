@@ -30,6 +30,8 @@ package org.opennms.alec.data;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
 public class CreateSituationPayloadImpl implements CreateSituationPayload {
 
     private final List<String> alarmIdList;
@@ -54,6 +56,7 @@ public class CreateSituationPayloadImpl implements CreateSituationPayload {
         return builder;
     }
 
+    @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
         private List<String> alarmIdList;
         private String diagnosticText;

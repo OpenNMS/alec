@@ -8,7 +8,7 @@ image::distributed_deployment.png[Distributed,700]
 [[prequisites]]
 == Prequisites
 
-In addition to an existing instance of OpenNMS Horizon 24.0.0 or greater, this guide assumes you have:
+In addition to an existing instance of OpenNMS Horizon 30.0.1 or greater, this guide assumes you have:
 
 1. A Kafka broker (or cluster) running Kafka 0.11.x or greater.
 2. One or more Minions are already active in the system

@@ -201,10 +201,10 @@ public class SituationRestImpl implements SituationRest {
     public Response createSituation(CreateSituationPayload createSituationPayload) {
         List<String> alarmIdList = createSituationPayload.getAlarmIdList();
         if (alarmIdList.size() <= 1) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS,  alarmIdList.size())).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarmIdList.size())).build();
         }
         Set<Alarm> alarms = new HashSet<>();
-        for (String id:alarmIdList) {
+        for (String id : alarmIdList) {
             try {
                 Optional<Alarm> alarm = alarmDatasource.getAlarm(Integer.parseInt(id));
                 if (alarm.isPresent() && alarmIsNotInAnotherSituation(alarm.get().getReductionKey())) {

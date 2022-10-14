@@ -3,16 +3,43 @@ import SeverityStatus from '@/elements/SeverityStatus.vue'
 import { formatDate } from '@/helpers/utils'
 import { TAlarm } from '@/types/TSituation'
 import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
+import { FeatherCheckbox } from '@featherds/checkbox'
+import { getAlarmById } from '@/services/AlarmService'
 
 const props = defineProps<{
 	alarm: TAlarm
+	selectAll: boolean
+	situationId: number
 }>()
+
+const selected = ref(false)
+const emit = defineEmits(['alarm-selected'])
+const alarm = ref(props.alarm)
+
+watch(props, () => {
+	alarm.value = props.alarm
+	selected.value = props.selectAll
+	emit('alarm-selected', props.alarm.id)
+})
+
+const updatedSelect = () => {
+	emit('alarm-selected', props.alarm.id)
+}
+
+const actionClicked = async (id: number) => {
+	alarm.value = await getAlarmById(id)
+}
 </script>
 
 <template>
-	<div class="card" v-if="props.alarm">
+	<div class="card" v-if="alarm">
 		<div>
 			<div class="row">
+				<FeatherCheckbox
+					v-model="selected"
+					label="selected"
+					@update:modelValue="updatedSelect"
+				/>
 				<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 				<SeverityStatus :severity="alarm?.severity" />
 			</div>
@@ -27,7 +54,13 @@ const props = defineProps<{
 			</div>
 		</div>
 
-		<AlarmActionBtns :alarm="alarm" :direction="'vertical'" />
+		<AlarmActionBtns
+			:alarm="alarm"
+			:direction="'vertical'"
+			showUnaknowledge
+			:situation-id="props.situationId"
+			@action-clicked="actionClicked"
+		/>
 	</div>
 </template>
 
@@ -40,10 +73,19 @@ const props = defineProps<{
 	flex-direction: row;
 	justify-content: space-between;
 }
+.checkbox {
+	> label {
+		display: none !important;
+	}
+}
 .row {
 	display: flex;
 	flex-direction: row;
 	padding: 5px 0;
+	align-items: baseline;
+	> label {
+		display: none !important;
+	}
 }
 .title {
 	font-size: 18px;

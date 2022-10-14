@@ -6,7 +6,7 @@ export interface ApiResponse {
 }
 
 export type TSituation = {
-	id: string
+	id: number
 	severity: string
 	nodeId: number
 	nodeLabel: string

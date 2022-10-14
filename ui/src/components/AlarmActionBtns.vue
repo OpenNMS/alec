@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { FeatherButton } from '@featherds/button'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
-import Cancel from '@featherds/icon/action/Cancel'
 import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
@@ -14,19 +13,27 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 const props = defineProps<{
 	alarm: TAlarm | TSituation
 	direction: 'horizontal' | 'vertical'
+	showClear?: boolean
+	showUnaknowledge?: boolean
+	situationId: number
 }>()
 const situationStore = useSituationsStore()
+const emit = defineEmits(['action-clicked'])
+
 const handleAcknowledgeAction = async (isAck: boolean) => {
 	const result = await sendAcknowledge(props.alarm.id, isAck)
 	if (result) {
-		situationStore.getSituations()
+		situationStore.selectedSituation = props.situationId
+		emit('action-clicked', props.alarm.id)
 	}
 }
 
 const handleAction = async (action: string) => {
 	const result = await sendAction(props.alarm.id, action)
 	if (result) {
-		situationStore.getSituations()
+		situationStore.selectedSituation = props.situationId
+		emit('action-clicked', props.alarm.id)
+		situationStore.getSituation(props.situationId)
 	}
 }
 </script>
@@ -44,14 +51,6 @@ const handleAction = async (action: string) => {
 			<span>Acknowledge</span>
 		</FeatherButton>
 		<FeatherButton
-			v-if="alarm.ackTime"
-			class="acction-btn"
-			@click="() => handleAcknowledgeAction(false)"
-		>
-			<FeatherIcon :icon="Cancel" aria-hidden="true" class="icon unack" />
-			<span>Unacknowledge</span>
-		</FeatherButton>
-		<FeatherButton
 			v-if="alarm.severity != 'CRITICAL'"
 			class="acction-btn"
 			@click="() => handleAction(CONST.ESCALATE)"
@@ -64,7 +63,11 @@ const handleAction = async (action: string) => {
 			<span>Escalate</span>
 		</FeatherButton>
 		<FeatherButton
-			v-if="alarm.severity != 'NORMAL' && alarm.severity != 'CLEARED'"
+			v-if="
+				props.showClear &&
+				alarm.severity != 'NORMAL' &&
+				alarm.severity != 'CLEARED'
+			"
 			class="acction-btn"
 			@click="() => handleAction(CONST.CLEAR)"
 		>
@@ -84,7 +87,7 @@ const handleAction = async (action: string) => {
 	&.vertical {
 		flex-direction: column;
 		> button {
-			min-width: 180px;
+			min-width: 170px;
 			margin-bottom: 12px;
 		}
 		> button:last-child {

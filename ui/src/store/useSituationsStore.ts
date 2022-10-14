@@ -2,16 +2,19 @@ import { defineStore } from 'pinia'
 import {
 	getAllAlarms,
 	getSituations,
-	getAllNodes
+	getAllNodes,
+	getAlarmsByIds,
+	getAlarmById
 } from '@/services/AlarmService'
 import { getSituationsStatus } from '@/services/AlecService'
 
 import { TAlarm, TNode, TSituation, TSituationSaved } from '@/types/TSituation'
-import { groupBy, mapKeys } from 'lodash'
+import { groupBy, mapKeys, cloneDeep } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
 	totalSituations: number
+	selectedSituation: number
 	nodes: TNode[]
 }
 
@@ -19,6 +22,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 	state: (): TState => ({
 		situations: [],
 		totalSituations: 0,
+		selectedSituation: -1,
 		nodes: []
 	}),
 	actions: {
@@ -59,6 +63,19 @@ export const useSituationsStore = defineStore('situationsStore', {
 					...(groupByStatus['REJECTED'] || [])
 				]
 				this.situations = situationOrdered
+			}
+		},
+		async getSituation(id: number) {
+			const resultSituation = (await getAlarmById(id)) as TSituation
+			if (resultSituation) {
+				const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
+				const resultAlarms = await getAlarmsByIds(alarmIds)
+				resultSituation.alarms = resultAlarms as TAlarm[]
+
+				const situations = cloneDeep(this.situations)
+				const index = this.situations.findIndex((s) => s.id == id)
+				situations[index] = resultSituation
+				this.situations = situations
 			}
 		}
 	}

@@ -59,7 +59,6 @@ const situationStatusChanged = (status: string, id: string) => {
 			sit.status = status
 		}
 	})
-
 	state.situations = cloneDeep(auxSituations)
 }
 
@@ -69,7 +68,17 @@ const setNodes = () => {
 }
 
 situationStore.$subscribe((mutation, storeState) => {
-	state.situationSelected = storeState.situations[0]?.id
+	if (storeState.selectedSituation != -1) {
+		state.selectedSituationIndex = situationStore.situations.findIndex(
+			(s) => s.id === storeState.selectedSituation
+		)
+		if (situationStore.situations[state.selectedSituationIndex]) {
+			state.situationSelected =
+				situationStore.situations[state.selectedSituationIndex].id
+		}
+	} else {
+		state.situationSelected = storeState.situations[0]?.id
+	}
 	setNodes()
 	totalSituations.value = situationStore.situations.length
 	state.allSituations = chunk(situationStore.situations, PAGE_SIZE)
@@ -107,11 +116,17 @@ const filterByNode = () => {
 		if (filtered) {
 			totalSituations.value = filtered.length
 			state.situations = filtered
+			if (filtered[0] && filtered[0].id) {
+				situationSelected(filtered[0].id)
+			}
 		}
 	} else {
 		state.nodeSelectedValue = undefined
 		totalSituations.value = situationStore.situations.length
 		initPaging(state.allSituations)
+		if (state.allSituations[0] && state.allSituations[0][0]) {
+			situationSelected(state.allSituations[0][0].id)
+		}
 	}
 }
 

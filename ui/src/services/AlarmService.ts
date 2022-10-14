@@ -1,6 +1,8 @@
 import { rest, v2 } from './axiosInstances'
 import { pick } from 'lodash'
-import { TAlarm, TNode } from '@/types/TSituation'
+import { TAlarm, TNode, TSituation } from '@/types/TSituation'
+import CONST from '@/helpers/constants'
+
 const situationListEndpoint = '/alarms?_s='
 
 export const sendAcknowledge = async (
@@ -49,6 +51,34 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 	}
 }
 
+export const sendClearAlarms = async (ids: number[]) => {
+	try {
+		/*await Promise.all(
+			alarmIds.map(async (id) => {
+				await sendAction(id, CONST.CLEAR)
+			})
+		)
+		*/
+
+		const alarmIds = ids.join(',alarm.id==')
+		const result = await v2.put(
+			`alarms?_s=alarm.id==${alarmIds}&clear=true`,
+			null,
+			{
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			}
+		)
+		if (result.status == 204) {
+			return true
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
 export const getSituations = async (): Promise<any | false> => {
 	try {
 		const url = `${situationListEndpoint}isSituation==true&limit=0`
@@ -67,6 +97,35 @@ export const getAllAlarms = async (): Promise<TAlarm[] | false> => {
 		const resp = await v2('/alarms?limit=0')
 		if (resp.status === 200) {
 			return resp.data.alarm
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const getAlarmsByIds = async (
+	ids: number[]
+): Promise<TAlarm[] | false> => {
+	try {
+		const alarmIds = ids.join(',id==')
+		const resp = await v2(`/alarms?_s=id==${alarmIds}`)
+		if (resp.status === 200) {
+			return resp.data.alarm
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const getAlarmById = async (
+	id: number
+): Promise<TAlarm | TSituation | false> => {
+	try {
+		const resp = await v2(`/alarms/${id}`)
+		if (resp.status === 200) {
+			return resp.data
 		}
 		return false
 	} catch (err) {

@@ -3,7 +3,6 @@ import SeverityStatus from '@/elements/SeverityStatus.vue'
 import InformationBox from '@/elements/InformationBox.vue'
 import { TSituation } from '@/types/TSituation'
 import { FeatherIcon } from '@featherds/icon'
-import CheckCircle from '@featherds/icon/action/CheckCircle'
 import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
@@ -15,7 +14,10 @@ import { formatDate } from '@/helpers/utils'
 import CONST from '@/helpers/constants'
 import { groupBy, size } from 'lodash'
 import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
-const ACCEPTED = CONST.ACCEPTED
+import { useSituationsStore } from '@/store/useSituationsStore'
+
+const situationStore = useSituationsStore()
+
 const REJECTED = CONST.REJECTED
 
 const userStore = useUserStore()
@@ -25,37 +27,37 @@ const props = defineProps<{
 	situationInfo: TSituation
 }>()
 const status = ref(props.situationInfo.status)
+const situationInfo = ref(props.situationInfo)
+
+watch(props, () => {
+	status.value = props.situationInfo.status || ''
+	situationInfo.value = props.situationInfo
+})
 
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
 	status.value = action
 	emit('situation-status-changed', action, props.situationInfo?.id)
 }
-watch(props, () => {
-	status.value = props.situationInfo.status || ''
-})
+
+const actionClicked = () => {
+	situationStore.selectedSituation = props.situationInfo?.id
+	situationStore.getSituations()
+}
 </script>
 
 <template>
 	<div class="section">
 		<div class="action-section">
+			<AlarmActionBtns
+				:alarm="situationInfo"
+				:direction="'horizontal'"
+				showClear
+				:situation-id="props.situationInfo.id"
+				@action-clicked="actionClicked"
+			/>
+
 			<div v-if="userStore.allowSave" class="btn-row">
-				<FeatherButton
-					v-if="status !== REJECTED"
-					class="btn"
-					data-test="btn-accept"
-					:class="{ accepted: status == ACCEPTED }"
-					@click="() => handleFeedbackSituation(ACCEPTED)"
-				>
-					<FeatherIcon
-						:icon="CheckCircle"
-						aria-hidden="true"
-						class="icon accept"
-						:class="{ accepted: status == ACCEPTED }"
-					/>
-					<span v-if="status == ACCEPTED"> {{ ACCEPTED }}</span>
-					<span v-else> ACCEPT</span>
-				</FeatherButton>
 				<FeatherButton
 					class="btn"
 					:class="{ rejected: status == REJECTED }"
@@ -71,54 +73,51 @@ watch(props, () => {
 					<span v-else> REJECT</span>
 				</FeatherButton>
 			</div>
-			<AlarmActionBtns :alarm="props.situationInfo" :direction="'horizontal'" />
 		</div>
-		<div v-if="props.situationInfo" class="situation-detail">
+		<div v-if="situationInfo" class="situation-detail">
 			<div
 				class="severity-line"
-				:class="[`${props.situationInfo?.severity?.toLowerCase()}-bg dark`]"
+				:class="[`${situationInfo?.severity?.toLowerCase()}-bg dark`]"
 			></div>
 			<div class="situation-info">
 				<div class="id">
 					<div>
-						Situation - {{ props.situationInfo?.id }} - affecting
-						{{ size(groupBy(props.situationInfo?.alarms, 'nodeId')) }} node
-						<span v-if="props.situationInfo.alarms"
-							>having {{ props.situationInfo.alarms.length }} alarms
+						Situation - {{ situationInfo?.id }} - affecting
+						{{ size(groupBy(situationInfo?.alarms, 'nodeId')) }} node
+						<span v-if="situationInfo.alarms"
+							>having {{ situationInfo.alarms.length }} alarms
 						</span>
 					</div>
-					<SeverityStatus :severity="props.situationInfo?.severity" />
+					<SeverityStatus :severity="situationInfo?.severity" />
 				</div>
 
-				<span v-html="props.situationInfo.description"></span>
+				<span v-html="situationInfo.description"></span>
 				<p></p>
 				<div class="boxes">
 					<InformationBox
 						label="First Event"
-						:info="formatDate(props.situationInfo.firstEventTime)"
+						:info="formatDate(situationInfo.firstEventTime)"
 					/>
 					<InformationBox
 						label="Last Event"
-						:info="formatDate(props.situationInfo.lastEventTime)"
+						:info="formatDate(situationInfo.lastEventTime)"
 					/>
 					<InformationBox
 						label="Reduction Key"
-						:info="props.situationInfo.reductionKey"
+						:info="situationInfo.reductionKey"
 					/>
 				</div>
 			</div>
 			<div class="parameters">
-				<AlarmsCountBySeverity
-					:alarms="props.situationInfo?.alarms"
-					size="large"
-				/>
+				<AlarmsCountBySeverity :alarms="situationInfo?.alarms" size="large" />
 			</div>
 		</div>
 	</div>
-	<div
-		v-if="props.situationInfo.alarms && props.situationInfo.alarms.length > 0"
-	>
-		<AlarmFilters :alarms="props.situationInfo.alarms" />
+	<div v-if="situationInfo.alarms && situationInfo.alarms.length > 0">
+		<AlarmFilters
+			:alarms="situationInfo.alarms"
+			:situation-id="situationInfo.id"
+		/>
 	</div>
 </template>
 <style scoped lang="scss">
@@ -133,12 +132,11 @@ watch(props, () => {
 	margin-top: 10px;
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
+	> div {
+		margin-right: 15px;
+	}
 }
 
-.action-btns {
-	display: flex;
-}
 .severity-line {
 	width: 5px;
 	margin-right: 10px;

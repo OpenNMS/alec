@@ -99,8 +99,8 @@ const handleSituationSelected = () => {
 	margin-right: 5px;
 }
 .severity-line {
-	min-width: 4px;
-	width: 4px;
+	min-width: 5px;
+	width: 5px;
 }
 .content {
 	padding: 10px;

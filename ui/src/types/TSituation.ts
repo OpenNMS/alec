@@ -6,7 +6,7 @@ export interface ApiResponse {
 }
 
 export type TSituation = {
-	id: string
+	id: number
 	severity: string
 	nodeId: number
 	nodeLabel: string
@@ -30,6 +30,7 @@ export type TSituation = {
 	affectedNodeCount: number
 	status?: string
 	creationTime: Date
+	ackTime: Date
 }
 
 export type TEvent = {
@@ -51,7 +52,7 @@ export type TEvent = {
 }
 
 export type TAlarm = {
-	id: string
+	id: number
 	severity: string
 	nodeId: number
 	nodeLabel: string
@@ -66,6 +67,7 @@ export type TAlarm = {
 	summary: string
 	clear: boolean
 	description: string
+	ackTime: Date
 }
 
 export type TSituationSaved = {

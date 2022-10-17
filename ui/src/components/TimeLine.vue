@@ -43,6 +43,7 @@ const getOffset = (alarmStart: Date | undefined): number => {
 	</FeatherTooltip>
 
 	<div
+		v-if="alarm.lastEventTime !== alarm.firstEventTime"
 		class="line"
 		:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
 		:style="{

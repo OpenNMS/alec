@@ -60,7 +60,7 @@ export const saveEngineParameter = async (
 }
 
 export const sendFeedbackAcceptSituation = async (
-	id: string,
+	id: number,
 	action: string
 ) => {
 	try {

@@ -7,18 +7,36 @@ import {
 import { TSituation } from '@/types/TSituation'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
+import { useSituationsStore } from '@/store/useSituationsStore'
+
+const situationStore = useSituationsStore()
 const emit = defineEmits(['situation-status-changed'])
 const props = defineProps<{
 	alarmInfo: TSituation
 }>()
 
+const situation = ref(props.alarmInfo)
+
 const situationStatusChanged = (status: string, id: string) => {
 	emit('situation-status-changed', status, id)
 }
+
+watch(props, () => {
+	situation.value = props.alarmInfo
+})
+
+situationStore.$subscribe((mutation, storeState) => {
+	const situationFounded = storeState.situations.find(
+		(s) => s.id == props.alarmInfo.id
+	)
+	if (situationFounded) {
+		situation.value = situationFounded
+	}
+})
 </script>
 
 <template>
-	<div v-if="props.alarmInfo" class="detail">
+	<div v-if="situation" class="detail">
 		<FeatherTabContainer>
 			<template v-slot:tabs>
 				<FeatherTab>Details</FeatherTab>
@@ -26,12 +44,12 @@ const situationStatusChanged = (status: string, id: string) => {
 			</template>
 			<FeatherTabPanel class="panel">
 				<SituationDetailTab
-					:situation-info="props.alarmInfo"
+					:situation-info="situation"
 					@situation-status-changed="situationStatusChanged"
 				/>
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel"
-				><SituationMetricsTab :situation="props?.alarmInfo" />
+				><SituationMetricsTab :situation="situation" />
 			</FeatherTabPanel>
 		</FeatherTabContainer>
 	</div>

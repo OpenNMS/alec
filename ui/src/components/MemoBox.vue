@@ -2,18 +2,36 @@
 import { FeatherIcon } from '@featherds/icon'
 import EditMode from '@featherds/icon/action/EditMode'
 import Cancel from '@featherds/icon/navigation/Cancel'
-
+import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherTextarea } from '@featherds/textarea'
+import { TMemo } from '@/types/TSituation'
 
 const props = defineProps<{
 	label: string
-	text: string | number | Date
+	memo: TMemo
 }>()
 
 const isEdit = ref(false)
-const memoText = ref(props.text)
+const memoText = ref(props.memo?.body)
+
+console.log(props.memo)
+watch(props, () => {
+	memoText.value = props.memo?.body
+	isEdit.value = false
+})
+
 const showEditInput = () => {
 	isEdit.value = !isEdit.value
+}
+
+const removeMemo = () => {
+	isEdit.value = false
+	console.log('remove')
+}
+
+const saveMemo = () => {
+	isEdit.value = false
+	console.log('save')
 }
 </script>
 
@@ -24,29 +42,40 @@ const showEditInput = () => {
 			<div class="action-icons">
 				<div class="icon-btn">
 					<FeatherIcon
+						v-if="!isEdit"
 						:icon="EditMode"
 						aria-hidden="true"
 						class="icon"
 						@click="showEditInput"
 					/>
 				</div>
-				<div class="icon-btn" v-if="props.text && props.text != ''">
+				<div class="icon-btn" v-if="isEdit">
+					<FeatherIcon
+						:icon="CheckCircle"
+						aria-hidden="true"
+						class="icon"
+						@click="saveMemo"
+					/>
+				</div>
+				<div class="icon-btn" v-if="(memoText && memoText != '') || isEdit">
 					<FeatherIcon
 						:icon="Cancel"
 						aria-hidden="true"
 						class="icon"
-						@click="showEditInput"
+						@click="removeMemo"
 					/>
 				</div>
 			</div>
 		</div>
 		<div class="text" v-if="!isEdit">
-			{{ props.text }}
+			{{ memoText }}
 		</div>
 		<FeatherTextarea
+			class="text"
 			v-if="isEdit"
 			v-model="memoText"
 			rows="3"
+			label=""
 			hideLabel
 		></FeatherTextarea>
 	</div>
@@ -72,12 +101,11 @@ const showEditInput = () => {
 }
 .icon {
 	font-size: 22px;
+	margin: 7px 10px;
 }
 .icon-btn {
 	background-color: #efefef;
-	padding: 5px 8px;
 	border-radius: 5px;
-	margin-bottom: 8px;
 	cursor: pointer;
 	margin-left: 8px;
 }
@@ -86,6 +114,7 @@ const showEditInput = () => {
 	flex-direction: row;
 }
 .text {
-	font-size: 12px;
+	margin-top: 8px;
+	font-size: 14px;
 }
 </style>

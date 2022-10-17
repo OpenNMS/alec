@@ -49,9 +49,11 @@ const handleSituationSelected = () => {
 					/>
 				</div>
 			</div>
-			<div class="count-info">
+			<div class="count-info" v-if="props.situationInfo.alarms">
 				Alarms:
-				<span class="info-title">{{ props.situationInfo.alarms.length }}</span>
+				<span class="info-title">{{
+					props.situationInfo.relatedAlarms.length
+				}}</span>
 			</div>
 			<div
 				class="info-title"
@@ -97,8 +99,8 @@ const handleSituationSelected = () => {
 	margin-right: 5px;
 }
 .severity-line {
-	min-width: 4px;
-	width: 4px;
+	min-width: 5px;
+	width: 5px;
 }
 .content {
 	padding: 10px;

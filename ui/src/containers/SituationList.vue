@@ -18,7 +18,7 @@ const PAGE_SIZE = 10
 type TState = {
 	situations: TSituation[]
 	selectedSituationIndex: number
-	situationSelected: string
+	situationSelected: number | null
 	nodes: Record<string, string | number>[]
 	results: Record<string, string | number>[]
 	nodeSelectedValue: Record<string, string> | undefined
@@ -27,7 +27,7 @@ type TState = {
 const state: TState = reactive({
 	situations: [],
 	selectedSituationIndex: 0,
-	situationSelected: '',
+	situationSelected: null,
 	nodes: [],
 	results: [],
 	nodeSelectedValue: undefined,
@@ -44,7 +44,7 @@ const initPaging = (situations: Array<TSituation[]>) => {
 	totalPages.value = situations.length
 }
 
-const situationSelected = (id: string) => {
+const situationSelected = (id: number) => {
 	window.scrollTo(0, 0)
 	state.situationSelected = id
 	state.selectedSituationIndex = situationStore.situations.findIndex(
@@ -52,7 +52,7 @@ const situationSelected = (id: string) => {
 	)
 }
 
-const situationStatusChanged = (status: string, id: string) => {
+const situationStatusChanged = (status: string, id: number) => {
 	const auxSituations = state.situations
 	auxSituations.forEach((sit) => {
 		if (sit.id === id) {

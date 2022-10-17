@@ -27,7 +27,10 @@ const updatedSelect = () => {
 }
 
 const actionClicked = async (id: number) => {
-	alarm.value = await getAlarmById(id)
+	const alarmResult = await getAlarmById(id)
+	if (alarmResult) {
+		alarm.value = alarmResult as TAlarm
+	}
 }
 </script>
 

@@ -26,9 +26,12 @@ watch(props, () => {
 })
 
 situationStore.$subscribe((mutation, storeState) => {
-	situation.value = storeState.situations.find(
+	const situationFounded = storeState.situations.find(
 		(s) => s.id == props.alarmInfo.id
 	)
+	if (situationFounded) {
+		situation.value = situationFounded
+	}
 })
 </script>
 

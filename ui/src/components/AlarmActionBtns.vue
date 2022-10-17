@@ -4,6 +4,8 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
+import { sendFeedbackAcceptSituation } from '@/services/AlecService'
+
 import CONST from '@/helpers/constants'
 import { TAlarm, TSituation } from '@/types/TSituation'
 
@@ -26,6 +28,7 @@ const handleAcknowledgeAction = async (isAck: boolean) => {
 		situationStore.selectedSituation = props.situationId
 		emit('action-clicked', props.alarm.id)
 	}
+	await sendFeedbackAcceptSituation(props.situationId, CONST.ACCEPTED)
 }
 
 const handleAction = async (action: string) => {

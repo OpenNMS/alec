@@ -13,7 +13,6 @@ import { groupBy, mapKeys, cloneDeep } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
-	totalSituations: number
 	selectedSituation: number
 	nodes: TNode[]
 }
@@ -21,7 +20,6 @@ type TState = {
 export const useSituationsStore = defineStore('situationsStore', {
 	state: (): TState => ({
 		situations: [],
-		totalSituations: 0,
 		selectedSituation: -1,
 		nodes: []
 	}),
@@ -43,20 +41,17 @@ export const useSituationsStore = defineStore('situationsStore', {
 			}
 
 			const resultStatus = await getSituationsStatus()
-			this.totalSituations = result.totalCount
 			if (result) {
 				const situations = result.alarm.map((s: TSituation) => {
 					const alarms = s.relatedAlarms.map((a: TAlarm) => allAlarms[a.id])
 					const sitStatus = resultStatus.filter(
-						(rs: TSituationSaved) => rs.id == s.id
+						(rs: TSituationSaved) => parseInt(rs.id) === s.id
 					)
 					s.alarms = alarms
-					s.status = sitStatus & sitStatus[0] ? sitStatus[0].status : 'CREATED'
+					s.status = sitStatus && sitStatus[0] ? sitStatus[0].status : 'CREATED'
 					return s
 				})
-
 				const groupByStatus = groupBy(situations, 'status')
-
 				const situationOrdered = [
 					...(groupByStatus['CREATED'] || []),
 					...(groupByStatus['ACCEPTED'] || []),

@@ -16,6 +16,7 @@ const situationStore = useSituationsStore()
 
 type TState = {
 	selectedAlarms: number[]
+	alarms: TAlarm[]
 }
 const props = defineProps<{
 	alarms: TAlarm[]
@@ -42,7 +43,7 @@ const handleAlarmFilters = (selected: string) => {
 		selectedFilters.value = ['all']
 		state.alarms = props.alarms
 	} else {
-		state.alarms.value = props.alarms.filter((a) =>
+		state.alarms = props.alarms.filter((a) =>
 			selectedFilters.value.includes(a.severity)
 		)
 	}
@@ -54,7 +55,7 @@ watch(props, () => {
 	selectAll.value = false
 })
 
-const alarmSelected = (id) => {
+const alarmSelected = (id: number) => {
 	if (state.selectedAlarms.includes(id)) {
 		remove(state.selectedAlarms, (a) => a == id)
 	} else {

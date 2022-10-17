@@ -1,6 +1,6 @@
 = Requirements
 
-Before installing ALEC, we assume that you already have an instance of OpenNMS Horizon 24.0.0 or greater up and running.
+Before installing ALEC, we assume that you already have an instance of OpenNMS Horizon 30.0.1 or greater up and running.
 
 TIP: See link:https://www.opennms.org/en/install[OpenNMS Installation] for help on getting started with OpenNMS.
 

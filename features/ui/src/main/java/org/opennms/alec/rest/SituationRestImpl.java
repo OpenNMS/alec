@@ -33,12 +33,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.CreateSituationPayload;
 import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.SituationStatusImpl;
@@ -59,6 +62,7 @@ public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
     public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
     public static final String ALARM_NOT_FOUND = "Alarm {0} not found";
+    public static final String NEED_2_ALARMS = "We need at least two alarms to create a situation, we found {} alarm";
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
@@ -68,9 +72,9 @@ public class SituationRestImpl implements SituationRest {
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
                              AlarmDatasource alarmDatasource) {
-        this.kvStore = kvStore;
-        this.situationDatasource = situationDatasource;
-        this.alarmDatasource = alarmDatasource;
+        this.kvStore = Objects.requireNonNull(kvStore);
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
+        this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         objectMapper = new ObjectMapper();
     }
 
@@ -193,10 +197,44 @@ public class SituationRestImpl implements SituationRest {
         }
     }
 
+    @Override
+    public Response createSituation(CreateSituationPayload createSituationPayload) {
+        List<String> alarmIdList = createSituationPayload.getAlarmIdList();
+        if (alarmIdList.size() <= 1) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarmIdList.size())).build();
+        }
+        Set<Alarm> alarms = new HashSet<>();
+        for (String id : alarmIdList) {
+            try {
+                Optional<Alarm> alarm = alarmDatasource.getAlarm(Integer.parseInt(id));
+                if (alarm.isPresent() && alarmIsNotInAnotherSituation(alarm.get().getReductionKey())) {
+                    alarms.add(alarm.get());
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return somethingWentWrong(e);
+            }
+        }
+        if (alarms.size() <= 1) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarms.size())).build();
+        }
+        final String situationId = UUID.randomUUID().toString();
+        Situation situation = ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(System.currentTimeMillis())
+                .setAlarms(alarms)
+                .setDiagnosticText(createSituationPayload.getDiagnosticText())
+                .setDescription(createSituationPayload.getDescription())
+                .build();
+        situationDatasource.forwardSituation(situation);
+        return Response.ok().build();
+    }
+
     private boolean alarmIsNotInAnotherSituation(String reductionKey) throws InterruptedException {
         for (Situation situation : situationDatasource.getSituations()) {
             for (Alarm alarm : situation.getAlarms()) {
                 if (reductionKey.equals(alarm.getReductionKey())) {
+                    LOG.debug("Alarm {} is in another situation", alarm.getReductionKey());
                     return false;
                 }
             }

@@ -55,6 +55,7 @@ const actionClicked = () => {
 				:alarm="situationInfo"
 				:direction="'horizontal'"
 				showClear
+				isSituation
 				:situation-id="props.situationInfo.id"
 				@action-clicked="actionClicked"
 			/>

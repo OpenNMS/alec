@@ -127,11 +127,45 @@ export const getAlarmById = async (
 
 export const getAllNodes = async (): Promise<TNode[] | false> => {
 	try {
-		const resp = await v2('nodes?limit=0')
+		const resp = await v2('/nodes?limit=0')
 		if (resp.status === 200) {
 			const resultNodes = resp.data.node
 			const nodes = resultNodes.map((rn: any) => pick(rn, ['id', 'label']))
 			return nodes
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const saveMemo = async (alarmId: number, memoText: string) => {
+	try {
+		const result = await v2.put(
+			`/alarms/${alarmId}/memo`,
+			{
+				body: memoText
+			},
+			{
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			}
+		)
+		if (result.status == 204) {
+			return true
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const deleteMemo = async (alarmId: number) => {
+	try {
+		const result = await v2.delete(`/alarms/${alarmId}/memo`)
+		if (result.status == 204) {
+			return true
 		}
 		return false
 	} catch (err) {

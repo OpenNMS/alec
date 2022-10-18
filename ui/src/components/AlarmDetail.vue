@@ -60,7 +60,6 @@ const actionClicked = async (id: number) => {
 		<AlarmActionBtns
 			:alarm="alarm"
 			:direction="'vertical'"
-			showUnaknowledge
 			:situation-id="props.situationId"
 			@action-clicked="actionClicked"
 		/>

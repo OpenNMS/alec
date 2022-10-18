@@ -8,6 +8,7 @@ import { TSituation } from '@/types/TSituation'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
+import { ref, watch } from 'vue'
 
 const situationStore = useSituationsStore()
 const emit = defineEmits(['situation-status-changed'])

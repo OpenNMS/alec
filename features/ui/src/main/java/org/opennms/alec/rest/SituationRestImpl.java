@@ -109,6 +109,8 @@ public class SituationRestImpl implements SituationRest {
             try {
                 situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.REJECTED).build());
                 kvStoreSituationsByStatus();
+                //Store rejected situation to the cloud
+                client.sendSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.ACCEPTED).build());
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -252,6 +254,10 @@ public class SituationRestImpl implements SituationRest {
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);
+    }
+
+    private void dataLakeStore(Situation situation, String description) {
+
     }
 
     private Response somethingWentWrong(Throwable e) {

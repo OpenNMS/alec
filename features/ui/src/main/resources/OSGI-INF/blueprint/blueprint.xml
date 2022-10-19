@@ -12,25 +12,35 @@
 
     <!-- Build and expose the JAX-RS annotated webhook handler.
      This will automatically mount the endpoint over the REST API. -->
-    <bean id="restImpl" class="org.opennms.alec.rest.ALECRestImpl">
+    <bean id="engineRest" class="org.opennms.alec.rest.EngineRestImpl">
         <argument ref="keyValueStore"/>
         <argument ref="driver"/>
         <argument ref="engineFactories"/>
     </bean>
 
-    <bean id="situationImpl" class="org.opennms.alec.rest.SituationRestImpl">
+    <bean id="agreementRest" class="org.opennms.alec.rest.AgreementRestImpl">
+        <argument ref="keyValueStore"/>
+    </bean>
+
+    <bean id="situationRest" class="org.opennms.alec.rest.SituationRestImpl">
         <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
         <argument ref="alarmDatasource"/>
     </bean>
 
-    <service interface="org.opennms.alec.rest.ALECRest" ref="restImpl">
+    <service interface="org.opennms.alec.rest.AgreementRest" ref="agreementRest">
         <service-properties>
             <entry key="application-path" value="/rest" />
         </service-properties>
     </service>
 
-    <service interface="org.opennms.alec.rest.SituationRest" ref="situationImpl">
+    <service interface="org.opennms.alec.rest.EngineRest" ref="engineRest">
+        <service-properties>
+            <entry key="application-path" value="/rest" />
+        </service-properties>
+    </service>
+
+    <service interface="org.opennms.alec.rest.SituationRest" ref="situationRest">
         <service-properties>
             <entry key="application-path" value="/rest" />
         </service-properties>

@@ -1,3 +1,31 @@
+/*******************************************************************************
+ * This file is part of OpenNMS(R).
+ *
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
+ *
+ * OpenNMS(R) is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * OpenNMS(R) is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OpenNMS(R).  If not, see:
+ *      http://www.gnu.org/licenses/
+ *
+ * For more information contact:
+ *     OpenNMS(R) Licensing <license@opennms.org>
+ *     http://www.opennms.org/
+ *     http://www.opennms.com/
+ *******************************************************************************/
+
 package org.opennms.alec.rest;
 
 import java.util.List;
@@ -6,8 +34,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
-import org.opennms.alec.data.Agreement;
-import org.opennms.alec.data.ConfigurationImpl;
 import org.opennms.alec.data.EngineParameter;
 import org.opennms.alec.data.EngineParameterImpl;
 import org.opennms.alec.data.KeyEnum;
@@ -23,53 +49,22 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ALECRestImpl implements ALECRest {
-    private static final Logger LOG = LoggerFactory.getLogger(ALECRestImpl.class);
-    public static final String ALEC_CONFIG = "ALEC_CONFIG";
+public class EngineRestImpl implements EngineRest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EngineRestImpl.class);
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final List<EngineFactory> engineFactories;
     private final Driver driver;
 
-    public ALECRestImpl(KeyValueStore<String> kvStore,
-                        EngineRegistry engineRegistry,
-                        List<EngineFactory> engineFactories) {
+    public EngineRestImpl(KeyValueStore<String> kvStore,
+                          EngineRegistry engineRegistry,
+                          List<EngineFactory> engineFactories) {
         this.kvStore = kvStore;
         this.driver = (Driver) engineRegistry.getEngineRegistry();
         this.engineFactories = engineFactories;
         objectMapper = new ObjectMapper();
-    }
-
-    @Override
-    public Response ping() {
-        return Response.ok("pong!!").build();
-    }
-
-    @Override
-    public Response getConfigurations() {
-        LOG.debug("Get Configurations");
-        ConfigurationImpl.Builder configuration = ConfigurationImpl.newBuilder();
-        KeyEnum.stream().forEach(keyEnum -> {
-            String value = kvStore.get(keyEnum.toString(), ALEC_CONFIG).orElse("");
-            switch (keyEnum) {
-                case ENGINE:
-                    try {
-                        configuration.engineParameter(objectMapper.readValue(value, EngineParameter.class));
-                    } catch (JsonProcessingException e) {
-                        configuration.engineParameter(null);
-                    }
-                    break;
-                case AGREEMENT:
-                    try {
-                        configuration.agreement(objectMapper.readValue(value, Agreement.class));
-                    } catch (JsonProcessingException e) {
-                        configuration.agreement(null);
-                    }
-                    break;
-            }
-        });
-        return Response.ok().entity(configuration.build()).build();
     }
 
     @Override
@@ -91,7 +86,7 @@ public class ALECRestImpl implements ALECRest {
             }
             return Response.serverError().entity("No Engine found !!").build();
         } catch (Exception e) {
-            return somethingWentWrong(e);
+            return ALECRestUtils.somethingWentWrong(e);
         }
     }
 
@@ -99,50 +94,21 @@ public class ALECRestImpl implements ALECRest {
     public Response getEngineConfiguration() {
         LOG.debug("Get engine configuration");
         try {
-            Optional<String> engineConfiguration = kvStore.get(KeyEnum.ENGINE.toString(), ALEC_CONFIG);
+            Optional<String> engineConfiguration = kvStore.get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
             if (engineConfiguration.isPresent()) {
                 return Response.ok().entity(objectMapper.readValue(engineConfiguration.get(), EngineParameter.class)).build();
             } else {
                 return Response.noContent().build();
             }
         } catch (JsonProcessingException e) {
-            return somethingWentWrong(e);
-        }
-    }
-
-    @Override
-    public Response setAgreementConfiguration(Agreement agreement) {
-        LOG.debug("Set agreement configuration: {}", agreement);
-        CompletableFuture<Long> future;
-        try {
-            future = kvStore.putAsync(KeyEnum.AGREEMENT.toString(),
-                    objectMapper.writeValueAsString(agreement),
-                    ALEC_CONFIG);
-        } catch (JsonProcessingException e) {
-            return somethingWentWrong(e);
-        }
-        return Response.ok(future.join()).build();
-    }
-
-    @Override
-    public Response getAgreementConfiguration() {
-        LOG.debug("Get agreement configuration");
-        try {
-            Optional<String> agreementConfiguration = kvStore.get(KeyEnum.AGREEMENT.toString(), ALEC_CONFIG);
-            if (agreementConfiguration.isPresent()) {
-                return Response.ok().entity(objectMapper.readValue(agreementConfiguration.get(), Agreement.class)).build();
-            } else {
-                return Response.noContent().build();
-            }
-        } catch (JsonProcessingException e) {
-            return somethingWentWrong(e);
+            return ALECRestUtils.somethingWentWrong(e);
         }
     }
 
     private Response storeEngineParameter(EngineParameter engineParameter) throws JsonProcessingException {
         CompletableFuture<Long> future = kvStore.putAsync(KeyEnum.ENGINE.toString(),
                 objectMapper.writeValueAsString(engineParameter),
-                ALEC_CONFIG);
+                ALECRestUtils.ALEC_CONFIG);
         return Response.ok(future.join()).build();
     }
 
@@ -172,10 +138,5 @@ public class ALECRestImpl implements ALECRest {
                 .distanceMeasureName(dbScanEngineFactory.getDistanceMeasureFactoryName())
                 .engineName(dbScanEngineFactory.getName())
                 .build();
-    }
-
-    private Response somethingWentWrong(Throwable e) {
-        LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity("something went wrong: " + e.getMessage()).build();
     }
 }

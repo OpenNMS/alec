@@ -36,7 +36,7 @@ const removeMemo = async () => {
 	isEdit.value = false
 	const result = await deleteMemo(props.id, props.type)
 	if (result) {
-		memoText.value = null
+		memoText.value = ''
 		situationStore.selectedSituation = props.situationId
 		situationStore.getSituation(props.situationId)
 	} else {

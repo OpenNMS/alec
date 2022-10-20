@@ -204,7 +204,7 @@ const onGotoPage = (nextPage: number) => {
 			No results found
 		</div>
 	</div>
-	<FeatherSnackbar v-model="showError" center="center" error="error">
+	<FeatherSnackbar v-model="showError" center error>
 		An error has occured
 	</FeatherSnackbar>
 </template>

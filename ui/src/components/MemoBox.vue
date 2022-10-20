@@ -7,8 +7,10 @@ import { FeatherTextarea } from '@featherds/textarea'
 import { TMemo } from '@/types/TSituation'
 import { saveMemo, deleteMemo } from '@/services/AlarmService'
 import { useSituationsStore } from '@/store/useSituationsStore'
+import { useAppStore } from '@/store/useAppStore'
 
 const situationStore = useSituationsStore()
+const appStore = useAppStore()
 
 const props = defineProps<{
 	id: number
@@ -32,19 +34,26 @@ const showEditInput = () => {
 
 const removeMemo = async () => {
 	isEdit.value = false
-	memoText.value = null
-	await deleteMemo(props.id, props.type)
-	situationStore.selectedSituation = props.situationId
-	situationStore.getSituation(props.situationId)
+	const result = await deleteMemo(props.id, props.type)
+	if (result) {
+		memoText.value = null
+		situationStore.selectedSituation = props.situationId
+		situationStore.getSituation(props.situationId)
+	} else {
+		appStore.showErrorMsg()
+	}
 }
 
 const saveMemoText = async () => {
 	isEdit.value = false
 	if (memoText.value && memoText.value !== '') {
-		await saveMemo(props.id, props.type, memoText.value)
-		situationStore.selectedSituation = props.situationId
-
-		situationStore.getSituation(props.situationId)
+		const result = await saveMemo(props.id, props.type, memoText.value)
+		if (result) {
+			situationStore.selectedSituation = props.situationId
+			situationStore.getSituation(props.situationId)
+		} else {
+			appStore.showErrorMsg()
+		}
 	}
 }
 </script>

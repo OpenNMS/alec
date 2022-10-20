@@ -8,7 +8,12 @@ import { reactive, ref } from 'vue'
 import { cloneDeep, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
+import { FeatherSnackbar } from '@featherds/snackbar'
+import { useAppStore } from '@/store/useAppStore'
+
 const situationStore = useSituationsStore()
+const appStore = useAppStore()
+
 situationStore.getSituations()
 situationStore.getNodes()
 
@@ -37,6 +42,7 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
 const forceUpdate = ref(false)
+const showError = ref(false)
 
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
@@ -66,6 +72,10 @@ const setNodes = () => {
 	state.nodes = situationStore.nodes
 	state.results = situationStore.nodes
 }
+
+appStore.$subscribe((mutation, storeState) => {
+	showError.value = storeState.showError
+})
 
 situationStore.$subscribe((mutation, storeState) => {
 	const oldIndex = state.selectedSituationIndex
@@ -194,6 +204,9 @@ const onGotoPage = (nextPage: number) => {
 			No results found
 		</div>
 	</div>
+	<FeatherSnackbar v-model="showError" center="center" error="error">
+		An error has occured
+	</FeatherSnackbar>
 </template>
 
 <style lang="scss" scoped>

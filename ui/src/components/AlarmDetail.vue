@@ -6,6 +6,7 @@ import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { getAlarmById } from '@/services/AlarmService'
 import MemoBox from '@/components/MemoBox.vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps<{
 	alarm: TAlarm

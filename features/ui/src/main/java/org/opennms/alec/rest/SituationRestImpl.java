@@ -97,7 +97,7 @@ public class SituationRestImpl implements SituationRest {
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
-                return somethingWentWrong(e);
+                return ALECRestUtils.somethingWentWrong(e);
             }
         }
 
@@ -124,7 +124,7 @@ public class SituationRestImpl implements SituationRest {
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
-                return somethingWentWrong(e);
+                return ALECRestUtils.somethingWentWrong(e);
             }
         }
 
@@ -212,7 +212,7 @@ public class SituationRestImpl implements SituationRest {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return somethingWentWrong(e);
+                return ALECRestUtils.somethingWentWrong(e);
             }
         }
         if (alarms.size() <= 1) {
@@ -251,7 +251,7 @@ public class SituationRestImpl implements SituationRest {
         } catch (InterruptedException e) {
             throw e;
         } catch (Exception e) {
-            return somethingWentWrong(e);
+            return ALECRestUtils.somethingWentWrong(e);
         }
     }
 
@@ -263,12 +263,7 @@ public class SituationRestImpl implements SituationRest {
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
 
-        kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestImpl.ALEC_CONFIG);
-        kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestImpl.ALEC_CONFIG);
-    }
-
-    private Response somethingWentWrong(Throwable e) {
-        LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity(MessageFormat.format("something went wrong: {0}", e.getMessage())).build();
+        kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestUtils.ALEC_CONFIG);
+        kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestUtils.ALEC_CONFIG);
     }
 }

@@ -4,7 +4,6 @@ import {
 	FeatherTabContainer,
 	FeatherTabPanel
 } from '@featherds/tabs'
-import { TSituation } from '@/types/TSituation'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'

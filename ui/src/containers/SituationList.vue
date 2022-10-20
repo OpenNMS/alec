@@ -205,7 +205,7 @@ const onGotoPage = (nextPage: number) => {
 		</div>
 	</div>
 	<FeatherSnackbar v-model="showError" center error>
-		An error has occured
+		{{ appStore.errorMessage || 'Error has occurred :(' }}
 	</FeatherSnackbar>
 </template>
 

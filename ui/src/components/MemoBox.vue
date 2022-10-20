@@ -40,7 +40,7 @@ const removeMemo = async () => {
 		situationStore.selectedSituation = props.situationId
 		situationStore.getSituation(props.situationId)
 	} else {
-		appStore.showErrorMsg()
+		appStore.showErrorMsg('Error on removing memo :(')
 	}
 }
 
@@ -52,7 +52,7 @@ const saveMemoText = async () => {
 			situationStore.selectedSituation = props.situationId
 			situationStore.getSituation(props.situationId)
 		} else {
-			appStore.showErrorMsg()
+			appStore.showErrorMsg('Error on saving memo :(')
 		}
 	}
 }

@@ -8,7 +8,6 @@ import { reactive, ref } from 'vue'
 import { cloneDeep, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
-
 const situationStore = useSituationsStore()
 situationStore.getSituations()
 situationStore.getNodes()
@@ -37,6 +36,7 @@ const loading = ref(false)
 const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
+const forceUpdate = ref(false)
 
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
@@ -68,6 +68,7 @@ const setNodes = () => {
 }
 
 situationStore.$subscribe((mutation, storeState) => {
+	const oldIndex = state.selectedSituationIndex
 	if (storeState.selectedSituation != -1) {
 		state.selectedSituationIndex = situationStore.situations.findIndex(
 			(s) => s.id === storeState.selectedSituation
@@ -75,6 +76,9 @@ situationStore.$subscribe((mutation, storeState) => {
 		if (situationStore.situations[state.selectedSituationIndex]) {
 			state.situationSelected =
 				situationStore.situations[state.selectedSituationIndex].id
+		}
+		if (oldIndex === state.selectedSituationIndex) {
+			forceUpdate.value = !forceUpdate.value
 		}
 	} else {
 		state.situationSelected = storeState.situations[0]?.id
@@ -178,7 +182,8 @@ const onGotoPage = (nextPage: number) => {
 				/>
 			</div>
 			<SituationDetail
-				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
+				:index="state.selectedSituationIndex"
+				:forceUpdate="forceUpdate"
 				@situation-status-changed="situationStatusChanged"
 			/>
 		</div>

@@ -3,7 +3,11 @@ import { pick } from 'lodash'
 import { TAlarm, TNode, TSituation } from '@/types/TSituation'
 
 const situationListEndpoint = '/alarms?_s='
-
+const urlencodedHeaders = {
+	headers: {
+		'Content-Type': 'application/x-www-form-urlencoded'
+	}
+}
 export const sendAcknowledge = async (
 	alarmId: number | string,
 	isAck: boolean
@@ -14,11 +18,7 @@ export const sendAcknowledge = async (
 			{
 				body: `alarm=${alarmId}`
 			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
 		if (resp.status === 204) {
 			return true
@@ -36,11 +36,7 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 			{
 				body: `alarm=${alarmId}`
 			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
 		if (resp.status === 204) {
 			return true
@@ -56,11 +52,7 @@ export const sendClearAlarms = async (ids: number[]) => {
 		const result = await v2.put(
 			`alarms?_s=alarm.id==${alarmIds}&clear=true`,
 			null,
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
 		if (result.status == 204) {
 			return true
@@ -139,18 +131,16 @@ export const getAllNodes = async (): Promise<TNode[] | false> => {
 	}
 }
 
-export const saveMemo = async (alarmId: number, memoText: string) => {
+export const saveMemo = async (
+	alarmId: number,
+	type: string,
+	memoText: string
+) => {
 	try {
 		const result = await v2.put(
-			`/alarms/${alarmId}/memo`,
-			{
-				body: memoText
-			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			`/alarms/${alarmId}/${type}`,
+			`body=${memoText}`,
+			urlencodedHeaders
 		)
 		if (result.status == 204) {
 			return true
@@ -161,9 +151,9 @@ export const saveMemo = async (alarmId: number, memoText: string) => {
 	}
 }
 
-export const deleteMemo = async (alarmId: number) => {
+export const deleteMemo = async (alarmId: number, type: string) => {
 	try {
-		const result = await v2.delete(`/alarms/${alarmId}/memo`)
+		const result = await v2.delete(`/alarms/${alarmId}/${type}`)
 		if (result.status == 204) {
 			return true
 		}

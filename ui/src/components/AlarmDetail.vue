@@ -5,6 +5,7 @@ import { TAlarm } from '@/types/TSituation'
 import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { getAlarmById } from '@/services/AlarmService'
+import MemoBox from '@/components/MemoBox.vue'
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -54,6 +55,24 @@ const actionClicked = async (id: number) => {
 			<div>
 				<strong>Last Event</strong>
 				- {{ formatDate(alarm.lastEventTime) }}
+			</div>
+			<div class="section memo-boxes">
+				<MemoBox
+					:id="alarm?.id"
+					boxType="small"
+					:situationId="props.situationId"
+					label="Sticky Memo"
+					type="memo"
+					:memo="alarm?.stickyMemo"
+				/>
+				<MemoBox
+					:id="alarm?.id"
+					boxType="small"
+					:situationId="props.situationId"
+					label="Journal Memo"
+					type="journal"
+					:memo="alarm?.reductionKeyMemo"
+				/>
 			</div>
 		</div>
 

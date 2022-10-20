@@ -12,26 +12,18 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 const situationStore = useSituationsStore()
 const emit = defineEmits(['situation-status-changed'])
 const props = defineProps<{
-	alarmInfo: TSituation
+	index: number
+	forceUpdate: boolean
 }>()
 
-const situation = ref(props.alarmInfo)
+const situation = ref(situationStore.situations[props.index])
 
 const situationStatusChanged = (status: string, id: string) => {
 	emit('situation-status-changed', status, id)
 }
 
 watch(props, () => {
-	situation.value = props.alarmInfo
-})
-
-situationStore.$subscribe((mutation, storeState) => {
-	const situationFounded = storeState.situations.find(
-		(s) => s.id == props.alarmInfo.id
-	)
-	if (situationFounded) {
-		situation.value = situationFounded
-	}
+	situation.value = situationStore.situations[props.index]
 })
 </script>
 

@@ -115,8 +115,20 @@ const actionClicked = () => {
 			</div>
 		</div>
 		<div class="section memo-boxes">
-			<MemoBox label="Sticky Memo" :memo="situationInfo?.stickyMemo" />
-			<MemoBox label="Journal Memo" :memo="situationInfo?.reductionKeyMemo" />
+			<MemoBox
+				:id="situationInfo?.id"
+				:situationId="situationInfo?.id"
+				label="Sticky Memo"
+				type="memo"
+				:memo="situationInfo?.stickyMemo"
+			/>
+			<MemoBox
+				:id="situationInfo?.id"
+				:situationId="situationInfo?.id"
+				label="Journal Memo"
+				type="journal"
+				:memo="situationInfo?.reductionKeyMemo"
+			/>
 		</div>
 	</div>
 	<div v-if="situationInfo.alarms && situationInfo.alarms.length > 0">
@@ -145,11 +157,12 @@ const actionClicked = () => {
 
 .severity-line {
 	width: 5px;
+	min-width: 5px;
 	margin-right: 10px;
 }
 .situation-info {
 	flex-grow: 1;
-	margin-right: 50px;
+	margin-right: 20px;
 }
 .id {
 	font-weight: 600;
@@ -176,8 +189,14 @@ const actionClicked = () => {
 		width: 49%;
 	}
 }
+.memo2 {
+	display: flex;
+	flex-direction: column;
+}
+
 .parameters {
 	width: 20%;
+	min-width: 180px;
 	display: flex;
 	padding-left: 20px;
 	border-left: 1px solid $border-grey;

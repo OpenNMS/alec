@@ -29,7 +29,10 @@ const handleAcknowledgeAction = async (isAck: boolean) => {
 		emit('action-clicked', props.alarm.id)
 	}
 	if (props.isSituation) {
-		await sendFeedbackAcceptSituation(props.situationId, CONST.ACCEPTED)
+		await sendFeedbackAcceptSituation(
+			props.situationId,
+			CONST.ACCEPTED.toLowerCase()
+		)
 	}
 }
 

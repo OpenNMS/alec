@@ -5,16 +5,22 @@ import Cancel from '@featherds/icon/navigation/Cancel'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherTextarea } from '@featherds/textarea'
 import { TMemo } from '@/types/TSituation'
+import { saveMemo, deleteMemo } from '@/services/AlarmService'
+import { useSituationsStore } from '@/store/useSituationsStore'
+
+const situationStore = useSituationsStore()
 
 const props = defineProps<{
+	id: number
 	label: string
 	memo: TMemo
+	type: 'journal' | 'memo'
+	situationId: number
+	boxType?: 'small' | 'normal'
 }>()
-
 const isEdit = ref(false)
 const memoText = ref(props.memo?.body)
 
-console.log(props.memo)
 watch(props, () => {
 	memoText.value = props.memo?.body
 	isEdit.value = false
@@ -24,19 +30,27 @@ const showEditInput = () => {
 	isEdit.value = !isEdit.value
 }
 
-const removeMemo = () => {
+const removeMemo = async () => {
 	isEdit.value = false
-	console.log('remove')
+	memoText.value = null
+	await deleteMemo(props.id, props.type)
+	situationStore.selectedSituation = props.situationId
+	situationStore.getSituation(props.situationId)
 }
 
-const saveMemo = () => {
+const saveMemoText = async () => {
 	isEdit.value = false
-	console.log('save')
+	if (memoText.value && memoText.value !== '') {
+		await saveMemo(props.id, props.type, memoText.value)
+		situationStore.selectedSituation = props.situationId
+
+		situationStore.getSituation(props.situationId)
+	}
 }
 </script>
 
 <template>
-	<div class="box">
+	<div :class="[props.boxType === 'small' ? 'box-small' : 'box']">
 		<div class="row">
 			<div class="label">{{ label }}</div>
 			<div class="action-icons">
@@ -45,7 +59,7 @@ const saveMemo = () => {
 						v-if="!isEdit"
 						:icon="EditMode"
 						aria-hidden="true"
-						class="icon"
+						class="icon edit"
 						@click="showEditInput"
 					/>
 				</div>
@@ -53,31 +67,33 @@ const saveMemo = () => {
 					<FeatherIcon
 						:icon="CheckCircle"
 						aria-hidden="true"
-						class="icon"
-						@click="saveMemo"
+						class="icon save"
+						@click="saveMemoText"
 					/>
 				</div>
 				<div class="icon-btn" v-if="(memoText && memoText != '') || isEdit">
 					<FeatherIcon
 						:icon="Cancel"
 						aria-hidden="true"
-						class="icon"
+						class="icon cancel"
 						@click="removeMemo"
 					/>
 				</div>
 			</div>
 		</div>
-		<div class="text" v-if="!isEdit">
-			{{ memoText }}
+		<div>
+			<div class="text" v-if="!isEdit && memoText != null">
+				{{ memoText }}
+			</div>
+			<FeatherTextarea
+				class="textarea"
+				v-if="isEdit"
+				v-model="memoText"
+				rows="2"
+				label=""
+				hideLabel
+			></FeatherTextarea>
 		</div>
-		<FeatherTextarea
-			class="text"
-			v-if="isEdit"
-			v-model="memoText"
-			rows="3"
-			label=""
-			hideLabel
-		></FeatherTextarea>
 	</div>
 </template>
 
@@ -86,25 +102,49 @@ const saveMemo = () => {
 .row {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
+	align-items: start;
 }
 .box {
 	border: 1px solid $border-grey;
-	padding: 10px 20px;
-	width: fit-content;
+	padding: 15px;
+	width: 49%;
 	margin-bottom: 20px;
 	background-color: #ffffff;
+
+	.label {
+		font-weight: 600;
+		font-size: 17px;
+	}
+
+	.icon {
+		font-size: 22px;
+	}
+	.text {
+		margin-top: 8px;
+		font-size: 14px;
+	}
 }
-.label {
-	font-weight: 600;
-	font-size: 17px;
-}
-.icon {
-	font-size: 22px;
-	margin: 7px 10px;
+.box-small {
+	margin-top: 5px;
+	> .row {
+		margin-top: 6px;
+	}
+
+	.label {
+		font-weight: 600;
+		font-size: 14px;
+	}
+
+	.icon {
+		font-size: 18px;
+	}
+	.text {
+		width: fit-content;
+		font-size: 14px;
+	}
 }
 .icon-btn {
-	background-color: #efefef;
+	//background-color: #efefef;
 	border-radius: 5px;
 	cursor: pointer;
 	margin-left: 8px;
@@ -113,8 +153,19 @@ const saveMemo = () => {
 	display: flex;
 	flex-direction: row;
 }
-.text {
-	margin-top: 8px;
-	font-size: 14px;
+.textarea {
+	margin-top: 3px;
+	width: 100%;
+}
+.icon {
+	&.save {
+		color: green;
+	}
+	&.cancel {
+		color: red;
+	}
+	&.edit {
+		color: #3988d7;
+	}
 }
 </style>

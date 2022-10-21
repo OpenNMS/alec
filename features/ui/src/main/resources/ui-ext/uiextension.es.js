@@ -11857,7 +11857,7 @@ function kI(t, o) {
   return vI(), TI("svg", NI, MI);
 }
 var ZI = /* @__PURE__ */ UI(RI, [["render", kI]]);
-const $c = () => window.VRouter || qc, bI = window.Vue.defineComponent, Re = window.Vue.createElementVNode, qo = window.Vue.createTextVNode, Xe = window.Vue.unref, on = window.Vue.createVNode, Va = window.Vue.withCtx, jp = window.Vue.openBlock, Xp = window.Vue.createElementBlock, JI = window.Vue.createCommentVNode, EI = window.Vue.pushScopeId, SI = window.Vue.popScopeId, Bt = (t) => (EI("data-v-0fd6b0cd"), t = t(), SI(), t), FI = { class: "container" }, AI = /* @__PURE__ */ Bt(() => /* @__PURE__ */ Re("div", { class: "title" }, "ALEC", -1)), WI = /* @__PURE__ */ Bt(() => /* @__PURE__ */ Re("div", { class: "description" }, [
+const $c = () => window.VRouter || qc, bI = window.Vue.defineComponent, Re = window.Vue.createElementVNode, qo = window.Vue.createTextVNode, Xe = window.Vue.unref, on = window.Vue.createVNode, Va = window.Vue.withCtx, jp = window.Vue.openBlock, Xp = window.Vue.createElementBlock, JI = window.Vue.createCommentVNode, EI = window.Vue.pushScopeId, SI = window.Vue.popScopeId, Bt = (t) => (EI("data-v-b4b3bdcf"), t = t(), SI(), t), FI = { class: "container" }, AI = /* @__PURE__ */ Bt(() => /* @__PURE__ */ Re("div", { class: "title" }, "ALEC", -1)), WI = /* @__PURE__ */ Bt(() => /* @__PURE__ */ Re("div", { class: "description" }, [
   /* @__PURE__ */ qo(" The Architecture for Learning Enabled Correlation, or ALEC, provides a machine learning powered solution for alarm correlation. Complex networks produce significant, and potentially overwhelming, amount of events and alarms. "),
   /* @__PURE__ */ Re("br"),
   /* @__PURE__ */ Re("strong", null, "Our goal"),
@@ -11870,7 +11870,7 @@ const $c = () => window.VRouter || qc, bI = window.Vue.defineComponent, Re = win
   setup(t) {
     const o = oi(), r = $c(), s = LI(!0), a = () => {
       const u = Boolean(s.value);
-      o.savePermission(u), u ? r.push({ name: "configuration" }) : r.push({ name: "situations" });
+      o.savePermission(u), r.push({ name: "configuration" });
     };
     return (u, d) => (jp(), Xp("div", FI, [
       AI,
@@ -11963,7 +11963,7 @@ const $c = () => window.VRouter || qc, bI = window.Vue.defineComponent, Re = win
     ]));
   }
 });
-const qI = /* @__PURE__ */ be($I, [["__scopeId", "data-v-0fd6b0cd"]]), KI = window.Vue.defineComponent, eD = window.Vue.createElementVNode, tD = window.Vue.createTextVNode, nD = window.Vue.unref, rD = window.Vue.withCtx, oD = window.Vue.createVNode, iD = window.Vue.Fragment, aD = window.Vue.openBlock, sD = window.Vue.createElementBlock, lD = window.Vue.pushScopeId, cD = window.Vue.popScopeId, uD = (t) => (lD("data-v-bcb7dcc6"), t = t(), cD(), t), dD = /* @__PURE__ */ uD(() => /* @__PURE__ */ eD("div", { class: "main" }, "Something bad is happening...", -1)), fD = /* @__PURE__ */ tD(" Reload "), hD = /* @__PURE__ */ KI({
+const qI = /* @__PURE__ */ be($I, [["__scopeId", "data-v-b4b3bdcf"]]), KI = window.Vue.defineComponent, eD = window.Vue.createElementVNode, tD = window.Vue.createTextVNode, nD = window.Vue.unref, rD = window.Vue.withCtx, oD = window.Vue.createVNode, iD = window.Vue.Fragment, aD = window.Vue.openBlock, sD = window.Vue.createElementBlock, lD = window.Vue.pushScopeId, cD = window.Vue.popScopeId, uD = (t) => (lD("data-v-bcb7dcc6"), t = t(), cD(), t), dD = /* @__PURE__ */ uD(() => /* @__PURE__ */ eD("div", { class: "main" }, "Something bad is happening...", -1)), fD = /* @__PURE__ */ tD(" Reload "), hD = /* @__PURE__ */ KI({
   __name: "ErrorPage",
   setup(t) {
     const o = $c(), r = () => {

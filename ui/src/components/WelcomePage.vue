@@ -16,11 +16,7 @@ const allowSave = ref(true)
 const handleClickContinue = () => {
 	const allow = Boolean(allowSave.value)
 	userStore.savePermission(allow)
-	if (allow) {
-		router.push({ name: 'configuration' })
-	} else {
-		router.push({ name: 'situations' })
-	}
+	router.push({ name: 'configuration' })
 }
 </script>
 

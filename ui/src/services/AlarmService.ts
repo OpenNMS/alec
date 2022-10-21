@@ -3,7 +3,11 @@ import { pick } from 'lodash'
 import { TAlarm, TNode, TSituation } from '@/types/TSituation'
 
 const situationListEndpoint = '/alarms?_s='
-
+const urlencodedHeaders = {
+	headers: {
+		'Content-Type': 'application/x-www-form-urlencoded'
+	}
+}
 export const sendAcknowledge = async (
 	alarmId: number | string,
 	isAck: boolean
@@ -14,16 +18,9 @@ export const sendAcknowledge = async (
 			{
 				body: `alarm=${alarmId}`
 			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
-		if (resp.status === 204) {
-			return true
-		}
-		return false
+		return resp.status === 204
 	} catch (err) {
 		return false
 	}
@@ -36,15 +33,9 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 			{
 				body: `alarm=${alarmId}`
 			},
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
-		if (resp.status === 204) {
-			return true
-		}
+		return resp.status === 204
 	} catch (err) {
 		return false
 	}
@@ -56,16 +47,9 @@ export const sendClearAlarms = async (ids: number[]) => {
 		const result = await v2.put(
 			`alarms?_s=alarm.id==${alarmIds}&clear=true`,
 			null,
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-			}
+			urlencodedHeaders
 		)
-		if (result.status == 204) {
-			return true
-		}
-		return false
+		return result.status == 204
 	} catch (err) {
 		return false
 	}
@@ -127,13 +111,39 @@ export const getAlarmById = async (
 
 export const getAllNodes = async (): Promise<TNode[] | false> => {
 	try {
-		const resp = await v2('nodes?limit=0')
+		const resp = await v2('/nodes?limit=0')
 		if (resp.status === 200) {
 			const resultNodes = resp.data.node
 			const nodes = resultNodes.map((rn: any) => pick(rn, ['id', 'label']))
 			return nodes
 		}
 		return false
+	} catch (err) {
+		return false
+	}
+}
+
+export const saveMemo = async (
+	alarmId: number,
+	type: string,
+	memoText: string
+) => {
+	try {
+		const result = await v2.put(
+			`/alarms/${alarmId}/${type}`,
+			`body=${memoText}`,
+			urlencodedHeaders
+		)
+		return result.status == 204
+	} catch (err) {
+		return false
+	}
+}
+
+export const deleteMemo = async (alarmId: number, type: string) => {
+	try {
+		const result = await v2.delete(`/alarms/${alarmId}/${type}`)
+		return result.status == 204
 	} catch (err) {
 		return false
 	}

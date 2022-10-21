@@ -70,6 +70,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 				const situations = cloneDeep(this.situations)
 				const index = this.situations.findIndex((s) => s.id == id)
 				situations[index] = resultSituation
+
 				this.situations = situations
 			}
 		}

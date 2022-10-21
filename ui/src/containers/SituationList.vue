@@ -8,8 +8,12 @@ import { reactive, ref } from 'vue'
 import { cloneDeep, chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
+import { FeatherSnackbar } from '@featherds/snackbar'
+import { useAppStore } from '@/store/useAppStore'
 
 const situationStore = useSituationsStore()
+const appStore = useAppStore()
+
 situationStore.getSituations()
 situationStore.getNodes()
 
@@ -37,6 +41,8 @@ const loading = ref(false)
 const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
+const forceUpdate = ref(false)
+const showError = ref(false)
 
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
@@ -67,14 +73,22 @@ const setNodes = () => {
 	state.results = situationStore.nodes
 }
 
+appStore.$subscribe((mutation, storeState) => {
+	showError.value = storeState.showError
+})
+
 situationStore.$subscribe((mutation, storeState) => {
 	if (storeState.selectedSituation != -1) {
+		const oldIndex = state.selectedSituationIndex
 		state.selectedSituationIndex = situationStore.situations.findIndex(
 			(s) => s.id === storeState.selectedSituation
 		)
 		if (situationStore.situations[state.selectedSituationIndex]) {
 			state.situationSelected =
 				situationStore.situations[state.selectedSituationIndex].id
+		}
+		if (oldIndex === state.selectedSituationIndex) {
+			forceUpdate.value = !forceUpdate.value
 		}
 	} else {
 		state.situationSelected = storeState.situations[0]?.id
@@ -178,7 +192,8 @@ const onGotoPage = (nextPage: number) => {
 				/>
 			</div>
 			<SituationDetail
-				:alarm-info="situationStore.situations[state.selectedSituationIndex]"
+				:index="state.selectedSituationIndex"
+				:forceUpdate="forceUpdate"
 				@situation-status-changed="situationStatusChanged"
 			/>
 		</div>
@@ -189,6 +204,9 @@ const onGotoPage = (nextPage: number) => {
 			No results found
 		</div>
 	</div>
+	<FeatherSnackbar v-model="showError" center error>
+		{{ appStore.errorMessage || 'Error has occurred :(' }}
+	</FeatherSnackbar>
 </template>
 
 <style lang="scss" scoped>

@@ -16,7 +16,7 @@ const props = defineProps<{
 	alarm: TAlarm | TSituation
 	direction: 'horizontal' | 'vertical'
 	showClear?: boolean
-	showUnaknowledge?: boolean
+	isSituation?: boolean
 	situationId: number
 }>()
 const situationStore = useSituationsStore()
@@ -28,7 +28,12 @@ const handleAcknowledgeAction = async (isAck: boolean) => {
 		situationStore.selectedSituation = props.situationId
 		emit('action-clicked', props.alarm.id)
 	}
-	await sendFeedbackAcceptSituation(props.situationId, CONST.ACCEPTED)
+	if (props.isSituation) {
+		await sendFeedbackAcceptSituation(
+			props.situationId,
+			CONST.ACCEPTED.toLowerCase()
+		)
+	}
 }
 
 const handleAction = async (action: string) => {

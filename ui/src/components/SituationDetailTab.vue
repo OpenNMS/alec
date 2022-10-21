@@ -7,6 +7,8 @@ import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
 import AlarmFilters from '@/components/AlarmFilters.vue'
+import MemoBox from '@/components/MemoBox.vue'
+
 import { FeatherButton } from '@featherds/button'
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/store/useUserStore'
@@ -53,6 +55,7 @@ const actionClicked = () => {
 				:alarm="situationInfo"
 				:direction="'horizontal'"
 				showClear
+				isSituation
 				:situation-id="props.situationInfo.id"
 				@action-clicked="actionClicked"
 			/>
@@ -90,7 +93,6 @@ const actionClicked = () => {
 					</div>
 					<SeverityStatus :severity="situationInfo?.severity" />
 				</div>
-
 				<span v-html="situationInfo.description"></span>
 				<p></p>
 				<div class="boxes">
@@ -112,8 +114,24 @@ const actionClicked = () => {
 				<AlarmsCountBySeverity :alarms="situationInfo?.alarms" size="large" />
 			</div>
 		</div>
+		<div class="section memo-boxes">
+			<MemoBox
+				:id="situationInfo?.id"
+				:situationId="situationInfo?.id"
+				label="Sticky Memo"
+				type="memo"
+				:memo="situationInfo?.stickyMemo"
+			/>
+			<MemoBox
+				:id="situationInfo?.id"
+				:situationId="situationInfo?.id"
+				label="Journal Memo"
+				type="journal"
+				:memo="situationInfo?.reductionKeyMemo"
+			/>
+		</div>
 	</div>
-	<div v-if="situationInfo.alarms && situationInfo.alarms.length > 0">
+	<div v-if="situationInfo.alarms && situationInfo.alarms.length">
 		<AlarmFilters
 			:alarms="situationInfo.alarms"
 			:situation-id="situationInfo.id"
@@ -139,11 +157,12 @@ const actionClicked = () => {
 
 .severity-line {
 	width: 5px;
+	min-width: 5px;
 	margin-right: 10px;
 }
 .situation-info {
 	flex-grow: 1;
-	margin-right: 50px;
+	margin-right: 20px;
 }
 .id {
 	font-weight: 600;
@@ -160,8 +179,24 @@ const actionClicked = () => {
 		margin-right: 10px;
 	}
 }
+
+.memo-boxes {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+
+	> div {
+		width: 49%;
+	}
+}
+.memo2 {
+	display: flex;
+	flex-direction: column;
+}
+
 .parameters {
 	width: 20%;
+	min-width: 180px;
 	display: flex;
 	padding-left: 20px;
 	border-left: 1px solid $border-grey;

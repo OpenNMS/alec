@@ -131,7 +131,7 @@ const actionClicked = () => {
 			/>
 		</div>
 	</div>
-	<div v-if="situationInfo.alarms && situationInfo.alarms.length > 0">
+	<div v-if="situationInfo.alarms && situationInfo.alarms.length">
 		<AlarmFilters
 			:alarms="situationInfo.alarms"
 			:situation-id="situationInfo.id"

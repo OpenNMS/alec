@@ -78,8 +78,8 @@ appStore.$subscribe((mutation, storeState) => {
 })
 
 situationStore.$subscribe((mutation, storeState) => {
-	const oldIndex = state.selectedSituationIndex
 	if (storeState.selectedSituation != -1) {
+		const oldIndex = state.selectedSituationIndex
 		state.selectedSituationIndex = situationStore.situations.findIndex(
 			(s) => s.id === storeState.selectedSituation
 		)

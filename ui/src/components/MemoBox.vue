@@ -8,6 +8,7 @@ import { TMemo } from '@/types/TSituation'
 import { saveMemo, deleteMemo } from '@/services/AlarmService'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { useAppStore } from '@/store/useAppStore'
+import { watch, ref } from 'vue'
 
 const situationStore = useSituationsStore()
 const appStore = useAppStore()
@@ -153,7 +154,6 @@ const saveMemoText = async () => {
 	}
 }
 .icon-btn {
-	//background-color: #efefef;
 	border-radius: 5px;
 	cursor: pointer;
 	margin-left: 8px;

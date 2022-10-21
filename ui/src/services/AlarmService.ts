@@ -20,10 +20,7 @@ export const sendAcknowledge = async (
 			},
 			urlencodedHeaders
 		)
-		if (resp.status === 204) {
-			return true
-		}
-		return false
+		return resp.status === 204
 	} catch (err) {
 		return false
 	}
@@ -38,9 +35,7 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 			},
 			urlencodedHeaders
 		)
-		if (resp.status === 204) {
-			return true
-		}
+		return resp.status === 204
 	} catch (err) {
 		return false
 	}
@@ -54,10 +49,7 @@ export const sendClearAlarms = async (ids: number[]) => {
 			null,
 			urlencodedHeaders
 		)
-		if (result.status == 204) {
-			return true
-		}
-		return false
+		return result.status == 204
 	} catch (err) {
 		return false
 	}
@@ -142,10 +134,7 @@ export const saveMemo = async (
 			`body=${memoText}`,
 			urlencodedHeaders
 		)
-		if (result.status == 204) {
-			return true
-		}
-		return false
+		return result.status == 204
 	} catch (err) {
 		return false
 	}
@@ -154,10 +143,7 @@ export const saveMemo = async (
 export const deleteMemo = async (alarmId: number, type: string) => {
 	try {
 		const result = await v2.delete(`/alarms/${alarmId}/${type}`)
-		if (result.status == 204) {
-			return true
-		}
-		return false
+		return result.status == 204
 	} catch (err) {
 		return false
 	}

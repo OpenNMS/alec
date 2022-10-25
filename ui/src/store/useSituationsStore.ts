@@ -4,12 +4,19 @@ import {
 	getSituations,
 	getAllNodes,
 	getAlarmsByIds,
-	getAlarmById
+	getAlarmById,
+	getEventsByAlarmId
 } from '@/services/AlarmService'
 import { getSituationsStatus } from '@/services/AlecService'
 
-import { TAlarm, TNode, TSituation, TSituationSaved } from '@/types/TSituation'
-import { groupBy, mapKeys, cloneDeep } from 'lodash'
+import {
+	TAlarm,
+	TEvent,
+	TNode,
+	TSituation,
+	TSituationSaved
+} from '@/types/TSituation'
+import { groupBy, mapKeys, cloneDeep, reverse } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
@@ -73,6 +80,19 @@ export const useSituationsStore = defineStore('situationsStore', {
 
 				this.situations = situations
 			}
+		},
+		async getEvents(situationId: number, alarmIds: number[]) {
+			const eventsById = {} as Record<number, TEvent[]>
+			await Promise.all(
+				alarmIds.map(async (id: number) => {
+					const events = await getEventsByAlarmId(id)
+					if (events) {
+						eventsById[id] = reverse(events)
+					}
+				})
+			)
+			const index = this.situations.findIndex((s) => s.id == situationId)
+			this.situations[index].events = eventsById
 		}
 	}
 })

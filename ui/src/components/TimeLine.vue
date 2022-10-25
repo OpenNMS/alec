@@ -13,7 +13,7 @@ const props = defineProps<{
 const nowDate = new Date().getTime()
 const getWidth = (
 	alarmStart: Date | undefined,
-	alarmEnd: Date | undefined
+	alarmEnd: Date | undefined | number
 ): number => {
 	return alarmStart
 		? (Number(alarmEnd) - Number(alarmStart)) * props.proportion
@@ -44,9 +44,6 @@ const getOffset = (alarmStart: Date | undefined): number => {
 				v-bind="attrs"
 				v-on="on"
 				:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
-				:style="{
-					//marginLeft: getOffset(alarm.firstEventTime) + 'px'
-				}"
 			></div>
 		</FeatherTooltip>
 		<div
@@ -76,9 +73,6 @@ const getOffset = (alarmStart: Date | undefined): number => {
 					:class="[`${event.severity.toLowerCase()}-bg dark`]"
 				></div>
 			</FeatherTooltip>
-			<!--<div>{{ event.id }}-</div>
-			<div>- {{ formatDate(event.createTime) }}</div>
-			<div>- {{ formatDate(event.time) }}</div>-->
 		</div>
 		<div
 			class="line"
@@ -124,6 +118,8 @@ const getOffset = (alarmStart: Date | undefined): number => {
 .event {
 	width: 3px;
 	height: 30px;
+	border-radius: 25px;
+
 	cursor: pointer;
 }
 </style>

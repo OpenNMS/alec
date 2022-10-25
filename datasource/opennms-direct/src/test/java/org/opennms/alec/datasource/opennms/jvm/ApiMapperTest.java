@@ -36,8 +36,13 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
+import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.ManagedObjectType;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
+import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.integration.api.v1.model.immutables.ImmutableAlarm;
 import org.opennms.integration.api.v1.model.immutables.ImmutableNode;
 
@@ -74,5 +79,20 @@ public class ApiMapperTest {
         Alarm alarm = mapper.toAlarm(apiAlarm);
         assertThat(alarm.getInventoryObjectType(), equalTo(ManagedObjectType.SnmpInterface.getName()));
         assertThat(alarm.getInventoryObjectId(), equalTo("fs:fid:123"));
+    }
+
+    @Test
+    public void toEventRejectedSituation() {
+        Situation situation = ImmutableSituation.newBuilderNow().setStatus(Status.REJECTED).setId("123").build();
+        InMemoryEvent result = mapper.toEvent(situation);
+        assertThat(result.getNodeId(), equalTo(null));
+        assertThat(result.getSeverity(), equalTo(Severity.CLEARED));
+        assertThat(result.getUei(), equalTo(ApiMapper.SITUATION_UEI));
+        assertThat(result.getSource(), equalTo("alec"));
+        assertThat(result.getParameterValue(ApiMapper.SITUATION_ID_PARM_NAME).get(), equalTo("123"));
+        assertThat(result.getParameterValue(ApiMapper.SITUATION_STATUS_PARM_NAME).get(), equalTo(Status.REJECTED.toString()));
+        assertThat(result.getParameterValue("situationDescr").get(), equalTo("situation rejected"));
+        assertThat(result.getParameterValue("situationLogMsg").get(), equalTo("situation rejected"));
+        assertThat(result.getParameters().size(), equalTo(4));
     }
 }

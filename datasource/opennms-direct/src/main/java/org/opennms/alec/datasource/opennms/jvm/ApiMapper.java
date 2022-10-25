@@ -185,41 +185,48 @@ public class ApiMapper {
         final ImmutableInMemoryEvent.Builder eventBuilder = ImmutableInMemoryEvent.newBuilder();
         eventBuilder.setUei(SITUATION_UEI).setSource("alec");
 
-        // Use the max severity as the situation severity
-        final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
-                .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
-                .max()
-                .orElseGet(Severity.INDETERMINATE::getValue));
-        eventBuilder.setSeverity(toSeverity(maxSeverity));
+        if(situation.getAlarms().isEmpty() && situation.getStatus() == Status.REJECTED) {
+            //Situation should be cleared
+            eventBuilder.setSeverity(org.opennms.integration.api.v1.model.Severity.CLEARED);
+
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg", "situation rejected"));
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", "situation rejected"));
+        } else {
+            // Use the max severity as the situation severity
+            final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
+                    .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
+                    .max()
+                    .orElseGet(Severity.INDETERMINATE::getValue));
+            eventBuilder.setSeverity(toSeverity(maxSeverity));
+
+            // Populate logmsg, descr and related node with details from the most relevant alarm
+            final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
+            if (alarmForDescr != null) {
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
+                        alarmForDescr.getSummary()));
+
+                String description = alarmForDescr.getDescription();
+                if (situation.getDiagnosticText() != null) {
+                    description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
+                }
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
+
+                // Set a node id - use the same node associated with the alarm we used to the description
+                eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);
+            }
+            // Set the related reduction keys
+            final AtomicInteger alarmIndex = new AtomicInteger(0);
+            situation.getAlarms().stream()
+                    .map(Alarm::getId)
+                    // Append a unique index to each related-reductionKey parameter since the underlying event builder
+                    // does not support many parameters with the same name. Alarmd will associate the related alarm
+                    // provided that the parameter name *starts with* 'related-reductionKey'
+                    .forEach(reductionKey -> eventBuilder.addParameter(ImmutableEventParameter
+                            .newInstance("related-reductionKey" + alarmIndex.incrementAndGet(), reductionKey)));
+        }
 
         // Relay the situation id
         eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
-
-        // Populate logmsg, descr and related node with details from the most relevant alarm
-        final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
-        if (alarmForDescr != null) {
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
-                    alarmForDescr.getSummary()));
-
-            String description = alarmForDescr.getDescription();
-            if (situation.getDiagnosticText() != null) {
-                description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
-            }
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
-
-            // Set a node id - use the same node associated with the alarm we used to the description
-            eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);
-        }
-
-        // Set the related reduction keys
-        final AtomicInteger alarmIndex = new AtomicInteger(0);
-        situation.getAlarms().stream()
-                .map(Alarm::getId)
-                // Append a unique index to each related-reductionKey parameter since the underlying event builder
-                // does not support many parameters with the same name. Alarmd will associate the related alarm
-                // provided that the parameter name *starts with* 'related-reductionKey'
-                .forEach(reductionKey -> eventBuilder.addParameter(ImmutableEventParameter
-                        .newInstance("related-reductionKey" + alarmIndex.incrementAndGet(), reductionKey)));
 
         // Add situation status
         eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_STATUS_PARM_NAME, situation.getStatus().toString()));

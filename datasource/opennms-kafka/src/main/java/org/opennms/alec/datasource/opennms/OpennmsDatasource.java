@@ -82,6 +82,7 @@ import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
+import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.HandlerRegistry;
 import org.opennms.alec.datasource.opennms.events.Event;
 import org.opennms.alec.datasource.opennms.events.JaxbUtils;
@@ -104,6 +105,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("java:S1874")
 public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, InventoryDatasource,
         AlarmFeedbackDatasource {
     private static final Logger LOG = LoggerFactory.getLogger(OpennmsDatasource.class);
@@ -598,6 +600,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
         return waitUntilStoreIsQueryable(ALARM_FEEDBACK_STORE);
     }
 
+    @SuppressWarnings("java:S899")
     private <K,V> ReadOnlyKeyValueStore<K, V> waitUntilStoreIsQueryable(String storeName) throws InterruptedException {
         if (streams == null) {
             throw new IllegalStateException("Datasource must be started first.");
@@ -618,7 +621,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
     @Override
     public void forwardSituation(Situation situation) {
-        if (situation.getAlarms().isEmpty()) {
+        if (situation.getAlarms().isEmpty() && situation.getStatus() != Status.REJECTED) {
             LOG.warn("Got situation with no alarms. Ignoring.");
             return;
         }

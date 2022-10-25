@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import {TSituation} from '@/types/TSituation'
-import {formatDistanceStrict} from 'date-fns'
-import {groupBy, maxBy, minBy, reverse, sortBy} from 'lodash'
-import {FeatherSelect, ISelectItemType} from '@featherds/select'
-import {FeatherIcon} from '@featherds/icon'
+import { TSituation } from '@/types/TSituation'
+import { formatDistanceStrict } from 'date-fns'
+import { minBy, maxBy, groupBy, sortBy, reverse } from 'lodash'
+import { FeatherSelect, ISelectItemType } from '@featherds/select'
+import { FeatherIcon } from '@featherds/icon'
 import AddCircleAlt from '@featherds/icon/action/AddCircleAlt'
 import TimeLine from '@/components/Timeline.vue'
 import Remove from '@featherds/icon/action/Remove'
-import {formatDate} from '@/helpers/utils'
-import {ref, watch} from 'vue'
-
+import { formatDate } from '@/helpers/utils'
+import { ref, watch } from 'vue'
 const DEFAULT_MAX_WIDTH = 700
 let maxWidth = ref(DEFAULT_MAX_WIDTH)
 
@@ -29,15 +28,19 @@ const getProportion = () => {
 
 const relatedAlarms = ref(props.situation.alarms)
 const minStart = ref(
-	minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
+	minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime || new Date()
 )
-const maxEnd = ref(maxBy(props.situation?.alarms, 'time')?.time || new Date())
+const maxEnd = ref(
+	maxBy(props.situation?.alarms, 'lastEventTime')?.lastEventTime || new Date()
+)
 const proportion = ref(getProportion())
 
 watch(props, () => {
 	minStart.value =
-		minBy(props.situation?.alarms, 'firstTime')?.firstTime || new Date()
-	maxEnd.value = maxBy(props.situation?.alarms, 'time')?.time || new Date()
+		minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime ||
+		new Date()
+	maxEnd.value =
+		maxBy(props.situation?.alarms, 'lastEventTime')?.lastEventTime || new Date()
 	maxWidth.value = DEFAULT_MAX_WIDTH
 	proportion.value = getProportion()
 	relatedAlarms.value = props.situation.alarms
@@ -68,7 +71,7 @@ const sortChanged = (sortObj: ISelectItemType | undefined) => {
 		const sorted = reverse(
 			sortBy(
 				props.situation.alarms,
-				(a) => Number(a.time) - Number(a.firstTime)
+				(a) => Number(a.lastEventTime) - Number(a.firstEventTime)
 			)
 		)
 		relatedAlarms.value = sorted
@@ -101,7 +104,7 @@ const handleClickZoomOut = () => {
 			</div>
 		</div>
 	</div>
-	<div v-if="relatedAlarms.length > 0" class="section">
+	<div v-if="relatedAlarms && relatedAlarms.length > 0" class="section">
 		<div class="id">Alarms</div>
 		<div class="action-btns">
 			<FeatherSelect
@@ -141,7 +144,7 @@ const handleClickZoomOut = () => {
 			<div class="container">
 				<div class="ids">
 					<div class="alarm-id" v-for="alarm in relatedAlarms" :key="alarm.id">
-						{{ alarm.nodeLabel }} [ {{ alarm.id }} ]
+						{{ alarm.nodeLabel }} - {{ alarm.id }}
 					</div>
 				</div>
 				<div class="timeline-container">

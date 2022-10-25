@@ -6,13 +6,14 @@ export interface ApiResponse {
 }
 
 export type TSituation = {
-	id: string
+	id: number
 	severity: string
 	nodeId: number
 	nodeLabel: string
 	uei: string
+	relatedAlarms: TAlarm[]
 	count: number
-	lastTime: number
+	lastEventTime: number
 	logMessage: string
 	location: string
 	reductionKey: string
@@ -29,6 +30,7 @@ export type TSituation = {
 	affectedNodeCount: number
 	status?: string
 	creationTime: Date
+	ackTime: Date
 }
 
 export type TEvent = {
@@ -50,24 +52,30 @@ export type TEvent = {
 }
 
 export type TAlarm = {
-	id: string
+	id: number
 	severity: string
 	nodeId: number
 	nodeLabel: string
 	uei: string
 	count: number
-	time: Date
+	lastEventTime: Date
 	logMessage: string
-	firstTime: Date
+	firstEventTime: Date
 	reductionKey: string
 	inventoryObjectId: string
 	inventoryObjectType: string
 	summary: string
 	clear: boolean
 	description: string
+	ackTime: Date
 }
 
 export type TSituationSaved = {
 	id: string
 	status: string
+}
+
+export type TNode = {
+	id: number
+	label: string
 }

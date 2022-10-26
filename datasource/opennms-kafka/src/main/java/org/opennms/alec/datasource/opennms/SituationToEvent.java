@@ -42,6 +42,9 @@ public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
     public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
+    public static final String SITUATION_LOG_MSG = "situationLogMsg";
+    public static final String SITUATION_DESCR = "situationDescr";
+    public static final String SITUATION_REJECTED = "situation rejected";
 
     private SituationToEvent() {
         throw new IllegalStateException("Utility class");
@@ -54,8 +57,8 @@ public class SituationToEvent {
         if (situation.getAlarms().isEmpty() && situation.getStatus() == Status.REJECTED) {
             //situation should be cleared
             e.setSeverity(Severity.CLEARED.name().toLowerCase());
-            e.addParam("situationLogMsg", "situation rejected");
-            e.addParam("situationDescr", "situation rejected");
+            e.addParam(SITUATION_LOG_MSG, SITUATION_REJECTED);
+            e.addParam(SITUATION_DESCR, SITUATION_REJECTED);
         } else {
             // Use the max severity as the situation severity
             final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
@@ -65,13 +68,13 @@ public class SituationToEvent {
             e.setSeverity(maxSeverity.name().toLowerCase());
 
             final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
-            e.addParam("situationLogMsg", alarmForDescr.getSummary());
+            e.addParam(SITUATION_LOG_MSG, alarmForDescr.getSummary());
 
             String description = alarmForDescr.getDescription();
             if (situation.getDiagnosticText() != null) {
                 description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
             }
-            e.addParam("situationDescr", description);
+            e.addParam(SITUATION_DESCR, description);
 
             // Set the related reduction keys
             situation.getAlarms().stream()

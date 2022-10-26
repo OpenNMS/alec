@@ -64,6 +64,9 @@ public class ApiMapper {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
     public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
+    public static final String SITUATION_LOG_MSG = "situationLogMsg";
+    public static final String SITUATION_DESCR = "situationDescr";
+    public static final String SITUATION_REJECTED = "situation rejected";
 
     private final ScriptedInventoryService inventoryService;
 
@@ -189,8 +192,8 @@ public class ApiMapper {
             //Situation should be cleared
             eventBuilder.setSeverity(org.opennms.integration.api.v1.model.Severity.CLEARED);
 
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg", "situation rejected"));
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", "situation rejected"));
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG, SITUATION_REJECTED));
+            eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, SITUATION_REJECTED));
         } else {
             // Use the max severity as the situation severity
             final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
@@ -202,14 +205,14 @@ public class ApiMapper {
             // Populate logmsg, descr and related node with details from the most relevant alarm
             final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
             if (alarmForDescr != null) {
-                eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG,
                         alarmForDescr.getSummary()));
 
                 String description = alarmForDescr.getDescription();
                 if (situation.getDiagnosticText() != null) {
                     description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
                 }
-                eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, description));
 
                 // Set a node id - use the same node associated with the alarm we used to the description
                 eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);

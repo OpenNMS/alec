@@ -16,7 +16,7 @@ import {
 	TSituation,
 	TSituationSaved
 } from '@/types/TSituation'
-import { groupBy, mapKeys, cloneDeep, reverse } from 'lodash'
+import { groupBy, mapKeys, cloneDeep, reverse, sortBy } from 'lodash'
 
 type TState = {
 	situations: TSituation[]
@@ -54,7 +54,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 					const sitStatus = resultStatus.filter(
 						(rs: TSituationSaved) => parseInt(rs.id) === s.id
 					)
-					s.alarms = alarms
+					s.alarms = sortBy(alarms, ['id'])
 					s.status = sitStatus && sitStatus[0] ? sitStatus[0].status : 'CREATED'
 					return s
 				})
@@ -72,8 +72,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 			if (resultSituation) {
 				const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
 				const resultAlarms = await getAlarmsByIds(alarmIds)
-				resultSituation.alarms = resultAlarms as TAlarm[]
-
+				const alarms = resultAlarms as TAlarm[]
+				resultSituation.alarms = sortBy(alarms, ['id'])
 				const situations = cloneDeep(this.situations)
 				const index = this.situations.findIndex((s) => s.id == id)
 				situations[index] = resultSituation

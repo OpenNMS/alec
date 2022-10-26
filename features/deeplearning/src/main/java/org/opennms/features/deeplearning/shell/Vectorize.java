@@ -120,7 +120,6 @@ public class Vectorize implements Action {
 
         private MyEngine(Set<Situation> situations, Consumer<OutputVector> consumer) {
             super(new MetricRegistry());
-            this.situations = Objects.requireNonNull(situations);
             this.consumer = Objects.requireNonNull(consumer);
 
             // Index the alarms by situation id

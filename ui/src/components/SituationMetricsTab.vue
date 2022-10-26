@@ -16,9 +16,7 @@ import EventsList from '@/components/EventsList.vue'
 
 import { useSituationsStore } from '@/store/useSituationsStore'
 const situationStore = useSituationsStore()
-const DEFAULT_MAX_WIDTH = 1250
 
-let maxWidth = ref(DEFAULT_MAX_WIDTH)
 const panelShow = ref(0)
 const options = [
 	{ id: 1, name: 'Creation Time' },
@@ -28,7 +26,11 @@ const options = [
 const sortedOption = ref(options[0])
 const props = defineProps<{
 	situation: TSituation
+	width: number
 }>()
+let maxWidth = ref(props.width)
+let container = ref(props.width)
+
 const nowDate = new Date().getTime()
 const getEvents = () => {
 	if (!props.situation.events) {
@@ -55,7 +57,7 @@ watch(props, () => {
 		minBy(props.situation?.alarms, 'firstEventTime')?.firstEventTime ||
 		new Date().getTime()
 	getEvents()
-	maxWidth.value = DEFAULT_MAX_WIDTH
+	maxWidth.value = container.value
 	proportion.value = getProportion()
 	relatedAlarms.value = props.situation.alarms
 	sortedOption.value = options[0]
@@ -103,7 +105,7 @@ const handleClickZoomOut = () => {
 }
 
 const handleClickZoomReset = () => {
-	maxWidth.value = DEFAULT_MAX_WIDTH
+	maxWidth.value = container.value
 	proportion.value = getProportion()
 }
 
@@ -164,7 +166,13 @@ const closePanel = () => {
 				</div>
 			</div>
 		</div>
-		<div class="alarms">
+		<div
+			v-if="container"
+			class="alarms"
+			:style="{
+				width: container + 50 + 'px'
+			}"
+		>
 			<div class="times">
 				<div>
 					{{ formatDate(minStart) }}
@@ -249,7 +257,6 @@ const closePanel = () => {
 	margin-top: 10px;
 	display: flex;
 	flex-direction: column;
-	max-width: 1300px;
 }
 .alarm-id {
 	font-size: 14px;
@@ -297,7 +304,7 @@ const closePanel = () => {
 }
 
 .select {
-	width: 15%;
+	width: auto;
 }
 
 .action-btns {

@@ -17,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const situation = ref(situationStore.situations[props.index])
-
+let container = ref()
 const situationStatusChanged = (status: string, id: string) => {
 	emit('situation-status-changed', status, id)
 }
@@ -25,10 +25,16 @@ const situationStatusChanged = (status: string, id: string) => {
 watch(props, () => {
 	situation.value = situationStore.situations[props.index]
 })
+
+onMounted(() => {
+	const widthCont =
+		document.getElementById('cont')?.getBoundingClientRect().width || 1200
+	container.value = widthCont - 90
+})
 </script>
 
 <template>
-	<div v-if="situation" class="detail">
+	<div v-if="situation" class="detail" id="cont">
 		<FeatherTabContainer>
 			<template v-slot:tabs>
 				<FeatherTab>Details</FeatherTab>
@@ -41,7 +47,11 @@ watch(props, () => {
 				/>
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel"
-				><SituationMetricsTab :situation="situation" />
+				><SituationMetricsTab
+					v-if="container"
+					:situation="situation"
+					:width="container"
+				/>
 			</FeatherTabPanel>
 		</FeatherTabContainer>
 	</div>

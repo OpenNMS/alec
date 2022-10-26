@@ -46,27 +46,27 @@ public final class AlecCollectionServiceGrpc {
   public static final String SERVICE_NAME = "AlecCollectionService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<SituationSetProtos.SituationSet,
+  private static volatile io.grpc.MethodDescriptor<SituationSet,
       com.google.protobuf.Empty> getSendSituationsMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "SendSituations",
-      requestType = SituationSetProtos.SituationSet.class,
+      requestType = SituationSet.class,
       responseType = com.google.protobuf.Empty.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<SituationSetProtos.SituationSet,
+  public static io.grpc.MethodDescriptor<SituationSet,
       com.google.protobuf.Empty> getSendSituationsMethod() {
-    io.grpc.MethodDescriptor<SituationSetProtos.SituationSet, com.google.protobuf.Empty> getSendSituationsMethod;
+    io.grpc.MethodDescriptor<SituationSet, com.google.protobuf.Empty> getSendSituationsMethod;
     if ((getSendSituationsMethod = AlecCollectionServiceGrpc.getSendSituationsMethod) == null) {
       synchronized (AlecCollectionServiceGrpc.class) {
         if ((getSendSituationsMethod = AlecCollectionServiceGrpc.getSendSituationsMethod) == null) {
           AlecCollectionServiceGrpc.getSendSituationsMethod = getSendSituationsMethod =
-              io.grpc.MethodDescriptor.<SituationSetProtos.SituationSet, com.google.protobuf.Empty>newBuilder()
+              io.grpc.MethodDescriptor.<SituationSet, com.google.protobuf.Empty>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SendSituations"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  SituationSetProtos.SituationSet.getDefaultInstance()))
+                  SituationSet.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.google.protobuf.Empty.getDefaultInstance()))
               .setSchemaDescriptor(new AlecCollectionServiceMethodDescriptorSupplier("SendSituations"))
@@ -127,7 +127,7 @@ public final class AlecCollectionServiceGrpc {
 
     /**
      */
-    public void sendSituations(SituationSetProtos.SituationSet request,
+    public void sendSituations(SituationSet request,
                                io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSendSituationsMethod(), responseObserver);
     }
@@ -138,7 +138,7 @@ public final class AlecCollectionServiceGrpc {
             getSendSituationsMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
-                SituationSetProtos.SituationSet,
+                SituationSet,
                 com.google.protobuf.Empty>(
                   this, METHODID_SEND_SITUATIONS)))
           .build();
@@ -161,7 +161,7 @@ public final class AlecCollectionServiceGrpc {
 
     /**
      */
-    public void sendSituations(SituationSetProtos.SituationSet request,
+    public void sendSituations(SituationSet request,
                                io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getSendSituationsMethod(), getCallOptions()), request, responseObserver);
@@ -184,7 +184,7 @@ public final class AlecCollectionServiceGrpc {
 
     /**
      */
-    public com.google.protobuf.Empty sendSituations(SituationSetProtos.SituationSet request) {
+    public com.google.protobuf.Empty sendSituations(SituationSet request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getSendSituationsMethod(), getCallOptions(), request);
     }
@@ -207,7 +207,7 @@ public final class AlecCollectionServiceGrpc {
     /**
      */
     public com.google.common.util.concurrent.ListenableFuture<com.google.protobuf.Empty> sendSituations(
-        SituationSetProtos.SituationSet request) {
+        SituationSet request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getSendSituationsMethod(), getCallOptions()), request);
     }
@@ -233,7 +233,7 @@ public final class AlecCollectionServiceGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_SEND_SITUATIONS:
-          serviceImpl.sendSituations((SituationSetProtos.SituationSet) request,
+          serviceImpl.sendSituations((SituationSet) request,
               (io.grpc.stub.StreamObserver<com.google.protobuf.Empty>) responseObserver);
           break;
         default:

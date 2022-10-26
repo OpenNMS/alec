@@ -38,10 +38,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.Agreement;
 import org.opennms.alec.data.CreateSituationPayload;
 import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
@@ -53,6 +55,8 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.grpc.SituationClient;
+import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +64,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
+    public static final String TARGET = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
     public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
     public static final String ALARM_NOT_FOUND = "Alarm {0} not found";
     public static final String NEED_2_ALARMS = "We need at least two alarms to create a situation, we found {} alarm";
@@ -69,6 +77,8 @@ public class SituationRestImpl implements SituationRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
+    private final SituationClient client;
+    private final ManagedChannel channel;
     private final AlarmDatasource alarmDatasource;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
@@ -78,14 +88,28 @@ public class SituationRestImpl implements SituationRest {
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         objectMapper = new ObjectMapper();
+
+        // Create a communication channel to the server, known as a Channel. Channels are thread-safe
+        // and reusable. It is common to create channels at the beginning of your application and reuse
+        // them until the application shuts down.
+        channel = ManagedChannelBuilder.forTarget(TARGET)
+                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
+                // needing certificates.
+                .usePlaintext()
+                .build();
+
+        client = new SituationClient(channel, new SituationToSituationProto(), canWeStore(kvStore));
     }
 
     @Override
-    public Response rejected(String situationId) throws InterruptedException {
+    public Response rejected(String situationId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
+        Optional<Situation> situationWithAlarmIdOptional;
+        situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
-        if (situationOptional.isPresent()) {
+        if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
             Situation situation = situationOptional.get();
+            Situation situationWithAlarmId = situationWithAlarmIdOptional.get();
             //check status
             if (Status.REJECTED.equals(situation.getStatus())) {
                 LOG.debug("Situation {} already rejected", situationId);
@@ -93,13 +117,21 @@ public class SituationRestImpl implements SituationRest {
             }
 
             try {
-                Situation situationRejected = ImmutableSituation.newBuilderFrom(situation)
+                feedback = String.format("reject situation [%s] -- user feedback :[%s]", situationId, feedback);
+                //Store rejected situation to the cloud before removing related alarms
+                ImmutableSituation immutableSituationWithId = ImmutableSituation.newBuilderFrom(situationWithAlarmId)
                         .setStatus(Status.REJECTED)
-                        .setAlarms(Collections.emptySet())
-                        .setSeverity(Severity.CLEARED)
+                        .setAlarms(situationWithAlarmId.getAlarms())
+                        .addFeedback(feedback)
                         .build();
 
-                return forwardAndStoreSituation(situationRejected, situationRejected.getAlarms());
+                ImmutableSituation immutableSituation = ImmutableSituation.newBuilderFrom(situation)
+                        .setStatus(Status.REJECTED)
+                        .setAlarms(Collections.emptySet())
+                        .setSeverity(Severity.NORMAL)
+                        .addFeedback(feedback)
+                        .build();
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -113,20 +145,26 @@ public class SituationRestImpl implements SituationRest {
     @Override
     public Response accepted(String situationId) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
+        Optional<Situation> situationWithAlarmIdOptional;
+        situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
-        if (situationOptional.isPresent()) {
+        if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
             Situation situation = situationOptional.get();
+            Situation situationWithAlarmId = situationWithAlarmIdOptional.get();
             //check status
             if (Status.ACCEPTED.equals(situation.getStatus())) {
                 LOG.debug("Situation {} already accepted", situationId);
                 return Response.accepted(MessageFormat.format("Situation {0} already accepted", situationId)).build();
             }
-
-            //Update situation
             try {
-                situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.ACCEPTED).build());
-                storeMLSituations();
-                return Response.ok().build();
+                ImmutableSituation immutableSituation = ImmutableSituation.newBuilderFrom(situation)
+                        .setStatus(Status.ACCEPTED)
+                        .build();
+
+                ImmutableSituation immutableSituationWithId = ImmutableSituation.newBuilderFrom(situationWithAlarmId)
+                        .setStatus(Status.ACCEPTED)
+                        .build();
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -155,17 +193,31 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response addAlarm(String situationId, String alarmId) throws InterruptedException {
+    public Response addAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
+        Optional<Situation> situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
-        if (situationOptional.isPresent()) {
+        if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
             if (alarmOptional.isPresent()) {
                 if (alarmIsNotInAnotherSituation(alarmOptional.get().getReductionKey())) {
+                    //adding feedback and new alarm
+                    Alarm alarm = alarmOptional.get();
+                    feedback = String.format("add alarm [%s] with description: [%s] to situation [%s] -- user feedback :[%s]", alarm.getId(), alarm.getDescription(), situationId, feedback);
                     Situation oldSituation = situationOptional.get();
+                    Situation oldSituationWithAlarmId = situationWithAlarmIdOptional.get();
                     Set<Alarm> alarms = new HashSet<>(oldSituation.getAlarms());
-                    alarms.add(alarmOptional.get());
-                    return forwardAndStoreSituation(oldSituation, alarms);
+                    alarms.add(alarm);
+                    ImmutableSituation immutableSituation = ImmutableSituation.newBuilderFrom(oldSituation)
+                            .addFeedback(feedback)
+                            .setAlarms(alarms)
+                            .build();
+
+                    ImmutableSituation immutableSituationWithId = ImmutableSituation.newBuilderFrom(oldSituationWithAlarmId)
+                            .addFeedback(feedback)
+                            .setAlarms(alarms)
+                            .build();
+                    return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
                 } else {
                     LOG.warn("Alarm {} is already in a situation, thus it will not be added to situation {}", alarmId, situationId);
                     return Response.status(Response.Status.CONFLICT).entity(MessageFormat.format("Alarm {0} is already in a situation", alarmId)).build();
@@ -181,18 +233,34 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response removeAlarm(String situationId, String alarmId) throws InterruptedException {
+    public Response removeAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
+        Optional<Situation> situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
-        if (situationOptional.isPresent()) {
+        if (situationOptional.isPresent() && situationWithAlarmIdOptional.isPresent()) {
+            if (situationOptional.get().getAlarms().size() <= 2) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("A situation needs at least 2 alarms").build();
+            }
             Optional<Alarm> alarmOptional = alarmDatasource.getAlarm(Integer.parseInt(alarmId));
             if (alarmOptional.isPresent()) {
                 Situation oldSituation = situationOptional.get();
+                Situation oldSituationWithAlarmId = situationWithAlarmIdOptional.get();
+                Alarm alarm = alarmOptional.get();
                 Set<Alarm> alarms = oldSituation.getAlarms()
                         .stream()
-                        .filter(alarm -> !alarmOptional.get().getReductionKey().equals(alarm.getReductionKey()))
+                        .filter(a -> !alarm.getReductionKey().equals(a.getReductionKey()))
                         .collect(Collectors.toUnmodifiableSet());
-                return forwardAndStoreSituation(oldSituation, alarms);
+                feedback = String.format("remove alarm [%s] with description: [%s] to situation [%s] -- user feedback :[%s]", alarm.getId(), alarm.getDescription(), situationId, feedback);
+                ImmutableSituation immutableSituation = ImmutableSituation.newBuilderFrom(oldSituation)
+                        .addFeedback(feedback)
+                        .setAlarms(alarms)
+                        .build();
+
+                ImmutableSituation immutableSituationWithId = ImmutableSituation.newBuilderFrom(oldSituationWithAlarmId)
+                        .addFeedback(feedback)
+                        .setAlarms(alarms)
+                        .build();
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
             } else {
                 LOG.warn("Alarm {} not found, thus it will not be removed from situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
@@ -231,6 +299,7 @@ public class SituationRestImpl implements SituationRest {
                 .setAlarms(alarms)
                 .setDiagnosticText(createSituationPayload.getDiagnosticText())
                 .setDescription(createSituationPayload.getDescription())
+                .setEngineParameter("user created")
                 .build();
         situationDatasource.forwardSituation(situation);
         return Response.ok().build();
@@ -248,11 +317,14 @@ public class SituationRestImpl implements SituationRest {
         return true;
     }
 
-    private Response forwardAndStoreSituation(Situation oldSituation, Set<Alarm> alarms) throws InterruptedException {
+    private Response forwardAndStoreSituation(Situation situation, Situation situationWithAlarmId) throws InterruptedException {
         try {
-            Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
-            situationDatasource.forwardSituation(newSituation);
-            storeMLSituations();
+            //update situation to opennms
+            situationDatasource.forwardSituation(situation);
+            //store updated situation to the cloud
+            client.sendSituation(situationWithAlarmId);
+            //store situation by status to the DB
+            kvStoreSituationsByStatus();
             return Response.ok().build();
         } catch (InterruptedException e) {
             throw e;
@@ -261,7 +333,7 @@ public class SituationRestImpl implements SituationRest {
         }
     }
 
-    private void storeMLSituations() throws JsonProcessingException, InterruptedException {
+    private void kvStoreSituationsByStatus() throws JsonProcessingException, InterruptedException {
         List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
@@ -271,5 +343,29 @@ public class SituationRestImpl implements SituationRest {
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestUtils.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestUtils.ALEC_CONFIG);
+    }
+
+    private boolean canWeStore(KeyValueStore<String> kvStore) {
+        Optional<String> agreementConfiguration = kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG);
+
+        boolean doStore;
+        if (agreementConfiguration.isPresent()) {
+            try {
+                doStore = objectMapper.readValue(agreementConfiguration.get(), Agreement.class).isAgreed();
+            } catch (JsonProcessingException e) {
+                doStore = false;
+            }
+        } else {
+            doStore = false;
+        }
+        return doStore;
+    }
+
+    public void destroy() {
+        try {
+            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

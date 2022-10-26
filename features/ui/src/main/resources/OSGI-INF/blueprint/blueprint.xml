@@ -22,7 +22,7 @@
         <argument ref="keyValueStore"/>
     </bean>
 
-    <bean id="situationRest" class="org.opennms.alec.rest.SituationRestImpl">
+    <bean id="situationRest" class="org.opennms.alec.rest.SituationRestImpl" destroy-method="destroy">
         <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
         <argument ref="alarmDatasource"/>

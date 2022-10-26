@@ -31,12 +31,12 @@ package org.opennms.alec.mapper;
 import java.util.Set;
 
 import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.grpc.SituationSetProtos;
+import org.opennms.alec.grpc.AlarmSet;
 
 public class AlarmToAlarmProto {
 
-    public SituationSetProtos.Alarm toAlarm(Alarm alarm) {
-        return SituationSetProtos.Alarm.newBuilder()
+    public org.opennms.alec.grpc.Alarm toAlarm(Alarm alarm) {
+        return org.opennms.alec.grpc.Alarm.newBuilder()
                 .setAlarmId(Long.parseLong(alarm.getId()))
                 .setFirstTimeSeen(Utils.getTimestamp(alarm.getFirstTime()))
                 .setLastTimeSeen(Utils.getTimestamp(alarm.getTime()))
@@ -49,8 +49,8 @@ public class AlarmToAlarmProto {
                 .build();
     }
 
-    public SituationSetProtos.AlarmSet toAlarms(Set<Alarm> alarms) {
-        SituationSetProtos.AlarmSet.Builder builder = SituationSetProtos.AlarmSet.newBuilder();
+    public AlarmSet toAlarms(Set<Alarm> alarms) {
+        AlarmSet.Builder builder = AlarmSet.newBuilder();
         for (Alarm alarm : alarms) {
             builder.addAlarms(toAlarm(alarm));
         }

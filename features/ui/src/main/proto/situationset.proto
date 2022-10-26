@@ -29,24 +29,6 @@ message AlarmSet {
   repeated Alarm alarms = 2;
 }
 
-message DistanceMeasure {
-  string name = 1;
-  double alpha = 2;
-  double beta = 3;
-  double epsilon = 4;
-}
-
-message Engine {
-  string name = 1;
-  DistanceMeasure distance_measure = 2;
-}
-
-enum StatusType {
-  ACCEPTED = 0;
-  REJECTED = 1;
-  MODIFIED = 2;
-}
-
 message Situation {
   int64 id = 1;
   google.protobuf.Timestamp creation_time = 2;
@@ -55,8 +37,9 @@ message Situation {
   string diagnostic = 5;
   repeated string tags = 6;
   google.protobuf.Timestamp last_modification_time = 7;
-  Engine engine = 8;
-  StatusType status = 9;
+  string engine_parameter = 8;
+  string status = 9;
+  repeated string rejected = 10;
 }
 
 message SituationSet {

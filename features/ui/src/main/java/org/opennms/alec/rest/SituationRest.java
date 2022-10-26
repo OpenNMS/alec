@@ -47,7 +47,7 @@ import org.opennms.alec.data.CreateSituationPayload;
 public interface SituationRest {
     @POST
     @Path("rejected/{id}")
-    Response rejected(@PathParam("id") String id) throws InterruptedException;
+    Response rejected(@PathParam("id") String id, String feedback) throws InterruptedException;
 
     @POST
     @Path("accepted/{id}")
@@ -62,11 +62,11 @@ public interface SituationRest {
 
     @PUT
     @Path("{situationId}/alarm/{alarmId}")
-    Response addAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId) throws InterruptedException;
+    Response addAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
 
     @DELETE
     @Path("{situationId}/alarm/{alarmId}")
-    Response removeAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId) throws InterruptedException;
+    Response removeAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
 
     @POST
     Response createSituation(CreateSituationPayload createSituationPayload);

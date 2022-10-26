@@ -33,27 +33,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.grpc.SituationSetProtos;
+import org.opennms.alec.grpc.SituationSet;
 
 public class SituationToSituationProto {
     final AlarmToAlarmProto alarmMapper = new AlarmToAlarmProto();
 
-   public org.opennms.alec.grpc.SituationSetProtos.Situation toSituation(Situation situation) {
-        return SituationSetProtos.Situation.newBuilder()
+   public org.opennms.alec.grpc.Situation toSituation(Situation situation) {
+        return org.opennms.alec.grpc.Situation.newBuilder()
                 .setAlarms(alarmMapper.toAlarms(situation.getAlarms()))
                 .setSeverity(situation.getSeverity().toString())
                 .setCreationTime(Utils.getTimestamp(situation.getCreationTime()))
                 .setLastModificationTime(Utils.getTimestamp(situation.getLastTime()))
                 .setDiagnostic(Optional.ofNullable(situation.getDiagnosticText()).orElse(""))
                 .setId(Long.parseLong(situation.getId()))
-//                .setEngine(situation.)
-                .setStatus(SituationSetProtos.StatusType.valueOf(situation.getStatus().toString()))
+                .setEngineParameter(Optional.ofNullable(situation.getEngineParameter()).orElse(""))
+                .setStatus(situation.getStatus().toString())
 //                .setTags()
+                .addAllRejected(situation.getFeedback())
                 .build();
     }
 
-    public SituationSetProtos.SituationSet toSituationSet(List<Situation> situations) {
-        return SituationSetProtos.SituationSet.newBuilder().addAllSituations(
+    public SituationSet toSituationSet(List<Situation> situations) {
+        return SituationSet.newBuilder().addAllSituations(
                 situations
                         .stream()
                         .map(this::toSituation)
@@ -61,8 +62,8 @@ public class SituationToSituationProto {
                 .build();
     }
 
-    public SituationSetProtos.SituationSet toSituationSet(Situation situation) {
-        return SituationSetProtos.SituationSet.newBuilder()
+    public SituationSet toSituationSet(Situation situation) {
+        return SituationSet.newBuilder()
                 .addSituations(toSituation(situation))
                 .build();
     }

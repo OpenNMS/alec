@@ -45,23 +45,27 @@ public class SituationClient {
     private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
 
     private final SituationToSituationProto mapper;
+    private boolean doStore;
 
-    public SituationClient(Channel channel, SituationToSituationProto mapper) {
+    public SituationClient(Channel channel, SituationToSituationProto mapper, boolean doStore) {
         blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
         this.mapper = mapper;
+        this.doStore = doStore;
     }
 
     public void sendSituation(Situation situation) {
-        try {
-            SituationSetProtos.SituationSet request = mapper.toSituationSet(situation);
-            LOG.debug("Will try to send {} ...", request);
-            blockingStub
-                    .withCallCredentials(
-                            new AuthenticationCallCredentials(
-                                    TOKEN))
-                    .sendSituations(request);
-        } catch (StatusRuntimeException e) {
-            LOG.error("RPC failed: {}", e.getStatus());
+        if (doStore) {
+            try {
+                SituationSet request = mapper.toSituationSet(situation);
+                LOG.debug("Will try to send {} ...", request);
+                blockingStub
+                        .withCallCredentials(
+                                new AuthenticationCallCredentials(
+                                        TOKEN))
+                        .sendSituations(request);
+            } catch (StatusRuntimeException e) {
+                LOG.error("RPC failed: {}", e.getStatus());
+            }
         }
     }
 }

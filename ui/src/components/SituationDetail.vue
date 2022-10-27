@@ -7,7 +7,7 @@ import {
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const situationStore = useSituationsStore()
 const emit = defineEmits(['situation-status-changed'])
@@ -17,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const situation = ref(situationStore.situations[props.index])
-let container = ref()
+const container = ref()
 const situationStatusChanged = (status: string, id: string) => {
 	emit('situation-status-changed', status, id)
 }

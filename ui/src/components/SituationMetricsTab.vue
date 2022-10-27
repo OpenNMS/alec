@@ -28,8 +28,8 @@ const props = defineProps<{
 	situation: TSituation
 	width: number
 }>()
-let maxWidth = ref(props.width)
-let container = ref(props.width)
+const maxWidth = ref(props.width)
+const container = ref(props.width)
 
 const nowDate = new Date().getTime()
 const getEvents = () => {
@@ -41,6 +41,7 @@ const getEvents = () => {
 getEvents()
 
 const getProportion = () => {
+	const nowDate = new Date().getTime()
 	return maxWidth.value / (Number(nowDate) - Number(minStart.value))
 }
 

@@ -7,7 +7,6 @@ const props = defineProps<{
 	alarm: TAlarm
 	proportion: number
 	minStart: number | Date
-	maxEnd: number | Date
 	events: TEvent[]
 }>()
 const nowDate = new Date().getTime()

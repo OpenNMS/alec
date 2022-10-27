@@ -31,7 +31,7 @@ const props = defineProps<{
 const maxWidth = ref(props.width)
 const container = ref(props.width)
 
-const nowDate = new Date().getTime()
+const nowDate = ref(new Date().getTime())
 const getEvents = () => {
 	if (!props.situation.events) {
 		const ids = props.situation?.alarms?.map((a) => a.id)
@@ -41,8 +41,8 @@ const getEvents = () => {
 getEvents()
 
 const getProportion = () => {
-	const nowDate = new Date().getTime()
-	return maxWidth.value / (Number(nowDate) - Number(minStart.value))
+	nowDate.value = new Date().getTime()
+	return maxWidth.value / (Number(nowDate.value) - Number(minStart.value))
 }
 
 const relatedAlarms = ref(props.situation.alarms)
@@ -203,7 +203,6 @@ const closePanel = () => {
 						:alarm="alarm"
 						:proportion="proportion"
 						:min-start="minStart"
-						:max-end="nowDate"
 						:events="props.situation.events[alarm.id]"
 					/>
 					<div class="panel" v-if="panelShow === alarm.id">

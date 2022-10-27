@@ -33,6 +33,7 @@ export type TSituation = {
 	ackTime: Date
 	reductionKeyMemo: TReductionKeyMemo
 	stickyMemo: TMemo
+	events: Record<number, TEvent[]>
 }
 
 export type TEvent = {

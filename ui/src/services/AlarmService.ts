@@ -1,6 +1,6 @@
 import { rest, v2 } from './axiosInstances'
 import { pick } from 'lodash'
-import { TAlarm, TNode, TSituation } from '@/types/TSituation'
+import { TAlarm, TEvent, TNode, TSituation } from '@/types/TSituation'
 
 const situationListEndpoint = '/alarms?_s='
 const urlencodedHeaders = {
@@ -102,6 +102,20 @@ export const getAlarmById = async (
 		const resp = await v2(`/alarms/${id}`)
 		if (resp.status === 200) {
 			return resp.data
+		}
+		return null
+	} catch (err) {
+		return null
+	}
+}
+
+export const getEventsByAlarmId = async (
+	id: number
+): Promise<TEvent[] | null> => {
+	try {
+		const resp = await v2(`/events?_s=alarm.id==${id}`)
+		if (resp.status === 200) {
+			return resp.data.event
 		}
 		return null
 	} catch (err) {

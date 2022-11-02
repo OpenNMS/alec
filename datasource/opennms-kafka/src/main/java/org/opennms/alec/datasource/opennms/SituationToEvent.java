@@ -31,6 +31,7 @@ package org.opennms.alec.datasource.opennms;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.util.AlarmUtil;
 import org.opennms.alec.datasource.opennms.events.Event;
 
@@ -41,37 +42,54 @@ public class SituationToEvent {
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
     public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
+    public static final String SITUATION_LOG_MSG = "situationLogMsg";
+    public static final String SITUATION_DESCR = "situationDescr";
+    public static final String SITUATION_REJECTED = "situation rejected";
+
+    private SituationToEvent() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static Event toEvent(Situation situation, Event.TimeFormat timeFormat) {
         final Event e = Event.withDateFormat(timeFormat);
         e.setUei(SITUATION_UEI);
 
-        // Use the max severity as the situation severity
-        final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
-                .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
-                .max()
-                .getAsInt());
-        e.setSeverity(maxSeverity.name().toLowerCase());
+        if (situation.getAlarms().isEmpty() && situation.getStatus() == Status.REJECTED) {
+            //situation should be cleared
+            e.setSeverity(Severity.CLEARED.name().toLowerCase());
+            e.addParam(SITUATION_LOG_MSG, SITUATION_REJECTED);
+            e.addParam(SITUATION_DESCR, SITUATION_REJECTED);
+        } else {
+            // Use the max severity as the situation severity
+            final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
+                    .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
+                    .max()
+                    .getAsInt());
+            e.setSeverity(maxSeverity.name().toLowerCase());
+
+            final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
+            e.addParam(SITUATION_LOG_MSG, alarmForDescr.getSummary());
+
+            String description = alarmForDescr.getDescription();
+            if (situation.getDiagnosticText() != null) {
+                description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
+            }
+            e.addParam(SITUATION_DESCR, description);
+
+            // Set the related reduction keys
+            situation.getAlarms().stream()
+                    .map(Alarm::getId)
+                    .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
+
+            // Set a node id - use the same node associated with the alarm we used to the description
+            e.setNodeId(alarmForDescr.getNodeId());
+        }
 
         // Relay the situation id
         e.addParam(SITUATION_ID_PARM_NAME, situation.getId());
 
-        final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
-        e.addParam("situationLogMsg", alarmForDescr.getSummary());
-
-        String description = alarmForDescr.getDescription();
-        if (situation.getDiagnosticText() != null) {
-            description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
-        }
-        e.addParam("situationDescr", description);
-
-        // Set the related reduction keys
-        situation.getAlarms().stream()
-                .map(Alarm::getId)
-                .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
-
-        // Set a node id - use the same node associated with the alarm we used to the description
-        e.setNodeId(alarmForDescr.getNodeId());
+        // Add situation status
+        e.addParam(SITUATION_STATUS_PARM_NAME, situation.getStatus().toString());
 
         return e;
     }

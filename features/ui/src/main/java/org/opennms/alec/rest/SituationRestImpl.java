@@ -30,6 +30,7 @@ package org.opennms.alec.rest;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.SituationStatusImpl;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
+import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
@@ -91,9 +93,13 @@ public class SituationRestImpl implements SituationRest {
             }
 
             try {
-                situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation).setStatus(Status.REJECTED).build());
-                storeMLSituations();
-                return Response.ok().build();
+                Situation situationRejected = ImmutableSituation.newBuilderFrom(situation)
+                        .setStatus(Status.REJECTED)
+                        .setAlarms(Collections.emptySet())
+                        .setSeverity(Severity.CLEARED)
+                        .build();
+
+                return forwardAndStoreSituation(situationRejected, situationRejected.getAlarms());
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {

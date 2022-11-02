@@ -39,12 +39,13 @@ watch(props, () => {
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
 	status.value = action
-	emit('situation-status-changed', action, props.situationInfo?.id)
+	//emit('situation-status-changed', action, props.situationInfo?.id)
+	situationStore.getSituation(props.situationInfo.id)
 }
 
 const actionClicked = () => {
-	situationStore.selectedSituation = props.situationInfo?.id
-	situationStore.getSituations()
+	//situationStore.selectedSituation = props.situationInfo?.id
+	//situationStore.getSituations()
 }
 </script>
 

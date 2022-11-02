@@ -25,8 +25,9 @@ const emit = defineEmits(['action-clicked'])
 const handleAcknowledgeAction = async (isAck: boolean) => {
 	const result = await sendAcknowledge(props.alarm.id, isAck)
 	if (result) {
-		situationStore.selectedSituation = props.situationId
-		emit('action-clicked', props.alarm.id)
+		//situationStore.selectedSituation = props.situationId
+		//emit('action-clicked', props.alarm.id)
+		situationStore.getSituation(props.situationId)
 	}
 	if (props.isSituation) {
 		await sendFeedbackAcceptSituation(
@@ -39,7 +40,7 @@ const handleAcknowledgeAction = async (isAck: boolean) => {
 const handleAction = async (action: string) => {
 	const result = await sendAction(props.alarm.id, action)
 	if (result) {
-		situationStore.selectedSituation = props.situationId
+		//situationStore.selectedSituation = props.situationId
 		emit('action-clicked', props.alarm.id)
 		situationStore.getSituation(props.situationId)
 	}

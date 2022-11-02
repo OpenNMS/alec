@@ -38,8 +38,8 @@ const removeMemo = async () => {
 	const result = await deleteMemo(props.id, props.type)
 	if (result) {
 		memoText.value = ''
-		situationStore.selectedSituation = props.situationId
-		situationStore.getSituation(props.situationId)
+		//	situationStore.selectedSituation = props.situationId
+		//situationStore.getSituation(props.situationId)
 	} else {
 		appStore.showErrorMsg('Error on removing memo :(')
 	}
@@ -50,8 +50,8 @@ const saveMemoText = async () => {
 	if (memoText.value && memoText.value !== '') {
 		const result = await saveMemo(props.id, props.type, memoText.value)
 		if (result) {
-			situationStore.selectedSituation = props.situationId
-			situationStore.getSituation(props.situationId)
+			//situationStore.selectedSituation = props.situationId
+			//situationStore.getSituation(props.situationId)
 		} else {
 			appStore.showErrorMsg('Error on saving memo :(')
 		}

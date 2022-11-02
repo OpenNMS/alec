@@ -11,7 +11,7 @@ import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { sendClearAlarms } from '@/services/AlarmService'
 import { FeatherCheckbox } from '@featherds/checkbox'
-
+const emit = defineEmits(['selected-severities'])
 const situationStore = useSituationsStore()
 
 type TState = {
@@ -20,11 +20,13 @@ type TState = {
 }
 const props = defineProps<{
 	alarms: TAlarm[]
-	situationId: number
+	situationId?: number
 }>()
 const selectAll = ref(false)
 
 const alarmFilters = computed(() => keys(groupBy(props.alarms, 'severity')))
+
+console.log(alarmFilters)
 const selectedFilters = ref(['all'])
 
 const state: TState = reactive({
@@ -41,12 +43,13 @@ const handleAlarmFilters = (selected: string) => {
 	}
 	if (selected === 'all' || selectedFilters.value.length === 0) {
 		selectedFilters.value = ['all']
-		state.alarms = props.alarms
+		//state.alarms = props.alarms
 	} else {
-		state.alarms = props.alarms.filter((a) =>
+		/*state.alarms = props.alarms.filter((a) =>
 			selectedFilters.value.includes(a.severity)
-		)
+		)*/
 	}
+	emit('selected-severities', selectedFilters.value)
 }
 watch(props, () => {
 	selectedFilters.value = ['all']
@@ -75,60 +78,31 @@ const handleClearAction = async () => {
 </script>
 
 <template>
-	<div class="container">
-		<div class="row">
-			<div class="title">Alarms</div>
-			<FeatherChipList
-				:key="selectedFilters.toString()"
-				v-if="alarmFilters.length > 1"
-				condensed
-				class="alarm-filters"
-				label="Random list for condensed visual testing"
-			>
-				<FeatherChip
-					:class="{ clicked: selectedFilters.includes('all') }"
-					@click="handleAlarmFilters('all')"
-				>
-					ALL
-				</FeatherChip>
-				<FeatherChip
-					:class="[
-						{ clicked: selectedFilters.includes(severity) },
-						`${severity?.toLowerCase()}-bg`
-					]"
-					v-for="severity in alarmFilters"
-					:key="severity"
-					@click="handleAlarmFilters(severity)"
-				>
-					<StatusColor :severity="severity" />{{ severity }}
-				</FeatherChip>
-			</FeatherChipList>
-		</div>
-		<div class="row actions">
-			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton class="acction-btn" @click="() => handleClearAction()">
-				<FeatherIcon
-					:icon="MarkComplete"
-					aria-hidden="true"
-					class="icon clear"
-				/>
-				<span>Clear</span>
-			</FeatherButton>
-		</div>
-
-		<div class="section">
-			<div class="alarm-list" v-if="state.alarms.length > 0">
-				<div v-for="alarmInfo in state.alarms" :key="alarmInfo.id">
-					<AlarmDetail
-						:alarm="alarmInfo"
-						:selectAll="selectAll"
-						:situation-id="props.situationId"
-						@alarm-selected="alarmSelected"
-					/>
-				</div>
-			</div>
-		</div>
-	</div>
+	<FeatherChipList
+		:key="selectedFilters.toString()"
+		v-if="alarmFilters.length > 0"
+		condensed
+		class="alarm-filters"
+		label=""
+	>
+		<FeatherChip
+			:class="{ clicked: selectedFilters.includes('all') }"
+			@click="handleAlarmFilters('all')"
+		>
+			ALL
+		</FeatherChip>
+		<FeatherChip
+			:class="[
+				{ clicked: selectedFilters.includes(severity) },
+				`${severity?.toLowerCase()}-bg`
+			]"
+			v-for="severity in alarmFilters"
+			:key="severity"
+			@click="handleAlarmFilters(severity)"
+		>
+			<StatusColor :severity="severity" />{{ severity }}
+		</FeatherChip>
+	</FeatherChipList>
 </template>
 
 <style scoped lang="scss">
@@ -156,10 +130,6 @@ const handleClearAction = async () => {
 	> label {
 		display: none !important;
 	}
-}
-
-.alarm-filters {
-	margin-left: 30px;
 }
 
 .title {

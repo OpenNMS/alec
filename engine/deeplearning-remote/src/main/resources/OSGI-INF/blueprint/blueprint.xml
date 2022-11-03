@@ -1,0 +1,29 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0">
+
+    <!-- Configuration properties -->
+    <cm:property-placeholder id="datasourceProperties" persistent-id="org.opennms.alec.engine.deeplearning" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="epsilon" value="500"/>
+            <cm:property name="numGraphProcessingThreads" value="2"/>
+            <!-- Defaults to max(#processors - 3, 1) when the value is set to 0 -->
+            <cm:property name="numTensorFlowProcessingThreads" value="0"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <bean id="deepLearningEngineConf" class="org.opennms.alec.engine.deeplearning.remote.DeepLearningEngineConf">
+        <property name="epsilon" value="${epsilon}"/>
+        <property name="numGraphProcessingThreads" value="${numGraphProcessingThreads}"/>
+        <property name="numTensorFlowProcessingThreads" value="${numTensorFlowProcessingThreads}"/>
+    </bean>
+
+    <!-- Create and expose the engine factory -->
+    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="20">
+        <bean class="org.opennms.alec.engine.deeplearning.remote.DeepLearningEngineRemoteFactory">
+            <argument index="0" ref="deepLearningEngineConf"/>
+            <argument index="1" value=""/>
+            <argument index="2" value=""/>
+        </bean>
+    </service>
+
+</blueprint>

@@ -42,6 +42,7 @@ import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.deeplearning.remote.DeepLearningEngineRemoteFactory;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,8 @@ public class EngineRestImpl implements EngineRest {
                 switch (engineName) {
                     case "dbscan":
                         return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory.get().getEngineFactory()));
+                    case "deeplearning-remote":
+                        return storeEngineParameter(configureDeeplearning(engineParameter, driver, (DeepLearningEngineRemoteFactory) factory.get().getEngineFactory()));
                     case "cluster":
                     default:
                         return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory.get().getEngineFactory()));
@@ -137,6 +140,18 @@ public class EngineRestImpl implements EngineRest {
                 .epsilon(dbScanEngineFactory.getEpsilon())
                 .distanceMeasureName(dbScanEngineFactory.getDistanceMeasureFactoryName())
                 .engineName(dbScanEngineFactory.getName())
+                .build();
+    }
+
+    private EngineParameter configureDeeplearning(EngineParameter engineParameter, Driver driver, DeepLearningEngineRemoteFactory deepLearningEngineRemoteFactory) {
+        deepLearningEngineRemoteFactory.setUri(engineParameter.getRemoteUri());
+        deepLearningEngineRemoteFactory.setToken(engineParameter.getToken());
+        driver.setEngineFactory(deepLearningEngineRemoteFactory);
+        driver.destroy();
+        driver.initAsync();
+
+        return EngineParameterImpl.newBuilder()
+                .engineName(deepLearningEngineRemoteFactory.getName())
                 .build();
     }
 }

@@ -63,13 +63,13 @@ public class DriverHealthCheck implements HealthCheck {
         // Verify that ticks are completing in a reasonable about of time
         final Timer ticks = driver.getTickTimer();
         final long tickResolutionMs = driver.getTickResolutionMs();
-        final long tickDuration99Ms = TimeUnit.NANOSECONDS.toMillis(new Double(ticks.getSnapshot().get99thPercentile()).longValue());
+        final long tickDuration99Ms = TimeUnit.NANOSECONDS.toMillis((long) ticks.getSnapshot().get99thPercentile());
         if (tickDuration99Ms > tickResolutionMs) {
             return ImmutableResponse.newInstance(Status.Failure, String.format("Ticks are taking too long. " +
                     "Expected rate: %d ms Duration (99 percentile): %d ms", tickResolutionMs, tickDuration99Ms));
         }
 
         // All checks passed
-        return ImmutableResponse.newInstance(Status.Success, String.format("Tick duration (99 percentile): %d ms", tickDuration99Ms));
+        return ImmutableResponse.newInstance(Status.Success, String.format("Engine: %s - Tick duration (99 percentile): %d ms", driver.getEngineFactory().getName(), tickDuration99Ms));
     }
 }

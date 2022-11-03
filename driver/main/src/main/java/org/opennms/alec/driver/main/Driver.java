@@ -116,6 +116,7 @@ public class Driver implements EngineRegistry {
         initAsync();
     }
 
+    @SuppressWarnings({"java:S2142", "java:S1149"})
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         LOG.info("Creating engine with name: {}", engineFactory.getName());
@@ -179,8 +180,9 @@ public class Driver implements EngineRegistry {
                 // Expose the metrics for this engine via JMX
                 jmxReporter.start();
             } catch (Exception e) {
-                if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     LOG.warn("Initialization was interrupted.");
+                    Thread.currentThread().interrupt();
                 } else {
                     LOG.error("Initialization failed with exception.", e);
                 }
@@ -227,6 +229,7 @@ public class Driver implements EngineRegistry {
                 }
             } catch (InterruptedException e) {
                 LOG.error("Interrupted while waiting for initialization thread to stop.");
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -272,6 +275,10 @@ public class Driver implements EngineRegistry {
     @Override
     public EngineRegistry getEngineRegistry() {
         return this;
+    }
+
+    public EngineFactory getEngineFactory() {
+        return engineFactory;
     }
 
     public void setEngineFactory(EngineFactory engineFactory) {

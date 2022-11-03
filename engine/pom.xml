@@ -14,6 +14,7 @@
         <module>cluster</module>
         <module>dbscan</module>
         <module>deeplearning</module>
+        <module>deeplearning-remote</module>
         <module>itest</module>
     </modules>
 </project>

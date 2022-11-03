@@ -101,6 +101,13 @@
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning/${project.version}</bundle>
     </feature>
 
+    <feature name="alec-engine-deeplearning-remote" description="ALEC :: Engine :: Deep Learning Remote" version="${project.version}">
+        <feature version="${project.version}">alec-engine-cluster</feature>
+        <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
+        <bundle dependency="true">mvn:com.googlecode.json-simple/json-simple/${json-simple.version}</bundle>
+        <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning.remote/${project.version}</bundle>
+    </feature>
+
     <!-- Drivers -->
 
     <feature name="alec-driver-main" description="ALEC :: Driver :: Main" version="${project.version}">
@@ -223,6 +230,7 @@
         <feature>opennms-alec-plugin</feature>
         <feature>alec-driver-main</feature>
         <feature>alec-engine-dbscan</feature>
+        <feature>alec-engine-deeplearning-remote</feature>
         <feature>alec-datasource-opennms-direct</feature>
         <feature>alec-processor-standalone</feature>
         <feature>alec-features-graph-shell</feature>

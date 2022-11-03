@@ -23,7 +23,6 @@ const situationStore = useSituationsStore()
 const REJECTED = CONST.REJECTED
 
 const userStore = useUserStore()
-const emit = defineEmits(['situation-status-changed'])
 
 const props = defineProps<{
 	situationInfo: TSituation
@@ -39,13 +38,7 @@ watch(props, () => {
 const handleFeedbackSituation = (action: string) => {
 	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
 	status.value = action
-	//emit('situation-status-changed', action, props.situationInfo?.id)
 	situationStore.getSituation(props.situationInfo.id)
-}
-
-const actionClicked = () => {
-	//situationStore.selectedSituation = props.situationInfo?.id
-	//situationStore.getSituations()
 }
 </script>
 
@@ -58,7 +51,6 @@ const actionClicked = () => {
 				showClear
 				isSituation
 				:situation-id="props.situationInfo.id"
-				@action-clicked="actionClicked"
 			/>
 
 			<div v-if="userStore.allowSave" class="btn-row">

@@ -6,11 +6,9 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherTextarea } from '@featherds/textarea'
 import { TMemo } from '@/types/TSituation'
 import { saveMemo, deleteMemo } from '@/services/AlarmService'
-import { useSituationsStore } from '@/store/useSituationsStore'
 import { useAppStore } from '@/store/useAppStore'
 import { watch, ref } from 'vue'
 
-const situationStore = useSituationsStore()
 const appStore = useAppStore()
 
 const props = defineProps<{
@@ -38,8 +36,6 @@ const removeMemo = async () => {
 	const result = await deleteMemo(props.id, props.type)
 	if (result) {
 		memoText.value = ''
-		//	situationStore.selectedSituation = props.situationId
-		//situationStore.getSituation(props.situationId)
 	} else {
 		appStore.showErrorMsg('Error on removing memo :(')
 	}
@@ -49,10 +45,7 @@ const saveMemoText = async () => {
 	isEdit.value = false
 	if (memoText.value && memoText.value !== '') {
 		const result = await saveMemo(props.id, props.type, memoText.value)
-		if (result) {
-			//situationStore.selectedSituation = props.situationId
-			//situationStore.getSituation(props.situationId)
-		} else {
+		if (!result) {
 			appStore.showErrorMsg('Error on saving memo :(')
 		}
 	}

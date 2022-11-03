@@ -25,7 +25,6 @@ const handleSituationSelected = () => {
 		v-on:click="handleSituationSelected"
 		class="card"
 		:class="{
-			selected: props.selected,
 			rejected: props.situationInfo.status == REJECTED
 		}"
 	>
@@ -86,9 +85,6 @@ const handleSituationSelected = () => {
 	border: 1px solid $border-grey;
 	height: 100%;
 	&:hover {
-		border: 1px solid $dark-blue;
-	}
-	&.selected {
 		border: 1px solid $dark-blue;
 	}
 

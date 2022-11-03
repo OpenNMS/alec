@@ -1,36 +1,29 @@
 <script setup lang="ts">
-import { TAlarm } from '@/types/TSituation'
+import { TAlarm, TSituation } from '@/types/TSituation'
 import { FeatherChipList, FeatherChip } from '@featherds/chips'
 import { ref, watch, computed, reactive } from 'vue'
-import { groupBy, keys, remove } from 'lodash'
-import AlarmDetail from '@/components/AlarmDetail.vue'
+import { groupBy, keys } from 'lodash'
 import StatusColor from '@/elements/StatusColor.vue'
-import { FeatherButton } from '@featherds/button'
-import MarkComplete from '@featherds/icon/action/MarkComplete'
-import { FeatherIcon } from '@featherds/icon'
-import { useSituationsStore } from '@/store/useSituationsStore'
-import { sendClearAlarms } from '@/services/AlarmService'
-import { FeatherCheckbox } from '@featherds/checkbox'
+
 const emit = defineEmits(['selected-severities'])
-const situationStore = useSituationsStore()
 
 type TState = {
-	selectedAlarms: number[]
-	alarms: TAlarm[]
+	alarms: TAlarm[] | TSituation[]
 }
 const props = defineProps<{
-	alarms: TAlarm[]
+	alarms: TAlarm[] | TSituation[]
 	situationId?: number
+	preSelected?: string[]
 }>()
 const selectAll = ref(false)
 
 const alarmFilters = computed(() => keys(groupBy(props.alarms, 'severity')))
 
-console.log(alarmFilters)
-const selectedFilters = ref(['all'])
+const selectedFilters = ref(
+	props.preSelected?.length ? props.preSelected : ['all']
+)
 
 const state: TState = reactive({
-	selectedAlarms: [],
 	alarms: props.alarms
 })
 
@@ -43,38 +36,18 @@ const handleAlarmFilters = (selected: string) => {
 	}
 	if (selected === 'all' || selectedFilters.value.length === 0) {
 		selectedFilters.value = ['all']
-		//state.alarms = props.alarms
-	} else {
-		/*state.alarms = props.alarms.filter((a) =>
-			selectedFilters.value.includes(a.severity)
-		)*/
 	}
 	emit('selected-severities', selectedFilters.value)
 }
+
 watch(props, () => {
-	selectedFilters.value = ['all']
+	selectedFilters.value = props.preSelected?.length
+		? props.preSelected
+		: ['all']
 	state.alarms = props.alarms
 	state.selectedAlarms = []
 	selectAll.value = false
 })
-
-const alarmSelected = (id: number) => {
-	if (state.selectedAlarms.includes(id)) {
-		remove(state.selectedAlarms, (a) => a == id)
-	} else {
-		state.selectedAlarms.push(id)
-	}
-}
-
-const handleClearAction = async () => {
-	if (state.selectedAlarms.length) {
-		await sendClearAlarms(state.selectedAlarms)
-		//situationStore.selectedSituation = props.situationId
-		situationStore.getSituation(props.situationId)
-		state.selectedAlarms = []
-		selectAll.value = false
-	}
-}
 </script>
 
 <template>
@@ -82,7 +55,6 @@ const handleClearAction = async () => {
 		:key="selectedFilters.toString()"
 		v-if="alarmFilters.length > 0"
 		condensed
-		class="alarm-filters"
 		label=""
 	>
 		<FeatherChip
@@ -108,57 +80,9 @@ const handleClearAction = async () => {
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
 @import '@featherds/table/scss/table';
-.container {
-	border: 1px solid $border-grey;
-	padding: 15px;
-	background-color: #ffffff;
-}
 
-.row {
-	display: flex;
-	flex-direction: row;
-	align-items: baseline;
-}
-
-.actions {
-	margin-top: 20px;
-	padding-left: 15px;
-
-	> div {
-		margin-right: 10px;
-	}
-	> label {
-		display: none !important;
-	}
-}
-
-.title {
-	font-size: 21px;
-	font-weight: 600;
-	padding: 5px;
-	padding-bottom: 10px;
-}
 .clicked {
 	border: 2px solid $dark-blue !important;
 	background-color: #e6e6e6 !important;
-}
-.alarm-list {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	> div {
-		margin-top: 20px;
-		width: 100%;
-	}
-}
-
-.icon {
-	font-size: 18px;
-	margin-right: 4px;
-	vertical-align: sub;
-
-	&.clear {
-		color: blue;
-	}
 }
 </style>

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, Router } from 'vue-router'
-import SituationList2 from '@/containers/SituationList2.vue'
-import SituationDetail2 from '@/containers/SituationDetail2.vue'
+import SituationList2 from '@/containers/SituationList.vue'
+import SituationDetail2 from '@/containers/SituationDetail.vue'
 
 import WelcomePage from '@/components/WelcomePage.vue'
 import ErrorPage from '@/components/ErrorPage.vue'

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import {
-	getAllAlarms,
 	getSituations,
 	getAllNodes,
 	getAlarmsByIds,
@@ -16,7 +15,7 @@ import {
 	TSituation,
 	TSituationSaved
 } from '@/types/TSituation'
-import { groupBy, mapKeys, cloneDeep, reverse, sortBy } from 'lodash'
+import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
 	node: Record<string, string>
@@ -48,23 +47,15 @@ export const useSituationsStore = defineStore('situationsStore', {
 			}
 		},
 		async getSituations() {
-			console.log('-----get situations-----')
 			this.situations = []
 			const result = await getSituations()
-			//const resultAlarms = await getAllAlarms()
-			//let allAlarms: Record<number, TAlarm> = []
-			//if (resultAlarms) {
-			//	allAlarms = mapKeys(resultAlarms, (a) => a.id)
-			//}
 
 			const resultStatus = await getSituationsStatus()
 			if (result) {
 				const situations = result.alarm.map((s: TSituation) => {
-					//const alarms = s.relatedAlarms.map((a: TAlarm) => allAlarms[a.id])
 					const sitStatus = resultStatus.filter(
 						(rs: TSituationSaved) => parseInt(rs.id) === s.id
 					)
-					s.alarms = s.relatedAlarms //sortBy(alarms, ['id'])
 					s.status = sitStatus && sitStatus[0] ? sitStatus[0].status : 'CREATED'
 					return s
 				})
@@ -80,19 +71,13 @@ export const useSituationsStore = defineStore('situationsStore', {
 			}
 		},
 		async getSituation(id: number) {
-			console.log('-----get Situation-----')
-
 			const resultSituation = (await getAlarmById(id)) as TSituation
 			if (resultSituation) {
 				const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
 				const resultAlarms = await getAlarmsByIds(alarmIds)
 				const alarms = resultAlarms as TAlarm[]
 				resultSituation.alarms = sortBy(alarms, ['id'])
-				//const situations = cloneDeep(this.situations)
-				//const index = this.situations.findIndex((s) => s.id == id)
-				//situations[index] = resultSituation
 				this.situationDetail = resultSituation
-				//this.situations = situations
 			}
 		},
 		async getEvents(situationId: number, alarmIds: number[]) {
@@ -105,8 +90,6 @@ export const useSituationsStore = defineStore('situationsStore', {
 					}
 				})
 			)
-			const index = this.situations.findIndex((s) => s.id == situationId)
-			//this.situations[index].events = eventsById
 			if (this.situationDetail) {
 				this.situationDetail.events = eventsById
 			}

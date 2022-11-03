@@ -10,40 +10,33 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { FeatherIcon } from '@featherds/icon'
+import { TSituation } from '@/types/TSituation'
 
 import { FeatherButton } from '@featherds/button'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 const router = useRouter()
 const route = useRoute()
-
-const situationId = ref(route.params.id)
+const paramId = parseInt(route.params.id as string)
+const situationId = ref(paramId)
 const situationStore = useSituationsStore()
 situationStore.getSituation(situationId.value)
 
 if (!situationStore.situations.length) {
 	situationStore.getSituations()
 }
-const emit = defineEmits(['situation-status-changed'])
 
-const situation = ref(null)
+const situation = ref()
 const container = ref()
 const filteredSituationsCurrentIndex = ref(
-	situationStore.filteredSituations.findIndex((id) => id == situationId.value)
+	situationStore.filteredSituations.findIndex((id) => id === situationId.value)
 )
 
-const situationStatusChanged = (status: string, id: string) => {
-	emit('situation-status-changed', status, id)
-}
-
-/*
-watch(props, () => {
-	situation.value = situationStore.situations[index]
-})
-*/
-
-situationStore.$subscribe((mutation, storeState) => {
-	situation.value = storeState.situationDetail
-})
+watch(
+	() => situationStore.situationDetail,
+	() => {
+		situation.value = situationStore.situationDetail as TSituation
+	}
+)
 
 onMounted(() => {
 	const widthCont =
@@ -56,11 +49,9 @@ const showSituationList = () => {
 		name: 'situations'
 	})
 }
-const showNextSituation = (step) => {
-	console.log(situationStore.filteredSituations)
+const showNextSituation = (step: number) => {
 	const index = filteredSituationsCurrentIndex.value
 	const id = situationStore.filteredSituations[index + step]
-	console.log(id)
 	router.push({
 		name: 'situationDetail',
 		params: {
@@ -70,7 +61,7 @@ const showNextSituation = (step) => {
 }
 
 watch(route, () => {
-	situationId.value = route.params.id
+	situationId.value = parseInt(route.params.id as string)
 	situationStore.getSituation(situationId.value)
 	filteredSituationsCurrentIndex.value =
 		situationStore.filteredSituations.findIndex((id) => id == situationId.value)
@@ -117,10 +108,7 @@ watch(route, () => {
 					<FeatherTab>Metrics</FeatherTab>
 				</template>
 				<FeatherTabPanel class="panel">
-					<SituationDetailTab
-						:situation-info="situation"
-						@situation-status-changed="situationStatusChanged"
-					/>
+					<SituationDetailTab :situation-info="situation" />
 				</FeatherTabPanel>
 				<FeatherTabPanel class="panel"
 					><SituationMetricsTab

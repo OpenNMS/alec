@@ -18,7 +18,8 @@ import {
 import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
-	node: Record<string, string>
+	node: Record<string, string> | undefined
+	severities: string[]
 }
 type TState = {
 	situations: TSituation[]
@@ -71,13 +72,15 @@ export const useSituationsStore = defineStore('situationsStore', {
 			}
 		},
 		async getSituation(id: number) {
-			const resultSituation = (await getAlarmById(id)) as TSituation
-			if (resultSituation) {
-				const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
-				const resultAlarms = await getAlarmsByIds(alarmIds)
-				const alarms = resultAlarms as TAlarm[]
-				resultSituation.alarms = sortBy(alarms, ['id'])
-				this.situationDetail = resultSituation
+			if (id) {
+				const resultSituation = (await getAlarmById(id)) as TSituation
+				if (resultSituation) {
+					const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
+					const resultAlarms = await getAlarmsByIds(alarmIds)
+					const alarms = resultAlarms as TAlarm[]
+					resultSituation.alarms = sortBy(alarms, ['id'])
+					this.situationDetail = resultSituation
+				}
 			}
 		},
 		async getEvents(situationId: number, alarmIds: number[]) {

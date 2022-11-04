@@ -45,7 +45,6 @@ watch(props, () => {
 		? props.preSelected
 		: ['all']
 	state.alarms = props.alarms
-	state.selectedAlarms = []
 	selectAll.value = false
 })
 </script>

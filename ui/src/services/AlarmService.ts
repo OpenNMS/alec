@@ -41,11 +41,14 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 	}
 }
 
-export const sendClearAlarms = async (ids: number[]) => {
+export const sendActionMultiplyAlarms = async (
+	ids: number[],
+	action: string
+) => {
 	try {
 		const alarmIds = ids.join(',alarm.id==')
 		const result = await v2.put(
-			`alarms?_s=alarm.id==${alarmIds}&clear=true`,
+			`alarms?_s=alarm.id==${alarmIds}&${action}=true`,
 			null,
 			urlencodedHeaders
 		)

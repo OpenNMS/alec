@@ -7,9 +7,10 @@ import { FeatherButton } from '@featherds/button'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { sendClearAlarms } from '@/services/AlarmService'
+import { sendActionMultiplyAlarms } from '@/services/AlarmService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import CheckCircle from '@featherds/icon/action/CheckCircle'
 
 const situationStore = useSituationsStore()
 
@@ -45,9 +46,9 @@ const alarmSelected = (id: number) => {
 	}
 }
 
-const handleClearAction = async () => {
+const handleActionMultiplyAlarms = async (action: string) => {
 	if (state.selectedAlarms.length) {
-		await sendClearAlarms(state.selectedAlarms)
+		await sendActionMultiplyAlarms(state.selectedAlarms, action)
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
 		selectAll.value = false
@@ -74,13 +75,23 @@ const updateList = (severities: string[]) => {
 		</div>
 		<div class="row actions">
 			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton class="acction-btn" @click="() => handleClearAction()">
+			<FeatherButton
+				class="acction-btn"
+				@click="() => handleActionMultiplyAlarms('clear')"
+			>
 				<FeatherIcon
 					:icon="MarkComplete"
 					aria-hidden="true"
 					class="icon clear"
 				/>
 				<span>Clear</span>
+			</FeatherButton>
+			<FeatherButton
+				class="acction-btn"
+				@click="() => handleActionMultiplyAlarms('ack')"
+			>
+				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
+				<span>Acknowledge</span>
 			</FeatherButton>
 		</div>
 
@@ -157,6 +168,9 @@ const updateList = (severities: string[]) => {
 
 	&.clear {
 		color: blue;
+	}
+	&.ack {
+		color: green;
 	}
 }
 </style>

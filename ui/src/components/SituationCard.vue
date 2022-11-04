@@ -14,6 +14,10 @@ const props = defineProps<{
 	situationInfo: TSituation
 }>()
 const emit = defineEmits(['situation-selected'])
+const description =
+	props.situationInfo.description
+		.replace(/(<([^>]+)>)/gi, '')
+		.substring(0, 230) + '...'
 
 const handleSituationSelected = () => {
 	emit('situation-selected', props.situationInfo?.id)
@@ -54,7 +58,7 @@ const handleSituationSelected = () => {
 				<span class="info-title"> First Event: </span
 				>{{ formatDate(props.situationInfo.firstEventTime) }}
 			</div>
-			<span class="description" v-html="situationInfo.description"></span>
+			<div class="description">{{ description }}</div>
 			<hr />
 			<div class="count-info" v-if="props.situationInfo.relatedAlarms">
 				Alarms:
@@ -92,13 +96,6 @@ const handleSituationSelected = () => {
 		background-color: #f3f3f3;
 		opacity: 0.4;
 	}
-}
-.description {
-	text-overflow: ellipsis;
-	-webkit-line-clamp: 3;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
 }
 .title-row {
 	display: flex;

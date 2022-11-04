@@ -18,7 +18,7 @@ import {
 import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
-	node: Record<string, string> | undefined
+	node?: Record<string, string>
 	severities: string[]
 }
 type TState = {

@@ -6,7 +6,7 @@ import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import Refresh from '@featherds/icon/navigation/Refresh'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
@@ -296,7 +296,6 @@ h2 {
 }
 .situation-list {
 	display: flex;
-	flex-direction: row;
 	background-color: #ffffff;
 	padding-bottom: 20px;
 	margin: auto;

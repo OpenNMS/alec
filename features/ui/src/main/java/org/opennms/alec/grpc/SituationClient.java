@@ -38,14 +38,11 @@ import io.grpc.StatusRuntimeException;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
-    public static final String TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." +
-            "eyJzdWIiOiJhbGVjIiwibmFtZSI6IkFsZWMgUG9DIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
-            "pj85oD7z6aOJ0JkR8HK35aON7J4QALuFO_H6DswSSU8";
 
     private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
 
     private final SituationToSituationProto mapper;
-    private boolean doStore;
+    private final boolean doStore;
 
     public SituationClient(Channel channel, SituationToSituationProto mapper, boolean doStore) {
         blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
@@ -53,7 +50,7 @@ public class SituationClient {
         this.doStore = doStore;
     }
 
-    public void sendSituation(Situation situation) {
+    public void sendSituation(Situation situation, String token) {
         if (doStore) {
             try {
                 SituationSet request = mapper.toSituationSet(situation);
@@ -61,7 +58,7 @@ public class SituationClient {
                 blockingStub
                         .withCallCredentials(
                                 new AuthenticationCallCredentials(
-                                        TOKEN))
+                                        token))
                         .sendSituations(request);
             } catch (StatusRuntimeException e) {
                 LOG.error("RPC failed: {}", e.getStatus());

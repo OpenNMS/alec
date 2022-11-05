@@ -48,7 +48,7 @@ public class SituationRestImplTest {
     @Test
     public void rejected() throws InterruptedException {
         SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms));
-        try (Response actual = underTest.rejected("11", "rejected")) {
+        try (Response actual = underTest.rejected("","11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
         }
     }
@@ -56,7 +56,7 @@ public class SituationRestImplTest {
     @Test
     public void removeAlarm() throws InterruptedException {
         SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms));
-        try (Response actual = underTest.removeAlarm("11", "2", "remove alarm 1")) {
+        try (Response actual = underTest.removeAlarm("","11", "2", "remove alarm 1")) {
             assertThat(actual.getStatus(), equalTo(200));
         }
     }

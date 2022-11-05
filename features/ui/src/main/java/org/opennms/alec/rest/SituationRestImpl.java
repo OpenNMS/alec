@@ -102,7 +102,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response rejected(String situationId, String feedback) throws InterruptedException {
+    public Response rejected(String token, String situationId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
         Optional<Situation> situationWithAlarmIdOptional;
         situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
@@ -131,7 +131,7 @@ public class SituationRestImpl implements SituationRest {
                         .setSeverity(Severity.NORMAL)
                         .addFeedback(feedback)
                         .build();
-                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId, token);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -143,7 +143,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response accepted(String situationId) throws InterruptedException {
+    public Response accepted(String token, String situationId) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
         Optional<Situation> situationWithAlarmIdOptional;
         situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
@@ -164,7 +164,7 @@ public class SituationRestImpl implements SituationRest {
                 ImmutableSituation immutableSituationWithId = ImmutableSituation.newBuilderFrom(situationWithAlarmId)
                         .setStatus(Status.ACCEPTED)
                         .build();
-                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId, token);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -193,7 +193,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response addAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
+    public Response addAlarm(String token, String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
         Optional<Situation> situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
@@ -217,7 +217,7 @@ public class SituationRestImpl implements SituationRest {
                             .addFeedback(feedback)
                             .setAlarms(alarms)
                             .build();
-                    return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
+                    return forwardAndStoreSituation(immutableSituation, immutableSituationWithId, token);
                 } else {
                     LOG.warn("Alarm {} is already in a situation, thus it will not be added to situation {}", alarmId, situationId);
                     return Response.status(Response.Status.CONFLICT).entity(MessageFormat.format("Alarm {0} is already in a situation", alarmId)).build();
@@ -233,7 +233,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response removeAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
+    public Response removeAlarm(String token, String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
         Optional<Situation> situationWithAlarmIdOptional = situationDatasource.getSituationWithAlarmId(Integer.parseInt(situationId));
 
@@ -260,7 +260,7 @@ public class SituationRestImpl implements SituationRest {
                         .addFeedback(feedback)
                         .setAlarms(alarms)
                         .build();
-                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId);
+                return forwardAndStoreSituation(immutableSituation, immutableSituationWithId, token);
             } else {
                 LOG.warn("Alarm {} not found, thus it will not be removed from situation {}", alarmId, situationId);
                 return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(ALARM_NOT_FOUND, alarmId)).build();
@@ -272,7 +272,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response createSituation(CreateSituationPayload createSituationPayload) {
+    public Response createSituation(String token, CreateSituationPayload createSituationPayload) {
         List<String> alarmIdList = createSituationPayload.getAlarmIdList();
         if (alarmIdList.size() <= 1) {
             return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarmIdList.size())).build();
@@ -317,12 +317,12 @@ public class SituationRestImpl implements SituationRest {
         return true;
     }
 
-    private Response forwardAndStoreSituation(Situation situation, Situation situationWithAlarmId) throws InterruptedException {
+    private Response forwardAndStoreSituation(Situation situation, Situation situationWithAlarmId, String token) throws InterruptedException {
         try {
             //update situation to opennms
             situationDatasource.forwardSituation(situation);
             //store updated situation to the cloud
-            client.sendSituation(situationWithAlarmId);
+            client.sendSituation(situationWithAlarmId, token);
             //store situation by status to the DB
             kvStoreSituationsByStatus();
             return Response.ok().build();

@@ -39,6 +39,7 @@ import org.opennms.alec.datasource.api.Severity;
  */
 public final class ImmutableAlarm implements Alarm {
     private final String id;
+    private final long longId;
     private final long firstTime;
     private final long time;
     private final Severity severity;
@@ -53,6 +54,7 @@ public final class ImmutableAlarm implements Alarm {
 
     private ImmutableAlarm(Builder builder) {
         this.id = builder.id;
+        this.longId = builder.longId;
         this.firstTime = builder.firstTime;
         this.time = builder.time;
         this.severity = builder.severity;
@@ -68,6 +70,7 @@ public final class ImmutableAlarm implements Alarm {
 
     public static final class Builder {
         private String id;
+        private long longId;
         private long firstTime;
         private long time;
         private Severity severity;
@@ -87,6 +90,7 @@ public final class ImmutableAlarm implements Alarm {
 
         private Builder(Alarm alarm) {
             this.id = alarm.getId();
+            this.longId = alarm.getLongId();
             this.firstTime = alarm.getFirstTime();
             this.time = alarm.getTime();
             this.severity = alarm.getSeverity();
@@ -102,6 +106,11 @@ public final class ImmutableAlarm implements Alarm {
 
         public Builder setId(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder setLongId(long longId) {
+            this.longId = longId;
             return this;
         }
 
@@ -181,6 +190,11 @@ public final class ImmutableAlarm implements Alarm {
     }
 
     @Override
+    public long getLongId() {
+        return longId;
+    }
+
+    @Override
     public long getFirstTime(){
         return firstTime;
     }
@@ -248,6 +262,7 @@ public final class ImmutableAlarm implements Alarm {
         return time == that.time &&
                 firstTime == that.firstTime &&
                 Objects.equals(id, that.id) &&
+                Objects.equals(longId, that.longId) &&
                 severity == that.severity &&
                 Objects.equals(inventoryObjectId, that.inventoryObjectId) &&
                 Objects.equals(inventoryObjectType, that.inventoryObjectType) &&
@@ -261,13 +276,14 @@ public final class ImmutableAlarm implements Alarm {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time, severity, inventoryObjectId, inventoryObjectType, summary, description, nodeId, nodeLabel, nodeLocation, reductionKey);
+        return Objects.hash(id, longId, time, severity, inventoryObjectId, inventoryObjectType, summary, description, nodeId, nodeLabel, nodeLocation, reductionKey);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", ImmutableAlarm.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
+                .add("longId=" + longId)
                 .add("firstTime=" + firstTime)
                 .add("time=" + time)
                 .add("severity=" + severity)

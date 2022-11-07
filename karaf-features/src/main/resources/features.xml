@@ -105,6 +105,8 @@
         <feature version="${project.version}">alec-engine-cluster</feature>
         <bundle dependency="true">wrap:mvn:info.debatty/java-string-similarity/${string.similarity.version}</bundle>
         <bundle dependency="true">mvn:com.googlecode.json-simple/json-simple/${json-simple.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient-osgi.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore-osgi.version}</bundle>
         <bundle>mvn:org.opennms.alec.engine/org.opennms.alec.engine.deeplearning.remote/${project.version}</bundle>
     </feature>
 

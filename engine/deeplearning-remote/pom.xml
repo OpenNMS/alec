@@ -30,14 +30,14 @@
             <version>${json-simple.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.http</groupId>
-            <artifactId>org.apache.karaf.http.core</artifactId>
-            <version>${karaf.version}</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
+            <version>${httpclient-osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>fluent-hc</artifactId>
-            <version>${fluent-hc.version}</version>
+            <artifactId>httpcore-osgi</artifactId>
+            <version>${httpcore-osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

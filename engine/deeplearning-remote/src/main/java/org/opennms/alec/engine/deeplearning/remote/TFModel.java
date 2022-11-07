@@ -57,7 +57,7 @@ public class TFModel {
                     .bodyString(data, ContentType.APPLICATION_JSON)
                     .execute().returnContent();
         } catch (IOException e) {
-            LOG.error("{}", e.getMessage());
+            LOG.error("Error while sending request to target host: '{}'", uri, e.getCause());
             return null;
         }
     }
@@ -102,6 +102,10 @@ public class TFModel {
         LOG.debug(toJSONString);
         Content content = sendRequest(toJSONString);
         LOG.debug("remote engine returns: {}", content);
-        return "[1]".equals(content.asString());
+        if (content != null) {
+            return "[1]".equals(content.asString());
+        } else {
+            return false;
+        }
     }
 }

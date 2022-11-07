@@ -93,7 +93,8 @@
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
         <json-simple.version>1.1.1</json-simple.version>
-        <fluent-hc.version>4.5.13</fluent-hc.version>
+        <httpclient-osgi.version>4.5.13</httpclient-osgi.version>
+        <httpcore-osgi.version>4.4.15</httpcore-osgi.version>
     </properties>
 
     <dependencyManagement>

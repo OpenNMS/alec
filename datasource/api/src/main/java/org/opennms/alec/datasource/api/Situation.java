@@ -39,6 +39,8 @@ public interface Situation {
 
     String getId();
 
+    long getLongId();
+
     /**
      * Timestamp in millis
      */

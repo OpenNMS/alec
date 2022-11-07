@@ -31,6 +31,9 @@ export type TSituation = {
 	status?: string
 	creationTime: Date
 	ackTime: Date
+	reductionKeyMemo: TReductionKeyMemo
+	stickyMemo: TMemo
+	events: Record<number, TEvent[]>
 }
 
 export type TEvent = {
@@ -68,6 +71,8 @@ export type TAlarm = {
 	clear: boolean
 	description: string
 	ackTime: Date
+	reductionKeyMemo: TReductionKeyMemo
+	stickyMemo: TMemo
 }
 
 export type TSituationSaved = {
@@ -79,3 +84,15 @@ export type TNode = {
 	id: number
 	label: string
 }
+
+export type TMemo = {
+	id: number
+	body: string
+	author: string
+	updated: Date
+	created: Date
+}
+
+export type TReductionKeyMemo = {
+	reductionkey: string
+} & TMemo

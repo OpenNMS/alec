@@ -4,40 +4,37 @@ import {
 	FeatherTabContainer,
 	FeatherTabPanel
 } from '@featherds/tabs'
-import { TSituation } from '@/types/TSituation'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const situationStore = useSituationsStore()
 const emit = defineEmits(['situation-status-changed'])
 const props = defineProps<{
-	alarmInfo: TSituation
+	index: number
+	forceUpdate: boolean
 }>()
 
-const situation = ref(props.alarmInfo)
-
+const situation = ref(situationStore.situations[props.index])
+const container = ref()
 const situationStatusChanged = (status: string, id: string) => {
 	emit('situation-status-changed', status, id)
 }
 
 watch(props, () => {
-	situation.value = props.alarmInfo
+	situation.value = situationStore.situations[props.index]
 })
 
-situationStore.$subscribe((mutation, storeState) => {
-	const situationFounded = storeState.situations.find(
-		(s) => s.id == props.alarmInfo.id
-	)
-	if (situationFounded) {
-		situation.value = situationFounded
-	}
+onMounted(() => {
+	const widthCont =
+		document.getElementById('cont')?.getBoundingClientRect().width || 1200
+	container.value = widthCont - 90
 })
 </script>
 
 <template>
-	<div v-if="situation" class="detail">
+	<div v-if="situation" class="detail" id="cont">
 		<FeatherTabContainer>
 			<template v-slot:tabs>
 				<FeatherTab>Details</FeatherTab>
@@ -50,7 +47,11 @@ situationStore.$subscribe((mutation, storeState) => {
 				/>
 			</FeatherTabPanel>
 			<FeatherTabPanel class="panel"
-				><SituationMetricsTab :situation="situation" />
+				><SituationMetricsTab
+					v-if="container"
+					:situation="situation"
+					:width="container"
+				/>
 			</FeatherTabPanel>
 		</FeatherTabContainer>
 	</div>

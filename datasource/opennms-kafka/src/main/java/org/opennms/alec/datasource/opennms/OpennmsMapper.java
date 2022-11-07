@@ -50,7 +50,11 @@ import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 
-public class OpennmsMapper {
+public final class OpennmsMapper {
+
+    private OpennmsMapper() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static Alarm toAlarm(OpennmsModelProtos.Alarm alarm) {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
@@ -71,6 +75,7 @@ public class OpennmsMapper {
         
         return alarmBuilder
                 .setId(alarm.getReductionKey())
+                .setLongId(alarm.getId())
                 .setTime(alarm.getLastEventTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setSummary(alarm.getLogMessage())
@@ -110,29 +115,14 @@ public class OpennmsMapper {
 
     public static Situation toSituation(OpennmsModelProtos.Alarm alarm) {
         final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
-                .setCreationTime(alarm.getFirstEventTime());
+                .setCreationTime(alarm.getFirstEventTime())
+                .setLongId(alarm.getId());
         final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
         if (lastEvent != null) {
             lastEvent.getParameterList().stream()
                     .filter( p -> SituationToEvent.SITUATION_ID_PARM_NAME.equals(p.getName()))
                     .findFirst()
                     .ifPresent(p -> situationBuilder.setId(p.getValue()));
-            lastEvent.getParameterList().stream()
-                    .filter( p -> SituationToEvent.SITUATION_STATUS_PARM_NAME.equals(p.getName()))
-                    .findFirst()
-                    .ifPresent(p -> situationBuilder.setStatus(Status.valueOf(p.getValue())));
-        }
-        situationBuilder.setSeverity(toSeverity(alarm.getSeverity()));
-        alarm.getRelatedAlarmList().forEach(relatedAlarm -> situationBuilder.addAlarm(toAlarm(relatedAlarm)));
-        return situationBuilder.build();
-    }
-
-    public static Situation toSituationWithAlarmId(OpennmsModelProtos.Alarm alarm) {
-        final ImmutableSituation.Builder situationBuilder = ImmutableSituation.newBuilder()
-                .setCreationTime(alarm.getFirstEventTime())
-                .setId(String.valueOf(alarm.getId()));
-        final OpennmsModelProtos.Event lastEvent = alarm.getLastEvent();
-        if (lastEvent != null) {
             lastEvent.getParameterList().stream()
                     .filter( p -> SituationToEvent.SITUATION_STATUS_PARM_NAME.equals(p.getName()))
                     .findFirst()
@@ -152,7 +142,7 @@ public class OpennmsMapper {
                 !Strings.isNullOrEmpty(node.getForeignId())) {
             return node.getForeignSource() + ":" + node.getForeignId();
         } else {
-            return Long.valueOf(node.getId()).toString();
+            return Long.toString(node.getId());
         }
     }
 
@@ -161,7 +151,7 @@ public class OpennmsMapper {
                 !Strings.isNullOrEmpty(nodeCriteria.getForeignId())) {
             return nodeCriteria.getForeignSource() + ":" + nodeCriteria.getForeignId();
         } else {
-            return Long.valueOf(nodeCriteria.getId()).toString();
+            return Long.toString(nodeCriteria.getId());
         }
     }
 

@@ -13,6 +13,7 @@ const props = defineProps<{
 	selected: boolean
 }>()
 const emit = defineEmits(['situation-selected'])
+
 const handleSituationSelected = () => {
 	emit('situation-selected', props.situationInfo?.id)
 }

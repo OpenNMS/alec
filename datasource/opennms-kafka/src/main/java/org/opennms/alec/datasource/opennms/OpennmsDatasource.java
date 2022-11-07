@@ -545,23 +545,6 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
     }
 
     @Override
-    public List<Situation> getSituationsWithAlarmId() throws InterruptedException {
-        final List<Situation> situations = new ArrayList<>();
-        waitUntilSituationStoreIsQueryable().all().forEachRemaining(entry -> {
-            final Situation situation;
-            try {
-                situation = OpennmsMapper.toSituationWithAlarmId(entry.value);
-            } catch (Exception e) {
-                LOG.warn(IGNORED_SITUATION, entry.value, e);
-                return;
-            }
-            situations.add(situation);
-        });
-
-        return situations;
-    }
-
-    @Override
 
     public Optional<Situation> getSituationWithAlarmId(int id) throws InterruptedException {
         OpennmsModelProtos.Alarm alarm = waitUntilSituationStoreIsQueryable().get(String.format("%s::%d", SituationToEvent.SITUATION_UEI, id));

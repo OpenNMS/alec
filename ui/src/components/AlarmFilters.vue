@@ -64,10 +64,13 @@ const alarmSelected = (id: number) => {
 }
 
 const handleClearAction = async () => {
-	await sendClearAlarms(state.selectedAlarms)
-	situationStore.getSituation(props.situationId)
-	state.selectedAlarms = []
-	selectAll.value = false
+	if (state.selectedAlarms.length) {
+		await sendClearAlarms(state.selectedAlarms)
+		situationStore.selectedSituation = props.situationId
+		situationStore.getSituation(props.situationId)
+		state.selectedAlarms = []
+		selectAll.value = false
+	}
 }
 </script>
 
@@ -89,7 +92,10 @@ const handleClearAction = async () => {
 					ALL
 				</FeatherChip>
 				<FeatherChip
-					:class="{ clicked: selectedFilters.includes(severity) }"
+					:class="[
+						{ clicked: selectedFilters.includes(severity) },
+						`${severity?.toLowerCase()}-bg`
+					]"
 					v-for="severity in alarmFilters"
 					:key="severity"
 					@click="handleAlarmFilters(severity)"
@@ -162,10 +168,9 @@ const handleClearAction = async () => {
 	padding: 5px;
 	padding-bottom: 10px;
 }
-
 .clicked {
 	border: 2px solid $dark-blue !important;
-	background-color: rgb(212, 212, 212) !important;
+	background-color: #e6e6e6 !important;
 }
 .alarm-list {
 	display: flex;

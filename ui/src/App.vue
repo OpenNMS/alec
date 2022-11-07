@@ -12,4 +12,11 @@ body {
 	margin: 0;
 	background-color: #f4f7fc;
 }
+
+.label-border {
+	display: none !important;
+}
+.feather-input-sub-text {
+	display: none !important;
+}
 </style>

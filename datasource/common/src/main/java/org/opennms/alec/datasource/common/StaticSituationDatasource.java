@@ -49,16 +49,6 @@ public class StaticSituationDatasource implements SituationDatasource {
     }
 
     @Override
-    public List<Situation> getSituationsWithAlarmId() {
-        return getSituations();
-    }
-
-    @Override
-    public Optional<Situation> getSituationWithAlarmId(int id) throws InterruptedException {
-        return situations.stream().filter(situation -> String.valueOf(id).equals(situation.getId())).findFirst();
-    }
-
-    @Override
     public Optional<Situation> getSituation(int id) throws InterruptedException {
         return situations.stream().filter(situation -> String.valueOf(id).equals(situation.getId())).findFirst();
     }

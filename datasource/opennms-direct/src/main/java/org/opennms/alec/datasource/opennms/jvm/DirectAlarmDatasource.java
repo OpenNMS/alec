@@ -272,37 +272,6 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     }
 
     @Override
-    public List<Situation> getSituationsWithAlarmId() {
-        waitForInit();
-
-        rwLock.readLock().lock();
-        try {
-            return alarmsById.values().stream()
-                    .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
-                    .map(mapper::toSituationWithAlarmId)
-                    .collect(Collectors.toList());
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public Optional<Situation> getSituationWithAlarmId(int id) throws InterruptedException {
-        waitForInit();
-
-        rwLock.readLock().lock();
-        try {
-            return alarmsById.values().stream()
-                    .filter(alarm -> id == alarm.getId())
-                    .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
-                    .map(mapper::toSituationWithAlarmId)
-                    .findFirst();
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Optional<Situation> getSituation(int id) throws InterruptedException {
         waitForInit();
 

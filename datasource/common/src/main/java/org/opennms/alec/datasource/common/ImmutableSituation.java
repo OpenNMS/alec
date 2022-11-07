@@ -345,30 +345,6 @@ public final class ImmutableSituation implements Situation {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ImmutableSituation that = (ImmutableSituation) o;
-        return creationTime == that.creationTime &&
-                severity == that.severity &&
-                Objects.equals(resourceKeys, that.resourceKeys) &&
-                Objects.equals(alarms, that.alarms) &&
-                Objects.equals(diagnosticText, that.diagnosticText) &&
-                Objects.equals(status, that.status) &&
-                Objects.equals(reductionKey, that.reductionKey) &&
-                Objects.equals(lastTime, that.lastTime) &&
-                Objects.equals(uei, that.uei) &&
-                Objects.equals(id, that.id) &&
-                Objects.equals(longId, that.longId) &&
-                Objects.equals(description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, longId, creationTime, resourceKeys, alarms, severity, diagnosticText, status, reductionKey, lastTime, uei, description, feedback, engineParameter);
-    }
-
-    @Override
     public String toString() {
         return new StringJoiner(", ", ImmutableSituation.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
@@ -394,11 +370,11 @@ public final class ImmutableSituation implements Situation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ImmutableSituation that = (ImmutableSituation) o;
-        return creationTime == that.creationTime && Objects.equals(id, that.id) && severity == that.severity && Objects.equals(resourceKeys, that.resourceKeys) && Objects.equals(alarms, that.alarms) && Objects.equals(alarmsFromMap, that.alarmsFromMap) && Objects.equals(diagnosticText, that.diagnosticText) && status == that.status && Objects.equals(reductionKey, that.reductionKey) && Objects.equals(lastTime, that.lastTime) && Objects.equals(uei, that.uei) && Objects.equals(description, that.description) && Objects.equals(feedback, that.feedback) && Objects.equals(engineParameter, that.engineParameter);
+        return longId == that.longId && creationTime == that.creationTime && Objects.equals(id, that.id) && severity == that.severity && Objects.equals(resourceKeys, that.resourceKeys) && Objects.equals(alarms, that.alarms) && Objects.equals(alarmsFromMap, that.alarmsFromMap) && Objects.equals(diagnosticText, that.diagnosticText) && status == that.status && Objects.equals(reductionKey, that.reductionKey) && Objects.equals(lastTime, that.lastTime) && Objects.equals(uei, that.uei) && Objects.equals(description, that.description) && Objects.equals(feedback, that.feedback) && Objects.equals(engineParameter, that.engineParameter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, creationTime, severity, resourceKeys, alarms, alarmsFromMap, diagnosticText, status, reductionKey, lastTime, uei, description, feedback, engineParameter);
+        return Objects.hash(id, longId, creationTime, severity, resourceKeys, alarms, alarmsFromMap, diagnosticText, status, reductionKey, lastTime, uei, description, feedback, engineParameter);
     }
 }

@@ -49,16 +49,17 @@ private static final long serialVersionUID = 0L;
     engineParameter_ = "";
     status_ = "";
     rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    sid_ = "";
   }
 
-  @Override
+  @java.lang.Override
   @SuppressWarnings({"unused"})
-  protected Object newInstance(
+  protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
     return new Situation();
   }
 
-  @Override
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
     return this.unknownFields;
@@ -69,7 +70,7 @@ private static final long serialVersionUID = 0L;
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     if (extensionRegistry == null) {
-      throw new NullPointerException();
+      throw new java.lang.NullPointerException();
     }
     int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
@@ -101,11 +102,11 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 26: {
-            AlarmSet.Builder subBuilder = null;
+            org.opennms.alec.grpc.AlarmSet.Builder subBuilder = null;
             if (alarms_ != null) {
               subBuilder = alarms_.toBuilder();
             }
-            alarms_ = input.readMessage(AlarmSet.parser(), extensionRegistry);
+            alarms_ = input.readMessage(org.opennms.alec.grpc.AlarmSet.parser(), extensionRegistry);
             if (subBuilder != null) {
               subBuilder.mergeFrom(alarms_);
               alarms_ = subBuilder.buildPartial();
@@ -114,19 +115,19 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 34: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             severity_ = s;
             break;
           }
           case 42: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             diagnostic_ = s;
             break;
           }
           case 50: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               tags_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000001;
@@ -148,24 +149,30 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 66: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             engineParameter_ = s;
             break;
           }
           case 74: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             status_ = s;
             break;
           }
           case 82: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000002) != 0)) {
               rejected_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000002;
             }
             rejected_.add(s);
+            break;
+          }
+          case 90: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            sid_ = s;
             break;
           }
           default: {
@@ -195,15 +202,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return SituationSetProtos.internal_static_Situation_descriptor;
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_Situation_descriptor;
   }
 
-  @Override
-  protected FieldAccessorTable
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return SituationSetProtos.internal_static_Situation_fieldAccessorTable
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_Situation_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            Situation.class, Builder.class);
+            org.opennms.alec.grpc.Situation.class, org.opennms.alec.grpc.Situation.Builder.class);
   }
 
   public static final int ID_FIELD_NUMBER = 1;
@@ -212,7 +219,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 id = 1;</code>
    * @return The id.
    */
-  @Override
+  @java.lang.Override
   public long getId() {
     return id_;
   }
@@ -223,7 +230,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    * @return Whether the creationTime field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasCreationTime() {
     return creationTime_ != null;
   }
@@ -231,25 +238,25 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    * @return The creationTime.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Timestamp getCreationTime() {
     return creationTime_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : creationTime_;
   }
   /**
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.TimestampOrBuilder getCreationTimeOrBuilder() {
     return getCreationTime();
   }
 
   public static final int ALARMS_FIELD_NUMBER = 3;
-  private AlarmSet alarms_;
+  private org.opennms.alec.grpc.AlarmSet alarms_;
   /**
    * <code>.AlarmSet alarms = 3;</code>
    * @return Whether the alarms field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasAlarms() {
     return alarms_ != null;
   }
@@ -257,33 +264,33 @@ private static final long serialVersionUID = 0L;
    * <code>.AlarmSet alarms = 3;</code>
    * @return The alarms.
    */
-  @Override
-  public AlarmSet getAlarms() {
-    return alarms_ == null ? AlarmSet.getDefaultInstance() : alarms_;
+  @java.lang.Override
+  public org.opennms.alec.grpc.AlarmSet getAlarms() {
+    return alarms_ == null ? org.opennms.alec.grpc.AlarmSet.getDefaultInstance() : alarms_;
   }
   /**
    * <code>.AlarmSet alarms = 3;</code>
    */
-  @Override
-  public AlarmSetOrBuilder getAlarmsOrBuilder() {
+  @java.lang.Override
+  public org.opennms.alec.grpc.AlarmSetOrBuilder getAlarmsOrBuilder() {
     return getAlarms();
   }
 
   public static final int SEVERITY_FIELD_NUMBER = 4;
-  private volatile Object severity_;
+  private volatile java.lang.Object severity_;
   /**
    * <code>string severity = 4;</code>
    * @return The severity.
    */
-  @Override
-  public String getSeverity() {
-    Object ref = severity_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getSeverity() {
+    java.lang.Object ref = severity_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       severity_ = s;
       return s;
     }
@@ -292,14 +299,14 @@ private static final long serialVersionUID = 0L;
    * <code>string severity = 4;</code>
    * @return The bytes for severity.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSeverityBytes() {
-    Object ref = severity_;
-    if (ref instanceof String) {
+    java.lang.Object ref = severity_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       severity_ = b;
       return b;
     } else {
@@ -308,20 +315,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DIAGNOSTIC_FIELD_NUMBER = 5;
-  private volatile Object diagnostic_;
+  private volatile java.lang.Object diagnostic_;
   /**
    * <code>string diagnostic = 5;</code>
    * @return The diagnostic.
    */
-  @Override
-  public String getDiagnostic() {
-    Object ref = diagnostic_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getDiagnostic() {
+    java.lang.Object ref = diagnostic_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       diagnostic_ = s;
       return s;
     }
@@ -330,14 +337,14 @@ private static final long serialVersionUID = 0L;
    * <code>string diagnostic = 5;</code>
    * @return The bytes for diagnostic.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getDiagnosticBytes() {
-    Object ref = diagnostic_;
-    if (ref instanceof String) {
+    java.lang.Object ref = diagnostic_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       diagnostic_ = b;
       return b;
     } else {
@@ -367,7 +374,7 @@ private static final long serialVersionUID = 0L;
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
-  public String getTags(int index) {
+  public java.lang.String getTags(int index) {
     return tags_.get(index);
   }
   /**
@@ -386,7 +393,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    * @return Whether the lastModificationTime field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasLastModificationTime() {
     return lastModificationTime_ != null;
   }
@@ -394,33 +401,33 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    * @return The lastModificationTime.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Timestamp getLastModificationTime() {
     return lastModificationTime_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : lastModificationTime_;
   }
   /**
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.TimestampOrBuilder getLastModificationTimeOrBuilder() {
     return getLastModificationTime();
   }
 
   public static final int ENGINE_PARAMETER_FIELD_NUMBER = 8;
-  private volatile Object engineParameter_;
+  private volatile java.lang.Object engineParameter_;
   /**
    * <code>string engine_parameter = 8;</code>
    * @return The engineParameter.
    */
-  @Override
-  public String getEngineParameter() {
-    Object ref = engineParameter_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getEngineParameter() {
+    java.lang.Object ref = engineParameter_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       engineParameter_ = s;
       return s;
     }
@@ -429,14 +436,14 @@ private static final long serialVersionUID = 0L;
    * <code>string engine_parameter = 8;</code>
    * @return The bytes for engineParameter.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getEngineParameterBytes() {
-    Object ref = engineParameter_;
-    if (ref instanceof String) {
+    java.lang.Object ref = engineParameter_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       engineParameter_ = b;
       return b;
     } else {
@@ -445,20 +452,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int STATUS_FIELD_NUMBER = 9;
-  private volatile Object status_;
+  private volatile java.lang.Object status_;
   /**
    * <code>string status = 9;</code>
    * @return The status.
    */
-  @Override
-  public String getStatus() {
-    Object ref = status_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getStatus() {
+    java.lang.Object ref = status_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       status_ = s;
       return s;
     }
@@ -467,14 +474,14 @@ private static final long serialVersionUID = 0L;
    * <code>string status = 9;</code>
    * @return The bytes for status.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getStatusBytes() {
-    Object ref = status_;
-    if (ref instanceof String) {
+    java.lang.Object ref = status_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       status_ = b;
       return b;
     } else {
@@ -504,7 +511,7 @@ private static final long serialVersionUID = 0L;
    * @param index The index of the element to return.
    * @return The rejected at the given index.
    */
-  public String getRejected(int index) {
+  public java.lang.String getRejected(int index) {
     return rejected_.get(index);
   }
   /**
@@ -517,8 +524,46 @@ private static final long serialVersionUID = 0L;
     return rejected_.getByteString(index);
   }
 
+  public static final int SID_FIELD_NUMBER = 11;
+  private volatile java.lang.Object sid_;
+  /**
+   * <code>string sid = 11;</code>
+   * @return The sid.
+   */
+  @java.lang.Override
+  public java.lang.String getSid() {
+    java.lang.Object ref = sid_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      sid_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string sid = 11;</code>
+   * @return The bytes for sid.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getSidBytes() {
+    java.lang.Object ref = sid_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      sid_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
-  @Override
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -528,7 +573,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (id_ != 0L) {
@@ -561,10 +606,13 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < rejected_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 10, rejected_.getRaw(i));
     }
+    if (!getSidBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 11, sid_);
+    }
     unknownFields.writeTo(output);
   }
 
-  @Override
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -614,20 +662,23 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getRejectedList().size();
     }
+    if (!getSidBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, sid_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
   }
 
-  @Override
-  public boolean equals(final Object obj) {
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof Situation)) {
+    if (!(obj instanceof org.opennms.alec.grpc.Situation)) {
       return super.equals(obj);
     }
-    Situation other = (Situation) obj;
+    org.opennms.alec.grpc.Situation other = (org.opennms.alec.grpc.Situation) obj;
 
     if (getId()
         != other.getId()) return false;
@@ -658,11 +709,13 @@ private static final long serialVersionUID = 0L;
         .equals(other.getStatus())) return false;
     if (!getRejectedList()
         .equals(other.getRejectedList())) return false;
+    if (!getSid()
+        .equals(other.getSid())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public int hashCode() {
     if (memoizedHashCode != 0) {
       return memoizedHashCode;
@@ -700,74 +753,76 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + REJECTED_FIELD_NUMBER;
       hash = (53 * hash) + getRejectedList().hashCode();
     }
+    hash = (37 * hash) + SID_FIELD_NUMBER;
+    hash = (53 * hash) + getSid().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Situation parseFrom(byte[] data)
+  public static org.opennms.alec.grpc.Situation parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Situation parseFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.Situation parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Situation parseDelimitedFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.Situation parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static Situation parseDelimitedFrom(
+  public static org.opennms.alec.grpc.Situation parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Situation parseFrom(
+  public static org.opennms.alec.grpc.Situation parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -775,23 +830,23 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  @Override
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(Situation prototype) {
+  public static Builder newBuilder(org.opennms.alec.grpc.Situation prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
-  @Override
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
   }
 
-  @Override
+  @java.lang.Override
   protected Builder newBuilderForType(
-      BuilderParent parent) {
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
     Builder builder = new Builder(parent);
     return builder;
   }
@@ -801,18 +856,18 @@ private static final long serialVersionUID = 0L;
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:Situation)
-      SituationOrBuilder {
+      org.opennms.alec.grpc.SituationOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return SituationSetProtos.internal_static_Situation_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Situation_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return SituationSetProtos.internal_static_Situation_fieldAccessorTable
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Situation_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              Situation.class, Builder.class);
+              org.opennms.alec.grpc.Situation.class, org.opennms.alec.grpc.Situation.Builder.class);
     }
 
     // Construct using org.opennms.alec.grpc.Situation.newBuilder()
@@ -821,7 +876,7 @@ private static final long serialVersionUID = 0L;
     }
 
     private Builder(
-        BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
       maybeForceBuilderInitialization();
     }
@@ -830,7 +885,7 @@ private static final long serialVersionUID = 0L;
               .alwaysUseFieldBuilders) {
       }
     }
-    @Override
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       id_ = 0L;
@@ -865,32 +920,34 @@ private static final long serialVersionUID = 0L;
 
       rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000002);
+      sid_ = "";
+
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return SituationSetProtos.internal_static_Situation_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Situation_descriptor;
     }
 
-    @Override
-    public Situation getDefaultInstanceForType() {
-      return Situation.getDefaultInstance();
+    @java.lang.Override
+    public org.opennms.alec.grpc.Situation getDefaultInstanceForType() {
+      return org.opennms.alec.grpc.Situation.getDefaultInstance();
     }
 
-    @Override
-    public Situation build() {
-      Situation result = buildPartial();
+    @java.lang.Override
+    public org.opennms.alec.grpc.Situation build() {
+      org.opennms.alec.grpc.Situation result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
       return result;
     }
 
-    @Override
-    public Situation buildPartial() {
-      Situation result = new Situation(this);
+    @java.lang.Override
+    public org.opennms.alec.grpc.Situation buildPartial() {
+      org.opennms.alec.grpc.Situation result = new org.opennms.alec.grpc.Situation(this);
       int from_bitField0_ = bitField0_;
       result.id_ = id_;
       if (creationTimeBuilder_ == null) {
@@ -922,54 +979,55 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
       }
       result.rejected_ = rejected_;
+      result.sid_ = sid_;
       onBuilt();
       return result;
     }
 
-    @Override
+    @java.lang.Override
     public Builder clone() {
       return super.clone();
     }
-    @Override
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.setField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
       return super.clearField(field);
     }
-    @Override
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
       return super.clearOneof(oneof);
     }
-    @Override
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
+        int index, java.lang.Object value) {
       return super.setRepeatedField(field, index, value);
     }
-    @Override
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.addRepeatedField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof Situation) {
-        return mergeFrom((Situation)other);
+      if (other instanceof org.opennms.alec.grpc.Situation) {
+        return mergeFrom((org.opennms.alec.grpc.Situation)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(Situation other) {
-      if (other == Situation.getDefaultInstance()) return this;
+    public Builder mergeFrom(org.opennms.alec.grpc.Situation other) {
+      if (other == org.opennms.alec.grpc.Situation.getDefaultInstance()) return this;
       if (other.getId() != 0L) {
         setId(other.getId());
       }
@@ -1018,26 +1076,30 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
+      if (!other.getSid().isEmpty()) {
+        sid_ = other.sid_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Situation parsedMessage = null;
+      org.opennms.alec.grpc.Situation parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (Situation) e.getUnfinishedMessage();
+        parsedMessage = (org.opennms.alec.grpc.Situation) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -1053,7 +1115,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 id = 1;</code>
      * @return The id.
      */
-    @Override
+    @java.lang.Override
     public long getId() {
       return id_;
     }
@@ -1198,9 +1260,9 @@ private static final long serialVersionUID = 0L;
       return creationTimeBuilder_;
     }
 
-    private AlarmSet alarms_;
+    private org.opennms.alec.grpc.AlarmSet alarms_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder> alarmsBuilder_;
+        org.opennms.alec.grpc.AlarmSet, org.opennms.alec.grpc.AlarmSet.Builder, org.opennms.alec.grpc.AlarmSetOrBuilder> alarmsBuilder_;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      * @return Whether the alarms field is set.
@@ -1212,9 +1274,9 @@ private static final long serialVersionUID = 0L;
      * <code>.AlarmSet alarms = 3;</code>
      * @return The alarms.
      */
-    public AlarmSet getAlarms() {
+    public org.opennms.alec.grpc.AlarmSet getAlarms() {
       if (alarmsBuilder_ == null) {
-        return alarms_ == null ? AlarmSet.getDefaultInstance() : alarms_;
+        return alarms_ == null ? org.opennms.alec.grpc.AlarmSet.getDefaultInstance() : alarms_;
       } else {
         return alarmsBuilder_.getMessage();
       }
@@ -1222,7 +1284,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      */
-    public Builder setAlarms(AlarmSet value) {
+    public Builder setAlarms(org.opennms.alec.grpc.AlarmSet value) {
       if (alarmsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -1239,7 +1301,7 @@ private static final long serialVersionUID = 0L;
      * <code>.AlarmSet alarms = 3;</code>
      */
     public Builder setAlarms(
-        AlarmSet.Builder builderForValue) {
+        org.opennms.alec.grpc.AlarmSet.Builder builderForValue) {
       if (alarmsBuilder_ == null) {
         alarms_ = builderForValue.build();
         onChanged();
@@ -1252,11 +1314,11 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      */
-    public Builder mergeAlarms(AlarmSet value) {
+    public Builder mergeAlarms(org.opennms.alec.grpc.AlarmSet value) {
       if (alarmsBuilder_ == null) {
         if (alarms_ != null) {
           alarms_ =
-            AlarmSet.newBuilder(alarms_).mergeFrom(value).buildPartial();
+            org.opennms.alec.grpc.AlarmSet.newBuilder(alarms_).mergeFrom(value).buildPartial();
         } else {
           alarms_ = value;
         }
@@ -1284,7 +1346,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      */
-    public AlarmSet.Builder getAlarmsBuilder() {
+    public org.opennms.alec.grpc.AlarmSet.Builder getAlarmsBuilder() {
       
       onChanged();
       return getAlarmsFieldBuilder().getBuilder();
@@ -1292,23 +1354,23 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      */
-    public AlarmSetOrBuilder getAlarmsOrBuilder() {
+    public org.opennms.alec.grpc.AlarmSetOrBuilder getAlarmsOrBuilder() {
       if (alarmsBuilder_ != null) {
         return alarmsBuilder_.getMessageOrBuilder();
       } else {
         return alarms_ == null ?
-            AlarmSet.getDefaultInstance() : alarms_;
+            org.opennms.alec.grpc.AlarmSet.getDefaultInstance() : alarms_;
       }
     }
     /**
      * <code>.AlarmSet alarms = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>
+        org.opennms.alec.grpc.AlarmSet, org.opennms.alec.grpc.AlarmSet.Builder, org.opennms.alec.grpc.AlarmSetOrBuilder> 
         getAlarmsFieldBuilder() {
       if (alarmsBuilder_ == null) {
         alarmsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>(
+            org.opennms.alec.grpc.AlarmSet, org.opennms.alec.grpc.AlarmSet.Builder, org.opennms.alec.grpc.AlarmSetOrBuilder>(
                 getAlarms(),
                 getParentForChildren(),
                 isClean());
@@ -1317,21 +1379,21 @@ private static final long serialVersionUID = 0L;
       return alarmsBuilder_;
     }
 
-    private Object severity_ = "";
+    private java.lang.Object severity_ = "";
     /**
      * <code>string severity = 4;</code>
      * @return The severity.
      */
-    public String getSeverity() {
-      Object ref = severity_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getSeverity() {
+      java.lang.Object ref = severity_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         severity_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1340,11 +1402,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getSeverityBytes() {
-      Object ref = severity_;
+      java.lang.Object ref = severity_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         severity_ = b;
         return b;
       } else {
@@ -1357,7 +1419,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSeverity(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1393,21 +1455,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object diagnostic_ = "";
+    private java.lang.Object diagnostic_ = "";
     /**
      * <code>string diagnostic = 5;</code>
      * @return The diagnostic.
      */
-    public String getDiagnostic() {
-      Object ref = diagnostic_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getDiagnostic() {
+      java.lang.Object ref = diagnostic_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         diagnostic_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1416,11 +1478,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getDiagnosticBytes() {
-      Object ref = diagnostic_;
+      java.lang.Object ref = diagnostic_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         diagnostic_ = b;
         return b;
       } else {
@@ -1433,7 +1495,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setDiagnostic(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1496,7 +1558,7 @@ private static final long serialVersionUID = 0L;
      * @param index The index of the element to return.
      * @return The tags at the given index.
      */
-    public String getTags(int index) {
+    public java.lang.String getTags(int index) {
       return tags_.get(index);
     }
     /**
@@ -1515,7 +1577,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTags(
-        int index, String value) {
+        int index, java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1530,7 +1592,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addTags(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1545,7 +1607,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addAllTags(
-        Iterable<String> values) {
+        java.lang.Iterable<java.lang.String> values) {
       ensureTagsIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, tags_);
@@ -1698,21 +1760,21 @@ private static final long serialVersionUID = 0L;
       return lastModificationTimeBuilder_;
     }
 
-    private Object engineParameter_ = "";
+    private java.lang.Object engineParameter_ = "";
     /**
      * <code>string engine_parameter = 8;</code>
      * @return The engineParameter.
      */
-    public String getEngineParameter() {
-      Object ref = engineParameter_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getEngineParameter() {
+      java.lang.Object ref = engineParameter_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         engineParameter_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1721,11 +1783,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getEngineParameterBytes() {
-      Object ref = engineParameter_;
+      java.lang.Object ref = engineParameter_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         engineParameter_ = b;
         return b;
       } else {
@@ -1738,7 +1800,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEngineParameter(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1774,21 +1836,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object status_ = "";
+    private java.lang.Object status_ = "";
     /**
      * <code>string status = 9;</code>
      * @return The status.
      */
-    public String getStatus() {
-      Object ref = status_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         status_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1797,11 +1859,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getStatusBytes() {
-      Object ref = status_;
+      java.lang.Object ref = status_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         status_ = b;
         return b;
       } else {
@@ -1814,7 +1876,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setStatus(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1877,7 +1939,7 @@ private static final long serialVersionUID = 0L;
      * @param index The index of the element to return.
      * @return The rejected at the given index.
      */
-    public String getRejected(int index) {
+    public java.lang.String getRejected(int index) {
       return rejected_.get(index);
     }
     /**
@@ -1896,7 +1958,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setRejected(
-        int index, String value) {
+        int index, java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1911,7 +1973,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addRejected(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1926,7 +1988,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addAllRejected(
-        Iterable<String> values) {
+        java.lang.Iterable<java.lang.String> values) {
       ensureRejectedIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, rejected_);
@@ -1959,13 +2021,89 @@ private static final long serialVersionUID = 0L;
       onChanged();
       return this;
     }
-    @Override
+
+    private java.lang.Object sid_ = "";
+    /**
+     * <code>string sid = 11;</code>
+     * @return The sid.
+     */
+    public java.lang.String getSid() {
+      java.lang.Object ref = sid_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        sid_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string sid = 11;</code>
+     * @return The bytes for sid.
+     */
+    public com.google.protobuf.ByteString
+        getSidBytes() {
+      java.lang.Object ref = sid_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        sid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string sid = 11;</code>
+     * @param value The sid to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSid(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      sid_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string sid = 11;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSid() {
+      
+      sid_ = getDefaultInstance().getSid();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string sid = 11;</code>
+     * @param value The bytes for sid to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSidBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      sid_ = value;
+      onChanged();
+      return this;
+    }
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.setUnknownFields(unknownFields);
     }
 
-    @Override
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.mergeUnknownFields(unknownFields);
@@ -1976,18 +2114,18 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:Situation)
-  private static final Situation DEFAULT_INSTANCE;
+  private static final org.opennms.alec.grpc.Situation DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new Situation();
+    DEFAULT_INSTANCE = new org.opennms.alec.grpc.Situation();
   }
 
-  public static Situation getDefaultInstance() {
+  public static org.opennms.alec.grpc.Situation getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
   private static final com.google.protobuf.Parser<Situation>
       PARSER = new com.google.protobuf.AbstractParser<Situation>() {
-    @Override
+    @java.lang.Override
     public Situation parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2000,13 +2138,13 @@ private static final long serialVersionUID = 0L;
     return PARSER;
   }
 
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Parser<Situation> getParserForType() {
     return PARSER;
   }
 
-  @Override
-  public Situation getDefaultInstanceForType() {
+  @java.lang.Override
+  public org.opennms.alec.grpc.Situation getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

@@ -49,16 +49,17 @@ private static final long serialVersionUID = 0L;
     summary_ = "";
     description_ = "";
     tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    salarmId_ = "";
   }
 
-  @Override
+  @java.lang.Override
   @SuppressWarnings({"unused"})
-  protected Object newInstance(
+  protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
     return new Alarm();
   }
 
-  @Override
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
     return this.unknownFields;
@@ -69,7 +70,7 @@ private static final long serialVersionUID = 0L;
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     if (extensionRegistry == null) {
-      throw new NullPointerException();
+      throw new java.lang.NullPointerException();
     }
     int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
@@ -114,42 +115,48 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 34: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             inventoryObjectId_ = s;
             break;
           }
           case 42: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             inventoryObjectType_ = s;
             break;
           }
           case 50: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             severity_ = s;
             break;
           }
           case 58: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             summary_ = s;
             break;
           }
           case 66: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
 
             description_ = s;
             break;
           }
           case 74: {
-            String s = input.readStringRequireUtf8();
+            java.lang.String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               tags_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000001;
             }
             tags_.add(s);
+            break;
+          }
+          case 82: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            salarmId_ = s;
             break;
           }
           default: {
@@ -176,15 +183,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return SituationSetProtos.internal_static_Alarm_descriptor;
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_Alarm_descriptor;
   }
 
-  @Override
-  protected FieldAccessorTable
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return SituationSetProtos.internal_static_Alarm_fieldAccessorTable
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_Alarm_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            Alarm.class, Builder.class);
+            org.opennms.alec.grpc.Alarm.class, org.opennms.alec.grpc.Alarm.Builder.class);
   }
 
   public static final int ALARM_ID_FIELD_NUMBER = 1;
@@ -193,7 +200,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 alarm_id = 1;</code>
    * @return The alarmId.
    */
-  @Override
+  @java.lang.Override
   public long getAlarmId() {
     return alarmId_;
   }
@@ -204,7 +211,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp first_time_seen = 2;</code>
    * @return Whether the firstTimeSeen field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasFirstTimeSeen() {
     return firstTimeSeen_ != null;
   }
@@ -212,14 +219,14 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp first_time_seen = 2;</code>
    * @return The firstTimeSeen.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Timestamp getFirstTimeSeen() {
     return firstTimeSeen_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : firstTimeSeen_;
   }
   /**
    * <code>.google.protobuf.Timestamp first_time_seen = 2;</code>
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.TimestampOrBuilder getFirstTimeSeenOrBuilder() {
     return getFirstTimeSeen();
   }
@@ -230,7 +237,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_time_seen = 3;</code>
    * @return Whether the lastTimeSeen field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasLastTimeSeen() {
     return lastTimeSeen_ != null;
   }
@@ -238,33 +245,33 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_time_seen = 3;</code>
    * @return The lastTimeSeen.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Timestamp getLastTimeSeen() {
     return lastTimeSeen_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : lastTimeSeen_;
   }
   /**
    * <code>.google.protobuf.Timestamp last_time_seen = 3;</code>
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.TimestampOrBuilder getLastTimeSeenOrBuilder() {
     return getLastTimeSeen();
   }
 
   public static final int INVENTORY_OBJECT_ID_FIELD_NUMBER = 4;
-  private volatile Object inventoryObjectId_;
+  private volatile java.lang.Object inventoryObjectId_;
   /**
    * <code>string inventory_object_id = 4;</code>
    * @return The inventoryObjectId.
    */
-  @Override
-  public String getInventoryObjectId() {
-    Object ref = inventoryObjectId_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getInventoryObjectId() {
+    java.lang.Object ref = inventoryObjectId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       inventoryObjectId_ = s;
       return s;
     }
@@ -273,14 +280,14 @@ private static final long serialVersionUID = 0L;
    * <code>string inventory_object_id = 4;</code>
    * @return The bytes for inventoryObjectId.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getInventoryObjectIdBytes() {
-    Object ref = inventoryObjectId_;
-    if (ref instanceof String) {
+    java.lang.Object ref = inventoryObjectId_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       inventoryObjectId_ = b;
       return b;
     } else {
@@ -289,20 +296,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int INVENTORY_OBJECT_TYPE_FIELD_NUMBER = 5;
-  private volatile Object inventoryObjectType_;
+  private volatile java.lang.Object inventoryObjectType_;
   /**
    * <code>string inventory_object_type = 5;</code>
    * @return The inventoryObjectType.
    */
-  @Override
-  public String getInventoryObjectType() {
-    Object ref = inventoryObjectType_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getInventoryObjectType() {
+    java.lang.Object ref = inventoryObjectType_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       inventoryObjectType_ = s;
       return s;
     }
@@ -311,14 +318,14 @@ private static final long serialVersionUID = 0L;
    * <code>string inventory_object_type = 5;</code>
    * @return The bytes for inventoryObjectType.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getInventoryObjectTypeBytes() {
-    Object ref = inventoryObjectType_;
-    if (ref instanceof String) {
+    java.lang.Object ref = inventoryObjectType_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       inventoryObjectType_ = b;
       return b;
     } else {
@@ -327,20 +334,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SEVERITY_FIELD_NUMBER = 6;
-  private volatile Object severity_;
+  private volatile java.lang.Object severity_;
   /**
    * <code>string severity = 6;</code>
    * @return The severity.
    */
-  @Override
-  public String getSeverity() {
-    Object ref = severity_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getSeverity() {
+    java.lang.Object ref = severity_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       severity_ = s;
       return s;
     }
@@ -349,14 +356,14 @@ private static final long serialVersionUID = 0L;
    * <code>string severity = 6;</code>
    * @return The bytes for severity.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSeverityBytes() {
-    Object ref = severity_;
-    if (ref instanceof String) {
+    java.lang.Object ref = severity_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       severity_ = b;
       return b;
     } else {
@@ -365,20 +372,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SUMMARY_FIELD_NUMBER = 7;
-  private volatile Object summary_;
+  private volatile java.lang.Object summary_;
   /**
    * <code>string summary = 7;</code>
    * @return The summary.
    */
-  @Override
-  public String getSummary() {
-    Object ref = summary_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getSummary() {
+    java.lang.Object ref = summary_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       summary_ = s;
       return s;
     }
@@ -387,14 +394,14 @@ private static final long serialVersionUID = 0L;
    * <code>string summary = 7;</code>
    * @return The bytes for summary.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSummaryBytes() {
-    Object ref = summary_;
-    if (ref instanceof String) {
+    java.lang.Object ref = summary_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       summary_ = b;
       return b;
     } else {
@@ -403,20 +410,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DESCRIPTION_FIELD_NUMBER = 8;
-  private volatile Object description_;
+  private volatile java.lang.Object description_;
   /**
    * <code>string description = 8;</code>
    * @return The description.
    */
-  @Override
-  public String getDescription() {
-    Object ref = description_;
-    if (ref instanceof String) {
-      return (String) ref;
+  @java.lang.Override
+  public java.lang.String getDescription() {
+    java.lang.Object ref = description_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      String s = bs.toStringUtf8();
+      java.lang.String s = bs.toStringUtf8();
       description_ = s;
       return s;
     }
@@ -425,14 +432,14 @@ private static final long serialVersionUID = 0L;
    * <code>string description = 8;</code>
    * @return The bytes for description.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getDescriptionBytes() {
-    Object ref = description_;
-    if (ref instanceof String) {
+    java.lang.Object ref = description_;
+    if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+              (java.lang.String) ref);
       description_ = b;
       return b;
     } else {
@@ -462,7 +469,7 @@ private static final long serialVersionUID = 0L;
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
-  public String getTags(int index) {
+  public java.lang.String getTags(int index) {
     return tags_.get(index);
   }
   /**
@@ -475,8 +482,46 @@ private static final long serialVersionUID = 0L;
     return tags_.getByteString(index);
   }
 
+  public static final int SALARM_ID_FIELD_NUMBER = 10;
+  private volatile java.lang.Object salarmId_;
+  /**
+   * <code>string salarm_id = 10;</code>
+   * @return The salarmId.
+   */
+  @java.lang.Override
+  public java.lang.String getSalarmId() {
+    java.lang.Object ref = salarmId_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      salarmId_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string salarm_id = 10;</code>
+   * @return The bytes for salarmId.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getSalarmIdBytes() {
+    java.lang.Object ref = salarmId_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      salarmId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
-  @Override
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -486,7 +531,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (alarmId_ != 0L) {
@@ -516,10 +561,13 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < tags_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 9, tags_.getRaw(i));
     }
+    if (!getSalarmIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 10, salarmId_);
+    }
     unknownFields.writeTo(output);
   }
 
-  @Override
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -560,20 +608,23 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getTagsList().size();
     }
+    if (!getSalarmIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, salarmId_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
   }
 
-  @Override
-  public boolean equals(final Object obj) {
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof Alarm)) {
+    if (!(obj instanceof org.opennms.alec.grpc.Alarm)) {
       return super.equals(obj);
     }
-    Alarm other = (Alarm) obj;
+    org.opennms.alec.grpc.Alarm other = (org.opennms.alec.grpc.Alarm) obj;
 
     if (getAlarmId()
         != other.getAlarmId()) return false;
@@ -599,11 +650,13 @@ private static final long serialVersionUID = 0L;
         .equals(other.getDescription())) return false;
     if (!getTagsList()
         .equals(other.getTagsList())) return false;
+    if (!getSalarmId()
+        .equals(other.getSalarmId())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public int hashCode() {
     if (memoizedHashCode != 0) {
       return memoizedHashCode;
@@ -635,74 +688,76 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + TAGS_FIELD_NUMBER;
       hash = (53 * hash) + getTagsList().hashCode();
     }
+    hash = (37 * hash) + SALARM_ID_FIELD_NUMBER;
+    hash = (53 * hash) + getSalarmId().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Alarm parseFrom(byte[] data)
+  public static org.opennms.alec.grpc.Alarm parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static Alarm parseFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.Alarm parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Alarm parseDelimitedFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.Alarm parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static Alarm parseDelimitedFrom(
+  public static org.opennms.alec.grpc.Alarm parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static Alarm parseFrom(
+  public static org.opennms.alec.grpc.Alarm parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -710,23 +765,23 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  @Override
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(Alarm prototype) {
+  public static Builder newBuilder(org.opennms.alec.grpc.Alarm prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
-  @Override
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
   }
 
-  @Override
+  @java.lang.Override
   protected Builder newBuilderForType(
-      BuilderParent parent) {
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
     Builder builder = new Builder(parent);
     return builder;
   }
@@ -736,18 +791,18 @@ private static final long serialVersionUID = 0L;
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:Alarm)
-      AlarmOrBuilder {
+      org.opennms.alec.grpc.AlarmOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return SituationSetProtos.internal_static_Alarm_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Alarm_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return SituationSetProtos.internal_static_Alarm_fieldAccessorTable
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Alarm_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              Alarm.class, Builder.class);
+              org.opennms.alec.grpc.Alarm.class, org.opennms.alec.grpc.Alarm.Builder.class);
     }
 
     // Construct using org.opennms.alec.grpc.Alarm.newBuilder()
@@ -756,7 +811,7 @@ private static final long serialVersionUID = 0L;
     }
 
     private Builder(
-        BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
       maybeForceBuilderInitialization();
     }
@@ -765,7 +820,7 @@ private static final long serialVersionUID = 0L;
               .alwaysUseFieldBuilders) {
       }
     }
-    @Override
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       alarmId_ = 0L;
@@ -794,32 +849,34 @@ private static final long serialVersionUID = 0L;
 
       tags_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000001);
+      salarmId_ = "";
+
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return SituationSetProtos.internal_static_Alarm_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_Alarm_descriptor;
     }
 
-    @Override
-    public Alarm getDefaultInstanceForType() {
-      return Alarm.getDefaultInstance();
+    @java.lang.Override
+    public org.opennms.alec.grpc.Alarm getDefaultInstanceForType() {
+      return org.opennms.alec.grpc.Alarm.getDefaultInstance();
     }
 
-    @Override
-    public Alarm build() {
-      Alarm result = buildPartial();
+    @java.lang.Override
+    public org.opennms.alec.grpc.Alarm build() {
+      org.opennms.alec.grpc.Alarm result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
       return result;
     }
 
-    @Override
-    public Alarm buildPartial() {
-      Alarm result = new Alarm(this);
+    @java.lang.Override
+    public org.opennms.alec.grpc.Alarm buildPartial() {
+      org.opennms.alec.grpc.Alarm result = new org.opennms.alec.grpc.Alarm(this);
       int from_bitField0_ = bitField0_;
       result.alarmId_ = alarmId_;
       if (firstTimeSeenBuilder_ == null) {
@@ -842,54 +899,55 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
       }
       result.tags_ = tags_;
+      result.salarmId_ = salarmId_;
       onBuilt();
       return result;
     }
 
-    @Override
+    @java.lang.Override
     public Builder clone() {
       return super.clone();
     }
-    @Override
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.setField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
       return super.clearField(field);
     }
-    @Override
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
       return super.clearOneof(oneof);
     }
-    @Override
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
+        int index, java.lang.Object value) {
       return super.setRepeatedField(field, index, value);
     }
-    @Override
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.addRepeatedField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof Alarm) {
-        return mergeFrom((Alarm)other);
+      if (other instanceof org.opennms.alec.grpc.Alarm) {
+        return mergeFrom((org.opennms.alec.grpc.Alarm)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(Alarm other) {
-      if (other == Alarm.getDefaultInstance()) return this;
+    public Builder mergeFrom(org.opennms.alec.grpc.Alarm other) {
+      if (other == org.opennms.alec.grpc.Alarm.getDefaultInstance()) return this;
       if (other.getAlarmId() != 0L) {
         setAlarmId(other.getAlarmId());
       }
@@ -929,26 +987,30 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
+      if (!other.getSalarmId().isEmpty()) {
+        salarmId_ = other.salarmId_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Alarm parsedMessage = null;
+      org.opennms.alec.grpc.Alarm parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (Alarm) e.getUnfinishedMessage();
+        parsedMessage = (org.opennms.alec.grpc.Alarm) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -964,7 +1026,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 alarm_id = 1;</code>
      * @return The alarmId.
      */
-    @Override
+    @java.lang.Override
     public long getAlarmId() {
       return alarmId_;
     }
@@ -1228,21 +1290,21 @@ private static final long serialVersionUID = 0L;
       return lastTimeSeenBuilder_;
     }
 
-    private Object inventoryObjectId_ = "";
+    private java.lang.Object inventoryObjectId_ = "";
     /**
      * <code>string inventory_object_id = 4;</code>
      * @return The inventoryObjectId.
      */
-    public String getInventoryObjectId() {
-      Object ref = inventoryObjectId_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getInventoryObjectId() {
+      java.lang.Object ref = inventoryObjectId_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         inventoryObjectId_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1251,11 +1313,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getInventoryObjectIdBytes() {
-      Object ref = inventoryObjectId_;
+      java.lang.Object ref = inventoryObjectId_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         inventoryObjectId_ = b;
         return b;
       } else {
@@ -1268,7 +1330,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setInventoryObjectId(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1304,21 +1366,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object inventoryObjectType_ = "";
+    private java.lang.Object inventoryObjectType_ = "";
     /**
      * <code>string inventory_object_type = 5;</code>
      * @return The inventoryObjectType.
      */
-    public String getInventoryObjectType() {
-      Object ref = inventoryObjectType_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getInventoryObjectType() {
+      java.lang.Object ref = inventoryObjectType_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         inventoryObjectType_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1327,11 +1389,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getInventoryObjectTypeBytes() {
-      Object ref = inventoryObjectType_;
+      java.lang.Object ref = inventoryObjectType_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         inventoryObjectType_ = b;
         return b;
       } else {
@@ -1344,7 +1406,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setInventoryObjectType(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1380,21 +1442,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object severity_ = "";
+    private java.lang.Object severity_ = "";
     /**
      * <code>string severity = 6;</code>
      * @return The severity.
      */
-    public String getSeverity() {
-      Object ref = severity_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getSeverity() {
+      java.lang.Object ref = severity_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         severity_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1403,11 +1465,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getSeverityBytes() {
-      Object ref = severity_;
+      java.lang.Object ref = severity_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         severity_ = b;
         return b;
       } else {
@@ -1420,7 +1482,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSeverity(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1456,21 +1518,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object summary_ = "";
+    private java.lang.Object summary_ = "";
     /**
      * <code>string summary = 7;</code>
      * @return The summary.
      */
-    public String getSummary() {
-      Object ref = summary_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getSummary() {
+      java.lang.Object ref = summary_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         summary_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1479,11 +1541,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getSummaryBytes() {
-      Object ref = summary_;
+      java.lang.Object ref = summary_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         summary_ = b;
         return b;
       } else {
@@ -1496,7 +1558,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSummary(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1532,21 +1594,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private Object description_ = "";
+    private java.lang.Object description_ = "";
     /**
      * <code>string description = 8;</code>
      * @return The description.
      */
-    public String getDescription() {
-      Object ref = description_;
-      if (!(ref instanceof String)) {
+    public java.lang.String getDescription() {
+      java.lang.Object ref = description_;
+      if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
+        java.lang.String s = bs.toStringUtf8();
         description_ = s;
         return s;
       } else {
-        return (String) ref;
+        return (java.lang.String) ref;
       }
     }
     /**
@@ -1555,11 +1617,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getDescriptionBytes() {
-      Object ref = description_;
+      java.lang.Object ref = description_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+                (java.lang.String) ref);
         description_ = b;
         return b;
       } else {
@@ -1572,7 +1634,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setDescription(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1635,7 +1697,7 @@ private static final long serialVersionUID = 0L;
      * @param index The index of the element to return.
      * @return The tags at the given index.
      */
-    public String getTags(int index) {
+    public java.lang.String getTags(int index) {
       return tags_.get(index);
     }
     /**
@@ -1654,7 +1716,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTags(
-        int index, String value) {
+        int index, java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1669,7 +1731,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addTags(
-        String value) {
+        java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1684,7 +1746,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addAllTags(
-        Iterable<String> values) {
+        java.lang.Iterable<java.lang.String> values) {
       ensureTagsIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, tags_);
@@ -1717,13 +1779,89 @@ private static final long serialVersionUID = 0L;
       onChanged();
       return this;
     }
-    @Override
+
+    private java.lang.Object salarmId_ = "";
+    /**
+     * <code>string salarm_id = 10;</code>
+     * @return The salarmId.
+     */
+    public java.lang.String getSalarmId() {
+      java.lang.Object ref = salarmId_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        salarmId_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string salarm_id = 10;</code>
+     * @return The bytes for salarmId.
+     */
+    public com.google.protobuf.ByteString
+        getSalarmIdBytes() {
+      java.lang.Object ref = salarmId_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        salarmId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string salarm_id = 10;</code>
+     * @param value The salarmId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSalarmId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      salarmId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string salarm_id = 10;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSalarmId() {
+      
+      salarmId_ = getDefaultInstance().getSalarmId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string salarm_id = 10;</code>
+     * @param value The bytes for salarmId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSalarmIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      salarmId_ = value;
+      onChanged();
+      return this;
+    }
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.setUnknownFields(unknownFields);
     }
 
-    @Override
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.mergeUnknownFields(unknownFields);
@@ -1734,18 +1872,18 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:Alarm)
-  private static final Alarm DEFAULT_INSTANCE;
+  private static final org.opennms.alec.grpc.Alarm DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new Alarm();
+    DEFAULT_INSTANCE = new org.opennms.alec.grpc.Alarm();
   }
 
-  public static Alarm getDefaultInstance() {
+  public static org.opennms.alec.grpc.Alarm getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
   private static final com.google.protobuf.Parser<Alarm>
       PARSER = new com.google.protobuf.AbstractParser<Alarm>() {
-    @Override
+    @java.lang.Override
     public Alarm parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1758,13 +1896,13 @@ private static final long serialVersionUID = 0L;
     return PARSER;
   }
 
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Parser<Alarm> getParserForType() {
     return PARSER;
   }
 
-  @Override
-  public Alarm getDefaultInstanceForType() {
+  @java.lang.Override
+  public org.opennms.alec.grpc.Alarm getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

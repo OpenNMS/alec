@@ -37,7 +37,8 @@ public class AlarmToAlarmProto {
 
     public org.opennms.alec.grpc.Alarm toAlarm(Alarm alarm) {
         return org.opennms.alec.grpc.Alarm.newBuilder()
-                .setAlarmId(Long.parseLong(alarm.getId()))
+                .setAlarmId(alarm.getLongId())
+                .setSalarmId(alarm.getId())
                 .setFirstTimeSeen(Utils.getTimestamp(alarm.getFirstTime()))
                 .setLastTimeSeen(Utils.getTimestamp(alarm.getTime()))
                 .setSeverity(alarm.getSeverity().toString())

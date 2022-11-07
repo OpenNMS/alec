@@ -52,12 +52,12 @@ public interface SituationSetOrBuilder extends
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  java.util.List<Situation>
+  java.util.List<org.opennms.alec.grpc.Situation> 
       getSituationsList();
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  Situation getSituations(int index);
+  org.opennms.alec.grpc.Situation getSituations(int index);
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
@@ -65,11 +65,11 @@ public interface SituationSetOrBuilder extends
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  java.util.List<? extends SituationOrBuilder>
+  java.util.List<? extends org.opennms.alec.grpc.SituationOrBuilder> 
       getSituationsOrBuilderList();
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  SituationOrBuilder getSituationsOrBuilder(
+  org.opennms.alec.grpc.SituationOrBuilder getSituationsOrBuilder(
       int index);
 }

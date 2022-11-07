@@ -46,14 +46,14 @@ private static final long serialVersionUID = 0L;
     situations_ = java.util.Collections.emptyList();
   }
 
-  @Override
+  @java.lang.Override
   @SuppressWarnings({"unused"})
-  protected Object newInstance(
+  protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
     return new SituationSet();
   }
 
-  @Override
+  @java.lang.Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
     return this.unknownFields;
@@ -64,7 +64,7 @@ private static final long serialVersionUID = 0L;
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     if (extensionRegistry == null) {
-      throw new NullPointerException();
+      throw new java.lang.NullPointerException();
     }
     int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
@@ -92,11 +92,11 @@ private static final long serialVersionUID = 0L;
           }
           case 18: {
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              situations_ = new java.util.ArrayList<Situation>();
+              situations_ = new java.util.ArrayList<org.opennms.alec.grpc.Situation>();
               mutable_bitField0_ |= 0x00000001;
             }
             situations_.add(
-                input.readMessage(Situation.parser(), extensionRegistry));
+                input.readMessage(org.opennms.alec.grpc.Situation.parser(), extensionRegistry));
             break;
           }
           default: {
@@ -123,15 +123,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return SituationSetProtos.internal_static_SituationSet_descriptor;
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_SituationSet_descriptor;
   }
 
-  @Override
-  protected FieldAccessorTable
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return SituationSetProtos.internal_static_SituationSet_fieldAccessorTable
+    return org.opennms.alec.grpc.SituationSetProtos.internal_static_SituationSet_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            SituationSet.class, Builder.class);
+            org.opennms.alec.grpc.SituationSet.class, org.opennms.alec.grpc.SituationSet.Builder.class);
   }
 
   public static final int TIMESTAMP_FIELD_NUMBER = 1;
@@ -140,7 +140,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp timestamp = 1;</code>
    * @return Whether the timestamp field is set.
    */
-  @Override
+  @java.lang.Override
   public boolean hasTimestamp() {
     return timestamp_ != null;
   }
@@ -148,60 +148,60 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp timestamp = 1;</code>
    * @return The timestamp.
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Timestamp getTimestamp() {
     return timestamp_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : timestamp_;
   }
   /**
    * <code>.google.protobuf.Timestamp timestamp = 1;</code>
    */
-  @Override
+  @java.lang.Override
   public com.google.protobuf.TimestampOrBuilder getTimestampOrBuilder() {
     return getTimestamp();
   }
 
   public static final int SITUATIONS_FIELD_NUMBER = 2;
-  private java.util.List<Situation> situations_;
+  private java.util.List<org.opennms.alec.grpc.Situation> situations_;
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  @Override
-  public java.util.List<Situation> getSituationsList() {
+  @java.lang.Override
+  public java.util.List<org.opennms.alec.grpc.Situation> getSituationsList() {
     return situations_;
   }
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  @Override
-  public java.util.List<? extends SituationOrBuilder>
+  @java.lang.Override
+  public java.util.List<? extends org.opennms.alec.grpc.SituationOrBuilder> 
       getSituationsOrBuilderList() {
     return situations_;
   }
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  @Override
+  @java.lang.Override
   public int getSituationsCount() {
     return situations_.size();
   }
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  @Override
-  public Situation getSituations(int index) {
+  @java.lang.Override
+  public org.opennms.alec.grpc.Situation getSituations(int index) {
     return situations_.get(index);
   }
   /**
    * <code>repeated .Situation situations = 2;</code>
    */
-  @Override
-  public SituationOrBuilder getSituationsOrBuilder(
+  @java.lang.Override
+  public org.opennms.alec.grpc.SituationOrBuilder getSituationsOrBuilder(
       int index) {
     return situations_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
-  @Override
+  @java.lang.Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -211,7 +211,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (timestamp_ != null) {
@@ -223,7 +223,7 @@ private static final long serialVersionUID = 0L;
     unknownFields.writeTo(output);
   }
 
-  @Override
+  @java.lang.Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -242,15 +242,15 @@ private static final long serialVersionUID = 0L;
     return size;
   }
 
-  @Override
-  public boolean equals(final Object obj) {
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof SituationSet)) {
+    if (!(obj instanceof org.opennms.alec.grpc.SituationSet)) {
       return super.equals(obj);
     }
-    SituationSet other = (SituationSet) obj;
+    org.opennms.alec.grpc.SituationSet other = (org.opennms.alec.grpc.SituationSet) obj;
 
     if (hasTimestamp() != other.hasTimestamp()) return false;
     if (hasTimestamp()) {
@@ -263,7 +263,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @Override
+  @java.lang.Override
   public int hashCode() {
     if (memoizedHashCode != 0) {
       return memoizedHashCode;
@@ -283,69 +283,69 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static SituationSet parseFrom(byte[] data)
+  public static org.opennms.alec.grpc.SituationSet parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static SituationSet parseFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.SituationSet parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static SituationSet parseDelimitedFrom(java.io.InputStream input)
+  public static org.opennms.alec.grpc.SituationSet parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static SituationSet parseDelimitedFrom(
+  public static org.opennms.alec.grpc.SituationSet parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static SituationSet parseFrom(
+  public static org.opennms.alec.grpc.SituationSet parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -353,23 +353,23 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  @Override
+  @java.lang.Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(SituationSet prototype) {
+  public static Builder newBuilder(org.opennms.alec.grpc.SituationSet prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
-  @Override
+  @java.lang.Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
   }
 
-  @Override
+  @java.lang.Override
   protected Builder newBuilderForType(
-      BuilderParent parent) {
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
     Builder builder = new Builder(parent);
     return builder;
   }
@@ -379,18 +379,18 @@ private static final long serialVersionUID = 0L;
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:SituationSet)
-      SituationSetOrBuilder {
+      org.opennms.alec.grpc.SituationSetOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return SituationSetProtos.internal_static_SituationSet_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_SituationSet_descriptor;
     }
 
-    @Override
-    protected FieldAccessorTable
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return SituationSetProtos.internal_static_SituationSet_fieldAccessorTable
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_SituationSet_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              SituationSet.class, Builder.class);
+              org.opennms.alec.grpc.SituationSet.class, org.opennms.alec.grpc.SituationSet.Builder.class);
     }
 
     // Construct using org.opennms.alec.grpc.SituationSet.newBuilder()
@@ -399,7 +399,7 @@ private static final long serialVersionUID = 0L;
     }
 
     private Builder(
-        BuilderParent parent) {
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
       maybeForceBuilderInitialization();
     }
@@ -409,7 +409,7 @@ private static final long serialVersionUID = 0L;
         getSituationsFieldBuilder();
       }
     }
-    @Override
+    @java.lang.Override
     public Builder clear() {
       super.clear();
       if (timestampBuilder_ == null) {
@@ -427,29 +427,29 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return SituationSetProtos.internal_static_SituationSet_descriptor;
+      return org.opennms.alec.grpc.SituationSetProtos.internal_static_SituationSet_descriptor;
     }
 
-    @Override
-    public SituationSet getDefaultInstanceForType() {
-      return SituationSet.getDefaultInstance();
+    @java.lang.Override
+    public org.opennms.alec.grpc.SituationSet getDefaultInstanceForType() {
+      return org.opennms.alec.grpc.SituationSet.getDefaultInstance();
     }
 
-    @Override
-    public SituationSet build() {
-      SituationSet result = buildPartial();
+    @java.lang.Override
+    public org.opennms.alec.grpc.SituationSet build() {
+      org.opennms.alec.grpc.SituationSet result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
       return result;
     }
 
-    @Override
-    public SituationSet buildPartial() {
-      SituationSet result = new SituationSet(this);
+    @java.lang.Override
+    public org.opennms.alec.grpc.SituationSet buildPartial() {
+      org.opennms.alec.grpc.SituationSet result = new org.opennms.alec.grpc.SituationSet(this);
       int from_bitField0_ = bitField0_;
       if (timestampBuilder_ == null) {
         result.timestamp_ = timestamp_;
@@ -469,50 +469,50 @@ private static final long serialVersionUID = 0L;
       return result;
     }
 
-    @Override
+    @java.lang.Override
     public Builder clone() {
       return super.clone();
     }
-    @Override
+    @java.lang.Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.setField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
       return super.clearField(field);
     }
-    @Override
+    @java.lang.Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
       return super.clearOneof(oneof);
     }
-    @Override
+    @java.lang.Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, Object value) {
+        int index, java.lang.Object value) {
       return super.setRepeatedField(field, index, value);
     }
-    @Override
+    @java.lang.Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        Object value) {
+        java.lang.Object value) {
       return super.addRepeatedField(field, value);
     }
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof SituationSet) {
-        return mergeFrom((SituationSet)other);
+      if (other instanceof org.opennms.alec.grpc.SituationSet) {
+        return mergeFrom((org.opennms.alec.grpc.SituationSet)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(SituationSet other) {
-      if (other == SituationSet.getDefaultInstance()) return this;
+    public Builder mergeFrom(org.opennms.alec.grpc.SituationSet other) {
+      if (other == org.opennms.alec.grpc.SituationSet.getDefaultInstance()) return this;
       if (other.hasTimestamp()) {
         mergeTimestamp(other.getTimestamp());
       }
@@ -547,21 +547,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @Override
+    @java.lang.Override
     public final boolean isInitialized() {
       return true;
     }
 
-    @Override
+    @java.lang.Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      SituationSet parsedMessage = null;
+      org.opennms.alec.grpc.SituationSet parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (SituationSet) e.getUnfinishedMessage();
+        parsedMessage = (org.opennms.alec.grpc.SituationSet) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -691,22 +691,22 @@ private static final long serialVersionUID = 0L;
       return timestampBuilder_;
     }
 
-    private java.util.List<Situation> situations_ =
+    private java.util.List<org.opennms.alec.grpc.Situation> situations_ =
       java.util.Collections.emptyList();
     private void ensureSituationsIsMutable() {
       if (!((bitField0_ & 0x00000001) != 0)) {
-        situations_ = new java.util.ArrayList<Situation>(situations_);
+        situations_ = new java.util.ArrayList<org.opennms.alec.grpc.Situation>(situations_);
         bitField0_ |= 0x00000001;
        }
     }
 
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        Situation, Situation.Builder, SituationOrBuilder> situationsBuilder_;
+        org.opennms.alec.grpc.Situation, org.opennms.alec.grpc.Situation.Builder, org.opennms.alec.grpc.SituationOrBuilder> situationsBuilder_;
 
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public java.util.List<Situation> getSituationsList() {
+    public java.util.List<org.opennms.alec.grpc.Situation> getSituationsList() {
       if (situationsBuilder_ == null) {
         return java.util.Collections.unmodifiableList(situations_);
       } else {
@@ -726,7 +726,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public Situation getSituations(int index) {
+    public org.opennms.alec.grpc.Situation getSituations(int index) {
       if (situationsBuilder_ == null) {
         return situations_.get(index);
       } else {
@@ -737,7 +737,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder setSituations(
-        int index, Situation value) {
+        int index, org.opennms.alec.grpc.Situation value) {
       if (situationsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -754,7 +754,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder setSituations(
-        int index, Situation.Builder builderForValue) {
+        int index, org.opennms.alec.grpc.Situation.Builder builderForValue) {
       if (situationsBuilder_ == null) {
         ensureSituationsIsMutable();
         situations_.set(index, builderForValue.build());
@@ -767,7 +767,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public Builder addSituations(Situation value) {
+    public Builder addSituations(org.opennms.alec.grpc.Situation value) {
       if (situationsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -784,7 +784,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder addSituations(
-        int index, Situation value) {
+        int index, org.opennms.alec.grpc.Situation value) {
       if (situationsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -801,7 +801,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder addSituations(
-        Situation.Builder builderForValue) {
+        org.opennms.alec.grpc.Situation.Builder builderForValue) {
       if (situationsBuilder_ == null) {
         ensureSituationsIsMutable();
         situations_.add(builderForValue.build());
@@ -815,7 +815,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder addSituations(
-        int index, Situation.Builder builderForValue) {
+        int index, org.opennms.alec.grpc.Situation.Builder builderForValue) {
       if (situationsBuilder_ == null) {
         ensureSituationsIsMutable();
         situations_.add(index, builderForValue.build());
@@ -829,7 +829,7 @@ private static final long serialVersionUID = 0L;
      * <code>repeated .Situation situations = 2;</code>
      */
     public Builder addAllSituations(
-        Iterable<? extends Situation> values) {
+        java.lang.Iterable<? extends org.opennms.alec.grpc.Situation> values) {
       if (situationsBuilder_ == null) {
         ensureSituationsIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
@@ -869,14 +869,14 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public Situation.Builder getSituationsBuilder(
+    public org.opennms.alec.grpc.Situation.Builder getSituationsBuilder(
         int index) {
       return getSituationsFieldBuilder().getBuilder(index);
     }
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public SituationOrBuilder getSituationsOrBuilder(
+    public org.opennms.alec.grpc.SituationOrBuilder getSituationsOrBuilder(
         int index) {
       if (situationsBuilder_ == null) {
         return situations_.get(index);  } else {
@@ -886,7 +886,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public java.util.List<? extends SituationOrBuilder>
+    public java.util.List<? extends org.opennms.alec.grpc.SituationOrBuilder> 
          getSituationsOrBuilderList() {
       if (situationsBuilder_ != null) {
         return situationsBuilder_.getMessageOrBuilderList();
@@ -897,31 +897,31 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public Situation.Builder addSituationsBuilder() {
+    public org.opennms.alec.grpc.Situation.Builder addSituationsBuilder() {
       return getSituationsFieldBuilder().addBuilder(
-          Situation.getDefaultInstance());
+          org.opennms.alec.grpc.Situation.getDefaultInstance());
     }
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public Situation.Builder addSituationsBuilder(
+    public org.opennms.alec.grpc.Situation.Builder addSituationsBuilder(
         int index) {
       return getSituationsFieldBuilder().addBuilder(
-          index, Situation.getDefaultInstance());
+          index, org.opennms.alec.grpc.Situation.getDefaultInstance());
     }
     /**
      * <code>repeated .Situation situations = 2;</code>
      */
-    public java.util.List<Situation.Builder>
+    public java.util.List<org.opennms.alec.grpc.Situation.Builder> 
          getSituationsBuilderList() {
       return getSituationsFieldBuilder().getBuilderList();
     }
     private com.google.protobuf.RepeatedFieldBuilderV3<
-        Situation, Situation.Builder, SituationOrBuilder>
+        org.opennms.alec.grpc.Situation, org.opennms.alec.grpc.Situation.Builder, org.opennms.alec.grpc.SituationOrBuilder> 
         getSituationsFieldBuilder() {
       if (situationsBuilder_ == null) {
         situationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-            Situation, Situation.Builder, SituationOrBuilder>(
+            org.opennms.alec.grpc.Situation, org.opennms.alec.grpc.Situation.Builder, org.opennms.alec.grpc.SituationOrBuilder>(
                 situations_,
                 ((bitField0_ & 0x00000001) != 0),
                 getParentForChildren(),
@@ -930,13 +930,13 @@ private static final long serialVersionUID = 0L;
       }
       return situationsBuilder_;
     }
-    @Override
+    @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.setUnknownFields(unknownFields);
     }
 
-    @Override
+    @java.lang.Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.mergeUnknownFields(unknownFields);
@@ -947,18 +947,18 @@ private static final long serialVersionUID = 0L;
   }
 
   // @@protoc_insertion_point(class_scope:SituationSet)
-  private static final SituationSet DEFAULT_INSTANCE;
+  private static final org.opennms.alec.grpc.SituationSet DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new SituationSet();
+    DEFAULT_INSTANCE = new org.opennms.alec.grpc.SituationSet();
   }
 
-  public static SituationSet getDefaultInstance() {
+  public static org.opennms.alec.grpc.SituationSet getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
   private static final com.google.protobuf.Parser<SituationSet>
       PARSER = new com.google.protobuf.AbstractParser<SituationSet>() {
-    @Override
+    @java.lang.Override
     public SituationSet parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -971,13 +971,13 @@ private static final long serialVersionUID = 0L;
     return PARSER;
   }
 
-  @Override
+  @java.lang.Override
   public com.google.protobuf.Parser<SituationSet> getParserForType() {
     return PARSER;
   }
 
-  @Override
-  public SituationSet getDefaultInstanceForType() {
+  @java.lang.Override
+  public org.opennms.alec.grpc.SituationSet getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

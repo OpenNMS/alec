@@ -52,12 +52,12 @@ public interface AlarmSetOrBuilder extends
   /**
    * <code>repeated .Alarm alarms = 2;</code>
    */
-  java.util.List<Alarm>
+  java.util.List<org.opennms.alec.grpc.Alarm> 
       getAlarmsList();
   /**
    * <code>repeated .Alarm alarms = 2;</code>
    */
-  Alarm getAlarms(int index);
+  org.opennms.alec.grpc.Alarm getAlarms(int index);
   /**
    * <code>repeated .Alarm alarms = 2;</code>
    */
@@ -65,11 +65,11 @@ public interface AlarmSetOrBuilder extends
   /**
    * <code>repeated .Alarm alarms = 2;</code>
    */
-  java.util.List<? extends AlarmOrBuilder>
+  java.util.List<? extends org.opennms.alec.grpc.AlarmOrBuilder> 
       getAlarmsOrBuilderList();
   /**
    * <code>repeated .Alarm alarms = 2;</code>
    */
-  AlarmOrBuilder getAlarmsOrBuilder(
+  org.opennms.alec.grpc.AlarmOrBuilder getAlarmsOrBuilder(
       int index);
 }

@@ -22,6 +22,7 @@ message Alarm {
   string summary = 7;
   string description = 8;
   repeated string tags = 9;
+  string salarm_id = 10;
 }
 
 message AlarmSet {
@@ -40,6 +41,7 @@ message Situation {
   string engine_parameter = 8;
   string status = 9;
   repeated string rejected = 10;
+  string sid = 11;
 }
 
 message SituationSet {

@@ -50,7 +50,7 @@ import org.opennms.alec.datasource.opennms.proto.OpennmsModelProtos;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 
-public class OpennmsMapper {
+public final class OpennmsMapper {
 
     private OpennmsMapper() {
         throw new IllegalStateException("Utility class");

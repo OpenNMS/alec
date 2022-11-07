@@ -140,7 +140,7 @@ public class SituationRestImpl implements SituationRest {
     @Override
     public Response getSituationStatusList() throws InterruptedException {
         List<SituationStatus> situationStatusList = new ArrayList<>();
-        situationDatasource.getSituationsWithAlarmId().forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
+        situationDatasource.getSituations().forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
                 .id(o.getId())
                 .status(o.getStatus())
                 .build()));
@@ -150,7 +150,7 @@ public class SituationRestImpl implements SituationRest {
 
     @Override
     public Response getSituationList() throws InterruptedException {
-        List<Situation> situations = situationDatasource.getSituationsWithAlarmId();
+        List<Situation> situations = situationDatasource.getSituations();
         return Response.ok(situations).build();
     }
 
@@ -262,10 +262,10 @@ public class SituationRestImpl implements SituationRest {
     }
 
     private void storeMLSituations() throws JsonProcessingException, InterruptedException {
-        List<Situation> acceptedSituations = situationDatasource.getSituationsWithAlarmId().stream()
+        List<Situation> acceptedSituations = situationDatasource.getSituations().stream()
                 .filter(s -> Status.ACCEPTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
-        List<Situation> rejectedSituations = situationDatasource.getSituationsWithAlarmId().stream()
+        List<Situation> rejectedSituations = situationDatasource.getSituations().stream()
                 .filter(s -> Status.REJECTED.equals(s.getStatus()))
                 .collect(Collectors.toList());
 

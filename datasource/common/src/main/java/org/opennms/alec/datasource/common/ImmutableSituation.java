@@ -52,6 +52,7 @@ import org.opennms.alec.datasource.api.Status;
  */
 public final class ImmutableSituation implements Situation {
     private final String id;
+    private final long longId;
     private final long creationTime;
     private final Severity severity;
     private final List<ResourceKey> resourceKeys;
@@ -66,6 +67,7 @@ public final class ImmutableSituation implements Situation {
 
     private ImmutableSituation(Builder builder) {
         this.id = builder.id;
+        this.longId = builder.longId;
         this.creationTime = builder.creationTime;
         this.severity = builder.severity;
         this.resourceKeys = builder.resourceKeys == null ? Collections.emptyList() :
@@ -83,6 +85,7 @@ public final class ImmutableSituation implements Situation {
 
     public static final class Builder {
         private String id;
+        private long longId;
         private Long creationTime;
         private Severity severity;
         private List<ResourceKey> resourceKeys;
@@ -99,6 +102,7 @@ public final class ImmutableSituation implements Situation {
 
         private Builder(Situation situation) {
             this.id = situation.getId();
+            this.longId = situation.getLongId();
             this.creationTime = situation.getCreationTime();
             this.severity = situation.getSeverity();
             // Copy contents for the collections to avoid referencing a collection we don't control
@@ -117,6 +121,11 @@ public final class ImmutableSituation implements Situation {
 
         public Builder setId(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder setLongId(long longId) {
+            this.longId = longId;
             return this;
         }
 
@@ -253,6 +262,11 @@ public final class ImmutableSituation implements Situation {
     }
 
     @Override
+    public long getLongId() {
+        return longId;
+    }
+
+    @Override
     public long getCreationTime() {
         return creationTime;
     }
@@ -316,18 +330,21 @@ public final class ImmutableSituation implements Situation {
                 Objects.equals(reductionKey, that.reductionKey) &&
                 Objects.equals(lastTime, that.lastTime) &&
                 Objects.equals(uei, that.uei) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(longId, that.longId) &&
                 Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(creationTime, resourceKeys, alarms, severity, diagnosticText, status, reductionKey, lastTime, uei, description);
+        return Objects.hash(id, longId, creationTime, resourceKeys, alarms, severity, diagnosticText, status, reductionKey, lastTime, uei, description);
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", ImmutableSituation.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
+                .add("longId=" + longId)
                 .add("creationTime=" + creationTime)
                 .add("severity=" + severity)
                 .add("resourceKeys=" + resourceKeys)

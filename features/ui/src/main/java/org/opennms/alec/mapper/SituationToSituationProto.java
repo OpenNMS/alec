@@ -33,13 +33,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.grpc.SituationSet;
+import org.opennms.alec.grpc.generated.SituationSet;
 
 public class SituationToSituationProto {
     final AlarmToAlarmProto alarmMapper = new AlarmToAlarmProto();
 
-   public org.opennms.alec.grpc.Situation toSituation(Situation situation) {
-        return org.opennms.alec.grpc.Situation.newBuilder()
+   public org.opennms.alec.grpc.generated.Situation toSituation(Situation situation) {
+        return org.opennms.alec.grpc.generated.Situation.newBuilder()
                 .setAlarms(alarmMapper.toAlarms(situation.getAlarms()))
                 .setSeverity(situation.getSeverity().toString())
                 .setCreationTime(Utils.getTimestamp(situation.getCreationTime()))

@@ -31,12 +31,12 @@ package org.opennms.alec.mapper;
 import java.util.Set;
 
 import org.opennms.alec.datasource.api.Alarm;
-import org.opennms.alec.grpc.AlarmSet;
+import org.opennms.alec.grpc.generated.AlarmSet;
 
 public class AlarmToAlarmProto {
 
-    public org.opennms.alec.grpc.Alarm toAlarm(Alarm alarm) {
-        return org.opennms.alec.grpc.Alarm.newBuilder()
+    public org.opennms.alec.grpc.generated.Alarm toAlarm(Alarm alarm) {
+        return org.opennms.alec.grpc.generated.Alarm.newBuilder()
                 .setAlarmId(alarm.getLongId())
                 .setSalarmId(alarm.getId())
                 .setFirstTimeSeen(Utils.getTimestamp(alarm.getFirstTime()))

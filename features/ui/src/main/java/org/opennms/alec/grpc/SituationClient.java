@@ -29,6 +29,8 @@
 package org.opennms.alec.grpc;
 
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.grpc.generated.AlecCollectionServiceGrpc;
+import org.opennms.alec.grpc.generated.SituationSet;
 import org.opennms.alec.mapper.SituationToSituationProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

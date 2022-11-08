@@ -44,8 +44,12 @@
     </modules>
 
     <properties>
+        <!-- Configuration properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <sonar.exclusions>**/generated/**</sonar.exclusions>
+
+        <!-- Dependency properties -->
         <asciitable.version>0.3.2</asciitable.version>
         <awaitility.version>3.1.1</awaitility.version>
         <commons.csv.version>1.5</commons.csv.version>

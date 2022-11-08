@@ -6,7 +6,7 @@
             <property name="id" value="uiExtension"/>
             <property name="menuEntry" value="ALEC"/>
             <property name="resourceRoot" value="ui-ext"/>
-            <property name="moduleFileName" value="uiextension.es.js"/>
+            <property name="moduleFileName" value="alecextension.es.js"/>
         </bean>
     </service>
 

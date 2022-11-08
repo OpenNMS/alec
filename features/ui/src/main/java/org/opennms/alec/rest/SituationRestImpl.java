@@ -282,13 +282,19 @@ public class SituationRestImpl implements SituationRest {
             return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarms.size())).build();
         }
         final String situationId = UUID.randomUUID().toString();
+        final Severity maxSeverity = Severity.fromValue(alarms.stream()
+                .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
+                .max()
+                .orElseGet(Severity.INDETERMINATE::getValue));
         Situation situation = ImmutableSituation.newBuilder()
                 .setId(situationId)
                 .setCreationTime(System.currentTimeMillis())
+                .setLastTime(System.currentTimeMillis())
                 .setAlarms(alarms)
                 .setDiagnosticText(createSituationPayload.getDiagnosticText())
                 .setDescription(createSituationPayload.getDescription())
                 .setEngineParameter("user created")
+                .setSeverity(maxSeverity)
                 .build();
         try {
             forwardAndStoreSituation(situation, token);

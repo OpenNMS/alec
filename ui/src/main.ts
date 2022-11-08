@@ -7,7 +7,7 @@ import '@featherds/styles/themes/open-light.css'
 import { createPinia } from 'pinia'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-window['uiextension'] = App
+window['alecextension'] = App
 
 if (envMode == 'development') {
 	createApp(App).use(router).use(createPinia()).mount('#app')

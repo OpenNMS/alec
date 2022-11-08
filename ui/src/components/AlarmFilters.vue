@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { TAlarm } from '@/types/TSituation'
-import { FeatherChipList, FeatherChip } from '@featherds/chips'
-import { ref, watch, computed, reactive } from 'vue'
-import { groupBy, keys, remove } from 'lodash'
+import { ref, watch, reactive } from 'vue'
+import { remove } from 'lodash'
 import AlarmDetail from '@/components/AlarmDetail.vue'
-import StatusColor from '@/elements/StatusColor.vue'
 import { FeatherButton } from '@featherds/button'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { sendClearAlarms } from '@/services/AlarmService'
+import { sendActionMultiplyAlarms } from '@/services/AlarmService'
 import { FeatherCheckbox } from '@featherds/checkbox'
+import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import CheckCircle from '@featherds/icon/action/CheckCircle'
 
 const situationStore = useSituationsStore()
 
@@ -24,7 +24,6 @@ const props = defineProps<{
 }>()
 const selectAll = ref(false)
 
-const alarmFilters = computed(() => keys(groupBy(props.alarms, 'severity')))
 const selectedFilters = ref(['all'])
 
 const state: TState = reactive({
@@ -32,22 +31,6 @@ const state: TState = reactive({
 	alarms: props.alarms
 })
 
-const handleAlarmFilters = (selected: string) => {
-	selectedFilters.value = selectedFilters.value.filter((f) => f !== 'all')
-	if (selectedFilters.value.includes(selected)) {
-		selectedFilters.value = selectedFilters.value.filter((f) => f !== selected)
-	} else {
-		selectedFilters.value.push(selected)
-	}
-	if (selected === 'all' || selectedFilters.value.length === 0) {
-		selectedFilters.value = ['all']
-		state.alarms = props.alarms
-	} else {
-		state.alarms = props.alarms.filter((a) =>
-			selectedFilters.value.includes(a.severity)
-		)
-	}
-}
 watch(props, () => {
 	selectedFilters.value = ['all']
 	state.alarms = props.alarms
@@ -63,13 +46,20 @@ const alarmSelected = (id: number) => {
 	}
 }
 
-const handleClearAction = async () => {
+const handleActionMultiplyAlarms = async (action: string) => {
 	if (state.selectedAlarms.length) {
-		await sendClearAlarms(state.selectedAlarms)
-		situationStore.selectedSituation = props.situationId
+		await sendActionMultiplyAlarms(state.selectedAlarms, action)
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
 		selectAll.value = false
+	}
+}
+
+const updateList = (severities: string[]) => {
+	if (severities.includes('all')) {
+		state.alarms = props.alarms
+	} else {
+		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
 	}
 }
 </script>
@@ -78,41 +68,30 @@ const handleClearAction = async () => {
 	<div class="container">
 		<div class="row">
 			<div class="title">Alarms</div>
-			<FeatherChipList
-				:key="selectedFilters.toString()"
-				v-if="alarmFilters.length > 1"
-				condensed
-				class="alarm-filters"
-				label="Random list for condensed visual testing"
-			>
-				<FeatherChip
-					:class="{ clicked: selectedFilters.includes('all') }"
-					@click="handleAlarmFilters('all')"
-				>
-					ALL
-				</FeatherChip>
-				<FeatherChip
-					:class="[
-						{ clicked: selectedFilters.includes(severity) },
-						`${severity?.toLowerCase()}-bg`
-					]"
-					v-for="severity in alarmFilters"
-					:key="severity"
-					@click="handleAlarmFilters(severity)"
-				>
-					<StatusColor :severity="severity" />{{ severity }}
-				</FeatherChip>
-			</FeatherChipList>
+			<FiltersSeverity
+				:alarms="props.alarms"
+				@selected-severities="updateList"
+			/>
 		</div>
 		<div class="row actions">
 			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton class="acction-btn" @click="() => handleClearAction()">
+			<FeatherButton
+				class="acction-btn"
+				@click="() => handleActionMultiplyAlarms('clear')"
+			>
 				<FeatherIcon
 					:icon="MarkComplete"
 					aria-hidden="true"
 					class="icon clear"
 				/>
 				<span>Clear</span>
+			</FeatherButton>
+			<FeatherButton
+				class="acction-btn"
+				@click="() => handleActionMultiplyAlarms('ack')"
+			>
+				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
+				<span>Acknowledge</span>
 			</FeatherButton>
 		</div>
 
@@ -189,6 +168,9 @@ const handleClearAction = async () => {
 
 	&.clear {
 		color: blue;
+	}
+	&.ack {
+		color: green;
 	}
 }
 </style>

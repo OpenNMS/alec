@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory, Router } from 'vue-router'
-import SituationList from '@/containers/SituationList.vue'
+import SituationList2 from '@/containers/SituationList.vue'
+import SituationDetail2 from '@/containers/SituationDetail.vue'
+
 import WelcomePage from '@/components/WelcomePage.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 
@@ -53,7 +55,12 @@ const routes = [
 		path: '/situations',
 		name: 'situations',
 		beforeEnter: () => checkUser(),
-		component: SituationList
+		component: SituationList2
+	},
+	{
+		path: '/situations/:id',
+		name: 'situationDetail',
+		component: SituationDetail2
 	},
 	{
 		path: '/error',

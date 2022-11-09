@@ -84,7 +84,7 @@ const handleSituationSelected = () => {
 	display: flex;
 	width: 100%;
 	flex-direction: row;
-	background-color: #ffffff;
+	background-color: #fbfbfb;
 	cursor: pointer;
 	border: 1px solid $border-grey;
 	height: 100%;

@@ -6128,7 +6128,7 @@ const jt = (t) => {
       console.log("error date", t);
     }
   return i;
-}, BM = window.Vue.defineComponent, Pt = window.Vue.unref, df = window.Vue.normalizeClass, dn = window.Vue.createElementVNode, yi = window.Vue.toDisplayString, hf = window.Vue.createVNode, Zr = window.Vue.openBlock, Jr = window.Vue.createElementBlock, xl = window.Vue.createCommentVNode, Zm = window.Vue.createTextVNode, DM = window.Vue.renderList, IM = window.Vue.Fragment, OM = window.Vue.pushScopeId, QM = window.Vue.popScopeId, Jm = (t) => (OM("data-v-ed1e125a"), t = t(), QM(), t), _M = { class: "content" }, zM = { class: "title-row" }, GM = { class: "title" }, YM = {
+}, BM = window.Vue.defineComponent, Pt = window.Vue.unref, df = window.Vue.normalizeClass, dn = window.Vue.createElementVNode, yi = window.Vue.toDisplayString, hf = window.Vue.createVNode, Zr = window.Vue.openBlock, Jr = window.Vue.createElementBlock, xl = window.Vue.createCommentVNode, Zm = window.Vue.createTextVNode, DM = window.Vue.renderList, IM = window.Vue.Fragment, OM = window.Vue.pushScopeId, QM = window.Vue.popScopeId, Jm = (t) => (OM("data-v-7c453c05"), t = t(), QM(), t), _M = { class: "content" }, zM = { class: "title-row" }, GM = { class: "title" }, YM = {
   key: 0,
   class: "accepted"
 }, PM = {
@@ -6198,7 +6198,7 @@ const jt = (t) => {
     };
   }
 });
-const KM = /* @__PURE__ */ ye(qM, [["__scopeId", "data-v-ed1e125a"]]), ek = window.Vue.openBlock, tk = window.Vue.createElementBlock, nk = window.Vue.createElementVNode;
+const KM = /* @__PURE__ */ ye(qM, [["__scopeId", "data-v-7c453c05"]]), ek = window.Vue.openBlock, tk = window.Vue.createElementBlock, nk = window.Vue.createElementVNode;
 var rk = (t, i) => {
   const r = t.__vccOpts || t;
   for (const [a, l] of i)
@@ -10329,7 +10329,7 @@ const eC = /* @__PURE__ */ ye(KW, [["__scopeId", "data-v-438eed08"]]), tC = "/wh
       }
     }
   }
-}), iC = window.Vue.defineComponent, Dt = window.Vue.createVNode, ht = window.Vue.unref, ec = window.Vue.normalizeClass, va = window.Vue.toDisplayString, jn = window.Vue.openBlock, Xn = window.Vue.createElementBlock, Va = window.Vue.createCommentVNode, oC = window.Vue.withCtx, It = window.Vue.createElementVNode, aC = window.Vue.createTextVNode, sC = window.Vue.Fragment, lC = window.Vue.pushScopeId, cC = window.Vue.popScopeId, uC = (t) => (lC("data-v-664473b6"), t = t(), cC(), t), dC = { class: "section" }, hC = { class: "action-section" }, fC = {
+}), iC = window.Vue.defineComponent, Dt = window.Vue.createVNode, ht = window.Vue.unref, ec = window.Vue.normalizeClass, va = window.Vue.toDisplayString, jn = window.Vue.openBlock, Xn = window.Vue.createElementBlock, Va = window.Vue.createCommentVNode, oC = window.Vue.withCtx, It = window.Vue.createElementVNode, aC = window.Vue.createTextVNode, sC = window.Vue.Fragment, lC = window.Vue.pushScopeId, cC = window.Vue.popScopeId, uC = (t) => (lC("data-v-eecc24f5"), t = t(), cC(), t), dC = { class: "section" }, hC = { class: "action-section" }, fC = {
   key: 0,
   class: "btn-row"
 }, pC = { key: 0 }, mC = { key: 1 }, wC = {
@@ -10364,6 +10364,7 @@ const eC = /* @__PURE__ */ ye(KW, [["__scopeId", "data-v-438eed08"]]), tC = "/wh
             ht(l).allowSave ? (jn(), Xn("div", fC, [
               Dt(ht(wt), {
                 class: ec(["btn", { rejected: c.value == ht(a) }]),
+                "data-test": "btn-reject",
                 onClick: V[0] || (V[0] = () => p(ht(a)))
               }, {
                 default: oC(() => [
@@ -10445,7 +10446,7 @@ const eC = /* @__PURE__ */ ye(KW, [["__scopeId", "data-v-438eed08"]]), tC = "/wh
     };
   }
 });
-const JC = /* @__PURE__ */ ye(ZC, [["__scopeId", "data-v-664473b6"]]);
+const JC = /* @__PURE__ */ ye(ZC, [["__scopeId", "data-v-eecc24f5"]]);
 var bC = Object.defineProperty, EC = Object.defineProperties, SC = Object.getOwnPropertyDescriptors, Np = Object.getOwnPropertySymbols, FC = Object.prototype.hasOwnProperty, AC = Object.prototype.propertyIsEnumerable, yp = (t, i, r) => i in t ? bC(t, i, { enumerable: !0, configurable: !0, writable: !0, value: r }) : t[i] = r, Tc = (t, i) => {
   for (var r in i || (i = {}))
     FC.call(i, r) && yp(t, r, i[r]);

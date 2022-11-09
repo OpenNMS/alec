@@ -101,3 +101,17 @@ export const getSituations = async (): Promise<TSituation[] | false> => {
 		return false
 	}
 }
+
+export const removeAlarmFromSituation = async (
+	situationId: number,
+	alarmId: number
+) => {
+	try {
+		const resp = await rest.delete(
+			`${base}/situation/${situationId}/alarm/${alarmId}`
+		)
+		return resp.status === 200
+	} catch (err) {
+		return false
+	}
+}

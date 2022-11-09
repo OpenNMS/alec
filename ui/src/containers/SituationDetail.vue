@@ -11,14 +11,18 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { FeatherIcon } from '@featherds/icon'
 import { TSituation } from '@/types/TSituation'
-
 import { FeatherButton } from '@featherds/button'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
+import { FeatherSnackbar } from '@featherds/snackbar'
+import { useAppStore } from '@/store/useAppStore'
+
 const router = useRouter()
 const route = useRoute()
 const paramId = parseInt(route.params.id as string)
 const situationId = ref(paramId)
 const situationStore = useSituationsStore()
+const appStore = useAppStore()
+
 situationStore.getSituation(situationId.value)
 
 if (!situationStore.situations.length) {
@@ -30,6 +34,7 @@ const container = ref()
 const filteredSituationsCurrentIndex = ref(
 	situationStore.filteredSituations.findIndex((id) => id === situationId.value)
 )
+const showError = ref(false)
 
 watch(
 	() => situationStore.situationDetail,
@@ -65,6 +70,9 @@ watch(route, () => {
 	situationStore.getSituation(situationId.value)
 	filteredSituationsCurrentIndex.value =
 		situationStore.filteredSituations.findIndex((id) => id == situationId.value)
+})
+appStore.$subscribe((mutation, storeState) => {
+	showError.value = storeState.showError
 })
 </script>
 
@@ -119,6 +127,12 @@ watch(route, () => {
 				</FeatherTabPanel>
 			</FeatherTabContainer>
 		</div>
+		<FeatherSnackbar v-model="showError" center error>
+			{{ appStore.errorMessage }}
+			<template v-slot:button>
+				<FeatherButton @click="showError = false" text>dismiss</FeatherButton>
+			</template>
+		</FeatherSnackbar>
 	</div>
 </template>
 <style scoped lang="scss">

@@ -50,6 +50,10 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
+import org.opennms.alec.engine.deeplearning.utils.InputVector;
+import org.opennms.alec.engine.deeplearning.utils.TFClustererTasks;
+import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

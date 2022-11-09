@@ -29,8 +29,8 @@
 package org.opennms.alec.engine.deeplearning;
 
 import org.junit.Test;
-import org.opennms.alec.engine.deeplearning.remote.InputVector;
 import org.opennms.alec.engine.deeplearning.remote.TFModel;
+import org.opennms.alec.engine.deeplearning.utils.InputVector;
 
 //Use to test remote model connection
 // token and uri should be specified on testing but not push

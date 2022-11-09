@@ -47,10 +47,10 @@ import org.opennms.alec.driver.test.MockInventoryType;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.GraphManager;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
-import org.opennms.alec.engine.deeplearning.remote.DeepLearningEngineConf;
 import org.opennms.alec.engine.deeplearning.remote.TFClusterer;
 import org.opennms.alec.engine.deeplearning.remote.TFModel;
-import org.opennms.alec.engine.deeplearning.remote.Vectorizer;
+import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
+import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 
 public class TFClustererTest {
 

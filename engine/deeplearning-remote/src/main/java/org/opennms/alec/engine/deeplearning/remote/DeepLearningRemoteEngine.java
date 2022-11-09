@@ -36,6 +36,8 @@ import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
+import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 
 import com.codahale.metrics.MetricRegistry;
 

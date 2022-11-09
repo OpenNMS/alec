@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2022 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.deeplearning.remote;
+package org.opennms.alec.engine.deeplearning.utils;
 
 import java.util.Objects;
 
@@ -38,9 +38,18 @@ public class DeepLearningEngineConf {
     private static final int DEFAULT_NUM_TF_THREADS = Math.max(Runtime.getRuntime().availableProcessors() - 3, 1);
     private static final double DEFAULT_EPSILON = 500;
 
+    private String modelPath;
     private double epsilon = DEFAULT_EPSILON;
     private int numGraphProcessingThreads = DEFAULT_NUM_GRAPH_THREADS;
     private int numTensorFlowProcessingThreads = DEFAULT_NUM_TF_THREADS;
+
+    public String getModelPath() {
+        return modelPath;
+    }
+
+    public void setModelPath(String modelPath) {
+        this.modelPath = modelPath;
+    }
 
     public double getEpsilon() {
         return epsilon;
@@ -84,19 +93,21 @@ public class DeepLearningEngineConf {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeepLearningEngineConf that = (DeepLearningEngineConf) o;
-        return Objects.equals(epsilon, that.epsilon) &&
+        return Objects.equals(modelPath, that.modelPath) &&
+                Objects.equals(epsilon, that.epsilon) &&
                 Objects.equals(numGraphProcessingThreads, that.numGraphProcessingThreads) &&
                 Objects.equals(numTensorFlowProcessingThreads, that.numTensorFlowProcessingThreads);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(epsilon, numGraphProcessingThreads, numTensorFlowProcessingThreads);
+        return Objects.hash(modelPath, epsilon, numGraphProcessingThreads, numTensorFlowProcessingThreads);
     }
 
     @Override
     public String toString() {
         return "DeepLearningEngineConf{" +
+                "modelPath='" + getModelPath() + '\'' +
                 ", epsilon=" + getEpsilon() +
                 ", numGraphProcessingThreads=" + getNumGraphProcessingThreads() +
                 ", numTensorFlowProcessingThreads=" + getNumTensorFlowProcessingThreads() +

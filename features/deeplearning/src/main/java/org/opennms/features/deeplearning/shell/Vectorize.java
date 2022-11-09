@@ -61,9 +61,9 @@ import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
-import org.opennms.alec.engine.deeplearning.InputVector;
-import org.opennms.alec.engine.deeplearning.OutputVector;
-import org.opennms.alec.engine.deeplearning.Vectorizer;
+import org.opennms.alec.engine.deeplearning.utils.InputVector;
+import org.opennms.alec.engine.deeplearning.utils.OutputVector;
+import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -71,6 +71,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 @Command(scope = "opennms-alec", name = "tensorflow-vectorize", description = "Convert a fault data set to vectors for the purpose of training a TensorFlow model.")
 @Service
+@SuppressWarnings({"java:S106", "java:S112"})
 public class Vectorize implements Action {
 
     @Option(name = "--alarms-in", description = "XML file containing the list of alarms", required = true)
@@ -85,8 +86,6 @@ public class Vectorize implements Action {
     @Option(name = "--csv-out", description = "Output CSV", required = true)
     private String csvOut;
 
-    private CSVPrinter csvPrinter;
-
     @Override
     public Object execute() throws Exception {
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
@@ -94,7 +93,7 @@ public class Vectorize implements Action {
         final Set<Situation> situations = JaxbUtils.getSituations(Paths.get(situationsIn));
 
         final Path path = Paths.get(csvOut);
-        System.out.printf("Writing to: %s\n", path);
+        System.out.printf("Writing to: %s%n", path);
         try (
                 BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvOut));
                 CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
@@ -116,13 +115,11 @@ public class Vectorize implements Action {
 
     private static class MyEngine extends AbstractClusterEngine {
         private final Consumer<OutputVector> consumer;
-        private final Set<Situation> situations;
         private final Map<String,String> alarmIdToSituationId = new LinkedHashMap<>();
         private Vectorizer vectorizer;
 
         private MyEngine(Set<Situation> situations, Consumer<OutputVector> consumer) {
             super(new MetricRegistry());
-            this.situations = Objects.requireNonNull(situations);
             this.consumer = Objects.requireNonNull(consumer);
 
             // Index the alarms by situation id
@@ -166,7 +163,7 @@ public class Vectorize implements Action {
             return alarmsInSpaceAndTime;
         }
 
-        private boolean areAlarmsCurrentlyRelated(AlarmInSpaceTime a1, AlarmInSpaceTime a2, long timestampInMillis) {
+        private boolean areAlarmsCurrentlyRelated(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
             // TODO: We should improve this to consider time as well
             final String s1 = alarmIdToSituationId.get(a1.getAlarmId());
             final String s2 = alarmIdToSituationId.get(a2.getAlarmId());

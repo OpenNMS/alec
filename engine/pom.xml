@@ -16,5 +16,6 @@
         <module>deeplearning</module>
         <module>deeplearning-remote</module>
         <module>itest</module>
+        <module>deepelearning-utils</module>
     </modules>
 </project>

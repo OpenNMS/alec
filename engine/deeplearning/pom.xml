@@ -16,6 +16,10 @@
             <artifactId>org.opennms.alec.engine.cluster</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.opennms.alec.engine</groupId>
+            <artifactId>org.opennms.alec.engine.deeplearning.utils</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.alec.wrap</groupId>
             <artifactId>org.opennms.alec.wrap.tensorflow</artifactId>
             <version>${project.version}</version>
@@ -28,10 +32,6 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>info.debatty</groupId>
-            <artifactId>java-string-similarity</artifactId>
         </dependency>
 
         <dependency>

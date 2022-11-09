@@ -12,7 +12,7 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="deepLearningEngineConf" class="org.opennms.alec.engine.deeplearning.DeepLearningEngineConf">
+    <bean id="deepLearningEngineConf" class="org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf">
         <property name="modelPath" value="${modelPath}"/>
         <property name="epsilon" value="${epsilon}"/>
         <property name="numGraphProcessingThreads" value="${numGraphProcessingThreads}"/>

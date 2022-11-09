@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.deeplearning.remote;
+package org.opennms.alec.engine.deeplearning.utils;
 
 import java.util.Objects;
 
@@ -35,18 +35,18 @@ import org.opennms.alec.engine.cluster.CEVertex;
 
 public class TFClustererTasks {
 
-    interface TaskVisitor {
+    public interface TaskVisitor {
         void pairAlarmsOnVertex(PairAlarmsOnVertex task);
 
         void pairAlarmsOnVertices(PairAlarmsOnVertices pairAlarmsOnVertices);
     }
 
-    interface Task {
+    public interface Task {
 
         void visit(TaskVisitor visitor);
     }
 
-    static class PairAlarmsOnVertex implements Task {
+    public static class PairAlarmsOnVertex implements Task {
         private final CEVertex v;
 
         public PairAlarmsOnVertex(CEVertex v) {
@@ -63,7 +63,7 @@ public class TFClustererTasks {
         }
     }
 
-    static class PairAlarmsOnVertices implements Task {
+    public static class PairAlarmsOnVertices implements Task {
         private final CEVertex v1;
         private final CEVertex v2;
         private final double distance;
@@ -92,7 +92,7 @@ public class TFClustererTasks {
         }
     }
 
-    static class RelatesTo {
+    public static class RelatesTo {
         private final AlarmInSpaceTime a1;
         private final AlarmInSpaceTime a2;
         private final InputVector inputVector;

@@ -31,6 +31,7 @@ package org.opennms.alec.engine.deeplearning;
 import java.util.Objects;
 
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
 import org.osgi.framework.BundleContext;
 
 import com.codahale.metrics.MetricRegistry;

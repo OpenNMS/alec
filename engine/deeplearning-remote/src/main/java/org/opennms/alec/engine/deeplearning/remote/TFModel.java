@@ -35,6 +35,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.opennms.alec.engine.deeplearning.utils.InputVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

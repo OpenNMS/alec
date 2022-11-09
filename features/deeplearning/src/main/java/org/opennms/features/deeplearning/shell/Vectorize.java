@@ -146,7 +146,7 @@ public class Vectorize implements Action {
                     final InputVector inputVector = vectorizer.vectorize(a1, a2);
                     consumer.accept(OutputVector.builder()
                             .inputVector(inputVector)
-                            .areAlarmsRelated(areAlarmsCurrentlyRelated(a1, a2, timestampInMillis))
+                            .areAlarmsRelated(areAlarmsCurrentlyRelated(a1, a2))
                             .build());
                 }
             }

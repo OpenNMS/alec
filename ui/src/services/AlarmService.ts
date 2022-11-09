@@ -165,3 +165,15 @@ export const deleteMemo = async (alarmId: number, type: string) => {
 		return false
 	}
 }
+
+export const getAlarmsUnassigned = async (): Promise<TAlarm[] | false> => {
+	try {
+		const resp = await v2.get('alarms?_s=isInSituation==false')
+		if (resp.status === 200) {
+			return resp.data.alarm
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}

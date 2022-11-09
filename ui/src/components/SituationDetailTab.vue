@@ -56,6 +56,7 @@ const handleFeedbackSituation = (action: string) => {
 			<div v-if="userStore.allowSave" class="btn-row">
 				<FeatherButton
 					class="btn"
+					data-test="btn-reject"
 					:class="{ rejected: status == REJECTED }"
 					@click="() => handleFeedbackSituation(REJECTED)"
 				>
@@ -133,7 +134,6 @@ const handleFeedbackSituation = (action: string) => {
 </template>
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
-@import '@featherds/table/scss/table';
 
 .action-section {
 	padding: 15px;

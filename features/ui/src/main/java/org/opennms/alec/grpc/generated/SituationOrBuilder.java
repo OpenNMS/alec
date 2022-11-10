@@ -74,7 +74,7 @@ public interface SituationOrBuilder extends
    * <code>string severity = 4;</code>
    * @return The severity.
    */
-  java.lang.String getSeverity();
+  String getSeverity();
   /**
    * <code>string severity = 4;</code>
    * @return The bytes for severity.
@@ -86,7 +86,7 @@ public interface SituationOrBuilder extends
    * <code>string diagnostic = 5;</code>
    * @return The diagnostic.
    */
-  java.lang.String getDiagnostic();
+  String getDiagnostic();
   /**
    * <code>string diagnostic = 5;</code>
    * @return The bytes for diagnostic.
@@ -98,7 +98,7 @@ public interface SituationOrBuilder extends
    * <code>repeated string tags = 6;</code>
    * @return A list containing the tags.
    */
-  java.util.List<java.lang.String>
+  java.util.List<String>
       getTagsList();
   /**
    * <code>repeated string tags = 6;</code>
@@ -110,7 +110,7 @@ public interface SituationOrBuilder extends
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
-  java.lang.String getTags(int index);
+  String getTags(int index);
   /**
    * <code>repeated string tags = 6;</code>
    * @param index The index of the value to return.
@@ -138,7 +138,7 @@ public interface SituationOrBuilder extends
    * <code>string engine_parameter = 8;</code>
    * @return The engineParameter.
    */
-  java.lang.String getEngineParameter();
+  String getEngineParameter();
   /**
    * <code>string engine_parameter = 8;</code>
    * @return The bytes for engineParameter.
@@ -150,7 +150,7 @@ public interface SituationOrBuilder extends
    * <code>string status = 9;</code>
    * @return The status.
    */
-  java.lang.String getStatus();
+  String getStatus();
   /**
    * <code>string status = 9;</code>
    * @return The bytes for status.
@@ -162,7 +162,7 @@ public interface SituationOrBuilder extends
    * <code>repeated string rejected = 10;</code>
    * @return A list containing the rejected.
    */
-  java.util.List<java.lang.String>
+  java.util.List<String>
       getRejectedList();
   /**
    * <code>repeated string rejected = 10;</code>
@@ -174,7 +174,7 @@ public interface SituationOrBuilder extends
    * @param index The index of the element to return.
    * @return The rejected at the given index.
    */
-  java.lang.String getRejected(int index);
+  String getRejected(int index);
   /**
    * <code>repeated string rejected = 10;</code>
    * @param index The index of the value to return.
@@ -187,7 +187,7 @@ public interface SituationOrBuilder extends
    * <code>string sid = 11;</code>
    * @return The sid.
    */
-  java.lang.String getSid();
+  String getSid();
   /**
    * <code>string sid = 11;</code>
    * @return The bytes for sid.

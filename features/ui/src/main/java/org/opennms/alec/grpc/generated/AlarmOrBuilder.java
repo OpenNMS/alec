@@ -74,7 +74,7 @@ public interface AlarmOrBuilder extends
    * <code>string inventory_object_id = 4;</code>
    * @return The inventoryObjectId.
    */
-  java.lang.String getInventoryObjectId();
+  String getInventoryObjectId();
   /**
    * <code>string inventory_object_id = 4;</code>
    * @return The bytes for inventoryObjectId.
@@ -86,7 +86,7 @@ public interface AlarmOrBuilder extends
    * <code>string inventory_object_type = 5;</code>
    * @return The inventoryObjectType.
    */
-  java.lang.String getInventoryObjectType();
+  String getInventoryObjectType();
   /**
    * <code>string inventory_object_type = 5;</code>
    * @return The bytes for inventoryObjectType.
@@ -98,7 +98,7 @@ public interface AlarmOrBuilder extends
    * <code>string severity = 6;</code>
    * @return The severity.
    */
-  java.lang.String getSeverity();
+  String getSeverity();
   /**
    * <code>string severity = 6;</code>
    * @return The bytes for severity.
@@ -110,7 +110,7 @@ public interface AlarmOrBuilder extends
    * <code>string summary = 7;</code>
    * @return The summary.
    */
-  java.lang.String getSummary();
+  String getSummary();
   /**
    * <code>string summary = 7;</code>
    * @return The bytes for summary.
@@ -122,7 +122,7 @@ public interface AlarmOrBuilder extends
    * <code>string description = 8;</code>
    * @return The description.
    */
-  java.lang.String getDescription();
+  String getDescription();
   /**
    * <code>string description = 8;</code>
    * @return The bytes for description.
@@ -134,7 +134,7 @@ public interface AlarmOrBuilder extends
    * <code>repeated string tags = 9;</code>
    * @return A list containing the tags.
    */
-  java.util.List<java.lang.String>
+  java.util.List<String>
       getTagsList();
   /**
    * <code>repeated string tags = 9;</code>
@@ -146,7 +146,7 @@ public interface AlarmOrBuilder extends
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
-  java.lang.String getTags(int index);
+  String getTags(int index);
   /**
    * <code>repeated string tags = 9;</code>
    * @param index The index of the value to return.
@@ -159,7 +159,7 @@ public interface AlarmOrBuilder extends
    * <code>string salarm_id = 10;</code>
    * @return The salarmId.
    */
-  java.lang.String getSalarmId();
+  String getSalarmId();
   /**
    * <code>string salarm_id = 10;</code>
    * @return The bytes for salarmId.

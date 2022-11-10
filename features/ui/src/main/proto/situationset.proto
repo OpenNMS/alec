@@ -47,4 +47,5 @@ message Situation {
 message SituationSet {
   google.protobuf.Timestamp timestamp = 1;
   repeated Situation situations = 2;
+  string tenant_id = 3;
 }

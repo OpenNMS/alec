@@ -52,14 +52,14 @@ private static final long serialVersionUID = 0L;
     sid_ = "";
   }
 
-  @java.lang.Override
+  @Override
   @SuppressWarnings({"unused"})
-  protected java.lang.Object newInstance(
+  protected Object newInstance(
       UnusedPrivateParameter unused) {
     return new Situation();
   }
 
-  @java.lang.Override
+  @Override
   public final com.google.protobuf.UnknownFieldSet
   getUnknownFields() {
     return this.unknownFields;
@@ -70,7 +70,7 @@ private static final long serialVersionUID = 0L;
       throws com.google.protobuf.InvalidProtocolBufferException {
     this();
     if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
+      throw new NullPointerException();
     }
     int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
@@ -115,19 +115,19 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 34: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
 
             severity_ = s;
             break;
           }
           case 42: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
 
             diagnostic_ = s;
             break;
           }
           case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000001) != 0)) {
               tags_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000001;
@@ -149,19 +149,19 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 66: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
 
             engineParameter_ = s;
             break;
           }
           case 74: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
 
             status_ = s;
             break;
           }
           case 82: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
             if (!((mutable_bitField0_ & 0x00000002) != 0)) {
               rejected_ = new com.google.protobuf.LazyStringArrayList();
               mutable_bitField0_ |= 0x00000002;
@@ -170,7 +170,7 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 90: {
-            java.lang.String s = input.readStringRequireUtf8();
+            String s = input.readStringRequireUtf8();
 
             sid_ = s;
             break;
@@ -205,12 +205,12 @@ private static final long serialVersionUID = 0L;
     return SituationSetProtos.internal_static_Situation_descriptor;
   }
 
-  @java.lang.Override
-  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+  @Override
+  protected FieldAccessorTable
       internalGetFieldAccessorTable() {
     return SituationSetProtos.internal_static_Situation_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            Situation.class, Situation.Builder.class);
+            Situation.class, Builder.class);
   }
 
   public static final int ID_FIELD_NUMBER = 1;
@@ -219,7 +219,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 id = 1;</code>
    * @return The id.
    */
-  @java.lang.Override
+  @Override
   public long getId() {
     return id_;
   }
@@ -230,7 +230,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    * @return Whether the creationTime field is set.
    */
-  @java.lang.Override
+  @Override
   public boolean hasCreationTime() {
     return creationTime_ != null;
   }
@@ -238,14 +238,14 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    * @return The creationTime.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.Timestamp getCreationTime() {
     return creationTime_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : creationTime_;
   }
   /**
    * <code>.google.protobuf.Timestamp creation_time = 2;</code>
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.TimestampOrBuilder getCreationTimeOrBuilder() {
     return getCreationTime();
   }
@@ -256,7 +256,7 @@ private static final long serialVersionUID = 0L;
    * <code>.AlarmSet alarms = 3;</code>
    * @return Whether the alarms field is set.
    */
-  @java.lang.Override
+  @Override
   public boolean hasAlarms() {
     return alarms_ != null;
   }
@@ -264,33 +264,33 @@ private static final long serialVersionUID = 0L;
    * <code>.AlarmSet alarms = 3;</code>
    * @return The alarms.
    */
-  @java.lang.Override
+  @Override
   public AlarmSet getAlarms() {
     return alarms_ == null ? AlarmSet.getDefaultInstance() : alarms_;
   }
   /**
    * <code>.AlarmSet alarms = 3;</code>
    */
-  @java.lang.Override
+  @Override
   public AlarmSetOrBuilder getAlarmsOrBuilder() {
     return getAlarms();
   }
 
   public static final int SEVERITY_FIELD_NUMBER = 4;
-  private volatile java.lang.Object severity_;
+  private volatile Object severity_;
   /**
    * <code>string severity = 4;</code>
    * @return The severity.
    */
-  @java.lang.Override
-  public java.lang.String getSeverity() {
-    java.lang.Object ref = severity_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
+  @Override
+  public String getSeverity() {
+    Object ref = severity_;
+    if (ref instanceof String) {
+      return (String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
+      String s = bs.toStringUtf8();
       severity_ = s;
       return s;
     }
@@ -299,14 +299,14 @@ private static final long serialVersionUID = 0L;
    * <code>string severity = 4;</code>
    * @return The bytes for severity.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.ByteString
       getSeverityBytes() {
-    java.lang.Object ref = severity_;
-    if (ref instanceof java.lang.String) {
+    Object ref = severity_;
+    if (ref instanceof String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
+              (String) ref);
       severity_ = b;
       return b;
     } else {
@@ -315,20 +315,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DIAGNOSTIC_FIELD_NUMBER = 5;
-  private volatile java.lang.Object diagnostic_;
+  private volatile Object diagnostic_;
   /**
    * <code>string diagnostic = 5;</code>
    * @return The diagnostic.
    */
-  @java.lang.Override
-  public java.lang.String getDiagnostic() {
-    java.lang.Object ref = diagnostic_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
+  @Override
+  public String getDiagnostic() {
+    Object ref = diagnostic_;
+    if (ref instanceof String) {
+      return (String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
+      String s = bs.toStringUtf8();
       diagnostic_ = s;
       return s;
     }
@@ -337,14 +337,14 @@ private static final long serialVersionUID = 0L;
    * <code>string diagnostic = 5;</code>
    * @return The bytes for diagnostic.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.ByteString
       getDiagnosticBytes() {
-    java.lang.Object ref = diagnostic_;
-    if (ref instanceof java.lang.String) {
+    Object ref = diagnostic_;
+    if (ref instanceof String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
+              (String) ref);
       diagnostic_ = b;
       return b;
     } else {
@@ -374,7 +374,7 @@ private static final long serialVersionUID = 0L;
    * @param index The index of the element to return.
    * @return The tags at the given index.
    */
-  public java.lang.String getTags(int index) {
+  public String getTags(int index) {
     return tags_.get(index);
   }
   /**
@@ -393,7 +393,7 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    * @return Whether the lastModificationTime field is set.
    */
-  @java.lang.Override
+  @Override
   public boolean hasLastModificationTime() {
     return lastModificationTime_ != null;
   }
@@ -401,33 +401,33 @@ private static final long serialVersionUID = 0L;
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    * @return The lastModificationTime.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.Timestamp getLastModificationTime() {
     return lastModificationTime_ == null ? com.google.protobuf.Timestamp.getDefaultInstance() : lastModificationTime_;
   }
   /**
    * <code>.google.protobuf.Timestamp last_modification_time = 7;</code>
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.TimestampOrBuilder getLastModificationTimeOrBuilder() {
     return getLastModificationTime();
   }
 
   public static final int ENGINE_PARAMETER_FIELD_NUMBER = 8;
-  private volatile java.lang.Object engineParameter_;
+  private volatile Object engineParameter_;
   /**
    * <code>string engine_parameter = 8;</code>
    * @return The engineParameter.
    */
-  @java.lang.Override
-  public java.lang.String getEngineParameter() {
-    java.lang.Object ref = engineParameter_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
+  @Override
+  public String getEngineParameter() {
+    Object ref = engineParameter_;
+    if (ref instanceof String) {
+      return (String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
+      String s = bs.toStringUtf8();
       engineParameter_ = s;
       return s;
     }
@@ -436,14 +436,14 @@ private static final long serialVersionUID = 0L;
    * <code>string engine_parameter = 8;</code>
    * @return The bytes for engineParameter.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.ByteString
       getEngineParameterBytes() {
-    java.lang.Object ref = engineParameter_;
-    if (ref instanceof java.lang.String) {
+    Object ref = engineParameter_;
+    if (ref instanceof String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
+              (String) ref);
       engineParameter_ = b;
       return b;
     } else {
@@ -452,20 +452,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int STATUS_FIELD_NUMBER = 9;
-  private volatile java.lang.Object status_;
+  private volatile Object status_;
   /**
    * <code>string status = 9;</code>
    * @return The status.
    */
-  @java.lang.Override
-  public java.lang.String getStatus() {
-    java.lang.Object ref = status_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
+  @Override
+  public String getStatus() {
+    Object ref = status_;
+    if (ref instanceof String) {
+      return (String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
+      String s = bs.toStringUtf8();
       status_ = s;
       return s;
     }
@@ -474,14 +474,14 @@ private static final long serialVersionUID = 0L;
    * <code>string status = 9;</code>
    * @return The bytes for status.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.ByteString
       getStatusBytes() {
-    java.lang.Object ref = status_;
-    if (ref instanceof java.lang.String) {
+    Object ref = status_;
+    if (ref instanceof String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
+              (String) ref);
       status_ = b;
       return b;
     } else {
@@ -511,7 +511,7 @@ private static final long serialVersionUID = 0L;
    * @param index The index of the element to return.
    * @return The rejected at the given index.
    */
-  public java.lang.String getRejected(int index) {
+  public String getRejected(int index) {
     return rejected_.get(index);
   }
   /**
@@ -525,20 +525,20 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SID_FIELD_NUMBER = 11;
-  private volatile java.lang.Object sid_;
+  private volatile Object sid_;
   /**
    * <code>string sid = 11;</code>
    * @return The sid.
    */
-  @java.lang.Override
-  public java.lang.String getSid() {
-    java.lang.Object ref = sid_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
+  @Override
+  public String getSid() {
+    Object ref = sid_;
+    if (ref instanceof String) {
+      return (String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
+      String s = bs.toStringUtf8();
       sid_ = s;
       return s;
     }
@@ -547,14 +547,14 @@ private static final long serialVersionUID = 0L;
    * <code>string sid = 11;</code>
    * @return The bytes for sid.
    */
-  @java.lang.Override
+  @Override
   public com.google.protobuf.ByteString
       getSidBytes() {
-    java.lang.Object ref = sid_;
-    if (ref instanceof java.lang.String) {
+    Object ref = sid_;
+    if (ref instanceof String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
+              (String) ref);
       sid_ = b;
       return b;
     } else {
@@ -563,7 +563,7 @@ private static final long serialVersionUID = 0L;
   }
 
   private byte memoizedIsInitialized = -1;
-  @java.lang.Override
+  @Override
   public final boolean isInitialized() {
     byte isInitialized = memoizedIsInitialized;
     if (isInitialized == 1) return true;
@@ -573,7 +573,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @java.lang.Override
+  @Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (id_ != 0L) {
@@ -612,7 +612,7 @@ private static final long serialVersionUID = 0L;
     unknownFields.writeTo(output);
   }
 
-  @java.lang.Override
+  @Override
   public int getSerializedSize() {
     int size = memoizedSize;
     if (size != -1) return size;
@@ -670,8 +670,8 @@ private static final long serialVersionUID = 0L;
     return size;
   }
 
-  @java.lang.Override
-  public boolean equals(final java.lang.Object obj) {
+  @Override
+  public boolean equals(final Object obj) {
     if (obj == this) {
      return true;
     }
@@ -715,7 +715,7 @@ private static final long serialVersionUID = 0L;
     return true;
   }
 
-  @java.lang.Override
+  @Override
   public int hashCode() {
     if (memoizedHashCode != 0) {
       return memoizedHashCode;
@@ -830,7 +830,7 @@ private static final long serialVersionUID = 0L;
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
 
-  @java.lang.Override
+  @Override
   public Builder newBuilderForType() { return newBuilder(); }
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
@@ -838,15 +838,15 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder(Situation prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
-  @java.lang.Override
+  @Override
   public Builder toBuilder() {
     return this == DEFAULT_INSTANCE
         ? new Builder() : new Builder().mergeFrom(this);
   }
 
-  @java.lang.Override
+  @Override
   protected Builder newBuilderForType(
-      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      BuilderParent parent) {
     Builder builder = new Builder(parent);
     return builder;
   }
@@ -856,27 +856,27 @@ private static final long serialVersionUID = 0L;
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
       // @@protoc_insertion_point(builder_implements:Situation)
-          SituationOrBuilder {
+      SituationOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return SituationSetProtos.internal_static_Situation_descriptor;
     }
 
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    @Override
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
       return SituationSetProtos.internal_static_Situation_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              Situation.class, Situation.Builder.class);
+              Situation.class, Builder.class);
     }
 
-    // Construct using org.opennms.alec.grpc.Situation.newBuilder()
+    // Construct using org.opennms.alec.grpc.generated.Situation.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
 
     private Builder(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        BuilderParent parent) {
       super(parent);
       maybeForceBuilderInitialization();
     }
@@ -885,7 +885,7 @@ private static final long serialVersionUID = 0L;
               .alwaysUseFieldBuilders) {
       }
     }
-    @java.lang.Override
+    @Override
     public Builder clear() {
       super.clear();
       id_ = 0L;
@@ -925,18 +925,18 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
       return SituationSetProtos.internal_static_Situation_descriptor;
     }
 
-    @java.lang.Override
+    @Override
     public Situation getDefaultInstanceForType() {
       return Situation.getDefaultInstance();
     }
 
-    @java.lang.Override
+    @Override
     public Situation build() {
       Situation result = buildPartial();
       if (!result.isInitialized()) {
@@ -945,7 +945,7 @@ private static final long serialVersionUID = 0L;
       return result;
     }
 
-    @java.lang.Override
+    @Override
     public Situation buildPartial() {
       Situation result = new Situation(this);
       int from_bitField0_ = bitField0_;
@@ -984,39 +984,39 @@ private static final long serialVersionUID = 0L;
       return result;
     }
 
-    @java.lang.Override
+    @Override
     public Builder clone() {
       return super.clone();
     }
-    @java.lang.Override
+    @Override
     public Builder setField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
+        Object value) {
       return super.setField(field, value);
     }
-    @java.lang.Override
+    @Override
     public Builder clearField(
         com.google.protobuf.Descriptors.FieldDescriptor field) {
       return super.clearField(field);
     }
-    @java.lang.Override
+    @Override
     public Builder clearOneof(
         com.google.protobuf.Descriptors.OneofDescriptor oneof) {
       return super.clearOneof(oneof);
     }
-    @java.lang.Override
+    @Override
     public Builder setRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
+        int index, Object value) {
       return super.setRepeatedField(field, index, value);
     }
-    @java.lang.Override
+    @Override
     public Builder addRepeatedField(
         com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
+        Object value) {
       return super.addRepeatedField(field, value);
     }
-    @java.lang.Override
+    @Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof Situation) {
         return mergeFrom((Situation)other);
@@ -1085,12 +1085,12 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    @java.lang.Override
+    @Override
     public final boolean isInitialized() {
       return true;
     }
 
-    @java.lang.Override
+    @Override
     public Builder mergeFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1115,7 +1115,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 id = 1;</code>
      * @return The id.
      */
-    @java.lang.Override
+    @Override
     public long getId() {
       return id_;
     }
@@ -1262,7 +1262,7 @@ private static final long serialVersionUID = 0L;
 
     private AlarmSet alarms_;
     private com.google.protobuf.SingleFieldBuilderV3<
-            AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder> alarmsBuilder_;
+        AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder> alarmsBuilder_;
     /**
      * <code>.AlarmSet alarms = 3;</code>
      * @return Whether the alarms field is set.
@@ -1366,11 +1366,11 @@ private static final long serialVersionUID = 0L;
      * <code>.AlarmSet alarms = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-            AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>
+        AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>
         getAlarmsFieldBuilder() {
       if (alarmsBuilder_ == null) {
         alarmsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-                AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>(
+            AlarmSet, AlarmSet.Builder, AlarmSetOrBuilder>(
                 getAlarms(),
                 getParentForChildren(),
                 isClean());
@@ -1379,21 +1379,21 @@ private static final long serialVersionUID = 0L;
       return alarmsBuilder_;
     }
 
-    private java.lang.Object severity_ = "";
+    private Object severity_ = "";
     /**
      * <code>string severity = 4;</code>
      * @return The severity.
      */
-    public java.lang.String getSeverity() {
-      java.lang.Object ref = severity_;
-      if (!(ref instanceof java.lang.String)) {
+    public String getSeverity() {
+      Object ref = severity_;
+      if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         severity_ = s;
         return s;
       } else {
-        return (java.lang.String) ref;
+        return (String) ref;
       }
     }
     /**
@@ -1402,11 +1402,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getSeverityBytes() {
-      java.lang.Object ref = severity_;
+      Object ref = severity_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         severity_ = b;
         return b;
       } else {
@@ -1419,7 +1419,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSeverity(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1455,21 +1455,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object diagnostic_ = "";
+    private Object diagnostic_ = "";
     /**
      * <code>string diagnostic = 5;</code>
      * @return The diagnostic.
      */
-    public java.lang.String getDiagnostic() {
-      java.lang.Object ref = diagnostic_;
-      if (!(ref instanceof java.lang.String)) {
+    public String getDiagnostic() {
+      Object ref = diagnostic_;
+      if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         diagnostic_ = s;
         return s;
       } else {
-        return (java.lang.String) ref;
+        return (String) ref;
       }
     }
     /**
@@ -1478,11 +1478,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getDiagnosticBytes() {
-      java.lang.Object ref = diagnostic_;
+      Object ref = diagnostic_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         diagnostic_ = b;
         return b;
       } else {
@@ -1495,7 +1495,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setDiagnostic(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1558,7 +1558,7 @@ private static final long serialVersionUID = 0L;
      * @param index The index of the element to return.
      * @return The tags at the given index.
      */
-    public java.lang.String getTags(int index) {
+    public String getTags(int index) {
       return tags_.get(index);
     }
     /**
@@ -1577,7 +1577,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTags(
-        int index, java.lang.String value) {
+        int index, String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1592,7 +1592,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addTags(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1607,7 +1607,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addAllTags(
-        java.lang.Iterable<java.lang.String> values) {
+        Iterable<String> values) {
       ensureTagsIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, tags_);
@@ -1760,21 +1760,21 @@ private static final long serialVersionUID = 0L;
       return lastModificationTimeBuilder_;
     }
 
-    private java.lang.Object engineParameter_ = "";
+    private Object engineParameter_ = "";
     /**
      * <code>string engine_parameter = 8;</code>
      * @return The engineParameter.
      */
-    public java.lang.String getEngineParameter() {
-      java.lang.Object ref = engineParameter_;
-      if (!(ref instanceof java.lang.String)) {
+    public String getEngineParameter() {
+      Object ref = engineParameter_;
+      if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         engineParameter_ = s;
         return s;
       } else {
-        return (java.lang.String) ref;
+        return (String) ref;
       }
     }
     /**
@@ -1783,11 +1783,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getEngineParameterBytes() {
-      java.lang.Object ref = engineParameter_;
+      Object ref = engineParameter_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         engineParameter_ = b;
         return b;
       } else {
@@ -1800,7 +1800,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEngineParameter(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1836,21 +1836,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object status_ = "";
+    private Object status_ = "";
     /**
      * <code>string status = 9;</code>
      * @return The status.
      */
-    public java.lang.String getStatus() {
-      java.lang.Object ref = status_;
-      if (!(ref instanceof java.lang.String)) {
+    public String getStatus() {
+      Object ref = status_;
+      if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         status_ = s;
         return s;
       } else {
-        return (java.lang.String) ref;
+        return (String) ref;
       }
     }
     /**
@@ -1859,11 +1859,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getStatusBytes() {
-      java.lang.Object ref = status_;
+      Object ref = status_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         status_ = b;
         return b;
       } else {
@@ -1876,7 +1876,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setStatus(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1939,7 +1939,7 @@ private static final long serialVersionUID = 0L;
      * @param index The index of the element to return.
      * @return The rejected at the given index.
      */
-    public java.lang.String getRejected(int index) {
+    public String getRejected(int index) {
       return rejected_.get(index);
     }
     /**
@@ -1958,7 +1958,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setRejected(
-        int index, java.lang.String value) {
+        int index, String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1973,7 +1973,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addRejected(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -1988,7 +1988,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addAllRejected(
-        java.lang.Iterable<java.lang.String> values) {
+        Iterable<String> values) {
       ensureRejectedIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, rejected_);
@@ -2022,21 +2022,21 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object sid_ = "";
+    private Object sid_ = "";
     /**
      * <code>string sid = 11;</code>
      * @return The sid.
      */
-    public java.lang.String getSid() {
-      java.lang.Object ref = sid_;
-      if (!(ref instanceof java.lang.String)) {
+    public String getSid() {
+      Object ref = sid_;
+      if (!(ref instanceof String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         sid_ = s;
         return s;
       } else {
-        return (java.lang.String) ref;
+        return (String) ref;
       }
     }
     /**
@@ -2045,11 +2045,11 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ByteString
         getSidBytes() {
-      java.lang.Object ref = sid_;
+      Object ref = sid_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         sid_ = b;
         return b;
       } else {
@@ -2062,7 +2062,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSid(
-        java.lang.String value) {
+        String value) {
       if (value == null) {
     throw new NullPointerException();
   }
@@ -2097,13 +2097,13 @@ private static final long serialVersionUID = 0L;
       onChanged();
       return this;
     }
-    @java.lang.Override
+    @Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.setUnknownFields(unknownFields);
     }
 
-    @java.lang.Override
+    @Override
     public final Builder mergeUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
       return super.mergeUnknownFields(unknownFields);
@@ -2125,7 +2125,7 @@ private static final long serialVersionUID = 0L;
 
   private static final com.google.protobuf.Parser<Situation>
       PARSER = new com.google.protobuf.AbstractParser<Situation>() {
-    @java.lang.Override
+    @Override
     public Situation parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2138,12 +2138,12 @@ private static final long serialVersionUID = 0L;
     return PARSER;
   }
 
-  @java.lang.Override
+  @Override
   public com.google.protobuf.Parser<Situation> getParserForType() {
     return PARSER;
   }
 
-  @java.lang.Override
+  @Override
   public Situation getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }

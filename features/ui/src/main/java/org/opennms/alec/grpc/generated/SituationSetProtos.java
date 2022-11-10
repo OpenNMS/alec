@@ -70,7 +70,7 @@ public final class SituationSetProtos {
   private static  com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
+    String[] descriptorData = {
       "\n\022situationset.proto\032\033google/protobuf/em" +
       "pty.proto\032\037google/protobuf/timestamp.pro" +
       "to\"\227\002\n\005Alarm\022\020\n\010alarm_id\030\001 \001(\003\0223\n\017first_" +
@@ -89,13 +89,13 @@ public final class SituationSetProtos {
       "\003(\t\022:\n\026last_modification_time\030\007 \001(\0132\032.go" +
       "ogle.protobuf.Timestamp\022\030\n\020engine_parame" +
       "ter\030\010 \001(\t\022\016\n\006status\030\t \001(\t\022\020\n\010rejected\030\n " +
-      "\003(\t\022\013\n\003sid\030\013 \001(\t\"]\n\014SituationSet\022-\n\ttime" +
+      "\003(\t\022\013\n\003sid\030\013 \001(\t\"p\n\014SituationSet\022-\n\ttime" +
       "stamp\030\001 \001(\0132\032.google.protobuf.Timestamp\022" +
-      "\036\n\nsituations\030\002 \003(\0132\n.Situation2R\n\025AlecC" +
-      "ollectionService\0229\n\016SendSituations\022\r.Sit" +
-      "uationSet\032\026.google.protobuf.Empty\"\000B-\n\025o" +
-      "rg.opennms.alec.grpcB\022SituationSetProtos" +
-      "P\001b\006proto3"
+      "\036\n\nsituations\030\002 \003(\0132\n.Situation\022\021\n\ttenan" +
+      "t_id\030\003 \001(\t2R\n\025AlecCollectionService\0229\n\016S" +
+      "endSituations\022\r.SituationSet\032\026.google.pr" +
+      "otobuf.Empty\"\000B7\n\037org.opennms.alec.grpc." +
+      "generatedB\022SituationSetProtosP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -108,25 +108,25 @@ public final class SituationSetProtos {
     internal_static_Alarm_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Alarm_descriptor,
-        new java.lang.String[] { "AlarmId", "FirstTimeSeen", "LastTimeSeen", "InventoryObjectId", "InventoryObjectType", "Severity", "Summary", "Description", "Tags", "SalarmId", });
+        new String[] { "AlarmId", "FirstTimeSeen", "LastTimeSeen", "InventoryObjectId", "InventoryObjectType", "Severity", "Summary", "Description", "Tags", "SalarmId", });
     internal_static_AlarmSet_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_AlarmSet_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AlarmSet_descriptor,
-        new java.lang.String[] { "Timestamp", "Alarms", });
+        new String[] { "Timestamp", "Alarms", });
     internal_static_Situation_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_Situation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Situation_descriptor,
-        new java.lang.String[] { "Id", "CreationTime", "Alarms", "Severity", "Diagnostic", "Tags", "LastModificationTime", "EngineParameter", "Status", "Rejected", "Sid", });
+        new String[] { "Id", "CreationTime", "Alarms", "Severity", "Diagnostic", "Tags", "LastModificationTime", "EngineParameter", "Status", "Rejected", "Sid", });
     internal_static_SituationSet_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_SituationSet_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SituationSet_descriptor,
-        new java.lang.String[] { "Timestamp", "Situations", });
+        new String[] { "Timestamp", "Situations", "TenantId", });
     com.google.protobuf.EmptyProto.getDescriptor();
     com.google.protobuf.TimestampProto.getDescriptor();
   }

@@ -83,7 +83,7 @@ public final class AlecCollectionServiceGrpc {
   public static AlecCollectionServiceStub newStub(io.grpc.Channel channel) {
     io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceStub> factory =
       new io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceStub>() {
-        @java.lang.Override
+        @Override
         public AlecCollectionServiceStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
           return new AlecCollectionServiceStub(channel, callOptions);
         }
@@ -98,7 +98,7 @@ public final class AlecCollectionServiceGrpc {
       io.grpc.Channel channel) {
     io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceBlockingStub> factory =
       new io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceBlockingStub>() {
-        @java.lang.Override
+        @Override
         public AlecCollectionServiceBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
           return new AlecCollectionServiceBlockingStub(channel, callOptions);
         }
@@ -113,7 +113,7 @@ public final class AlecCollectionServiceGrpc {
       io.grpc.Channel channel) {
     io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceFutureStub> factory =
       new io.grpc.stub.AbstractStub.StubFactory<AlecCollectionServiceFutureStub>() {
-        @java.lang.Override
+        @Override
         public AlecCollectionServiceFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
           return new AlecCollectionServiceFutureStub(channel, callOptions);
         }
@@ -132,13 +132,13 @@ public final class AlecCollectionServiceGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSendSituationsMethod(), responseObserver);
     }
 
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+    @Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getSendSituationsMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
-                      SituationSet,
+                SituationSet,
                 com.google.protobuf.Empty>(
                   this, METHODID_SEND_SITUATIONS)))
           .build();
@@ -153,7 +153,7 @@ public final class AlecCollectionServiceGrpc {
       super(channel, callOptions);
     }
 
-    @java.lang.Override
+    @Override
     protected AlecCollectionServiceStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AlecCollectionServiceStub(channel, callOptions);
@@ -176,7 +176,7 @@ public final class AlecCollectionServiceGrpc {
       super(channel, callOptions);
     }
 
-    @java.lang.Override
+    @Override
     protected AlecCollectionServiceBlockingStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AlecCollectionServiceBlockingStub(channel, callOptions);
@@ -198,7 +198,7 @@ public final class AlecCollectionServiceGrpc {
       super(channel, callOptions);
     }
 
-    @java.lang.Override
+    @Override
     protected AlecCollectionServiceFutureStub build(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AlecCollectionServiceFutureStub(channel, callOptions);
@@ -228,8 +228,8 @@ public final class AlecCollectionServiceGrpc {
       this.methodId = methodId;
     }
 
-    @java.lang.Override
-    @java.lang.SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_SEND_SITUATIONS:
@@ -241,8 +241,8 @@ public final class AlecCollectionServiceGrpc {
       }
     }
 
-    @java.lang.Override
-    @java.lang.SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
@@ -256,12 +256,12 @@ public final class AlecCollectionServiceGrpc {
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     AlecCollectionServiceBaseDescriptorSupplier() {}
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
       return SituationSetProtos.getDescriptor();
     }
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
       return getFileDescriptor().findServiceByName("AlecCollectionService");
     }
@@ -281,7 +281,7 @@ public final class AlecCollectionServiceGrpc {
       this.methodName = methodName;
     }
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Descriptors.MethodDescriptor getMethodDescriptor() {
       return getServiceDescriptor().findMethodByName(methodName);
     }

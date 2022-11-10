@@ -72,4 +72,16 @@ public interface SituationSetOrBuilder extends
    */
   SituationOrBuilder getSituationsOrBuilder(
       int index);
+
+  /**
+   * <code>string tenant_id = 3;</code>
+   * @return The tenantId.
+   */
+  String getTenantId();
+  /**
+   * <code>string tenant_id = 3;</code>
+   * @return The bytes for tenantId.
+   */
+  com.google.protobuf.ByteString
+      getTenantIdBytes();
 }

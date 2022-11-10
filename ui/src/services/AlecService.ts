@@ -1,11 +1,11 @@
 import { rest } from './axiosInstances'
 import CONST from '@/helpers/constants'
-import { TSituation } from '@/types/TSituation'
+import { TSituation, TNewSituation } from '@/types/TSituation'
 const base = '/alec'
 const engineEndpoint = '/alec/engine/configuration'
 const endpointAgreement = '/alec/agreement/configuration'
 const situationStatusEndpoint = '/alec/situation/statusList'
-const situationListEndpoint = '/alec/situation'
+const situationEndpoint = '/alec/situation'
 
 export const savePermission = async (allowSaveValue: boolean) => {
 	try {
@@ -92,11 +92,22 @@ export const getSituationsStatus = async () => {
 
 export const getSituations = async (): Promise<TSituation[] | false> => {
 	try {
-		const resp = await rest.get(situationListEndpoint)
+		const resp = await rest.get(situationEndpoint)
 		if (resp.status === 200) {
 			return resp.data
 		}
 		return resp.data
+	} catch (err) {
+		return false
+	}
+}
+
+export const createSituations = async (
+	situationInfo: TNewSituation
+): Promise<boolean> => {
+	try {
+		const resp = await rest.post(situationEndpoint, situationInfo)
+		return resp.status === 200
 	} catch (err) {
 		return false
 	}

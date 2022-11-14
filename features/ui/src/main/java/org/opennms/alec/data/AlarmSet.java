@@ -25,29 +25,17 @@
  *     http://www.opennms.org/
  *     http://www.opennms.com/
  *******************************************************************************/
-package org.opennms.alec.rest;
 
-import java.text.MessageFormat;
+package org.opennms.alec.data;
 
-import javax.ws.rs.core.Response;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class ALECRestUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(ALECRestUtils.class);
-    public static final String ALEC_CONFIG = "ALEC_CONFIG";
+@JsonDeserialize(builder = AlarmSetImpl.Builder.class)
+public interface AlarmSet {
 
-    private ALECRestUtils() {
-        throw new IllegalStateException("Utility class");
-    }
+    String getSituationId();
 
-    public static Response somethingWentWrong(Throwable e) {
-        LOG.error(e.getMessage(), e.fillInStackTrace());
-        return Response.serverError().entity(MessageFormat.format("something went wrong: {0}", e.getMessage())).build();
-    }
-
-    public static Response noContent() {
-        return Response.noContent().build();
-    }
+    List<String> getAlarmIdList();
 }

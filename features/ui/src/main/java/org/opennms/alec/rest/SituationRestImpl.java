@@ -58,6 +58,7 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.grpc.SituationClient;
 import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
+import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,13 +81,16 @@ public class SituationRestImpl implements SituationRest {
     private final SituationClient client;
     private final ManagedChannel channel;
     private final AlarmDatasource alarmDatasource;
+    private final RuntimeInfo runtimeInfo;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
-                             AlarmDatasource alarmDatasource) {
+                             AlarmDatasource alarmDatasource,
+                             RuntimeInfo runtimeInfo) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
+        this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
 
         //channel to store situations
@@ -117,7 +121,7 @@ public class SituationRestImpl implements SituationRest {
                                 .setAlarms(situation.getAlarms())
                                 .addFeedback(feedback)
                                 .build(),
-                        token);
+                        token, runtimeInfo.getSystemId());
                 kvStoreSituationsByStatus();
 
                 //Free alarms and Forward situation to opennms
@@ -323,7 +327,7 @@ public class SituationRestImpl implements SituationRest {
         //update situation to opennms
         situationDatasource.forwardSituation(situation);
         //store updated situation to the cloud
-        client.sendSituation(situation, token);
+        client.sendSituation(situation, token, runtimeInfo.getSystemId());
         //store situation by status to the DB
         kvStoreSituationsByStatus();
     }

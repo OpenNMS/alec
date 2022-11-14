@@ -52,10 +52,10 @@ public class SituationClient {
         this.doStore = doStore;
     }
 
-    public void sendSituation(Situation situation, String token) {
+    public void sendSituation(Situation situation, String token, String systemId) {
         if (doStore) {
             try {
-                SituationSet request = mapper.toSituationSet(situation);
+                SituationSet request = mapper.toSituationSet(situation, systemId);
                 LOG.debug("Will try to send {} ...", request);
                 blockingStub
                         .withCallCredentials(

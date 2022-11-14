@@ -26,6 +26,7 @@
         <argument ref="keyValueStore"/>
         <argument ref="situationDatasource"/>
         <argument ref="alarmDatasource"/>
+        <argument ref="runtimeInfo"/>
     </bean>
 
     <service interface="org.opennms.alec.rest.AgreementRest" ref="agreementRest">
@@ -59,5 +60,8 @@
 
     <!--alarm datasource    -->
     <reference id="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource" />
+
+    <!--runtime Info    -->
+    <reference id="runtimeInfo" interface="org.opennms.integration.api.v1.runtime.RuntimeInfo" />
 
 </blueprint>

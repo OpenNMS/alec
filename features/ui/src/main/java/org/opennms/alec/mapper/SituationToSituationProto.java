@@ -63,9 +63,10 @@ public class SituationToSituationProto {
                 .build();
     }
 
-    public SituationSet toSituationSet(Situation situation) {
+    public SituationSet toSituationSet(Situation situation, String systemId) {
         return SituationSet.newBuilder()
                 .addSituations(toSituation(situation))
+                .setTenantId(systemId)
                 .build();
     }
 }

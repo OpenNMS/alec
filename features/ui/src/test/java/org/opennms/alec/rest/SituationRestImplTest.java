@@ -27,6 +27,7 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.StaticAlarmDatasource;
 import org.opennms.alec.datasource.common.StaticSituationDatasource;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
+import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +35,9 @@ public class SituationRestImplTest {
 
     @Mock
     KeyValueStore<String> kvStore;
+
+    @Mock
+    RuntimeInfo runtimeInfo;
 
     List<Situation> situations = new ArrayList<>();
     List<Alarm> alarms = new ArrayList<>();
@@ -43,11 +47,12 @@ public class SituationRestImplTest {
         //we don't want to store testing data to the cloud
         when(kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG)).thenReturn(Optional.of("{\"agreed\":false}"));
         getAlarmsAndSituations();
+        when(runtimeInfo.getSystemId()).thenReturn("42");
     }
 
     @Test
     public void rejected() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms));
+        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo);
         try (Response actual = underTest.rejected("","11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
         }
@@ -55,7 +60,7 @@ public class SituationRestImplTest {
 
     @Test
     public void removeAlarm() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms));
+        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo);
         try (Response actual = underTest.removeAlarm("","11", "2", "remove alarm 1")) {
             assertThat(actual.getStatus(), equalTo(200));
         }

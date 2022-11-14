@@ -80,7 +80,7 @@ export type TSituationSaved = {
 	status: string
 }
 export type TNewSituation = {
-	alarmIdList: string[]
+	alarmIdList: number[]
 	diagnosticText: string
 	description: string
 }

@@ -13,9 +13,9 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { truncateText } from '@/helpers/utils'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
-import { remove } from 'lodash'
+import { remove, includes } from 'lodash'
 import { createSituations } from '@/services/AlecService'
-
+import type { Ref } from 'vue'
 const router = useRouter()
 const situationStore = useSituationsStore()
 
@@ -25,7 +25,7 @@ const descriptionError = ref('')
 const diagnosticText = ref()
 const diagnosticError = ref('')
 
-const alarmIds = ref([])
+const alarmIds = ref([]) as Ref<number[]>
 const errorAlarmList = ref(false)
 const errorSave = ref()
 
@@ -58,9 +58,9 @@ const updateList = (severities: string[]) => {
 	}
 }
 
-const updatedSelect = (alarmId: number) => {
+const addAlarm = (alarmId: number) => {
 	errorAlarmList.value = false
-	if (!alarmIds.value.includes(alarmId)) {
+	if (!includes(alarmIds.value, alarmId)) {
 		alarmIds.value.push(alarmId)
 	} else {
 		remove(alarmIds.value, (a) => a === alarmId)
@@ -134,7 +134,7 @@ const cleanFields = () => {
 				></FeatherTextarea>
 				<div>
 					<div class="totalAlarms" :class="{ errorList: errorAlarmList }">
-						Total alarms selected:
+						Total alarms added:
 						<span class="total">{{ alarmIds.length }}</span>
 					</div>
 					<div v-if="errorAlarmList" class="errorList">
@@ -153,32 +153,35 @@ const cleanFields = () => {
 				</div>
 			</div>
 			<div class="alarm-column">
-				<h4>ALARMS TO ADD</h4>
-				<FiltersSeverity :alarms="alarms" @selected-severities="updateList" />
+				<h4>Add Unassociated Alarms</h4>
+				<FiltersSeverity
+					:alarms="situationStore.unassignedAlarms"
+					@selected-severities="updateList"
+				/>
 				<div v-if="alarms" class="alarms">
 					<div
 						v-for="alarm in alarms"
 						:key="alarm.id"
-						:class="[`${alarm.severity.toLowerCase()}-bg`]"
 						class="alarm"
+						:class="{ selected: includes(alarmIds, alarm.id) }"
 					>
 						<div class="alarmInfo">
+							<div
+								class="triangle"
+								:class="[`${alarm.severity.toLowerCase()}`]"
+							></div>
 							<FeatherCheckbox
-								:modelValue="alarmIds.includes(alarm.id)"
+								:modelValue="includes(alarmIds, alarm.id)"
 								label="selected"
-								@update:modelValue="() => updatedSelect(alarm.id)"
+								@update:modelValue="() => addAlarm(alarm.id)"
 							/>
 
 							<div class="alarm-title">
 								{{ alarm.nodeLabel }} - {{ alarm.id }}
 							</div>
-							<div
-								class="severity-status"
-								:class="[`${alarm.severity.toLowerCase()}-bg dark`]"
-							></div>
 						</div>
 						<div class="description">
-							{{ truncateText(alarm.description, 380) }}
+							{{ truncateText(alarm.description, 300) }}
 						</div>
 					</div>
 				</div>
@@ -209,20 +212,33 @@ const cleanFields = () => {
 }
 
 .alarm-column {
-	padding: 20px;
-	border: 1px solid $border-grey;
 	width: 100%;
 	margin-left: 20px;
 }
 
 .alarms {
-	height: 500px;
+	height: 600px;
 	overflow-y: auto;
-	margin-top: 15px;
+	margin-top: 10px;
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: nowrap;
+	width: 100%;
+	flex-wrap: wrap;
+	align-content: flex-start;
 }
 
 .alarm {
 	margin-top: 15px;
+	width: 49%;
+	min-width: 48%;
+	padding: 15px;
+	border: 1px solid $border-grey;
+	position: relative;
+	min-height: 140px;
+	&.selected {
+		border: 1px solid #273180;
+	}
 }
 
 .fields {
@@ -230,7 +246,7 @@ const cleanFields = () => {
 	flex-direction: column;
 	width: 700px;
 	> div {
-		margin-bottom: 20px;
+		margin-bottom: 0px;
 	}
 }
 
@@ -246,7 +262,6 @@ const cleanFields = () => {
 .alarmInfo {
 	display: flex;
 	align-items: center;
-	padding: 0 20px;
 }
 
 .alarm-title {
@@ -257,11 +272,15 @@ const cleanFields = () => {
 	width: 15px;
 	height: 15px;
 	border-radius: 50px;
-	margin-left: 10px;
+	margin-right: 10px;
 }
 .description {
-	padding-left: 30px;
 	font-size: 13px;
+}
+
+.add-btn {
+	justify-content: end;
+	display: flex;
 }
 
 .totalAlarms {
@@ -275,7 +294,7 @@ const cleanFields = () => {
 }
 
 .total {
-	font-size: 16px;
+	font-size: 18px;
 }
 
 .errorList {
@@ -292,5 +311,61 @@ const cleanFields = () => {
 	flex-grow: 1;
 	display: flex;
 	align-items: end;
+}
+
+.triangle {
+	width: 12%;
+	padding-bottom: 6%;
+	overflow: hidden;
+	position: absolute;
+	top: 0%;
+	left: 88%;
+
+	&.critical {
+		&:before {
+			background-color: $severity-alarm-critical-border;
+		}
+	}
+
+	&.major {
+		&:before {
+			background-color: $severity-alarm-major-border;
+		}
+	}
+
+	&.minor {
+		&:before {
+			background-color: $severity-alarm-minor-border;
+		}
+	}
+
+	&.warning {
+		&:before {
+			background-color: $severity-alarm-warning-border;
+		}
+	}
+
+	&.indeterminate {
+		&:before {
+			background-color: $severity-alarm-indeterminate-border;
+		}
+	}
+
+	&.normal {
+		&:before {
+			background-color: $severity-alarm-normal-border;
+		}
+	}
+
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transform-origin: 100% 100%;
+		transform: rotate(45deg);
+	}
 }
 </style>

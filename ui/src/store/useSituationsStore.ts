@@ -4,7 +4,8 @@ import {
 	getAllNodes,
 	getAlarmsByIds,
 	getAlarmById,
-	getEventsByAlarmId
+	getEventsByAlarmId,
+	getAlarmsUnassigned
 } from '@/services/AlarmService'
 import { getSituationsStatus } from '@/services/AlecService'
 
@@ -28,6 +29,7 @@ type TState = {
 	nodes: TNode[]
 	filteredSituations: number[]
 	filters: TFilters | null
+	unassignedAlarms: TAlarm[]
 }
 
 export const useSituationsStore = defineStore('situationsStore', {
@@ -37,7 +39,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 		situationDetail: null,
 		filteredSituations: [],
 		nodes: [],
-		filters: null
+		filters: null,
+		unassignedAlarms: []
 	}),
 	actions: {
 		async getNodes() {
@@ -95,6 +98,12 @@ export const useSituationsStore = defineStore('situationsStore', {
 			)
 			if (this.situationDetail) {
 				this.situationDetail.events = eventsById
+			}
+		},
+		async getUnassignedAlarms() {
+			const resultAlarms = await getAlarmsUnassigned()
+			if (resultAlarms) {
+				this.unassignedAlarms = resultAlarms as TAlarm[]
 			}
 		}
 	}

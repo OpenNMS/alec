@@ -6,6 +6,7 @@ import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import Refresh from '@featherds/icon/navigation/Refresh'
+import Add from '@featherds/icon/action/Add'
 import { reactive, ref, watch } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
@@ -19,6 +20,7 @@ const appStore = useAppStore()
 
 situationStore.getSituations()
 situationStore.getNodes()
+situationStore.getUnassignedAlarms()
 
 const PAGE_SIZE = 9
 
@@ -175,6 +177,12 @@ const updateList = (severities: string[]) => {
 	}
 }
 
+const addNewSituation = () => {
+	router.push({
+		name: 'addSituation'
+	})
+}
+
 const resetFilters = () => {
 	state.filterSeverities = ['all']
 	state.nodeSelectedValue = undefined
@@ -188,7 +196,13 @@ const resetFilters = () => {
 
 <template>
 	<div class="list-main">
-		<h2>Situation List</h2>
+		<div class="header">
+			<h2>Situation List</h2>
+			<FeatherButton class="new-situation-btn" @click="() => addNewSituation()">
+				<FeatherIcon :icon="Add" aria-hidden="true" class="icon" />
+				<span>New Situation</span>
+			</FeatherButton>
+		</div>
 		<div class="filters">
 			<FeatherButton class="reset-btn" @click="() => resetFilters()">
 				<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
@@ -257,6 +271,16 @@ const resetFilters = () => {
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
+.header {
+	display: flex;
+	justify-content: space-between;
+}
+.new-situation-btn {
+	height: 44px;
+	background-color: #46ae46;
+	color: white;
+}
+
 .list-main {
 	min-height: 800px;
 }

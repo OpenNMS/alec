@@ -16,7 +16,4 @@ body {
 .label-border {
 	display: none !important;
 }
-.feather-input-sub-text {
-	display: none !important;
-}
 </style>

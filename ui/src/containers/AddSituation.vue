@@ -6,7 +6,7 @@ import Cancel from '@featherds/icon/navigation/Cancel'
 import { FeatherButton } from '@featherds/button'
 import { useRouter } from 'vue-router'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
-import { TNewSituation, TAlarm } from '@/types/TSituation'
+import { TNewSituation } from '@/types/TSituation'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
@@ -16,6 +16,8 @@ import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { remove, includes } from 'lodash'
 import { createSituations } from '@/services/AlecService'
 import type { Ref } from 'vue'
+import { ref, watch } from 'vue'
+
 const router = useRouter()
 const situationStore = useSituationsStore()
 

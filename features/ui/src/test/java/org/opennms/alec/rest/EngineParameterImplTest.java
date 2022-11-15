@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.opennms.alec.data.EngineParameter;
 import org.opennms.alec.data.EngineParameterImpl;
-import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class EngineParameterImplTest {
         String json = objectMapper.writeValueAsString(parameter);
         LOG.info("Serializing a plain String: {}", json);
 
-        assertThat(json, equalTo("{\"engineName\":\"dbscan\",\"distanceMeasureName\":\"test\",\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"remoteUri\":null,\"token\":null}"));
+        assertThat(json, equalTo("{\"engineName\":\"dbscan\",\"distanceMeasureName\":\"test\",\"alpha\":1.0,\"beta\":2.0,\"epsilon\":3.0,\"remoteUri\":null,\"token\":null,\"remote\":false}"));
     }
 
     @Test
@@ -65,7 +64,7 @@ public class EngineParameterImplTest {
 
         assertThat(DBScanEngine.DEFAULT_ALPHA, equalTo(engineParameter.getAlpha()));
         assertThat(DBScanEngine.DEFAULT_BETA, equalTo(engineParameter.getBeta()));
-        assertThat(AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, equalTo(engineParameter.getEpsilon()));
+        assertThat(null, equalTo(engineParameter.getEpsilon()));
         assertThat(DBScanEngine.DEFAULT_DISTANCE_MEASURE, equalTo(engineParameter.getDistanceMeasureName()));
         assertThat("dbscan", equalTo(engineParameter.getEngineName()));
     }

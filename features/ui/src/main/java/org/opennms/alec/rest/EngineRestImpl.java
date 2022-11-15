@@ -68,7 +68,10 @@ public class EngineRestImpl implements EngineRest {
         this.engineFactories = engineFactories;
         objectMapper = new ObjectMapper();
 
-        setEngineConfiguration((EngineParameter) getEngineConfiguration().getEntity());
+        EngineParameter engineParameter = (EngineParameter) getEngineConfiguration().getEntity();
+        if(engineParameter != null) {
+            setEngineConfiguration(engineParameter);
+        }
     }
 
     @Override

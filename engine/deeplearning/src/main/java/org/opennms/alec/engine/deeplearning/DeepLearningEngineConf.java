@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.deeplearning.utils;
+package org.opennms.alec.engine.deeplearning;
 
 import java.util.Objects;
 
@@ -36,7 +36,7 @@ import java.util.Objects;
 public class DeepLearningEngineConf {
     private static final int DEFAULT_NUM_GRAPH_THREADS = 2;
     private static final int DEFAULT_NUM_TF_THREADS = Math.max(Runtime.getRuntime().availableProcessors() - 3, 1);
-    private static final double DEFAULT_EPSILON = 500;
+    public static final double DEFAULT_EPSILON = 500;
 
     private String modelPath;
     private double epsilon = DEFAULT_EPSILON;

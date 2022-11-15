@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.deeplearning.utils;
+package org.opennms.alec.engine.deeplearning;
 
 import java.util.Objects;
 

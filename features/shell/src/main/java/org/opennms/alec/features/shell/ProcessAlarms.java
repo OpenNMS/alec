@@ -51,7 +51,7 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
-import org.opennms.alec.engine.deeplearning.remote.DeepLearningEngineRemoteFactory;
+import org.opennms.alec.engine.deeplearning.DeepLearningEngineFactory;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Situations.
@@ -116,9 +116,14 @@ public class ProcessAlarms implements Action {
             ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
             ((DBScanEngineFactory) engineFactory).setAlpha(alpha);
             ((DBScanEngineFactory) engineFactory).setBeta(beta);
-        } else if ("deeplearning-remote".equals(engineFactory.getName())) {
-            ((DeepLearningEngineRemoteFactory) engineFactory).setToken(token);
-            ((DeepLearningEngineRemoteFactory) engineFactory).setUri(uri);
+        } else if ("deeplearning".equals(engineFactory.getName()) && !token.isEmpty() && !uri.isEmpty()) {
+            ((DeepLearningEngineFactory) engineFactory).setToken(token);
+            ((DeepLearningEngineFactory) engineFactory).setUri(uri);
+            ((DeepLearningEngineFactory) engineFactory).setRemote(true);
+        } else if ("deeplearning".equals(engineFactory.getName())) {
+            ((DeepLearningEngineFactory) engineFactory).setToken("");
+            ((DeepLearningEngineFactory) engineFactory).setUri("");
+            ((DeepLearningEngineFactory) engineFactory).setRemote(false);
         }
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
         final List<InventoryObject> inventory;

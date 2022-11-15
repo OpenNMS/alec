@@ -119,8 +119,13 @@ public class Driver implements EngineRegistry {
     @SuppressWarnings({"java:S2142", "java:S1149"})
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        LOG.info("Creating engine with name: {}", engineFactory.getName());
-        engine = engineFactory.createEngine(metrics);
+        LOG.info("Creating engine: {}", engineFactory.getNameConf());
+        try {
+            engine = engineFactory.createEngine(metrics);
+        } catch (IllegalArgumentException e) {
+            future.completeExceptionally(e);
+            return future;
+        }
         // Register the handler that confirms situations that have come round trip back to this driver
         situationDatasource.registerHandler(confirmingSituationHandler);
         // Register the situation processor responsible for accepting and processing all situations generated via the
@@ -206,7 +211,7 @@ public class Driver implements EngineRegistry {
             state = DriverState.RUNNING;
             future.complete(null);
         });
-        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getName()));
+        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getNameConf()));
         initThread.setUncaughtExceptionHandler((th,ex) -> {
             LOG.error("Initialization failed with uncaught exception.", ex);
             future.completeExceptionally(ex);

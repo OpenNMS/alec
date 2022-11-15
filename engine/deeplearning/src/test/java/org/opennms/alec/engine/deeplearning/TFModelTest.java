@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.hasSize;
 import java.util.List;
 
 import org.junit.Test;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
 import org.tensorflow.Tensor;
 
 public class TFModelTest {

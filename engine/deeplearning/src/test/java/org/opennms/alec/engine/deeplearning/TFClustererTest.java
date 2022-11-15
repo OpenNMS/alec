@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.InventoryObject;
@@ -47,8 +48,6 @@ import org.opennms.alec.driver.test.MockInventoryType;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.GraphManager;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
-import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
-import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 
 public class TFClustererTest {
 
@@ -115,6 +114,51 @@ public class TFClustererTest {
         SpatialDistanceCalculator spatialDistanceCalculator = (vertexIdA, vertexIdB) -> 0;
         Vectorizer vectorizer = new Vectorizer(graphManager, spatialDistanceCalculator);
         TFClusterer tfClusterer = new TFClusterer(tfModel, vectorizer, new DeepLearningEngineConf());
+        tfClusterer.init();
+
+        // There are no alarms to cluster, so we should get 0 clusters
+        List<Cluster<AlarmInSpaceTime>> clusters = graphManager.withGraph(tfClusterer::cluster);
+        assertThat(clusters, hasSize(0));
+
+        long start = System.currentTimeMillis();
+        int N = 200;
+        int K = 2;
+        for (int k = 1; k <= K; k++) {
+            for (int i = 0; i < N; i++) {
+                Alarm alarm = ImmutableAlarm.newBuilder()
+                        .setInventoryObjectId("n" + k + "-c1-p1")
+                        .setInventoryObjectType(MockInventoryType.PORT.getType())
+                        .setTime(0)
+                        .setId("a-n" + k + "-" + i)
+                        .build();
+                graphManager.addOrUpdateAlarm(alarm);
+            }
+        }
+
+        clusters = graphManager.withGraph(tfClusterer::cluster);
+        long deltaMs = System.currentTimeMillis() - start;
+        System.out.printf("took %.2f seconds for %d alarms.\n", deltaMs / 1000d, K * N);
+
+        // We expect these to be clustered together
+        assertThat(clusters, hasSize(K));
+        for (int k = 0; k < K; k++) {
+            assertThat(clusters.get(k).getPoints(), hasSize(N));
+        }
+    }
+
+    @Test(timeout = 180000)
+    @Ignore("take too much time and token updates regularly")
+    //took 946.94 seconds for 400 alarms.
+    public void canPerformanceTestClustererRemote() {
+        // Build a graph from the inventory
+        GraphManager graphManager = new GraphManager();
+        graphManager.addInventory(network);
+
+        // Build our clusterer
+        RemoteModel remoteModel = new RemoteModel("", "");
+        SpatialDistanceCalculator spatialDistanceCalculator = (vertexIdA, vertexIdB) -> 0;
+        Vectorizer vectorizer = new Vectorizer(graphManager, spatialDistanceCalculator);
+        TFClusterer tfClusterer = new TFClusterer(remoteModel, vectorizer, new DeepLearningEngineConf());
         tfClusterer.init();
 
         // There are no alarms to cluster, so we should get 0 clusters

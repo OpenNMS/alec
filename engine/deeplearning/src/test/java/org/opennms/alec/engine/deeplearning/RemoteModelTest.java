@@ -28,18 +28,17 @@
 
 package org.opennms.alec.engine.deeplearning;
 
+import org.junit.Ignore;
 import org.junit.Test;
-import org.opennms.alec.engine.deeplearning.remote.TFModel;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
 
 //Use to test remote model connection
 // token and uri should be specified on testing but not push
-//@Ignore
-public class TFModelTest {
+@Ignore("token updates Regularly")
+public class RemoteModelTest {
     /**
      * This also verifies that the default model can be loaded from the classpath.
      */
-    private final TFModel tfModel = new TFModel("", "");
+    private final RemoteModel remoteModel = new RemoteModel("", "");
 
 
     /**
@@ -65,7 +64,7 @@ public class TFModelTest {
         int N = 50;
         long startMs = System.currentTimeMillis();
         for (int i = 0; i < N; i++) {
-            tfModel.isRelated(inputVector);
+            remoteModel.isRelated(inputVector);
         }
         long deltaMs = System.currentTimeMillis() - startMs;
 

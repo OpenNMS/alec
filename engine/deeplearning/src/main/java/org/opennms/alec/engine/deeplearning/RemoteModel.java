@@ -26,7 +26,7 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.engine.deeplearning.remote;
+package org.opennms.alec.engine.deeplearning;
 
 import java.io.IOException;
 
@@ -35,16 +35,15 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TFModel {
-    private static final Logger LOG = LoggerFactory.getLogger(TFModel.class);
+public class RemoteModel {
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteModel.class);
     private final String token;
     private final String uri;
 
-    public TFModel(String token, String uri) {
+    public RemoteModel(String token, String uri) {
         this.token = token;
         this.uri = uri;
     }
@@ -60,6 +59,20 @@ public class TFModel {
         } catch (IOException e) {
             LOG.error("Error while sending request to target host: '{}'", uri, e.getCause());
             return null;
+        }
+    }
+
+    public boolean ping() {
+        String data = "{\"input_data\":{\"data\":[[\"SnmpInterface\",\"SnmpInterface\",0,0,0,2.0,1.0,0.4666,-1.0]],\"columns\":[\"type_a\",\"type_b\",\"same_instance\",\"same_parent\",\"share_ancestor\",\"time_delta_seconds\",\"distance_on_graph\",\"io_id_similarity\",\"io_label_similarity\"],\"index\":[0]}}";
+        try {
+            return Request.Post(uri)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer " + token)
+                    .bodyString(data, ContentType.APPLICATION_JSON)
+                    .execute().returnResponse().getStatusLine().getStatusCode() == 200;
+        } catch (IOException e) {
+            LOG.error("Error while sending request to target host: '{}'", uri, e.getCause());
+            return false;
         }
     }
 

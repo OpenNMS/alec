@@ -6,11 +6,13 @@ import java.util.StringJoiner;
 import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.HellingerDistanceMeasure;
+import org.opennms.alec.engine.deeplearning.DeepLearningEngineConf;
 
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 public class EngineParameterImpl implements EngineParameter {
 
+    public static final String DBSCAN = "dbscan";
     private final Double alpha;
     private final Double beta;
     private final Double epsilon;
@@ -18,6 +20,7 @@ public class EngineParameterImpl implements EngineParameter {
     private final String engineName;
     private final String remoteUri;
     private final String token;
+    private final boolean remote;
 
     private EngineParameterImpl(Builder builder) {
         alpha = builder.alpha;
@@ -27,6 +30,7 @@ public class EngineParameterImpl implements EngineParameter {
         engineName = builder.engineName;
         remoteUri = builder.remoteUri;
         token = builder.token;
+        remote = builder.remote;
     }
 
     public static Builder newBuilder() {
@@ -42,19 +46,32 @@ public class EngineParameterImpl implements EngineParameter {
         builder.engineName = copy.getEngineName();
         builder.remoteUri = copy.getRemoteUri();
         builder.token = copy.getToken();
+        builder.remote = copy.isRemote();
         return builder;
     }
 
     @Override
     public Double getAlpha() {
-        return Optional.ofNullable(alpha)
-                .orElse(DBScanEngine.DEFAULT_ALPHA);
+        if (Optional.ofNullable(alpha).isEmpty()) {
+            if (DBSCAN.equals(getEngineName())) {
+                return DBScanEngine.DEFAULT_ALPHA;
+            }
+            return null;
+        } else {
+            return alpha;
+        }
     }
 
     @Override
     public Double getBeta() {
-        return Optional.ofNullable(beta)
-                .orElse(DBScanEngine.DEFAULT_BETA);
+        if (Optional.ofNullable(beta).isEmpty()) {
+            if (DBSCAN.equals(getEngineName())) {
+                return DBScanEngine.DEFAULT_BETA;
+            }
+            return null;
+        } else {
+            return beta;
+        }
     }
 
     @Override
@@ -64,8 +81,12 @@ public class EngineParameterImpl implements EngineParameter {
                 case "hellinger":
                     return HellingerDistanceMeasure.DEFAULT_EPSILON;
                 case "alarminspacetime":
-                default:
                     return AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON;
+                default:
+                    if (engineName.equals("deeplearning")) {
+                        return DeepLearningEngineConf.DEFAULT_EPSILON;
+                    }
+                    return null;
             }
         } else {
             return epsilon;
@@ -74,8 +95,14 @@ public class EngineParameterImpl implements EngineParameter {
 
     @Override
     public String getDistanceMeasureName() {
-        return Optional.ofNullable(distanceMeasureName)
-                .orElse(DBScanEngine.DEFAULT_DISTANCE_MEASURE);
+        if (Optional.ofNullable(distanceMeasureName).isEmpty()) {
+            if (DBSCAN.equals(engineName)) {
+                return DBScanEngine.DEFAULT_DISTANCE_MEASURE;
+            }
+            return "";
+        } else {
+            return distanceMeasureName;
+        }
     }
 
     @Override
@@ -92,6 +119,11 @@ public class EngineParameterImpl implements EngineParameter {
         return token;
     }
 
+    @Override
+    public boolean isRemote() {
+        return remote;
+    }
+
     @JsonPOJOBuilder(withPrefix = "")
     public static final class Builder {
         private Double alpha;
@@ -101,18 +133,13 @@ public class EngineParameterImpl implements EngineParameter {
         private String engineName;
         private String remoteUri;
         private String token;
+        private boolean remote;
 
         private Builder() {
         }
 
-        public Builder(Double alpha, Double beta, Double epsilon, String distanceMeasureName, String engineName, String remoteUri, String token) {
-            this.alpha = alpha;
-            this.beta = beta;
-            this.epsilon = epsilon;
-            this.distanceMeasureName = distanceMeasureName;
-            this.engineName = engineName;
-            this.remoteUri = remoteUri;
-            this.token = token;
+        public static Builder newBuilder() {
+            return new Builder();
         }
 
         public Builder alpha(Double val) {
@@ -150,6 +177,11 @@ public class EngineParameterImpl implements EngineParameter {
             return this;
         }
 
+        public Builder remote(boolean val) {
+            remote = val;
+            return this;
+        }
+
         public EngineParameterImpl build() {
             return new EngineParameterImpl(this);
         }
@@ -163,8 +195,9 @@ public class EngineParameterImpl implements EngineParameter {
                 .add("epsilon=" + epsilon)
                 .add("distanceMeasureName='" + distanceMeasureName + "'")
                 .add("engineName='" + engineName + "'")
-                .add("uri='" + remoteUri + "'")
+                .add("remoteUri='" + remoteUri + "'")
                 .add("token='" + token + "'")
+                .add("remote=" + remote)
                 .toString();
     }
 }

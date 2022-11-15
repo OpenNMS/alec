@@ -43,8 +43,6 @@ import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEVertex;
 import org.opennms.alec.engine.cluster.GraphManager;
 import org.opennms.alec.engine.cluster.SpatialDistanceCalculator;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
-import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 
 public class VectorizerTest {
 

@@ -61,9 +61,9 @@ import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
-import org.opennms.alec.engine.deeplearning.utils.OutputVector;
-import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
+import org.opennms.alec.engine.deeplearning.InputVector;
+import org.opennms.alec.engine.deeplearning.OutputVector;
+import org.opennms.alec.engine.deeplearning.Vectorizer;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -184,6 +184,11 @@ public class Vectorize implements Action {
         @Override
         public String getName() {
             return "test";
+        }
+
+        @Override
+        public String getNameConf() {
+            return getName();
         }
 
         @Override

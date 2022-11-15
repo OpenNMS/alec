@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>org.opennms.alec.engine</groupId>
-            <artifactId>org.opennms.alec.engine.deeplearning.remote</artifactId>
+            <artifactId>org.opennms.alec.engine.deeplearning</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

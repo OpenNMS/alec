@@ -50,10 +50,6 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
-import org.opennms.alec.engine.deeplearning.utils.DeepLearningEngineConf;
-import org.opennms.alec.engine.deeplearning.utils.InputVector;
-import org.opennms.alec.engine.deeplearning.utils.TFClustererTasks;
-import org.opennms.alec.engine.deeplearning.utils.Vectorizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +68,7 @@ public class TFClusterer {
     private static final Logger LOG = LoggerFactory.getLogger(TFClusterer.class);
 
     private final TFModel tfModel;
+    private final RemoteModel remoteModel;
     private final Vectorizer vectorizer;
 
     private final double epsilon;
@@ -87,6 +84,18 @@ public class TFClusterer {
         this.tfModel = Objects.requireNonNull(tfModel);
         this.vectorizer = Objects.requireNonNull(vectorizer);
         Objects.requireNonNull(conf);
+        this.remoteModel = null;
+
+        epsilon = conf.getEpsilon();
+        numGraphThreads = conf.getNumGraphProcessingThreads();
+        numTfThreads = conf.getNumTensorFlowProcessingThreads();
+    }
+
+    public TFClusterer(RemoteModel remoteModel, Vectorizer vectorizer, DeepLearningEngineConf conf) {
+        this.remoteModel = Objects.requireNonNull(remoteModel);
+        this.vectorizer = Objects.requireNonNull(vectorizer);
+        Objects.requireNonNull(conf);
+        this.tfModel = null;
 
         epsilon = conf.getEpsilon();
         numGraphThreads = conf.getNumGraphProcessingThreads();
@@ -326,7 +335,12 @@ public class TFClusterer {
     private void processTask(BlockingQueue<TFClustererTasks.RelatesTo> relationQueue, TFClustererTasks.Task task) {
         LOG.trace("Processing task: {}", task);
         try {
-            final TFTaskVisitor visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
+            TFTaskVisitor visitor;
+            if (tfModel != null) {
+                visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
+            } else {
+                visitor = new TFTaskVisitor(remoteModel, vectorizer, relationQueue);
+            }
             task.visit(visitor);
             LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
         } catch (Exception e) {
@@ -337,6 +351,7 @@ public class TFClusterer {
     private static class TFTaskVisitor implements TFClustererTasks.TaskVisitor {
 
         private final TFModel tfModel;
+        private final RemoteModel remoteModel;
         private final Vectorizer vectorizer;
         private final BlockingQueue<TFClustererTasks.RelatesTo> relationQueue;
 
@@ -346,6 +361,14 @@ public class TFClusterer {
             this.tfModel = tfModel;
             this.vectorizer = vectorizer;
             this.relationQueue = relationQueue;
+            this.remoteModel = null;
+        }
+
+        public TFTaskVisitor(RemoteModel remoteModel, Vectorizer vectorizer, BlockingQueue<TFClustererTasks.RelatesTo> relationQueue) {
+            this.tfModel = null;
+            this.vectorizer = vectorizer;
+            this.relationQueue = relationQueue;
+            this.remoteModel = remoteModel;
         }
 
         @Override
@@ -361,12 +384,16 @@ public class TFClusterer {
                     final Alarm a2 = alarms.get(j);
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(vertex, a2);
                     final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(inputVector)) {
-                        LOG.debug("{} is related to {}", a1.getId(), a2.getId());
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
-                    }
+                    isRelated(a1, a1st, a2, a2st, inputVector);
                     numIsRelatedCalls++;
                 }
+            }
+        }
+
+        private void isRelated(Alarm a1, AlarmInSpaceTime a1st, Alarm a2, AlarmInSpaceTime a2st, InputVector inputVector) {
+            if ((tfModel != null && tfModel.isRelated(inputVector)) || (remoteModel!= null && remoteModel.isRelated(inputVector))) {
+                LOG.debug("{} is related to {}", a1.getId(), a2.getId());
+                relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
             }
         }
 
@@ -382,10 +409,7 @@ public class TFClusterer {
                 for (Alarm a2 : v2.getAlarms()) {
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(v2, a2);
                     final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(inputVector)) {
-                        LOG.debug("{} is related to {}", a1.getId(), a2.getId());
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
-                    }
+                    isRelated(a1, a1st, a2, a2st, inputVector);
                     numIsRelatedCalls++;
                 }
             }

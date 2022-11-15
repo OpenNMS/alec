@@ -39,6 +39,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.AlarmSet;
 import org.opennms.alec.data.CreateSituationPayload;
 
 @Path("alec/situation")
@@ -47,26 +48,26 @@ import org.opennms.alec.data.CreateSituationPayload;
 public interface SituationRest {
     @POST
     @Path("rejected/{id}")
-    Response rejected(@PathParam("id") String id) throws InterruptedException;
+    Response rejected(@PathParam("id") String id);
 
     @POST
     @Path("accepted/{id}")
-    Response accepted(@PathParam("id") String id) throws InterruptedException;
+    Response accepted(@PathParam("id") String id);
 
     @GET
     @Path("statusList")
-    Response getSituationStatusList() throws InterruptedException;
+    Response getSituationStatusList();
 
     @GET
-    Response getSituationList() throws InterruptedException;
+    Response getSituationList();
 
     @PUT
-    @Path("{situationId}/alarm/{alarmId}")
-    Response addAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId) throws InterruptedException;
+    @Path("alarm")
+    Response addAlarm(AlarmSet alarm);
 
     @DELETE
-    @Path("{situationId}/alarm/{alarmId}")
-    Response removeAlarm(@PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId) throws InterruptedException;
+    @Path("alarm")
+    Response removeAlarm(AlarmSet alarm);
 
     @POST
     Response createSituation(CreateSituationPayload createSituationPayload);

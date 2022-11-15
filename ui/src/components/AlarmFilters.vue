@@ -8,7 +8,7 @@ import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { sendActionMultiplyAlarms } from '@/services/AlarmService'
-import { removeAlarmFromSituation } from '@/services/AlecService'
+import { removeAlarmsFromSituation } from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
@@ -61,15 +61,14 @@ const handleActionMultiplyAlarms = async (action: string) => {
 
 const handleRemoveAlarm = async () => {
 	if (state.selectedAlarms.length) {
-		//@TODO remove many alarms
-		const result = await removeAlarmFromSituation(
+		const result = await removeAlarmsFromSituation(
 			props.situationId,
-			state.selectedAlarms[0]
+			state.selectedAlarms
 		)
 		if (result) {
 			situationStore.getSituation(props.situationId)
 		} else {
-			appStore.showErrorMsg('Error on removing alarm :(')
+			appStore.showErrorMsg('Error on removing alarms :(')
 		}
 	}
 }

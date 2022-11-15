@@ -13,4 +13,9 @@ const formatDate = (date: Date | string | number | undefined) => {
 	return formattedDate
 }
 
-export { formatDate }
+const truncateText = (text: string, length: number) => {
+	const end = text.length > length ? '...' : ''
+	return text.replace(/(<([^>]+)>)/gi, '').substring(0, length) + end
+}
+
+export { formatDate, truncateText }

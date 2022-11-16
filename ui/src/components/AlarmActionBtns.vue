@@ -5,6 +5,7 @@ import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
+import ExitToApp from '@featherds/icon/action/ExitToApp'
 
 import CONST from '@/helpers/constants'
 import { TAlarm, TSituation } from '@/types/TSituation'
@@ -77,6 +78,14 @@ const handleAction = async (action: string) => {
 		>
 			<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon clear" />
 			<span>Clear</span>
+		</FeatherButton>
+		<FeatherButton
+			v-if="!props.showMove"
+			class="acction-btn"
+			@click="() => handleMoveAction()"
+		>
+			<FeatherIcon :icon="ExitToApp" aria-hidden="true" class="icon clear" />
+			<span>Move</span>
 		</FeatherButton>
 	</div>
 </template>

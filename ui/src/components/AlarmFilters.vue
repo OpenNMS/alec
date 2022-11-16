@@ -11,6 +11,7 @@ import { sendActionMultiplyAlarms } from '@/services/AlarmService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
+import ExitToApp from '@featherds/icon/action/ExitToApp'
 
 const situationStore = useSituationsStore()
 
@@ -93,6 +94,10 @@ const updateList = (severities: string[]) => {
 				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
 				<span>Acknowledge</span>
 			</FeatherButton>
+			<FeatherButton class="acction-btn" @click="() => handleMoveAction()">
+				<FeatherIcon :icon="ExitToApp" aria-hidden="true" class="icon move" />
+				<span>Move</span>
+			</FeatherButton>
 		</div>
 
 		<div class="section">
@@ -171,6 +176,11 @@ const updateList = (severities: string[]) => {
 	}
 	&.ack {
 		color: green;
+	}
+	&.move {
+		color: #7004f4;
+		font-size: 20px;
+		vertical-align: text-bottom;
 	}
 }
 </style>

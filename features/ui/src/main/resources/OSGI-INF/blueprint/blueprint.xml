@@ -3,10 +3,10 @@
     <!-- Expose our UI Extension -->
     <service id="uiExtension" interface="org.opennms.integration.api.v1.ui.UIExtension">
         <bean class="org.opennms.alec.ui.UIExtension">
-            <property name="id" value="uiExtension"/>
+            <property name="id" value="alecUiExtension"/>
             <property name="menuEntry" value="ALEC"/>
             <property name="resourceRoot" value="ui-ext"/>
-            <property name="moduleFileName" value="alecextension.es.js"/>
+            <property name="moduleFileName" value="alecUiExtension.es.js"/>
         </bean>
     </service>
 

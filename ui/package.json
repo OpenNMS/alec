@@ -4,12 +4,12 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/alecextension.umd.js",
-  "module": "./dist/alecextension.es.js",
+  "main": "./dist/alecUiExtension.umd.js",
+  "module": "./dist/alecUiExtension.es.js",
   "exports": {
     ".": {
-      "import": "./dist/alecextension.es.js",
-      "require": "./dist/alecextension.umd.js"
+      "import": "./dist/alecUiExtension.es.js",
+      "require": "./dist/alecUiExtension.umd.js"
     }
   },
   "scripts": {

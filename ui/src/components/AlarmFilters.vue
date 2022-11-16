@@ -196,6 +196,8 @@ const updateList = (severities: string[]) => {
 	}
 	&.remove {
 		color: red;
+		font-size: 21px;
+		vertical-align: text-bottom;
 	}
 }
 </style>

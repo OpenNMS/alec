@@ -582,6 +582,18 @@
         <releases><enabled>false</enabled></releases>
         <snapshots><enabled>true</enabled></snapshots>
       </repository>
+      <repository>
+          <id>opennms-maven</id>
+          <url>https://packages.opennms.com/public/maven/maven/</url>
+          <releases>
+              <enabled>true</enabled>
+              <updatePolicy>always</updatePolicy>
+          </releases>
+          <snapshots>
+              <enabled>true</enabled>
+              <updatePolicy>always</updatePolicy>
+          </snapshots>
+      </repository>
     </repositories>
 
     <profiles>

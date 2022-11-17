@@ -70,7 +70,7 @@ import io.grpc.ManagedChannelBuilder;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
-    public static final String TARGET = "ctojeralecpoc.eastus.cloudapp.azure.com:50051";
+    public static final String TARGET = "alec.onms-dp-dev.dev.nonprod.dataservice.opennms.com:443";
     public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
     public static final String ALARM_NOT_FOUND = "Alarm {0} not found";
     public static final String NEED_2_ALARMS = "We need at least two alarms to create a situation, we found {0} alarm";
@@ -121,7 +121,8 @@ public class SituationRestImpl implements SituationRest {
                                 .setAlarms(situation.getAlarms())
                                 .addFeedback(feedback)
                                 .build(),
-                        token, runtimeInfo.getSystemId());
+                        token,
+                        runtimeInfo.getSystemId());
                 kvStoreSituationsByStatus();
 
                 //Free alarms and Forward situation to opennms

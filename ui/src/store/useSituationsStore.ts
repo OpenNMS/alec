@@ -78,7 +78,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 			if (id) {
 				const resultSituation = (await getAlarmById(id)) as TSituation
 				if (resultSituation) {
-					const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
+					const alarmIds = resultSituation.relatedAlarms?.map((a) => a.id)
 					const resultAlarms = await getAlarmsByIds(alarmIds)
 					const alarms = resultAlarms as TAlarm[]
 					resultSituation.alarms = sortBy(alarms, ['id'])

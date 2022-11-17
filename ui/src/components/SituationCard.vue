@@ -6,18 +6,16 @@ import Cancel from '@featherds/icon/action/Cancel'
 import { TSituation } from '@/types/TSituation'
 import CONST from '@/helpers/constants'
 import { formatDate } from '@/helpers/utils'
+import { truncateText } from '@/helpers/utils'
 
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
 const props = defineProps<{
 	situationInfo: TSituation
+	small?: boolean
 }>()
 const emit = defineEmits(['situation-selected'])
-const description =
-	props.situationInfo.description
-		.replace(/(<([^>]+)>)/gi, '')
-		.substring(0, 230) + '...'
 
 const handleSituationSelected = () => {
 	emit('situation-selected', props.situationInfo?.id)
@@ -54,11 +52,15 @@ const handleSituationSelected = () => {
 					/>
 				</div>
 			</div>
-			<div>
+			<div v-if="!props.small">
 				<span class="info-title"> First Event: </span
 				>{{ formatDate(props.situationInfo.firstEventTime) }}
 			</div>
-			<div class="description">{{ description }}</div>
+			<div class="description">
+				{{
+					truncateText(props.situationInfo.description, props.small ? 100 : 230)
+				}}
+			</div>
 			<hr />
 			<div class="count-info" v-if="props.situationInfo.relatedAlarms">
 				Alarms:
@@ -100,7 +102,7 @@ const handleSituationSelected = () => {
 .title-row {
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 15px;
+	margin-bottom: 10px;
 }
 .title {
 	font-size: 20px;

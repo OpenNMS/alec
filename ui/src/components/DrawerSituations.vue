@@ -1,21 +1,43 @@
 <script setup lang="ts">
-import * as components from '@featherds/drawer'
-const props = defineProps<{
-	label: string
-	info: string | number | Date
-}>()
+import { FeatherDrawer } from '@featherds/drawer'
+import { useSituationsStore } from '@/store/useSituationsStore'
+import SituationCard from '@/components/SituationCard.vue'
+import { ref, watch } from 'vue'
 
-const visible = ref(true)
+const emit = defineEmits(['situation-selected', 'drawer-closed'])
+
+const props = defineProps<{
+	visible: boolean
+}>()
+const situationStore = useSituationsStore()
+const visible = ref(props.visible)
+
+watch(props, () => {
+	visible.value = props.visible
+})
 </script>
 
 <template>
 	<FeatherDrawer
-		id="drawer"
 		v-model="visible"
-		:labels="{ close: 'close', title: 'Account settings' }"
+		:labels="{ close: 'close', title: 'Situations' }"
+		@update:modelValue="emit('drawer-closed')"
 	>
-		<div class="fixed-width">
-			<h1>Situations:</h1>
+		<div class="content">
+			<h3>Situations:</h3>
+			<div class="situation-list">
+				<div
+					class="card"
+					v-for="situationInfo in situationStore.situations"
+					:key="situationInfo.id"
+				>
+					<SituationCard
+						@click="emit('situation-selected', situationInfo.id)"
+						:situation-info="situationInfo"
+						small
+					/>
+				</div>
+			</div>
 		</div>
 	</FeatherDrawer>
 </template>
@@ -35,5 +57,23 @@ const visible = ref(true)
 }
 .date {
 	font-size: 12px;
+}
+
+.content {
+	padding: 10px;
+	width: 700px;
+}
+
+.situation-list {
+	margin-top: 20px;
+	overflow-y: auto;
+	height: 800px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+.card {
+	margin-bottom: 10px;
+	width: 328px;
 }
 </style>

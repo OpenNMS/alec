@@ -12,6 +12,10 @@ import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import ExitToApp from '@featherds/icon/action/ExitToApp'
+import DrawerSituations from '@/components/DrawerSituations.vue'
+import { useAppStore } from '@/store/useAppStore'
+
+const appStore = useAppStore()
 
 const situationStore = useSituationsStore()
 
@@ -26,7 +30,7 @@ const props = defineProps<{
 const selectAll = ref(false)
 
 const selectedFilters = ref(['all'])
-
+const showSituations = ref(false)
 const state: TState = reactive({
 	selectedAlarms: [],
 	alarms: props.alarms
@@ -63,6 +67,18 @@ const updateList = (severities: string[]) => {
 		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
 	}
 }
+const handleMoveToSituation = (situationId: number) => {
+	console.log('move to ', situationId, ' these alarms ', state.selectedAlarms)
+	showSituations.value = false
+}
+
+const handleMoveClick = () => {
+	if (state.selectedAlarms.length) {
+		showSituations.value = false
+	} else {
+		appStore.showErrorMsg('Error on saving memo :(')
+	}
+}
 </script>
 
 <template>
@@ -76,26 +92,16 @@ const updateList = (severities: string[]) => {
 		</div>
 		<div class="row actions">
 			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton
-				class="acction-btn"
-				@click="() => handleActionMultiplyAlarms('clear')"
-			>
-				<FeatherIcon
-					:icon="MarkComplete"
-					aria-hidden="true"
-					class="icon clear"
-				/>
+			<FeatherButton @click="() => handleActionMultiplyAlarms('clear')">
+				<FeatherIcon :icon="MarkComplete" class="icon clear" />
 				<span>Clear</span>
 			</FeatherButton>
-			<FeatherButton
-				class="acction-btn"
-				@click="() => handleActionMultiplyAlarms('ack')"
-			>
-				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
+			<FeatherButton @click="() => handleActionMultiplyAlarms('ack')">
+				<FeatherIcon :icon="CheckCircle" class="icon ack" />
 				<span>Acknowledge</span>
 			</FeatherButton>
-			<FeatherButton class="acction-btn" @click="() => handleMoveAction()">
-				<FeatherIcon :icon="ExitToApp" aria-hidden="true" class="icon move" />
+			<FeatherButton @click="handleMoveClick">
+				<FeatherIcon :icon="ExitToApp" class="icon move" />
 				<span>Move</span>
 			</FeatherButton>
 		</div>
@@ -112,6 +118,11 @@ const updateList = (severities: string[]) => {
 				</div>
 			</div>
 		</div>
+		<DrawerSituations
+			:visible="showSituations"
+			@situation-selected="handleMoveToSituation"
+			@drawer-closed="() => (showSituations = false)"
+		/>
 	</div>
 </template>
 

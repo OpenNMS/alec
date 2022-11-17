@@ -124,13 +124,13 @@ const cleanFields = () => {
 			<div class="fields">
 				<FeatherTextarea
 					v-model="descriptionText"
-					label="Diagnostic Text"
+					label="Description"
 					rows="4"
 					:error="descriptionError"
 				></FeatherTextarea>
 				<FeatherTextarea
 					v-model="diagnosticText"
-					label="Description"
+					label="Diagnostic Text"
 					rows="4"
 					:error="diagnosticError"
 				></FeatherTextarea>

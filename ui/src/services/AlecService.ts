@@ -102,6 +102,38 @@ export const getSituations = async (): Promise<TSituation[] | false> => {
 	}
 }
 
+export const removeAlarmsFromSituation = async (
+	situationId: number,
+	alarmIdList: number[]
+) => {
+	try {
+		const resp = await rest.delete(`${base}/situation/alarm/`, {
+			data: {
+				situationId,
+				alarmIdList
+			}
+		})
+		return resp.status === 200
+	} catch (err) {
+		return false
+	}
+}
+
+export const assignAlarmsToSituation = async (
+	situationId: number,
+	alarmIdList: number[]
+) => {
+	try {
+		const resp = await rest.put(`${base}/situation/alarm/`, {
+			situationId,
+			alarmIdList
+		})
+		return resp.status === 200
+	} catch (err) {
+		return false
+	}
+}
+
 export const createSituations = async (
 	situationInfo: TNewSituation
 ): Promise<boolean> => {

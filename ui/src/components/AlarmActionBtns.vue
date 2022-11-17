@@ -80,7 +80,7 @@ const handleAction = async (action: string) => {
 			<span>Clear</span>
 		</FeatherButton>
 		<FeatherButton
-			v-if="!props.showMove"
+			v-if="props.showMove"
 			class="acction-btn"
 			@click="() => handleMoveAction()"
 		>

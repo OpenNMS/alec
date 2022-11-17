@@ -8,6 +8,10 @@ import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { sendActionMultiplyAlarms } from '@/services/AlarmService'
+import {
+	removeAlarmsFromSituation,
+	assignAlarmsToSituation
+} from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
@@ -16,6 +20,7 @@ import DrawerSituations from '@/components/DrawerSituations.vue'
 import { useAppStore } from '@/store/useAppStore'
 
 const appStore = useAppStore()
+import Delete from '@featherds/icon/action/Delete'
 
 const situationStore = useSituationsStore()
 
@@ -57,6 +62,24 @@ const handleActionMultiplyAlarms = async (action: string) => {
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
 		selectAll.value = false
+	} else {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
+	}
+}
+
+const handleRemoveAlarm = async () => {
+	if (state.selectedAlarms.length) {
+		const result = await removeAlarmsFromSituation(
+			props.situationId,
+			state.selectedAlarms
+		)
+		if (result) {
+			situationStore.getSituation(props.situationId)
+		} else {
+			appStore.showErrorMsg('Error on removing alarms :(')
+		}
+	} else {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
 	}
 }
 
@@ -67,16 +90,33 @@ const updateList = (severities: string[]) => {
 		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
 	}
 }
-const handleMoveToSituation = (situationId: number) => {
-	console.log('move to ', situationId, ' these alarms ', state.selectedAlarms)
+
+const handleMoveToSituation = async (situationId: number) => {
+	const resultRemove = await removeAlarmsFromSituation(
+		props.situationId,
+		state.selectedAlarms
+	)
+	if (resultRemove) {
+		const resultMove = await assignAlarmsToSituation(
+			situationId,
+			state.selectedAlarms
+		)
+		if (resultMove) {
+			situationStore.getSituation(props.situationId)
+		} else {
+			appStore.showErrorMsg('Error on moving the alarms :(')
+		}
+	} else {
+		appStore.showErrorMsg('Error on moving the alarms :(')
+	}
 	showSituations.value = false
 }
 
 const handleMoveClick = () => {
 	if (state.selectedAlarms.length) {
-		showSituations.value = false
+		showSituations.value = true
 	} else {
-		appStore.showErrorMsg('Error on saving memo :(')
+		appStore.showErrorMsg('You need to choose at least one alarm!')
 	}
 }
 </script>
@@ -103,6 +143,10 @@ const handleMoveClick = () => {
 			<FeatherButton @click="handleMoveClick">
 				<FeatherIcon :icon="ExitToApp" class="icon move" />
 				<span>Move</span>
+			</FeatherButton>
+			<FeatherButton @click="handleRemoveAlarm">
+				<FeatherIcon :icon="Delete" class="icon remove" />
+				<span>Remove</span>
 			</FeatherButton>
 		</div>
 
@@ -191,6 +235,10 @@ const handleMoveClick = () => {
 	&.move {
 		color: #7004f4;
 		font-size: 20px;
+	}
+	&.remove {
+		color: red;
+		font-size: 21px;
 		vertical-align: text-bottom;
 	}
 }

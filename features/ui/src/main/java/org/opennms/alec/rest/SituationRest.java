@@ -71,4 +71,8 @@ public interface SituationRest {
 
     @POST
     Response createSituation(@HeaderParam ("token") String token, CreateSituationPayload createSituationPayload);
+
+    @GET
+    @Path("proto")
+    Response callProto();
 }

@@ -312,6 +312,24 @@ public class SituationRestImpl implements SituationRest {
         return Response.ok().build();
     }
 
+    @Override
+    public Response callProto() {
+        final String situationId = UUID.randomUUID().toString();
+
+        Situation situation = ImmutableSituation.newBuilder()
+                .setId(situationId)
+                .setCreationTime(System.currentTimeMillis())
+                .setLastTime(System.currentTimeMillis())
+                .setAlarms(Collections.emptySet())
+                .setDiagnosticText("")
+                .setDescription("")
+                .setEngineParameter("user created")
+                .setSeverity(Severity.MAJOR)
+                .build();
+        client.sendSituation(situation, "", "test");
+        return Response.ok().build();
+    }
+
     private boolean alarmIsNotInAnotherSituation(String reductionKey) throws InterruptedException {
         for (Situation situation : situationDatasource.getSituations()) {
             for (Alarm alarm : situation.getAlarms()) {

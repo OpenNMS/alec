@@ -8,10 +8,14 @@ import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { sendActionMultiplyAlarms } from '@/services/AlarmService'
+import { removeAlarmsFromSituation } from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
+import Delete from '@featherds/icon/action/Delete'
+import { useAppStore } from '@/store/useAppStore'
 
+const appStore = useAppStore()
 const situationStore = useSituationsStore()
 
 type TState = {
@@ -55,6 +59,20 @@ const handleActionMultiplyAlarms = async (action: string) => {
 	}
 }
 
+const handleRemoveAlarm = async () => {
+	if (state.selectedAlarms.length) {
+		const result = await removeAlarmsFromSituation(
+			props.situationId,
+			state.selectedAlarms
+		)
+		if (result) {
+			situationStore.getSituation(props.situationId)
+		} else {
+			appStore.showErrorMsg('Error on removing alarms :(')
+		}
+	}
+}
+
 const updateList = (severities: string[]) => {
 	if (severities.includes('all')) {
 		state.alarms = props.alarms
@@ -92,6 +110,10 @@ const updateList = (severities: string[]) => {
 			>
 				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
 				<span>Acknowledge</span>
+			</FeatherButton>
+			<FeatherButton class="acction-btn" @click="() => handleRemoveAlarm()">
+				<FeatherIcon :icon="Delete" aria-hidden="true" class="icon remove" />
+				<span>Remove</span>
 			</FeatherButton>
 		</div>
 
@@ -171,6 +193,11 @@ const updateList = (severities: string[]) => {
 	}
 	&.ack {
 		color: green;
+	}
+	&.remove {
+		color: red;
+		font-size: 21px;
+		vertical-align: text-bottom;
 	}
 }
 </style>

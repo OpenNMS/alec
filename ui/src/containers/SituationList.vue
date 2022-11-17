@@ -11,12 +11,10 @@ import { reactive, ref, watch } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
-import { useAppStore } from '@/store/useAppStore'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const situationStore = useSituationsStore()
-const appStore = useAppStore()
 
 situationStore.getSituations()
 situationStore.getNodes()
@@ -49,7 +47,6 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
 const withFilters = ref(false)
-const showError = ref(false)
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
 	state.situations = situations[0]
@@ -60,10 +57,6 @@ const setNodes = () => {
 	state.nodes = situationStore.nodes
 	state.results = situationStore.nodes
 }
-
-appStore.$subscribe((mutation, storeState) => {
-	showError.value = storeState.showError
-})
 
 watch(
 	() => situationStore.situations,

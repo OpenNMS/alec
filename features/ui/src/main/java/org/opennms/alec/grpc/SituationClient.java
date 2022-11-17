@@ -58,9 +58,9 @@ public class SituationClient {
                 SituationSet request = mapper.toSituationSet(situation, systemId);
                 LOG.debug("Will try to send {} ...", request);
                 blockingStub
-                        .withCallCredentials(
-                                new AuthenticationCallCredentials(
-                                        token))
+//                        .withCallCredentials(
+//                                new AuthenticationCallCredentials(
+//                                        token))
                         .sendSituations(request);
             } catch (StatusRuntimeException e) {
                 LOG.error("RPC failed: {}", e.getStatus());

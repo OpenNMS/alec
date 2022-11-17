@@ -120,6 +120,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.opennms.tsaas.alec</groupId>
+            <artifactId>alec-gateway</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

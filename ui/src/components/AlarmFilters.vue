@@ -18,9 +18,9 @@ import CheckCircle from '@featherds/icon/action/CheckCircle'
 import ExitToApp from '@featherds/icon/action/ExitToApp'
 import DrawerSituations from '@/components/DrawerSituations.vue'
 import { useAppStore } from '@/store/useAppStore'
+import Delete from '@featherds/icon/action/Delete'
 
 const appStore = useAppStore()
-import Delete from '@featherds/icon/action/Delete'
 
 const situationStore = useSituationsStore()
 
@@ -49,6 +49,7 @@ watch(props, () => {
 })
 
 const alarmSelected = (id: number) => {
+	console.log('id --- ', id)
 	if (state.selectedAlarms.includes(id)) {
 		remove(state.selectedAlarms, (a) => a == id)
 	} else {
@@ -57,7 +58,7 @@ const alarmSelected = (id: number) => {
 }
 
 const handleActionMultiplyAlarms = async (action: string) => {
-	if (state.selectedAlarms.length) {
+	if (state.selectedAlarms.length || selectAll.value) {
 		await sendActionMultiplyAlarms(state.selectedAlarms, action)
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
@@ -163,6 +164,7 @@ const handleMoveClick = () => {
 			</div>
 		</div>
 		<DrawerSituations
+			:situationId="props.situationId"
 			:visible="showSituations"
 			@situation-selected="handleMoveToSituation"
 			@drawer-closed="() => (showSituations = false)"

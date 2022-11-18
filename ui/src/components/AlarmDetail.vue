@@ -23,6 +23,9 @@ const alarm = ref(props.alarm)
 watch(props, () => {
 	alarm.value = props.alarm
 	selected.value = props.selectAll
+	if (props.selectAll) {
+		emit('alarm-selected', props.alarm.id)
+	}
 })
 
 const updatedSelect = () => {

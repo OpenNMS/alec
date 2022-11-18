@@ -17,7 +17,9 @@ import CONST from '@/helpers/constants'
 import { groupBy, size } from 'lodash'
 import AlarmActionBtns from '@/components/AlarmActionBtns.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
+import { useAppStore } from '@/store/useAppStore'
 
+const appStore = useAppStore()
 const situationStore = useSituationsStore()
 
 const REJECTED = CONST.REJECTED
@@ -35,10 +37,17 @@ watch(props, () => {
 	situationInfo.value = props.situationInfo
 })
 
-const handleFeedbackSituation = (action: string) => {
-	sendFeedbackAcceptSituation(props.situationInfo?.id, action.toLowerCase())
-	status.value = action
-	situationStore.getSituation(props.situationInfo.id)
+const handleFeedbackSituation = async (action: string) => {
+	const result = await sendFeedbackAcceptSituation(
+		props.situationInfo?.id,
+		action.toLowerCase()
+	)
+	if (result) {
+		status.value = action
+		situationStore.getSituation(props.situationInfo.id)
+	} else {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
+	}
 }
 </script>
 

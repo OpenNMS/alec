@@ -79,14 +79,6 @@ const handleAction = async (action: string) => {
 			<FeatherIcon :icon="MarkComplete" aria-hidden="true" class="icon clear" />
 			<span>Clear</span>
 		</FeatherButton>
-		<FeatherButton
-			v-if="props.showMove"
-			class="acction-btn"
-			@click="() => handleMoveAction()"
-		>
-			<FeatherIcon :icon="ExitToApp" aria-hidden="true" class="icon clear" />
-			<span>Move</span>
-		</FeatherButton>
 	</div>
 </template>
 

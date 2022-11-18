@@ -7,6 +7,7 @@ import { ref, watch } from 'vue'
 const emit = defineEmits(['situation-selected', 'drawer-closed'])
 
 const props = defineProps<{
+	situationId: number
 	visible: boolean
 }>()
 const situationStore = useSituationsStore()
@@ -28,7 +29,9 @@ watch(props, () => {
 			<div class="situation-list">
 				<div
 					class="card"
-					v-for="situationInfo in situationStore.situations"
+					v-for="situationInfo in situationStore.situations.filter(
+						(s) => s.id != props.situationId
+					)"
 					:key="situationInfo.id"
 				>
 					<SituationCard

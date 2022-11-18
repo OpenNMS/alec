@@ -69,10 +69,7 @@ export const sendFeedbackAcceptSituation = async (
 				'Access-Control-Allow-Origin': '*'
 			}
 		})
-		if (resp.status === 200) {
-			return true
-		}
-		return false
+		return resp.status === 200
 	} catch (err) {
 		return false
 	}

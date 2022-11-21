@@ -5,7 +5,6 @@ import KeyboardArrowUp from '@featherds/icon/hardware/KeyboardArrowUp'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { sendAcknowledge, sendAction } from '@/services/AlarmService'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
-import ExitToApp from '@featherds/icon/action/ExitToApp'
 
 import CONST from '@/helpers/constants'
 import { TAlarm, TSituation } from '@/types/TSituation'

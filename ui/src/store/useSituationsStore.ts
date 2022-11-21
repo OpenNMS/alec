@@ -51,7 +51,6 @@ export const useSituationsStore = defineStore('situationsStore', {
 					s.status = s.parameters.filter(
 						(p) => p.name == 'situationStatus'
 					)[0]?.value
-					console.log(s)
 					return s
 				})
 

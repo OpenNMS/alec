@@ -49,7 +49,6 @@ watch(props, () => {
 })
 
 const alarmSelected = (id: number) => {
-	console.log('id --- ', id)
 	if (state.selectedAlarms.includes(id)) {
 		remove(state.selectedAlarms, (a) => a == id)
 	} else {
@@ -58,7 +57,7 @@ const alarmSelected = (id: number) => {
 }
 
 const handleActionMultiplyAlarms = async (action: string) => {
-	if (state.selectedAlarms.length || selectAll.value) {
+	if (state.selectedAlarms.length) {
 		await sendActionMultiplyAlarms(state.selectedAlarms, action)
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
@@ -68,8 +67,20 @@ const handleActionMultiplyAlarms = async (action: string) => {
 	}
 }
 
+const validateCountSelectedAlarms = () => {
+	if (state.selectedAlarms.length === props.alarms.length) {
+		appStore.showErrorMsg('You cannnot remove all alarms from the situation')
+		return false
+	}
+	if (!state.selectedAlarms.length) {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
+		return false
+	}
+	return true
+}
+
 const handleRemoveAlarm = async () => {
-	if (state.selectedAlarms.length) {
+	if (validateCountSelectedAlarms()) {
 		const result = await removeAlarmsFromSituation(
 			props.situationId,
 			state.selectedAlarms
@@ -79,8 +90,6 @@ const handleRemoveAlarm = async () => {
 		} else {
 			appStore.showErrorMsg('Error on removing alarms :(')
 		}
-	} else {
-		appStore.showErrorMsg('You need to choose at least one alarm!')
 	}
 }
 
@@ -93,23 +102,26 @@ const updateList = (severities: string[]) => {
 }
 
 const handleMoveToSituation = async (situationId: number) => {
-	const resultRemove = await removeAlarmsFromSituation(
-		props.situationId,
-		state.selectedAlarms
-	)
-	if (resultRemove) {
-		const resultMove = await assignAlarmsToSituation(
-			situationId,
+	if (validateCountSelectedAlarms()) {
+		const resultRemove = await removeAlarmsFromSituation(
+			props.situationId,
 			state.selectedAlarms
 		)
-		if (resultMove) {
-			situationStore.getSituation(props.situationId)
+		if (resultRemove) {
+			const resultMove = await assignAlarmsToSituation(
+				situationId,
+				state.selectedAlarms
+			)
+			if (resultMove) {
+				situationStore.getSituation(props.situationId)
+			} else {
+				appStore.showErrorMsg('Error on moving the alarms :(')
+			}
 		} else {
 			appStore.showErrorMsg('Error on moving the alarms :(')
 		}
-	} else {
-		appStore.showErrorMsg('Error on moving the alarms :(')
 	}
+
 	showSituations.value = false
 }
 

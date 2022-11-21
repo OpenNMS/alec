@@ -78,9 +78,14 @@ const routes = [
 const VRouter: Router = (window as any).VRouter
 
 if (VRouter) {
+	// Parent route should be in form 'Plugin-{extensionId}'
+	// and 'extensionId' must match 'id' value in blueprint.xml
+	const alecParentRoute = 'Plugin-alecUiExtension'
+	const parentRoute = VRouter.hasRoute(alecParentRoute) ? alecParentRoute : 'Plugin'
+
 	for (const route of routes) {
 		const { path, name, component, beforeEnter } = route
-		VRouter.addRoute('Plugin', {
+		VRouter.addRoute(parentRoute, {
 			path: path.slice(1),
 			name,
 			component,

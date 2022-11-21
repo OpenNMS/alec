@@ -127,6 +127,9 @@ appStore.$subscribe((mutation, storeState) => {
 				</FeatherTabPanel>
 			</FeatherTabContainer>
 		</div>
+		<div v-else class="noSituation">
+			Error. The situation {{ paramId }} does not exist.
+		</div>
 		<FeatherSnackbar v-model="showError" center error>
 			{{ appStore.errorMessage }}
 			<template v-slot:button>
@@ -167,5 +170,15 @@ appStore.$subscribe((mutation, storeState) => {
 	background-color: #cacaca;
 	width: fit-content;
 	margin-bottom: 20px;
+}
+
+.noSituation {
+	padding: 30px;
+	border: 1px solid #dfdfdf;
+	background-color: #ffffff;
+	width: 600px;
+	text-align: center;
+	margin: 80px auto;
+	font-size: 17px;
 }
 </style>

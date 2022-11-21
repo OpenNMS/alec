@@ -5,6 +5,12 @@ export interface ApiResponse {
 	alarm: TSituation[]
 }
 
+export type TParameter = {
+	name: string
+	type: string
+	value: string
+}
+
 export type TSituation = {
 	id: number
 	severity: string
@@ -23,7 +29,7 @@ export type TSituation = {
 	suppressedUntil: Date
 	suppressedTime: Date
 	lastEvent: TEvent
-	parameters: []
+	parameters: TParameter[]
 	x733ProbableCause: number
 	ifIndex: number
 	alarms: TAlarm[]

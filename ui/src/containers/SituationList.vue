@@ -341,4 +341,8 @@ h2 {
 		margin-right: 15px;
 	}
 }
+
+.map-search {
+	display: flex;
+}
 </style>

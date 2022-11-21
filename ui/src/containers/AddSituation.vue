@@ -12,6 +12,7 @@ import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { truncateText } from '@/helpers/utils'
+import UnassignedAlarmCard from '@/components/UnassignedAlarmCard.vue'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { remove, includes } from 'lodash'
 import { createSituations } from '@/services/AlecService'
@@ -160,33 +161,21 @@ const cleanFields = () => {
 					:alarms="situationStore.unassignedAlarms"
 					@selected-severities="updateList"
 				/>
-				<div v-if="alarms" class="alarms">
+				<div v-if="alarms.length" class="alarms">
 					<div
 						v-for="alarm in alarms"
 						:key="alarm.id"
 						class="alarm"
 						:class="{ selected: includes(alarmIds, alarm.id) }"
 					>
-						<div class="alarmInfo">
-							<div
-								class="triangle"
-								:class="[`${alarm.severity.toLowerCase()}`]"
-							></div>
-							<FeatherCheckbox
-								:modelValue="includes(alarmIds, alarm.id)"
-								label="selected"
-								@update:modelValue="() => addAlarm(alarm.id)"
-							/>
-
-							<div class="alarm-title">
-								{{ alarm.nodeLabel }} - {{ alarm.id }}
-							</div>
-						</div>
-						<div class="description">
-							{{ truncateText(alarm.description, 300) }}
-						</div>
+						<UnassignedAlarmCard
+							:selected="includes(alarmIds, alarm.id)"
+							:alarm="alarm"
+							@selected-alarm="addAlarm"
+						/>
 					</div>
 				</div>
+				<div v-else>There is no unassigned alarms</div>
 			</div>
 		</div>
 		<FeatherSnackbar v-model="errorSave" center error>
@@ -211,6 +200,7 @@ const cleanFields = () => {
 	border: 1px solid $border-grey;
 	padding: 20px;
 	margin-top: 20px;
+	min-height: 650px;
 }
 
 .alarm-column {
@@ -261,23 +251,11 @@ const cleanFields = () => {
 	font-size: 19px;
 	margin-right: 5px;
 }
-.alarmInfo {
-	display: flex;
-	align-items: center;
-}
-
-.alarm-title {
-	font-size: 16px;
-	font-weight: 600;
-}
 .severity-status {
 	width: 15px;
 	height: 15px;
 	border-radius: 50px;
 	margin-right: 10px;
-}
-.description {
-	font-size: 13px;
 }
 
 .add-btn {
@@ -313,61 +291,5 @@ const cleanFields = () => {
 	flex-grow: 1;
 	display: flex;
 	align-items: end;
-}
-
-.triangle {
-	width: 12%;
-	padding-bottom: 6%;
-	overflow: hidden;
-	position: absolute;
-	top: 0%;
-	left: 88%;
-
-	&.critical {
-		&:before {
-			background-color: $severity-alarm-critical-border;
-		}
-	}
-
-	&.major {
-		&:before {
-			background-color: $severity-alarm-major-border;
-		}
-	}
-
-	&.minor {
-		&:before {
-			background-color: $severity-alarm-minor-border;
-		}
-	}
-
-	&.warning {
-		&:before {
-			background-color: $severity-alarm-warning-border;
-		}
-	}
-
-	&.indeterminate {
-		&:before {
-			background-color: $severity-alarm-indeterminate-border;
-		}
-	}
-
-	&.normal {
-		&:before {
-			background-color: $severity-alarm-normal-border;
-		}
-	}
-
-	&:before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		transform-origin: 100% 100%;
-		transform: rotate(45deg);
-	}
 }
 </style>

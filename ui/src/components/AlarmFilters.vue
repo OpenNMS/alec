@@ -8,14 +8,20 @@ import MarkComplete from '@featherds/icon/action/MarkComplete'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { sendActionMultiplyAlarms } from '@/services/AlarmService'
-import { removeAlarmsFromSituation } from '@/services/AlecService'
+import {
+	removeAlarmsFromSituation,
+	assignAlarmsToSituation
+} from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
-import Delete from '@featherds/icon/action/Delete'
+import ExitToApp from '@featherds/icon/action/ExitToApp'
+import DrawerSituations from '@/components/DrawerSituations.vue'
 import { useAppStore } from '@/store/useAppStore'
+import Delete from '@featherds/icon/action/Delete'
 
 const appStore = useAppStore()
+
 const situationStore = useSituationsStore()
 
 type TState = {
@@ -29,7 +35,7 @@ const props = defineProps<{
 const selectAll = ref(false)
 
 const selectedFilters = ref(['all'])
-
+const showSituations = ref(false)
 const state: TState = reactive({
 	selectedAlarms: [],
 	alarms: props.alarms
@@ -56,11 +62,25 @@ const handleActionMultiplyAlarms = async (action: string) => {
 		situationStore.getSituation(props.situationId)
 		state.selectedAlarms = []
 		selectAll.value = false
+	} else {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
 	}
 }
 
+const validateCountSelectedAlarms = () => {
+	if (state.selectedAlarms.length === props.alarms.length) {
+		appStore.showErrorMsg('You cannnot remove all alarms from the situation')
+		return false
+	}
+	if (!state.selectedAlarms.length) {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
+		return false
+	}
+	return true
+}
+
 const handleRemoveAlarm = async () => {
-	if (state.selectedAlarms.length) {
+	if (validateCountSelectedAlarms()) {
 		const result = await removeAlarmsFromSituation(
 			props.situationId,
 			state.selectedAlarms
@@ -80,6 +100,38 @@ const updateList = (severities: string[]) => {
 		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
 	}
 }
+
+const handleMoveToSituation = async (situationId: number) => {
+	if (validateCountSelectedAlarms()) {
+		const resultRemove = await removeAlarmsFromSituation(
+			props.situationId,
+			state.selectedAlarms
+		)
+		if (resultRemove) {
+			const resultMove = await assignAlarmsToSituation(
+				situationId,
+				state.selectedAlarms
+			)
+			if (resultMove) {
+				situationStore.getSituation(props.situationId)
+			} else {
+				appStore.showErrorMsg('Error on moving the alarms :(')
+			}
+		} else {
+			appStore.showErrorMsg('Error on moving the alarms :(')
+		}
+	}
+
+	showSituations.value = false
+}
+
+const handleMoveClick = () => {
+	if (state.selectedAlarms.length) {
+		showSituations.value = true
+	} else {
+		appStore.showErrorMsg('You need to choose at least one alarm!')
+	}
+}
 </script>
 
 <template>
@@ -93,26 +145,20 @@ const updateList = (severities: string[]) => {
 		</div>
 		<div class="row actions">
 			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton
-				class="acction-btn"
-				@click="() => handleActionMultiplyAlarms('clear')"
-			>
-				<FeatherIcon
-					:icon="MarkComplete"
-					aria-hidden="true"
-					class="icon clear"
-				/>
+			<FeatherButton @click="() => handleActionMultiplyAlarms('clear')">
+				<FeatherIcon :icon="MarkComplete" class="icon clear" />
 				<span>Clear</span>
 			</FeatherButton>
-			<FeatherButton
-				class="acction-btn"
-				@click="() => handleActionMultiplyAlarms('ack')"
-			>
-				<FeatherIcon :icon="CheckCircle" aria-hidden="true" class="icon ack" />
+			<FeatherButton @click="() => handleActionMultiplyAlarms('ack')">
+				<FeatherIcon :icon="CheckCircle" class="icon ack" />
 				<span>Acknowledge</span>
 			</FeatherButton>
-			<FeatherButton class="acction-btn" @click="() => handleRemoveAlarm()">
-				<FeatherIcon :icon="Delete" aria-hidden="true" class="icon remove" />
+			<FeatherButton @click="handleMoveClick">
+				<FeatherIcon :icon="ExitToApp" class="icon move" />
+				<span>Move</span>
+			</FeatherButton>
+			<FeatherButton @click="handleRemoveAlarm">
+				<FeatherIcon :icon="Delete" class="icon remove" />
 				<span>Remove</span>
 			</FeatherButton>
 		</div>
@@ -129,6 +175,12 @@ const updateList = (severities: string[]) => {
 				</div>
 			</div>
 		</div>
+		<DrawerSituations
+			:situationId="props.situationId"
+			:visible="showSituations"
+			@situation-selected="handleMoveToSituation"
+			@drawer-closed="() => (showSituations = false)"
+		/>
 	</div>
 </template>
 
@@ -193,6 +245,10 @@ const updateList = (severities: string[]) => {
 	}
 	&.ack {
 		color: green;
+	}
+	&.move {
+		color: #7004f4;
+		font-size: 20px;
 	}
 	&.remove {
 		color: red;

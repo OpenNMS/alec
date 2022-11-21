@@ -69,10 +69,7 @@ export const sendFeedbackAcceptSituation = async (
 				'Access-Control-Allow-Origin': '*'
 			}
 		})
-		if (resp.status === 200) {
-			return true
-		}
-		return false
+		return resp.status === 200
 	} catch (err) {
 		return false
 	}
@@ -112,6 +109,21 @@ export const removeAlarmsFromSituation = async (
 				situationId,
 				alarmIdList
 			}
+		})
+		return resp.status === 200
+	} catch (err) {
+		return false
+	}
+}
+
+export const assignAlarmsToSituation = async (
+	situationId: number,
+	alarmIdList: number[]
+) => {
+	try {
+		const resp = await rest.put(`${base}/situation/alarm/`, {
+			situationId,
+			alarmIdList
 		})
 		return resp.status === 200
 	} catch (err) {

@@ -7,15 +7,8 @@ import {
 	getEventsByAlarmId,
 	getAlarmsUnassigned
 } from '@/services/AlarmService'
-import { getSituationsStatus } from '@/services/AlecService'
 
-import {
-	TAlarm,
-	TEvent,
-	TNode,
-	TSituation,
-	TSituationSaved
-} from '@/types/TSituation'
+import { TAlarm, TEvent, TNode, TSituation } from '@/types/TSituation'
 import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
@@ -53,16 +46,14 @@ export const useSituationsStore = defineStore('situationsStore', {
 		async getSituations() {
 			this.situations = []
 			const result = await getSituations()
-
-			const resultStatus = await getSituationsStatus()
 			if (result) {
 				const situations = result.alarm.map((s: TSituation) => {
-					const sitStatus = resultStatus.filter(
-						(rs: TSituationSaved) => parseInt(rs.id) === s.id
-					)
-					s.status = sitStatus && sitStatus[0] ? sitStatus[0].status : 'CREATED'
+					s.status = s.parameters.filter(
+						(p) => p.name == 'situationStatus'
+					)[0]?.value
 					return s
 				})
+
 				this.filteredSituations = situations.map((s: TSituation) => s.id)
 
 				const groupByStatus = groupBy(situations, 'status')
@@ -78,9 +69,13 @@ export const useSituationsStore = defineStore('situationsStore', {
 			if (id) {
 				const resultSituation = (await getAlarmById(id)) as TSituation
 				if (resultSituation) {
-					const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
+					const alarmIds = resultSituation.relatedAlarms?.map((a) => a.id)
 					const resultAlarms = await getAlarmsByIds(alarmIds)
 					const alarms = resultAlarms as TAlarm[]
+
+					resultSituation.status = resultSituation.parameters.filter(
+						(p) => p.name == 'situationStatus'
+					)[0]?.value
 					resultSituation.alarms = sortBy(alarms, ['id'])
 					this.situationDetail = resultSituation
 				}

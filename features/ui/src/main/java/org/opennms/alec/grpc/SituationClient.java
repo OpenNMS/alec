@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.grpc.Channel;
-import io.grpc.StatusRuntimeException;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
@@ -54,17 +53,10 @@ public class SituationClient {
 
     public void sendSituation(Situation situation, String token, String systemId) {
         if (doStore) {
-            try {
-                SituationSet request = mapper.toSituationSet(situation, systemId);
-                LOG.debug("Will try to send {} ...", request);
-                blockingStub
-//                        .withCallCredentials(
-//                                new AuthenticationCallCredentials(
-//                                        token))
-                        .sendSituations(request);
-            } catch (StatusRuntimeException e) {
-                LOG.error("RPC failed: {}", e.getStatus());
-            }
+            SituationSet request = mapper.toSituationSet(situation, systemId);
+            LOG.debug("Will try to send {} ...", request);
+            blockingStub
+                    .sendSituations(request);
         }
     }
 }

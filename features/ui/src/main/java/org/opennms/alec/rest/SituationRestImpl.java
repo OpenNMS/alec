@@ -55,6 +55,7 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.grpc.GrpcConnectionConfig;
 import org.opennms.alec.grpc.SituationClient;
 import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
@@ -86,7 +87,8 @@ public class SituationRestImpl implements SituationRest {
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
                              AlarmDatasource alarmDatasource,
-                             RuntimeInfo runtimeInfo) {
+                             RuntimeInfo runtimeInfo,
+                             GrpcConnectionConfig grpcConnectionConfig) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
@@ -94,8 +96,7 @@ public class SituationRestImpl implements SituationRest {
         objectMapper = new ObjectMapper();
 
         //channel to store situations
-        channel = ManagedChannelBuilder.forTarget(TARGET)
-                .usePlaintext()
+        channel = ManagedChannelBuilder.forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
                 .build();
 
         client = new SituationClient(channel, new SituationToSituationProto(), canWeStore(kvStore));
@@ -312,24 +313,6 @@ public class SituationRestImpl implements SituationRest {
         return Response.ok().build();
     }
 
-    @Override
-    public Response callProto() {
-        final String situationId = UUID.randomUUID().toString();
-
-        Situation situation = ImmutableSituation.newBuilder()
-                .setId(situationId)
-                .setCreationTime(System.currentTimeMillis())
-                .setLastTime(System.currentTimeMillis())
-                .setAlarms(Collections.emptySet())
-                .setDiagnosticText("")
-                .setDescription("")
-                .setEngineParameter("user created")
-                .setSeverity(Severity.MAJOR)
-                .build();
-        client.sendSituation(situation, "", "test");
-        return Response.ok().build();
-    }
-
     private boolean alarmIsNotInAnotherSituation(String reductionKey) throws InterruptedException {
         for (Situation situation : situationDatasource.getSituations()) {
             for (Alarm alarm : situation.getAlarms()) {
@@ -342,7 +325,7 @@ public class SituationRestImpl implements SituationRest {
         return true;
     }
 
-    private void forwardAndStoreSituation(Situation situation, String token) throws InterruptedException, JsonProcessingException {
+    private void forwardAndStoreSituation(Situation situation, String token) throws JsonProcessingException, InterruptedException {
         //update situation to opennms
         situationDatasource.forwardSituation(situation);
         //store updated situation to the cloud

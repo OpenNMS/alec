@@ -26,6 +26,7 @@ import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.StaticAlarmDatasource;
 import org.opennms.alec.datasource.common.StaticSituationDatasource;
+import org.opennms.alec.grpc.GrpcConnectionConfig;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 
@@ -39,6 +40,9 @@ public class SituationRestImplTest {
     @Mock
     RuntimeInfo runtimeInfo;
 
+    @Mock
+    GrpcConnectionConfig grpcConnectionConfig;
+
     List<Situation> situations = new ArrayList<>();
     List<Alarm> alarms = new ArrayList<>();
 
@@ -48,11 +52,13 @@ public class SituationRestImplTest {
         when(kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG)).thenReturn(Optional.of("{\"agreed\":false}"));
         getAlarmsAndSituations();
         when(runtimeInfo.getSystemId()).thenReturn("42");
+        when(grpcConnectionConfig.getHost()).thenReturn("localhost");
+        when(grpcConnectionConfig.getPort()).thenReturn(80);
     }
 
     @Test
     public void rejected() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo);
+        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
         try (Response actual = underTest.rejected("","11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
         }
@@ -60,7 +66,7 @@ public class SituationRestImplTest {
 
     @Test
     public void removeAlarm() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo);
+        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
         try (Response actual = underTest.removeAlarm("","11", "2", "remove alarm 1")) {
             assertThat(actual.getStatus(), equalTo(200));
         }

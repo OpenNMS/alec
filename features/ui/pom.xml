@@ -11,13 +11,6 @@
     <packaging>bundle</packaging>
 
     <build>
-       <!-- <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.0</version>
-            </extension>
-        </extensions>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -31,26 +24,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-           <!-- <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    &lt;!&ndash;use osx-x86_64 only for M1 otherwise  ${os.detected.classifier}&ndash;&gt;
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf-java.version}:exe:osx-x86_64</protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    &lt;!&ndash;use osx-x86_64 only for M1 otherwise  ${os.detected.classifier}&ndash;&gt;
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:osx-x86_64</pluginArtifact>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
         </plugins>
     </build>
 
@@ -93,36 +66,22 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.opennms.alec.wrap</groupId>
+            <artifactId>grpc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>${protobuf-java.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-            <version>${grpc.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-stub</artifactId>
-            <version>${grpc.version}</version>
-        </dependency>
-        <dependency> <!-- necessary for Java 9+ -->
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>annotations-api</artifactId>
-            <version>6.0.53</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opennms.tsaas.alec</groupId>
             <artifactId>alec-gateway</artifactId>
             <version>0.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.tsaas.platform</groupId>
+            <artifactId>tsaas-authenticate-grpc</artifactId>
+            <version>0.8.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -48,11 +48,11 @@ import org.opennms.alec.data.CreateSituationPayload;
 public interface SituationRest {
     @POST
     @Path("rejected/{id}")
-    Response rejected(@HeaderParam ("token") String token, @PathParam("id") String id, String feedback) throws InterruptedException;
+    Response rejected(@HeaderParam("token") String token, @PathParam("id") String id, String feedback) throws InterruptedException;
 
     @POST
     @Path("accepted/{id}")
-    Response accepted(@HeaderParam ("token") String token, @PathParam("id") String id) throws InterruptedException;
+    Response accepted(@HeaderParam("token") String token, @PathParam("id") String id) throws InterruptedException;
 
     @GET
     @Path("statusList")
@@ -63,16 +63,12 @@ public interface SituationRest {
 
     @PUT
     @Path("{situationId}/alarm/{alarmId}")
-    Response addAlarm(@HeaderParam ("token") String token, @PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
+    Response addAlarm(@HeaderParam("token") String token, @PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
 
     @DELETE
     @Path("{situationId}/alarm/{alarmId}")
-    Response removeAlarm(@HeaderParam ("token") String token, @PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
+    Response removeAlarm(@HeaderParam("token") String token, @PathParam("situationId") String situationId, @PathParam("alarmId") String alarmId, String feedback) throws InterruptedException;
 
     @POST
-    Response createSituation(@HeaderParam ("token") String token, CreateSituationPayload createSituationPayload);
-
-    @GET
-    @Path("proto")
-    Response callProto();
+    Response createSituation(@HeaderParam("token") String token, CreateSituationPayload createSituationPayload);
 }

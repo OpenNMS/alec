@@ -93,7 +93,7 @@
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
         <grpc.version>1.46.0</grpc.version>
-        <protobuf-java.version>3.19.0</protobuf-java.version>
+        <protobuf-java.version>3.19.3</protobuf-java.version>
     </properties>
 
     <dependencyManagement>
@@ -397,6 +397,11 @@
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jakarta.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.opennms.alec.wrap</groupId>
+                <artifactId>grpc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -512,27 +517,6 @@
                     <releaseProfiles>release</releaseProfiles>
                 </configuration>
             </plugin>
-	    <!--
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.7.201606060606</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-	    -->
 
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

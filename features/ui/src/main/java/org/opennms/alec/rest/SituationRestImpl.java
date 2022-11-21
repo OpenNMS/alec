@@ -103,7 +103,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response rejected(String token, String situationId, String feedback) throws InterruptedException {
+    public Response rejected(String situationId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
@@ -122,7 +122,6 @@ public class SituationRestImpl implements SituationRest {
                                 .setAlarms(situation.getAlarms())
                                 .addFeedback(feedback)
                                 .build(),
-                        token,
                         runtimeInfo.getSystemId());
                 kvStoreSituationsByStatus();
 
@@ -147,7 +146,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response accepted(String token, String situationId) throws InterruptedException {
+    public Response accepted(String situationId) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
@@ -161,7 +160,7 @@ public class SituationRestImpl implements SituationRest {
                 ImmutableSituation immutableSituation = ImmutableSituation.newBuilderFrom(situation)
                         .setStatus(Status.ACCEPTED)
                         .build();
-                forwardAndStoreSituation(immutableSituation, token);
+                forwardAndStoreSituation(immutableSituation);
                 return Response.ok().build();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -192,7 +191,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response addAlarm(String token, String situationId, String alarmId, String feedback) throws InterruptedException {
+    public Response addAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
@@ -210,7 +209,7 @@ public class SituationRestImpl implements SituationRest {
                             .setAlarms(alarms)
                             .build();
                     try {
-                        forwardAndStoreSituation(immutableSituation, token);
+                        forwardAndStoreSituation(immutableSituation);
                         return Response.ok().build();
                     } catch (JsonProcessingException e) {
                         return ALECRestUtils.somethingWentWrong(e);
@@ -230,7 +229,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response removeAlarm(String token, String situationId, String alarmId, String feedback) throws InterruptedException {
+    public Response removeAlarm(String situationId, String alarmId, String feedback) throws InterruptedException {
         Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
 
         if (situationOptional.isPresent()) {
@@ -251,7 +250,7 @@ public class SituationRestImpl implements SituationRest {
                         .setAlarms(alarms)
                         .build();
                 try {
-                    forwardAndStoreSituation(immutableSituation, token);
+                    forwardAndStoreSituation(immutableSituation);
                     return Response.ok().build();
                 } catch (JsonProcessingException e) {
                     return ALECRestUtils.somethingWentWrong(e);
@@ -267,7 +266,7 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response createSituation(String token, CreateSituationPayload createSituationPayload) {
+    public Response createSituation(CreateSituationPayload createSituationPayload) {
         List<String> alarmIdList = createSituationPayload.getAlarmIdList();
         if (alarmIdList.size() <= 1) {
             return Response.status(Response.Status.BAD_REQUEST).entity(MessageFormat.format(NEED_2_ALARMS, alarmIdList.size())).build();
@@ -303,7 +302,7 @@ public class SituationRestImpl implements SituationRest {
                 .setSeverity(maxSeverity)
                 .build();
         try {
-            forwardAndStoreSituation(situation, token);
+            forwardAndStoreSituation(situation);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ALECRestUtils.somethingWentWrong(e);
@@ -325,11 +324,11 @@ public class SituationRestImpl implements SituationRest {
         return true;
     }
 
-    private void forwardAndStoreSituation(Situation situation, String token) throws JsonProcessingException, InterruptedException {
+    private void forwardAndStoreSituation(Situation situation) throws JsonProcessingException, InterruptedException {
         //update situation to opennms
         situationDatasource.forwardSituation(situation);
         //store updated situation to the cloud
-        client.sendSituation(situation, token, runtimeInfo.getSystemId());
+        client.sendSituation(situation, runtimeInfo.getSystemId());
         //store situation by status to the DB
         kvStoreSituationsByStatus();
     }

@@ -51,7 +51,7 @@ public class SituationClient {
         this.doStore = doStore;
     }
 
-    public void sendSituation(Situation situation, String token, String systemId) {
+    public void sendSituation(Situation situation, String systemId) {
         if (doStore) {
             SituationSet request = mapper.toSituationSet(situation, systemId);
             LOG.debug("Will try to send {} ...", request);

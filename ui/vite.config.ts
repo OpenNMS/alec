@@ -32,8 +32,8 @@ export default defineConfig({
 		cssCodeSplit: false, // keep css in one chunk
 		lib: {
 			entry: path.resolve(__dirname, 'src/main.ts'),
-			name: 'uiextension',
-			fileName: (format) => `uiextension.${format}.js`
+			name: 'alecUiExtension',
+			fileName: (format) => `alecUiExtension.${format}.js`
 		},
 		rollupOptions: {
 			// make sure to externalize deps that shouldn't be bundled

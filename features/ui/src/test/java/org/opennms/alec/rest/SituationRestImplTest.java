@@ -2,25 +2,39 @@ package org.opennms.alec.rest;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opennms.alec.data.AlarmSetImpl;
+import org.opennms.alec.data.CreateSituationPayloadImpl;
+import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
+import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableSituation;
@@ -43,8 +57,11 @@ public class SituationRestImplTest {
     @Mock
     GrpcConnectionConfig grpcConnectionConfig;
 
+    private SituationDatasource situationDatasource;
+
     List<Situation> situations = new ArrayList<>();
     List<Alarm> alarms = new ArrayList<>();
+    private SituationRestImpl underTest;
 
     @Before
     public void setUp() {
@@ -54,6 +71,13 @@ public class SituationRestImplTest {
         when(runtimeInfo.getSystemId()).thenReturn("42");
         when(grpcConnectionConfig.getHost()).thenReturn("localhost");
         when(grpcConnectionConfig.getPort()).thenReturn(80);
+        situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms));
+    }
+
+    @After
+    public void tearDown() {
+        verifyNoMoreInteractions(situationDatasource);
     }
 
     @Test
@@ -68,7 +92,153 @@ public class SituationRestImplTest {
     public void removeAlarm() throws InterruptedException {
         SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
         try (Response actual = underTest.removeAlarm("","11", "2", "remove alarm 1")) {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.rejected("11")) {
             assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(0));
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void removeAlarms() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("3", "4")).build())) {
+            assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(2));
+            assertThat(situationCaptor.getValue().getAlarms().stream()
+                    .map(Alarm::getId)
+                    .collect(Collectors
+                            .toList()).containsAll(Arrays.asList("2", "5")), equalTo(true));
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void removeOneAlarm() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("5")).build())) {
+            assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(3));
+            assertThat(situationCaptor.getValue().getAlarms().stream()
+                    .map(Alarm::getId)
+                    .collect(Collectors
+                            .toList()).containsAll(Arrays.asList("2", "3", "4")), equalTo(true));
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void removeBadAlarms() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("10", "11")).build())) {
+            assertThat(actual.getStatus(), equalTo(204));
+            verify(situationDatasource, times(0)).forwardSituation(situationCaptor.capture());
+            verify(situationDatasource, times(1)).getSituation(11);
+        }
+    }
+
+    @Test
+    public void removeAlarmsNotIntThisSituation() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        //Trying to remove alarms from another situation
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("0", "1")).build())) {
+            assertThat(actual.getStatus(), equalTo(204));
+            verify(situationDatasource, times(0)).forwardSituation(situationCaptor.capture());
+            verify(situationDatasource, times(1)).getSituation(11);
+        }
+    }
+
+    @Test
+    public void addAlarmsAlreadyInSituation() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        // trying to add alarms from another situation
+        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("0", "1")).build())) {
+            assertThat(actual.getStatus(), equalTo(204));
+            verify(situationDatasource, times(0)).forwardSituation(any());
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void addAlarms() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("7", "8")).build())) {
+            assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(6));
+            assertThat(situationCaptor.getValue().getAlarms().stream()
+                    .map(Alarm::getId)
+                    .collect(Collectors
+                            .toList()).containsAll(Arrays.asList("2", "3", "4", "5", "7", "8")), equalTo(true));
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(4)).getSituations();
+        }
+    }
+
+    @Test
+    public void createSituation() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.createSituation(CreateSituationPayloadImpl.newBuilder().alarmIdList(Arrays.asList("7", "8")).description("description").diagnosticText("diagnostic").build())) {
+            assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(2));
+            assertThat(situationCaptor.getValue().getAlarms().stream()
+                    .map(Alarm::getId)
+                    .collect(Collectors
+                            .toList()).containsAll(Arrays.asList("7", "8")), equalTo(true));
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void createSituationWithBadAlarms() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.createSituation(CreateSituationPayloadImpl.newBuilder().alarmIdList(Arrays.asList("1", "2")).description("description").diagnosticText("diagnostic").build())) {
+            assertThat(actual.getStatus(), equalTo(204));
+            verify(situationDatasource, times(0)).forwardSituation(any());
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void accepted() throws InterruptedException {
+        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        try (Response actual = underTest.accepted("11")) {
+            assertThat(actual.getStatus(), equalTo(200));
+            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
+            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(4));
+            assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.ACCEPTED));
+            verify(situationDatasource, times(1)).getSituation(11);
+            verify(situationDatasource, times(2)).getSituations();
+        }
+    }
+
+    @Test
+    public void getSituationList() throws InterruptedException {
+        try (Response actual = underTest.getSituationList()) {
+            assertThat(actual.getStatus(), equalTo(200));
+            List<Situation> situationList = (List<Situation>) actual.getEntity();
+            assertThat(situationList.size(), equalTo(2));
+            verify(situationDatasource, times(1)).getSituations();
+        }
+    }
+
+    @Test
+    public void getSituationStatusList() throws InterruptedException {
+        try (Response actual = underTest.getSituationStatusList()) {
+            assertThat(actual.getStatus(), equalTo(200));
+            List<SituationStatus> situationList = (List<SituationStatus>) actual.getEntity();
+            assertThat(situationList.size(), equalTo(2));
+            verify(situationDatasource, times(1)).getSituations();
         }
     }
 
@@ -82,8 +252,7 @@ public class SituationRestImplTest {
                     .setSummary("summary")
                     .setInventoryObjectId("inventoryObjectId")
                     .setInventoryObjectType("inventoryObjectType")
-                    .build());
-
+                    .setLongId(i).setReductionKey(String.valueOf(i)).build());
         }
 
         situations.add(ImmutableSituation.newBuilderNow()

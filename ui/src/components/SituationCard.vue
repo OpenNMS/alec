@@ -5,14 +5,19 @@ import { groupBy, keys } from 'lodash'
 import Cancel from '@featherds/icon/action/Cancel'
 import { TSituation } from '@/types/TSituation'
 import CONST from '@/helpers/constants'
+import { formatDate } from '@/helpers/utils'
+
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
 
 const props = defineProps<{
 	situationInfo: TSituation
-	selected: boolean
 }>()
 const emit = defineEmits(['situation-selected'])
+const description =
+	props.situationInfo.description
+		.replace(/(<([^>]+)>)/gi, '')
+		.substring(0, 230) + '...'
 
 const handleSituationSelected = () => {
 	emit('situation-selected', props.situationInfo?.id)
@@ -24,7 +29,6 @@ const handleSituationSelected = () => {
 		v-on:click="handleSituationSelected"
 		class="card"
 		:class="{
-			selected: props.selected,
 			rejected: props.situationInfo.status == REJECTED
 		}"
 	>
@@ -50,7 +54,13 @@ const handleSituationSelected = () => {
 					/>
 				</div>
 			</div>
-			<div class="count-info" v-if="props.situationInfo.alarms">
+			<div>
+				<span class="info-title"> First Event: </span
+				>{{ formatDate(props.situationInfo.firstEventTime) }}
+			</div>
+			<div class="description">{{ description }}</div>
+			<hr />
+			<div class="count-info" v-if="props.situationInfo.relatedAlarms">
 				Alarms:
 				<span class="info-title">{{
 					props.situationInfo.relatedAlarms.length
@@ -58,7 +68,9 @@ const handleSituationSelected = () => {
 			</div>
 			<div
 				class="info-title"
-				v-for="node in keys(groupBy(props.situationInfo.alarms, 'nodeLabel'))"
+				v-for="node in keys(
+					groupBy(props.situationInfo.relatedAlarms, 'nodeLabel')
+				)"
 				:key="node"
 			>
 				- {{ node }}
@@ -69,17 +81,14 @@ const handleSituationSelected = () => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 .card {
-	width: 270px;
-	height: auto;
 	display: flex;
+	width: 100%;
 	flex-direction: row;
-	background-color: #ffffff;
+	background-color: #fbfbfb;
 	cursor: pointer;
 	border: 1px solid $border-grey;
+	height: 100%;
 	&:hover {
-		border: 1px solid $dark-blue;
-	}
-	&.selected {
 		border: 1px solid $dark-blue;
 	}
 
@@ -104,10 +113,11 @@ const handleSituationSelected = () => {
 	width: 5px;
 }
 .content {
-	padding: 10px;
+	padding: 15px;
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	justify-content: space-between;
 }
 .icon {
 	font-size: 24px;
@@ -129,7 +139,7 @@ const handleSituationSelected = () => {
 }
 
 .info-title {
-	font-size: 14px;
+	font-size: 15px;
 	font-weight: 600;
 }
 </style>

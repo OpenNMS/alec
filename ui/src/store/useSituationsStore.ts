@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import {
-	getAllAlarms,
 	getSituations,
 	getAllNodes,
 	getAlarmsByIds,
 	getAlarmById,
-	getEventsByAlarmId
+	getEventsByAlarmId,
+	getAlarmsUnassigned
 } from '@/services/AlarmService'
 import { getSituationsStatus } from '@/services/AlecService'
 
@@ -16,19 +16,31 @@ import {
 	TSituation,
 	TSituationSaved
 } from '@/types/TSituation'
-import { groupBy, mapKeys, cloneDeep, reverse, sortBy } from 'lodash'
+import { groupBy, reverse, sortBy } from 'lodash'
 
+type TFilters = {
+	node?: Record<string, string>
+	severities: string[]
+}
 type TState = {
 	situations: TSituation[]
 	selectedSituation: number
+	situationDetail: TSituation | null
 	nodes: TNode[]
+	filteredSituations: number[]
+	filters: TFilters | null
+	unassignedAlarms: TAlarm[]
 }
 
 export const useSituationsStore = defineStore('situationsStore', {
 	state: (): TState => ({
 		situations: [],
 		selectedSituation: -1,
-		nodes: []
+		situationDetail: null,
+		filteredSituations: [],
+		nodes: [],
+		filters: null,
+		unassignedAlarms: []
 	}),
 	actions: {
 		async getNodes() {
@@ -41,23 +53,18 @@ export const useSituationsStore = defineStore('situationsStore', {
 		async getSituations() {
 			this.situations = []
 			const result = await getSituations()
-			const resultAlarms = await getAllAlarms()
-			let allAlarms: Record<number, TAlarm> = []
-			if (resultAlarms) {
-				allAlarms = mapKeys(resultAlarms, (a) => a.id)
-			}
 
 			const resultStatus = await getSituationsStatus()
 			if (result) {
 				const situations = result.alarm.map((s: TSituation) => {
-					const alarms = s.relatedAlarms.map((a: TAlarm) => allAlarms[a.id])
 					const sitStatus = resultStatus.filter(
 						(rs: TSituationSaved) => parseInt(rs.id) === s.id
 					)
-					s.alarms = sortBy(alarms, ['id'])
 					s.status = sitStatus && sitStatus[0] ? sitStatus[0].status : 'CREATED'
 					return s
 				})
+				this.filteredSituations = situations.map((s: TSituation) => s.id)
+
 				const groupByStatus = groupBy(situations, 'status')
 				const situationOrdered = [
 					...(groupByStatus['CREATED'] || []),
@@ -68,17 +75,15 @@ export const useSituationsStore = defineStore('situationsStore', {
 			}
 		},
 		async getSituation(id: number) {
-			const resultSituation = (await getAlarmById(id)) as TSituation
-			if (resultSituation) {
-				const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
-				const resultAlarms = await getAlarmsByIds(alarmIds)
-				const alarms = resultAlarms as TAlarm[]
-				resultSituation.alarms = sortBy(alarms, ['id'])
-				const situations = cloneDeep(this.situations)
-				const index = this.situations.findIndex((s) => s.id == id)
-				situations[index] = resultSituation
-
-				this.situations = situations
+			if (id) {
+				const resultSituation = (await getAlarmById(id)) as TSituation
+				if (resultSituation) {
+					const alarmIds = resultSituation.relatedAlarms.map((a) => a.id)
+					const resultAlarms = await getAlarmsByIds(alarmIds)
+					const alarms = resultAlarms as TAlarm[]
+					resultSituation.alarms = sortBy(alarms, ['id'])
+					this.situationDetail = resultSituation
+				}
 			}
 		},
 		async getEvents(situationId: number, alarmIds: number[]) {
@@ -91,8 +96,15 @@ export const useSituationsStore = defineStore('situationsStore', {
 					}
 				})
 			)
-			const index = this.situations.findIndex((s) => s.id == situationId)
-			this.situations[index].events = eventsById
+			if (this.situationDetail) {
+				this.situationDetail.events = eventsById
+			}
+		},
+		async getUnassignedAlarms() {
+			const resultAlarms = await getAlarmsUnassigned()
+			if (resultAlarms) {
+				this.unassignedAlarms = resultAlarms as TAlarm[]
+			}
 		}
 	}
 })

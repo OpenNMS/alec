@@ -7,6 +7,8 @@ import { FeatherCheckbox } from '@featherds/checkbox'
 import { getAlarmById } from '@/services/AlarmService'
 import MemoBox from '@/components/MemoBox.vue'
 import { ref, watch } from 'vue'
+import CheckCircle from '@featherds/icon/action/CheckCircle'
+import { FeatherIcon } from '@featherds/icon'
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -21,7 +23,6 @@ const alarm = ref(props.alarm)
 watch(props, () => {
 	alarm.value = props.alarm
 	selected.value = props.selectAll
-	emit('alarm-selected', props.alarm.id)
 })
 
 const updatedSelect = () => {
@@ -47,6 +48,14 @@ const actionClicked = async (id: number) => {
 				/>
 				<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 				<SeverityStatus :severity="alarm?.severity" />
+
+				<div v-if="alarm.ackTime" class="ack">
+					<FeatherIcon
+						:icon="CheckCircle"
+						aria-hidden="true"
+						class="icon-ack"
+					/>
+				</div>
 			</div>
 			<div class="description" v-html="alarm.description"></div>
 			<div>
@@ -104,9 +113,12 @@ const actionClicked = async (id: number) => {
 	display: flex;
 	flex-direction: row;
 	padding: 5px 0;
-	align-items: baseline;
+	align-items: center;
 	> label {
 		display: none !important;
+	}
+	.layout-container {
+		margin: 0;
 	}
 }
 .title {
@@ -118,5 +130,11 @@ const actionClicked = async (id: number) => {
 
 .description {
 	word-break: break-word;
+}
+
+.ack {
+	font-size: 27px;
+	color: green;
+	margin-left: 10px;
 }
 </style>

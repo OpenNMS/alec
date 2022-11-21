@@ -41,11 +41,14 @@ export const sendAction = async (alarmId: number | string, action: string) => {
 	}
 }
 
-export const sendClearAlarms = async (ids: number[]) => {
+export const sendActionMultiplyAlarms = async (
+	ids: number[],
+	action: string
+) => {
 	try {
 		const alarmIds = ids.join(',alarm.id==')
 		const result = await v2.put(
-			`alarms?_s=alarm.id==${alarmIds}&clear=true`,
+			`alarms?_s=alarm.id==${alarmIds}&${action}=true`,
 			null,
 			urlencodedHeaders
 		)
@@ -158,6 +161,20 @@ export const deleteMemo = async (alarmId: number, type: string) => {
 	try {
 		const result = await v2.delete(`/alarms/${alarmId}/${type}`)
 		return result.status == 204
+	} catch (err) {
+		return false
+	}
+}
+
+export const getAlarmsUnassigned = async (): Promise<TAlarm[] | false> => {
+	try {
+		const resp = await v2.get(
+			'alarms?_s=isInSituation==false;isSituation==false'
+		)
+		if (resp.status === 200) {
+			return resp.data.alarm
+		}
+		return false
 	} catch (err) {
 		return false
 	}

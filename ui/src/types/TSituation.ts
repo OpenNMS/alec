@@ -79,6 +79,11 @@ export type TSituationSaved = {
 	id: string
 	status: string
 }
+export type TNewSituation = {
+	alarmIdList: number[]
+	diagnosticText: string
+	description: string
+}
 
 export type TNode = {
 	id: number

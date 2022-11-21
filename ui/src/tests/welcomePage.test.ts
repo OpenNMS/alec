@@ -11,20 +11,7 @@ const wrapper = mount(WelcomePage, {
 	}
 } as any) as any
 
-test('Should redirect to situation list if not accept', async () => {
-	const router = useRouter()
-	const push = vi.spyOn(router, 'push')
-	const store = useUserStore()
-	store.userId = 'test'
-	wrapper.vm.allowSave = false
-	const continueBtn = wrapper.find('[data-test="continue-btn"]')
-	await continueBtn.trigger('click')
-
-	expect(push).toHaveBeenCalledTimes(1)
-	expect(push).toHaveBeenCalledWith({ name: 'situations' })
-})
-
-test('Should redirect to confiration if accepts', async () => {
+test('Should redirect to confiration after click continue', async () => {
 	const router = useRouter()
 	const push = vi.spyOn(router, 'push')
 	const store = useUserStore()

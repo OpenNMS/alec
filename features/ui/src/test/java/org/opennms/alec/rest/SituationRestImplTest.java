@@ -28,12 +28,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.data.AlarmSetImpl;
 import org.opennms.alec.data.CreateSituationPayloadImpl;
-import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.data.KeyEnum;
+import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
-import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
@@ -72,7 +71,7 @@ public class SituationRestImplTest {
         when(grpcConnectionConfig.getHost()).thenReturn("localhost");
         when(grpcConnectionConfig.getPort()).thenReturn(80);
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms));
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
     }
 
     @After
@@ -82,21 +81,13 @@ public class SituationRestImplTest {
 
     @Test
     public void rejected() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
-        try (Response actual = underTest.rejected("","11", "rejected")) {
-            assertThat(actual.getStatus(), equalTo(200));
-        }
-    }
-
-    @Test
-    public void removeAlarm() throws InterruptedException {
-        SituationRestImpl underTest = new SituationRestImpl(kvStore, new StaticSituationDatasource(situations), new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
-        try (Response actual = underTest.removeAlarm("","11", "2", "remove alarm 1")) {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.rejected("11")) {
+        try (Response actual = underTest.rejected("11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(0));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
@@ -122,7 +113,7 @@ public class SituationRestImplTest {
     @Test
     public void removeOneAlarm() throws InterruptedException {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("5")).build())) {
+        try (Response actual = underTest.removeAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(List.of("5")).build())) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(3));
@@ -171,7 +162,7 @@ public class SituationRestImplTest {
     @Test
     public void addAlarms() throws InterruptedException {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("7", "8")).build())) {
+        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("7", "8")).feedback("feedback").build())) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(6));
@@ -179,6 +170,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("2", "3", "4", "5", "7", "8")), equalTo(true));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm [[7, 8]] to situation [11] -- user feedback :[feedback]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(4)).getSituations();
         }
@@ -238,6 +231,8 @@ public class SituationRestImplTest {
             assertThat(actual.getStatus(), equalTo(200));
             List<SituationStatus> situationList = (List<SituationStatus>) actual.getEntity();
             assertThat(situationList.size(), equalTo(2));
+            assertThat(situationList.get(0).getId(), equalTo("10"));
+            assertThat(situationList.get(1).getId(), equalTo("11"));
             verify(situationDatasource, times(1)).getSituations();
         }
     }
@@ -257,6 +252,7 @@ public class SituationRestImplTest {
 
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("10")
+                .setLongId(10)
                 .addAlarm(alarms.get(0))
                 .addAlarm(alarms.get(1))
                 .setSeverity(Severity.MAJOR)
@@ -266,6 +262,7 @@ public class SituationRestImplTest {
                 .build());
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("11")
+                .setLongId(11)
                 .addAlarm(alarms.get(2))
                 .addAlarm(alarms.get(3))
                 .addAlarm(alarms.get(4))

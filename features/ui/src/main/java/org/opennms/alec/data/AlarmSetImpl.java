@@ -35,20 +35,24 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 public class AlarmSetImpl implements AlarmSet {
     private final String situationId;
     private final List<String> alarmIdList;
+    private final String feedback;
+
 
     private AlarmSetImpl(Builder builder) {
         situationId = builder.situationId;
         alarmIdList = builder.alarmIdList;
+        feedback = builder.feedback;
     }
 
-    public static AlarmSetImpl.Builder newBuilder() {
-        return new AlarmSetImpl.Builder();
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public static Builder newBuilder(AlarmSet copy) {
         Builder builder = new Builder();
         builder.situationId = copy.getSituationId();
         builder.alarmIdList = copy.getAlarmIdList();
+        builder.feedback = copy.getFeedback();
         return builder;
     }
 
@@ -56,6 +60,7 @@ public class AlarmSetImpl implements AlarmSet {
     public static final class Builder {
         private String situationId;
         private List<String> alarmIdList;
+        private String feedback;
 
         private Builder() {
         }
@@ -74,6 +79,11 @@ public class AlarmSetImpl implements AlarmSet {
             return this;
         }
 
+        public Builder feedback(String val) {
+            feedback = val;
+            return this;
+        }
+
         public AlarmSetImpl build() {
             return new AlarmSetImpl(this);
         }
@@ -87,5 +97,10 @@ public class AlarmSetImpl implements AlarmSet {
     @Override
     public List<String> getAlarmIdList() {
         return alarmIdList;
+    }
+
+    @Override
+    public String getFeedback() {
+        return feedback;
     }
 }

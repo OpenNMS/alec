@@ -3,27 +3,19 @@ import { TAlarm, TSituation } from '@/types/TSituation'
 import { FeatherChipList, FeatherChip } from '@featherds/chips'
 import { ref, watch, computed, reactive } from 'vue'
 import { groupBy, keys } from 'lodash'
-import StatusColor from '@/elements/StatusColor.vue'
 
-const emit = defineEmits(['selected-severities'])
+const emit = defineEmits(['selected-option'])
 
 type TState = {
 	alarms: TAlarm[] | TSituation[]
 }
 const props = defineProps<{
 	alarms: TAlarm[] | TSituation[]
-	situationId?: number
-	preSelected?: string[]
-	isVertical?: boolean
+	property: string
 }>()
-const selectAll = ref(false)
 
-const alarmFilters = computed(() => keys(groupBy(props.alarms, 'severity')))
-
-const selectedFilters = ref(
-	props.preSelected?.length ? props.preSelected : ['all']
-)
-
+const alarmFilters = computed(() => keys(groupBy(props.alarms, props.property)))
+const selectedFilters = ref(['all'])
 const state: TState = reactive({
 	alarms: props.alarms
 })
@@ -38,15 +30,12 @@ const handleAlarmFilters = (selected: string) => {
 	if (selected === 'all' || selectedFilters.value.length === 0) {
 		selectedFilters.value = ['all']
 	}
-	emit('selected-severities', selectedFilters.value)
+	emit('selected-option', selectedFilters.value)
 }
 
 watch(props, () => {
-	selectedFilters.value = props.preSelected?.length
-		? props.preSelected
-		: ['all']
+	selectedFilters.value = ['all']
 	state.alarms = props.alarms
-	selectAll.value = false
 })
 </script>
 
@@ -56,7 +45,7 @@ watch(props, () => {
 		v-if="alarmFilters.length > 0"
 		condensed
 		label=""
-		:class="{ vertical: props.isVertical }"
+		class="vertical"
 	>
 		<FeatherChip
 			:class="{ clicked: selectedFilters.includes('all') }"
@@ -65,15 +54,12 @@ watch(props, () => {
 			ALL
 		</FeatherChip>
 		<FeatherChip
-			:class="[
-				{ clicked: selectedFilters.includes(severity) },
-				`${severity?.toLowerCase()}-bg`
-			]"
-			v-for="severity in alarmFilters"
-			:key="severity"
-			@click="handleAlarmFilters(severity)"
+			:class="[{ clicked: selectedFilters.includes(option) }]"
+			v-for="option in alarmFilters"
+			:key="option"
+			@click="handleAlarmFilters(option)"
 		>
-			<StatusColor :severity="severity" />{{ severity }}
+			{{ option }}
 		</FeatherChip>
 	</FeatherChipList>
 </template>

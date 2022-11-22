@@ -10,8 +10,6 @@ import { TNewSituation } from '@/types/TSituation'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { truncateText } from '@/helpers/utils'
 import UnassignedAlarmCard from '@/components/UnassignedAlarmCard.vue'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { remove, includes } from 'lodash'
@@ -165,7 +163,7 @@ const cleanFields = () => {
 					<div
 						v-for="alarm in alarms"
 						:key="alarm.id"
-						class="alarm"
+						class="alarm-card"
 						:class="{ selected: includes(alarmIds, alarm.id) }"
 					>
 						<UnassignedAlarmCard
@@ -219,15 +217,8 @@ const cleanFields = () => {
 	flex-wrap: wrap;
 	align-content: flex-start;
 }
-
-.alarm {
-	margin-top: 15px;
+.alarm-card {
 	width: 49%;
-	min-width: 48%;
-	padding: 15px;
-	border: 1px solid $border-grey;
-	position: relative;
-	min-height: 140px;
 	&.selected {
 		border: 1px solid #273180;
 	}

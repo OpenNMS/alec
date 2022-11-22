@@ -11,24 +11,37 @@ const props = defineProps<{
 </script>
 
 <template>
-	<div class="alarmInfo">
-		<div class="triangle" :class="[`${alarm.severity.toLowerCase()}`]"></div>
-		<FeatherCheckbox
-			:modelValue="props.selected"
-			label="selected"
-			@update:modelValue="emit('selected-alarm', alarm.id)"
-		/>
+	<div class="alarm">
+		<div class="alarmInfo">
+			<div class="triangle" :class="[`${alarm.severity.toLowerCase()}`]"></div>
+			<FeatherCheckbox
+				:modelValue="props.selected"
+				label="selected"
+				@update:modelValue="emit('selected-alarm', alarm.id)"
+			/>
 
-		<div class="alarm-title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
-	</div>
-	<div class="description">
-		{{ truncateText(alarm.description, 300) }}
+			<div class="alarm-title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
+		</div>
+		<div class="description">
+			{{ truncateText(alarm.description, 300) }}
+		</div>
 	</div>
 </template>
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
+.alarm {
+	margin-top: 15px;
+	padding: 15px;
+	border: 1px solid $border-grey;
+	position: relative;
+	min-height: 140px;
+	background-color: #ffffff;
+	&.selected {
+		border: 1px solid #273180;
+	}
+}
 .alarmInfo {
 	display: flex;
 	align-items: center;
@@ -96,5 +109,9 @@ const props = defineProps<{
 		transform-origin: 100% 100%;
 		transform: rotate(45deg);
 	}
+}
+
+.layout-container {
+	margin-bottom: 0;
 }
 </style>

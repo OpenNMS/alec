@@ -7,11 +7,19 @@ import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import Add from '@featherds/icon/action/Add'
+import View from '@featherds/icon/action/View'
 import { reactive, ref, watch } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
 import { useRouter } from 'vue-router'
+import NewSituationBtn from '@/elements/NewSituationBtn.vue'
+
+const Icons = markRaw({
+	Add,
+	View
+})
+
 const router = useRouter()
 
 const situationStore = useSituationsStore()
@@ -176,6 +184,12 @@ const addNewSituation = () => {
 	})
 }
 
+const viewUnassignedAlarms = () => {
+	router.push({
+		name: 'viewUnassignedAlarms'
+	})
+}
+
 const resetFilters = () => {
 	state.filterSeverities = ['all']
 	state.nodeSelectedValue = undefined
@@ -191,10 +205,16 @@ const resetFilters = () => {
 	<div class="list-main">
 		<div class="header">
 			<h2>Situation List</h2>
-			<FeatherButton class="new-situation-btn" @click="() => addNewSituation()">
-				<FeatherIcon :icon="Add" aria-hidden="true" class="icon" />
-				<span>New Situation</span>
-			</FeatherButton>
+			<div>
+				<FeatherButton
+					class="view-situation-btn"
+					@click="() => viewUnassignedAlarms()"
+				>
+					<FeatherIcon :icon="Icons.View" aria-hidden="true" class="icon" />
+					<span>View Unassociated Alarms</span>
+				</FeatherButton>
+				<NewSituationBtn />
+			</div>
 		</div>
 		<div class="filters">
 			<FeatherButton class="reset-btn" @click="() => resetFilters()">
@@ -272,6 +292,12 @@ const resetFilters = () => {
 	height: 44px;
 	background-color: #46ae46;
 	color: white;
+}
+
+.view-situation-btn {
+	background-color: #465cae;
+	color: white;
+	height: 44px;
 }
 
 .list-main {

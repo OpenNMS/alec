@@ -15,7 +15,7 @@ import { FeatherButton } from '@featherds/button'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { useAppStore } from '@/store/useAppStore'
-
+import { FeatherSpinner } from '@featherds/progress'
 const router = useRouter()
 const route = useRoute()
 const paramId = parseInt(route.params.id as string)
@@ -31,6 +31,8 @@ if (!situationStore.situations.length) {
 
 const situation = ref()
 const container = ref()
+const loading = ref(true)
+
 const filteredSituationsCurrentIndex = ref(
 	situationStore.filteredSituations.findIndex((id) => id === situationId.value)
 )
@@ -40,6 +42,7 @@ watch(
 	() => situationStore.situationDetail,
 	() => {
 		situation.value = situationStore.situationDetail as TSituation
+		loading.value = false
 	}
 )
 
@@ -109,26 +112,29 @@ appStore.$subscribe((mutation, storeState) => {
 				</FeatherButton>
 			</div>
 		</div>
-		<div v-if="situation" class="detail">
-			<FeatherTabContainer>
-				<template v-slot:tabs>
-					<FeatherTab>Details</FeatherTab>
-					<FeatherTab>Metrics</FeatherTab>
-				</template>
-				<FeatherTabPanel class="panel">
-					<SituationDetailTab :situation-info="situation" />
-				</FeatherTabPanel>
-				<FeatherTabPanel class="panel"
-					><SituationMetricsTab
-						v-if="container"
-						:situation="situation"
-						:width="container"
-					/>
-				</FeatherTabPanel>
-			</FeatherTabContainer>
-		</div>
-		<div v-else class="noSituation">
-			Error. The situation {{ paramId }} does not exist.
+		<FeatherSpinner class="spinner" v-if="loading" />
+		<div v-else>
+			<div v-if="situation" class="detail">
+				<FeatherTabContainer>
+					<template v-slot:tabs>
+						<FeatherTab>Details</FeatherTab>
+						<FeatherTab>Metrics</FeatherTab>
+					</template>
+					<FeatherTabPanel class="panel">
+						<SituationDetailTab :situation-info="situation" />
+					</FeatherTabPanel>
+					<FeatherTabPanel class="panel"
+						><SituationMetricsTab
+							v-if="container"
+							:situation="situation"
+							:width="container"
+						/>
+					</FeatherTabPanel>
+				</FeatherTabContainer>
+			</div>
+			<div v-else class="noSituation">
+				Error. The situation {{ paramId }} does not exist.
+			</div>
 		</div>
 		<FeatherSnackbar v-model="showError" center error>
 			{{ appStore.errorMessage }}
@@ -145,6 +151,9 @@ appStore.$subscribe((mutation, storeState) => {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+}
+.spinner {
+	margin: 100px auto;
 }
 .detail {
 	width: 100%;

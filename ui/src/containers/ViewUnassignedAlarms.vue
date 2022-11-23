@@ -18,7 +18,15 @@ import { FeatherSnackbar } from '@featherds/snackbar'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
 import { groupBy, keys } from 'lodash'
+import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
+import { isToday, isYesterday, isThisWeek } from 'date-fns'
 
+const timePeriods = [
+	{ id: 1, name: 'No filter' },
+	{ id: 2, name: 'Today' },
+	{ id: 3, name: 'Yesterday' },
+	{ id: 4, name: 'This week' }
+]
 const Icons = markRaw({
 	ArrowBack,
 	ExitToApp
@@ -37,16 +45,14 @@ const showError = ref(false)
 const isError = ref(false)
 const nodeFilters = ref(['all'])
 const severityFilters = ref(['all'])
-const byDateFilters = ref(['all'])
+const selectedTimePeriod = ref(timePeriods[0].id)
 
 const showPanel = true
+
 watch(
 	() => situationStore.unassignedAlarms,
 	() => {
-		alarms.value = situationStore.unassignedAlarms
-		nodeFilters.value = ['all']
-		severityFilters.value = ['all']
-		byDateFilters.value = ref(['all'])
+		updateList()
 	}
 )
 
@@ -68,6 +74,11 @@ const updateListNodes = (nodes: string[]) => {
 	updateList()
 }
 
+const timePeriodChanged = (value) => {
+	selectedTimePeriod.value = value
+	updateList()
+}
+
 const updateList = () => {
 	let alarmsFiltered = situationStore.unassignedAlarms
 	if (!severityFilters.value.includes('all')) {
@@ -79,6 +90,26 @@ const updateList = () => {
 		alarmsFiltered = alarmsFiltered.filter((a) =>
 			nodeFilters.value.includes(a.nodeLabel)
 		)
+	}
+
+	if (selectedTimePeriod.value !== 1) {
+		console.log(selectedTimePeriod.value)
+
+		switch (selectedTimePeriod.value) {
+			case 2:
+				alarmsFiltered = alarmsFiltered.filter((a) => isToday(a.firstEventTime))
+				break
+			case 3:
+				alarmsFiltered = alarmsFiltered.filter((a) =>
+					isYesterday(a.firstEventTime)
+				)
+				break
+			case 4:
+				alarmsFiltered = alarmsFiltered.filter((a) =>
+					isThisWeek(a.firstEventTime)
+				)
+				break
+		}
 	}
 	alarms.value = alarmsFiltered
 }
@@ -133,9 +164,11 @@ const handleMoveClick = () => {
 		<div class="content">
 			<div class="filters">
 				<FeatherExpansionPanel title="By Severity" v-model="showPanel">
-					<FiltersSeverity
+					<ChipListByProperty
 						:alarms="situationStore.unassignedAlarms"
-						@selected-severities="updateListSeverities"
+						@selected-option="updateListSeverities"
+						:pre-selected="severityFilters"
+						property="severity"
 						isVertical
 					/>
 				</FeatherExpansionPanel>
@@ -143,14 +176,25 @@ const handleMoveClick = () => {
 					<ChipListByProperty
 						:alarms="situationStore.unassignedAlarms"
 						@selected-option="updateListNodes"
+						:pre-selected="nodeFilters"
 						property="nodeLabel"
+						isVertical
 					/>
-					<ChipListByProperty
-						:alarms="situationStore.unassignedAlarms"
-						@selected-option="updateListNodes"
-						property="firstEventTime"
-						isDate
-					/>
+				</FeatherExpansionPanel>
+				<FeatherExpansionPanel title="By Date Start">
+					<FeatherRadioGroup
+						:label="''"
+						v-model="selectedTimePeriod"
+						vertical
+						@update:modelValue="timePeriodChanged"
+					>
+						<FeatherRadio
+							v-for="item in timePeriods"
+							:value="item.id"
+							:key="item.id"
+							>{{ item.name }}</FeatherRadio
+						>
+					</FeatherRadioGroup>
 				</FeatherExpansionPanel>
 			</div>
 			<div class="list">
@@ -196,10 +240,6 @@ const handleMoveClick = () => {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.container {
-	margin: var($spacing-m);
-}
-
 .content {
 	display: flex;
 	margin-top: var($spacing-m);
@@ -208,7 +248,6 @@ const handleMoveClick = () => {
 .filters {
 	width: 330px;
 	min-width: 20%;
-	max-width: 20%;
 	margin-right: 20px;
 }
 
@@ -233,11 +272,16 @@ const handleMoveClick = () => {
 	height: 600px;
 	overflow-y: auto;
 	display: flex;
-	justify-content: space-between;
 	flex-wrap: nowrap;
 	width: 100%;
 	flex-wrap: wrap;
 	align-content: flex-start;
+	> div {
+		margin-right: 1%;
+	}
+	> div:nth-child(3n) {
+		margin-right: 0;
+	}
 }
 
 .card {
@@ -257,6 +301,6 @@ const handleMoveClick = () => {
 }
 
 .layout-container {
-	margin-bottom: 0;
+	margin-bottom: 0 !important;
 }
 </style>

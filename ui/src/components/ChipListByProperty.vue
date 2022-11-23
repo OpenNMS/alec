@@ -3,6 +3,7 @@ import { TAlarm, TSituation } from '@/types/TSituation'
 import { FeatherChipList, FeatherChip } from '@featherds/chips'
 import { ref, watch, computed, reactive } from 'vue'
 import { groupBy, keys } from 'lodash'
+import StatusColor from '@/elements/StatusColor.vue'
 
 const emit = defineEmits(['selected-option'])
 
@@ -12,10 +13,15 @@ type TState = {
 const props = defineProps<{
 	alarms: TAlarm[] | TSituation[]
 	property: string
+	preSelected?: string[]
+	isVertical?: boolean
 }>()
+const selectAll = ref(false)
 
 const alarmFilters = computed(() => keys(groupBy(props.alarms, props.property)))
-const selectedFilters = ref(['all'])
+const selectedFilters = ref(
+	props.preSelected?.length ? props.preSelected : ['all']
+)
 const state: TState = reactive({
 	alarms: props.alarms
 })
@@ -34,8 +40,11 @@ const handleAlarmFilters = (selected: string) => {
 }
 
 watch(props, () => {
-	selectedFilters.value = ['all']
+	selectedFilters.value = props.preSelected?.length
+		? props.preSelected
+		: ['all']
 	state.alarms = props.alarms
+	selectAll.value = false
 })
 </script>
 
@@ -45,7 +54,7 @@ watch(props, () => {
 		v-if="alarmFilters.length > 0"
 		condensed
 		label=""
-		class="vertical"
+		:class="{ vertical: props.isVertical }"
 	>
 		<FeatherChip
 			:class="{ clicked: selectedFilters.includes('all') }"
@@ -54,12 +63,17 @@ watch(props, () => {
 			ALL
 		</FeatherChip>
 		<FeatherChip
-			:class="[{ clicked: selectedFilters.includes(option) }]"
+			:class="[
+				{ clicked: selectedFilters.includes(option) },
+				`${option?.toLowerCase()}-bg`
+			]"
 			v-for="option in alarmFilters"
 			:key="option"
 			@click="handleAlarmFilters(option)"
 		>
-			{{ option }}
+			<StatusColor v-if="property == 'severity'" :severity="option" />{{
+				option
+			}}
 		</FeatherChip>
 	</FeatherChipList>
 </template>

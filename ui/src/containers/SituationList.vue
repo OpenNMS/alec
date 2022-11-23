@@ -178,12 +178,6 @@ const updateList = (severities: string[]) => {
 	}
 }
 
-const addNewSituation = () => {
-	router.push({
-		name: 'addSituation'
-	})
-}
-
 const viewUnassignedAlarms = () => {
 	router.push({
 		name: 'viewUnassignedAlarms'
@@ -287,11 +281,6 @@ const resetFilters = () => {
 .header {
 	display: flex;
 	justify-content: space-between;
-}
-.new-situation-btn {
-	height: 44px;
-	background-color: #46ae46;
-	color: white;
 }
 
 .view-situation-btn {

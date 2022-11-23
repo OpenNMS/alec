@@ -17,6 +17,8 @@ import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
+import { groupBy, keys } from 'lodash'
+
 const Icons = markRaw({
 	ArrowBack,
 	ExitToApp
@@ -33,11 +35,18 @@ const showSituations = ref(false)
 const showErrorMsg = ref('')
 const showError = ref(false)
 const isError = ref(false)
+const nodeFilters = ref(['all'])
+const severityFilters = ref(['all'])
+const byDateFilters = ref(['all'])
+
 const showPanel = true
 watch(
 	() => situationStore.unassignedAlarms,
 	() => {
 		alarms.value = situationStore.unassignedAlarms
+		nodeFilters.value = ['all']
+		severityFilters.value = ['all']
+		byDateFilters.value = ref(['all'])
 	}
 )
 
@@ -49,14 +58,29 @@ const addAlarm = (alarmId: number) => {
 	}
 }
 
-const updateList = (severities: string[]) => {
-	if (severities.includes('all')) {
-		alarms.value = situationStore.unassignedAlarms
-	} else {
-		alarms.value = situationStore.unassignedAlarms.filter((a) =>
-			severities.includes(a.severity)
+const updateListSeverities = (severities: string[]) => {
+	severityFilters.value = severities
+	updateList()
+}
+
+const updateListNodes = (nodes: string[]) => {
+	nodeFilters.value = nodes
+	updateList()
+}
+
+const updateList = () => {
+	let alarmsFiltered = situationStore.unassignedAlarms
+	if (!severityFilters.value.includes('all')) {
+		alarmsFiltered = alarmsFiltered.filter((a) =>
+			severityFilters.value.includes(a.severity)
 		)
 	}
+	if (!nodeFilters.value.includes('all')) {
+		alarmsFiltered = alarmsFiltered.filter((a) =>
+			nodeFilters.value.includes(a.nodeLabel)
+		)
+	}
+	alarms.value = alarmsFiltered
 }
 
 const handleSelect = () => {
@@ -111,15 +135,21 @@ const handleMoveClick = () => {
 				<FeatherExpansionPanel title="By Severity" v-model="showPanel">
 					<FiltersSeverity
 						:alarms="situationStore.unassignedAlarms"
-						@selected-severities="updateList"
+						@selected-severities="updateListSeverities"
 						isVertical
 					/>
 				</FeatherExpansionPanel>
-				<FeatherExpansionPanel title="By Node Label">
+				<FeatherExpansionPanel title="By Node Label" v-model="showPanel">
 					<ChipListByProperty
 						:alarms="situationStore.unassignedAlarms"
-						@selected-nodelabel="updateList"
+						@selected-option="updateListNodes"
 						property="nodeLabel"
+					/>
+					<ChipListByProperty
+						:alarms="situationStore.unassignedAlarms"
+						@selected-option="updateListNodes"
+						property="firstEventTime"
+						isDate
 					/>
 				</FeatherExpansionPanel>
 			</div>
@@ -176,7 +206,9 @@ const handleMoveClick = () => {
 }
 
 .filters {
-	width: 22%;
+	width: 330px;
+	min-width: 20%;
+	max-width: 20%;
 	margin-right: 20px;
 }
 

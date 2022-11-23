@@ -2,7 +2,10 @@
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { truncateText } from '@/helpers/utils'
 import { TAlarm } from '@/types/TSituation'
+import { formatDistanceStrict } from 'date-fns'
+
 const emit = defineEmits(['selected-alarm'])
+const nowDate = new Date().getTime()
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -22,8 +25,12 @@ const props = defineProps<{
 
 			<div class="alarm-title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
 		</div>
+		<div>
+			<strong> Duration: </strong>
+			{{ formatDistanceStrict(nowDate, new Date(alarm.firstEventTime)) }}
+		</div>
 		<div class="description">
-			{{ truncateText(alarm.description, 300) }}
+			{{ truncateText(alarm.description, 120) }}
 		</div>
 	</div>
 </template>

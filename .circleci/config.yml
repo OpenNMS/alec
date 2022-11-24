@@ -117,7 +117,7 @@ workflows:
       - sonar:
           context: "OpenNMS Build"
           requires:
-            - build
+            - pre-build
           filters:
             tags:
               only: /.*/

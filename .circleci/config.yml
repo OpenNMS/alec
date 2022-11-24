@@ -46,13 +46,13 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build:
-          context: "OpenNMS Build"
-          requires:
-            - pre-build
-          filters:
-            tags:
-              only: /.*/
+#      - build:
+#          context: "OpenNMS Build"
+#          requires:
+#            - pre-build
+#          filters:
+#            tags:
+#              only: /.*/
 #      - build-debian:
 #          context: "OpenNMS Build"
 #          requires:

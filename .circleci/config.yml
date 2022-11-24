@@ -435,6 +435,8 @@ jobs:
   sonar:
     executor: build-executor
     steps:
+      - attach_workspace:
+          at: ~/
       - run:
           name: Run SonarQube Code Analysis
           when: always

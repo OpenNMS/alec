@@ -439,5 +439,4 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            export MAVEN_OPTS="-Xmx12g -XX:ReservedCodeCacheSize=1g -XX:+TieredCompilation"
-            .circleci/scripts/sonar.sh
+            mvn sonar:sonar

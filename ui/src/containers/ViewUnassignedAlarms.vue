@@ -16,16 +16,10 @@ import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
 import { isToday, isYesterday, isThisWeek } from 'date-fns'
 import { TAlarm } from '@/types/TSituation'
+import FilterByDate from '@/components/FilterByDate.vue'
 
-const timePeriods = [
-	{ id: 1, name: 'No filter' },
-	{ id: 2, name: 'Today' },
-	{ id: 3, name: 'Yesterday' },
-	{ id: 4, name: 'This week' }
-]
 const Icons = markRaw({
 	ArrowBack,
 	ExitToApp
@@ -44,7 +38,7 @@ const showError = ref(false)
 const isError = ref(false)
 const nodeFilters = ref(['all'])
 const severityFilters = ref(['all'])
-const selectedTimePeriod = ref(timePeriods[0].id)
+const selectedTimePeriod = ref(1)
 
 const showPanel = ref(true)
 
@@ -80,17 +74,19 @@ const timePeriodChanged = (value: number) => {
 
 const updateList = () => {
 	let alarmsFiltered = situationStore.unassignedAlarms
+	//filter by severity
 	if (!severityFilters.value.includes('all')) {
 		alarmsFiltered = alarmsFiltered.filter((a) =>
 			severityFilters.value.includes(a.severity)
 		)
 	}
+	//filter by node label
 	if (!nodeFilters.value.includes('all')) {
 		alarmsFiltered = alarmsFiltered.filter((a) =>
 			nodeFilters.value.includes(a.nodeLabel)
 		)
 	}
-
+	//filter by date
 	if (selectedTimePeriod.value !== 1) {
 		switch (selectedTimePeriod.value) {
 			case 2:
@@ -178,20 +174,8 @@ const handleMoveClick = () => {
 						isVertical
 					/>
 				</FeatherExpansionPanel>
-				<FeatherExpansionPanel title="By Date Start">
-					<FeatherRadioGroup
-						:label="''"
-						v-model="selectedTimePeriod"
-						vertical
-						@update:modelValue="(v) => timePeriodChanged(v as number)"
-					>
-						<FeatherRadio
-							v-for="item in timePeriods"
-							:value="item.id"
-							:key="item.id"
-							>{{ item.name }}</FeatherRadio
-						>
-					</FeatherRadioGroup>
+				<FeatherExpansionPanel title="By Start Date">
+					<FilterByDate @filter-date-selected="timePeriodChanged" />
 				</FeatherExpansionPanel>
 			</div>
 			<div class="list">

@@ -15,6 +15,9 @@ import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
 import { useRouter } from 'vue-router'
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
+import FilterByDate from '@/components/FilterByDate.vue'
+import { FeatherExpansionPanel } from '@featherds/expansion'
+import { isToday, isYesterday, isThisWeek } from 'date-fns'
 
 const Icons = markRaw({
 	Add,
@@ -39,7 +42,6 @@ type TState = {
 	results: Record<string, string | number>[]
 	nodeSelectedValue: Record<string, string> | undefined
 	allSituations: Array<TSituation>[]
-	filterSeverities: Array<string>
 }
 const state: TState = reactive({
 	situations: [],
@@ -48,14 +50,17 @@ const state: TState = reactive({
 	nodes: [],
 	results: [],
 	nodeSelectedValue: undefined,
-	allSituations: [],
-	filterSeverities: ['all']
+	allSituations: []
 })
 const loading = ref(false)
 const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
 const withFilters = ref(false)
+const selectedSeverity = ref(['all'])
+const selectedTimeStart = ref(1)
+const showPanel = ref(true)
+
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
 	state.situations = situations[0]
@@ -80,14 +85,16 @@ watch(
 	}
 )
 
+//when come back to situation list, it has to mantain same filters
 const checkPreviousFilters = () => {
 	if (situationStore.filters) {
 		if (situationStore.filters.node) {
 			state.nodeSelectedValue = situationStore.filters.node
 		}
 		if (situationStore.filters.severities) {
-			state.filterSeverities = situationStore.filters.severities
+			selectedSeverity.value = situationStore.filters.severities
 		}
+		selectedTimeStart.value = situationStore.filters.timeStart
 		filterByNode()
 		situationStore.filters = null
 	}
@@ -108,6 +115,22 @@ const search = (q: string) => {
 	loading.value = false
 }
 
+const filterByTime = (situations: TSituation[]) => {
+	let filtered = situations
+	switch (selectedTimeStart.value) {
+		case 2:
+			filtered = situations.filter((a) => isToday(a.firstEventTime))
+			break
+		case 3:
+			filtered = situations.filter((a) => isYesterday(a.firstEventTime))
+			break
+		case 4:
+			filtered = situations.filter((a) => isThisWeek(a.firstEventTime))
+			break
+	}
+	return filtered
+}
+
 const filterByNode = () => {
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
 		let filtered = situationStore.situations
@@ -121,33 +144,31 @@ const filterByNode = () => {
 			})
 			.filter((s) => s) as TSituation[]
 		if (filtered) {
-			if (!state.filterSeverities.includes('all')) {
-				filtered = filtered.filter((s) =>
-					state.filterSeverities.includes(s.severity)
-				)
-			}
-			totalSituations.value = filtered.length
-			state.situations = filtered
-
-			const ids = filtered.map((s: TSituation) => s.id)
-			situationStore.filteredSituations = ids
+			applyFilters(filtered)
 			withFilters.value = true
 		}
 	} else {
 		state.nodeSelectedValue = undefined
-		if (!state.filterSeverities.includes('all')) {
-			const filtered = situationStore.situations.filter((s) =>
-				state.filterSeverities.includes(s.severity)
-			)
-			state.situations = filtered
-			totalSituations.value = filtered.length
-			const ids = filtered.map((s) => s.id)
-			withFilters.value = true
-			situationStore.filteredSituations = ids
-		} else {
-			resetFilters()
-		}
+		withFilters.value = true
+		applyFilters(situationStore.situations)
 	}
+}
+
+const applyFilters = (situations: TSituation[]) => {
+	let filteredSituations = situations
+	if (!selectedSeverity.value.includes('all')) {
+		filteredSituations = situations.filter((s) =>
+			selectedSeverity.value.includes(s.severity)
+		)
+	}
+
+	if (selectedTimeStart.value !== 1) {
+		filteredSituations = filterByTime(filteredSituations)
+	}
+	state.situations = filteredSituations
+	totalSituations.value = filteredSituations.length
+	const ids = filteredSituations.map((s) => s.id)
+	situationStore.filteredSituations = ids
 }
 
 const onGotoPage = (nextPage: number) => {
@@ -156,10 +177,15 @@ const onGotoPage = (nextPage: number) => {
 }
 
 const showDetail = (id: number) => {
-	if (state.nodeSelectedValue || state.filterSeverities.length) {
+	if (
+		state.nodeSelectedValue ||
+		selectedSeverity.value.length ||
+		selectedTimeStart.value !== 1
+	) {
 		situationStore.filters = {
 			node: state.nodeSelectedValue,
-			severities: state.filterSeverities
+			severities: selectedSeverity.value,
+			timeStart: selectedTimeStart.value
 		}
 	}
 
@@ -170,11 +196,25 @@ const showDetail = (id: number) => {
 		}
 	})
 }
-const updateList = (severities: string[]) => {
-	if (severities.includes('all') && !state.nodeSelectedValue) {
+
+const timePeriodChanged = (value: number) => {
+	selectedTimeStart.value = value
+	updateList()
+}
+
+const severityChanged = (severities: string[]) => {
+	selectedSeverity.value = severities
+	updateList()
+}
+
+const updateList = () => {
+	if (
+		selectedSeverity.value.includes('all') &&
+		selectedTimeStart.value === 1 &&
+		!state.nodeSelectedValue
+	) {
 		resetFilters()
 	} else {
-		state.filterSeverities = severities
 		filterByNode()
 	}
 }
@@ -186,7 +226,8 @@ const viewUnassignedAlarms = () => {
 }
 
 const resetFilters = () => {
-	state.filterSeverities = ['all']
+	selectedSeverity.value = ['all']
+	selectedTimeStart.value = 1
 	state.nodeSelectedValue = undefined
 	const ids = situationStore.situations.map((s) => s.id)
 	situationStore.filteredSituations = ids
@@ -211,69 +252,80 @@ const resetFilters = () => {
 				<NewSituationBtn />
 			</div>
 		</div>
-		<div class="filters">
-			<FeatherButton class="reset-btn" @click="() => resetFilters()">
-				<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
-				<span>Reset Filters</span>
-			</FeatherButton>
+		<div class="content">
+			<div class="filters">
+				<FeatherButton class="reset-btn" @click="() => resetFilters()">
+					<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
+					<span>Reset Filters</span>
+				</FeatherButton>
+				<FeatherExpansionPanel title="By Severity" v-model="showPanel">
+					<ChipListByProperty
+						:alarms="situationStore.situations"
+						:pre-selected="selectedSeverity"
+						@selected-option="severityChanged"
+						property="severity"
+						isVertical
+					/>
+				</FeatherExpansionPanel>
 
-			<ChipListByProperty
-				:alarms="situationStore.situations"
-				@selected-option="updateList"
-				property="severity"
-			/>
-
-			<div class="autocomplete">
-				<FeatherAutocomplete
-					class="map-search"
-					label="Find by node"
-					:loading="loading"
-					v-model="state.nodeSelectedValue"
-					:results="state.results"
-					type="single"
-					@search="search"
-					@update:modelValue="filterByNode"
-				>
-				</FeatherAutocomplete>
+				<FeatherExpansionPanel title="By Start Date" v-model="showPanel">
+					<FilterByDate
+						@filter-date-selected="timePeriodChanged"
+						:pre-selected="selectedTimeStart"
+					/>
+				</FeatherExpansionPanel>
 			</div>
-		</div>
-		<div
-			class="container"
-			v-if="state.situations && state.situations.length > 0"
-		>
-			<div>
-				Result: {{ state.situations.length }} of
-				{{ totalSituations }}
-			</div>
-			<div class="situation-list">
+			<div class="container">
+				<div class="autocomplete">
+					<div>
+						Result: {{ state.situations.length }} of
+						{{ totalSituations }}
+					</div>
+					<FeatherAutocomplete
+						class="map-search"
+						label="Find by node"
+						:loading="loading"
+						v-model="state.nodeSelectedValue"
+						:results="state.results"
+						type="single"
+						@search="search"
+						@update:modelValue="filterByNode"
+					>
+					</FeatherAutocomplete>
+				</div>
 				<div
-					class="card"
-					v-for="situationInfo in state.situations"
-					:key="situationInfo.id"
+					class="situation-list"
+					v-if="state.situations && state.situations.length > 0"
 				>
-					<SituationCard
-						@click="() => showDetail(situationInfo.id)"
-						:situation-info="situationInfo"
+					<div
+						class="card"
+						v-for="situationInfo in state.situations"
+						:key="situationInfo.id"
+					>
+						<SituationCard
+							@click="() => showDetail(situationInfo.id)"
+							:situation-info="situationInfo"
+						/>
+					</div>
+				</div>
+				<div
+					v-if="!state.situations || state.situations.length == 0"
+					class="container empty"
+				>
+					No results found
+				</div>
+				<div
+					class="footer-pager"
+					v-if="!withFilters && totalSituations > PAGE_SIZE"
+				>
+					<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
+					<SimplePagination
+						@go-to-page="onGotoPage"
+						:currentPage="currentPage"
+						:totalPages="totalPages"
 					/>
 				</div>
 			</div>
-			<div
-				class="footer-pager"
-				v-if="!withFilters && totalSituations > PAGE_SIZE"
-			>
-				<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
-				<SimplePagination
-					@go-to-page="onGotoPage"
-					:currentPage="currentPage"
-					:totalPages="totalPages"
-				/>
-			</div>
-		</div>
-		<div
-			v-if="!state.situations || state.situations.length == 0"
-			class="container"
-		>
-			No results found
 		</div>
 	</div>
 </template>
@@ -291,6 +343,11 @@ const resetFilters = () => {
 	height: 44px;
 }
 
+.content {
+	display: flex;
+	margin-top: 20px;
+}
+
 .list-main {
 	min-height: 800px;
 }
@@ -298,7 +355,8 @@ const resetFilters = () => {
 .reset-btn {
 	font-size: 12px;
 	padding: 0px 12px;
-	margin-right: 20px;
+	margin-bottom: 20px;
+	box-shadow: var(--feather-shadow-1);
 }
 
 .icon {
@@ -312,31 +370,32 @@ h2 {
 }
 
 .autocomplete {
-	margin-left: auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 15px;
 }
 .filters {
-	padding: 15px;
-	margin-bottom: 20px;
-	background-color: #ffffff;
-	margin-top: 10px;
 	display: flex;
-	flex-direction: row;
-	align-items: center;
-	border: 1px solid $border-grey;
+	min-width: 300px;
+	flex-direction: column;
+	margin-right: 15px;
 }
 .container {
 	display: flex;
+	padding-top: 20px;
 	flex-direction: column;
+	border: 1px solid $border-grey;
+	background-color: #ffffff;
+	width: 100%;
 }
+
 .situation-list {
 	display: flex;
-	background-color: #ffffff;
-	padding-bottom: 20px;
-	margin: auto;
-	margin-top: 16px;
+	margin: 10px auto;
 	flex-wrap: wrap;
 	width: 100%;
-	border: 1px solid $border-grey;
+	padding-bottom: 15px;
 
 	> div {
 		width: 32%;
@@ -361,5 +420,11 @@ h2 {
 
 .map-search {
 	display: flex;
+}
+
+.empty {
+	padding-left: var($spacing-xl);
+	border: none;
+	font-size: 16px;
 }
 </style>

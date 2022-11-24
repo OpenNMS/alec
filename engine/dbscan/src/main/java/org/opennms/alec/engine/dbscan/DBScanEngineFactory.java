@@ -30,6 +30,7 @@ package org.opennms.alec.engine.dbscan;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
@@ -64,6 +65,16 @@ public class DBScanEngineFactory implements EngineFactory {
     @Override
     public String getName() {
         return "dbscan";
+    }
+
+    @Override
+    public String getNameConf() {
+        return new StringJoiner(", ", getName() + "[", "]")
+                .add("epsilon=" + epsilon)
+                .add("alpha=" + alpha)
+                .add("beta=" + beta)
+                .add("distanceMeasure='" + distanceMeasureFactoryName + "'")
+                .toString();
     }
 
     @Override

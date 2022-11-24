@@ -104,6 +104,7 @@ public class EngineRestImplTest {
                 distanceMeasureFactoryMap);
         when(engineRegistry.getEngineRegistry()).thenReturn(driver);
         engineFactories = Arrays.asList(dbScanEngineFactory, clusterEngineFactory);
+        when(driver.initAsync()).thenReturn(CompletableFuture.completedFuture(null));
     }
 
     @Test
@@ -120,7 +121,7 @@ public class EngineRestImplTest {
             assertThat("distanceMeasureName", equalTo(engineParameter.getDistanceMeasureName()));
             assertThat("dbscan", equalTo(engineParameter.getEngineName()));
         }
-        verify(kvStore, times(1)).get(anyString(), anyString());
+        verify(kvStore, times(2)).get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
         verifyNoMoreInteractions(kvStore);
     }
 
@@ -132,7 +133,7 @@ public class EngineRestImplTest {
         try (Response result = underTest.getEngineConfiguration()) {
             assertThat(result.getStatus(), equalTo(Response.Status.NO_CONTENT.getStatusCode()));
         }
-        verify(kvStore, times(1)).get(anyString(), anyString());
+        verify(kvStore, times(2)).get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
         verifyNoMoreInteractions(kvStore);
     }
 
@@ -151,6 +152,7 @@ public class EngineRestImplTest {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         }
         verify(kvStore, times(1)).putAsync(eq(KeyEnum.ENGINE.toString()), argumentCaptor.capture(), eq(ALECRestUtils.ALEC_CONFIG));
+        verify(kvStore, times(1)).get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
         verifyNoMoreInteractions(kvStore, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().build())));
@@ -170,14 +172,11 @@ public class EngineRestImplTest {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         }
         verify(kvStore, times(1)).putAsync(eq(KeyEnum.ENGINE.toString()), argumentCaptor.capture(), eq(ALECRestUtils.ALEC_CONFIG));
+        verify(kvStore, times(1)).get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
         verifyNoMoreInteractions(kvStore, engineServiceReference);
 
-        assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter()
-                .alpha(DBScanEngine.DEFAULT_ALPHA)
-                .beta(DBScanEngine.DEFAULT_BETA)
-                .epsilon(AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON)
-                .engineName("cluster")
-                .distanceMeasureName("alarminspaceandtimedistance").build())));
+        assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(EngineParameterImpl.newBuilder()
+                .engineName("cluster").build())));
     }
 
     @Test
@@ -194,6 +193,7 @@ public class EngineRestImplTest {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         }
         verify(kvStore, times(1)).putAsync(eq(KeyEnum.ENGINE.toString()), argumentCaptor.capture(), eq(ALECRestUtils.ALEC_CONFIG));
+        verify(kvStore, times(1)).get(KeyEnum.ENGINE.toString(), ALECRestUtils.ALEC_CONFIG);
         verifyNoMoreInteractions(kvStore, engineServiceReference);
 
         assertThat(argumentCaptor.getValue(), equalTo(getParameterAsString(getParameter().alpha(DBScanEngine.DEFAULT_ALPHA).build())));

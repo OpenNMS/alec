@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -68,6 +68,7 @@ public class TFClusterer {
     private static final Logger LOG = LoggerFactory.getLogger(TFClusterer.class);
 
     private final TFModel tfModel;
+    private final RemoteModel remoteModel;
     private final Vectorizer vectorizer;
 
     private final double epsilon;
@@ -83,6 +84,18 @@ public class TFClusterer {
         this.tfModel = Objects.requireNonNull(tfModel);
         this.vectorizer = Objects.requireNonNull(vectorizer);
         Objects.requireNonNull(conf);
+        this.remoteModel = null;
+
+        epsilon = conf.getEpsilon();
+        numGraphThreads = conf.getNumGraphProcessingThreads();
+        numTfThreads = conf.getNumTensorFlowProcessingThreads();
+    }
+
+    public TFClusterer(RemoteModel remoteModel, Vectorizer vectorizer, DeepLearningEngineConf conf) {
+        this.remoteModel = Objects.requireNonNull(remoteModel);
+        this.vectorizer = Objects.requireNonNull(vectorizer);
+        Objects.requireNonNull(conf);
+        this.tfModel = null;
 
         epsilon = conf.getEpsilon();
         numGraphThreads = conf.getNumGraphProcessingThreads();
@@ -138,11 +151,7 @@ public class TFClusterer {
     public List<Cluster<AlarmInSpaceTime>> cluster(Graph<CEVertex, CEEdge> g) {
         // Gather the list of vertices with alarms
         final Set<CEVertex> verticesWithAlarms = new LinkedHashSet<>();
-        for (CEVertex v : g.getVertices()) {
-            if (v.hasAlarms()) {
-                verticesWithAlarms.add(v);
-            }
-        }
+        feedVertices(g, verticesWithAlarms);
 
         // Split the graph into disconnected sub-graphs - this has complexity O(|V| + |E|)
         final Set<Set<CEVertex>> subgraphs = weakComponentClusterer.apply(g);
@@ -154,29 +163,10 @@ public class TFClusterer {
 
         // Spawn K TF processing threads
         List<CompletableFuture<Void>> tfProcessingFutures = new LinkedList<>();
-        for (int k = 0; k < numTfThreads; k++) {
-            tfProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
-                        processTfTasks(taskQueue, relationQueue, doneSubmittingTasks);
-                        // The task processer will return when we're done submitting tasks
-                        // and the queue is empty
-                        return null;
-                    }));
-        }
+        feedFutures(taskQueue, relationQueue, doneSubmittingTasks, tfProcessingFutures);
 
         List<CompletableFuture<Void>> subgraphProcessingFutures = new LinkedList<>();
-        for (Set<CEVertex> subgraph : subgraphs) {
-            // Only consider the subgraphs that contain some vertex with an alarm
-            final Set<CEVertex> verticesInSubgraphWithAlarmsAsSet = Sets.intersection(subgraph, verticesWithAlarms);
-            if (verticesInSubgraphWithAlarmsAsSet.isEmpty()) {
-                // Ignore this subgraph
-                continue;
-            }
-
-            subgraphProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
-                processSubgraph(verticesInSubgraphWithAlarmsAsSet, taskQueue);
-                return null;
-            }, graphExecutor));
-        }
+        feedSubGraph(verticesWithAlarms, subgraphs, taskQueue, subgraphProcessingFutures);
 
         // Wait for the graph processing threads to complete
         CompletableFuture<Void> subgraphProcessed = CompletableFuture.allOf(subgraphProcessingFutures.toArray(new CompletableFuture[0]));
@@ -193,6 +183,21 @@ public class TFClusterer {
         Map<String, Integer> alarmIdToClusterId = new LinkedHashMap<>();
         Map<Integer, List<AlarmInSpaceTime>> clustersById = new LinkedHashMap<>();
 
+        processSubGraph(relationQueue, subgraphProcessed, relationsProcessed, nextClusterIndex, alarmIdToClusterId, clustersById);
+
+        // Build clusters from the maps
+        List<Cluster<AlarmInSpaceTime>> clusters = new LinkedList<>();
+        for (List<AlarmInSpaceTime> clusterAsList : clustersById.values()) {
+            Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
+            for (AlarmInSpaceTime point : clusterAsList) {
+                cluster.addPoint(point);
+            }
+            clusters.add(cluster);
+        }
+        return clusters;
+    }
+
+    private static void processSubGraph(BlockingQueue<TFClustererTasks.RelatesTo> relationQueue, CompletableFuture<Void> subgraphProcessed, CompletableFuture<Void> relationsProcessed, int nextClusterIndex, Map<String, Integer> alarmIdToClusterId, Map<Integer, List<AlarmInSpaceTime>> clustersById) {
         while (!subgraphProcessed.isDone()
                 || !relationsProcessed.isDone()
                 || !relationQueue.isEmpty()) {
@@ -210,54 +215,82 @@ public class TFClusterer {
                 // is either a1 or a2 already in a cluster?
                 Integer a1c = alarmIdToClusterId.get(a1.getAlarmId());
                 Integer a2c = alarmIdToClusterId.get(a2.getAlarmId());
-                if (a1c == null && a2c == null) {
-                    // no existing cluster, create a new one
-                    int clusterIndex = ++nextClusterIndex;
-                    alarmIdToClusterId.put(a1.getAlarmId(), clusterIndex);
-                    alarmIdToClusterId.put(a2.getAlarmId(), clusterIndex);
-                    clustersById.put(clusterIndex, new LinkedList<>(Arrays.asList(a1, a2)));
-                } else if (a1c != null && a2c == null) {
-                    // a1 is already in a cluster, but a2 is not, add a2 to the same cluster
-                    int clusterIndex = a1c;
-                    alarmIdToClusterId.put(a2.getAlarmId(), clusterIndex);
-                    clustersById.get(clusterIndex).add(a2);
-                } else if (a1c == null && a2c != null) {
-                    // a2 is already in a cluster, but a1 is not, add a1 to the same cluster
-                    int clusterIndex = a2c;
-                    alarmIdToClusterId.put(a1.getAlarmId(), clusterIndex);
-                    clustersById.get(clusterIndex).add(a1);
-                } else if (!a1c.equals(a2c)) {
-                    // they are both already in clusters, but not the same cluster
-                    // merge the clusters
-                    int clusterIndexToMergeTo = a1c;
-                    int clusterIndexToMergeFrom = a2c;
-
-                    List<AlarmInSpaceTime> clusterToMergeTo = clustersById.get(clusterIndexToMergeTo);
-                    for (AlarmInSpaceTime alarm : clustersById.remove(clusterIndexToMergeFrom)) {
-                        clusterToMergeTo.add(alarm);
-                        alarmIdToClusterId.put(alarm.getAlarmId(), clusterIndexToMergeTo);
-                    }
-                }
+                nextClusterIndex = getNextClusterIndex(nextClusterIndex, alarmIdToClusterId, clustersById, a1, a2, a1c, a2c);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
                 LOG.info("Interrupted while waiting for results. Aborting cluster operation.");
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             }
         }
-
-        // Build clusters from the maps
-        List<Cluster<AlarmInSpaceTime>> clusters = new LinkedList<>();
-        for (List<AlarmInSpaceTime> clusterAsList : clustersById.values()) {
-            Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
-            for (AlarmInSpaceTime point : clusterAsList) {
-                cluster.addPoint(point);
-            }
-            clusters.add(cluster);
-        }
-        return clusters;
     }
 
-    private void processSubgraph(Set<CEVertex> verticesInSubgraphWithAlarmsAsSet, BlockingQueue<TFClustererTasks.Task> taskQueue) {
+    private static int getNextClusterIndex(int nextClusterIndex, Map<String, Integer> alarmIdToClusterId, Map<Integer, List<AlarmInSpaceTime>> clustersById, AlarmInSpaceTime a1, AlarmInSpaceTime a2, Integer a1c, Integer a2c) {
+        if (a1c == null && a2c == null) {
+            // no existing cluster, create a new one
+            int clusterIndex = ++nextClusterIndex;
+            alarmIdToClusterId.put(a1.getAlarmId(), clusterIndex);
+            alarmIdToClusterId.put(a2.getAlarmId(), clusterIndex);
+            clustersById.put(clusterIndex, new LinkedList<>(Arrays.asList(a1, a2)));
+        } else if (a1c != null && a2c == null) {
+            // a1 is already in a cluster, but a2 is not, add a2 to the same cluster
+            int clusterIndex = a1c;
+            alarmIdToClusterId.put(a2.getAlarmId(), clusterIndex);
+            clustersById.get(clusterIndex).add(a2);
+        } else if (a1c == null) {
+            // a2 is already in a cluster, but a1 is not, add a1 to the same cluster
+            int clusterIndex = a2c;
+            alarmIdToClusterId.put(a1.getAlarmId(), clusterIndex);
+            clustersById.get(clusterIndex).add(a1);
+        } else if (!a1c.equals(a2c)) {
+            // they are both already in clusters, but not the same cluster
+            // merge the clusters
+            int clusterIndexToMergeTo = a1c;
+            int clusterIndexToMergeFrom = a2c;
+
+            List<AlarmInSpaceTime> clusterToMergeTo = clustersById.get(clusterIndexToMergeTo);
+            for (AlarmInSpaceTime alarm : clustersById.remove(clusterIndexToMergeFrom)) {
+                clusterToMergeTo.add(alarm);
+                alarmIdToClusterId.put(alarm.getAlarmId(), clusterIndexToMergeTo);
+            }
+        }
+        return nextClusterIndex;
+    }
+
+    private void feedSubGraph(Set<CEVertex> verticesWithAlarms, Set<Set<CEVertex>> subgraphs, BlockingQueue<TFClustererTasks.Task> taskQueue, List<CompletableFuture<Void>> subgraphProcessingFutures) {
+        for (Set<CEVertex> subgraph : subgraphs) {
+            // Only consider the subgraphs that contain some vertex with an alarm
+            final Set<CEVertex> verticesInSubgraphWithAlarmsAsSet = Sets.intersection(subgraph, verticesWithAlarms);
+            if (verticesInSubgraphWithAlarmsAsSet.isEmpty()) {
+                // Ignore this subgraph
+                continue;
+            }
+
+            subgraphProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
+                processSubGraph(verticesInSubgraphWithAlarmsAsSet, taskQueue);
+                return null;
+            }, graphExecutor));
+        }
+    }
+
+    private void feedFutures(BlockingQueue<TFClustererTasks.Task> taskQueue, BlockingQueue<TFClustererTasks.RelatesTo> relationQueue, AtomicBoolean doneSubmittingTasks, List<CompletableFuture<Void>> tfProcessingFutures) {
+        for (int k = 0; k < numTfThreads; k++) {
+            tfProcessingFutures.add(CompletableFuture.supplyAsync(() -> {
+                processTfTasks(taskQueue, relationQueue, doneSubmittingTasks);
+                // The task processer will return when we're done submitting tasks
+                // and the queue is empty
+                return null;
+            }));
+        }
+    }
+
+    private static void feedVertices(Graph<CEVertex, CEEdge> g, Set<CEVertex> verticesWithAlarms) {
+        for (CEVertex v : g.getVertices()) {
+            if (v.hasAlarms()) {
+                verticesWithAlarms.add(v);
+            }
+        }
+    }
+
+    private void processSubGraph(Set<CEVertex> verticesInSubgraphWithAlarmsAsSet, BlockingQueue<TFClustererTasks.Task> taskQueue) {
         LOG.trace("Graph Processing thread started.");
         // Compute the distance between all of the vertices with alarms in this subgraph
         final List<CEVertex> verticesInSubgraphWithAlarms = new ArrayList<>(verticesInSubgraphWithAlarmsAsSet);
@@ -289,25 +322,36 @@ public class TFClusterer {
                     continue;
                 }
 
-                LOG.trace("Processing task: {}", task);
-                try {
-                    final TFTaskVisitor visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
-                    task.visit(visitor);
-                    LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
-                } catch (Exception e) {
-                    LOG.error("Error occurred while executing task: {}: {}", task, e.getMessage(), e);
-                }
+                processTask(relationQueue, task);
             } catch (InterruptedException e) {
                 LOG.info("Interrupted while waiting for the next task. Exiting thread.");
+                Thread.currentThread().interrupt();
                 return;
             }
         }
         LOG.trace("TF Processing thread finished.");
     }
 
+    private void processTask(BlockingQueue<TFClustererTasks.RelatesTo> relationQueue, TFClustererTasks.Task task) {
+        LOG.trace("Processing task: {}", task);
+        try {
+            TFTaskVisitor visitor;
+            if (tfModel != null) {
+                visitor = new TFTaskVisitor(tfModel, vectorizer, relationQueue);
+            } else {
+                visitor = new TFTaskVisitor(remoteModel, vectorizer, relationQueue);
+            }
+            task.visit(visitor);
+            LOG.trace("Done processing task. {} related calls total.", visitor.getNumIsRelatedCalls());
+        } catch (Exception e) {
+            LOG.error("Error occurred while executing task: {}: {}", task, e.getMessage(), e);
+        }
+    }
+
     private static class TFTaskVisitor implements TFClustererTasks.TaskVisitor {
 
         private final TFModel tfModel;
+        private final RemoteModel remoteModel;
         private final Vectorizer vectorizer;
         private final BlockingQueue<TFClustererTasks.RelatesTo> relationQueue;
 
@@ -317,6 +361,14 @@ public class TFClusterer {
             this.tfModel = tfModel;
             this.vectorizer = vectorizer;
             this.relationQueue = relationQueue;
+            this.remoteModel = null;
+        }
+
+        public TFTaskVisitor(RemoteModel remoteModel, Vectorizer vectorizer, BlockingQueue<TFClustererTasks.RelatesTo> relationQueue) {
+            this.tfModel = null;
+            this.vectorizer = vectorizer;
+            this.relationQueue = relationQueue;
+            this.remoteModel = remoteModel;
         }
 
         @Override
@@ -332,11 +384,16 @@ public class TFClusterer {
                     final Alarm a2 = alarms.get(j);
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(vertex, a2);
                     final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(inputVector)) {
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
-                    }
+                    isRelated(a1, a1st, a2, a2st, inputVector);
                     numIsRelatedCalls++;
                 }
+            }
+        }
+
+        private void isRelated(Alarm a1, AlarmInSpaceTime a1st, Alarm a2, AlarmInSpaceTime a2st, InputVector inputVector) {
+            if ((tfModel != null && tfModel.isRelated(inputVector)) || (remoteModel!= null && remoteModel.isRelated(inputVector))) {
+                LOG.debug("{} is related to {}", a1.getId(), a2.getId());
+                relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
             }
         }
 
@@ -352,9 +409,7 @@ public class TFClusterer {
                 for (Alarm a2 : v2.getAlarms()) {
                     final AlarmInSpaceTime a2st = new AlarmInSpaceTime(v2, a2);
                     final InputVector inputVector = vectorizer.vectorize(a1st, a2st);
-                    if (tfModel.isRelated(inputVector)) {
-                        relationQueue.add(new TFClustererTasks.RelatesTo(a1st, a2st, inputVector));
-                    }
+                    isRelated(a1, a1st, a2, a2st, inputVector);
                     numIsRelatedCalls++;
                 }
             }

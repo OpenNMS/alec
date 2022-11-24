@@ -115,7 +115,13 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-
+      - sonar:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
 
 commands:
   smoke-test:
@@ -427,3 +433,12 @@ jobs:
             name: Push packages to CloudSmith
             command: .circleci/scripts/publish-cloudsmith.sh
 
+  sonar:
+    executor: build-executor
+    steps:
+      - run:
+          name: Run SonarQube Code Analysis
+          when: always
+          command: |
+            export MAVEN_OPTS="-Xmx12g -XX:ReservedCodeCacheSize=1g -XX:+TieredCompilation"
+            .circleci/scripts/sonar.sh

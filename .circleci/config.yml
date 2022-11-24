@@ -441,4 +441,4 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            mvn sonar:sonar
+            mvn sonar:sonar -P sonar

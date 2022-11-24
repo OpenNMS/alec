@@ -3,6 +3,8 @@ import Add from '@featherds/icon/action/Add'
 import { useRouter } from 'vue-router'
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
+import { markRaw } from 'vue'
+
 const router = useRouter()
 
 const Icons = markRaw({

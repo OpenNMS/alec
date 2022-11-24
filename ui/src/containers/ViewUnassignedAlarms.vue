@@ -2,9 +2,8 @@
 import UnassignedAlarmCard from '@/components/UnassignedAlarmCard.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import type { Ref } from 'vue'
-import { ref, watch } from 'vue'
+import { ref, watch, markRaw } from 'vue'
 import { remove, includes } from 'lodash'
-import FiltersSeverity from '@/components/FiltersSeverity.vue'
 import ExitToApp from '@featherds/icon/action/ExitToApp'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { FeatherButton } from '@featherds/button'
@@ -17,9 +16,9 @@ import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { groupBy, keys } from 'lodash'
 import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
 import { isToday, isYesterday, isThisWeek } from 'date-fns'
+import { TAlarm } from '@/types/TSituation'
 
 const timePeriods = [
 	{ id: 1, name: 'No filter' },
@@ -36,7 +35,7 @@ const situationStore = useSituationsStore()
 situationStore.getUnassignedAlarms()
 situationStore.getSituations()
 
-const alarms = ref([])
+const alarms = ref([]) as Ref<TAlarm[]>
 const alarmIds = ref([]) as Ref<number[]>
 const selectAll = ref(false)
 const showSituations = ref(false)
@@ -47,7 +46,7 @@ const nodeFilters = ref(['all'])
 const severityFilters = ref(['all'])
 const selectedTimePeriod = ref(timePeriods[0].id)
 
-const showPanel = true
+const showPanel = ref(true)
 
 watch(
 	() => situationStore.unassignedAlarms,
@@ -74,7 +73,7 @@ const updateListNodes = (nodes: string[]) => {
 	updateList()
 }
 
-const timePeriodChanged = (value) => {
+const timePeriodChanged = (value: number) => {
 	selectedTimePeriod.value = value
 	updateList()
 }
@@ -93,8 +92,6 @@ const updateList = () => {
 	}
 
 	if (selectedTimePeriod.value !== 1) {
-		console.log(selectedTimePeriod.value)
-
 		switch (selectedTimePeriod.value) {
 			case 2:
 				alarmsFiltered = alarmsFiltered.filter((a) => isToday(a.firstEventTime))
@@ -111,12 +108,12 @@ const updateList = () => {
 				break
 		}
 	}
-	alarms.value = alarmsFiltered
+	alarms.value = alarmsFiltered as TAlarm[]
 }
 
 const handleSelect = () => {
 	if (selectAll.value) {
-		alarmIds.value = alarms.value.map((a) => a.id)
+		alarmIds.value = alarms.value.map((a: TAlarm) => a.id)
 	} else {
 		alarmIds.value = []
 	}
@@ -186,7 +183,7 @@ const handleMoveClick = () => {
 						:label="''"
 						v-model="selectedTimePeriod"
 						vertical
-						@update:modelValue="timePeriodChanged"
+						@update:modelValue="(v) => timePeriodChanged(v as number)"
 					>
 						<FeatherRadio
 							v-for="item in timePeriods"
@@ -269,7 +266,7 @@ const handleMoveClick = () => {
 }
 
 .alarms {
-	height: 600px;
+	height: 800px;
 	overflow-y: auto;
 	display: flex;
 	flex-wrap: nowrap;

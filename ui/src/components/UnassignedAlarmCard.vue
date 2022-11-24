@@ -14,7 +14,7 @@ const props = defineProps<{
 </script>
 
 <template>
-	<div class="alarm">
+	<div class="alarm" :class="{ selected: props.selected }">
 		<div class="alarmInfo">
 			<div class="triangle" :class="[`${alarm.severity.toLowerCase()}`]"></div>
 			<FeatherCheckbox

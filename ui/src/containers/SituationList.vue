@@ -2,13 +2,14 @@
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SimplePagination from '@/components/SimplePagination.vue'
-import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import ChipListByProperty from '@/components/ChipListByProperty.vue'
+
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import Add from '@featherds/icon/action/Add'
 import View from '@featherds/icon/action/View'
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, markRaw } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
@@ -215,10 +216,11 @@ const resetFilters = () => {
 				<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
 				<span>Reset Filters</span>
 			</FeatherButton>
-			<FiltersSeverity
+
+			<ChipListByProperty
 				:alarms="situationStore.situations"
-				@selected-severities="updateList"
-				:pre-selected="state.filterSeverities"
+				@selected-option="updateList"
+				property="severity"
 			/>
 
 			<div class="autocomplete">

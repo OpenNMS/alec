@@ -23,7 +23,9 @@
     "rules": {
       "vue/script-setup-uses-vars": "error",
       "indent": [
-          "error", "tab"
+          "error", "tab", {
+            "SwitchCase": 1
+        }
         ],
         "semi": [
           "error",

@@ -37,22 +37,26 @@ public class CreateSituationPayloadImpl implements CreateSituationPayload {
     private final List<String> alarmIdList;
     private final String diagnosticText;
     private final String description;
+    private final String feedback;
+
 
     private CreateSituationPayloadImpl(Builder builder) {
         alarmIdList = builder.alarmIdList;
         diagnosticText = builder.diagnosticText;
         description = builder.description;
+        feedback = builder.feedback;
     }
 
     public static Builder newBuilder() {
         return new Builder();
     }
 
-    public static Builder newBuilder(CreateSituationPayloadImpl copy) {
+    public static Builder newBuilder(CreateSituationPayload copy) {
         Builder builder = new Builder();
         builder.alarmIdList = copy.getAlarmIdList();
         builder.diagnosticText = copy.getDiagnosticText();
         builder.description = copy.getDescription();
+        builder.feedback = copy.getFeedback();
         return builder;
     }
 
@@ -61,8 +65,13 @@ public class CreateSituationPayloadImpl implements CreateSituationPayload {
         private List<String> alarmIdList;
         private String diagnosticText;
         private String description;
+        private String feedback;
 
         private Builder() {
+        }
+
+        public static Builder newBuilder() {
+            return new Builder();
         }
 
         public Builder alarmIdList(List<String> val) {
@@ -77,6 +86,11 @@ public class CreateSituationPayloadImpl implements CreateSituationPayload {
 
         public Builder description(String val) {
             description = val;
+            return this;
+        }
+
+        public Builder feedback(String val) {
+            feedback = val;
             return this;
         }
 
@@ -98,5 +112,10 @@ public class CreateSituationPayloadImpl implements CreateSituationPayload {
     @Override
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String getFeedback() {
+        return feedback;
     }
 }

@@ -116,6 +116,7 @@ public class Driver implements EngineRegistry {
         initAsync();
     }
 
+    @SuppressWarnings("java:S1149")
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         LOG.info("Creating engine with name: {}", engineFactory.getName());
@@ -179,8 +180,9 @@ public class Driver implements EngineRegistry {
                 // Expose the metrics for this engine via JMX
                 jmxReporter.start();
             } catch (Exception e) {
-                if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     LOG.warn("Initialization was interrupted.");
+                    Thread.currentThread().interrupt();
                 } else {
                     LOG.error("Initialization failed with exception.", e);
                 }
@@ -193,7 +195,7 @@ public class Driver implements EngineRegistry {
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("ALEC Driver Tick");
+                    Thread.currentThread().setName("ALEC Driver Tick -- " + engineFactory.getParameters());
                     try (com.codahale.metrics.Timer.Context context = ticks.time()) {
                         engine.tick(System.currentTimeMillis());
                     } catch (Exception e) {
@@ -227,6 +229,7 @@ public class Driver implements EngineRegistry {
                 }
             } catch (InterruptedException e) {
                 LOG.error("Interrupted while waiting for initialization thread to stop.");
+                Thread.currentThread().interrupt();
             }
         }
 

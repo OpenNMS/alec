@@ -130,7 +130,7 @@ public class SituationRestImpl implements SituationRest {
         try {
             List<SituationStatus> situationStatusList = new ArrayList<>();
             situationDatasource.getSituations().forEach(o -> situationStatusList.add(SituationStatusImpl.newBuilder()
-                    .id(o.getId())
+                    .id(String.valueOf(o.getLongId()))
                     .status(o.getStatus())
                     .build()));
             List<SituationStatus> sorted = situationStatusList.stream().sorted(Comparator.comparing(SituationStatus::getStatus)).collect(Collectors.toList());

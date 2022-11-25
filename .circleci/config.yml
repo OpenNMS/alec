@@ -76,7 +76,6 @@ workflows:
               ignore:
                 - develop
                 - /^release-.*/
-                - feature/fix_smoke_test
             tags:
               ignore: /^v.*/
       - smoke-test-full:
@@ -88,7 +87,6 @@ workflows:
               only:
                 - develop
                 - /^release-.*/
-                - feature/fix_smoke_test
             tags:
               only: /^v.*/
 

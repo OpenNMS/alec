@@ -25,7 +25,7 @@ watch(props, () => {
 		@update:modelValue="emit('drawer-closed')"
 	>
 		<div class="content">
-			<h4>Click on situation where to move the alarms:</h4>
+			<h4>Choose the situation where to move the alarms:</h4>
 			<div class="situation-list">
 				<div
 					class="card"

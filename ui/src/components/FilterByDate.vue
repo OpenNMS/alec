@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
+import { watch, ref } from 'vue'
 
 const props = defineProps<{
 	preSelected?: number

@@ -17,7 +17,7 @@ import { useRouter } from 'vue-router'
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { isToday, isYesterday, isThisWeek } from 'date-fns'
+import { filterListByDate } from '@/helpers/utils'
 
 const Icons = markRaw({
 	Add,
@@ -115,22 +115,6 @@ const search = (q: string) => {
 	loading.value = false
 }
 
-const filterByTime = (situations: TSituation[]) => {
-	let filtered = situations
-	switch (selectedTimeStart.value) {
-		case 2:
-			filtered = situations.filter((a) => isToday(a.firstEventTime))
-			break
-		case 3:
-			filtered = situations.filter((a) => isYesterday(a.firstEventTime))
-			break
-		case 4:
-			filtered = situations.filter((a) => isThisWeek(a.firstEventTime))
-			break
-	}
-	return filtered
-}
-
 const filterByNode = () => {
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
 		let filtered = situationStore.situations
@@ -163,7 +147,10 @@ const applyFilters = (situations: TSituation[]) => {
 	}
 
 	if (selectedTimeStart.value !== 1) {
-		filteredSituations = filterByTime(filteredSituations)
+		filteredSituations = filterListByDate(
+			selectedTimeStart.value,
+			filteredSituations
+		) as TSituation[]
 	}
 	state.situations = filteredSituations
 	totalSituations.value = filteredSituations.length
@@ -407,7 +394,9 @@ h2 {
 .map-search {
 	z-index: 1000;
 	width: 400px !important;
+	display: flex;
 }
+
 .footer-pager {
 	display: flex;
 	justify-content: center;
@@ -416,10 +405,6 @@ h2 {
 	> :first-child {
 		margin-right: 15px;
 	}
-}
-
-.map-search {
-	display: flex;
 }
 
 .empty {

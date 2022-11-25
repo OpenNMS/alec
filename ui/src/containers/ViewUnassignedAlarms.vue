@@ -16,9 +16,9 @@ import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
-import { isToday, isYesterday, isThisWeek } from 'date-fns'
 import { TAlarm } from '@/types/TSituation'
 import FilterByDate from '@/components/FilterByDate.vue'
+import { filterListByDate } from '@/helpers/utils'
 
 const Icons = markRaw({
 	ArrowBack,
@@ -88,21 +88,10 @@ const updateList = () => {
 	}
 	//filter by date
 	if (selectedTimePeriod.value !== 1) {
-		switch (selectedTimePeriod.value) {
-			case 2:
-				alarmsFiltered = alarmsFiltered.filter((a) => isToday(a.firstEventTime))
-				break
-			case 3:
-				alarmsFiltered = alarmsFiltered.filter((a) =>
-					isYesterday(a.firstEventTime)
-				)
-				break
-			case 4:
-				alarmsFiltered = alarmsFiltered.filter((a) =>
-					isThisWeek(a.firstEventTime)
-				)
-				break
-		}
+		alarmsFiltered = filterListByDate(
+			selectedTimePeriod.value,
+			alarmsFiltered
+		) as TAlarm[]
 	}
 	alarms.value = alarmsFiltered as TAlarm[]
 }

@@ -8,7 +8,8 @@
       "plugin:vue/vue3-essential",
       "plugin:@typescript-eslint/recommended",
       "prettier",
-      "./.eslintrc-auto-import.json"
+      "./.eslintrc-auto-import.json",
+      "plugin:vue-scoped-css/vue3-recommended"
     ],
     "parser": "vue-eslint-parser",
     "parserOptions": {

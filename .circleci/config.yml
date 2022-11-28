@@ -53,7 +53,15 @@ workflows:
           filters:
             tags:
               only: /.*/
+
       - build-debian:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+      - sonar:
           context: "OpenNMS Build"
           requires:
             - build
@@ -115,13 +123,7 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-      - sonar:
-          context: "OpenNMS Build"
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
+
 
 commands:
   smoke-test:
@@ -442,4 +444,5 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            mvn sonar:sonar -P sonar -Dsonar.projectKey=opennms
+            mvn -Psonar verify \ 
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 

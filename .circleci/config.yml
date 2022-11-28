@@ -444,5 +444,5 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            mvn -Psonar -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline \
+            mvn -Psonar -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 

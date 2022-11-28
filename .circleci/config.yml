@@ -46,78 +46,79 @@ workflows:
           filters:
             tags:
               only: /.*/
-#      - build:
-#          context: "OpenNMS Build"
-#          requires:
-#            - pre-build
-#          filters:
-#            tags:
-#              only: /.*/
-#      - build-debian:
-#          context: "OpenNMS Build"
-#          requires:
-#            - build
-#          filters:
-#            tags:
-#              only: /.*/
-#      - build-docs:
-#          context: "OpenNMS Build"
-#          requires:
-#            - pre-build
-#          filters:
-#            tags:
-#              only: /.*/
-#      - smoke-test-commit:
-#          context: "OpenNMS Build"
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              ignore:
-#                - develop
-#                - /^release-.*/
-#            tags:
-#              ignore: /^v.*/
-#      - smoke-test-full:
-#          context: "OpenNMS Build"
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              only:
-#                - develop
-#                - /^release-.*/
-#            tags:
-#              only: /^v.*/
-      # Run deploy jobs on version tags, release branches and develop
-#      - deploy-maven:
-#          context: "OpenNMS Build"
-#          requires:
-#            - smoke-test-commit
-#            - smoke-test-full
-#          filters:
-#            # Maven deploy requires GPG signing for releases - we do this manually
-#            branches:
-#              only:
-#                - develop
-#                - /release-.*/
-#      - deploy-packages:
-#          context: "OpenNMS Build"
-#          requires:
-#            - smoke-test-commit
-#            - smoke-test-full
-#            - build-debian
-#          filters:
-#            tags:
-#              only: /^v.*/
-#            branches:
-#              only:
-#                - develop
-#                - /release-.*/
-      - sonar:
+      - build:
           context: "OpenNMS Build"
           requires:
             - pre-build
+          filters:
+            tags:
+              only: /.*/
+      - build-debian:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+      - build-docs:
+          context: "OpenNMS Build"
+          requires:
+            - pre-build
+          filters:
+            tags:
+              only: /.*/
+      - smoke-test-commit:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - develop
+                - /^release-.*/
+            tags:
+              ignore: /^v.*/
+      - smoke-test-full:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - /^release-.*/
+            tags:
+              only: /^v.*/
+
+      # Run deploy jobs on version tags, release branches and develop
+      - deploy-maven:
+          context: "OpenNMS Build"
+          requires:
+            - smoke-test-commit
+            - smoke-test-full
+          filters:
+            # Maven deploy requires GPG signing for releases - we do this manually
+            branches:
+              only:
+                - develop
+                - /release-.*/
+      - deploy-packages:
+          context: "OpenNMS Build"
+          requires:
+            - smoke-test-commit
+            - smoke-test-full
+            - build-debian
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - develop
+                - /release-.*/
+      - sonar:
+          context: "OpenNMS Build"
+          requires:
+            - build
           filters:
             tags:
               only: /.*/

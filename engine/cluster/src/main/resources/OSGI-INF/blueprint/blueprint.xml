@@ -2,7 +2,7 @@
 >
 
     <!-- Create and expose the engine factory -->
-    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="30">
+    <service interface="org.opennms.alec.engine.api.EngineFactory">
         <bean class="org.opennms.alec.engine.cluster.ClusterEngineFactory"/>
     </service>
 

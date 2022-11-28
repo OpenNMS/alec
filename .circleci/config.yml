@@ -445,4 +445,4 @@ jobs:
           when: always
           command: |
             mvn -Psonar -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.login="SONAR_TOKEN"

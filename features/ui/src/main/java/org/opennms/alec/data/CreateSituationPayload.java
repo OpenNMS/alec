@@ -39,4 +39,6 @@ public interface CreateSituationPayload {
     String getDiagnosticText();
 
     String getDescription();
+
+    String getFeedback();
 }

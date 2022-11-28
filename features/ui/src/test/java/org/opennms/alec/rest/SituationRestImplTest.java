@@ -28,6 +28,7 @@ import org.opennms.alec.data.AlarmSetImpl;
 import org.opennms.alec.data.CreateSituationPayloadImpl;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.datasource.api.Alarm;
+import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
@@ -65,10 +66,12 @@ public class SituationRestImplTest {
     @Test
     public void rejected() throws InterruptedException {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.rejected("11")) {
+        try (Response actual = underTest.rejected("11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(0));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
@@ -143,7 +146,7 @@ public class SituationRestImplTest {
     @Test
     public void addAlarms() throws InterruptedException {
         ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
-        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("7", "8")).build())) {
+        try (Response actual = underTest.addAlarm(AlarmSetImpl.newBuilder().situationId("11").alarmIdList(Arrays.asList("7", "8")).feedback("feedback").build())) {
             assertThat(actual.getStatus(), equalTo(200));
             verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
             assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(6));
@@ -151,6 +154,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("2", "3", "4", "5", "7", "8")), equalTo(true));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm [[7, 8]] to situation [11] -- user feedback :[feedback]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(4)).getSituations();
         }
@@ -226,6 +231,10 @@ public class SituationRestImplTest {
                 .setLongId(10)
                 .addAlarm(alarms.get(0))
                 .addAlarm(alarms.get(1))
+                .setSeverity(Severity.MAJOR)
+                .setLastTime(System.currentTimeMillis())
+                .setEngineParameter("engine test")
+                .setStatus(Status.CREATED)
                 .build());
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("11")
@@ -234,6 +243,10 @@ public class SituationRestImplTest {
                 .addAlarm(alarms.get(3))
                 .addAlarm(alarms.get(4))
                 .addAlarm(alarms.get(5))
+                .setSeverity(Severity.MAJOR)
+                .setLastTime(System.currentTimeMillis())
+                .setEngineParameter("engine test")
+                .setStatus(Status.CREATED)
                 .build());
     }
 }

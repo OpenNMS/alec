@@ -200,7 +200,7 @@ public class Driver implements EngineRegistry {
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("ALEC Driver Tick");
+                    Thread.currentThread().setName("ALEC Driver Tick -- " + engineFactory.getParameters());
                     try (com.codahale.metrics.Timer.Context context = ticks.time()) {
                         engine.tick(System.currentTimeMillis());
                     } catch (Exception e) {

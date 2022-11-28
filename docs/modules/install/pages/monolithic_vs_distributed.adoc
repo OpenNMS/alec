@@ -1,28 +1,28 @@
-= Monilithic vs Distributed
+= Monolithic Versus Distributed Setup
 
-ALEC can be installed in the OpenNMS JVM as an additional service (monolithic deployment) or externally on the Sentinel JVM (distributed deployment).
+You can install ALEC in the OpenNMS JVM as an additional service (monolithic deployment) or externally on the Sentinel JVM (distributed deployment).
 
-If you are looking for something easy to set up to perform an evaluation or test with your existing environment, consider the xref:monolithic_install.adoc[monolithic deployment].
+If you are looking for something easy to set up evaluate or test ALEC with your existing environment, consider the xref:monolithic_install.adoc[monolithic deployment].
 
-If you are considering deploying ALEC in a production environment and have load, scaling and resiliency requirements, consider the  xref:distributed_install.adoc[distributed deployment].
+If you are considering deploying ALEC in a production environment and have load, scaling, and resiliency requirements, consider the xref:distributed_install.adoc[distributed deployment].
 
 == Monolithic Deployment
 
 === Pros
 
-1. Easy to setup
+1. Easy to set up.
 
-=== Cons / Limitations
+=== Cons/Limitations
 
-1. Additional load on your OpenNMS instance
+1. Additional load on your OpenNMS instance.
 
 == Distributed Deployment
 
 === Pros
 
-1. Take load off of the core JVM
-2. Fault tolerant setup (ALEC runs in HA)
+1. Take load off of the core JVM.
+2. Fault tolerant setup (ALEC runs in high availability).
 
 === Cons / Limitations
 
-1. Additional complexity (more components to manage)
+1. Additional complexity (more components to manage).

@@ -83,6 +83,11 @@ public class DeepLearningEngineFactory implements EngineFactory {
         return this;
     }
 
+    @Override
+    public String getParameters() {
+        return String.format("engine: %s", getName());
+    }
+
     public void setToken(String token) {
         this.token = token;
     }

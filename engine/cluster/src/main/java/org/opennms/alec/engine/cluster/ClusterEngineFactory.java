@@ -55,4 +55,8 @@ public class ClusterEngineFactory implements EngineFactory {
         return this;
     }
 
+    @Override
+    public String getParameters() {
+        return String.format("engine: %s", getName());
+    }
 }

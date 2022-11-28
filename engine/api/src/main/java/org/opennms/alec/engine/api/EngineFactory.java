@@ -40,4 +40,6 @@ public interface EngineFactory {
 
     EngineFactory getEngineFactory();
 
+    String getParameters();
+
 }

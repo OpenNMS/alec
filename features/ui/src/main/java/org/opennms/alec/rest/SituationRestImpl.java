@@ -80,20 +80,22 @@ public class SituationRestImpl implements SituationRest {
     }
 
     @Override
-    public Response rejected(String situationId) {
+    public Response rejected(String situationId, String feedback) {
         try {
             Optional<Situation> situationOptional = situationDatasource.getSituation(Integer.parseInt(situationId));
             if (situationOptional.isPresent()) {
-                Situation situation = situationOptional.get();
+                final Situation situation = situationOptional.get();
                 //check status
                 if (Status.REJECTED.equals(situation.getStatus())) {
                     LOG.debug("Situation {} already rejected", situationId);
                     return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
                 }
+                feedback = String.format("reject situation [%s] -- user feedback :[%s]", situationId, feedback);
                 Situation situationRejected = ImmutableSituation.newBuilderFrom(situation)
                         .setStatus(Status.REJECTED)
                         .setAlarms(Collections.emptySet())
                         .setSeverity(Severity.CLEARED)
+                        .addFeedback(feedback)
                         .build();
                 return forwardAndStoreSituation(situationRejected, situationRejected.getAlarms());
             }
@@ -163,7 +165,8 @@ public class SituationRestImpl implements SituationRest {
                 if (oldSituation.getAlarms().equals(alarmSet)) {
                     return ALECRestUtils.noContent();
                 }
-                return forwardAndStoreSituation(oldSituation, alarmSet);
+                String feedback = String.format("add alarm [%s] to situation [%s] -- user feedback :[%s]", alarm.getAlarmIdList(), alarm.getSituationId(), alarm.getFeedback());
+                return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).build(), alarmSet);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -186,7 +189,8 @@ public class SituationRestImpl implements SituationRest {
                 if (oldSituation.getAlarms().equals(alarmSet)) {
                     return ALECRestUtils.noContent();
                 } else {
-                    return forwardAndStoreSituation(oldSituation, alarmSet);
+                    String feedback = String.format("remove alarms [%s] to situation [%s] -- user feedback :[%s]", alarm.getAlarmIdList(), situationId, alarm.getFeedback());
+                    return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).build(), alarmSet);
                 }
             }
         } catch (InterruptedException e) {
@@ -218,6 +222,8 @@ public class SituationRestImpl implements SituationRest {
                 .setDiagnosticText(createSituationPayload.getDiagnosticText())
                 .setDescription(createSituationPayload.getDescription())
                 .setSeverity(maxSeverity)
+                .setEngineParameter("user created")
+                .addFeedback(createSituationPayload.getFeedback())
                 .build();
         if (situation.getAlarms().size() >= 2) {
             situationDatasource.forwardSituation(situation);

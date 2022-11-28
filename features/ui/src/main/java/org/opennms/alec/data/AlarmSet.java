@@ -38,4 +38,6 @@ public interface AlarmSet {
     String getSituationId();
 
     List<String> getAlarmIdList();
+
+    String getFeedback();
 }

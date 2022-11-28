@@ -29,6 +29,7 @@
 package org.opennms.alec.engine.deeplearning;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import org.opennms.alec.engine.api.EngineFactory;
 import org.osgi.framework.BundleContext;
@@ -38,10 +39,22 @@ import com.codahale.metrics.MetricRegistry;
 public class DeepLearningEngineFactory implements EngineFactory {
     private final BundleContext bundleContext;
     private final DeepLearningEngineConf conf;
+    private String token;
+    private String uri;
+    private boolean isRemote = false;
 
     public DeepLearningEngineFactory(BundleContext bundleContext, DeepLearningEngineConf conf) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
         this.conf = Objects.requireNonNull(conf);
+        this.token = "";
+        this.uri = "";
+    }
+
+    public DeepLearningEngineFactory(DeepLearningEngineConf conf, String token, String uri) {
+        this.conf = Objects.requireNonNull(conf);
+        this.token = token;
+        this.uri = uri;
+        this.bundleContext = null;
     }
 
     @Override
@@ -50,13 +63,19 @@ public class DeepLearningEngineFactory implements EngineFactory {
     }
 
     @Override
-    public String toString() {
-        return getName();
+    public String getNameConf() {
+        return new StringJoiner(", ", getName() + "[", "]")
+                .add("isRemote=" + isRemote)
+                .toString();
     }
 
     @Override
     public DeepLearningEngine createEngine(MetricRegistry metrics) {
-        return new DeepLearningEngine(metrics, bundleContext, conf);
+        if (!isRemote) {
+            return new DeepLearningEngine(metrics, bundleContext, conf);
+        } else {
+            return new DeepLearningEngine(metrics, conf, token, uri);
+        }
     }
 
     @Override
@@ -68,5 +87,30 @@ public class DeepLearningEngineFactory implements EngineFactory {
     public String getParameters() {
         return String.format("engine: %s", getName());
     }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public boolean isRemote() {
+        return isRemote;
+    }
+
+    public void setRemote(boolean remote) {
+        isRemote = remote;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
 
 }

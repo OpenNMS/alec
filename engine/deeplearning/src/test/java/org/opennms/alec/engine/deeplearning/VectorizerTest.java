@@ -29,8 +29,8 @@
 package org.opennms.alec.engine.deeplearning;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

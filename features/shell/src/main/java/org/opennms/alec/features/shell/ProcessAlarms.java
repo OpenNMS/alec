@@ -51,6 +51,7 @@ import org.opennms.alec.driver.test.TestDriver;
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.deeplearning.DeepLearningEngineFactory;
 
 /**
  * Input an XML Document of Alarms and Output an XML document of Situations.
@@ -59,6 +60,7 @@ import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
  */
 @Command(scope = "opennms-alec", name = "process-alarms", description = "Alarm Processing Runner")
 @Service
+@SuppressWarnings("java:S106")
 public class ProcessAlarms implements Action {
 
     @Reference
@@ -85,7 +87,7 @@ public class ProcessAlarms implements Action {
     @Completion(EngineNameCompleter.class)
     private String engineName;
 
-    @Option(name = "--measure", aliases = {"-m"}, description = "Distance Measure", required = true)
+    @Option(name = "--measure", aliases = {"-m"}, description = "Distance Measure")
     @Completion(DistanceMeasureCompleter.class)
     private String distanceMeasureName;
 
@@ -98,19 +100,34 @@ public class ProcessAlarms implements Action {
     @Option(name = "--beta", description = "Define beta")
     private double beta = 0.55257784d;
 
+    @Option(name = "--token", description = "Azure token for remote model")
+    private String token;
+
+    @Option(name = "--uri", description = "Azure uri for remote model")
+    private String uri;
+
     @Override
     public Object execute() throws Exception {
         EngineFactory engineFactory = getEngineFactory();
-        final DistanceMeasureFactory distanceMeasureFactory = getDistanceMeasureFactory();
+
         if ("dbscan".equals(engineFactory.getName())) {
+            final DistanceMeasureFactory distanceMeasureFactory = getDistanceMeasureFactory();
             ((DBScanEngineFactory) engineFactory).setDistanceMeasureFactoryName(distanceMeasureFactory.getName());
             ((DBScanEngineFactory) engineFactory).setEpsilon(epsilon);
             ((DBScanEngineFactory) engineFactory).setAlpha(alpha);
             ((DBScanEngineFactory) engineFactory).setBeta(beta);
+        } else if ("deeplearning".equals(engineFactory.getName()) && !token.isEmpty() && !uri.isEmpty()) {
+            ((DeepLearningEngineFactory) engineFactory).setToken(token);
+            ((DeepLearningEngineFactory) engineFactory).setUri(uri);
+            ((DeepLearningEngineFactory) engineFactory).setRemote(true);
+        } else if ("deeplearning".equals(engineFactory.getName())) {
+            ((DeepLearningEngineFactory) engineFactory).setToken("");
+            ((DeepLearningEngineFactory) engineFactory).setUri("");
+            ((DeepLearningEngineFactory) engineFactory).setRemote(false);
         }
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
         final List<InventoryObject> inventory;
-        if (inventoryIn != null ) {
+        if (inventoryIn != null) {
             inventory = JaxbUtils.getInventory(Paths.get(inventoryIn));
         } else {
             inventory = Collections.emptyList();
@@ -135,7 +152,7 @@ public class ProcessAlarms implements Action {
 
     private void write(List<Situation> situations) throws IOException, JAXBException {
         String filepath = situationsOut == null || situationsOut.isEmpty() ? "situations.xml" : situationsOut;
-        System.out.printf("Writing %d situations to %s.\n", situations.size(), filepath);
+        System.out.printf("Writing %d situations to %s.%n", situations.size(), filepath);
         JaxbUtils.writeSituations(situations, Paths.get(filepath));
     }
 
@@ -145,7 +162,7 @@ public class ProcessAlarms implements Action {
                 .orElseThrow(() -> {
                     final String engineNames = engineFactories.stream()
                             .map(EngineFactory::getName)
-                            .collect(Collectors.joining( "," ));
+                            .collect(Collectors.joining(","));
                     return new RuntimeException("No engine found for " + engineName
                             + ". Available engines include: " + engineNames);
                 });
@@ -157,7 +174,7 @@ public class ProcessAlarms implements Action {
                 .orElseThrow(() -> {
                     final String distanceMeasureNames = distanceMeasureFactories.stream()
                             .map(DistanceMeasureFactory::getName)
-                            .collect(Collectors.joining( "," ));
+                            .collect(Collectors.joining(","));
                     return new RuntimeException("No distance measure found for " + distanceMeasureName
                             + ". Available distance measure include: " + distanceMeasureNames);
                 });

@@ -92,6 +92,9 @@
         <tensorflow.version>1.13.1</tensorflow.version>
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
+        <json-simple.version>1.1.1</json-simple.version>
+        <httpclient-osgi.version>4.5.13</httpclient-osgi.version>
+        <httpcore-osgi.version>4.4.15</httpcore-osgi.version>
     </properties>
 
     <dependencyManagement>
@@ -510,28 +513,6 @@
                     <releaseProfiles>release</releaseProfiles>
                 </configuration>
             </plugin>
-	    <!--
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.7.201606060606</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-	    -->
-
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>

@@ -71,6 +71,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 @Command(scope = "opennms-alec", name = "tensorflow-vectorize", description = "Convert a fault data set to vectors for the purpose of training a TensorFlow model.")
 @Service
+@SuppressWarnings({"java:S106", "java:S112"})
 public class Vectorize implements Action {
 
     @Option(name = "--alarms-in", description = "XML file containing the list of alarms", required = true)
@@ -184,6 +185,11 @@ public class Vectorize implements Action {
         @Override
         public String getName() {
             return "test";
+        }
+
+        @Override
+        public String getNameConf() {
+            return getName();
         }
 
         @Override

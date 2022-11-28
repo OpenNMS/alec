@@ -215,6 +215,8 @@ public class SituationRestImplTest {
             assertThat(actual.getStatus(), equalTo(200));
             List<SituationStatus> situationList = (List<SituationStatus>) actual.getEntity();
             assertThat(situationList.size(), equalTo(2));
+            assertThat(situationList.get(0).getId(), equalTo("10"));
+            assertThat(situationList.get(1).getId(), equalTo("11"));
             verify(situationDatasource, times(1)).getSituations();
         }
     }
@@ -226,6 +228,7 @@ public class SituationRestImplTest {
 
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("10")
+                .setLongId(10)
                 .addAlarm(alarms.get(0))
                 .addAlarm(alarms.get(1))
                 .setSeverity(Severity.MAJOR)
@@ -235,6 +238,7 @@ public class SituationRestImplTest {
                 .build());
         situations.add(ImmutableSituation.newBuilderNow()
                 .setId("11")
+                .setLongId(11)
                 .addAlarm(alarms.get(2))
                 .addAlarm(alarms.get(3))
                 .addAlarm(alarms.get(4))

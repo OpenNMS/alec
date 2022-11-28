@@ -51,34 +51,60 @@ import edu.uci.ics.jung.graph.Graph;
 public class DeepLearningEngine extends AbstractClusterEngine {
     private final DeepLearningEngineConf conf;
     private final TFModel tfModel;
+    private final RemoteModel remoteModel;
     private TFClusterer tfClusterer;
 
     public DeepLearningEngine(MetricRegistry metrics, BundleContext bundleContext, DeepLearningEngineConf conf) {
         this(metrics, new TFModel(bundleContext, conf.getModelPath()), conf);
     }
 
+    public DeepLearningEngine(MetricRegistry metrics, DeepLearningEngineConf conf, String token, String uri) {
+        super(metrics);
+        this.conf = Objects.requireNonNull(conf);
+        this.remoteModel = new RemoteModel(token, uri);
+        if (!ping()) {
+            throw new IllegalArgumentException("ping remote model failed " + uri);
+        }
+        this.tfModel = null;
+    }
+
     private DeepLearningEngine(MetricRegistry metrics, TFModel tfModel, DeepLearningEngineConf conf) {
         super(metrics);
         this.tfModel = Objects.requireNonNull(tfModel);
         this.conf = Objects.requireNonNull(conf);
+        this.remoteModel = null;
     }
 
     @Override
     public void onInit() {
         Vectorizer vectorizer = new Vectorizer(getGraphManager(), this);
-        tfClusterer = new TFClusterer(tfModel, vectorizer, conf);
+        if (remoteModel == null) {
+            tfClusterer = new TFClusterer(tfModel, vectorizer, conf);
+        } else {
+            tfClusterer = new TFClusterer(remoteModel, vectorizer, conf);
+        }
         tfClusterer.init();
     }
 
     @Override
     public void onDestroy() {
         tfClusterer.destroy();
-        tfModel.close();
+        if(tfModel != null) {
+            tfModel.close();
+        }
     }
 
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
         return tfClusterer.cluster(g);
+    }
+
+    public boolean ping() {
+        if (remoteModel != null) {
+            return remoteModel.ping();
+        } else {
+            return false;
+        }
     }
 
 }

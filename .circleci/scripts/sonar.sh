@@ -78,7 +78,7 @@ find_tests()
 }
 
 # shellcheck disable=SC1091
-#. ./.circleci/scripts/lib.sh
+. ./.circleci/scripts/lib.sh
 
 PR_NUM="$(get_pr_num || echo 0)"
 REFERENCE_BRANCH="$(get_reference_branch || echo "develop")"

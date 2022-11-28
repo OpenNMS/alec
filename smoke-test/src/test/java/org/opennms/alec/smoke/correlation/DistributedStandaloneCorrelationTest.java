@@ -76,7 +76,7 @@ public class DistributedStandaloneCorrelationTest extends CorrelationTestBase {
         LOG.debug("Checking for engine {}", engine);
 
         await()
-                .atMost(60, TimeUnit.
+                .atMost(30, TimeUnit.
                         SECONDS)
                 .pollInterval(5, TimeUnit.SECONDS)
                 .ignoreExceptions()

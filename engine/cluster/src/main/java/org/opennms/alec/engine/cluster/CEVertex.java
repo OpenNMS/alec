@@ -47,7 +47,7 @@ public class CEVertex implements Vertex {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClusterEngine.class);
 
     private final long id;
-    private final InventoryObject inventoryObject;
+    private InventoryObject inventoryObject;
     private final ResourceKey resourceKey;
     private final Map<String, Alarm> alarmsById = new LinkedHashMap<>();
     private final long createdTimestamp;
@@ -63,6 +63,10 @@ public class CEVertex implements Vertex {
         this.inventoryObject = inventoryObject;
         createdTimestamp = System.currentTimeMillis();
         updatedTimestamp = createdTimestamp;
+    }
+
+    public void setInventoryObject(InventoryObject inventoryObject) {
+        this.inventoryObject = inventoryObject;
     }
 
     public ResourceKey getResourceKey() {

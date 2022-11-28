@@ -129,6 +129,12 @@ class InventoryFactory {
                 alarmBuilder.setInventoryObjectType(type.getName());
                 alarmBuilder.setInventoryObjectId(String.format("%s:%s", toNodeCriteria(alarm.getNode()), alarm.getManagedObjectInstance()));
             }
+
+            // point back to the IO we created, instead of using the information that was passed via in the field
+            if (type == ManagedObjectType.BgpPeer) {
+                InventoryObject bgpIo = TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), toNodeCriteria(alarm)).get(0);
+                alarmBuilder.setInventoryObjectId(bgpIo.getId());
+            }
         }
 
         if ((alarm.getManagedObjectType() == null || alarm.getManagedObjectInstance() == null) && alarm.getNode() != null) {

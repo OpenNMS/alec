@@ -94,7 +94,7 @@ public class GraphManager {
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
-            verticesToVerify.add(resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
+            final CEVertex ioVertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
                 LOG.trace("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
                 final CEVertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
@@ -102,7 +102,14 @@ public class GraphManager {
                 idtoVertexMap.put(vertex.getNumericId(), vertex);
                 verticesAdded.add(vertex);
                 return vertex;
-            }));
+            });
+
+            if (ioVertex.getInventoryObject().isEmpty()) {
+                // The vertex may have been previously created from an alarm, and not have the IO
+                ioVertex.setInventoryObject(io);
+            }
+
+            verticesToVerify.add(ioVertex);
         }
 
         // Now handle the relationships

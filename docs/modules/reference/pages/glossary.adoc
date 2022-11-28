@@ -1,0 +1,21 @@
+
+= Glossary
+
+This glossary defines terms that are specific to the OpenNMS ALEC plugin.
+For more general terminology related to the OpenNMS project, see the https://docs.opennms.com/horizon/latest/reference/glossary.html[core documentation].
+
+== A
+
+alarm:: A fault or problem that is triggered by one or more events.
+
+== I
+
+inventory object (IO):: An abstract element to which an alarm is related.
+Alarms can be related to a maximum of one inventory object.
++
+Inventory objects can have relations to other inventory objects.
+
+== S
+
+situation:: A representation of a synthetic "parent" alarm which is triggered by one or more "child" alarms.
+Situations should only be created if there are two or more alarms in an alarm causality tree; otherwise, the event could be represented by a single alarm.

@@ -444,5 +444,5 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            mvn -Psonar -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.login="$SONAR_TOKEN"
+            export MAVEN_OPTS="-Xmx12g -XX:ReservedCodeCacheSize=1g -XX:+TieredCompilation"
+            .circleci/scripts/sonar.sh

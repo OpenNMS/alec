@@ -608,7 +608,6 @@
             </activation>
             <properties>
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.login>403e578d6e712376ec4f03c50303b209be3f2814</sonar.login>
                 <sonar.organization>opennms</sonar.organization>
                 <sonar.moduleKey>${artifactId}</sonar.moduleKey>
                 <sonar.projectKey>opennms</sonar.projectKey>

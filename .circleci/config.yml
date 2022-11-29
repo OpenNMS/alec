@@ -445,4 +445,4 @@ jobs:
           when: always
           command: |
             mvn -Psonar,coverage -Dbuild.packages clean verify dependency:resolve-plugins dependency:go-offline \
-            sonar:sonar
+            sonar:sonar -Dsonar.login=$SONARCLOUD_LOGIN

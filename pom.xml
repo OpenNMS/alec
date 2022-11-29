@@ -617,7 +617,6 @@
                 <sonar.organization>opennms</sonar.organization>
                 <sonar.projectKey>OpenNMS_alec</sonar.projectKey>
                 <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
-                <sonar.login>$SONARCLOUD_LOGIN</sonar.login>
             </properties>
         </profile>
         <profile>

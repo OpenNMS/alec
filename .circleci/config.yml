@@ -444,7 +444,8 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            mvn sonar:sonar -Dsonar.login=$SONARCLOUD_LOGIN \
+            mvn -DskipTests -Dbuild.packages clean verify dependency:resolve-plugins dependency:go-offline \
+            sonar:sonar -Dsonar.login=$SONARCLOUD_LOGIN \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.organization=opennms \
             -Dsonar.projectKey=OpenNMS_alec

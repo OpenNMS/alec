@@ -532,7 +532,7 @@
             <version>2.22.1</version>
             <configuration>
                 <!-- see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
-                <argLine>-Xmx1024m -Xms1024m -XX:MaxPermSize=512m -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+                <argLine>${argLine} -Xmx1024m -Xms1024m -XX:MaxPermSize=512m -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
             </configuration>
           </plugin>
           <plugin>
@@ -617,6 +617,7 @@
                 <sonar.organization>opennms</sonar.organization>
                 <sonar.projectKey>OpenNMS_alec</sonar.projectKey>
                 <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
+                <sonar.login>$SONARCLOUD_LOGIN</sonar.login>
             </properties>
         </profile>
         <profile>

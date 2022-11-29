@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
+import javax.xml.transform.TransformerFactory;
 
 import org.opennms.alec.data.AlarmSet;
 import org.opennms.alec.data.CreateSituationPayload;
@@ -77,6 +78,8 @@ public class SituationRestImpl implements SituationRest {
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         objectMapper = new ObjectMapper();
+        TransformerFactory transFactory = TransformerFactory.newInstance();
+
     }
 
     @Override

@@ -22,4 +22,4 @@ Alarms can be related to a minimum of zero inventory objects, and a maximum of o
 == S
 
 situation:: A representation of a synthetic "parent" alarm which is triggered by one or more "child" alarms.
-Situations should only be created if there are two or more alarms in an alarm causality tree; otherwise, the event could be represented by a single alarm.
+Situations should be created only if there are two or more alarms in an alarm causality tree; otherwise, the event could be represented by a single alarm.

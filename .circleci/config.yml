@@ -444,5 +444,8 @@ jobs:
           name: Run SonarQube Code Analysis
           when: always
           command: |
-            export MAVEN_OPTS="-Xmx12g -XX:ReservedCodeCacheSize=1g -XX:+TieredCompilation"
-            .circleci/scripts/sonar.sh
+            mvn -DskipTests -Dbuild.packages clean verify dependency:resolve-plugins dependency:go-offline \
+            sonar:sonar -Dsonar.login="$SONAR_TOKEN" \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.organization=opennms \
+            -Dsonar.projectKey=OpenNMS_alec

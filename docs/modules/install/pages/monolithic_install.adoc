@@ -1,41 +1,45 @@
 = Monolithic Install
 :imagesdir: ../assets/images
 
-This installation guide describes a monolithic install where we run _ALEC_ as another service within the _OpenNMS_ core:
+This section describes a monolithic install where we run ALEC as another service within the OpenNMS core:
 
 image::monolithic_deployment.png[Monolithic,400]
 
-== Common Setup
+== Common setup
 
 Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
 
 == Install ALEC
 
 For RHEL or CentOS users, install the package via YUM:
+
 ```
 yum -y install opennms-alec-plugin
 ```
 
-For Ubuntu or Debian users, the package via APT:
+For Ubuntu or Debian users, install the package via APT:
+
 ```
 apt install opennms-alec-plugin
 ```
 
 Configure the feature set to be installed when OpenNMS starts:
+
 ```
 echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
 ```
 
-To install the feature set immediately without restarting, login to the OpenNMS Karaf shell and run:
+To install the feature set immediately without restarting, log in to the OpenNMS Karaf shell and run the following:
+
 ```
 feature:install alec-opennms-standalone
 ```
 
-NOTE: We bundle many common features up together for ease of use, but you can also install these individually if for example, you would like to run using a different _engine_.
+NOTE: We bundle many common features together for ease of use, but you can also install these individually if, for example, you would like to run using a different engine.
 
-== Verify
+== Verify installation
 
-Run the health check again to verify that everything was loaded correctly using the `health:check` command in the OpenNMS Karaf shell.
+Run the `health:check` command in the OpenNMS Karaf shell to verify that everything loaded correctly.
 
 You can enumerate the available graphs using:
 ```
@@ -44,10 +48,10 @@ opennms-alec:list-graphs
 
 At this point we expect the command output a single graph called "dbscan":
 ```
-admin@opennms> opennms-alec:list-graphs 
+admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
-It's okay of there are no situations, vertices or edges on the graph at this point.
+It's okay of there are no situations, vertices, or edges on the graph at this point.
 
-Continue to xref:verifying.adoc[Verifying your install] for more details.
+Continue to xref:verifying.adoc[Verify your install] for more details.

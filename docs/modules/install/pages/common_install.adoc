@@ -1,37 +1,42 @@
-= Common Install
+= Pre-Installation Tasks
 :imagesdir: ../assets/images
 
-This guide contains instructions for installing _ALEC_ that are common to both the monolithic and distributed installs.
+This section describes the tasks you must complete before installing ALEC.
+These tasks include configuring OpenNMS and setting up an APT or YUM repository.
 
-== OpenNMS Configuration
+== OpenNMS configuration
 
-=== $OPENMS_HOME
+=== $OPENNMS_HOME
 
-The installation instructions will refer to the `$OPENNMS_HOME` environment variable which is expected to be set.
+The ALEC installation instructions refer to the `$OPENNMS_HOME` environment variable, which must be set.
 
-If running OpenNMS on RHEL or CentOS, this is commonly set as:
+With OpenNMS running on RHEL or CentOS, this is commonly set as:
+
 ```
 export OPENNMS_HOME=/opt/opennms
 ```
 
-If running OpenNMS on Ubuntu or Debian, this is commonly set as:
+With OpenNMS running on Ubuntu or Debian, this is commonly set as:
+
 ```
 export OPENNMS_HOME=/usr/share/opennms
 ```
 
-===  Health check
+ ## need to verify what all this does. It's very confusing.##
 
-We're going to use the `health:check` command in the Karaf shell to help validate our deployment.
-Let's make sure all of the health checks pass before going any further.
+=== Run a health check
 
-From the OpenNMS Karaf shell, run:
+You can use the `health:check` command in the Karaf shell to help validate your deployment.
+
+From the OpenNMS Karaf shell, run the following:
+
 ```
 health:check
 ```
+You will probably see something similar to the following, since the `opennms-flows` feature is installed by default:
 
-In my case, the output looks like:
 ```
-admin@opennms> health:check 
+admin@opennms> health:check
 Verifying the health of the container
 
 Verifying installed bundles                    [ Success  ]
@@ -39,20 +44,18 @@ Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did 
 
 => Oh no, something is wrong
 ```
-
-The `opennms-flows` feature is installed by default, and the health check will fail no Elasticsearch server is configured.
-You can choose to either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance using:
+The health check fails, since no Elasticsearch server is configured.
+You can either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance:
 
 ```
 config:edit org.opennms.features.flows.persistence.elastic
 config:property-set elasticUrl http://elastic:9200
 config:update
 ```
+TIP: Replace the sample URL with one that points to your Elasticsearch instance.
 
-TIP: Update the URL accordingly to point to your Elasticsearch instance.
+Run the health check again, and expect to see output similar to the following:
 
-
-We can now run the health check again, and expect to see output like:
 ```
 admin@opennms> health:check
 Verifying the health of the container
@@ -67,24 +70,23 @@ Everything is awesome.
 
 === Enable alarm history storage for Elasticsearch
 
-When using ALEC, we strongly recommend that leverage our integration for maintaining alarm history in Elasticsearch.
-This data can be used for analysis and to help train the correlation engine.
+When using ALEC, we strongly recommend that you leverage our integration for maintaining alarm history in Elasticsearch.
+ALEC can use this data for analysis and to help train the correlation engine.
 
-From the OpenNMS Karaf shell, run:
+.From the OpenNMS Karaf shell, run the following, replacing the sample URL with one that points to your Elasticsearch instance:
+
 ```
 config:edit org.opennms.features.alarms.history.elastic
 config:property-set elasticUrl http://elastic:9200
 config:update
 ```
 
-TIP: Update the URL accordingly to point to your Elasticsearch instance.
-
-And install the feature using:
+.Use the following to install the feature:
 ```
 feature:install opennms-alarm-history-elastic
 ```
 
-If everything is configured properly, the health check should show output similar to:
+If everything is configured properly, the health check should show output similar to the following:
 ```
 admin@opennms> health:check
 Verifying the health of the container
@@ -98,30 +100,33 @@ Number of active alarms stored in Elasticsearch (Alarm History)   [ Success  ] =
 
 === Enable Syslogd
 
-Let's take advantage of the Syslog patterns and event definitions provided in ALEC by enabling Syslogd.
+Enabling Syslogd lets you take advantage of the Syslog patterns and event definitions that ALEC provides.
 
-Enable Syslogd by editing `$OPENNMS_HOME/etc/service-configuration.xml` and changing:
+Enable Syslogd by editing `$OPENNMS_HOME/etc/service-configuration.xml` and changing the following:
+
 ```
 <service enabled="false">
     <name>OpenNMS:Name=Syslogd</name>
 ```
 
 to:
+
 ```
 <service>
     <name>OpenNMS:Name=Syslogd</name>
 ```
 
-This change will come in effect next time OpenNMS is restarted - we don't need to do this yet.
+This change will come into effect the next time OpenNMS restarts.
+Do not restart OpenNMS at this point.
 
-== ALEC/OpenNMS Package Repositories
+== ALEC/OpenNMS package repositories
 
 Packages for ALEC are made available the same Debian and YUM repositories as OpenNMS.
-If you already have the stable repository installed, you may skip this step.
+If you already have the stable repository installed, you can skip this step.
 
-=== Setup APT repository (Ubuntu/Debian)
+=== Set up APT repository (Ubuntu/Debian)
 
-For Ubuntu or Debian based distributions, install the repository using:
+For Ubuntu- or Debian-based distributions, install the repository:
 
 ```
 cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
@@ -132,9 +137,9 @@ wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
 apt update
 ```
 
-=== Setup YUM repository (RHEL/CentOS)
+=== Set up YUM repository (RHEL/CentOS)
 
-For RHEL or CentOS based distributions, install the repository using:
+For RHEL- or CentOS-based distributions, install the repository:
 
 ```
 yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm

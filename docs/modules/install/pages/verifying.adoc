@@ -1,13 +1,14 @@
-= Verifying your install
+= Verify Your Installation
 :imagesdir: ../assets/images
 
-Here we assume that you already have ALEC deployed using either the monolithic or distributed deployments.
+The procedures in this section apply to both monolithic and distributed deployments.
 
-== Testing syslog message handling
+== Test syslog message handling
 
-Here we work to verify that syslog messages are being properly converted to alarms and show that we can create a situation from multiple alarms.
+To verify that syslog messages are being properly converted to alarms and show that ALEC can create a situation from multiple alarms, do the following:
 
-Let's start by provisioning a node for the `localhost` in OpenNMS:
+.Provision a node for the `localhost` in OpenNMS:
+
 ```
 $OPENNMS_HOME/bin/provision.pl requisition add alec
 $OPENNMS_HOME/bin/provision.pl node add alec localhost localhost
@@ -15,54 +16,57 @@ $OPENNMS_HOME/bin/provision.pl interface add alec localhost 127.0.0.1
 $OPENNMS_HOME/bin/provision.pl requisition import alec
 ```
 
-IMPORTANT: We assume that the localhost is running an SNMP agent.
+IMPORTANT: This assumes that the localhost is running an SNMP agent.
 
-Now, let's set the `ifDescr` for an interface on the node we just provisioned.
+.Set the `ifDescr` for an interface on the node we just provisioned.
+
 ```
 export IFDESCR="eth0"
 ```
+.Trigger a Syslog message:
 
-Now trigger a Syslog message:
 ```
 echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface $IFDESCR is down (Link failure)" | nc -v -u 127.0.0.1 10514
 ```
-
 We expect to see a new "interface down" alarm attached to the node we just provisioned:
 
 image::verify_ifdown_example.png[Interface down alarm,600]
 
-TIP: If the Syslog message is not being recognized and bring formatted to a proper event & alarm, ensure that the `opennms-alec-plugin` feature is running in OpenNMS and that the related bundles are active.
+TIP: If the Syslog message is not being recognized and bring formatted to a proper event and alarm, ensure that the `opennms-alec-plugin` feature is running in OpenNMS and that the related bundles are active.
 
-We can now trigger a second alarm against this same interface using:
+.Next, trigger a second alarm against this same interface:
+
 ```
 echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %PKT_INFRA-LINEPROTO-5-UPDOWN: Line protocol on Interface $IFDESCR, changed state to Down" | nc -v -u 127.0.0.1 10514
 ```
-
 If both of these alarms are triggered together in a small enough window of time (within 1 minute for the purposes of this example), a situation should be automatically created:
 
 image::verify_situation_example.png[Situation,600]
 
-Congratulations you have correlated your first two alarms!
+Congratulations, you have correlated your first two alarms.
 
-== Viewing the ALEC graph
+== View the ALEC graph
 
 At any point in time, you can export the ALEC graph to view the inventory and alarms in context.
 
-We can export the ALEC graph from a Karaf shell using:
+.Export the ALEC graph from a Karaf shell:
+
 ```
 opennms-alec:export-graph dbscan /tmp/dbscan.graph.xml
 ```
 
 NOTE: If ALEC is running on Sentinel, make sure to run this from the Sentinel shell.
 
-Import the graph into OpenNMS using:
+.Import the graph into OpenNMS:
+
 ```
 curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/dbscan.graph.xml 'http://localhost:8980/opennms/rest/graphml/alec'
 ```
 
-NOTE: If you get an error saying that a `"Graph with name alec already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/alec'` and try again.
+NOTE: If you get an error that a `"Graph with name alec already exists"`, you can delete the previous graph using: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/alec'` and try again.
 
-Next, navigate to the topology map, and view the graph named "alec".
-The resulting graph from the previous example looks like:
+.Next, navigate to the topology map, and view the graph named "alec".
+
+The resulting graph from the previous example looks like the following:
 
 image::verify_topology_example.png[Topology,600]

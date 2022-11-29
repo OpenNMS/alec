@@ -49,7 +49,7 @@ workflows:
       - build:
           context: "OpenNMS Build"
           requires:
-            - sonar
+            - pre-build
           filters:
             tags:
               only: /.*/
@@ -63,7 +63,7 @@ workflows:
       - sonar:
           context: "OpenNMS Build"
           requires:
-            - pre-build
+            - build
           filters:
             tags:
               only: /.*/

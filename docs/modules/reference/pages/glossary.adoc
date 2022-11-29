@@ -8,12 +8,16 @@ For more general terminology related to the OpenNMS project, see the https://doc
 
 alarm:: A fault or problem that is triggered by one or more events.
 
+ALEC:: Architecture for Learning Enabled Correlation.
+
+== C
+
+cluster:: A group of correlated alarms.
+
 == I
 
-inventory object (IO):: An abstract element to which an alarm is related.
-Alarms can be related to a maximum of one inventory object.
-+
-Inventory objects can have relations to other inventory objects.
+inventory object (IO):: An abstraction of monitored nodes and their components.
+Alarms can be related to a minimum of zero inventory objects, and a maximum of one.
 
 == S
 

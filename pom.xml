@@ -96,7 +96,6 @@
         <httpclient-osgi.version>4.5.13</httpclient-osgi.version>
         <httpcore-osgi.version>4.4.15</httpcore-osgi.version>
         <sonarVersion>3.7.0.1746</sonarVersion>
-        <jettyVersion>9.4.48.v20220622</jettyVersion>
         <jacoco.version>0.8.8</jacoco.version>
     </properties>
 

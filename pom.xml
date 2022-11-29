@@ -97,6 +97,7 @@
         <httpcore-osgi.version>4.4.15</httpcore-osgi.version>
         <sonarVersion>3.7.0.1746</sonarVersion>
         <jettyVersion>9.4.48.v20220622</jettyVersion>
+        <jacoco.version>0.8.8</jacoco.version>
     </properties>
 
     <dependencyManagement>
@@ -422,6 +423,11 @@
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>${sonarVersion}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -612,6 +618,36 @@
                 <sonar.projectKey>OpenNMS_alec</sonar.projectKey>
                 <sonar.moduleKey>${project.artifactId}</sonar.moduleKey>
             </properties>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <formats>
+                                        <format>XML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

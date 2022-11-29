@@ -227,6 +227,14 @@ public class SituationRestImpl implements SituationRest {
         }
     }
 
+    private String[] months;
+    public String[] getMonths() {
+        return months;
+    }
+    public void setMonths(String[] months) {
+        this.months = months;
+    }
+
     private Set<Alarm> getAlarmSetToAdd(List<String> alarmIdList) throws InterruptedException {
         Set<Alarm> alarms = new HashSet<>();
         for (String id : alarmIdList) {

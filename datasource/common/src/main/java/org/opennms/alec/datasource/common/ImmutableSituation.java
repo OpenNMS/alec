@@ -64,8 +64,6 @@ public final class ImmutableSituation implements Situation {
     private final Long lastTime;
     private final String uei;
     private final String description;
-    private final List<String> feedbacks;
-    private final String engineParameter;
 
     private ImmutableSituation(Builder builder) {
         this.id = builder.id;
@@ -83,9 +81,6 @@ public final class ImmutableSituation implements Situation {
         this.lastTime = builder.lastTime;
         this.uei = builder.uei;
         this.description = builder.description;
-        this.feedbacks = builder.feedbacks == null ? Collections.emptyList() :
-                Collections.unmodifiableList(new ArrayList<>(builder.feedbacks));
-        this.engineParameter = builder.engineParameter;
     }
 
     public static final class Builder {
@@ -101,8 +96,6 @@ public final class ImmutableSituation implements Situation {
         private Long lastTime;
         private String uei;
         private String description;
-        private List<String> feedbacks;
-        private String engineParameter;
 
         private Builder() {
         }
@@ -124,8 +117,6 @@ public final class ImmutableSituation implements Situation {
             this.lastTime = situation.getLastTime();
             this.uei = situation.getUei();
             this.description = situation.getDescription();
-            this.feedbacks = new ArrayList<>(situation.getFeedback());
-            this.engineParameter = situation.getEngineParameter();
         }
 
         public Builder setId(String id) {
@@ -218,24 +209,6 @@ public final class ImmutableSituation implements Situation {
 
         public Builder setDescription(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder setFeedbacks(List<String> feedbacks) {
-            this.feedbacks = feedbacks;
-            return this;
-        }
-
-        public Builder addFeedback(String feedback) {
-            if (feedbacks == null) {
-                feedbacks = new ArrayList<>();
-            }
-            feedbacks.add(feedback);
-            return this;
-        }
-
-        public Builder setEngineParameter(String engineParameter) {
-            this.engineParameter = engineParameter;
             return this;
         }
 
@@ -344,13 +317,27 @@ public final class ImmutableSituation implements Situation {
     }
 
     @Override
-    public List<String> getFeedback() {
-        return feedbacks;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImmutableSituation that = (ImmutableSituation) o;
+        return creationTime == that.creationTime &&
+                severity == that.severity &&
+                Objects.equals(resourceKeys, that.resourceKeys) &&
+                Objects.equals(alarms, that.alarms) &&
+                Objects.equals(diagnosticText, that.diagnosticText) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(reductionKey, that.reductionKey) &&
+                Objects.equals(lastTime, that.lastTime) &&
+                Objects.equals(uei, that.uei) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(longId, that.longId) &&
+                Objects.equals(description, that.description);
     }
 
     @Override
-    public String getEngineParameter() {
-        return engineParameter;
+    public int hashCode() {
+        return Objects.hash(id, longId, creationTime, resourceKeys, alarms, severity, diagnosticText, status, reductionKey, lastTime, uei, description);
     }
 
     @Override
@@ -369,21 +356,6 @@ public final class ImmutableSituation implements Situation {
                 .add("lastTime=" + lastTime)
                 .add("uei='" + uei + "'")
                 .add("description='" + description + "'")
-                .add("feedbacks=" + feedbacks)
-                .add("engineParameter='" + engineParameter + "'")
                 .toString();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ImmutableSituation that = (ImmutableSituation) o;
-        return longId == that.longId && creationTime == that.creationTime && Objects.equals(id, that.id) && severity == that.severity && Objects.equals(resourceKeys, that.resourceKeys) && Objects.equals(alarms, that.alarms) && Objects.equals(alarmsFromMap, that.alarmsFromMap) && Objects.equals(diagnosticText, that.diagnosticText) && status == that.status && Objects.equals(reductionKey, that.reductionKey) && Objects.equals(lastTime, that.lastTime) && Objects.equals(uei, that.uei) && Objects.equals(description, that.description) && Objects.equals(feedbacks, that.feedbacks) && Objects.equals(engineParameter, that.engineParameter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, longId, creationTime, severity, resourceKeys, alarms, alarmsFromMap, diagnosticText, status, reductionKey, lastTime, uei, description, feedbacks, engineParameter);
     }
 }

@@ -94,12 +94,6 @@ public class DBScanEngineFactory implements EngineFactory {
         return this;
     }
 
-    @Override
-    public String getParameters() {
-        return String.format("engine: %s, alpha: %s, beta: %s, epsilon: %s, distanceMeasure: %s",
-                getName(), getAlpha(), getBeta(), getEpsilon(), getDistanceMeasureFactoryName());
-    }
-
     public double getEpsilon() {
         return epsilon;
     }

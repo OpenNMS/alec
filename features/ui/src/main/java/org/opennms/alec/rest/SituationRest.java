@@ -48,7 +48,7 @@ import org.opennms.alec.data.CreateSituationPayload;
 public interface SituationRest {
     @POST
     @Path("rejected/{id}")
-    Response rejected(@PathParam("id") String id, String feedback);
+    Response rejected(@PathParam("id") String id);
 
     @POST
     @Path("accepted/{id}")

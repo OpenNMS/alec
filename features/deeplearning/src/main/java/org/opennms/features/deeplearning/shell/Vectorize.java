@@ -87,7 +87,6 @@ public class Vectorize implements Action {
     private String csvOut;
 
     @Override
-    @SuppressWarnings({"java:S106","java:S112"})
     public Object execute() throws Exception {
         final List<Alarm> alarms = JaxbUtils.getAlarms(Paths.get(alarmsIn));
         final List<InventoryObject> inventory = JaxbUtils.getInventory(Paths.get(inventoryIn));
@@ -200,11 +199,6 @@ public class Vectorize implements Action {
         @Override
         public EngineFactory getEngineFactory() {
             return this;
-        }
-
-        @Override
-        public String getParameters() {
-            return String.format("engine: %s", getName());
         }
     }
 

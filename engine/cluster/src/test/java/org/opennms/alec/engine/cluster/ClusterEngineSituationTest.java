@@ -82,7 +82,6 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // No situations should have been triggered yet
         assertThat(triggeredSituations, hasSize(0));
 
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         ClusterEngine clusterEngine = new ClusterEngine(new MetricRegistry());
         clusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
         clusterEngine.registerSituationHandler(this);
@@ -156,7 +155,7 @@ public class ClusterEngineSituationTest implements SituationHandler {
 
         // No situations should have been triggered yet
         assertThat(triggeredSituations, hasSize(0));
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
+
         Engine oneClusterEngine = new OneClusterEngine(new MetricRegistry());
         oneClusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), MockInventory.SAMPLE_NETWORK);
         oneClusterEngine.registerSituationHandler(this);
@@ -225,7 +224,6 @@ public class ClusterEngineSituationTest implements SituationHandler {
         // No situations should have been triggered yet
         assertThat(triggeredSituations, hasSize(0));
 
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         Engine oneClusterEngine = new OneClusterEngine(new MetricRegistry());
         oneClusterEngine.init(alarms, Collections.emptyList(), Collections.emptyList(), MockInventory.SAMPLE_NETWORK);
         oneClusterEngine.registerSituationHandler(this);

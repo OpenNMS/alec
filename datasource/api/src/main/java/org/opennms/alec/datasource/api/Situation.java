@@ -67,8 +67,4 @@ public interface Situation {
     String getUei();
 
     String getDescription();
-
-    List<String> getFeedback();
-
-    String getEngineParameter();
 }

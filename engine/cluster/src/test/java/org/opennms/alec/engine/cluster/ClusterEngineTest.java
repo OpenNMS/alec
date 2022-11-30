@@ -152,7 +152,6 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situationsById.keySet(), hasSize(0));
 
         // Tick
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         engine.tick(now+2);
 
         // We should now have a single situation with both alarms
@@ -246,7 +245,6 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situationsById.keySet(), hasSize(0));
 
         // Tick
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         engine.tick(now+2);
 
         // We should now have a single situation with both alarms
@@ -299,7 +297,6 @@ public class ClusterEngineTest implements SituationHandler {
         // A cluster with a single alarm that was not previously mapped to a situation should be in a new situation
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         context = engine.getTickContextFor(0L);
         engine.mapClusterToSituations(cluster, context);
         situations = context.getNewOrUpdatedSituations();
@@ -379,7 +376,6 @@ public class ClusterEngineTest implements SituationHandler {
         cluster.addPoint(alarm4InSpaceTime);
 
         // Process the cluster
-        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         engine.solveEntireGraphForTesting();
         engine.setSituations(Arrays.asList(situation1, situation2));
         AbstractClusterEngine.TickContext context = engine.getTickContextFor(0L);

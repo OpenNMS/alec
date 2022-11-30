@@ -24,6 +24,7 @@ const situationStore = useSituationsStore()
 const appStore = useAppStore()
 
 situationStore.getSituation(situationId.value)
+situationStore.getUnassignedAlarms()
 
 if (!situationStore.situations.length) {
 	situationStore.getSituations()

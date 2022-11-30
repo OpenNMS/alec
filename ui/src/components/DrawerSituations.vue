@@ -70,13 +70,11 @@ watch(props, () => {
 .situation-list {
 	margin-top: 20px;
 	overflow-y: auto;
-	height: 800px;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
 }
 .card {
-	margin-bottom: 10px;
 	width: 328px;
 }
 </style>

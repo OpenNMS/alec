@@ -375,6 +375,7 @@ h2 {
 	border: 1px solid $border-grey;
 	background-color: #ffffff;
 	width: 100%;
+	min-height: 650px;
 }
 
 .situation-list {

@@ -64,7 +64,7 @@ const props = defineProps<{
 
 .triangle {
 	width: 12%;
-	padding-bottom: 6%;
+	padding-bottom: 8%;
 	overflow: hidden;
 	position: absolute;
 	top: 0%;

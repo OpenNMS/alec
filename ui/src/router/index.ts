@@ -5,7 +5,7 @@ import AddSituation from '@/containers/AddSituation.vue'
 
 import WelcomePage from '@/components/WelcomePage.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
-
+import ViewUnassignedAlarms from '@/containers/ViewUnassignedAlarms.vue'
 import ConfigurationPage from '@/components/ConfigurationPage.vue'
 import { useUserStore } from '@/store/useUserStore'
 
@@ -72,6 +72,11 @@ const routes = [
 		path: '/error',
 		name: 'error',
 		component: ErrorPage
+	},
+	{
+		path: '/situations/view-unassigned-alarms',
+		name: 'viewUnassignedAlarms',
+		component: ViewUnassignedAlarms
 	}
 ]
 
@@ -81,7 +86,9 @@ if (VRouter) {
 	// Parent route should be in form 'Plugin-{extensionId}'
 	// and 'extensionId' must match 'id' value in blueprint.xml
 	const alecParentRoute = 'Plugin-alecUiExtension'
-	const parentRoute = VRouter.hasRoute(alecParentRoute) ? alecParentRoute : 'Plugin'
+	const parentRoute = VRouter.hasRoute(alecParentRoute)
+		? alecParentRoute
+		: 'Plugin'
 
 	for (const route of routes) {
 		const { path, name, component, beforeEnter } = route

@@ -5,13 +5,12 @@ import Cancel from '@featherds/icon/navigation/Cancel'
 
 import { FeatherButton } from '@featherds/button'
 import { useRouter } from 'vue-router'
-import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import ChipListByProperty from '@/components/ChipListByProperty.vue'
+
 import { TNewSituation } from '@/types/TSituation'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
-import { FeatherCheckbox } from '@featherds/checkbox'
-import { truncateText } from '@/helpers/utils'
 import UnassignedAlarmCard from '@/components/UnassignedAlarmCard.vue'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { remove, includes } from 'lodash'
@@ -157,17 +156,13 @@ const cleanFields = () => {
 			</div>
 			<div class="alarm-column">
 				<h4>Add Unassociated Alarms</h4>
-				<FiltersSeverity
+				<ChipListByProperty
 					:alarms="situationStore.unassignedAlarms"
-					@selected-severities="updateList"
+					@selected-option="updateList"
+					property="severity"
 				/>
 				<div v-if="alarms.length" class="alarms">
-					<div
-						v-for="alarm in alarms"
-						:key="alarm.id"
-						class="alarm"
-						:class="{ selected: includes(alarmIds, alarm.id) }"
-					>
+					<div v-for="alarm in alarms" :key="alarm.id" class="alarm-card">
 						<UnassignedAlarmCard
 							:selected="includes(alarmIds, alarm.id)"
 							:alarm="alarm"
@@ -219,18 +214,8 @@ const cleanFields = () => {
 	flex-wrap: wrap;
 	align-content: flex-start;
 }
-
-.alarm {
-	margin-top: 15px;
+.alarm-card {
 	width: 49%;
-	min-width: 48%;
-	padding: 15px;
-	border: 1px solid $border-grey;
-	position: relative;
-	min-height: 140px;
-	&.selected {
-		border: 1px solid #273180;
-	}
 }
 
 .fields {
@@ -238,7 +223,7 @@ const cleanFields = () => {
 	flex-direction: column;
 	width: 700px;
 	> div {
-		margin-bottom: 0px;
+		margin-bottom: 20px;
 	}
 }
 

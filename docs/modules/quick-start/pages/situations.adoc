@@ -1,0 +1,5 @@
+
+= Step 2: View and Add Situations
+
+Now that you have xref:engine.adoc[selected and configured a correlation engine], ALEC automatically begins to identify situations.
+This requires new alarms to be triggered within your OpenNMS environment, so--depending on its usual activity--this may take some time.

@@ -1,0 +1,33 @@
+
+:imagesdir: ../assets
+= Step 1: First-Time Login and Engine Configuration
+
+This section explains first-time login tasks and how to configure a correlation engine.
+ALEC includes two correlation engines: DBSCAN and Deep Learning.
+This Quick Start guide explains how to set up and configure xref:engine:dbscan.adoc[DBSCAN].
+For information on the Deep Learning engine, see xref:engines:deeplearning.adoc[Deep Learning].
+
+After you install ALEC, you can access it via the OpenNMS web UI.
+Log in to the web UI and click *Plugins > ALEC* in the top menu bar.
+An introduction to the ALEC plugin is displayed, explaining the plugin and its key benefits.
+
+== First-time login and data choices
+
+As part of the introduction to ALEC, OpenNMS prompts for permission to send ALEC usage data to The OpenNMS Group.
+We use this anonymized information to help determine product use and improve the ALEC plugin.
+We do not share it with third parties, and will not use it for sales purposes.
+
+.ALEC data permissions prompt
+image::data-permissions.png[ALEC data permissions prompt, 500]
+
+Select *Yes* or *No*, and click *Continue*.
+The correlation engine configuration screen is displayed.
+
+== Configure DBSCAN engine
+
+When you access the ALEC plugin for the first time, you are prompted to select and configure a correlation engine.
+
+.Correlation engine configuration prompt
+image::engine-config.png[Correlation engine configuration prompt; includes details on the Clustering and Deep Learning engines, 600]
+
+The engine that you choose determines how alerts will be grouped into clusters.

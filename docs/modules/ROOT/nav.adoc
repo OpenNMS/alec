@@ -3,13 +3,9 @@
 * xref:about:terminology.adoc[Terminology]
 
 .Installation
-* xref:install:requirements.adoc[Requirements]
-* xref:install:monolithic_vs_distributed.adoc[Monolithic vs Distributed]
-* xref:install:common_install.adoc[Common Install]
-* xref:install:monolithic_install.adoc[Monolithic Install]
-* xref:install:distributed_install.adoc[Distributed Install]
-* xref:install:verifying.adoc[Verifying your install]
-* xref:install:upgrading.adoc[Upgrading your install]
+* xref:install:introduction.adoc[Overview]
+* xref:install:pre_install.adoc[Pre-Installation Tasks]
+* xref:install:basic_install.adoc[Basic Install]
 
 .Architecture
 * xref:architecture:overview.adoc[Overview]
@@ -27,3 +23,6 @@
 
 .Reference
 * xref:reference:model.adoc[Model]
+* xref:install:distributed_install.adoc[Distributed Install]
+* xref:install:verifying.adoc[Verifying your install]
+* xref:install:upgrading.adoc[Upgrading your install]

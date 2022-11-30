@@ -6,25 +6,23 @@ These tasks include configuring OpenNMS and setting up an APT or YUM repository.
 
 == OpenNMS configuration
 
-=== $OPENNMS_HOME
+=== Set $OPENNMS_HOME variable
 
 The ALEC installation instructions refer to the `$OPENNMS_HOME` environment variable, which must be set.
 
-With OpenNMS running on RHEL or CentOS, this is commonly set as:
+On RHEL or CentOS, use the following command:
 
 ```
 export OPENNMS_HOME=/opt/opennms
 ```
 
-With OpenNMS running on Ubuntu or Debian, this is commonly set as:
+On Ubuntu or Debian, use the following command:
 
 ```
 export OPENNMS_HOME=/usr/share/opennms
 ```
 
- ## need to verify what all this does. It's very confusing.##
-
-=== Run a health check
+=== Validate your OpenNMS deployment
 
 You can use the `health:check` command in the Karaf shell to help validate your deployment.
 
@@ -33,7 +31,10 @@ From the OpenNMS Karaf shell, run the following:
 ```
 health:check
 ```
-You will probably see something similar to the following, since the `opennms-flows` feature is installed by default:
+If the health check returns and `everything is awesome` message, continue with the next pre-installation task.
+An `Oh no, something is wrong` message indicates a problem you must address.
+
+The most common result you may see involves a missing Elasticsearch configuration, similar to the following:
 
 ```
 admin@opennms> health:check
@@ -44,8 +45,9 @@ Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did 
 
 => Oh no, something is wrong
 ```
-The health check fails, since no Elasticsearch server is configured.
-You can either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance:
+An OpenNMS deployment installs the `opennms-flows` feature by default, but may not point to the Elasticsearch server.
+
+To fix this issue, you can either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance:
 
 ```
 config:edit org.opennms.features.flows.persistence.elastic
@@ -54,19 +56,7 @@ config:update
 ```
 TIP: Replace the sample URL with one that points to your Elasticsearch instance.
 
-Run the health check again, and expect to see output similar to the following:
-
-```
-admin@opennms> health:check
-Verifying the health of the container
-
-Verifying installed bundles                    [ Success  ]
-Connecting to ElasticSearch ReST API (Flows)   [ Success  ]
-
-=> Everything is awesome
-```
-
-Everything is awesome.
+Run the health check again to confirm that `everything is awesome`.
 
 === Enable alarm history storage for Elasticsearch
 
@@ -82,27 +72,21 @@ config:update
 ```
 
 .Use the following to install the feature:
+
 ```
 feature:install opennms-alarm-history-elastic
 ```
 
-If everything is configured properly, the health check should show output similar to the following:
-```
-admin@opennms> health:check
-Verifying the health of the container
+.Run the `health:check`
 
-Verifying installed bundles                                       [ Success  ]
-Connecting to ElasticSearch ReST API (Flows)                      [ Success  ]
-Number of active alarms stored in Elasticsearch (Alarm History)   [ Success  ] => Found 0 alarms.
-
-=> Everything is awesome
-```
+If everything is configured properly, you should receive an `everything is awesome` message.
 
 === Enable Syslogd
 
-Enabling Syslogd lets you take advantage of the Syslog patterns and event definitions that ALEC provides.
+We recommend that you enable Syslogd to take advantage of the Syslog patterns and event definitions that ALEC provides:
 
-Enable Syslogd by editing `$OPENNMS_HOME/etc/service-configuration.xml` and changing the following:
+.Edit `$OPENNMS_HOME/etc/service-configuration.xml`
+and change the following:
 
 ```
 <service enabled="false">
@@ -119,7 +103,7 @@ to:
 This change will come into effect the next time OpenNMS restarts.
 Do not restart OpenNMS at this point.
 
-== ALEC/OpenNMS package repositories
+== Set up ALEC/OpenNMS package repositories
 
 Packages for ALEC are made available the same Debian and YUM repositories as OpenNMS.
 If you already have the stable repository installed, you can skip this step.
@@ -136,7 +120,6 @@ EOF
 wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
 apt update
 ```
-
 === Set up YUM repository (RHEL/CentOS)
 
 For RHEL- or CentOS-based distributions, install the repository:

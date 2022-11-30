@@ -1,13 +1,13 @@
-= Monolithic Install
+= Basic Install
 :imagesdir: ../assets/images
 
 This section describes a monolithic install where we run ALEC as another service within the OpenNMS core:
 
 image::monolithic_deployment.png[Monolithic,400]
 
-== Common setup
+== Before you begin
 
-Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
+Make sure you complete the xref:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
 
 == Install ALEC
 

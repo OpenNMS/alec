@@ -4616,7 +4616,7 @@ const zk = "/alarms?_s=", ks = {
   }
 }, jk = async (e) => {
   try {
-    const r = e.join(",id=="), o = await Zn(`/alarms?_s=id==${r}`);
+    const r = e.join(",id=="), o = await Zn(`/alarms?_s=id==${r}&limit==0`);
     return o.status === 200 ? o.data.alarm : !1;
   } catch {
     return !1;
@@ -4661,7 +4661,7 @@ const zk = "/alarms?_s=", ks = {
 }, Kk = async () => {
   try {
     const e = await Zn.get(
-      "alarms?_s=isInSituation==false;isSituation==false"
+      "alarms?_s=isInSituation==false;isSituation==false&limit==0"
     );
     return e.status === 200 ? e.data.alarm : !1;
   } catch {

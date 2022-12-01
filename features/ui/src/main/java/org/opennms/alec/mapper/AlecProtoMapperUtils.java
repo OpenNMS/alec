@@ -32,9 +32,9 @@ import java.time.Instant;
 
 import com.google.protobuf.Timestamp;
 
-public class AlecMapperUtils {
+public class AlecProtoMapperUtils {
 
-    private AlecMapperUtils() {
+    private AlecProtoMapperUtils() {
         throw new IllegalStateException("Utility class");
     }
 

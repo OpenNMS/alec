@@ -55,8 +55,7 @@ public class SituationClient {
         if (doStore) {
             SituationSet request = mapper.toSituationSet(situation, systemId);
             LOG.debug("Will try to send {} ...", request);
-            blockingStub
-                    .sendSituations(request);
+            blockingStub.sendSituations(request);
         }
     }
 }

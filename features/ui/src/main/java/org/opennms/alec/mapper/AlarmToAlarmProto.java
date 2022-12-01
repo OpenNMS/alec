@@ -46,7 +46,6 @@ public class AlarmToAlarmProto {
                 .setSummary(alarm.getSummary())
                 .setInventoryObjectId(alarm.getInventoryObjectId())
                 .setInventoryObjectType(alarm.getInventoryObjectType())
-//                .addAllTags()
                 .build();
     }
 

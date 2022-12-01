@@ -48,7 +48,6 @@ public class SituationToSituationProto {
                 .setId(situation.getLongId())
                 .setSid(situation.getId())
                 .setStatus(situation.getStatus().toString())
-//                .setTags()
                 .build();
     }
 

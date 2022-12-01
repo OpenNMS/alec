@@ -61,7 +61,10 @@
 
     <feature name="alec-ui" description="ALEC :: Features :: UI" version="${project.version}">
         <feature version="${project.version}" dependency="true">alec-datasource-opennms-direct</feature>
-
+        <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
+        <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf-java.version}</bundle>
+        <bundle>mvn:org.opennms.tsaas.alec/alec-gateway/${alec-gateway.version}</bundle>
+        <bundle>mvn:org.opennms.alec.wrap/grpc/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.ui/${project.version}</bundle>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
     </feature>

@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "org.opennms.alec.grpc.generated";
+
+option java_outer_classname = "SituationSetProtos";
+option java_multiple_files = true;
+
+service AlecCollectionService {
+  rpc SendSituations (SituationSet) returns (google.protobuf.Empty) {}
+}
+
+message Alarm {
+  int64 alarm_id = 1;
+  google.protobuf.Timestamp first_time_seen = 2;
+  google.protobuf.Timestamp last_time_seen = 3;
+  string inventory_object_id = 4;
+  string inventory_object_type = 5;
+  string severity = 6;
+  string summary = 7;
+  string description = 8;
+  repeated string tags = 9;
+  string salarm_id = 10;
+}
+
+message AlarmSet {
+  google.protobuf.Timestamp timestamp = 1;
+  repeated Alarm alarms = 2;
+}
+
+message Situation {
+  int64 id = 1;
+  google.protobuf.Timestamp creation_time = 2;
+  AlarmSet alarms = 3;
+  string severity = 4;
+  string diagnostic = 5;
+  repeated string tags = 6;
+  google.protobuf.Timestamp last_modification_time = 7;
+  string engine_parameter = 8;
+  string status = 9;
+  repeated string rejected = 10;
+  string sid = 11;
+}
+
+message SituationSet {
+  google.protobuf.Timestamp timestamp = 1;
+  repeated Situation situations = 2;
+  string tenant_id = 3;
+}

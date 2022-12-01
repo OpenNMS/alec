@@ -1,0 +1,9 @@
+This file contains content that was removed, but could be added back
+
+To install the feature set immediately without restarting, log in to the OpenNMS Karaf shell and run the following:
+
+```
+feature:install alec-opennms-standalone
+```
+
+NOTE: We bundle many common features together for ease of use, but you can also install these individually if, for example, you would like to run using a different engine.

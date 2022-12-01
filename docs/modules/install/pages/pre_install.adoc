@@ -98,7 +98,7 @@ to:
 ```
 
 This change will come into effect the next time OpenNMS restarts.
-Do not restart OpenNMS at this point.
+Do not restart OpenNMS at this point, as you will restart it as part of the ALEC installation.
 
 == Set up ALEC/OpenNMS package repositories
 

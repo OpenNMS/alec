@@ -4,9 +4,9 @@
 There are two options for ALEC deployment: basic and distributed.
 This installation section describes how to complete a basic installation.
 
-The xref:basic_install.adoc[basic deployment], which installs ALEC in the OpenNMS JVM as an additional service, is easy to set up and lets you evaluate or test ALEC with your existing environment.
+The xref:basic_install.adoc[basic deployment], which installs ALEC in the OpenNMS core as an additional service, is easy to set up and lets you evaluate or test ALEC with your existing environment.
 
-The xref:distributed_install.adoc[distributed deployment], which installs ALEC externally on the Sentinel JVM, requires a more involved setup that we recommend for a production environment where you have load, scaling, and resiliency requirements.
+The xref:distributed_install.adoc[distributed deployment], which installs ALEC externally on an OpenNMS Sentinel server, requires a more involved setup that we recommend for a production environment where you have load, scaling, and resiliency requirements.
 
 .Basic vs. Distributed deployment pros and cons
 [options="header"]
@@ -34,7 +34,7 @@ ALEC requires the following:
 * Horizon 30.0.1+ or Meridian 2022+ up and running.
 (See link:https://docs.opennms.com/horizon/latest/deployment/core/introduction.html[OpenNMS deployment] for help on getting started with OpenNMS.)
 * https://www.elastic.co/products/elasticsearch[Elasticsearch] 6.7.0-7.6.2 to maintain event and alarm history for training purposes.
-(See https://docs.opennms.com/horizon/31/operation/deep-dive/elasticsearch/introduction.html[Elasticsearch integration] for more information.))
+(See https://docs.opennms.com/horizon/31/operation/deep-dive/elasticsearch/introduction.html[Elasticsearch integration] for more information.)
 
 == Before you begin
 You must complete the xref:pre_install.adoc[pre-installation tasks] before following the basic or distributed deployment procedures.

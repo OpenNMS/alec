@@ -1,7 +1,7 @@
 = Verify Your Installation
 :imagesdir: ../assets/images
 
-The procedures in this section apply to both monolithic and distributed deployments.
+The procedures in this section apply to basic and distributed deployments.
 
 == Test syslog message handling
 

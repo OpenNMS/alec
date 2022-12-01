@@ -9,8 +9,10 @@ content:
     tags:
      - v*
      - '!v2.0.0.alpha0'
+     - jira/ALEC-227
     start_path: docs
 ui:
+
   bundle:
     url: https://github.com/opennms-forge/antora-ui-opennms/releases/download/v3.1.0/ui-bundle.zip
 asciidoc:

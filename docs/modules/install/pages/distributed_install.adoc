@@ -1,4 +1,4 @@
-= Distributed Install
+= Distributed Installation
 :imagesdir: ../assets/images
 
 This section describes a distributed install where we run ALEC as a service on top of the Sentinel runtime:
@@ -11,13 +11,14 @@ image::distributed_deployment.png[Distributed,700]
 In addition to an existing instance of OpenNMS Horizon 30.0.1 or greater, this guide assumes you have the following:
 
 1. A Kafka broker (or cluster) running Kafka 0.11.x or greater.
-2. One or more Minions already active in the system
+2. One or more Minions already active in the system.
+3. Sentinel
 ** Minions configured to use Kafka for the transport.
 ** Minions ready to receive SNMP traps and Syslog messages.
 
-== Common setup
+== Before you begin
 
-Start by following the instructions in the xref:common_install.adoc[common install] section if you have not already done so.
+Make sure you complete the xref:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
 
 When installing the package repository, ensure that you do this on all of the systems that are running Sentinel and OpenNMS.
 

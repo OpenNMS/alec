@@ -28,15 +28,6 @@ Configure the feature set to be installed when OpenNMS restarts:
 ```
 echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
 ```
-
-To install the feature set immediately without restarting, log in to the OpenNMS Karaf shell and run the following:
-
-```
-feature:install alec-opennms-standalone
-```
-
-NOTE: We bundle many common features together for ease of use, but you can also install these individually if, for example, you would like to run using a different engine.
-
 == Verify installation
 
 Run the `health:check` command in the OpenNMS Karaf shell to verify that everything loaded correctly.
@@ -46,7 +37,7 @@ You can enumerate the available graphs using:
 opennms-alec:list-graphs
 ```
 
-At this point we expect the command output a single graph called "dbscan":
+At this point we expect the command to output a single graph called "dbscan":
 ```
 admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.

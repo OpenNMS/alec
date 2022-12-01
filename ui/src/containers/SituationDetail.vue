@@ -28,6 +28,7 @@ situationStore.getUnassignedAlarms()
 
 if (!situationStore.situations.length) {
 	situationStore.getSituations()
+	situationStore.getNodes()
 }
 
 const situation = ref()
@@ -44,6 +45,7 @@ watch(
 	() => {
 		situation.value = situationStore.situationDetail as TSituation
 		loading.value = false
+		situationStore.getUnassignedAlarms()
 	}
 )
 

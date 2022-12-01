@@ -325,9 +325,9 @@ const resetFilters = () => {
 }
 
 .view-situation-btn {
-	background-color: #465cae;
-	color: white;
-	height: 44px;
+	background-color: #465cae !important;
+	color: white !important;
+	height: 44px !important;
 }
 
 .content {

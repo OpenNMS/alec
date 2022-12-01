@@ -126,21 +126,23 @@ const handleMoveToSituation = async (situationId: number) => {
 			appStore.showErrorMsg('Error on moving the alarms :(')
 		}
 	}
-
 	showSituations.value = false
 }
 
 const moveAlarms = async (situationId: number, alarmIds: number[]) => {
-	const resultMove = await assignAlarmsToSituation(situationId, alarmIds)
-	if (resultMove) {
-		situationStore.getUnassignedAlarms()
-		situationStore.getSituation(situationId)
+	if (alarmIds.length) {
+		const resultMove = await assignAlarmsToSituation(situationId, alarmIds)
+		if (resultMove) {
+			situationStore.getSituation(situationId)
+		} else {
+			appStore.showErrorMsg('Error on moving the alarms :(')
+		}
 	} else {
-		appStore.showErrorMsg('Error on moving the alarms :(')
+		appStore.showErrorMsg('You need to select the alarms')
 	}
 }
 
-const handleAddAlarmsToSituation = async (alarmIds) => {
+const handleAddAlarmsToSituation = async (alarmIds: number[]) => {
 	await moveAlarms(props.situationId, alarmIds)
 	showUnassignedAlarms.value = false
 }
@@ -246,9 +248,9 @@ const handleMoveClick = () => {
 
 .add-alarms-btn {
 	margin-left: auto;
-	height: 44px;
-	background-color: #46ae46;
-	color: white;
+	height: 44px !important;
+	background-color: #46ae46 !important;
+	color: white !important;
 }
 
 .title {

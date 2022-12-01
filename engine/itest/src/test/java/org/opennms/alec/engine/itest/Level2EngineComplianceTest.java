@@ -87,6 +87,8 @@ public class Level2EngineComplianceTest {
         driver = TestDriver.builder()
                 .withEngineFactory(factory)
                 .build();
+
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
     }
 
     @Test

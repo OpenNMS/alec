@@ -31,6 +31,7 @@ package org.opennms.alec.rest;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.core.Response;
 
@@ -42,6 +43,7 @@ import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.api.EngineRegistry;
 import org.opennms.alec.engine.cluster.ClusterEngineFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
+import org.opennms.alec.engine.deeplearning.DeepLearningEngineFactory;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,11 @@ public class EngineRestImpl implements EngineRest {
         this.driver = (Driver) engineRegistry.getEngineRegistry();
         this.engineFactories = engineFactories;
         objectMapper = new ObjectMapper();
+
+        EngineParameter engineParameter = (EngineParameter) getEngineConfiguration().getEntity();
+        if(engineParameter != null) {
+            setEngineConfiguration(engineParameter);
+        }
     }
 
     @Override
@@ -78,10 +85,12 @@ public class EngineRestImpl implements EngineRest {
             if (factory.isPresent()) {
                 switch (engineName) {
                     case "dbscan":
-                        return storeEngineParameter(configureDBScan(engineParameter, driver, (DBScanEngineFactory) factory.get().getEngineFactory()));
+                        return configureAndStoreDBScan(engineParameter, driver, (DBScanEngineFactory) factory.get().getEngineFactory());
+                    case "deeplearning":
+                        return configureAndStoreDeeplearning(engineParameter, driver, (DeepLearningEngineFactory) factory.get().getEngineFactory());
                     case "cluster":
                     default:
-                        return storeEngineParameter(configureCluster(driver, (ClusterEngineFactory) factory.get().getEngineFactory()));
+                        return configureAndStoreCluster(driver, (ClusterEngineFactory) factory.get().getEngineFactory());
                 }
             }
             return Response.serverError().entity("No Engine found !!").build();
@@ -112,31 +121,86 @@ public class EngineRestImpl implements EngineRest {
         return Response.ok(future.join()).build();
     }
 
-    private EngineParameter configureCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {
+    private Response configureAndStoreCluster(Driver driver, ClusterEngineFactory clusterEngineFactory) {
         driver.setEngineFactory(clusterEngineFactory);
-        driver.destroy();
-        driver.initAsync();
-
-        return EngineParameterImpl.newBuilder()
-                .engineName(clusterEngineFactory.getName())
-                .build();
+        Response response = driverInit(driver);
+        if(response != null) {
+            return response;
+        }
+        try {
+            return storeEngineParameter(EngineParameterImpl.newBuilder()
+                    .engineName(clusterEngineFactory.getName())
+                    .build());
+        } catch (JsonProcessingException e) {
+            return ALECRestUtils.somethingWentWrong(e);
+        }
     }
 
-    private EngineParameter configureDBScan(EngineParameter engineParameter, Driver driver, DBScanEngineFactory dbScanEngineFactory) {
+    private Response configureAndStoreDBScan(EngineParameter engineParameter, Driver driver, DBScanEngineFactory dbScanEngineFactory) {
         dbScanEngineFactory.setAlpha(engineParameter.getAlpha());
         dbScanEngineFactory.setBeta(engineParameter.getBeta());
         dbScanEngineFactory.setEpsilon(engineParameter.getEpsilon());
         dbScanEngineFactory.setDistanceMeasureFactoryName(engineParameter.getDistanceMeasureName());
         driver.setEngineFactory(dbScanEngineFactory);
-        driver.destroy();
-        driver.initAsync();
+        Response response = driverInit(driver);
+        if(response != null) {
+            return response;
+        }
+        try {
+            return storeEngineParameter(EngineParameterImpl.newBuilder()
+                    .alpha(dbScanEngineFactory.getAlpha())
+                    .beta(dbScanEngineFactory.getBeta())
+                    .epsilon(dbScanEngineFactory.getEpsilon())
+                    .distanceMeasureName(dbScanEngineFactory.getDistanceMeasureFactoryName())
+                    .engineName(dbScanEngineFactory.getName())
+                    .build());
+        } catch (JsonProcessingException e) {
+            return ALECRestUtils.somethingWentWrong(e);
+        }
+    }
 
-        return EngineParameterImpl.newBuilder()
-                .alpha(dbScanEngineFactory.getAlpha())
-                .beta(dbScanEngineFactory.getBeta())
-                .epsilon(dbScanEngineFactory.getEpsilon())
-                .distanceMeasureName(dbScanEngineFactory.getDistanceMeasureFactoryName())
-                .engineName(dbScanEngineFactory.getName())
-                .build();
+    private Response configureAndStoreDeeplearning(EngineParameter engineParameter, Driver driver, DeepLearningEngineFactory deepLearningEngineFactory) {
+        String token = engineParameter.getToken();
+        String remoteUri = engineParameter.getRemoteUri();
+        if (token != null && !token.isEmpty() && remoteUri != null && !remoteUri.isEmpty()) {
+            deepLearningEngineFactory.setUri(remoteUri);
+            deepLearningEngineFactory.setToken(token);
+            deepLearningEngineFactory.setRemote(true);
+        } else {
+            deepLearningEngineFactory.setUri("");
+            deepLearningEngineFactory.setToken("");
+            deepLearningEngineFactory.setRemote(false);
+        }
+        driver.setEngineFactory(deepLearningEngineFactory);
+        Response response = driverInit(driver);
+        if(response != null) {
+            return response;
+        }
+        try {
+            return storeEngineParameter(EngineParameterImpl.newBuilder()
+                    .engineName(deepLearningEngineFactory.getName())
+                    .remoteUri(deepLearningEngineFactory.getUri())
+                    .token(deepLearningEngineFactory.getToken())
+                    .remote(deepLearningEngineFactory.isRemote())
+                    .build());
+        } catch (JsonProcessingException e) {
+            return ALECRestUtils.somethingWentWrong(e);
+        }
+    }
+
+    private Response driverInit(Driver driver) {
+        driver.destroy();
+        CompletableFuture<Void> future = driver.initAsync();
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            LOG.error("Engine creation failed", e.getCause());
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            LOG.error("Engine creation failed", e.getCause());
+            return ALECRestUtils.somethingWentWrong(e);
+        }
+
+        return null;
     }
 }

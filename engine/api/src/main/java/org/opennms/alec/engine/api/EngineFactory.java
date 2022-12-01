@@ -34,8 +34,12 @@ public interface EngineFactory {
 
     String getName();
 
+    String getNameConf();
+
     Engine createEngine(MetricRegistry metrics);
 
     EngineFactory getEngineFactory();
+
+    String getParameters();
 
 }

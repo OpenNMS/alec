@@ -152,6 +152,8 @@ public class TestDriver {
         engine.registerSituationHandler(session);
         engine.init(previousAlarms, previousAlarmFeedback, previousSituations, inventory);
 
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
+
         final GraphProvider graphProvider = getGraphProvider(engine);
         final boolean shouldExportGraph = isShouldExportGraph(graphProvider);
         long lastGraphGeneratedAt = 0;

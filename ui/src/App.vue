@@ -16,4 +16,8 @@ body {
 .label-border {
 	display: none !important;
 }
+
+.feather-input-sub-text {
+	display: none !important; /* it add a lot of space under radio group */
+}
 </style>

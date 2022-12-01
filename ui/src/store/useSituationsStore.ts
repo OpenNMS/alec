@@ -13,7 +13,8 @@ import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
 	node?: Record<string, string>
-	severities: string[]
+	severities?: string[]
+	timeStart: number
 }
 type TState = {
 	situations: TSituation[]

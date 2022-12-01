@@ -13,7 +13,8 @@ import {
 	assignAlarmsToSituation
 } from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
-import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import ChipListByProperty from '@/components/ChipListByProperty.vue'
+
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import ExitToApp from '@featherds/icon/action/ExitToApp'
 import DrawerSituations from '@/components/DrawerSituations.vue'
@@ -138,9 +139,10 @@ const handleMoveClick = () => {
 	<div class="container">
 		<div class="row">
 			<div class="title">Alarms</div>
-			<FiltersSeverity
+			<ChipListByProperty
 				:alarms="props.alarms"
-				@selected-severities="updateList"
+				@selected-option="updateList"
+				property="severity"
 			/>
 		</div>
 		<div class="row actions">

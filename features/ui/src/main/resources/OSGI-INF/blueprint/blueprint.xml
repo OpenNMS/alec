@@ -55,7 +55,7 @@
         </service-properties>
     </service>
 
-    <service interface="org.opennms.alec.rest.EngineRest" ref="engineRest">
+    <service interface="org.opennms.alec.rest.EngineRest" ref="engineRest" >
         <service-properties>
             <entry key="application-path" value="/rest" />
         </service-properties>

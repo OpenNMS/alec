@@ -1,8 +1,7 @@
 = Pre-Installation Tasks
 :imagesdir: ../assets/images
 
-This section describes the tasks you must complete before installing ALEC.
-These tasks include configuring OpenNMS and setting up an APT or YUM repository.
+This section describes the configuration tasks you must complete before installing ALEC.
 
 == OpenNMS configuration
 
@@ -24,14 +23,12 @@ export OPENNMS_HOME=/usr/share/opennms
 
 === Validate your OpenNMS deployment
 
-You can use the `health:check` command in the Karaf shell to help validate your deployment.
-
-From the OpenNMS Karaf shell, run the following:
+From the OpenNMS Karaf shell, run the following to help validate your deployment:
 
 ```
 health:check
 ```
-If the health check returns and `everything is awesome` message, continue with the next pre-installation task.
+If the health check returns an `everything is awesome` message, continue with the next pre-installation task.
 An `Oh no, something is wrong` message indicates a problem you must address.
 
 The most common result you may see involves a missing Elasticsearch configuration, similar to the following:
@@ -45,7 +42,7 @@ Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did 
 
 => Oh no, something is wrong
 ```
-An OpenNMS deployment installs the `opennms-flows` feature by default, but may not point to the Elasticsearch server.
+OpenNMS deployments install the `opennms-flows` feature by default, but may not point to the Elasticsearch server.
 
 To fix this issue, you can either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance:
 
@@ -105,7 +102,7 @@ Do not restart OpenNMS at this point.
 
 == Set up ALEC/OpenNMS package repositories
 
-Packages for ALEC are made available the same Debian and YUM repositories as OpenNMS.
+Packages for ALEC are available in the same Debian and YUM repositories as OpenNMS.
 If you already have the stable repository installed, you can skip this step.
 
 === Set up APT repository (Ubuntu/Debian)

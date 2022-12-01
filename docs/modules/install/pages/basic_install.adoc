@@ -1,9 +1,9 @@
-= Basic Install
+= Basic Installation
 :imagesdir: ../assets/images
 
-This section describes a monolithic install where we run ALEC as another service within the OpenNMS core:
+This section describes a basic installation where we run ALEC as another service within the OpenNMS core:
 
-image::monolithic_deployment.png[Monolithic,400]
+image::monolithic_deployment.png[basic ALEC installation,400]
 
 == Before you begin
 
@@ -23,7 +23,7 @@ For Ubuntu or Debian users, install the package via APT:
 apt install opennms-alec-plugin
 ```
 
-Configure the feature set to be installed when OpenNMS starts:
+Configure the feature set to be installed when OpenNMS restarts:
 
 ```
 echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"

@@ -1,11 +1,11 @@
 
-:imagesdir: ../assets
+:imagesdir: ../assets/images
 = Step 1: First-Time Login and Engine Configuration
 
 This section explains first-time login tasks and how to configure a correlation engine.
 ALEC includes two correlation engines: Clustering and Deep Learning.
 The engine that you choose determines how alerts are grouped into clusters.
-This Quick Start guide explains how to set up and configure the xref:engine:dbscan.adoc[Clustering] engine.
+This Quick Start guide explains how to set up and configure the xref:engines:dbscan.adoc[Clustering] engine.
 For information on the Deep Learning engine, see xref:engines:deeplearning.adoc[Deep Learning].
 
 After you install ALEC, you can access it via the OpenNMS web UI.
@@ -19,7 +19,7 @@ We use this anonymized information to help determine product use and improve the
 We do not share it with third parties, and will not use it for sales purposes.
 
 .ALEC data permissions prompt
-image::data-permissions.png[ALEC data permissions prompt, 500]
+image::data-permissions.png[ALEC data permissions prompt, 650]
 
 Select *Yes* or *No*, and click *Continue*.
 The correlation engine configuration screen is displayed.
@@ -29,7 +29,7 @@ The correlation engine configuration screen is displayed.
 When you access the ALEC plugin for the first time in the web UI, you are prompted to select and configure a correlation engine.
 
 .Correlation engine configuration prompt
-image::engine-config.png[Correlation engine configuration prompt; includes details about the Clustering and Deep Learning correlation engines, 600]
+image::engine-config.png[Correlation engine configuration prompt; includes details about the Clustering and Deep Learning correlation engines, 850]
 
 Choose *Clustering*, and click *Continue*.
 The Clustering engine is now configured.

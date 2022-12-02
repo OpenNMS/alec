@@ -3,7 +3,7 @@
 = Clustering Engine
 
 The Clustering engine is a xref:cluster.adoc[correlation engine] that builds alarm clusters using the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm].
-It draws information from the locally-persisted network inventory graph; this graph is automatically created and maintained by ALEC, and is based upon information from the associated xref:datasources:overview.adoc[data source].
+It draws information from the locally-persisted network inventory graph; this graph is automatically created and maintained by ALEC, and is based upon information from the associated xref:datasources:overview.adoc[datasource].
 
 == DBSCAN algorithm
 

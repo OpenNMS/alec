@@ -7,9 +7,7 @@ content:
   - url: .
     branches: HEAD
     tags:
-     - v*
-     - '!v2.0.0.alpha0'
-     - jira/ALEC-227
+      - jira/ALEC-227
     start_path: docs
 ui:
 

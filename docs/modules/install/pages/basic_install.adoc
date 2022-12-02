@@ -3,7 +3,7 @@
 
 This section describes a basic installation where we run ALEC as another service within the OpenNMS core:
 
-image::monolithic_deployment.png[basic ALEC installation,400]
+image::basic_deployment.png[basic ALEC installation,400]
 
 == Before you begin
 

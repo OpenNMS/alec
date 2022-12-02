@@ -1,5 +1,5 @@
 
-.xref:about:welcome.adoc[About ALEC]
+* xref:about:welcome.adoc[About ALEC]
 
 .Installation
 * xref:install:requirements.adoc[Requirements]

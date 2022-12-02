@@ -26,9 +26,9 @@ const addNewSituation = () => {
 
 <style lang="scss" scoped>
 .new-situation-btn {
-	height: 44px;
-	background-color: #46ae46;
-	color: white;
+	height: 44px !important;
+	background-color: #46ae46 !important;
+	color: white !important;
 }
 
 .icon {

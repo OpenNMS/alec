@@ -100,6 +100,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 			const resultAlarms = await getAlarmsUnassigned()
 			if (resultAlarms) {
 				this.unassignedAlarms = resultAlarms as TAlarm[]
+			} else {
+				this.unassignedAlarms = []
 			}
 		}
 	}

@@ -38,10 +38,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.data.Agreement;
 import org.opennms.alec.data.AlarmSet;
 import org.opennms.alec.data.CreateSituationPayload;
 import org.opennms.alec.data.KeyEnum;
@@ -54,12 +56,19 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.grpc.GrpcConnectionConfig;
+import org.opennms.alec.grpc.SituationClient;
+import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
+import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
@@ -68,15 +77,27 @@ public class SituationRestImpl implements SituationRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
+    private final SituationClient client;
+    private final ManagedChannel channel;
     private final AlarmDatasource alarmDatasource;
+    private final RuntimeInfo runtimeInfo;
 
     public SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
-                             AlarmDatasource alarmDatasource) {
+                             AlarmDatasource alarmDatasource,
+                             RuntimeInfo runtimeInfo,
+                             GrpcConnectionConfig grpcConnectionConfig) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
+        this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
+
+        //channel to store situations
+        channel = ManagedChannelBuilder.forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
+                .build();
+
+        client = new SituationClient(channel, new SituationToSituationProto(), canWeStore(kvStore));
     }
 
     @Override
@@ -91,19 +112,31 @@ public class SituationRestImpl implements SituationRest {
                     return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
                 }
                 feedback = String.format("reject situation [%s] -- user feedback :[%s]", situationId, feedback);
-                Situation situationRejected = ImmutableSituation.newBuilderFrom(situation)
+                //Store rejected situation to the cloud before removing related alarms
+                client.sendSituation(ImmutableSituation.newBuilderFrom(situation)
+                                .setStatus(Status.REJECTED)
+                                .setAlarms(situation.getAlarms())
+                                .build(),
+                        runtimeInfo.getSystemId());
+                kvStoreSituationsByStatus();
+
+                //Free alarms and Forward situation to opennms
+                situationDatasource.forwardSituation(ImmutableSituation.newBuilderFrom(situation)
                         .setStatus(Status.REJECTED)
                         .setAlarms(Collections.emptySet())
-                        .setSeverity(Severity.CLEARED)
+                        .setSeverity(Severity.NORMAL)
                         .addFeedback(feedback)
-                        .build();
-                return forwardAndStoreSituation(situationRejected, situationRejected.getAlarms());
+                        .build());
+                return Response.ok().build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return ALECRestUtils.somethingWentWrong(e);
+        } catch (Exception e) {
+            return ALECRestUtils.somethingWentWrong(e);
         }
-        return Response.status(Response.Status.NOT_FOUND).entity(MessageFormat.format(SITUATION_NOT_FOUND, situationId)).build();
     }
 
     @Override
@@ -280,5 +313,29 @@ public class SituationRestImpl implements SituationRest {
 
         kvStore.put(KeyEnum.ACCEPTED_SITUATION.toString(), objectMapper.writeValueAsString(acceptedSituations), ALECRestUtils.ALEC_CONFIG);
         kvStore.put(KeyEnum.REJECTED_SITUATION.toString(), objectMapper.writeValueAsString(rejectedSituations), ALECRestUtils.ALEC_CONFIG);
+    }
+
+    private boolean canWeStore(KeyValueStore<String> kvStore) {
+        Optional<String> agreementConfiguration = kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG);
+
+        boolean doStore;
+        if (agreementConfiguration.isPresent()) {
+            try {
+                doStore = objectMapper.readValue(agreementConfiguration.get(), Agreement.class).isAgreed();
+            } catch (JsonProcessingException e) {
+                doStore = false;
+            }
+        } else {
+            doStore = false;
+        }
+        return doStore;
+    }
+
+    public void destroy() {
+        try {
+            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

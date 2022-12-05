@@ -7,9 +7,11 @@ import { TSituation } from '@/types/TSituation'
 import CONST from '@/helpers/constants'
 import { formatDate } from '@/helpers/utils'
 import { truncateText } from '@/helpers/utils'
+import { formatDistanceStrict } from 'date-fns'
 
 const ACCEPTED = CONST.ACCEPTED
 const REJECTED = CONST.REJECTED
+const nowDate = new Date().getTime()
 
 const props = defineProps<{
 	situationInfo: TSituation
@@ -51,6 +53,15 @@ const handleSituationSelected = () => {
 						class="icon rejected"
 					/>
 				</div>
+			</div>
+			<div>
+				<span class="info-title"> Duration: </span>
+				{{
+					formatDistanceStrict(
+						nowDate,
+						new Date(props.situationInfo.firstEventTime)
+					)
+				}}
 			</div>
 			<div v-if="!props.small">
 				<span class="info-title"> First Event: </span

@@ -13,13 +13,25 @@ import {
 	assignAlarmsToSituation
 } from '@/services/AlecService'
 import { FeatherCheckbox } from '@featherds/checkbox'
-import FiltersSeverity from '@/components/FiltersSeverity.vue'
+import ChipListByProperty from '@/components/ChipListByProperty.vue'
+
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import ExitToApp from '@featherds/icon/action/ExitToApp'
 import DrawerSituations from '@/components/DrawerSituations.vue'
+import DrawerAlarms from '@/components/DrawerAlarms.vue'
+
 import { useAppStore } from '@/store/useAppStore'
 import Delete from '@featherds/icon/action/Delete'
+import Add from '@featherds/icon/action/Add'
+import { markRaw } from 'vue'
 
+const Icons = markRaw({
+	Add,
+	Delete,
+	MarkComplete,
+	CheckCircle,
+	ExitToApp
+})
 const appStore = useAppStore()
 
 const situationStore = useSituationsStore()
@@ -36,6 +48,7 @@ const selectAll = ref(false)
 
 const selectedFilters = ref(['all'])
 const showSituations = ref(false)
+const showUnassignedAlarms = ref(false)
 const state: TState = reactive({
 	selectedAlarms: [],
 	alarms: props.alarms
@@ -108,21 +121,30 @@ const handleMoveToSituation = async (situationId: number) => {
 			state.selectedAlarms
 		)
 		if (resultRemove) {
-			const resultMove = await assignAlarmsToSituation(
-				situationId,
-				state.selectedAlarms
-			)
-			if (resultMove) {
-				situationStore.getSituation(props.situationId)
-			} else {
-				appStore.showErrorMsg('Error on moving the alarms :(')
-			}
+			await moveAlarms(situationId, state.selectedAlarms)
 		} else {
 			appStore.showErrorMsg('Error on moving the alarms :(')
 		}
 	}
-
 	showSituations.value = false
+}
+
+const moveAlarms = async (situationId: number, alarmIds: number[]) => {
+	if (alarmIds.length) {
+		const resultMove = await assignAlarmsToSituation(situationId, alarmIds)
+		if (resultMove) {
+			situationStore.getSituation(situationId)
+		} else {
+			appStore.showErrorMsg('Error on moving the alarms :(')
+		}
+	} else {
+		appStore.showErrorMsg('You need to select the alarms')
+	}
+}
+
+const handleAddAlarmsToSituation = async (alarmIds: number[]) => {
+	await moveAlarms(props.situationId, alarmIds)
+	showUnassignedAlarms.value = false
 }
 
 const handleMoveClick = () => {
@@ -138,10 +160,18 @@ const handleMoveClick = () => {
 	<div class="container">
 		<div class="row">
 			<div class="title">Alarms</div>
-			<FiltersSeverity
+			<ChipListByProperty
 				:alarms="props.alarms"
-				@selected-severities="updateList"
+				@selected-option="updateList"
+				property="severity"
 			/>
+			<FeatherButton
+				class="add-alarms-btn"
+				@click="showUnassignedAlarms = true"
+			>
+				<FeatherIcon :icon="Icons.Add" aria-hidden="true" class="icon" />
+				<span>Add Alarms</span>
+			</FeatherButton>
 		</div>
 		<div class="row actions">
 			<FeatherCheckbox v-model="selectAll" label="selected" />
@@ -181,6 +211,11 @@ const handleMoveClick = () => {
 			@situation-selected="handleMoveToSituation"
 			@drawer-closed="() => (showSituations = false)"
 		/>
+		<DrawerAlarms
+			:visible="showUnassignedAlarms"
+			@alarms-selected="handleAddAlarmsToSituation"
+			@drawer-alarms-closed="() => (showUnassignedAlarms = false)"
+		/>
 	</div>
 </template>
 
@@ -211,8 +246,11 @@ const handleMoveClick = () => {
 	}
 }
 
-.alarm-filters {
-	margin-left: 30px;
+.add-alarms-btn {
+	margin-left: auto;
+	height: 44px !important;
+	background-color: #46ae46 !important;
+	color: white !important;
 }
 
 .title {
@@ -221,10 +259,7 @@ const handleMoveClick = () => {
 	padding: 5px;
 	padding-bottom: 10px;
 }
-.clicked {
-	border: 2px solid $dark-blue !important;
-	background-color: #e6e6e6 !important;
-}
+
 .alarm-list {
 	display: flex;
 	flex-direction: row;

@@ -100,6 +100,26 @@ public class SituationRestImpl implements SituationRest {
         client = new SituationClient(channel, new SituationToSituationProto(), canWeStore(kvStore));
     }
 
+    //Only for testing
+    protected SituationRestImpl(KeyValueStore<String> kvStore,
+                                SituationDatasource situationDatasource,
+                                AlarmDatasource alarmDatasource,
+                                RuntimeInfo runtimeInfo,
+                                GrpcConnectionConfig grpcConnectionConfig,
+                                SituationClient client) {
+        this.kvStore = Objects.requireNonNull(kvStore);
+        this.situationDatasource = Objects.requireNonNull(situationDatasource);
+        this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
+        this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
+        objectMapper = new ObjectMapper();
+
+        //channel to store situations
+        channel = ManagedChannelBuilder.forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
+                .build();
+
+        this.client = client;
+    }
+
     @Override
     public Response rejected(String situationId, String feedback) {
         try {
@@ -116,6 +136,7 @@ public class SituationRestImpl implements SituationRest {
                 client.sendSituation(ImmutableSituation.newBuilderFrom(situation)
                                 .setStatus(Status.REJECTED)
                                 .setAlarms(situation.getAlarms())
+                                .addFeedback(feedback)
                                 .build(),
                         runtimeInfo.getSystemId());
                 kvStoreSituationsByStatus();
@@ -292,7 +313,11 @@ public class SituationRestImpl implements SituationRest {
     private Response forwardAndStoreSituation(Situation oldSituation, Set<Alarm> alarms) {
         try {
             Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
+            //Forward situation to ONMS
             situationDatasource.forwardSituation(newSituation);
+            //Store  situation to the cloud
+            client.sendSituation(newSituation, runtimeInfo.getSystemId());
+
             kvStoreSituationsByStatus();
             return Response.ok().build();
         } catch (InterruptedException e) {

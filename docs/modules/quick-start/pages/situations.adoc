@@ -2,21 +2,23 @@
 :imagesdir: ../assets/images
 = Step 2: View and Create Situations
 
-Now that you have xref:engine-config.adoc[selected the Clustering engine], ALEC automatically begins to identify situations.
+Now that you have xref:engine-config.adoc[selected the clustering engine], ALEC automatically begins to identify situations.
 This requires new alarms to be triggered within your OpenNMS environment, so--depending on your network's usual activity--this may take some time.
 
-== View situations
+== View all situations
 
 After alarms have been triggered in OpenNMS, they are evaluated by the Clustering engine and grouped into clusters as appropriate.
-You can view current situations in the OpenNMS web UI: click *Plugins > ALEC* in the top menu bar.
+To view current situations in the OpenNMS web UI, click *Plugins > ALEC* in the top menu bar.
 The Situation List is displayed:
 
 .ALEC Situation List page
 image::situation-list.png[ALEC Situation List page displaying active situations, 800]
 
 Active situations are sorted from most to least severe.
-You can modify the sorting method by using the filters at the left of the screen.
+Use the filters at the left of the screen to modify the sorting method.
 To return to the default sorting and filtering settings, click *Reset Filters*.
+
+== View a specific situation
 
 To view more information on a specific situation, click its entry in the list.
 The situation details page is displayed:
@@ -39,9 +41,7 @@ image::situation-timeline.png[Situation timeline displaying three active alarms,
 == Create a situation
 
 You may occasionally notice alarms that are related, but that were not grouped into a situation.
-In these cases, you can create a situation to represent such relationships.
-
-Follow these steps to create a situation:
+In these cases, you can create a situation to represent such relationships:
 
 . Click *Plugins > ALEC* in the top menu bar.
 . Click *New Situation* and type a description in the *Description* box.

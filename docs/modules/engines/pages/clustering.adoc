@@ -2,18 +2,20 @@
 :imagesdir: ../assets/images
 = Clustering Engine
 
-The Clustering engine is a xref:introduction.adoc[correlation engine] that builds alarm clusters using the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm].
-It draws information from the locally-persisted network inventory graph; this graph is automatically created and maintained by ALEC, and is based upon information from the associated xref:datasources:overview.adoc[datasource].
+The clustering engine is a xref:introduction.adoc[correlation engine] that uses the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm] to build alarm clusters.
+It draws information from the locally persisted network inventory graph.
+ALEC automatically creates and maintains this graph, which is based on information from the associated xref:datasources:overview.adoc[datasource].
 
 == DBSCAN algorithm
 
-The DBSCAN algorithm that forms the basis for the Clustering engine measures the distance between alarms on the network inventory graph to determine whether they should be correlated into a cluster.
+The DBSCAN algorithm that forms the basis for the clustering engine measures the distance between alarms on the network inventory graph to determine whether they should be correlated into a cluster.
 The distance function calculates a weighted combination of distance in both time and space (on the shortest possible path between affected nodes) between alarms.
 
 == Performance
 
-The Clustering engine performs well when fewer than 500 candidate alarms exist.
-Note that alarms are considered to be candidates for correlation only when they have been created or updated within the last two hours (this interval can be configured).
+The clustering engine performs well when fewer than 500 candidate alarms exist.
+Note that ALEC considers only recent alarms (created or updated within the previous two hours) as candidates for correlation.
+You can configure this interval.
 
-The engine can be used on monitored networks that periodically experience more than 500 active alarms, since many of them will age out over time.
+You can use the engine on monitored networks that periodically experience more than 500 active alarms, since many of them will age out over time.
 The ALEC plugin's performance, however, may degrade when more than 500 active candidate alarms exist in your OpenNMS instance.

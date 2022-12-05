@@ -2,21 +2,22 @@
 :imagesdir: ../assets/images
 = Deep Learning Engine
 
-The Deep Learning engine is a xref:introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
-It draws information from the locally-persisted network inventory graph; this graph is automatically created and maintained by ALEC, and is based upon information from the associated xref:datasources:overview.adoc[datasource].
+The deep learning engine is a xref:introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
+It draws information from the locally persisted network inventory graph.
+Alec automatically creates and maintains this graph, which is based on information from the associated xref:datasources:overview.adoc[datasource].
 
 == TensorFlow
 
 To create clusters using TensorFlow, ALEC first reduces the clustering calculation to a binary classification that asks, "Are these two alarms related?"
-When the Deep Learning engine determines that two or more alarms are related, they are added to a cluster.
+When the deep learning engine determines that two or more alarms are related, they are added to a cluster.
 To reduce the computational complexity of these calculations, ALEC limits the search of potential active candidates to those that are nearby.
 
 == Ludwig
 
-The current model definition for the Deep Learning engine has been developed using https://github.com/uber/ludwig[Ludwig]:
+The current model definition for the deep learning engine has been developed using https://github.com/uber/ludwig[Ludwig]:
 
 .Ludwig training example
-image::ludwig_training.png[Shell interface showing an example of training input and output for Ludwig, 600]
+image::ludwig_training.png[Shell interface that shows an example of training input and output for Ludwig, 600]
 
 The model's input features include the following:
 
@@ -29,9 +30,9 @@ See https://github.com/OpenNMS/alec/blob/master/engine/deeplearning/src/main/res
 
 == Train the engine
 
-The Deep Learning engine must be trained via the Karaf shell before it can be used to correlate alarms.
+The deep learning engine must be trained via the Karaf shell before ALEC can use it to correlate alarms.
 
-WARNING: These instructions are included to help you get started with the engine.
+IMPORTANT: These instructions are included to help you get started with the engine.
 They are by no means all-encompassing.
 The training process will be improved in future ALEC releases.
 
@@ -76,7 +77,7 @@ ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv
 
 === Export the model
 
-Use the following script to export the trained model to a format that can be used in ALEC:
+Use the following script to export the trained model to a format that ALEC can use:
 
 [source]
 ----
@@ -115,7 +116,7 @@ opennms-alec:tensorflow-load-model /tmp/tf-export
 
 NOTE: If the command results are negative, you must retrain and re-export the training model.
 
-If the command results are positive, you can then configure the Deep Learning engine to use the model:
+If the command results are positive, you can then configure the deep learning engine to use the model:
 
 [source, karaf]
 ----
@@ -128,7 +129,7 @@ config:update
 
 You can run simulations to verify that the training model clusters alerts as expected.
 
-First, use the following commands to generate situations based on the data set snapshot from earlier:
+First, use the following commands to generate situations based on the dataset snapshot from earlier:
 
 [source, karaf]
 ----

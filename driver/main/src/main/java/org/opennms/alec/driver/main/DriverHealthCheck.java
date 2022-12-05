@@ -70,6 +70,6 @@ public class DriverHealthCheck implements HealthCheck {
         }
 
         // All checks passed
-        return ImmutableResponse.newInstance(Status.Success, String.format("Engine: %s - Tick duration (99 percentile): %d ms", driver.getEngineFactory().getNameConf(), tickDuration99Ms));
+        return ImmutableResponse.newInstance(Status.Success, String.format("%s - Tick duration (99 percentile): %d ms", driver.getEngineFactory().getName(), tickDuration99Ms));
     }
 }

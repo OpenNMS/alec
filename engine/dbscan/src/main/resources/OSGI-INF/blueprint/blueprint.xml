@@ -15,7 +15,7 @@
     <bean id="alarmInSpaceAndTimeDistanceMeasureFactory" class="org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory"/>
 
     <!-- Create and expose the engine factory -->
-    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="10">
+    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="20">
         <bean class="org.opennms.alec.engine.dbscan.DBScanEngineFactory">
             <argument value="${alpha}"/>
             <argument value="${beta}"/>

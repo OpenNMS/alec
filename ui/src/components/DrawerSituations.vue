@@ -25,7 +25,7 @@ watch(props, () => {
 		@update:modelValue="emit('drawer-closed')"
 	>
 		<div class="content">
-			<h3>Situations:</h3>
+			<h4>Choose the situation where to move the alarms:</h4>
 			<div class="situation-list">
 				<div
 					class="card"
@@ -70,13 +70,11 @@ watch(props, () => {
 .situation-list {
 	margin-top: 20px;
 	overflow-y: auto;
-	height: 800px;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
 }
 .card {
-	margin-bottom: 10px;
 	width: 328px;
 }
 </style>

@@ -13,7 +13,8 @@ import { groupBy, reverse, sortBy } from 'lodash'
 
 type TFilters = {
 	node?: Record<string, string>
-	severities: string[]
+	severities?: string[]
+	timeStart: number
 }
 type TState = {
 	situations: TSituation[]
@@ -99,6 +100,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 			const resultAlarms = await getAlarmsUnassigned()
 			if (resultAlarms) {
 				this.unassignedAlarms = resultAlarms as TAlarm[]
+			} else {
+				this.unassignedAlarms = []
 			}
 		}
 	}

@@ -13,5 +13,6 @@
         <module>asciitable</module>
         <module>jung</module>
         <module>tensorflow</module>
+        <module>grpc</module>
     </modules>
 </project>

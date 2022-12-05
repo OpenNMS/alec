@@ -9,6 +9,7 @@ import MemoBox from '@/components/MemoBox.vue'
 import { ref, watch } from 'vue'
 import CheckCircle from '@featherds/icon/action/CheckCircle'
 import { FeatherIcon } from '@featherds/icon'
+import { formatDistanceStrict } from 'date-fns'
 
 const props = defineProps<{
 	alarm: TAlarm
@@ -19,7 +20,7 @@ const props = defineProps<{
 const selected = ref(false)
 const emit = defineEmits(['alarm-selected'])
 const alarm = ref(props.alarm)
-
+const nowDate = new Date().getTime()
 watch(props, () => {
 	alarm.value = props.alarm
 	selected.value = props.selectAll
@@ -59,6 +60,10 @@ const actionClicked = async (id: number) => {
 						class="icon-ack"
 					/>
 				</div>
+			</div>
+			<div>
+				<strong> Duration: </strong>
+				{{ formatDistanceStrict(nowDate, new Date(alarm.firstEventTime)) }}
 			</div>
 			<div class="description" v-html="alarm.description"></div>
 			<div>

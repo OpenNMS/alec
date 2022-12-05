@@ -88,7 +88,7 @@ export const getAlarmsByIds = async (
 ): Promise<TAlarm[] | false> => {
 	try {
 		const alarmIds = ids.join(',id==')
-		const resp = await v2(`/alarms?_s=id==${alarmIds}`)
+		const resp = await v2(`/alarms?_s=id==${alarmIds}&limit==0`)
 		if (resp.status === 200) {
 			return resp.data.alarm
 		}
@@ -169,7 +169,7 @@ export const deleteMemo = async (alarmId: number, type: string) => {
 export const getAlarmsUnassigned = async (): Promise<TAlarm[] | false> => {
 	try {
 		const resp = await v2.get(
-			'alarms?_s=isInSituation==false;isSituation==false'
+			'alarms?_s=isInSituation==false;isSituation==false&limit==0'
 		)
 		if (resp.status === 200) {
 			return resp.data.alarm

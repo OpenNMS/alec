@@ -12,7 +12,7 @@ You can view current situations in the OpenNMS web UI: click *Plugins > ALEC* in
 The Situation List is displayed:
 
 .ALEC Situation List page
-image::situation-list.png[ALEC Situation List page displaying active situations, 700]
+image::situation-list.png[ALEC Situation List page displaying active situations, 800]
 
 Active situations are sorted from most to least severe.
 You can modify the sorting method by using the filters at the left of the screen.
@@ -22,7 +22,7 @@ To view more information on a specific situation, click its entry in the list.
 The situation details page is displayed:
 
 .Situation details page
-image::situation-details.png[Situation details page for a critical situation that affects two nodes, 700]
+image::situation-details.png[Situation details page for a critical situation that affects two nodes, 800]
 
 From this page, you can acknowledge the situation (indicate that it has been seen and is being addressed), clear it (mark the situation as not relevant), or reject it (indicate that the clustered alarms are not related).
 You can also take action on individual alarms within the cluster by selecting them in the *Alarms* list.
@@ -34,7 +34,7 @@ To view a timeline of the situation and its associated alarms, navigate to the *
 The timeline displays a graphical overview of alarm activity throughout the situation's lifetime.
 
 .Situation timeline page
-image::situation-timeline.png[Situation timeline displaying three active alarms, 700]
+image::situation-timeline.png[Situation timeline displaying three active alarms, 800]
 
 == Create a situation
 

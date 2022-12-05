@@ -2,7 +2,7 @@
 :imagesdir: ../assets/images
 = Deep Learning Engine
 
-The Deep Learning engine is a xref:cluster.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
+The Deep Learning engine is a xref:introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
 It draws information from the locally-persisted network inventory graph; this graph is automatically created and maintained by ALEC, and is based upon information from the associated xref:datasources:overview.adoc[datasource].
 
 == TensorFlow

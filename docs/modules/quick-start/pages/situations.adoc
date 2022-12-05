@@ -2,7 +2,7 @@
 :imagesdir: ../assets/images
 = Step 2: View and Create Situations
 
-Now that you have xref:engine.adoc[selected the Clustering engine], ALEC automatically begins to identify situations.
+Now that you have xref:engine-config.adoc[selected the Clustering engine], ALEC automatically begins to identify situations.
 This requires new alarms to be triggered within your OpenNMS environment, so--depending on your network's usual activity--this may take some time.
 
 == View situations

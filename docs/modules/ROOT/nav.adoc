@@ -12,7 +12,7 @@
 * xref:install:upgrading.adoc[Upgrading your install]
 
 .xref:quick-start:introduction.adoc[Quick Start]
-* xref:quick-start:engine.adoc[Step 1: First-Time Login & Engine Config]
+* xref:quick-start:engine-config.adoc[Step 1: First-Time Login & Engine Config]
 * xref:quick-start:situations.adoc[Step 2: View & Create Situations]
 
 .Architecture
@@ -24,8 +24,8 @@
 * xref:datasources:direct.adoc[Direct]
 * xref:datasources:kafka.adoc[Kafka]
 
-.xref:engines:cluster.adoc[Correlation Engines]
-* xref:engines:dbscan.adoc[Clustering Engine]
+.xref:engines:introduction.adoc[Correlation Engines]
+* xref:engines:clustering.adoc[Clustering Engine]
 * xref:engines:deeplearning.adoc[Deep Learning Engine]
 
 .Reference

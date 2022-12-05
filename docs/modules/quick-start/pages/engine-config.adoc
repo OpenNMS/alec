@@ -5,7 +5,7 @@
 This section explains first-time login tasks and how to configure a correlation engine.
 ALEC includes two correlation engines: Clustering and Deep Learning.
 The engine that you choose determines how alerts are grouped into clusters.
-This Quick Start guide explains how to set up and configure the xref:engines:dbscan.adoc[Clustering] engine.
+This Quick Start guide explains how to set up and configure the xref:engines:clustering.adoc[Clustering] engine.
 For information on the Deep Learning engine, see xref:engines:deeplearning.adoc[Deep Learning].
 
 After you install ALEC, you can access it via the OpenNMS web UI.
@@ -19,23 +19,23 @@ We use this anonymized information to help determine product use and improve the
 We do not share it with third parties, and will not use it for sales purposes.
 
 .ALEC data permissions prompt
-image::data-permissions.png[ALEC data permissions prompt, 650]
+image::data-permissions.png[ALEC data permissions prompt, 750]
 
 Select *Yes* or *No*, and click *Continue*.
 The correlation engine configuration screen is displayed.
 
 == Configure Clustering engine
 
-When you access the ALEC plugin for the first time in the web UI, you are prompted to select and configure a correlation engine.
+When you access the ALEC plugin for the first time in the web UI, you are prompted to select a correlation engine.
 
-.Correlation engine configuration prompt
-image::engine-config.png[Correlation engine configuration prompt; includes details about the Clustering and Deep Learning correlation engines, 850]
+.Correlation engine selection prompt
+image::engine-config.png[Correlation engine selection prompt; includes details about the Clustering and Deep Learning correlation engines, 900]
 
 Choose *Clustering*, and click *Continue*.
-The Clustering engine is now configured.
+The Clustering engine is now set.
 
 NOTE: After you select a correlation engine, it can be changed and updated only via the Karaf shell.
 
 == Beyond Quick Start
 
-For more information on ALEC's correlation engines, see the xref:engines:cluster.adoc[Correlation Engines] section.
+For more information on ALEC's correlation engines, see the xref:engines:introduction.adoc[Correlation Engines] section.

@@ -2,7 +2,7 @@
 = Correlation Engines
 
 Correlation engines are the underlying processes that drive ALEC.
-Two engines are implemented by default: xref:dbscan.adoc[Clustering] and xref:deeplearning.adoc[Deep Learning].
+Two engines are implemented by default: xref:clustering.adoc[Clustering] and xref:deeplearning.adoc[Deep Learning].
 Both extend the cluster engine, which builds network topology graphs based on information provided by your datasource (see xref:datasources:overview.adoc[ALEC Datasources]).
 
 == Cluster engine

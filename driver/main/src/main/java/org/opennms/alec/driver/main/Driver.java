@@ -119,7 +119,7 @@ public class Driver implements EngineRegistry {
     @SuppressWarnings({"java:S2142", "java:S1149"})
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        LOG.info("Creating engine: {}", engineFactory.getNameConf());
+        LOG.info("Creating engine: {}", engineFactory.getName());
         try {
             engine = engineFactory.createEngine(metrics);
         } catch (IllegalArgumentException e) {
@@ -200,7 +200,7 @@ public class Driver implements EngineRegistry {
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("ALEC Driver Tick -- " + engineFactory.getParameters());
+                    Thread.currentThread().setName("ALEC Driver Tick");
                     try (com.codahale.metrics.Timer.Context context = ticks.time()) {
                         engine.tick(System.currentTimeMillis());
                     } catch (Exception e) {
@@ -211,7 +211,7 @@ public class Driver implements EngineRegistry {
             state = DriverState.RUNNING;
             future.complete(null);
         });
-        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getNameConf()));
+        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getName()));
         initThread.setUncaughtExceptionHandler((th,ex) -> {
             LOG.error("Initialization failed with uncaught exception.", ex);
             future.completeExceptionally(ex);

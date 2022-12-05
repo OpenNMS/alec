@@ -41,11 +41,6 @@ public class ClusterEngineFactory implements EngineFactory {
     }
 
     @Override
-    public String getNameConf() {
-        return getName();
-    }
-
-    @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
         return new ClusterEngine(metrics);
     }
@@ -53,10 +48,5 @@ public class ClusterEngineFactory implements EngineFactory {
     @Override
     public EngineFactory getEngineFactory() {
         return this;
-    }
-
-    @Override
-    public String getParameters() {
-        return String.format("engine: %s", getName());
     }
 }

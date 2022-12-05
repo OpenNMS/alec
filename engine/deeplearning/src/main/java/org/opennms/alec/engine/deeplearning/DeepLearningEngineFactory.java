@@ -29,7 +29,6 @@
 package org.opennms.alec.engine.deeplearning;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 import org.opennms.alec.engine.api.EngineFactory;
 import org.osgi.framework.BundleContext;
@@ -63,13 +62,6 @@ public class DeepLearningEngineFactory implements EngineFactory {
     }
 
     @Override
-    public String getNameConf() {
-        return new StringJoiner(", ", getName() + "[", "]")
-                .add("isRemote=" + isRemote)
-                .toString();
-    }
-
-    @Override
     public DeepLearningEngine createEngine(MetricRegistry metrics) {
         if (!isRemote) {
             return new DeepLearningEngine(metrics, bundleContext, conf);
@@ -81,11 +73,6 @@ public class DeepLearningEngineFactory implements EngineFactory {
     @Override
     public EngineFactory getEngineFactory() {
         return this;
-    }
-
-    @Override
-    public String getParameters() {
-        return String.format("engine: %s", getName());
     }
 
     public void setToken(String token) {

@@ -301,5 +301,10 @@ public class ClusterEngineSituationTest implements SituationHandler {
 
             return Collections.singletonList(cluster);
         }
+
+        @Override
+        public String getName() {
+            return "onecluster";
+        }
     }
 }

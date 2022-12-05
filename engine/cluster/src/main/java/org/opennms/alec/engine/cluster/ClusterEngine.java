@@ -78,4 +78,8 @@ public class ClusterEngine extends AbstractClusterEngine {
         return clusters;
     }
 
+    @Override
+    public String getName() {
+        return "cluster";
+    }
 }

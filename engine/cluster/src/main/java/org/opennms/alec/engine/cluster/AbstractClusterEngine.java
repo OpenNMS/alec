@@ -513,7 +513,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 situationBuilders.size());
         situationBuilders.forEach(situationBuilder -> {
             situationBuilder.setDiagnosticText(getDiagnosticTextForSituation(situationBuilder.build()));
-            situationBuilder.setEngineParameter(Thread.currentThread().getName().substring(20));
+            situationBuilder.setEngineParameter(this.getName());
         });
         LOG.debug("{}: Done generating diagnostic texts.", context.getTimestampInMillis());
     }

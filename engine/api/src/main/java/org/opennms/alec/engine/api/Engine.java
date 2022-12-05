@@ -69,4 +69,6 @@ public interface Engine extends AlarmHandler, InventoryHandler, AlarmFeedbackHan
      * @throws InterruptedException if the thread is interrupted while waiting for the engine to init
      */
     void deleteSituation(String situationId) throws InterruptedException;
+
+    String getName();
 }

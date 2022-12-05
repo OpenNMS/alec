@@ -100,6 +100,11 @@ public class TickLoggingEngine implements Engine {
 
     }
 
+    @Override
+    public String getName() {
+        return "tickloggingengine";
+    }
+
     public synchronized List<Long> getTicks() {
         return ImmutableList.copyOf(ticks);
     }

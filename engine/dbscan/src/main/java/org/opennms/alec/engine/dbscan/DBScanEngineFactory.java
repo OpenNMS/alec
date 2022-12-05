@@ -30,7 +30,6 @@ package org.opennms.alec.engine.dbscan;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
 
 import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
@@ -68,16 +67,6 @@ public class DBScanEngineFactory implements EngineFactory {
     }
 
     @Override
-    public String getNameConf() {
-        return new StringJoiner(", ", getName() + "[", "]")
-                .add("epsilon=" + epsilon)
-                .add("alpha=" + alpha)
-                .add("beta=" + beta)
-                .add("distanceMeasure='" + distanceMeasureFactoryName + "'")
-                .toString();
-    }
-
-    @Override
     public AbstractClusterEngine createEngine(MetricRegistry metrics) {
         Optional<DistanceMeasureFactory> factory = Optional.ofNullable(distanceMeasureFactoryMap.get(distanceMeasureFactoryName));
         if (factory.isPresent()) {
@@ -92,12 +81,6 @@ public class DBScanEngineFactory implements EngineFactory {
     @Override
     public EngineFactory getEngineFactory() {
         return this;
-    }
-
-    @Override
-    public String getParameters() {
-        return String.format("engine: %s, alpha: %s, beta: %s, epsilon: %s, distanceMeasure: %s",
-                getName(), getAlpha(), getBeta(), getEpsilon(), getDistanceMeasureFactoryName());
     }
 
     public double getEpsilon() {

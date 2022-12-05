@@ -173,6 +173,11 @@ public class Vectorize implements Action {
             }
             return Objects.equals(s1,s2);
         }
+
+        @Override
+        public String getName() {
+            return "myengine";
+        }
     }
 
     private static class MyEngineFactory implements EngineFactory {
@@ -188,11 +193,6 @@ public class Vectorize implements Action {
         }
 
         @Override
-        public String getNameConf() {
-            return getName();
-        }
-
-        @Override
         public Engine createEngine(MetricRegistry metrics) {
             return engine;
         }
@@ -200,11 +200,6 @@ public class Vectorize implements Action {
         @Override
         public EngineFactory getEngineFactory() {
             return this;
-        }
-
-        @Override
-        public String getParameters() {
-            return String.format("engine: %s", getName());
         }
     }
 

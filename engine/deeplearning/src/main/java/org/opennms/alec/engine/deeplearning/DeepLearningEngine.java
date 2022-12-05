@@ -107,4 +107,12 @@ public class DeepLearningEngine extends AbstractClusterEngine {
         }
     }
 
+    @Override
+    public String getName() {
+        if(remoteModel == null) {
+            return "deeplearning";
+        } else {
+            return "deeplearningremote";
+        }
+    }
 }

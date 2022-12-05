@@ -116,4 +116,9 @@ public class DBScanEngine extends AbstractClusterEngine {
     public DistanceMeasure getDistanceMeasure() {
         return distanceMeasure;
     }
+
+    @Override
+    public String getName() {
+        return "dbscan";
+    }
 }

@@ -7,6 +7,8 @@ import WelcomePage from '@/components/WelcomePage.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import ViewUnassignedAlarms from '@/containers/ViewUnassignedAlarms.vue'
 import ConfigurationPage from '@/components/ConfigurationPage.vue'
+import AccountSettings from '@/containers/AccountSettings.vue'
+
 import { useUserStore } from '@/store/useUserStore'
 
 const checkUser = async () => {
@@ -77,6 +79,16 @@ const routes = [
 		path: '/situations/view-unassigned-alarms',
 		name: 'viewUnassignedAlarms',
 		component: ViewUnassignedAlarms
+	},
+	{
+		path: '/settings',
+		name: 'settings',
+		beforeEnter: async () => {
+			const userStore = useUserStore()
+			await userStore.getAlecInfo()
+			await userStore.getEngineInfo()
+		},
+		component: AccountSettings
 	}
 ]
 

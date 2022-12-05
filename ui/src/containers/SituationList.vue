@@ -9,6 +9,7 @@ import { FeatherIcon } from '@featherds/icon'
 import Refresh from '@featherds/icon/navigation/Refresh'
 import Add from '@featherds/icon/action/Add'
 import View from '@featherds/icon/action/View'
+import Settings from '@featherds/icon/action/Settings'
 import { reactive, ref, watch, markRaw } from 'vue'
 import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
@@ -21,7 +22,8 @@ import { filterListByDate } from '@/helpers/utils'
 
 const Icons = markRaw({
 	Add,
-	View
+	View,
+	Settings
 })
 
 const router = useRouter()
@@ -212,6 +214,12 @@ const viewUnassignedAlarms = () => {
 	})
 }
 
+const showSettings = () => {
+	router.push({
+		name: 'settings'
+	})
+}
+
 const resetFilters = () => {
 	selectedSeverity.value = ['all']
 	selectedTimeStart.value = 1
@@ -228,7 +236,7 @@ const resetFilters = () => {
 	<div class="list-main">
 		<div class="header">
 			<h2>Situation List</h2>
-			<div>
+			<div class="link-btns">
 				<FeatherButton
 					class="view-situation-btn"
 					@click="() => viewUnassignedAlarms()"
@@ -237,6 +245,12 @@ const resetFilters = () => {
 					<span>View Unassociated Alarms</span>
 				</FeatherButton>
 				<NewSituationBtn />
+				<FeatherIcon
+					:icon="Icons.Settings"
+					aria-hidden="true"
+					class="icon settings"
+					@click="showSettings"
+				/>
 			</div>
 		</div>
 		<div class="content">
@@ -322,6 +336,11 @@ const resetFilters = () => {
 .header {
 	display: flex;
 	justify-content: space-between;
+}
+
+.link-btns {
+	display: flex;
+	align-items: center;
 }
 
 .view-situation-btn {
@@ -412,5 +431,15 @@ h2 {
 	padding-left: var($spacing-xl);
 	border: none;
 	font-size: 16px;
+}
+
+.settings {
+	width: 44px;
+	height: 44px;
+	padding: 8px;
+	margin-left: 10px;
+	background-color: #d1d1d1;
+	border-radius: 5px;
+	cursor: pointer;
 }
 </style>

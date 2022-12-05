@@ -70,10 +70,8 @@ public class SituationRestImplTest {
         //we don't want to store testing data to the cloud
         getAlarmsAndSituations();
         when(runtimeInfo.getSystemId()).thenReturn("42");
-        when(grpcConnectionConfig.getHost()).thenReturn("localhost");
-        when(grpcConnectionConfig.getPort()).thenReturn(80);
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig, situationClient);
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, situationClient);
     }
 
     @After

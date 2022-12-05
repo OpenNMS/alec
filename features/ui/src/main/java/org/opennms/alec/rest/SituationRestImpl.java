@@ -38,7 +38,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -67,9 +66,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-
 public class SituationRestImpl implements SituationRest {
     private static final Logger LOG = LoggerFactory.getLogger(SituationRestImpl.class);
     public static final String SITUATION_NOT_FOUND = "Situation {0} not found";
@@ -78,7 +74,6 @@ public class SituationRestImpl implements SituationRest {
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
     private final SituationClient client;
-    private final ManagedChannel channel;
     private final AlarmDatasource alarmDatasource;
     private final RuntimeInfo runtimeInfo;
 
@@ -93,11 +88,7 @@ public class SituationRestImpl implements SituationRest {
         this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
 
-        //channel to store situations
-        channel = ManagedChannelBuilder.forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
-                .build();
-
-        client = new SituationClient(channel, new SituationToSituationProto(), canWeStore(kvStore));
+        client = new SituationClient(new SituationToSituationProto(), canWeStore(kvStore), grpcConnectionConfig);
     }
 
     //Only for testing
@@ -105,17 +96,12 @@ public class SituationRestImpl implements SituationRest {
                                 SituationDatasource situationDatasource,
                                 AlarmDatasource alarmDatasource,
                                 RuntimeInfo runtimeInfo,
-                                GrpcConnectionConfig grpcConnectionConfig,
                                 SituationClient client) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
-
-        //channel to store situations
-        channel = ManagedChannelBuilder.forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
-                .build();
 
         this.client = client;
     }
@@ -357,10 +343,6 @@ public class SituationRestImpl implements SituationRest {
     }
 
     public void destroy() {
-        try {
-            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        client.destroy();
     }
 }

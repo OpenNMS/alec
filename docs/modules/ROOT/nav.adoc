@@ -1,6 +1,5 @@
-.About
-* xref:about:welcome.adoc[Welcome]
-* xref:about:terminology.adoc[Terminology]
+
+* xref:about:welcome.adoc[About ALEC]
 
 .Installation
 * xref:install:requirements.adoc[Requirements]
@@ -27,3 +26,4 @@
 
 .Reference
 * xref:reference:model.adoc[Model]
+* xref:reference:glossary.adoc[Glossary]

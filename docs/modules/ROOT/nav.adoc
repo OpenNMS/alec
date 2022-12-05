@@ -20,9 +20,11 @@
 * xref:engines:deeplearning.adoc[Deep Learning Engine]
 * xref:engines:dbscan.adoc[DBSCAN Engine]
 
+.Administration
+* xref:admin:distributed_install.adoc[Distributed Installation]
+* xref:admin:verifying.adoc[Maintenance]
+* xref:admin:upgrading.adoc[Upgrade ALEC]
+
 .Reference
 * xref:reference:model.adoc[Model]
-* xref:install:distributed_install.adoc[Distributed Install]
-* xref:install:verifying.adoc[Verifying your install]
-* xref:install:upgrading.adoc[Upgrading your install]
 * xref:reference:glossary.adoc[Glossary]

@@ -5,7 +5,7 @@ There are two options for ALEC deployment: basic and distributed.
 
 A xref:basic_install.adoc[basic deployment], which installs ALEC in the OpenNMS core as an additional service, is easy to set up and lets you evaluate or test ALEC with your existing environment.
 
-A xref:distributed_install.adoc[distributed deployment], which installs ALEC externally on an OpenNMS Sentinel server(s), requires a more involved setup that we recommend for a production environment where you have load, scaling, and resiliency requirements.
+A xref:admin:distributed_install.adoc[distributed deployment], which installs ALEC externally on an OpenNMS Sentinel server(s), requires a more involved setup that we recommend for a production environment where you have load, scaling, and resiliency requirements.
 
 .Basic vs. Distributed deployment pros and cons
 [options="header"]

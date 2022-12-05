@@ -1,4 +1,4 @@
-= User's Guide to _ALEC_
+= User's Guide to ALEC
 :page-layout: home
 :!sectids:
 

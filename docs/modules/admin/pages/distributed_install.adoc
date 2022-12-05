@@ -1,7 +1,8 @@
 = Distributed Installation
 :imagesdir: ../assets/images
 
-This section describes a distributed install where we run ALEC as a service on top of the Sentinel runtime:
+This section describes a distributed install that runs ALEC as a service on top of an OpenNMS Sentinel.
+OpenNMS Sentinel provides scalability for data processing.
 
 image::distributed_deployment.png[Distributed,700]
 

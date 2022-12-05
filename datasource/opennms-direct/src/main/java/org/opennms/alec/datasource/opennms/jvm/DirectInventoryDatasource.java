@@ -345,10 +345,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
         if (nodeForAlarm != null) {
             inventoryToAdd.addAll(mapper.toInventory(nodeForAlarm));
-
-        } else {
-            inventoryToAdd.addAll(mapper.toInventory(alarm));
         }
+        inventoryToAdd.addAll(mapper.toInventory(alarm));
 
         if (inventoryToAdd.isEmpty()) {
             return;

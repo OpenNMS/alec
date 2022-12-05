@@ -140,9 +140,12 @@ public class AlecToOpennmsGraphConverter {
         this.graphBuilderInventory.addVertex(inventoryNode);
         alecToOnmsVertexMap.put(v, inventoryNode);
 
-        // Prune InventoryObjects nodes that have no Alarms and which have only one neighbor
+        // Remove snmp-interface IOs that have no Alarms and have only one neighbor
+        // TODO: Ideally we would not have to consider the type here
         if (graph.getIncidentEdges(v).size() < 2
-                && notAttachedToAlarm(v)) {
+                && notAttachedToAlarm(v)
+                && v.getInventoryObject().isPresent()
+                && v.getInventoryObject().get().getType().equals("snmp-interface")) {
             return;
         }
 

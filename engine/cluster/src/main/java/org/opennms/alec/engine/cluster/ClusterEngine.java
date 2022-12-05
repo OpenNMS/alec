@@ -33,8 +33,6 @@ import java.util.List;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.opennms.alec.datasource.api.Alarm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
 
@@ -44,8 +42,6 @@ import edu.uci.ics.jung.graph.Graph;
  * Simple cluster engine implementation
  */
 public class ClusterEngine extends AbstractClusterEngine {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ClusterEngine.class);
 
     public ClusterEngine(MetricRegistry metrics) {
         super(metrics);

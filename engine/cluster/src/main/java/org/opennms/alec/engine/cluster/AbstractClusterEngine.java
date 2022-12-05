@@ -356,7 +356,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 LOG.debug("{}: Clustering {} alarms.", timestampInMillis, numAlarms);
                 List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis,
                         graphManager.getFilteredGraph());
-                if (clustersOfAlarms == null) {
+                if (clustersOfAlarms == null || clustersOfAlarms.isEmpty()) {
                     LOG.debug("{}: No clustering was performed.", timestampInMillis);
                     return;
                 }

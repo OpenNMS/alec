@@ -29,6 +29,7 @@
 package org.opennms.alec.engine.dbscan;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,9 +100,9 @@ public class DBScanEngine extends AbstractClusterEngine {
                 .flatMap(Collection::stream)
                 .sorted(Comparator.comparing(AlarmInSpaceTime::getAlarmTime).thenComparing(AlarmInSpaceTime::getAlarmId))
                 .collect(Collectors.toList());
-        if (alarms.size() < 1) {
+        if (alarms.isEmpty()) {
             LOG.debug("{}: The graph contains no alarms. No clustering will be performed.", timestampInMillis);
-            return null;
+            return Collections.emptyList();
         }
 
         final DBSCANClusterer<AlarmInSpaceTime> clusterer = new DBSCANClusterer<>(epsilon, 1, distanceMeasure);

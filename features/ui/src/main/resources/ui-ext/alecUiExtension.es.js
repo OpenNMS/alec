@@ -11825,7 +11825,7 @@ const XD = /* @__PURE__ */ pe(LD, [["__scopeId", "data-v-7861b534"]]), qD = "/wh
       await T1(e) && (this.allowSave = e);
     }
   }
-}), tO = window.Vue.defineComponent, Xt = window.Vue.createVNode, Nt = window.Vue.unref, pu = window.Vue.normalizeClass, us = window.Vue.toDisplayString, Tr = window.Vue.openBlock, Ur = window.Vue.createElementBlock, ds = window.Vue.createCommentVNode, nO = window.Vue.withCtx, en = window.Vue.createElementVNode, rO = window.Vue.createTextVNode, oO = window.Vue.Fragment, aO = window.Vue.pushScopeId, iO = window.Vue.popScopeId, sO = (e) => (aO("data-v-7d539e83"), e = e(), iO(), e), lO = { class: "section" }, cO = { class: "action-section" }, uO = {
+}), tO = window.Vue.defineComponent, Xt = window.Vue.createVNode, Nt = window.Vue.unref, pu = window.Vue.normalizeClass, us = window.Vue.toDisplayString, Tr = window.Vue.openBlock, Ur = window.Vue.createElementBlock, ds = window.Vue.createCommentVNode, nO = window.Vue.withCtx, en = window.Vue.createElementVNode, rO = window.Vue.createTextVNode, oO = window.Vue.Fragment, aO = window.Vue.pushScopeId, iO = window.Vue.popScopeId, sO = (e) => (aO("data-v-71f6f735"), e = e(), iO(), e), lO = { class: "section" }, cO = { class: "action-section" }, uO = {
   key: 0,
   class: "btn-row"
 }, dO = { key: 0 }, fO = { key: 1 }, hO = {
@@ -11844,9 +11844,9 @@ const XD = /* @__PURE__ */ pe(LD, [["__scopeId", "data-v-7861b534"]]), qD = "/wh
     const m = async (v) => {
       var g;
       await y1(
-        (g = r.situationInfo) == null ? void 0 : g.id,
+        ((g = r.situationInfo) == null ? void 0 : g.id) + 1212,
         v.toLowerCase()
-      ) ? (d.value = v, i.getSituation(r.situationInfo.id)) : o.showErrorMsg("You need to choose at least one alarm!");
+      ) ? (d.value = v, i.getSituation(r.situationInfo.id)) : o.showErrorMsg("Error on rejecting the situation");
     };
     return (v, V) => {
       var g, U, M, b, A, C, F, W, _, I, S, z;
@@ -11945,7 +11945,7 @@ const XD = /* @__PURE__ */ pe(LD, [["__scopeId", "data-v-7861b534"]]), qD = "/wh
     };
   }
 });
-const RO = /* @__PURE__ */ pe(kO, [["__scopeId", "data-v-7d539e83"]]);
+const RO = /* @__PURE__ */ pe(kO, [["__scopeId", "data-v-71f6f735"]]);
 var MO = Object.defineProperty, bO = Object.defineProperties, SO = Object.getOwnPropertyDescriptors, bw = Object.getOwnPropertySymbols, ZO = Object.prototype.hasOwnProperty, EO = Object.prototype.propertyIsEnumerable, Sw = (e, r, o) => r in e ? MO(e, r, { enumerable: !0, configurable: !0, writable: !0, value: o }) : e[r] = o, Du = (e, r) => {
   for (var o in r || (r = {}))
     ZO.call(r, o) && Sw(e, o, r[o]);
@@ -12879,7 +12879,7 @@ tV({
     };
   }
 });
-const YQ = window.Vue.defineComponent, Se = window.Vue.unref, ut = window.Vue.createVNode, Wa = window.Vue.createElementVNode, Wt = window.Vue.withCtx, co = window.Vue.openBlock, Xw = window.Vue.createBlock, PQ = window.Vue.createCommentVNode, el = window.Vue.createTextVNode, hs = window.Vue.createElementBlock, qw = window.Vue.toDisplayString, HQ = window.Vue.pushScopeId, $Q = window.Vue.popScopeId, Ud = (e) => (HQ("data-v-87dcccfc"), e = e(), $Q(), e), jQ = { id: "cont" }, LQ = { class: "btns-navigation" }, XQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Situation List", -1)), qQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Show Previous Situation ", -1)), KQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Show Next Situation", -1)), ez = { key: 1 }, tz = {
+const YQ = window.Vue.defineComponent, Se = window.Vue.unref, ut = window.Vue.createVNode, Wa = window.Vue.createElementVNode, Wt = window.Vue.withCtx, co = window.Vue.openBlock, Xw = window.Vue.createBlock, PQ = window.Vue.createCommentVNode, el = window.Vue.createTextVNode, hs = window.Vue.createElementBlock, qw = window.Vue.toDisplayString, HQ = window.Vue.pushScopeId, $Q = window.Vue.popScopeId, Ud = (e) => (HQ("data-v-ea460f43"), e = e(), $Q(), e), jQ = { id: "cont" }, LQ = { class: "btns-navigation" }, XQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Situation List", -1)), qQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Show Previous Situation ", -1)), KQ = /* @__PURE__ */ Ud(() => /* @__PURE__ */ Wa("span", null, "Show Next Situation", -1)), ez = { key: 1 }, tz = {
   key: 0,
   class: "detail"
 }, nz = /* @__PURE__ */ el("Details"), rz = /* @__PURE__ */ el("Metrics"), oz = {
@@ -13015,7 +13015,8 @@ const YQ = window.Vue.defineComponent, Se = window.Vue.unref, ut = window.Vue.cr
         modelValue: g.value,
         "onUpdate:modelValue": A[4] || (A[4] = (C) => g.value = C),
         center: "",
-        error: ""
+        error: "",
+        timeout: 6e3
       }, {
         button: Wt(() => [
           ut(Se(he), {
@@ -13036,7 +13037,7 @@ const YQ = window.Vue.defineComponent, Se = window.Vue.unref, ut = window.Vue.cr
     ]));
   }
 });
-const uz = /* @__PURE__ */ pe(cz, [["__scopeId", "data-v-87dcccfc"]]), dz = window.Vue.defineComponent, Ge = window.Vue.unref, Bt = window.Vue.createVNode, Dt = window.Vue.createElementVNode, fo = window.Vue.withCtx, fz = window.Vue.toDisplayString, yd = window.Vue.createTextVNode, hz = window.Vue.normalizeClass, ho = window.Vue.openBlock, po = window.Vue.createElementBlock, pz = window.Vue.createCommentVNode, mz = window.Vue.renderList, wz = window.Vue.Fragment, vz = window.Vue.pushScopeId, Vz = window.Vue.popScopeId, Pa = (e) => (vz("data-v-7fae0d9e"), e = e(), Vz(), e), gz = { class: "container" }, Tz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("span", null, "Situation List", -1)), Uz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("h2", null, "New Situation", -1)), yz = { class: "form" }, Nz = { class: "fields" }, kz = /* @__PURE__ */ yd(" Total alarms added: "), Rz = { class: "total" }, Mz = {
+const uz = /* @__PURE__ */ pe(cz, [["__scopeId", "data-v-ea460f43"]]), dz = window.Vue.defineComponent, Ge = window.Vue.unref, Bt = window.Vue.createVNode, Dt = window.Vue.createElementVNode, fo = window.Vue.withCtx, fz = window.Vue.toDisplayString, yd = window.Vue.createTextVNode, hz = window.Vue.normalizeClass, ho = window.Vue.openBlock, po = window.Vue.createElementBlock, pz = window.Vue.createCommentVNode, mz = window.Vue.renderList, wz = window.Vue.Fragment, vz = window.Vue.pushScopeId, Vz = window.Vue.popScopeId, Pa = (e) => (vz("data-v-7fae0d9e"), e = e(), Vz(), e), gz = { class: "container" }, Tz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("span", null, "Situation List", -1)), Uz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("h2", null, "New Situation", -1)), yz = { class: "form" }, Nz = { class: "fields" }, kz = /* @__PURE__ */ yd(" Total alarms added: "), Rz = { class: "total" }, Mz = {
   key: 0,
   class: "errorList"
 }, bz = { class: "footer" }, Sz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("span", null, "Clear", -1)), Zz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("span", null, "Add Situation", -1)), Ez = { class: "alarm-column" }, Jz = /* @__PURE__ */ Pa(() => /* @__PURE__ */ Dt("h4", null, "Add Unassociated Alarms", -1)), Az = {

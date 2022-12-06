@@ -1,5 +1,6 @@
-= Pre-Installation Tasks
+
 :imagesdir: ../assets/images
+= Pre-Installation Tasks
 
 This section describes the configuration tasks you must complete before installing ALEC.
 

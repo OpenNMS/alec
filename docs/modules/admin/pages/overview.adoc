@@ -1,4 +1,5 @@
-= Overview
-:imagesdir: ../assets/images
 
-This section describes maintenance tasks and more advanced procedures, including distributed deployment and how to upgrade ALEC.
+:imagesdir: ../assets/images
+= Overview
+
+This section describes maintenance tasks and advanced procedures, including distributed deployment and how to upgrade ALEC.

@@ -58,8 +58,7 @@ See <<prequisites>>.
 
 == Install ALEC in OpenNMS
 
-.On the OpenNMS server, install the package:
-
+.Install the ALEC plugin package on your OpenNMS server:
 ```
 yum -y install opennms-alec-plugin
 ```
@@ -72,8 +71,7 @@ echo 'alec-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOM
 
 == Install ALEC in Sentinel
 
-.On the Sentinel systems, install the package:
-
+.Install the ALEC plugin package on your Sentinel systems:
 ```
 yum -y install sentinel-alec-plugin
 ```
@@ -113,17 +111,18 @@ See xref:datasources:kafka.adoc#_topics[topics] for details.
 
 Run the `health:check` command in both OpenNMS and Sentinel.
 
-From a Sentinel Karaf shell, enumerate the available graphs using the following:
+From a Sentinel Karaf shell, enumerate the available graphs using the following command:
 
 ```
 opennms-alec:list-graphs
 ```
 
-At this point we expect the command output a single graph called "dbscan":
+At this point we expect the command to output a single graph called "dbscan":
 
-```
+[source, karaf]
+----
 admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
-```
+----
 
-It's okay if there are no situations, vertices, or edges on the graph at this point.
+NOTE: There may not be any situations, vertices, or edges on the graph at this point.

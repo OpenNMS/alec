@@ -1,9 +1,11 @@
-= Basic Installation
+
 :imagesdir: ../assets/images
+= Basic Installation
 
-This section describes a basic installation where we run ALEC as another service within the OpenNMS core:
+This section describes a basic installation, where ALEC runs as another service within the OpenNMS core instance:
 
-image::basic_deployment.png[basic ALEC installation,400]
+.Example basic installation network architecture graph
+image::basic_deployment.png[Network architecture graph that displays a basic installation of ALEC, 400]
 
 == Before you begin
 

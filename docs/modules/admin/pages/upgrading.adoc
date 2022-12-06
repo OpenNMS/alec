@@ -1,9 +1,12 @@
-= Upgrade ALEC
+
 :imagesdir: ../assets/images
+= Upgrade ALEC
 
-This section includes instructions to upgrade ALEC on OpenNMS and Sentinel.
+This section describes how to upgrade ALEC on OpenNMS and Sentinel.
 
-== Upgrade ALEC on OpenNMS (basic and distributed deployments)
+== Upgrade ALEC on OpenNMS
+
+NOTE: The following instructions apply to both basic and distributed ALEC deployments.
 
 Stop OpenNMS:
 ```
@@ -27,8 +30,8 @@ sudo /etc/init.d/opennms restart
 
 == Upgrade ALEC on Sentinel (distributed deployment)
 
-Here we assume that ALEC is already up and running on one or more Sentinel instances.
-For each Sentinel instance, do the following:
+For this procedure, we assume that ALEC is already installed and running on one or more Sentinel instances in your network.
+Follow the steps below for each Sentinel instance:
 
 Stop Sentinel:
 ```

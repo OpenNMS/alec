@@ -8,7 +8,7 @@ A distributed deployment runs ALEC as a service on top of https://docs.opennms.c
 image::distributed_deployment.png[Network architecture graph that displays the components of a distributed installation of ALEC, 700]
 
 [[prequisites]]
-== Prequisites
+== Prerequisites
 
 In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, this guide assumes that you have the following:
 
@@ -113,9 +113,10 @@ Run the `health:check` command in both OpenNMS and Sentinel.
 
 From a Sentinel Karaf shell, enumerate the available graphs using the following command:
 
-```
+[source, karaf]
+----
 opennms-alec:list-graphs
-```
+----
 
 At this point we expect the command to output a single graph called "dbscan":
 

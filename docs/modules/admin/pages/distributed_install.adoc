@@ -1,22 +1,23 @@
-= Distributed Installation
+
 :imagesdir: ../assets/images
+= Distributed Installation
 
-A distributed installation runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[OpenNMSSentinel].
-OpenNMS Sentinel provides scalability for data processing.
+A distributed deployment runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[Sentinel], an OpenNMS component that enables scalability for data processing.
 
-image::distributed_deployment.png[Distributed,700]
+.Example distributed installation network architecture graph
+image::distributed_deployment.png[Network architecture graph that displays the components of a distributed installation of ALEC, 700]
 
 [[prequisites]]
 == Prequisites
 
-In addition to an existing instance of OpenNMS Horizon 30.0.1 or greater, this guide assumes you have the following:
+In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, this guide assumes that you have the following:
 
-1. A Kafka broker (or cluster) running Kafka 0.11.x or greater.
-2. One or more Minions already active in the system.
-3. Sentinel
+* A Kafka broker (or cluster) running Kafka 0.11.x or greater.
+* One or more active Minions.
+* OpenNMS Sentinel.
 ** Minions configured to use Kafka for the transport.
 ** Minions ready to receive SNMP traps and Syslog messages.
-4. ZooKeeper 3.5.10+.
+* ZooKeeper 3.5.10 or newer.
 
 == Before you begin
 
@@ -26,7 +27,10 @@ When installing the package repository, ensure that you do this on all of the sy
 
 == OpenNMS configuration
 
-=== Enable and configure the Kafka Producer (for topology and alarms)
+Complete the following steps through the OpenNMS Karaf shell.
+They configure your OpenNMS instance in preparation for a distributed installation of ALEC.
+
+=== Enable and configure the Kafka Producer
 
 .Configure the Kafka Producer to point to your Kafka broker:
 

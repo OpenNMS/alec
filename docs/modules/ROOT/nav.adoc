@@ -21,6 +21,7 @@
 * xref:engines:dbscan.adoc[DBSCAN Engine]
 
 .Administration
+* xref:admin:overview.adoc[Overview]
 * xref:admin:distributed_install.adoc[Distributed Installation]
 * xref:admin:verifying.adoc[Maintenance]
 * xref:admin:upgrading.adoc[Upgrade ALEC]

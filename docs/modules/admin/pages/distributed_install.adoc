@@ -1,7 +1,7 @@
 = Distributed Installation
 :imagesdir: ../assets/images
 
-This section describes a distributed install that runs ALEC as a service on top of an OpenNMS Sentinel.
+A distributed installation runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[OpenNMSSentinel].
 OpenNMS Sentinel provides scalability for data processing.
 
 image::distributed_deployment.png[Distributed,700]
@@ -16,10 +16,11 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or greater, this g
 3. Sentinel
 ** Minions configured to use Kafka for the transport.
 ** Minions ready to receive SNMP traps and Syslog messages.
+4. ZooKeeper 3.5.10+.
 
 == Before you begin
 
-Make sure you complete the xref:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
+Make sure you complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
 
 When installing the package repository, ensure that you do this on all of the systems that are running Sentinel and OpenNMS.
 
@@ -85,7 +86,7 @@ Configure the Kafka producer:
 echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.producer.cfg"
 ```
 
-TIP: The consumer is used to read alarms and inventory, while the producer is used to send events.
+TIP: The consumer reads alarms and inventory, while the producer sends events.
 
 .Configure ZooKeeper for distributed coordination:
 ```
@@ -122,5 +123,3 @@ dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
 It's okay if there are no situations, vertices, or edges on the graph at this point.
-
-Continue to xref:verifying.adoc[Verify your install] for more details.

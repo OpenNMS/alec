@@ -7,7 +7,7 @@ In order to build clusters using TensorFlow, we reduce the cluster problem to a 
 When two alarms are related, we add these to a cluster along with any other alarms that are related to any of these and so on.
 In order to help reduce the computational complexity in performing these pairwise computations, we limit the search of potential candidates to those that are nearby (within a distance of stem:[\epsilon].)
 
-The current model definition has been developped using link:https://github.com/uber/ludwig[Ludwig]:
+The current model definition has been developed using link:https://github.com/uber/ludwig[Ludwig]:
 
 image::ludwig_training.png[Ludwing training example,600]
 

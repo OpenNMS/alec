@@ -44,7 +44,4 @@ dbscan: 0 situations on 524 vertices and 4 edges.
 ```
 
 It's okay of there are no situations, vertices, or edges on the graph at this point.
-Refer to the ##Getting Started## section for information on how to use ALEC.
-
-
-Continue to xref:verifying.adoc[Verify your install] for more details.
+Refer to the ##Quick Start## section for information on how to use ALEC.

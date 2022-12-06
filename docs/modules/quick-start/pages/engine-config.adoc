@@ -4,9 +4,10 @@
 
 This section explains first-time login tasks and how to configure a correlation engine.
 ALEC includes two correlation engines: clustering and deep learning.
-The engine that you choose determines how alerts are grouped into clusters.
+The engine that you choose determines how ALEC groups alerts into clusters.
+
 This Quick Start guide explains how to set up and configure the xref:engines:clustering.adoc[clustering] engine.
-For information on the Deep Learning engine, see xref:engines:deeplearning.adoc[Deep Learning].
+The xref:engines:deeplearning.adoc[deep learning] engine requires additional setup, and is beyond the scope of this Quick Start guide.
 
 After you install ALEC, you can access it via the OpenNMS web UI.
 Log in to the web UI and click *Plugins > ALEC* in the top menu bar.

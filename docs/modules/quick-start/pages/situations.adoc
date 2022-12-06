@@ -5,9 +5,12 @@
 Now that you have xref:engine-config.adoc[selected the clustering engine], ALEC automatically begins to identify situations.
 This requires new alarms to be triggered within your OpenNMS environment, so--depending on your network's usual activity--this may take some time.
 
+As alarms are grouped into clusters, situations are created to represent their relationships.
+It is recommended that you evaluate situations as you see them, and address them as appropriate.
+
 == View all situations
 
-After alarms have been triggered in OpenNMS, they are evaluated by the Clustering engine and grouped into clusters as appropriate.
+After alarms have been triggered in OpenNMS, the clustering engine evaluates and groups them, and creates situations as appropriate.
 To view current situations in the OpenNMS web UI, click *Plugins > ALEC* in the top menu bar.
 The Situation List is displayed:
 
@@ -18,21 +21,64 @@ Active situations are sorted from most to least severe.
 Use the filters at the left of the screen to modify the sorting method.
 To return to the default sorting and filtering settings, click *Reset Filters*.
 
-== View a specific situation
+== View and manage a situation
 
-To view more information on a specific situation, click its entry in the list.
+To view more information and take action on a specific situation, click its entry in the Situation List.
 The situation details page is displayed:
 
 .Situation details page
 image::situation-details.png[Situation details page for a critical situation that affects two nodes, 800]
 
-From this page, you can acknowledge the situation (indicate that it has been seen and is being addressed), clear it (mark the situation as not relevant), or reject it (indicate that the clustered alarms are not related).
-You can also take action on individual alarms within the cluster by selecting them in the *Alarms* list.
+The title and description are automatically generated when the situation is created.
+The First Event field is populated when the situation is created, and the Last Event field is automatically updated to indicate the most recent alarm activity.
 
-You can create memos for both the situation overall and for individual alarms.
-To do so, click the *pencil* symbol beside the type of memo that you want to add, type your note, and click the *green check* symbol to save it.
+=== Manage situation
 
-To view a timeline of the situation and its associated alarms, navigate to the *Metrics* tab.
+You can take the following actions on a situation from its details page:
+
+* *Acknowledge:* Indicate that the situation has been seen and is being addressed.
+Your account will take ownership of the situation within OpenNMS.
+All associated alarms will also be acknowledged, and your account will take ownership of them.
+* *Clear:* Indicate that no action needs to be taken and remove the situation from the list of active situations.
+All associated alarms will also be cleared.
+* *Reject:* Indicate that the alarms in the situation are not related.
+
+You can also maintain sticky memos and journal memos for the situation.
+Sticky memos are used to note key information for the situation overall (for example, the potential root cause).
+Journal memos are used to log any important work or investigation steps; this can include root cause analysis or developing a fix for the underlying issue.
+
+Follow these steps to create a memo:
+
+. Navigate to a situation's details page.
+. Click the *pencil* symbol beside *Sticky Memo* or *Journal Memo*, as desired.
+. Type your note in the text box that is displayed.
+. Click the *green check* symbol to save the memo.
+
+=== Manage alarms
+
+You can take the following actions on individual alarms associated with a situation:
+
+* *Clear:* Indicate that no action needs to be taken and remove the alarm from the list of active alarms.
+* *Acknowledge:* Indicate that the alarm has been seen and is being addressed.
+Your account will take ownership of the alarm within OpenNMS.
+* *Move:* Move the alarm to a different situation.
+This should be used when another situation more accurately encompasses an issue.
+* *Remove:* Remove the alarm from the situation.
+This should be used when an alarm has been incorrectly associated with a situation.
+
+Follow these steps to manage individual alarms:
+
+. Navigate to a situation's details page.
+. Select an alarm from the *Alarms* list.
+. Evaluate the alarm and select the appropriate action (for example, acknowlege an alarm that you will be working on).
+. (Optional) Create a sticky memo or a journal memo.
+** Click the *pencil* symbol beside *Sticky Memo* or *Journal Memo*, as desired.
+** Type your note in the text box that is displayed.
+** Click the *green check* symbol to save the memo.
+
+=== View situation timeline
+
+To view a timeline of the situation and its associated alarms, navigate to the *Metrics* tab on the details page.
 The timeline displays a graphical overview of alarm activity throughout the situation's lifetime.
 
 .Situation timeline page

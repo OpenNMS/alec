@@ -65,6 +65,7 @@ Your account will take ownership of the alarm within OpenNMS.
 Use this when another situation more accurately encompasses an issue.
 * *Remove:* Remove the alarm from the situation.
 Use this when an alarm has been incorrectly associated with a situation.
+
 NOTE: The move and remove options help train ALEC to better identify relationships between alarms and more accurately cluster them into situations.
 
 Follow these steps to manage individual alarms:
@@ -74,7 +75,7 @@ Follow these steps to manage individual alarms:
 . Evaluate the alarm and select the appropriate action (for example, acknowlege an alarm that you will be working on).
 . (Optional) Create a sticky memo or a journal memo.
 ** Click the *pencil* symbol beside *Sticky Memo* or *Journal Memo*, as desired.
-** Type your note in the text box that is displayed.
+** Type your note in the text box.
 ** Click the *green check* symbol to save the memo.
 
 === View situation timeline
@@ -96,3 +97,10 @@ In these cases, you can create a situation to represent such relationships:
 This can include the affected nodes, details of any root-cause investigation, and other relevant information.
 . Add alarms to the situation by finding them in the *Add Associated Alarms* list and selecting the *check box* beside their names.
 . Click *Add Situation*.
+
+== View unassociated alarms
+
+In addition to creating and tracking situations, ALEC also displays alarms that are not associated with any situations.
+To see the list of unassociated alarms, navigate to *Plugins > ALEC* in the top menu bar, and click *View Unassociated Alarms*.
+
+You can select one or more alarms and click *Move* to associate them with an existing situation.

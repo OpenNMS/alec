@@ -67,7 +67,7 @@ const handleFeedbackSituation = async (action: string) => {
 					class="btn"
 					data-test="btn-reject"
 					:class="{ rejected: status == REJECTED }"
-					@click="() => handleFeedbackSituation(REJECTED)"
+					@click="handleFeedbackSituation(REJECTED)"
 				>
 					<FeatherIcon
 						:icon="Cancel"

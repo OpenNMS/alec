@@ -1,9 +1,15 @@
-import { test, expect } from 'vitest'
+import { test, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { situationsMock } from './Mock/situationsMock'
 const situation = situationsMock[0]
+
+vi.mock('@/services/AlecService', () => {
+  return {
+    sendFeedbackAcceptSituation: async () => true
+  }
+})
 
 const wrapper = mount(SituationDetailTab, {
 	global: {

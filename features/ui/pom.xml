@@ -60,22 +60,10 @@
         <dependency>
             <groupId>org.opennms.alec.engine</groupId>
             <artifactId>org.opennms.alec.engine.dbscan</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.opennms.alec.engine</groupId>
             <artifactId>org.opennms.alec.engine.deeplearning</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -85,30 +73,15 @@
         <dependency>
             <groupId>org.opennms.alec.wrap</groupId>
             <artifactId>grpc</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>${protobuf-java.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.opennms.tsaas.alec</groupId>
             <artifactId>alec-gateway</artifactId>
             <version>${alec-gateway.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

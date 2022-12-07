@@ -28,9 +28,6 @@
 
 package org.opennms.alec.grpc;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.opennms.alec.datasource.api.Situation;
@@ -40,58 +37,41 @@ import org.opennms.alec.mapper.SituationToSituationProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.Empty;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
 
-    private final AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
+    private AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
+    private ManagedChannel channel;
 
-    private final SituationToSituationProto mapper;
+    private final SituationToSituationProto mapper = new SituationToSituationProto();
     private final boolean doStore;
-    private final ManagedChannel channel;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public SituationClient(SituationToSituationProto mapper, boolean doStore, GrpcConnectionConfig grpcConnectionConfig) {
-        channel = ManagedChannelBuilder
-                .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
-                .build();
-        futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
-        this.mapper = mapper;
+    public SituationClient(boolean doStore, GrpcConnectionConfig grpcConnectionConfig) {
+        if (doStore) {
+            channel = ManagedChannelBuilder
+                    .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
+                    .build();
+            futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
+        }
         this.doStore = doStore;
     }
 
-    public CompletableFuture<Empty> sendSituation(Situation situation, String systemId) {
-        CompletableFuture<Empty> resultFuture = new CompletableFuture<>();
+    public void sendSituation(Situation situation, String systemId) {
         if (doStore) {
             SituationSet request = mapper.toSituationSet(situation, systemId);
             LOG.debug("Will try to send {} ...", request);
-            ListenableFuture<Empty> listenableFuture = futureStub.sendSituations(request);
-
-            listenableFuture.addListener(
-                    () -> processRequestCompletion(listenableFuture, resultFuture),
-                    executorService
-            );
-        }
-        return resultFuture;
-    }
-
-    private void processRequestCompletion(ListenableFuture<Empty> listenableFuture, CompletableFuture<Empty> resultFuture) {
-        try {
-            Empty response = listenableFuture.get();
-            resultFuture.complete(response);
-        } catch (Exception exc) {
-            resultFuture.completeExceptionally(exc);
+            futureStub.sendSituations(request);
         }
     }
 
     public void destroy() {
         try {
-            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            if (channel != null) {
+                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

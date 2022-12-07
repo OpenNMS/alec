@@ -57,7 +57,6 @@ import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.grpc.GrpcConnectionConfig;
 import org.opennms.alec.grpc.SituationClient;
-import org.opennms.alec.mapper.SituationToSituationProto;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 import org.slf4j.Logger;
@@ -88,7 +87,7 @@ public class SituationRestImpl implements SituationRest {
         this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
 
-        client = new SituationClient(new SituationToSituationProto(), canWeStore(kvStore), grpcConnectionConfig);
+        client = new SituationClient(canWeStore(kvStore), grpcConnectionConfig);
     }
 
     //Only for testing

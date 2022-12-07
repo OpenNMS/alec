@@ -4,13 +4,13 @@
 
 A distributed installation runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[Sentinel], an OpenNMS component that enables scalability for data processing.
 
-.Example distributed installation network architecture graph
-image::distributed_deployment.png[Network architecture graph that displays the components of a distributed installation of ALEC, 700]
+.Example distributed installation network architecture
+image::distributed_deployment.png[Network architecture graphic that displays the components of a distributed installation of ALEC, 700]
 
 [[prequisites]]
 == Prerequisites
 
-In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, this guide assumes that you have the following:
+In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these instructions assume that you have the following:
 
 * A Kafka broker (or cluster) running Kafka 0.11.x or greater.
 * One or more active Minions.
@@ -30,8 +30,6 @@ Make sure that you install the package repository on all systems that are runnin
 Complete the following steps in the OpenNMS Karaf shell.
 They configure your OpenNMS instance in preparation for a distributed installation of ALEC.
 
-=== Enable and configure the Kafka Producer
-
 .Configure the Kafka Producer to point to your Kafka broker:
 
 [source, karaf]
@@ -48,9 +46,7 @@ echo 'suppressIncrementalAlarms=false' >> "$OPENNMS_HOME/etc/org.opennms.feature
 
 Open `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg` in a text editor and add `opennms-kafka-producer` to the `featuresBoot` property.
 
-=== Enable consumption of Kafka events
-
-.Enable the Sink API consumer for eventd:
+.Enable consumption of Kafka events:
 
 [source, karaf]
 ----
@@ -119,20 +115,16 @@ alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/e
 
 == Verify your installation
 
-Restart OpenNMS and Sentinel.
+Follow these steps to verify your distributed ALEC installation:
 
-Ensure that the required Kafka topics are created (see xref:datasources:kafka.adoc#_topics[topics] for details).
+. Restart OpenNMS and Sentinel.
+. Make sure that the required Kafka topics have been created (see xref:datasources:kafka.adoc#_topics[Kafka topics]).
+. Run the `health:check` command in an OpenNMS Karaf shell to check the status of your OpenNMS instance.
+. Run the `health:check` command in a Sentinel Karaf shell to check the status of the Sentinel instance.
+** Repeat this step for each Sentinel instance in your environment.
+. Run the `opennms-alec:list-graphs` command in a Sentinel Karaf shell to enumerate all available graphs.
 
-Run the `health:check` command in both OpenNMS and Sentinel.
-
-From a Sentinel Karaf shell, enumerate the available graphs using the following command:
-
-[source, karaf]
-----
-opennms-alec:list-graphs
-----
-
-At this point we expect the command to output a single graph called "dbscan":
+At this point, the health check commands should return with no issues, and one graph named "dbscan" should be enumerated:
 
 [source, karaf]
 ----

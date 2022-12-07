@@ -10,28 +10,14 @@ This section describes the configuration tasks you must complete before installi
 
 The ALEC installation instructions refer to the `$OPENNMS_HOME` environment variable, which must be set.
 
-On RHEL or CentOS, use the following command:
+On RHEL or CentOS, use the following command: `export OPENNMS_HOME=/opt/opennms`.
 
-[source]
-----
-export OPENNMS_HOME=/opt/opennms
-----
-
-On Ubuntu or Debian, use the following command:
-
-[source, console]
-----
-export OPENNMS_HOME=/usr/share/opennms
-----
+On Ubuntu or Debian, use the following command: `export OPENNMS_HOME=/usr/share/opennms`.
 
 === Verify your OpenNMS installation
 
-From the OpenNMS Karaf shell, run the following to help validate your deployment:
+Run the `health:check` command in an OpenNMS Karaf shell to verify the status of your OpenNMS instance.
 
-[source, karaf]
-----
-health:check
-----
 If the health check returns "Everything is awesome," continue to the next pre-installation task.
 An "Oh no, something is wrong" error message indicates a problem that you must address before moving forward.
 
@@ -64,8 +50,8 @@ Run the `health:check` command again and, if the "Everything is awesome" message
 
 === Enable alarm history storage for Elasticsearch
 
-When using ALEC, we strongly recommend that you leverage our integration for maintaining alarm history in Elasticsearch.
-ALEC can use this data for analysis and to help train the correlation engine.
+We strongly recommend that, when using ALEC, you leverage the Elasticsearch integration.
+This integration lets OpenNMS maintain historical alarm information in Elasticsearch.
 
 To set up the integration, run the following commands in an OpenNMS Karaf shell:
 
@@ -78,7 +64,9 @@ config:property-set elasticUrl http://elastic:9200
 config:update
 ----
 
-.Use the following to install the feature:
+NOTE: Replace the sample URL (`http://elastic:9200`) with one that points to your Elasticsearch instance.
+
+.Install the feature:
 
 [source, karaf]
 ----
@@ -117,6 +105,16 @@ Do not restart OpenNMS at this point; you will restart it as part of the ALEC in
 Packages for ALEC are available in the same Debian and YUM repositories as OpenNMS.
 If you already have the stable repository installed, you can skip this step.
 
+=== Set up YUM repository (RHEL/CentOS)
+
+For RHEL- or CentOS-based distributions, install the repository:
+
+[source]
+----
+yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
+rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
+----
+
 === Set up APT repository (Ubuntu/Debian)
 
 For Ubuntu- or Debian-based distributions, install the repository:
@@ -131,12 +129,3 @@ wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
 apt update
 ----
 
-=== Set up YUM repository (RHEL/CentOS)
-
-For RHEL- or CentOS-based distributions, install the repository:
-
-[source]
-----
-yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
-rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
-----

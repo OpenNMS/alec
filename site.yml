@@ -18,6 +18,7 @@ ui:
 asciidoc:
   attributes:
     stem: latexmath
+    tabs: tabs
 output:
   clean: true
   dir: ./public

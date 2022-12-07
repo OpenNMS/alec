@@ -4,8 +4,8 @@
 
 This section describes a basic installation, where ALEC runs as another service within the OpenNMS core instance:
 
-.Example basic installation network architecture graph
-image::basic_deployment.png[Network architecture graph that displays a basic installation of ALEC, 400]
+.Example basic installation network architecture
+image::basic_deployment.png[Network architecture graphic that displays a basic ALEC installation, 400]
 
 == Before you begin
 
@@ -13,29 +13,21 @@ You must complete the xref:install:pre_install.adoc[pre-installation tasks] befo
 
 == Install ALEC
 
-For RHEL or CentOS users, install the package via YUM:
+. Install the package:
+.. RHEL or CentOS users, install via YUM: `yum -y install opennms-alec-plugin`.
+.. Ubuntu or Debian users, install via APT: `apt install opennms-alec-plugin`.
+. Configure the feature set to be installed when OpenNMS restarts:
 
-
-```
-yum -y install opennms-alec-plugin
-```
-
-For Ubuntu or Debian users, install the package via APT:
-
-```
-apt install opennms-alec-plugin
-```
-
-Configure the feature set to be installed when OpenNMS restarts:
-
-```
+[source, karaf]
+----
 echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
-```
+----
+
 == Verify installation
 
 Run the `health:check` command in the OpenNMS Karaf shell to verify that everything loaded correctly.
 
-You can enumerate the available graphs using:
+Use the following to enumerate the available graphs:
 
 [source,karaf]
 ----
@@ -50,6 +42,7 @@ admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
 ----
 
-NOTE: There may not be any situations, vertices, or edges on the graph at this point.
+NOTE: Your graph may not have any situations, vertices, or edges at this point.
+This is normal during initial setup.
 
 Refer to the ##Quick Start## section for information on how to use ALEC.

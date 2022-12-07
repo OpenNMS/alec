@@ -7,7 +7,7 @@ ALEC includes two correlation engines: clustering and deep learning.
 The engine that you choose determines how ALEC groups alerts into clusters.
 
 This Quick Start guide explains how to set up and configure the xref:engines:clustering.adoc[clustering] engine.
-The xref:engines:deeplearning.adoc[deep learning] engine requires additional setup, and is beyond the scope of this Quick Start guide.
+The xref:engines:deeplearning.adoc[deep learning] engine requires additional setup, and is covered as an advanced topic in the administration section.
 
 After you install ALEC, you can access it via the OpenNMS web UI.
 Log in to the web UI and click *Plugins > ALEC* in the top menu bar.
@@ -15,7 +15,7 @@ An introduction to the ALEC plugin is displayed, explaining the plugin and its k
 
 == First-time login and data choices
 
-As part of the introduction to ALEC, OpenNMS prompts for permission to send ALEC usage data to The OpenNMS Group.
+When you first log in and navigate to the ALEC plugin, OpenNMS prompts for permission to send usage data to The OpenNMS Group.
 We use this anonymized information to help determine product use and improve the ALEC plugin.
 We do not share it with third parties, and will not use it for sales purposes.
 

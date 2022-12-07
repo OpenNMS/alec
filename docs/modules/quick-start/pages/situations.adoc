@@ -5,8 +5,8 @@
 Now that you have xref:engine-config.adoc[selected the clustering engine], ALEC automatically begins to identify situations.
 This requires new alarms to be triggered within your OpenNMS environment, so--depending on your network's usual activity--this may take some time.
 
-As alarms are grouped into clusters, situations are created to represent their relationships.
-It is recommended that you evaluate situations as you see them, and address them as appropriate.
+As alarms are grouped into clusters, ALEC creates situations to represent their relationships.
+We recommend that you evaluate situations as you see them, and address them as appropriate.
 
 == View all situations
 
@@ -44,14 +44,14 @@ All associated alarms will also be cleared.
 * *Reject:* Indicate that the alarms in the situation are not related.
 
 You can also maintain sticky memos and journal memos for the situation.
-Sticky memos are used to note key information for the situation overall (for example, the potential root cause).
-Journal memos are used to log any important work or investigation steps; this can include root cause analysis or developing a fix for the underlying issue.
+Sticky memos note key information for the situation overall (for example, the potential root cause).
+Journal memos log any important work or investigation steps; this can include root cause analysis or developing a fix for the underlying issue.
 
 Follow these steps to create a memo:
 
 . Navigate to a situation's details page.
 . Click the *pencil* symbol beside *Sticky Memo* or *Journal Memo*, as desired.
-. Type your note in the text box that is displayed.
+. Type your note in the text box.
 . Click the *green check* symbol to save the memo.
 
 === Manage alarms
@@ -62,9 +62,10 @@ You can take the following actions on individual alarms associated with a situat
 * *Acknowledge:* Indicate that the alarm has been seen and is being addressed.
 Your account will take ownership of the alarm within OpenNMS.
 * *Move:* Move the alarm to a different situation.
-This should be used when another situation more accurately encompasses an issue.
+Use this when another situation more accurately encompasses an issue.
 * *Remove:* Remove the alarm from the situation.
-This should be used when an alarm has been incorrectly associated with a situation.
+Use this when an alarm has been incorrectly associated with a situation.
+NOTE: The move and remove options help train ALEC to better identify relationships between alarms and more accurately cluster them into situations.
 
 Follow these steps to manage individual alarms:
 

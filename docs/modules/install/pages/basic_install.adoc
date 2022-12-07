@@ -15,6 +15,7 @@ Make sure you complete the xref:pre_install.adoc[pre-installation tasks] before 
 
 For RHEL or CentOS users, install the package via YUM:
 
+
 ```
 yum -y install opennms-alec-plugin
 ```
@@ -35,15 +36,20 @@ echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME
 Run the `health:check` command in the OpenNMS Karaf shell to verify that everything loaded correctly.
 
 You can enumerate the available graphs using:
-```
+
+[source,karaf]
+----
 opennms-alec:list-graphs
-```
+----
 
 At this point we expect the command to output a single graph called "dbscan":
-```
+
+[source, karaf]
+----
 admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
-```
+----
 
-It's okay of there are no situations, vertices, or edges on the graph at this point.
+NOTE: There may not be any situations, vertices, or edges on the graph at this point.
+
 Refer to the ##Quick Start## section for information on how to use ALEC.

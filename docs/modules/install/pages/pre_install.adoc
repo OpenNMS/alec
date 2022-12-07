@@ -12,29 +12,33 @@ The ALEC installation instructions refer to the `$OPENNMS_HOME` environment vari
 
 On RHEL or CentOS, use the following command:
 
-```
+[source]
+----
 export OPENNMS_HOME=/opt/opennms
-```
+----
 
 On Ubuntu or Debian, use the following command:
 
-```
+[source, console]
+----
 export OPENNMS_HOME=/usr/share/opennms
-```
+----
 
 === Validate your OpenNMS deployment
 
 From the OpenNMS Karaf shell, run the following to help validate your deployment:
 
-```
+[source, karaf]
+----
 health:check
-```
+----
 If the health check returns an `everything is awesome` message, continue with the next pre-installation task.
 An `Oh no, something is wrong` message indicates a problem you must address.
 
 The most common result you may see involves a missing Elasticsearch configuration, similar to the following:
 
-```
+[source, karaf]
+----
 admin@opennms> health:check
 Verifying the health of the container
 
@@ -42,16 +46,19 @@ Verifying installed bundles                    [ Success  ]
 Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did not finish within 5000 ms
 
 => Oh no, something is wrong
-```
+----
+
 OpenNMS deployments install the `opennms-flows` feature by default, but may not point to the Elasticsearch server.
 
 To fix this issue, you can either uninstall the feature (using `feature:uninstall opennms-flows`), or point the feature to an Elasticsearch instance:
 
-```
+[source, karaf]
+----
 config:edit org.opennms.features.flows.persistence.elastic
 config:property-set elasticUrl http://elastic:9200
 config:update
-```
+----
+
 TIP: Replace the sample URL with one that points to your Elasticsearch instance.
 
 Run the health check again to confirm that `everything is awesome`.
@@ -63,17 +70,19 @@ ALEC can use this data for analysis and to help train the correlation engine.
 
 .From the OpenNMS Karaf shell, run the following, replacing the sample URL with one that points to your Elasticsearch instance:
 
-```
+[source, karaf]
+----
 config:edit org.opennms.features.alarms.history.elastic
 config:property-set elasticUrl http://elastic:9200
 config:update
-```
+----
 
 .Use the following to install the feature:
 
-```
+[source, karaf]
+----
 feature:install opennms-alarm-history-elastic
-```
+----
 
 .Run the `health:check`
 
@@ -86,17 +95,19 @@ We recommend that you enable Syslogd to take advantage of the Syslog patterns an
 .Edit `$OPENNMS_HOME/etc/service-configuration.xml`
 and change the following:
 
-```
+[source]
+----
 <service enabled="false">
     <name>OpenNMS:Name=Syslogd</name>
-```
+----
 
 to:
 
-```
+[source]
+----
 <service>
     <name>OpenNMS:Name=Syslogd</name>
-```
+----
 
 This change will come into effect the next time OpenNMS restarts.
 Do not restart OpenNMS at this point, as you will restart it as part of the ALEC installation.
@@ -110,19 +121,22 @@ If you already have the stable repository installed, you can skip this step.
 
 For Ubuntu- or Debian-based distributions, install the repository:
 
-```
+[source]
+----
 cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
 deb https://debian.opennms.org stable main
 deb-src https://debian.opennms.org stable main
 EOF
 wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
 apt update
-```
+----
+
 === Set up YUM repository (RHEL/CentOS)
 
 For RHEL- or CentOS-based distributions, install the repository:
 
-```
+[source]
+----
 yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
 rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
-```
+----

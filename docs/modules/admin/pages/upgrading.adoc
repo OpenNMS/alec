@@ -9,46 +9,64 @@ This section describes how to upgrade ALEC on OpenNMS and Sentinel.
 NOTE: The following instructions apply to both basic and distributed ALEC deployments.
 
 Stop OpenNMS:
-```
+
+[source]
+----
 sudo /etc/init.d/opennms stop
-```
+----
 
 Delete the .kar file cache:
-```
+
+[source]
+----
 sudo rm -rf $OPENNMS_HOME/data/kar
-```
+----
 
 Install the updated ALEC plugin package:
-```
+
+[source]
+----
 sudo yum -y install opennms-alec-plugin
-```
+----
 
 Restart OpenNMS:
-```
-sudo /etc/init.d/opennms restart
-```
 
-== Upgrade ALEC on Sentinel (distributed deployment)
+[source]
+----
+sudo /etc/init.d/opennms restart
+----
+
+== Upgrade ALEC on Sentinel
+
+NOTE: The following instructions apply only to a distributed ALEC deployment.
 
 For this procedure, we assume that ALEC is already installed and running on one or more Sentinel instances in your network.
 Follow the steps below for each Sentinel instance:
 
 Stop Sentinel:
-```
+
+[source]
+----
 sudo /etc/init.d/sentinel stop
-```
+----
 
 Delete the .kar file cache:
-```
+
+[source]
+----
 sudo rm -rf $SENTINEL_HOME/data/kar
-```
+----
 
 Install the updated ALEC plugin package:
-```
+
+[source]
+----
 sudo yum -y install sentinel-alec-plugin
-```
+----
 
 Restart Sentinel:
-```
+
+[source]
+----
 sudo /etc/init.d/sentinel restart
-```
+----

@@ -434,8 +434,8 @@ h2 {
 }
 
 .settings {
-	width: 44px;
-	height: 44px;
+	width: 44px !important;
+	height: 44px !important;
 	padding: 8px;
 	margin-left: 10px;
 	background-color: #d1d1d1;

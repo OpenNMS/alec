@@ -11415,7 +11415,7 @@ Ks({
     MenuFocusLoop: VA
   }
 });
-const bI = window.Vue.defineComponent, Du = window.Vue.createElementVNode, Tw = window.Vue.unref, SI = window.Vue.renderList, ZI = window.Vue.Fragment, fu = window.Vue.openBlock, Uw = window.Vue.createElementBlock, EI = window.Vue.createVNode, JI = window.Vue.withCtx, AI = window.Vue.createBlock, FI = window.Vue.pushScopeId, _I = window.Vue.popScopeId, CI = (e) => (FI("data-v-7f5329a1"), e = e(), _I(), e), WI = { class: "content" }, BI = /* @__PURE__ */ CI(() => /* @__PURE__ */ Du("h4", null, "Choose the situation where to move the alarms:", -1)), xI = { class: "situation-list" }, II = window.Vue.ref, DI = window.Vue.watch, OI = /* @__PURE__ */ bI({
+const bI = window.Vue.defineComponent, Du = window.Vue.createElementVNode, Tw = window.Vue.unref, SI = window.Vue.renderList, ZI = window.Vue.Fragment, fu = window.Vue.openBlock, Uw = window.Vue.createElementBlock, EI = window.Vue.createVNode, JI = window.Vue.withCtx, AI = window.Vue.createBlock, FI = window.Vue.pushScopeId, _I = window.Vue.popScopeId, CI = (e) => (FI("data-v-e4e9341c"), e = e(), _I(), e), WI = { class: "content" }, BI = /* @__PURE__ */ CI(() => /* @__PURE__ */ Du("h4", null, "Choose the situation where to move the alarms:", -1)), xI = { class: "situation-list" }, II = window.Vue.ref, DI = window.Vue.watch, OI = /* @__PURE__ */ bI({
   __name: "DrawerSituations",
   props: {
     situationId: null,
@@ -11457,7 +11457,7 @@ const bI = window.Vue.defineComponent, Du = window.Vue.createElementVNode, Tw = 
     }, 8, ["modelValue"]));
   }
 });
-const P1 = /* @__PURE__ */ pe(OI, [["__scopeId", "data-v-7f5329a1"]]), QI = window.Vue.defineComponent, yw = window.Vue.normalizeClass, wo = window.Vue.createElementVNode, os = window.Vue.unref, zI = window.Vue.createVNode, as = window.Vue.toDisplayString, GI = window.Vue.createTextVNode, YI = window.Vue.openBlock, PI = window.Vue.createElementBlock, HI = window.Vue.pushScopeId, $I = window.Vue.popScopeId, jI = (e) => (HI("data-v-92e8318d"), e = e(), $I(), e), LI = { class: "alarmInfo" }, XI = { class: "alarm-title" }, qI = /* @__PURE__ */ jI(() => /* @__PURE__ */ wo("strong", null, " Duration: ", -1)), KI = { class: "description" }, eD = /* @__PURE__ */ QI({
+const P1 = /* @__PURE__ */ pe(OI, [["__scopeId", "data-v-e4e9341c"]]), QI = window.Vue.defineComponent, yw = window.Vue.normalizeClass, wo = window.Vue.createElementVNode, os = window.Vue.unref, zI = window.Vue.createVNode, as = window.Vue.toDisplayString, GI = window.Vue.createTextVNode, YI = window.Vue.openBlock, PI = window.Vue.createElementBlock, HI = window.Vue.pushScopeId, $I = window.Vue.popScopeId, jI = (e) => (HI("data-v-92e8318d"), e = e(), $I(), e), LI = { class: "alarmInfo" }, XI = { class: "alarm-title" }, qI = /* @__PURE__ */ jI(() => /* @__PURE__ */ wo("strong", null, " Duration: ", -1)), KI = { class: "description" }, eD = /* @__PURE__ */ QI({
   __name: "UnassignedAlarmCard",
   props: {
     alarm: null,

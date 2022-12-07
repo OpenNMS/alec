@@ -2,7 +2,7 @@
 :imagesdir: ../assets/images
 = Distributed Installation
 
-A distributed deployment runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[Sentinel], an OpenNMS component that enables scalability for data processing.
+A distributed installation runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[Sentinel], an OpenNMS component that enables scalability for data processing.
 
 .Example distributed installation network architecture graph
 image::distributed_deployment.png[Network architecture graph that displays the components of a distributed installation of ALEC, 700]
@@ -21,13 +21,13 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, this gui
 
 == Before you begin
 
-Make sure you complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
+You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
 
-When installing the package repository, ensure that you do this on all of the systems that are running Sentinel and OpenNMS.
+Make sure that you install the package repository on all systems that are running Sentinel and OpenNMS.
 
 == OpenNMS configuration
 
-Complete the following steps through the OpenNMS Karaf shell.
+Complete the following steps in the OpenNMS Karaf shell.
 They configure your OpenNMS instance in preparation for a distributed installation of ALEC.
 
 === Enable and configure the Kafka Producer
@@ -46,9 +46,9 @@ echo 'bootstrap.servers=127.0.0.1:9092' > "$OPENNMS_HOME/etc/org.opennms.feature
 echo 'suppressIncrementalAlarms=false' >> "$OPENNMS_HOME/etc/org.opennms.features.kafka.producer.cfg"
 ----
 
-Add `opennms-kafka-producer` to the `featuresBoot` property in the `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg`.
+Open `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg` in a text editor and add `opennms-kafka-producer` to the `featuresBoot` property.
 
-=== Enable consumption of events from Kafka
+=== Enable consumption of Kafka events
 
 .Enable the Sink API consumer for eventd:
 
@@ -57,8 +57,7 @@ Add `opennms-kafka-producer` to the `featuresBoot` property in the `$OPENNMS_HOM
 echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.properties.d/event-sink.properties"
 ----
 
-IMPORTANT: We assume that you are already using the Kafka strategy for the Sink API.
-See <<prequisites>>.
+IMPORTANT: This procedure assumes that you are already using the Kafka strategy for the Sink API (see <<prequisites>>).
 
 == Install ALEC in OpenNMS
 
@@ -85,7 +84,7 @@ echo 'alec-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOM
 yum -y install sentinel-alec-plugin
 ----
 
-.Configure the Kafka Stream (consumer):
+.Configure Kafka Stream (consumer):
 
 [source, karaf]
 ----
@@ -93,14 +92,14 @@ echo 'bootstrap.servers=127.0.0.1:9092
 commit.interval.ms=5000' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.streams.cfg"
 ----
 
-Configure the Kafka producer:
+.Configure the Kafka producer:
 
 [source, karaf]
 ----
 echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.producer.cfg"
 ----
 
-TIP: The consumer reads alarms and inventory, while the producer sends events.
+TIP: Kafka Stream reads alarms and inventory, while the Kafka producer sends events.
 
 .Configure ZooKeeper for distributed coordination:
 
@@ -118,7 +117,7 @@ sentinel-coordination-zookeeper
 alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/alec.boot"
 ----
 
-== Verify
+== Verify your installation
 
 Restart OpenNMS and Sentinel.
 
@@ -141,4 +140,5 @@ admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
 ----
 
-NOTE: There may not be any situations, vertices, or edges on the graph at this point.
+NOTE: Your graph may not have any situations, vertices, or edges at this point.
+This is normal during initial setup.

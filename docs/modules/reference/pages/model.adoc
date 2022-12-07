@@ -1,5 +1,5 @@
-= Model
 :imagesdir: ../assets/images
+= Model
 
 == Types
 

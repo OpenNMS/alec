@@ -9,7 +9,7 @@ image::basic_deployment.png[Network architecture graph that displays a basic ins
 
 == Before you begin
 
-Make sure you complete the xref:pre_install.adoc[pre-installation tasks] before proceeding with the basic installation.
+You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
 
 == Install ALEC
 

@@ -8,7 +8,6 @@ import SituationDetailTab from '@/components/SituationDetailTab.vue'
 import SituationMetricsTab from '@/components/SituationMetricsTab.vue'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import { ref, watch, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { FeatherIcon } from '@featherds/icon'
 import { TSituation } from '@/types/TSituation'
 import { FeatherButton } from '@featherds/button'
@@ -16,6 +15,9 @@ import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { useAppStore } from '@/store/useAppStore'
 import { FeatherSpinner } from '@featherds/progress'
+import { useRoute } from 'vue-router'
+import useRouter from '@/composables/useRouter'
+
 const router = useRouter()
 const route = useRoute()
 const paramId = parseInt(route.params.id as string)

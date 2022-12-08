@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Add from '@featherds/icon/action/Add'
-import { useRouter } from 'vue-router'
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import { markRaw } from 'vue'
+import useRouter from '@/composables/useRouter'
 
 const router = useRouter()
 

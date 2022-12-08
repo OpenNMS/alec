@@ -10,7 +10,6 @@ import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import DrawerSituations from '@/components/DrawerSituations.vue'
 import { assignAlarmsToSituation } from '@/services/AlecService'
-import { useRouter } from 'vue-router'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
@@ -19,6 +18,7 @@ import { FeatherExpansionPanel } from '@featherds/expansion'
 import { TAlarm } from '@/types/TSituation'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { filterListByDate } from '@/helpers/utils'
+import useRouter from '@/composables/useRouter'
 
 const Icons = markRaw({
 	ArrowBack,

@@ -1,18 +1,22 @@
-import { test, expect } from 'vitest'
+import { test, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { situationsMock } from './Mock/situationsMock'
+let wrapper: any = null
+const situation = situationsMock[0]
 
-test('Should remove "all" and add severities', async () => {
-	const situation = situationsMock[0]
-	const wrapper = mount(ChipListByProperty, {
+beforeEach(() => {
+	wrapper = mount(ChipListByProperty, {
 		global: { plugins: [createTestingPinia()] },
 		props: {
 			alarms: situation.relatedAlarms,
 			property: 'severity'
 		}
-	} as any)
+	} as any) as any
+})
+
+test('Should remove "all" and add severities', async () => {
 	expect(wrapper.vm.selectedFilters).toEqual(['all'])
 	wrapper.vm.handleAlarmFilters('MAYOR')
 	expect(wrapper.vm.selectedFilters).toEqual(['MAYOR'])
@@ -21,14 +25,6 @@ test('Should remove "all" and add severities', async () => {
 })
 
 test('Should remove severities and replace by "all"', async () => {
-	const situation = situationsMock[0]
-	const wrapper = mount(ChipListByProperty, {
-		global: { plugins: [createTestingPinia()] },
-		props: {
-			alarms: situation.relatedAlarms,
-			property: 'severity'
-		}
-	} as any)
 	wrapper.vm.handleAlarmFilters('MAYOR')
 	wrapper.vm.handleAlarmFilters('MINOR')
 	expect(wrapper.vm.selectedFilters).toEqual(['MAYOR', 'MINOR'])

@@ -3,7 +3,7 @@
 = Maintenance Tasks
 
 This section describes maintenance tasks that you may want to perform.
-They apply to basic and distributed deployments.
+They apply to both basic and distributed installations.
 
 == Test syslog message handling
 

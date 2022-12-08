@@ -30,7 +30,7 @@ Make sure that you install the package repository on all systems that are runnin
 Complete the following steps in the OpenNMS Karaf shell.
 They configure your OpenNMS instance in preparation for a distributed installation of ALEC.
 
-.Configure the Kafka Producer to point to your Kafka broker:
+.Configure Kafka Producer to point to your Kafka broker:
 
 [source, karaf]
 ----

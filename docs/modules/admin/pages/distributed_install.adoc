@@ -19,12 +19,6 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these in
 ** Minions ready to receive SNMP traps and Syslog messages.
 * ZooKeeper 3.5.10 or newer.
 
-== Before you begin
-
-You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
-
-Make sure that you install the package repository on all systems that are running Sentinel and OpenNMS.
-
 == OpenNMS configuration
 
 Complete the following steps in the OpenNMS Karaf shell.
@@ -56,6 +50,10 @@ echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.p
 IMPORTANT: This procedure assumes that you are already using the Kafka strategy for the Sink API (see <<prequisites>>).
 
 == Install ALEC in OpenNMS
+
+You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
+
+Make sure that you install the package repository on all systems that are running Sentinel and OpenNMS.
 
 .Install the ALEC plugin package on your OpenNMS server:
 

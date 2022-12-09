@@ -1,9 +1,9 @@
+:imagesdir: ../assets/images
 = Model
-:imagesdir: ../assets/images 
 
 == Types
 
-The following types are supported using the built in Inventory Scripts:
+The following types are supported using the built-in inventory scripts:
 
 === Node (node)
 
@@ -11,7 +11,7 @@ Associates the alarm with a node object.
 
 There are no parameters required aside from the alarm being associated to a node.
 
-=== SNMP Interface (snmp-interface)
+=== SNMP interface (snmp-interface)
 
 Requires the `ifIndex` or `ifDescr` parameters to be set.
 
@@ -20,15 +20,15 @@ When given an `ifIndex` it will be used as-is.
 When given an `ifDescr` we will attempt to lookup the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
 
 [[snmp-interface-link]]
-=== SNMP Interface Link (snmp-interface-link)
+=== SNMP interface link (snmp-interface-link)
 
 Requires the `aIfDescr`, `zIfDescr` and `zHostname` parameters to be set.
 
-=== BGP Peer (bgp-peer)
+=== BGP peer (bgp-peer)
 
 Requires the `bgpPeer` parameters to be set.
 
-=== VPN Tunnel (vpn-tunnel)
+=== VPN tunnel (vpn-tunnel)
 
 Requires the `peerLocalAddr`, `peerRemoteAddr` and `tunnelId` parameters to be set.
 
@@ -36,18 +36,18 @@ Requires the `peerLocalAddr`, `peerRemoteAddr` and `tunnelId` parameters to be s
 
 Requires the `vrfNameOid` or `vrfName` parameter to be set.
 
-=== Entity-MIB Physical Entity (ent-physical-entity)
+=== Entity-MIB physical entity (ent-physical-entity)
 
 Requires the `entPhysicalIndex` parameter to be set.
 
-=== OSPF Router (ospf-router)
+=== OSPF router (ospf-router)
 
 Requires the `ospfRouterId` parameter to be set.
 
-=== MPLS Tunnel (mpls-tunnel)
+=== MPLS tunnel (mpls-tunnel)
 
 Requires the `mpls-tunnel` parameter to be set.
 
-=== MPLS LDP Session (mpls-tunnel)
+=== MPLS LDP session (mpls-tunnel)
 
 Requires the `mplsLdpEntityID` parameter to be set.

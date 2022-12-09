@@ -10,6 +10,10 @@
 * xref:install:verifying.adoc[Verifying your install]
 * xref:install:upgrading.adoc[Upgrading your install]
 
+.xref:quick-start:introduction.adoc[Quick Start]
+* xref:quick-start:engine-config.adoc[Step 1: First-Time Login & Engine Config]
+* xref:quick-start:situations.adoc[Step 2: View & Create Situations]
+
 .Architecture
 * xref:architecture:overview.adoc[Overview]
 * xref:architecture:opennms_integration.adoc[OpenNMS Integration]
@@ -19,10 +23,9 @@
 * xref:datasources:direct.adoc[Direct]
 * xref:datasources:kafka.adoc[Kafka]
 
-.Engines
-* xref:engines:cluster.adoc[Cluster Engine]
+.xref:engines:introduction.adoc[Correlation Engines]
+* xref:engines:clustering.adoc[Clustering Engine]
 * xref:engines:deeplearning.adoc[Deep Learning Engine]
-* xref:engines:dbscan.adoc[DBSCAN Engine]
 
 .Reference
 * xref:reference:model.adoc[Model]

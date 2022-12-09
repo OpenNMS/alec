@@ -1,0 +1,20 @@
+
+= Clustering Engine
+
+The clustering engine is a xref:introduction.adoc[correlation engine] that uses the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm] to build alarm clusters.
+It draws information from the locally persisted network inventory graph.
+ALEC automatically creates and maintains this graph, which is based on information from the associated xref:datasources:overview.adoc[datasource].
+
+== DBSCAN algorithm
+
+The DBSCAN algorithm that forms the basis for the clustering engine measures the distance between alarms on the network inventory graph to determine whether they should be correlated into a cluster.
+The distance function calculates a weighted combination of distance in both time and space (on the shortest possible path between affected nodes) between alarms.
+
+== Performance
+
+The clustering engine performs well when fewer than 500 candidate alarms exist.
+You can use the clustering engine on monitored networks that periodically experience more than 500 active alarms, since many of them will age out over time.
+The ALEC plugin's performance may degrade when more than 500 active candidate alarms exist in your OpenNMS instance.
+
+Note that ALEC considers only recent alarms (created or updated within the previous two hours) as candidates for correlation.
+You can configure the interval that ALEC uses to determine which alarms are candidates for correlation.

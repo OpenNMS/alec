@@ -1,89 +1,86 @@
-= Deep Learning Engine
+
 :imagesdir: ../assets/images
+= Deep Learning Engine
 
-The Deep Learning Engine is a xref:cluster.adoc[Cluster Engine] that uses a link:https://www.tensorflow.org/[TensorFlow] model to build clusters.
+The deep learning engine is a xref:introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
+It draws information from the locally persisted network inventory graph.
+Alec automatically creates and maintains this graph, which is based on information from the associated xref:datasources:overview.adoc[datasource].
 
-In order to build clusters using TensorFlow, we reduce the cluster problem to a binary classification problem that is analogous to asking: are these two alarms related?
-When two alarms are related, we add these to a cluster along with any other alarms that are related to any of these and so on.
-In order to help reduce the computational complexity in performing these pairwise computations, we limit the search of potential candidates to those that are nearby (within a distance of stem:[\epsilon].)
+== TensorFlow
 
-The current model definition has been developped using link:https://github.com/uber/ludwig[Ludwig]:
+To create clusters using TensorFlow, ALEC first reduces the clustering calculation to a binary classification that asks, "Are these two alarms related?"
+When the deep learning engine determines that two or more alarms are related, they are added to a cluster.
+To reduce the computational complexity of these calculations, ALEC limits the search of potential active candidates to those that are nearby.
 
-image::ludwig_training.png[Ludwing training example,600]
+== Ludwig
 
-The model input features include:
+The current model definition for the deep learning engine has been developed using https://github.com/uber/ludwig[Ludwig]:
 
-* The inventory object types (categorical)
-* Relations between the inventory objects (binary)
+.Ludwig training example
+image::ludwig_training.png[Shell interface that shows an example of training input and output for Ludwig, 600]
+
+The model's input features include the following:
+
+* Inventory object types (categorical)
+* Relations between inventory objects (binary)
 * Difference in time (numerical)
-* Distance on the graph (numerical)
+* Graphical distance (numerical)
 
-TIP: See link:https://github.com/OpenNMS/alec/blob/master/engine/deeplearning/src/main/resources/ludwig_model.yaml[ludwig_model.yaml] for the complete model definition.
+See https://github.com/OpenNMS/alec/blob/master/engine/deeplearning/src/main/resources/ludwig_model.yaml[ludwig_model.yaml] on the project's GitHub for more information on the model definition.
 
-== Using the engine
+== Train the engine
 
-To use the engine, install the `alec-engine-deeplearning` feature.
+The deep learning engine must be trained via the Karaf shell before ALEC can use it to correlate alarms.
 
-Once installed, restart the driver from the Karaf shell using:
+IMPORTANT: These instructions are included to help you get started with the engine.
+They are by no means all-encompassing.
+The training process will be improved in future ALEC releases.
 
-```
-bundle:restart org.opennms.alec.driver.main
-```
+=== Install shell commands
 
-Running the `list-graphs` command should now reflect that the `deeplearning` engine is being used:
+In the OpenNMS Karaf shell, run the following command to install the ALEC shell commands:
 
-```
-admin@opennms> opennms-alec:list-graphs
-deeplearning: 2 situations on 976 vertices and 839 edges.
-```
-
-TIP: Once installed add the feature to the `alec.boot` in a new line with `alec-engine-deeplearning wait-for-kar=opennms-alec-plugin` to ensure that engine is re-installed when the services are restarted.
-
-== Training
-
-CAUTION: These instructions are here to help you get started but are by no means complete.
-We plan to help make this process easier in future releases.
-
-Install the following features to access the shell commands required for training:
-
-```
+[source, karaf]
 feature:install alec-features-deeplearning alec-features-shell
-```
 
-=== Vectorize the datasets
+=== Vectorize datasets
 
-Let's take a snapshot of the current graph:
+First, take a snapshot of the current state of the datasource:
 
-```
+[source, karaf]
 opennms-alec:datasource-snapshot /tmp/snap1
-```
 
-Now edit `/tmp/snap1/alec.situations.xml` to reflect the desired state of situations.
+Next, edit `/tmp/snap1/alec.situations.xml` in a text editor to configure your desired situation state.
+Save your changes and return to the Karaf shell.
 
-Build vectors from the dataset:
+Run the following commands to build a vectorized representation of the snapshot:
 
-```
+[source, karaf]
+----
 opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/alec.alarms.xml \
-               --inventory-in /tmp/snap1/alec.inventory.xml \
-               --situations-in /tmp/snap1/alec.situations.xml \
-                --csv-out /tmp/snap1/alec.vector.dataset.csv
-```
+                                  --inventory-in /tmp/snap1/alec.inventory.xml \
+                                  --situations-in /tmp/snap1/alec.situations.xml \
+                                  --csv-out /tmp/snap1/alec.vector.dataset.csv
+----
 
-=== Train with Ludwig
+=== Train the model with Ludwig
 
-Use Ludwig to train the model:
+Retrieve `model.yaml` from the source tree's `ludwig_model.yaml` file.
 
-```
-ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv --model_definition_file model.yaml
-```
+Run the following command to train the model using Ludwig:
 
-NOTE: Pull `model.yaml` from the `ludwig_model.yaml` file in the source tree
+[source, karaf]
+----
+ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv
+             --model_definition_file model.yaml
+----
 
-=== Exporting the trained model
+=== Export the model
 
-Adapt the following script to export the model to a format that can be used in ALEC:
+Use the following script to export the trained model to a format that ALEC can use:
 
-```
+[source]
+----
 echo '#!/usr/bin/env python
 import numpy as np
 import tensorflow as tf
@@ -108,38 +105,45 @@ chmod +x export_model.py
 mkdir -p /tmp/tf-export
 cp -R ./export/* /tmp/tf-export/
 cp results/experiment_run_0/model/model_hyperparameters.json /tmp/tf-export/
-```
+----
 
+=== Use the model in ALEC
 
-=== Use the trained model in ALEC
+First, you must verify that the trained model can be loaded into ALEC:
 
-Verify that the model can be loaded:
-
-```
+[source, karaf]
 opennms-alec:tensorflow-load-model /tmp/tf-export
-```
 
-Configure the engine to use the model:
+NOTE: If the command results are negative, you must retrain and re-export the training model.
 
-```
+If the command results are positive, you can then configure the deep learning engine to use the model:
+
+[source, karaf]
+----
 config:edit org.opennms.alec.engine.deeplearning
 property-set modelPath /tmp/tf-export
 config:update
-```
+----
 
-=== Run simulations using the trained model
+=== Verify using simulations
 
-Generate situations:
+You can run simulations to verify that the training model clusters alerts as expected.
 
-```
+First, use the following commands to generate situations based on the dataset snapshot from earlier:
+
+[source, karaf]
+----
 opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
-    --inventory-in /tmp/snap1/alec.inventory.xml \
-    --situations-out /tmp/snap1/alec.situations.deeplearning.trained.xml \
-    --engine deeplearning
-```
+                            --inventory-in /tmp/snap1/alec.inventory.xml \
+                            --situations-out /tmp/snap1/alec.situations.deeplearning.trained.xml \
+                            --engine deeplearning
+----
 
-Compare results:
+Run the following command to compare the model's results to your ideal defition in `/tmp/snap1/alec.situations.xml`:
 
-```
+[source, karaf]
+----
 opennms-alec:score-situations -s peer /tmp/snap1/alec.situations.xml /tmp/snap1/alec.situations.deeplearning.trained.xml
-```
+----
+
+From here, you can repeat the previous steps to tweak the model as desired.

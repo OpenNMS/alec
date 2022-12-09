@@ -25,13 +25,13 @@ The most common result you may see involves a missing Elasticsearch configuratio
 
 [source, karaf]
 ----
-admin@opennms> health:check
+admin@opennms> health-check
 Verifying the health of the container
 
 Verifying installed bundles                    [ Success  ]
-Connecting to ElasticSearch ReST API (Flows)   [ Timeout  ] => Health Check did not finish within 5000 ms
+Connecting to ElasticSearch ReST API (Flows)   [ Success ] => Not configured
 
-=> Oh no, something is wrong
+=> Everything is awesome
 ----
 
 OpenNMS deployments install the `opennms-flows` feature set by default, but may not point to the Elasticsearch server.

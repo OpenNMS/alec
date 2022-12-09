@@ -13843,11 +13843,11 @@ const g4 = /* @__PURE__ */ pe(V4, [["__scopeId", "data-v-17251e76"]]), T4 = wind
     ], 64));
   }
 });
-const z4 = /* @__PURE__ */ pe(Q4, [["__scopeId", "data-v-90320d36"]]), G4 = window.VueRouter.createRouter, Y4 = window.VueRouter.createWebHistory, bu = async () => {
-  const e = window.VRouter || Md, r = Jr();
-  if (!r.userId) {
-    const o = await r.getUserRole();
-    await r.getAlecInfo(), o ? e.push({ name: "home" }) : e.push({ name: "error" });
+const z4 = /* @__PURE__ */ pe(Q4, [["__scopeId", "data-v-90320d36"]]), G4 = window.VueRouter.createRouter, Y4 = window.VueRouter.createWebHistory, bu = async (e) => {
+  const r = window.VRouter || Md, o = Jr();
+  if (!o.userId) {
+    const i = await o.getUserRole();
+    await o.getAlecInfo(), i ? r.push({ name: "home", params: e.params }) : r.push({ name: "error", params: e.params });
   }
 }, oV = [
   {
@@ -13862,19 +13862,19 @@ const z4 = /* @__PURE__ */ pe(Q4, [["__scopeId", "data-v-90320d36"]]), G4 = wind
   {
     path: "/welcome",
     name: "welcome",
-    beforeEnter: () => bu(),
+    beforeEnter: (e) => bu(e.params),
     component: rY
   },
   {
     path: "/setup",
     name: "configuration",
-    beforeEnter: () => bu(),
+    beforeEnter: (e) => bu(e.params),
     component: i4
   },
   {
     path: "/situations",
     name: "situations",
-    beforeEnter: () => bu(),
+    beforeEnter: (e) => bu(e.params),
     component: vW
   },
   {

@@ -46,7 +46,7 @@ const handleFeedbackSituation = async (action: string) => {
 		status.value = action
 		situationStore.getSituation(props.situationInfo.id)
 	} else {
-		appStore.showErrorMsg('You need to choose at least one alarm!')
+		appStore.showErrorMsg('Error on rejecting the situation')
 	}
 }
 </script>
@@ -67,7 +67,7 @@ const handleFeedbackSituation = async (action: string) => {
 					class="btn"
 					data-test="btn-reject"
 					:class="{ rejected: status == REJECTED }"
-					@click="() => handleFeedbackSituation(REJECTED)"
+					@click="handleFeedbackSituation(REJECTED)"
 				>
 					<FeatherIcon
 						:icon="Cancel"

@@ -99,7 +99,7 @@ const handleClickContinue = () => {
 	</div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
 	display: flex;
 	padding: 30px 80px;
@@ -123,15 +123,17 @@ const handleClickContinue = () => {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	margin-bottom: 30px;
-	margin-bottom: 20px;
-}
-.list div {
-	width: 20%;
-	max-width: 230px;
-	border: 1px solid #dfdfdf;
-	padding: 15px;
-	text-align: center;
+	margin: 30px 0;
+	> div {
+		margin-right: 20px;
+		min-width: 250px;
+		border: 1px solid #dfdfdf;
+		padding: 30px 15px;
+		text-align: center;
+	}
+	> div:last-child {
+		margin-right: 0;
+	}
 }
 .optin {
 	padding-top: 30px;

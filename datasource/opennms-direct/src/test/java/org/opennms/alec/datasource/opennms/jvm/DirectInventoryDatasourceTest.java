@@ -106,19 +106,19 @@ public class DirectInventoryDatasourceTest {
         when(alarm2.getManagedObjectType()).thenReturn(ManagedObjectType.EntPhysicalEntity.getName());
         when(alarm2.getNode()).thenReturn(node);
 
-        // After the first alarm we should have the inventory
+        // After the first alarm we should have the inventory (the node, and the physical entity)
         dic.handleNewOrUpdatedAlarm(alarm1);
-        assertThat(inventory, hasSize(1));
+        assertThat(inventory, hasSize(2));
 
-        // After the second alarm we should still have just the one inventory
+        // After the second alarm, the inventory should remain consistent
         dic.handleNewOrUpdatedAlarm(alarm2);
-        assertThat(inventory, hasSize(1));
+        assertThat(inventory, hasSize(2));
 
         // Deleting one of the alarms should not remove the inventory
         dic.handleDeletedAlarm(alarm1.getId(), alarm1.getReductionKey());
-        assertThat(inventory, hasSize(1));
+        assertThat(inventory, hasSize(2));
 
-        // Deleting the second alarm should remove the inventory since there is no longer any alarms referencing the
+        // Deleting the second alarm should remove the inventory since there are no longer any alarms referencing the
         // inventory
         dic.handleDeletedAlarm(alarm2.getId(), alarm2.getReductionKey());
         assertThat(inventory, hasSize(0));
@@ -128,9 +128,9 @@ public class DirectInventoryDatasourceTest {
         dic.handleAlarmSnapshot(Collections.emptyList());
         assertThat(inventory, hasSize(0));
 
-        // A snapshot containing both alarms should result in the inventory being re-added
+        // A snapshot containing both alarms should result in the inventory being (re-)added
         dic.handleAlarmSnapshot(Arrays.asList(alarm1, alarm2));
-        assertThat(inventory, hasSize(1));
+        assertThat(inventory, hasSize(2));
 
         // An empty snapshot should now result in the inventory being removed since both references are gone
         dic.handleAlarmSnapshot(Collections.emptyList());
@@ -274,10 +274,10 @@ public class DirectInventoryDatasourceTest {
 
         // Add the same inventory from an alarm source
         dic.handleNewOrUpdatedAlarm(alarm1);
-        assertThat(dic.getInventory(), hasSize(1));
+        assertThat(dic.getInventory(), hasSize(2));
         assertThat(dic.hasAnyAlarmReferences(), equalTo(true));
 
-        // Delete from the alarm source, inventory should still exist
+        // Delete from the alarm source, node should still exist, and entity (derived from alarm) will go away
         dic.handleAlarmSnapshot(Collections.emptyList());
         assertThat(dic.getInventory(), hasSize(1));
         assertThat(dic.hasAnyAlarmReferences(), equalTo(false));

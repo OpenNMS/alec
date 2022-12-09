@@ -24,7 +24,6 @@ OpenNMS then creates a new situation for the cluster.
 .Example network inventory graph with alarm cluster and situation
 image::model_with_situation.png[Network inventory graph that displays 10 inventory objects, their directional relations, a cluster of four attached alarms, and a situation, 600]
 
-
 ALEC uses https://www.drools.org/[Drools] rules to manage the state of all alarms, including situations:
 
 * The severity of a situation is the maximum severity of all related alarms, plus one.
@@ -37,4 +36,4 @@ ALEC implements two correlation engines:
 * *Deep Learning:* an algorithm that leverages deep-learning techniques through a neural network to correlate and group alarms.
 * *Clustering:* leverages the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm] to group alarms based on their distance from each other.
 
-To learn more, see xref:engines:deeplearning.adoc[Deep Learning] and xref:engines:dbscan.adoc[Clustering].
+To learn more, see the xref:engines:introduction.adoc[Correlation Engines] section.

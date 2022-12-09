@@ -20,7 +20,7 @@
     </bean>
 
     <!-- Create and expose the engine factory -->
-    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="20">
+    <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="10">
         <bean class="org.opennms.alec.engine.deeplearning.DeepLearningEngineFactory">
             <argument index="0" ref="blueprintBundleContext"/>
             <argument index="1" ref="deepLearningEngineConf"/>

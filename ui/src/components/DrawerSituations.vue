@@ -69,12 +69,16 @@ watch(props, () => {
 
 .situation-list {
 	margin-top: 20px;
-	overflow-y: auto;
+	overflow-y: scroll;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
+	height: 750px;
+	align-content: flex-start;
+	padding-right: 5px;
 }
 .card {
-	width: 328px;
+	width: 325px;
+	margin-bottom: 10px;
 }
 </style>

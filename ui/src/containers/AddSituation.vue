@@ -4,7 +4,8 @@ import Add from '@featherds/icon/action/Add'
 import Cancel from '@featherds/icon/navigation/Cancel'
 
 import { FeatherButton } from '@featherds/button'
-import { useRouter } from 'vue-router'
+import useRouter from '@/composables/useRouter'
+
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
 
 import { TNewSituation } from '@/types/TSituation'
@@ -235,17 +236,6 @@ const cleanFields = () => {
 .icon {
 	font-size: 19px;
 	margin-right: 5px;
-}
-.severity-status {
-	width: 15px;
-	height: 15px;
-	border-radius: 50px;
-	margin-right: 10px;
-}
-
-.add-btn {
-	justify-content: end;
-	display: flex;
 }
 
 .totalAlarms {

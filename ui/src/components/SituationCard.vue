@@ -130,7 +130,6 @@ const handleSituationSelected = () => {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	justify-content: space-between;
 }
 .icon {
 	font-size: 24px;

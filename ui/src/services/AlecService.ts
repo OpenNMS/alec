@@ -33,6 +33,18 @@ export const getUserInfo = async () => {
 	}
 }
 
+export const getEngineInfo = async () => {
+	try {
+		const resp = await rest.get(`${engineEndpoint}`)
+		if (resp.status === 200) {
+			return resp.data
+		}
+		return false
+	} catch (err) {
+		return false
+	}
+}
+
 export const saveEngineParameter = async (
 	engineName: string,
 	hellinger: boolean

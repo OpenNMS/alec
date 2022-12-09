@@ -69,7 +69,7 @@ public class AlecGraphProviderForOpennmsTest {
         assertEquals(2, container.getGraphs().size());
         Graph graph = container.getGraph("alec");
         assertEquals ("ALEC", graph.getLabel());
-        assertEquals(3, graph.getVertices().size());
+        assertEquals(4, graph.getVertices().size());
         assertEquals(1, graph.getVertices().stream().map(Vertex::getId).filter("situation-s1"::equals).count());
         assertEquals(1, graph.getVertices().stream().map(Vertex::getId).filter("alarm-0-a1"::equals).count());
         assertEquals(1, graph.getVertices().stream().map(Vertex::getId).filter("vertex-0"::equals).count());

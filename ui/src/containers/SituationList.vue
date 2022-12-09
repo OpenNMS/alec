@@ -20,6 +20,8 @@ import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
 import { filterListByDate } from '@/helpers/utils'
+import { useUserStore } from '@/store/useUserStore'
+import Cluster from '@/assets/test2.png'
 
 const Icons = markRaw({
 	Add,
@@ -28,8 +30,8 @@ const Icons = markRaw({
 })
 
 const router = useRouter()
-
 const situationStore = useSituationsStore()
+const userStore = useUserStore()
 
 situationStore.getSituations()
 situationStore.getNodes()
@@ -246,12 +248,23 @@ const resetFilters = () => {
 					<span>View Unassociated Alarms</span>
 				</FeatherButton>
 				<NewSituationBtn />
-				<FeatherIcon
-					:icon="Icons.Settings"
-					aria-hidden="true"
-					class="icon settings"
-					@click="showSettings"
-				/>
+
+				<div class="info-engine">
+					<img :src="Cluster" class="icon-type" />
+
+					<div class="engine" @click="showSettings">
+						ENGINE
+						<div v-if="userStore.engineInfo?.engineName" class="type">
+							CLUSTERING
+						</div>
+						<div v-else class="type">DEEP LEARNING</div>
+					</div>
+				</div>
+				<div class="optin" @click="showSettings">
+					OPT-IN
+					<div v-if="userStore.allowSave" class="optin-on">ON</div>
+					<div v-else class="optin-off">OFF</div>
+				</div>
 			</div>
 		</div>
 		<div class="content">
@@ -348,6 +361,54 @@ const resetFilters = () => {
 	background-color: #465cae !important;
 	color: white !important;
 	height: 44px !important;
+}
+
+.box-info {
+	display: flex;
+	flex-direction: column;
+	font-size: 11px;
+	align-items: center;
+	font-weight: 600;
+	line-height: 20px;
+	margin-left: 8px;
+	color: #636363;
+}
+
+.info-engine {
+	display: flex;
+	border: 1px solid $border-grey;
+	border-radius: 5px;
+	padding: 1px 7px;
+	cursor: pointer;
+	margin-left: 8px;
+
+	.icon-type {
+		//filter: invert(12%) sepia(72%) saturate(4818%) hue-rotate(244deg)
+		//	brightness(81%) contrast(143%);
+	}
+}
+.engine {
+	@extend .box-info;
+	.type {
+		color: #065eca;
+	}
+}
+
+.optin {
+	border: 1px solid $border-grey;
+	border-radius: 5px;
+	padding: 1px 7px;
+	cursor: pointer;
+
+	@extend .box-info;
+	.optin-on {
+		font-size: 18px;
+		color: green;
+	}
+	.optin-off {
+		font-size: 18px;
+		color: red;
+	}
 }
 
 .content {

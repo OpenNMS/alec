@@ -36,6 +36,7 @@ const saveConfiguration = async () => {
 	)
 	showNotification.value = true
 	if (savedEngine) {
+		userStore.getAlecInfo()
 		message.value = 'The settings were saved!'
 		isError.value = false
 	} else {

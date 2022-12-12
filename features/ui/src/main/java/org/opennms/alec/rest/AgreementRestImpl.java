@@ -48,9 +48,11 @@ public class AgreementRestImpl implements AgreementRest {
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
+    private final SituationRest situationRest;
 
-    public AgreementRestImpl(KeyValueStore<String> kvStore) {
+    public AgreementRestImpl(KeyValueStore<String> kvStore, SituationRest situationRest) {
         this.kvStore = kvStore;
+        this.situationRest = situationRest;
         objectMapper = new ObjectMapper();
     }
 
@@ -62,6 +64,7 @@ public class AgreementRestImpl implements AgreementRest {
             future = kvStore.putAsync(KeyEnum.AGREEMENT.toString(),
                     objectMapper.writeValueAsString(agreement),
                     ALECRestUtils.ALEC_CONFIG);
+            situationRest.updateAgreement(agreement.isAgreed());
         } catch (JsonProcessingException e) {
             return ALECRestUtils.somethingWentWrong(e);
         }

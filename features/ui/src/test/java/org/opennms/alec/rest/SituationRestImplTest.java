@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -28,7 +27,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.data.AlarmSetImpl;
 import org.opennms.alec.data.CreateSituationPayloadImpl;
-import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
@@ -40,6 +38,7 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.StaticAlarmDatasource;
 import org.opennms.alec.datasource.common.StaticSituationDatasource;
 import org.opennms.alec.grpc.GrpcConnectionConfig;
+import org.opennms.alec.grpc.SituationClient;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 
@@ -56,6 +55,9 @@ public class SituationRestImplTest {
     @Mock
     GrpcConnectionConfig grpcConnectionConfig;
 
+    @Mock
+    SituationClient situationClient;
+
     private SituationDatasource situationDatasource;
 
     List<Situation> situations = new ArrayList<>();
@@ -65,13 +67,10 @@ public class SituationRestImplTest {
     @Before
     public void setUp() {
         //we don't want to store testing data to the cloud
-        when(kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG)).thenReturn(Optional.of("{\"agreed\":false}"));
         getAlarmsAndSituations();
         when(runtimeInfo.getSystemId()).thenReturn("42");
-        when(grpcConnectionConfig.getHost()).thenReturn("localhost");
-        when(grpcConnectionConfig.getPort()).thenReturn(80);
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig, situationClient);
     }
 
     @After

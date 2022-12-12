@@ -33,6 +33,7 @@
 
     <bean id="agreementRest" class="org.opennms.alec.rest.AgreementRestImpl">
         <argument ref="keyValueStore"/>
+        <argument ref="situationRest"/>
     </bean>
 
     <bean id="situationRest" class="org.opennms.alec.rest.SituationRestImpl" destroy-method="destroy">

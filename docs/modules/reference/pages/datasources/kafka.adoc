@@ -1,0 +1,84 @@
+
+:imagesdir: ../assets/images
+= Kafka Datasource
+
+The Kafka datasource is used with a xref:admin:distributed_install.adoc[distributed installation] of ALEC.
+It integrates with OpenNMS by leveraging the event consumer and Kafka Producer features.
+
+The Kafka Producer is used to forward alarms, nodes, and topology data that is encoded in protocol buffers to various topics.
+The datasource consumes from these topics and provides a feed of alarms and inventory data to ALEC.
+
+TIP: The protocol buffers used by the Kafka Producer in OpenNMS Horizon 24.0.0 are available via https://github.com/OpenNMS/opennms/tree/0ae966e9ac632fb40ea7a915e57c1e057ba95989/features/kafka/producer/src/main/proto[GitHub].
+
+[topics]
+== Configure topics
+
+You can use the following properties to configure the names of the Kafka topics:
+
+[options="header", cols="1,2,2"]
+|===
+| Property
+| Default Value
+| Description
+
+| alarmTopic
+| alarms
+| Alarms managed by OpenNMS.
+
+| alarmFeedbackTopic
+| alarmFeedback
+| Alarm feedback managed by OpenNMS.
+
+| edgesTopic
+| edges
+| Topology managed by OpenNMS.
+
+| nodeTopic
+| nodes
+| Node inventory managed by OpenNMS.
+
+| eventSinkTopic
+| OpenNMS.Sink.Events
+| Used to forward events to OpenNMS.
+
+| inventoryTopic
+| alec-inventory
+| Used to maintain inventory state.
+|===
+
+NOTE: These topics must exist in the Kafka broker for the datasource to operate.
+
+== Event compatibility
+
+The `eventTimeFormat` property is used to determine how event creation times are encoded when ALEC sends events to OpenNMS via Kafka.
+Its value should be set depending on your OpenNMS version.
+For any OpenNMS version below Horizon 25.1.0 or Meridian 2019.1.0, the value should be `simple`.
+Otherwise, the default value (`iso`) should be used.
+
+=== Configuration
+
+To update the bundle configuration to point to a script on your file system, update the `scriptFile` property in `org.opennms.alec.datasource.opennms.kafka`:
+
+[source]
+----
+config:edit org.opennms.alec.datasource.opennms.kafka
+config:property-set scriptFile /tmp/inventory.groovy
+config:update
+----
+
+=== API
+
+There are three methods that are exposed to the `InventoryObject` script.
+Because edges and nodes are received on the Kafka topic, the following methods are invoked respectively:
+
+* `InventoryObjects edgeToInventory(TopologyEdge edge)`
+* `List<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node)`
+
+They allow ALEC to derive a full list of inventory objects.
+
+When alarms arrive on the Kafka topic, the following method is invoked: `EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm)`.
+The `EnrichedAlarm` type contains both a reference to an `InventoryObject` type and an `InventoryObject` identifier.
+Together, these identify the `InventoryObject` that the alarm will be attached to.
+
+Additionally, the `EnrichedAlarm` contains a list of inventory objects.
+This means that multiple objects can be derived from a single alarm.

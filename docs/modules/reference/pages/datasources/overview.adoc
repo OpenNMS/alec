@@ -1,0 +1,20 @@
+
+:imagesdir: ../assets/images
+= ALEC Datasources
+
+Datasources are responsible for interacting with OpenNMS and providing a feed of alarms, inventory objects, and situations.
+They also create situations in the monitoring system.
+
+ALEC provides two methods for integrating with OpenNMS: via a xref:datasources/direct.adoc[direct datasource] (for the basic installation), and via xref:datasources/kafka.adoc[Kafka] (for the distributed installation).
+
+== Scripted extensions
+
+Inventory objects are derived from the incoming stream of alarms, nodes, and links.
+Their mapping is done using a JSR-223 script that allows you to override or extend its behavior by modifying or replacing it.
+Its default implementation can be found in the `inventory.groovy` script in each bundle:
+
+* https://github.com/OpenNMS/alec/tree/master/datasource/opennms-direct/src/main/resources/inventory.groovy[Direct datasource]
+* https://github.com/OpenNMS/alec/tree/master/datasource/opennms-kafka/src/main/resources/inventory.groovy[Kafka datasource]
+
+NOTE: Make sure to use the script that corresponds to your version of ALEC.
+If you are replacing the script, the replacement _must_ use a scripting engine that implements `Invocable`, and it must be UTF-8 encoded.

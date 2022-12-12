@@ -1,0 +1,35 @@
+
+:imagesdir: ../assets/images
+= Direct Datasource
+
+The direct datasource is used with a xref:install:basic_install.adoc[basic installation] of ALEC.
+It runs on the same JVM as OpenNMS, and acts upon new alarms and nodes using the APIs provisioned by the https://docs.opennms.com/horizon/latest/development/oia/introduction.html[OpenNMS Plugin API].
+
+== Scripted extensions
+
+=== Configuration
+
+To update the bundle configuration to point to a script on your file system, you must update the `scriptFile` property in `org.opennms.alec.datasource.opennms.direct`:
+
+[source]
+----
+config:edit org.opennms.alec.datasource.opennms.direct
+config:property-set scriptFile /tmp/inventory.groovy
+config:update
+----
+
+=== API
+
+There are three methods that are exposed to the `InventoryObject` script.
+One is alarm-focused; the other two are inventory-focused.
+
+When an alarm arrives via the direct datasource, it is directly mapped from its OpenNMS type to the corresponding ALEC type.
+During the mapping process, the alarm is passed to the following method: `void overrideTypeAndIntance(ImmutableAlarm.Builder alarmBuilder, Alarm, alarm);`.
+This allows the `ModelObjectType` or `ModelObjectIdentifier` of the `InventoryObject` that the alarm will be associated wtih to be modified.
+
+As nodes arrive via the datasource, they are mapped from their OpenNMS type to the corresponding ALEC type.
+During that process, each node is passed to the following method to fetch `InventoryObjects`: `List<InventoryObject> nodeToInventory(Node node);`.
+
+Alarms are similarly processed as they arrive.
+If the alarm's `node` attribute is populated, the `nodeToInventory` method is invoked.
+If it is not populated, the following method is invoked: `List<InventoryObject> alarmToInventory(Alarm alarm);`.

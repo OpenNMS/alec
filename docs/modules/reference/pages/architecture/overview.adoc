@@ -5,7 +5,7 @@
 
 ALEC provides building blocks for developing correlation systems:
 
-image::architecture_components.png[Components,600]
+image::architecture/architecture_components.png[Components,600]
 
 A *datasource* is responsible for interacting with the monitoring system and providing a feed of alarms, inventory objects and situations.
 Data sources are also responsible for creating the situations in the *monitoring system*.

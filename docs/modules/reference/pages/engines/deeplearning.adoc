@@ -2,9 +2,9 @@
 :imagesdir: ../assets/images
 = Deep Learning Engine
 
-The deep learning engine is a xref:introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
+The deep learning engine is a xref:engines/introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
 It draws information from the locally persisted network inventory graph.
-Alec automatically creates and maintains this graph, which is based on information from the associated xref:datasources:overview.adoc[datasource].
+ALEC automatically creates and maintains this graph, which is based on information from the associated xref:datasources/overview.adoc[datasource].
 
 == TensorFlow
 
@@ -17,7 +17,7 @@ To reduce the computational complexity of these calculations, ALEC limits the se
 The current model definition for the deep learning engine has been developed using https://github.com/uber/ludwig[Ludwig]:
 
 .Ludwig training example
-image::ludwig_training.png[Shell interface that shows an example of training input and output for Ludwig, 600]
+image::engines/ludwig_training.png[Shell interface that shows an example of training input and output for Ludwig, 600]
 
 The model's input features include the following:
 
@@ -40,22 +40,22 @@ The training process will be improved in future ALEC releases.
 
 In the OpenNMS Karaf shell, run the following command to install the ALEC shell commands:
 
-[source, karaf]
+[source]
 feature:install alec-features-deeplearning alec-features-shell
 
 === Vectorize datasets
 
 First, take a snapshot of the current state of the datasource:
 
-[source, karaf]
+[source]
 opennms-alec:datasource-snapshot /tmp/snap1
 
-Next, edit `/tmp/snap1/alec.situations.xml` in a text editor to configure your desired situation state.
+Next, open `/tmp/snap1/alec.situations.xml` in a text editor and configure your desired situation state.
 Save your changes and return to the Karaf shell.
 
 Run the following commands to build a vectorized representation of the snapshot:
 
-[source, karaf]
+[source]
 ----
 opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/alec.alarms.xml \
                                   --inventory-in /tmp/snap1/alec.inventory.xml \
@@ -69,7 +69,7 @@ Retrieve `model.yaml` from the source tree's `ludwig_model.yaml` file.
 
 Run the following command to train the model using Ludwig:
 
-[source, karaf]
+[source]
 ----
 ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv
              --model_definition_file model.yaml
@@ -111,14 +111,14 @@ cp results/experiment_run_0/model/model_hyperparameters.json /tmp/tf-export/
 
 First, you must verify that the trained model can be loaded into ALEC:
 
-[source, karaf]
+[source]
 opennms-alec:tensorflow-load-model /tmp/tf-export
 
 NOTE: If the command results are negative, you must retrain and re-export the training model.
 
 If the command results are positive, you can then configure the deep learning engine to use the model:
 
-[source, karaf]
+[source]
 ----
 config:edit org.opennms.alec.engine.deeplearning
 property-set modelPath /tmp/tf-export
@@ -128,10 +128,9 @@ config:update
 === Verify using simulations
 
 You can run simulations to verify that the training model clusters alerts as expected.
-
 First, use the following commands to generate situations based on the dataset snapshot from earlier:
 
-[source, karaf]
+[source]
 ----
 opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
                             --inventory-in /tmp/snap1/alec.inventory.xml \
@@ -141,9 +140,7 @@ opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
 
 Run the following command to compare the model's results to your ideal defition in `/tmp/snap1/alec.situations.xml`:
 
-[source, karaf]
-----
+[source]
 opennms-alec:score-situations -s peer /tmp/snap1/alec.situations.xml /tmp/snap1/alec.situations.deeplearning.trained.xml
-----
 
 From here, you can repeat the previous steps to tweak the model as desired.

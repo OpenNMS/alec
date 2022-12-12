@@ -25,6 +25,7 @@ image::data-permissions.png[ALEC data permissions prompt, 750]
 Select *Yes* or *No*, and click *Continue*.
 The correlation engine configuration screen is displayed.
 
+[[clustering-engine-config]]
 == Configure clustering engine
 
 When you access the ALEC plugin for the first time in the web UI, you are prompted to select a correlation engine.

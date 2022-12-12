@@ -10,19 +10,6 @@
 * xref:quick-start:engine-config.adoc[Step 1: First-Time Login & Engine Config]
 * xref:quick-start:situations.adoc[Step 2: View & Create Situations]
 
-.Architecture
-* xref:architecture:overview.adoc[Overview]
-* xref:architecture:opennms_integration.adoc[OpenNMS Integration]
-
-.Datasources
-* xref:datasources:overview.adoc[Overview]
-* xref:datasources:direct.adoc[Direct]
-* xref:datasources:kafka.adoc[Kafka]
-
-.xref:engines:introduction.adoc[Correlation Engines]
-* xref:engines:clustering.adoc[Clustering Engine]
-* xref:engines:deeplearning.adoc[Deep Learning Engine]
-
 .Administration
 * xref:admin:overview.adoc[Overview]
 * xref:admin:distributed_install.adoc[Distributed Installation]
@@ -30,5 +17,13 @@
 * xref:admin:upgrading.adoc[Upgrade ALEC]
 
 .Reference
+* xref:reference:architecture/overview.adoc[Architecture]
+** xref:reference:architecture/opennms_integration.adoc[OpenNMS Integration]
+* xref:reference:engines/introduction.adoc[Correlation Engines]
+** xref:reference:engines/clustering.adoc[Clustering Engine]
+** xref:reference:engines/deeplearning.adoc[Deep Learning Engine]
+* xref:reference:datasources/overview.adoc[Datasources]
+** xref:reference:datasources/direct.adoc[Direct Datasource]
+** xref:reference:datasources/kafka.adoc[Kafka Datasource]
 * xref:reference:model.adoc[Model]
 * xref:reference:glossary.adoc[Glossary]

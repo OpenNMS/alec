@@ -19,6 +19,8 @@ import { TAlarm } from '@/types/TSituation'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { filterListByDate } from '@/helpers/utils'
 import useRouter from '@/composables/useRouter'
+import CommonFilters from '@/components/CommonFilters.vue'
+import NoResults from '@/elements/NoResults.vue'
 
 const Icons = markRaw({
 	ArrowBack,
@@ -28,6 +30,9 @@ const router = useRouter()
 const situationStore = useSituationsStore()
 situationStore.getUnassignedAlarms()
 situationStore.getSituations()
+if (!situationStore.nodes.length) {
+	situationStore.getNodes()
+}
 
 const alarms = ref([]) as Ref<TAlarm[]>
 const alarmIds = ref([]) as Ref<number[]>
@@ -131,6 +136,9 @@ const handleMoveClick = () => {
 		showErrorMsg.value = 'You need to choose at least one alarm!'
 	}
 }
+const filterList = (alarmsFiltered: TAlarm[]) => {
+	alarms.value = alarmsFiltered
+}
 </script>
 
 <template>
@@ -142,10 +150,15 @@ const handleMoveClick = () => {
 			</FeatherButton>
 			<NewSituationBtn />
 		</div>
-		<h2>List Unassigned Alarms</h2>
+		<h2>List Unassociated Alarms</h2>
 		<div class="content">
 			<div class="filters">
-				<FeatherExpansionPanel title="By Severity" v-model="showPanel">
+				<CommonFilters
+					:list="situationStore.unassignedAlarms"
+					@filtered-list="filterList"
+					isOpen
+				/>
+				<!--<FeatherExpansionPanel title="By Severity" v-model="showPanel">
 					<ChipListByProperty
 						:alarms="situationStore.unassignedAlarms"
 						@selected-option="updateListSeverities"
@@ -166,6 +179,7 @@ const handleMoveClick = () => {
 				<FeatherExpansionPanel title="By Start Date">
 					<FilterByDate @filter-date-selected="timePeriodChanged" />
 				</FeatherExpansionPanel>
+				-->
 			</div>
 			<div class="list">
 				<div class="action-btns">
@@ -189,7 +203,7 @@ const handleMoveClick = () => {
 						/>
 					</div>
 				</div>
-				<div v-else>There is no unassigned alarms</div>
+				<NoResults v-else />
 			</div>
 		</div>
 		<DrawerSituations
@@ -246,6 +260,7 @@ const handleMoveClick = () => {
 	width: 100%;
 	flex-wrap: wrap;
 	align-content: flex-start;
+	margin-top: var($spacing-m);
 	> div {
 		margin-right: 1%;
 	}
@@ -268,6 +283,13 @@ const handleMoveClick = () => {
 		color: #7004f4;
 		font-size: 20px;
 	}
+}
+
+.filters {
+	min-width: 20%;
+	background-color: white;
+	margin-right: 15px;
+	border: 1px solid $border-grey;
 }
 
 .layout-container {

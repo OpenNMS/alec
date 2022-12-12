@@ -6,7 +6,7 @@ import { FeatherIcon } from '@featherds/icon'
 import Cancel from '@featherds/icon/action/Cancel'
 import { sendFeedbackAcceptSituation } from '@/services/AlecService'
 import AlarmsCountBySeverity from '@/components/AlarmsCountBySeverity.vue'
-import AlarmFilters from '@/components/AlarmFilters.vue'
+import AlarmsListContainer from '@/components/AlarmsListContainer.vue'
 import MemoBox from '@/components/MemoBox.vue'
 
 import { FeatherButton } from '@featherds/button'
@@ -135,7 +135,7 @@ const handleFeedbackSituation = async (action: string) => {
 		</div>
 	</div>
 	<div v-if="situationInfo.alarms && situationInfo.alarms.length">
-		<AlarmFilters
+		<AlarmsListContainer
 			:alarms="situationInfo.alarms"
 			:situation-id="situationInfo.id"
 		/>

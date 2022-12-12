@@ -50,7 +50,17 @@ const actionClicked = async (id: number) => {
 					label="selected"
 					@update:modelValue="updatedSelect"
 				/>
-				<div class="title">{{ alarm.nodeLabel }} - {{ alarm.id }}</div>
+				<div
+					class="title"
+					v-on:click="
+						() => {
+							selected = !selected
+							updatedSelect()
+						}
+					"
+				>
+					{{ alarm.nodeLabel }} - {{ alarm.id }}
+				</div>
 				<SeverityStatus :severity="alarm?.severity" />
 
 				<div v-if="alarm.ackTime" class="ack">
@@ -134,6 +144,7 @@ const actionClicked = async (id: number) => {
 	font-weight: 600;
 	word-break: break-all;
 	margin-right: 10px;
+	cursor: pointer;
 }
 
 .description {

@@ -3,6 +3,7 @@ import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
 import SimplePagination from '@/components/SimplePagination.vue'
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
+import CommonFilters from '@/components/CommonFilters.vue'
 
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
@@ -233,6 +234,15 @@ const resetFilters = () => {
 	initPaging(state.allSituations)
 	withFilters.value = false
 }
+
+const filterList = (list: TSituation[]) => {
+	//state.situations = list
+	//totalSituations.value = list.length
+	console.log(list)
+	initPaging(list)
+	//console.log(list)
+	//withFilters.value = true
+}
 </script>
 
 <template>
@@ -268,6 +278,15 @@ const resetFilters = () => {
 			</div>
 		</div>
 		<div class="content">
+			<!--<div class="left-filters">
+				<CommonFilters
+					:list="situationStore.situations"
+					@filtered-list="filterList"
+					isOpen
+					isSituation
+				/>
+			</div>-->
+
 			<div class="filters">
 				<FeatherButton class="reset-btn" @click="() => resetFilters()">
 					<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
@@ -290,6 +309,7 @@ const resetFilters = () => {
 					/>
 				</FeatherExpansionPanel>
 			</div>
+
 			<div class="container">
 				<div class="autocomplete">
 					<div>
@@ -443,6 +463,13 @@ h2 {
 	align-items: center;
 	padding: 0 15px;
 }
+
+.left-filters {
+	width: 25%;
+	background-color: white;
+	margin-right: 15px;
+	border: 1px solid $border-grey;
+}
 .filters {
 	display: flex;
 	min-width: 300px;
@@ -461,7 +488,7 @@ h2 {
 
 .situation-list {
 	display: flex;
-	margin: 10px auto;
+	margin: 0px auto;
 	flex-wrap: wrap;
 	width: 100%;
 	padding-bottom: 15px;
@@ -482,7 +509,7 @@ h2 {
 .footer-pager {
 	display: flex;
 	justify-content: center;
-	margin-top: 20px;
+	margin-top: auto;
 	margin-bottom: 30px;
 	> :first-child {
 		margin-right: 15px;

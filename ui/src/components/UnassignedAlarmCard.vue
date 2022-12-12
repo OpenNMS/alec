@@ -39,7 +39,7 @@ const props = defineProps<{
 @import '@/styles/variables.scss';
 
 .alarm {
-	margin-top: 15px;
+	margin-bottom: 15px;
 	padding: 15px;
 	border: 1px solid $border-grey;
 	position: relative;

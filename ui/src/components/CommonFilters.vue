@@ -4,10 +4,22 @@ import { TAlarm, TSituation } from '@/types/TSituation'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import type { Ref } from 'vue'
-import { ref, reactive } from 'vue'
+import { ref, reactive, markRaw, watch } from 'vue'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { filterListByDate } from '@/helpers/utils'
+import { FeatherButton } from '@featherds/button'
+import { FeatherIcon } from '@featherds/icon'
+import FilterAlt from '@featherds/icon/action/FilterAlt'
+import ExpandLess from '@featherds/icon/navigation/ExpandLess'
+import ExpandMore from '@featherds/icon/navigation/ExpandMore'
+import Refresh from '@featherds/icon/navigation/Refresh'
 
+const Icons = markRaw({
+	FilterAlt,
+	ExpandLess,
+	ExpandMore,
+	Refresh
+})
 type TState = {
 	nodes: Record<string, string | number>[]
 	results: Record<string, string | number>[]
@@ -17,20 +29,38 @@ type TState = {
 const props = defineProps<{
 	list: TAlarm[]
 	isSituation?: boolean
+	isOpen?: boolean
 }>()
-const emit = defineEmits(['filtered-list', 'filters-count'])
+const emit = defineEmits(['filtered-list'])
 const situationStore = useSituationsStore()
+const showFilters = ref(props.isOpen)
 
 const severityFilters = ref(['all'])
 const selectedTimePeriod = ref(1)
 const list = ref(props.list) as Ref<(TSituation | TAlarm)[]>
 const loading = ref(false)
 const filtersCount = ref(0)
-
+const autocomplete = ref(null)
 const state: TState = reactive({
 	nodes: situationStore.nodes,
 	results: situationStore.nodes,
 	nodeSelectedValue: undefined
+})
+
+const setNodes = () => {
+	state.nodes = situationStore.nodes
+	state.results = situationStore.nodes
+}
+
+watch(
+	() => situationStore.nodes,
+	() => {
+		setNodes()
+	}
+)
+
+watch(props, () => {
+	list.value = props.list
 })
 
 const updateListSeverities = (severities: string[]) => {
@@ -58,9 +88,20 @@ const search = (q: string) => {
 	loading.value = false
 }
 
-const filterByNode = () => {
-	let filtered = props.list as (TSituation | TAlarm)[]
+const resetFilters = () => {
+	severityFilters.value = ['all']
+	selectedTimePeriod.value = 1
+	state.nodeSelectedValue = undefined
 	filtersCount.value = 0
+	emit('filtered-list', props.list)
+	if (!props.isOpen) {
+		showFilters.value = false
+	}
+}
+
+const filterByNode = () => {
+	filtersCount.value = 0
+	let filtered = props.list as (TSituation | TAlarm)[]
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
 		filtersCount.value++
 		if (props.isSituation) {
@@ -81,17 +122,18 @@ const filterByNode = () => {
 			)
 		}
 	}
+
+	//filter by severity
 	if (!severityFilters.value.includes('all')) {
 		filtersCount.value++
-
 		filtered = filtered.filter((a) =>
 			severityFilters.value.includes(a.severity)
 		)
 	}
+
 	//filter by date
 	if (selectedTimePeriod.value !== 1) {
 		filtersCount.value++
-
 		filtered = filterListByDate(
 			selectedTimePeriod.value,
 			filtered
@@ -100,42 +142,127 @@ const filterByNode = () => {
 	list.value = filtered
 
 	emit('filtered-list', filtered)
-	emit('filters-count', filtersCount.value)
+}
+
+const toogleFilters = () => {
+	showFilters.value = !showFilters.value
 }
 </script>
 
 <template>
-	<div>
-		<FeatherAutocomplete
-			label="Find by node"
-			:loading="loading"
-			v-model="state.nodeSelectedValue"
-			:results="state.results"
-			type="single"
-			@search="search"
-			@update:modelValue="filterByNode"
-		>
-		</FeatherAutocomplete>
-		<div class="title">By Severities:</div>
-		<ChipListByProperty
-			:alarms="props.list"
-			@selected-option="updateListSeverities"
-			property="severity"
-			:pre-selected="severityFilters"
-		/>
+	<div class="btn-filter" v-if="!props.isOpen" v-on:click="toogleFilters">
 		<div>
-			<div class="title">By Start Date:</div>
-			<FilterByDate
-				@filter-date-selected="timePeriodChanged"
-				:pre-selected="selectedTimePeriod"
+			<FeatherIcon :icon="Icons.FilterAlt" class="icon" /> Filters
+			<span class="count">{{ filtersCount }}</span>
+		</div>
+
+		<FeatherIcon
+			:icon="showFilters ? Icons.ExpandLess : Icons.ExpandMore"
+			class="icon"
+		/>
+	</div>
+	<div
+		v-show="showFilters"
+		class="filters"
+		:class="{ collapsed: !props.isOpen }"
+	>
+		<div class="results">
+			<div class="total">Results: {{ list.length }}</div>
+			<FeatherButton class="btn-reset" @click="resetFilters">
+				<FeatherIcon :icon="Icons.Refresh" class="icon" />
+				Reset
+			</FeatherButton>
+		</div>
+		<div>
+			<FeatherAutocomplete
+				ref="autocomplete"
+				label="Find by node"
+				:loading="loading"
+				v-model="state.nodeSelectedValue"
+				:results="state.results"
+				type="single"
+				@search="search"
+				@update:modelValue="filterByNode"
+			>
+			</FeatherAutocomplete>
+			<div class="title">By Severities:</div>
+			<ChipListByProperty
+				:alarms="props.list"
+				@selected-option="updateListSeverities"
+				property="severity"
+				:pre-selected="severityFilters"
 			/>
+			<div>
+				<div class="title">By Start Date:</div>
+				<FilterByDate
+					@filter-date-selected="timePeriodChanged"
+					:pre-selected="selectedTimePeriod"
+				/>
+			</div>
 		</div>
 	</div>
 </template>
 
 <style lang="scss" scoped>
+@use '@/styles/variables.scss';
+
 .title {
 	margin-top: 20px;
 	font-weight: 600;
+}
+
+.btn-reset {
+	margin-bottom: 20px;
+}
+
+.btn-filter {
+	display: flex;
+	width: 100%;
+	text-align: left;
+	height: 42px !important;
+	border-radius: 0 !important;
+	margin-top: 10px;
+	border: 1px solid variables.$border-grey;
+	background-color: #eeeeee;
+	align-items: center;
+	padding: 0px 10px;
+	justify-content: space-between;
+	cursor: pointer;
+}
+
+.filters {
+	padding: 10px;
+	padding-top: 15px;
+
+	&.collapsed {
+		border: 1px solid variables.$border-grey;
+		border-top: none;
+	}
+}
+
+.count {
+	font-size: 16px;
+	font-weight: 600;
+	margin-left: 5px;
+	background-color: #cad4d4;
+	padding: 1px 7px;
+	border-radius: 20px;
+}
+
+.icon {
+	font-size: 22px;
+	color: #627272;
+	vertical-align: text-bottom;
+}
+
+.total {
+	font-weight: 600;
+	font-size: 16px;
+}
+.results {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	align-items: baseline;
 }
 </style>

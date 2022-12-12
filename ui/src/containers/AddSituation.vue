@@ -7,8 +7,9 @@ import { FeatherButton } from '@featherds/button'
 import useRouter from '@/composables/useRouter'
 
 import ChipListByProperty from '@/components/ChipListByProperty.vue'
+import CommonFilters from '@/components/CommonFilters.vue'
 
-import { TNewSituation } from '@/types/TSituation'
+import { TNewSituation, TAlarm } from '@/types/TSituation'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import { FeatherIcon } from '@featherds/icon'
 import { useSituationsStore } from '@/store/useSituationsStore'
@@ -112,6 +113,10 @@ const cleanFields = () => {
 	alarmIds.value = []
 	alarms.value = situationStore.unassignedAlarms
 }
+
+const filterList = (list: TAlarm[]) => {
+	alarms.value = list
+}
 </script>
 
 <template>
@@ -126,23 +131,17 @@ const cleanFields = () => {
 				<FeatherTextarea
 					v-model="descriptionText"
 					label="Description"
-					rows="4"
+					rows="5"
 					:error="descriptionError"
 				></FeatherTextarea>
 				<FeatherTextarea
 					v-model="diagnosticText"
 					label="Diagnostic Text"
-					rows="4"
+					rows="5"
 					:error="diagnosticError"
 				></FeatherTextarea>
-				<div>
-					<div class="totalAlarms" :class="{ errorList: errorAlarmList }">
-						Total alarms added:
-						<span class="total">{{ alarmIds.length }}</span>
-					</div>
-					<div v-if="errorAlarmList" class="errorList">
-						It is required to add at least 2 alarms
-					</div>
+				<div v-if="errorAlarmList" class="errorList">
+					It is required to add at least 2 alarms
 				</div>
 				<div class="footer">
 					<FeatherButton class="btn" primary @click="cleanFields">
@@ -156,22 +155,34 @@ const cleanFields = () => {
 				</div>
 			</div>
 			<div class="alarm-column">
-				<h4>Add Unassociated Alarms</h4>
-				<ChipListByProperty
-					:alarms="situationStore.unassignedAlarms"
-					@selected-option="updateList"
-					property="severity"
-				/>
-				<div v-if="alarms.length" class="alarms">
-					<div v-for="alarm in alarms" :key="alarm.id" class="alarm-card">
-						<UnassignedAlarmCard
-							:selected="includes(alarmIds, alarm.id)"
-							:alarm="alarm"
-							@selected-alarm="addAlarm"
-						/>
+				<div class="header-alarms">
+					<h3>Add Unassociated Alarms</h3>
+					<div>
+						<div class="totalAlarms" :class="{ errorList: errorAlarmList }">
+							Total alarms added:
+							<span class="total">{{ alarmIds.length }}</span>
+						</div>
 					</div>
 				</div>
-				<div v-else>There is no unassigned alarms</div>
+				<div class="list">
+					<div class="filters">
+						<CommonFilters
+							:list="situationStore.unassignedAlarms"
+							@filtered-list="filterList"
+							isOpen
+						/>
+					</div>
+					<div v-if="alarms.length" class="alarms">
+						<div v-for="alarm in alarms" :key="alarm.id" class="alarm-card">
+							<UnassignedAlarmCard
+								:selected="includes(alarmIds, alarm.id)"
+								:alarm="alarm"
+								@selected-alarm="addAlarm"
+							/>
+						</div>
+					</div>
+					<div v-else>There is no unassigned alarms</div>
+				</div>
 			</div>
 		</div>
 		<FeatherSnackbar v-model="errorSave" center error>
@@ -196,16 +207,19 @@ const cleanFields = () => {
 	border: 1px solid $border-grey;
 	padding: 20px;
 	margin-top: 20px;
-	min-height: 650px;
+	min-height: 750px;
 }
 
 .alarm-column {
 	width: 100%;
 	margin-left: 20px;
+	border: 1px solid gray;
+	padding: 10px 15px;
+	border-radius: 5px;
 }
 
 .alarms {
-	height: 600px;
+	height: 650px;
 	overflow-y: auto;
 	margin-top: 10px;
 	display: flex;
@@ -222,7 +236,7 @@ const cleanFields = () => {
 .fields {
 	display: flex;
 	flex-direction: column;
-	width: 700px;
+	width: 600px;
 	> div {
 		margin-bottom: 20px;
 	}
@@ -239,13 +253,7 @@ const cleanFields = () => {
 }
 
 .totalAlarms {
-	font-size: 14px;
-	padding: 10px;
-	border: 1px solid rgba(10, 12, 27, 0.9);
-	width: 100%;
-	border-radius: 4px;
-	justify-content: space-between;
-	display: flex;
+	font-size: 16px;
 }
 
 .total {
@@ -253,9 +261,7 @@ const cleanFields = () => {
 }
 
 .errorList {
-	font-size: 12px;
 	color: #d43d45;
-	padding-left: 20px;
 }
 
 .layout-container {
@@ -266,5 +272,22 @@ const cleanFields = () => {
 	flex-grow: 1;
 	display: flex;
 	align-items: end;
+}
+
+.list {
+	display: flex;
+}
+
+.filters {
+	min-width: 30%;
+	margin-right: 15px;
+	margin-top: 9px;
+}
+
+.header-alarms {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
 }
 </style>

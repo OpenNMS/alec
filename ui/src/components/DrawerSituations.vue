@@ -2,12 +2,9 @@
 import { FeatherDrawer } from '@featherds/drawer'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import SituationCard from '@/components/SituationCard.vue'
-import { ref, watch } from 'vue'
+import { ref, watch, markRaw } from 'vue'
 import CommonFilters from '@/components/CommonFilters.vue'
 import { TSituation } from '@/types/TSituation'
-import { FeatherButton } from '@featherds/button'
-import { FeatherIcon } from '@featherds/icon'
-import FilterAlt from '@featherds/icon/action/FilterAlt'
 
 const emit = defineEmits(['situation-selected', 'drawer-closed'])
 
@@ -17,8 +14,6 @@ const props = defineProps<{
 }>()
 const situationStore = useSituationsStore()
 const visible = ref(props.visible)
-const showFilters = ref(false)
-const filtersCount = ref(0)
 const situations = ref(situationStore.situations)
 
 watch(props, () => {
@@ -44,24 +39,15 @@ const filterList = (list: TSituation[]) => {
 		@update:modelValue="emit('drawer-closed')"
 	>
 		<div class="content">
-			<h4>Choose the situation:</h4>
+			<h4 class="title">CHOOSE THE SITUATION:</h4>
 
-			<FeatherButton
-				class="btn-type"
-				@click="() => (showFilters = !showFilters)"
-			>
-				<FeatherIcon :icon="FilterAlt" aria-hidden="true" class="icon" />
-				Filters <span class="count">{{ filtersCount }}</span>
-			</FeatherButton>
-			<div v-show="showFilters" class="filters">
-				<CommonFilters
-					:list="
-						situationStore.situations.filter((s) => s.id != props.situationId)
-					"
-					@filtered-list="filterList"
-					@filters-count="(value) => (filtersCount = value)"
-				/>
-			</div>
+			<CommonFilters
+				:list="
+					situationStore.situations.filter((s) => s.id != props.situationId)
+				"
+				isSituation
+				@filtered-list="filterList"
+			/>
 			<div v-if="situations.length" class="situation-list">
 				<div
 					class="card"
@@ -82,26 +68,14 @@ const filterList = (list: TSituation[]) => {
 
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
-.box {
-	border: 1px solid $border-grey;
-	padding: 5px 20px;
-	width: fit-content;
-	margin: 10px 0;
-	text-align: center;
-}
-.label {
-	font-weight: 600;
-	font-size: 15px;
-}
-.date {
-	font-size: 12px;
-}
 
 .content {
 	padding: 10px;
 	width: 700px;
 }
-
+.title {
+	color: #494949e6;
+}
 .situation-list {
 	margin-top: 20px;
 	overflow-y: scroll;
@@ -110,45 +84,11 @@ const filterList = (list: TSituation[]) => {
 	justify-content: space-between;
 	height: 750px;
 	align-content: flex-start;
-	padding-right: 15px;
+	padding-right: 7px;
 }
 .card {
 	width: 325px;
 	margin-bottom: 10px;
-}
-
-.btn-type {
-	width: 100%;
-	text-align: left;
-	height: 42px !important;
-	border-radius: 0 !important;
-	margin-top: 10px;
-	box-shadow: var(--feather-shadow-2);
-	border: 1px solid $border-grey;
-	border-bottom: none;
-	background-color: #eeeeee;
-}
-
-.filters {
-	padding: 10px;
-	padding-top: 15px;
-	border: 1px solid $border-grey;
-	border-top: none;
-}
-
-.count {
-	font-size: 16px;
-	font-weight: 600;
-	margin-left: 5px;
-	background-color: #afc3c3;
-	padding: 1px 7px;
-	border-radius: 20px;
-}
-
-.icon {
-	font-size: 22px;
-	color: #627272;
-	vertical-align: text-bottom;
 }
 
 .empty {

@@ -265,7 +265,7 @@ public class SituationRestImpl implements SituationRest {
                 .addFeedback(createSituationPayload.getFeedback())
                 .build();
         if (situation.getAlarms().size() >= 2) {
-            situationDatasource.forwardSituation(situation);
+            forwardAndStoreSituation(situation, alarmSetToAdd);
             return Response.ok().build();
         } else {
             return ALECRestUtils.noContent();

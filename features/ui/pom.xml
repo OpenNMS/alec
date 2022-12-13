@@ -75,13 +75,13 @@
             <artifactId>grpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.opennms.tsaas.alec</groupId>
             <artifactId>alec-gateway</artifactId>
             <version>${alec-gateway.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

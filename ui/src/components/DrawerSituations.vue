@@ -14,7 +14,12 @@ const props = defineProps<{
 }>()
 const situationStore = useSituationsStore()
 const visible = ref(props.visible)
-const situations = ref(situationStore.situations)
+
+const filterById = () => {
+	return situationStore.situations.filter((s) => s.id != props.situationId)
+}
+const sitStore = ref(filterById)
+const situations = ref(filterById)
 
 watch(props, () => {
 	visible.value = props.visible
@@ -23,7 +28,9 @@ watch(props, () => {
 watch(
 	() => situationStore.situations,
 	() => {
-		situations.value = situationStore.situations
+		const filtered = filterById()
+		sitStore.value = filtered
+		situations.value = filtered
 	}
 )
 
@@ -41,13 +48,7 @@ const filterList = (list: TSituation[]) => {
 		<div class="content">
 			<h4 class="title">CHOOSE THE SITUATION:</h4>
 
-			<CommonFilters
-				:list="
-					situationStore.situations.filter((s) => s.id != props.situationId)
-				"
-				isSituation
-				@filtered-list="filterList"
-			/>
+			<CommonFilters :list="sitStore" isSituation @filtered-list="filterList" />
 			<div v-if="situations.length" class="situation-list">
 				<div
 					class="card"

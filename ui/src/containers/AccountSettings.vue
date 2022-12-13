@@ -63,7 +63,7 @@ const saveConfiguration = async () => {
 				(Detail information about engines
 				<a
 					target="_blank"
-					href="https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+					href="https://docs.opennms.com/alec/latest/engines/cluster.html"
 					>here</a
 				>)
 			</div>

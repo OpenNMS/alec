@@ -108,14 +108,6 @@ const handleRemoveAlarm = async () => {
 	}
 }
 
-const updateList = (severities: string[]) => {
-	if (severities.includes('all')) {
-		state.alarms = props.alarms
-	} else {
-		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
-	}
-}
-
 const handleMoveToSituation = async (situationId: number) => {
 	if (validateCountSelectedAlarms()) {
 		const resultRemove = await removeAlarmsFromSituation(
@@ -219,12 +211,6 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 				</div>
 			</div>
 		</div>
-
-		<!--<ChipListByProperty
-				:alarms="props.alarms"
-				@selected-option="updateList"
-				property="severity"
-			/>-->
 	</div>
 
 	<DrawerSituations

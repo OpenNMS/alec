@@ -30,7 +30,7 @@ const handleClickContinue = () => {
 			<strong>
 				<a
 					target="_blank"
-					href="https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+					href="https://docs.opennms.com/alec/latest/engines/cluster.html"
 				>
 					here
 				</a>
@@ -50,7 +50,7 @@ const handleClickContinue = () => {
 							calculate alarms difference in time and add it to their distance
 							within their network topology
 						</div>
-						<img class="img" src="/src/assets/clustering.png" />
+						<img class="img2" src="@/assets/engine2.png" />
 						<FeatherCheckbox
 							v-model="hellinger"
 							:disabled="engine !== CONST.ENGINE_DBSCAN"
@@ -76,7 +76,7 @@ const handleClickContinue = () => {
 							related. Based on its evaluation, situations are built by
 							association.
 						</div>
-						<img class="img img2" src="/src/assets/deeplearning.png" />
+						<img class="img2" src="@/assets/engine1.png" />
 					</div>
 				</FeatherRadio>
 			</FeatherRadioGroup>
@@ -98,8 +98,9 @@ const handleClickContinue = () => {
 	font-size: 16px;
 }
 .radio {
-	border: 1px solid grey;
+	border: 1px solid #bfbfbf;
 	padding: 10px 20px;
+	background-color: #f4f7fc;
 }
 .radio-content {
 	display: flex;
@@ -111,12 +112,6 @@ const handleClickContinue = () => {
 .title {
 	font-size: 18px;
 	padding-bottom: 5px;
-}
-.img {
-	margin-top: 10px;
-	height: auto;
-	width: 310px;
-	margin: 40px 0px;
 }
 .img2 {
 	margin-top: 50px;

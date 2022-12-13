@@ -16,13 +16,17 @@ import { chunk } from 'lodash'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { TSituation } from '@/types/TSituation'
 import useRouter from '@/composables/useRouter'
+import { FeatherSpinner } from '@featherds/progress'
 
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { FeatherExpansionPanel } from '@featherds/expansion'
 import { filterListByDate } from '@/helpers/utils'
 import { useUserStore } from '@/store/useUserStore'
-import Cluster from '@/assets/test2.png'
+import DeepLearning from '@/assets/option1.svg'
+import Cluster from '@/assets/option2.svg'
+
+import CONST from '@/helpers/constants'
 
 const Icons = markRaw({
 	Add,
@@ -58,14 +62,14 @@ const state: TState = reactive({
 	nodeSelectedValue: undefined,
 	allSituations: []
 })
-const loading = ref(false)
+const loading = ref(true)
 const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
 const withFilters = ref(false)
 const selectedSeverity = ref(['all'])
 const selectedTimeStart = ref(1)
-const showPanel = ref(true)
+//const showPanel = ref(true)
 
 const initPaging = (situations: Array<TSituation[]>) => {
 	currentPage.value = 0
@@ -81,18 +85,19 @@ const setNodes = () => {
 watch(
 	() => situationStore.situations,
 	() => {
+		loading.value = false
 		setNodes()
 		totalSituations.value = situationStore.situations.length
 		state.allSituations = chunk(situationStore.situations, PAGE_SIZE)
 		const ids = situationStore.situations.map((s) => s.id)
 		situationStore.filteredSituations = ids
 		initPaging(state.allSituations)
-		checkPreviousFilters()
+		//checkPreviousFilters()
 	}
 )
 
 //when come back to situation list, it has to mantain same filters
-const checkPreviousFilters = () => {
+/*const checkPreviousFilters = () => {
 	if (situationStore.filters) {
 		if (situationStore.filters.node) {
 			state.nodeSelectedValue = situationStore.filters.node
@@ -105,7 +110,8 @@ const checkPreviousFilters = () => {
 		situationStore.filters = null
 	}
 }
-
+*/
+/*
 const search = (q: string) => {
 	if (!q) {
 		state.nodeSelectedValue = undefined
@@ -120,7 +126,8 @@ const search = (q: string) => {
 		}))
 	loading.value = false
 }
-
+*/
+/*
 const filterByNode = () => {
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
 		let filtered = situationStore.situations
@@ -143,7 +150,8 @@ const filterByNode = () => {
 		applyFilters(situationStore.situations)
 	}
 }
-
+*/
+/*
 const applyFilters = (situations: TSituation[]) => {
 	let filteredSituations = situations
 	if (!selectedSeverity.value.includes('all')) {
@@ -163,6 +171,7 @@ const applyFilters = (situations: TSituation[]) => {
 	const ids = filteredSituations.map((s) => s.id)
 	situationStore.filteredSituations = ids
 }
+*/
 
 const onGotoPage = (nextPage: number) => {
 	currentPage.value = nextPage
@@ -175,11 +184,11 @@ const showDetail = (id: number) => {
 		selectedSeverity.value.length ||
 		selectedTimeStart.value !== 1
 	) {
-		situationStore.filters = {
+		/*situationStore.filters = {
 			node: state.nodeSelectedValue,
 			severities: selectedSeverity.value,
 			timeStart: selectedTimeStart.value
-		}
+		}*/
 	}
 
 	router.push({
@@ -190,27 +199,29 @@ const showDetail = (id: number) => {
 	})
 }
 
-const timePeriodChanged = (value: number) => {
-	selectedTimeStart.value = value
-	updateList()
-}
+// const timePeriodChanged = (value: number) => {
+// 	selectedTimeStart.value = value
+// 	updateList()
+// }
 
-const severityChanged = (severities: string[]) => {
-	selectedSeverity.value = severities
-	updateList()
-}
+// const severityChanged = (severities: string[]) => {
+// 	selectedSeverity.value = severities
+// 	updateList()
+// }
 
-const updateList = () => {
-	if (
-		selectedSeverity.value.includes('all') &&
-		selectedTimeStart.value === 1 &&
-		!state.nodeSelectedValue
-	) {
-		resetFilters()
-	} else {
-		filterByNode()
-	}
-}
+// const updateList = () => {
+// 	console.log('-----3----')
+
+// 	if (
+// 		selectedSeverity.value.includes('all') &&
+// 		selectedTimeStart.value === 1 &&
+// 		!state.nodeSelectedValue
+// 	) {
+// 		resetFilters()
+// 	} else {
+// 		filterByNode()
+// 	}
+// }
 
 const viewUnassignedAlarms = () => {
 	router.push({
@@ -224,22 +235,32 @@ const showSettings = () => {
 	})
 }
 
-const resetFilters = () => {
-	selectedSeverity.value = ['all']
-	selectedTimeStart.value = 1
-	state.nodeSelectedValue = undefined
-	const ids = situationStore.situations.map((s) => s.id)
-	situationStore.filteredSituations = ids
-	totalSituations.value = situationStore.situations.length
-	initPaging(state.allSituations)
-	withFilters.value = false
-}
+// const resetFilters = () => {
+// 	selectedSeverity.value = ['all']
+// 	selectedTimeStart.value = 1
+// 	state.nodeSelectedValue = undefined
+// 	const ids = situationStore.situations.map((s) => s.id)
+// 	situationStore.filteredSituations = ids
+// 	totalSituations.value = situationStore.situations.length
+// 	initPaging(state.allSituations)
+// 	withFilters.value = false
+// }
 
 const filterList = (list: TSituation[]) => {
 	//state.situations = list
 	//totalSituations.value = list.length
-	console.log(list)
-	initPaging(list)
+	if (list.length) {
+		totalSituations.value = list.length
+		state.allSituations = chunk(list, PAGE_SIZE)
+		const ids = list.map((s) => s.id)
+		situationStore.filteredSituations = ids
+		currentPage.value = 0
+		state.situations = state.allSituations[0]
+		totalPages.value = state.allSituations.length
+	} else {
+		state.situations = []
+	}
+
 	//console.log(list)
 	//withFilters.value = true
 }
@@ -260,11 +281,21 @@ const filterList = (list: TSituation[]) => {
 				<NewSituationBtn />
 
 				<div class="info-engine">
-					<img :src="Cluster" class="icon-type" />
+					<img
+						:src="
+							userStore.engineInfo?.engineName == CONST.CLUSTERING
+								? Cluster
+								: DeepLearning
+						"
+						class="icon-type"
+					/>
 
 					<div class="engine" @click="showSettings">
 						ENGINE
-						<div v-if="userStore.engineInfo?.engineName" class="type">
+						<div
+							v-if="userStore.engineInfo?.engineName == CONST.CLUSTERING"
+							class="type"
+						>
 							CLUSTERING
 						</div>
 						<div v-else class="type">DEEP LEARNING</div>
@@ -278,16 +309,16 @@ const filterList = (list: TSituation[]) => {
 			</div>
 		</div>
 		<div class="content">
-			<!--<div class="left-filters">
+			<div class="left-filters">
 				<CommonFilters
 					:list="situationStore.situations"
 					@filtered-list="filterList"
 					isOpen
 					isSituation
+					saveFilters
 				/>
-			</div>-->
-
-			<div class="filters">
+			</div>
+			<!--<div class="filters">
 				<FeatherButton class="reset-btn" @click="() => resetFilters()">
 					<FeatherIcon :icon="Refresh" aria-hidden="true" class="icon" />
 					<span>Reset Filters</span>
@@ -308,7 +339,7 @@ const filterList = (list: TSituation[]) => {
 						:pre-selected="selectedTimeStart"
 					/>
 				</FeatherExpansionPanel>
-			</div>
+			</div> -->
 
 			<div class="container">
 				<div class="autocomplete">
@@ -316,7 +347,7 @@ const filterList = (list: TSituation[]) => {
 						Result: {{ state.situations.length }} of
 						{{ totalSituations }}
 					</div>
-					<FeatherAutocomplete
+					<!--<FeatherAutocomplete
 						class="map-search"
 						label="Find by node"
 						:loading="loading"
@@ -326,39 +357,42 @@ const filterList = (list: TSituation[]) => {
 						@search="search"
 						@update:modelValue="filterByNode"
 					>
-					</FeatherAutocomplete>
+					</FeatherAutocomplete>-->
 				</div>
-				<div
-					class="situation-list"
-					v-if="state.situations && state.situations.length > 0"
-				>
+				<FeatherSpinner class="spinner" v-if="loading" />
+				<div v-else>
 					<div
-						class="card"
-						v-for="situationInfo in state.situations"
-						:key="situationInfo.id"
+						class="situation-list"
+						v-if="state.situations && state.situations.length > 0"
 					>
-						<SituationCard
-							@click="() => showDetail(situationInfo.id)"
-							:situation-info="situationInfo"
+						<div
+							class="card"
+							v-for="situationInfo in state.situations"
+							:key="situationInfo.id"
+						>
+							<SituationCard
+								@click="() => showDetail(situationInfo.id)"
+								:situation-info="situationInfo"
+							/>
+						</div>
+					</div>
+					<div
+						v-if="!state.situations || state.situations.length == 0"
+						class="container empty"
+					>
+						No results found
+					</div>
+					<div
+						class="footer-pager"
+						v-if="!withFilters && totalSituations > PAGE_SIZE"
+					>
+						<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
+						<SimplePagination
+							@go-to-page="onGotoPage"
+							:currentPage="currentPage"
+							:totalPages="totalPages"
 						/>
 					</div>
-				</div>
-				<div
-					v-if="!state.situations || state.situations.length == 0"
-					class="container empty"
-				>
-					No results found
-				</div>
-				<div
-					class="footer-pager"
-					v-if="!withFilters && totalSituations > PAGE_SIZE"
-				>
-					<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
-					<SimplePagination
-						@go-to-page="onGotoPage"
-						:currentPage="currentPage"
-						:totalPages="totalPages"
-					/>
 				</div>
 			</div>
 		</div>
@@ -386,7 +420,7 @@ const filterList = (list: TSituation[]) => {
 .box-info {
 	display: flex;
 	flex-direction: column;
-	font-size: 11px;
+	font-size: 10px;
 	align-items: center;
 	font-weight: 600;
 	line-height: 20px;
@@ -403,8 +437,9 @@ const filterList = (list: TSituation[]) => {
 	margin-left: 8px;
 
 	.icon-type {
-		//filter: invert(12%) sepia(72%) saturate(4818%) hue-rotate(244deg)
-		//	brightness(81%) contrast(143%);
+		width: 28px;
+		filter: invert(12%) sepia(72%) saturate(8824%) hue-rotate(236deg)
+			brightness(100%) contrast(46%);
 	}
 }
 .engine {
@@ -483,7 +518,7 @@ h2 {
 	border: 1px solid $border-grey;
 	background-color: #ffffff;
 	width: 100%;
-	min-height: 650px;
+	min-height: 750px;
 }
 
 .situation-list {
@@ -530,5 +565,8 @@ h2 {
 	background-color: #d1d1d1;
 	border-radius: 5px;
 	cursor: pointer;
+}
+.spinner {
+	margin: 100px auto;
 }
 </style>

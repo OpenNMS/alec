@@ -52,16 +52,6 @@ const showSituationList = () => {
 	})
 }
 
-const updateList = (severities: string[]) => {
-	if (severities.includes('all')) {
-		alarms.value = situationStore.unassignedAlarms
-	} else {
-		alarms.value = situationStore.unassignedAlarms.filter((a) =>
-			severities.includes(a.severity)
-		)
-	}
-}
-
 const addAlarm = (alarmId: number) => {
 	errorAlarmList.value = false
 	if (!includes(alarmIds.value, alarmId)) {
@@ -144,11 +134,11 @@ const filterList = (list: TAlarm[]) => {
 					It is required to add at least 2 alarms
 				</div>
 				<div class="footer">
-					<FeatherButton class="btn" primary @click="cleanFields">
+					<FeatherButton class="btn" @click="cleanFields">
 						<FeatherIcon :icon="Cancel" aria-hidden="true" class="icon" />
 						<span>Clear</span>
 					</FeatherButton>
-					<FeatherButton class="btn" primary @click="createSituation">
+					<FeatherButton class="btn-add" @click="createSituation">
 						<FeatherIcon :icon="Add" aria-hidden="true" class="icon" />
 						<span>Add Situation</span>
 					</FeatherButton>
@@ -245,6 +235,12 @@ const filterList = (list: TAlarm[]) => {
 .btn {
 	display: flex;
 	align-items: center;
+}
+
+.btn-add {
+	height: 36px !important;
+	background-color: #46ae46 !important;
+	color: white !important;
 }
 
 .icon {

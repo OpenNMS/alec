@@ -11,17 +11,11 @@ import AccountSettings from '@/containers/AccountSettings.vue'
 
 import { useUserStore } from '@/store/useUserStore'
 
-const checkUser = async (to: any) => {
-	const r = (window as any).VRouter || router
+const checkUser = async () => {
 	const userStore = useUserStore()
 	if (!userStore.userId) {
-		const resultRole = await userStore.getUserRole()
+		await userStore.getUserRole()
 		await userStore.getAlecInfo()
-		if (resultRole) {
-			r.push({ name: 'home', params: to.params })
-		} else {
-			r.push({ name: 'error', params: to.params })
-		}
 	}
 }
 
@@ -29,35 +23,29 @@ const routes = [
 	{
 		path: '/',
 		name: 'home',
-		beforeEnter: async (to: any) => {
-			const r = (window as any).VRouter || router
+		beforeEnter: async () => {
 			const userStore = useUserStore()
 			await userStore.getUserRole()
 			await userStore.getAlecInfo()
-			if (userStore.firstTime) {
-				r.push({ name: 'welcome', params: to.params })
-			} else {
-				r.push({ name: 'situations', params: to.params })
-			}
 		},
 		component: {}
 	},
 	{
 		path: '/welcome',
 		name: 'welcome',
-		beforeEnter: (to: any) => checkUser(to.params),
+		beforeEnter: () => checkUser(),
 		component: WelcomePage
 	},
 	{
 		path: '/setup',
 		name: 'configuration',
-		beforeEnter: (to: any) => checkUser(to.params),
+		beforeEnter: () => checkUser(),
 		component: ConfigurationPage
 	},
 	{
 		path: '/situations',
 		name: 'situations',
-		beforeEnter: (to: any) => checkUser(to.params),
+		beforeEnter: () => checkUser(),
 		component: SituationList
 	},
 	{

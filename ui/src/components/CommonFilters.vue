@@ -4,7 +4,7 @@ import { TAlarm, TSituation } from '@/types/TSituation'
 import { FeatherAutocomplete } from '@featherds/autocomplete'
 import { useSituationsStore } from '@/store/useSituationsStore'
 import type { Ref } from 'vue'
-import { ref, reactive, markRaw, watch } from 'vue'
+import { ref, reactive, markRaw, watch, onMounted } from 'vue'
 import FilterByDate from '@/components/FilterByDate.vue'
 import { filterListByDate } from '@/helpers/utils'
 import { FeatherButton } from '@featherds/button'
@@ -27,11 +27,14 @@ type TState = {
 }
 
 const props = defineProps<{
-	list: TAlarm[]
-	isSituation?: boolean
-	isOpen?: boolean
+	list: (TAlarm | TSituation)[]
+	isSituation?: boolean // for situation it checks related alarms nodeLabel
+	isOpen?: boolean //for drawers is closed with button
+	saveFilters?: boolean // for situation list needs to save filters in store
 }>()
+
 const emit = defineEmits(['filtered-list'])
+
 const situationStore = useSituationsStore()
 const showFilters = ref(props.isOpen)
 
@@ -47,6 +50,24 @@ const state: TState = reactive({
 	nodeSelectedValue: undefined
 })
 
+const applyStoreFilters = () => {
+	if (props.saveFilters) {
+		if (situationStore.filters) {
+			if (situationStore.filters.node) {
+				state.nodeSelectedValue = situationStore.filters.node
+			}
+
+			if (!situationStore.filters.severities.includes('all')) {
+				severityFilters.value = situationStore.filters.severities
+			}
+			selectedTimePeriod.value = situationStore.filters.timeStart
+
+			situationStore.filters = null
+			updateList()
+		}
+	}
+}
+
 const setNodes = () => {
 	state.nodes = situationStore.nodes
 	state.results = situationStore.nodes
@@ -61,16 +82,17 @@ watch(
 
 watch(props, () => {
 	list.value = props.list
+	applyStoreFilters()
 })
 
 const updateListSeverities = (severities: string[]) => {
 	severityFilters.value = severities
-	filterByNode()
+	updateList()
 }
 
 const timePeriodChanged = (value) => {
 	selectedTimePeriod.value = value
-	filterByNode()
+	updateList()
 }
 
 const search = (q: string) => {
@@ -97,9 +119,13 @@ const resetFilters = () => {
 	if (!props.isOpen) {
 		showFilters.value = false
 	}
+	if (props.saveFilters) {
+		situationStore.filters = null
+	}
+	list.value = props.list
 }
 
-const filterByNode = () => {
+const updateList = () => {
 	filtersCount.value = 0
 	let filtered = props.list as (TSituation | TAlarm)[]
 	if (state.nodeSelectedValue && state.nodeSelectedValue._text) {
@@ -140,8 +166,19 @@ const filterByNode = () => {
 		) as TSituation[]
 	}
 	list.value = filtered
+	if (props.saveFilters) {
+		saveFilters()
+	}
 
 	emit('filtered-list', filtered)
+}
+
+const saveFilters = () => {
+	situationStore.filters = {
+		node: state.nodeSelectedValue,
+		severities: severityFilters.value,
+		timeStart: selectedTimePeriod.value
+	}
 }
 
 const toogleFilters = () => {
@@ -182,7 +219,7 @@ const toogleFilters = () => {
 				:results="state.results"
 				type="single"
 				@search="search"
-				@update:modelValue="filterByNode"
+				@update:modelValue="updateList"
 			>
 			</FeatherAutocomplete>
 			<div class="title">By Severities:</div>

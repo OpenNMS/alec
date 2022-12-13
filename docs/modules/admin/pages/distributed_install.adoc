@@ -116,7 +116,7 @@ alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/e
 Follow these steps to verify your distributed ALEC installation:
 
 . Restart OpenNMS and Sentinel.
-. Make sure that the required Kafka topics have been created (see xref:datasources:kafka.adoc#_topics[Kafka topics]).
+. Make sure that the required Kafka topics have been created (see xref:reference:datasources/kafka.adoc#topics[Kafka topics]).
 . Run the `health:check` command in an OpenNMS Karaf shell to check the status of your OpenNMS instance.
 . Run the `health:check` command in a Sentinel Karaf shell to check the status of the Sentinel instance.
 ** Repeat this step for each Sentinel instance in your environment.

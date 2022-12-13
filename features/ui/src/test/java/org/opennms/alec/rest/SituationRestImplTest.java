@@ -197,7 +197,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("7", "8")), equalTo(true));
-            verify(situationDatasource, times(2)).getSituations();
+            verify(situationDatasource, times(4)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 

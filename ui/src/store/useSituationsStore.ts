@@ -54,7 +54,6 @@ export const useSituationsStore = defineStore('situationsStore', {
 					)[0]?.value
 					return s
 				})
-
 				this.filteredSituations = situations.map((s: TSituation) => s.id)
 
 				const groupByStatus = groupBy(situations, 'status')

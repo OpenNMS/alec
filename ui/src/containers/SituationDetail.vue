@@ -63,6 +63,8 @@ const showSituationList = () => {
 	})
 }
 const showNextSituation = (step: number) => {
+	console.log(situationStore.filteredSituations)
+
 	const index = filteredSituationsCurrentIndex.value
 	const id = situationStore.filteredSituations[index + step]
 	router.push({
@@ -141,7 +143,7 @@ appStore.$subscribe((mutation, storeState) => {
 				Error. The situation {{ paramId }} does not exist.
 			</div>
 		</div>
-		<FeatherSnackbar v-model="showError" center error :timeout="6000">
+		<FeatherSnackbar v-model="showError" right error :timeout="6000">
 			{{ appStore.errorMessage }}
 			<template v-slot:button>
 				<FeatherButton @click="showError = false" text>dismiss</FeatherButton>

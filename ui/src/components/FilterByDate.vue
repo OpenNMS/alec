@@ -28,6 +28,8 @@ watch(props, () => {
 		:label="''"
 		v-model="selectedTimePeriod"
 		vertical
+		hodeLabel
+		class="radio-dates"
 		@update:modelValue="emit('filter-date-selected', selectedTimePeriod)"
 	>
 		<FeatherRadio v-for="item in timePeriods" :value="item.id" :key="item.id">{{
@@ -41,5 +43,11 @@ watch(props, () => {
 
 .layout-container {
 	margin-bottom: 0 !important;
+}
+
+.radio-dates {
+	> :first-child {
+		margin-bottom: 8px !important;
+	}
 }
 </style>

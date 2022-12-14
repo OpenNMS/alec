@@ -13,12 +13,11 @@ import { assignAlarmsToSituation } from '@/services/AlecService'
 import ArrowBack from '@featherds/icon/navigation/ArrowBack'
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import { FeatherSnackbar } from '@featherds/snackbar'
-import ChipListByProperty from '@/components/ChipListByProperty.vue'
-import { FeatherExpansionPanel } from '@featherds/expansion'
 import { TAlarm } from '@/types/TSituation'
-import FilterByDate from '@/components/FilterByDate.vue'
-import { filterListByDate } from '@/helpers/utils'
 import useRouter from '@/composables/useRouter'
+import CommonFilters from '@/components/CommonFilters.vue'
+import NoResults from '@/elements/NoResults.vue'
+import { FeatherSpinner } from '@featherds/progress'
 
 const Icons = markRaw({
 	ArrowBack,
@@ -28,6 +27,9 @@ const router = useRouter()
 const situationStore = useSituationsStore()
 situationStore.getUnassignedAlarms()
 situationStore.getSituations()
+if (!situationStore.nodes.length) {
+	situationStore.getNodes()
+}
 
 const alarms = ref([]) as Ref<TAlarm[]>
 const alarmIds = ref([]) as Ref<number[]>
@@ -36,16 +38,13 @@ const showSituations = ref(false)
 const showErrorMsg = ref('')
 const showError = ref(false)
 const isError = ref(false)
-const nodeFilters = ref(['all'])
-const severityFilters = ref(['all'])
-const selectedTimePeriod = ref(1)
-
-const showPanel = ref(true)
+const loading = ref(true)
 
 watch(
 	() => situationStore.unassignedAlarms,
 	() => {
-		updateList()
+		alarms.value = situationStore.unassignedAlarms
+		loading.value = false
 	}
 )
 
@@ -55,45 +54,6 @@ const addAlarm = (alarmId: number) => {
 	} else {
 		remove(alarmIds.value, (a) => a === alarmId)
 	}
-}
-
-const updateListSeverities = (severities: string[]) => {
-	severityFilters.value = severities
-	updateList()
-}
-
-const updateListNodes = (nodes: string[]) => {
-	nodeFilters.value = nodes
-	updateList()
-}
-
-const timePeriodChanged = (value: number) => {
-	selectedTimePeriod.value = value
-	updateList()
-}
-
-const updateList = () => {
-	let alarmsFiltered = situationStore.unassignedAlarms
-	//filter by severity
-	if (!severityFilters.value.includes('all')) {
-		alarmsFiltered = alarmsFiltered.filter((a) =>
-			severityFilters.value.includes(a.severity)
-		)
-	}
-	//filter by node label
-	if (!nodeFilters.value.includes('all')) {
-		alarmsFiltered = alarmsFiltered.filter((a) =>
-			nodeFilters.value.includes(a.nodeLabel)
-		)
-	}
-	//filter by date
-	if (selectedTimePeriod.value !== 1) {
-		alarmsFiltered = filterListByDate(
-			selectedTimePeriod.value,
-			alarmsFiltered
-		) as TAlarm[]
-	}
-	alarms.value = alarmsFiltered as TAlarm[]
 }
 
 const handleSelect = () => {
@@ -131,6 +91,9 @@ const handleMoveClick = () => {
 		showErrorMsg.value = 'You need to choose at least one alarm!'
 	}
 }
+const filterList = (alarmsFiltered: TAlarm[]) => {
+	alarms.value = alarmsFiltered
+}
 </script>
 
 <template>
@@ -142,31 +105,16 @@ const handleMoveClick = () => {
 			</FeatherButton>
 			<NewSituationBtn />
 		</div>
-		<h2>List Unassigned Alarms</h2>
+		<h2>List Unassociated Alarms</h2>
 		<div class="content">
 			<div class="filters">
-				<FeatherExpansionPanel title="By Severity" v-model="showPanel">
-					<ChipListByProperty
-						:alarms="situationStore.unassignedAlarms"
-						@selected-option="updateListSeverities"
-						:pre-selected="severityFilters"
-						property="severity"
-						isVertical
-					/>
-				</FeatherExpansionPanel>
-				<FeatherExpansionPanel title="By Node Label" v-model="showPanel">
-					<ChipListByProperty
-						:alarms="situationStore.unassignedAlarms"
-						@selected-option="updateListNodes"
-						:pre-selected="nodeFilters"
-						property="nodeLabel"
-						isVertical
-					/>
-				</FeatherExpansionPanel>
-				<FeatherExpansionPanel title="By Start Date">
-					<FilterByDate @filter-date-selected="timePeriodChanged" />
-				</FeatherExpansionPanel>
+				<CommonFilters
+					:list="situationStore.unassignedAlarms"
+					@filtered-list="filterList"
+					isOpen
+				/>
 			</div>
+
 			<div class="list">
 				<div class="action-btns">
 					<FeatherCheckbox
@@ -179,17 +127,19 @@ const handleMoveClick = () => {
 						<span>Move</span>
 					</FeatherButton>
 				</div>
-
-				<div v-if="alarms.length" class="alarms">
-					<div v-for="alarm in alarms" :key="alarm.id" class="card">
-						<UnassignedAlarmCard
-							:selected="includes(alarmIds, alarm.id)"
-							:alarm="alarm"
-							@selected-alarm="addAlarm"
-						/>
+				<FeatherSpinner class="spinner" v-if="loading" />
+				<div v-else>
+					<div v-if="alarms.length" class="alarms">
+						<div v-for="alarm in alarms" :key="alarm.id" class="card">
+							<UnassignedAlarmCard
+								:selected="includes(alarmIds, alarm.id)"
+								:alarm="alarm"
+								@selected-alarm="addAlarm"
+							/>
+						</div>
 					</div>
+					<NoResults v-else />
 				</div>
-				<div v-else>There is no unassigned alarms</div>
 			</div>
 		</div>
 		<DrawerSituations
@@ -198,7 +148,7 @@ const handleMoveClick = () => {
 			@situation-selected="handleMoveToSituation"
 			@drawer-closed="() => (showSituations = false)"
 		/>
-		<FeatherSnackbar v-model="showError" center :error="isError">
+		<FeatherSnackbar v-model="showError" right :error="isError">
 			{{ showErrorMsg }}
 			<template v-slot:button>
 				<FeatherButton @click="showError = false" text>dismiss</FeatherButton>
@@ -246,6 +196,7 @@ const handleMoveClick = () => {
 	width: 100%;
 	flex-wrap: wrap;
 	align-content: flex-start;
+	margin-top: var($spacing-m);
 	> div {
 		margin-right: 1%;
 	}
@@ -270,7 +221,17 @@ const handleMoveClick = () => {
 	}
 }
 
+.filters {
+	min-width: 20%;
+	background-color: white;
+	margin-right: 15px;
+	border: 1px solid $border-grey;
+}
+
 .layout-container {
 	margin-bottom: 0 !important;
+}
+.spinner {
+	margin: 100px auto;
 }
 </style>

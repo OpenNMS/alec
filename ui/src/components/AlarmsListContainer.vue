@@ -24,6 +24,8 @@ import { useAppStore } from '@/store/useAppStore'
 import Delete from '@featherds/icon/action/Delete'
 import Add from '@featherds/icon/action/Add'
 import { markRaw } from 'vue'
+import CommonFilters from '@/components/CommonFilters.vue'
+import NoResults from '@/elements/NoResults.vue'
 
 const Icons = markRaw({
 	Add,
@@ -106,14 +108,6 @@ const handleRemoveAlarm = async () => {
 	}
 }
 
-const updateList = (severities: string[]) => {
-	if (severities.includes('all')) {
-		state.alarms = props.alarms
-	} else {
-		state.alarms = props.alarms.filter((a) => severities.includes(a.severity))
-	}
-}
-
 const handleMoveToSituation = async (situationId: number) => {
 	if (validateCountSelectedAlarms()) {
 		const resultRemove = await removeAlarmsFromSituation(
@@ -154,17 +148,16 @@ const handleMoveClick = () => {
 		appStore.showErrorMsg('You need to choose at least one alarm!')
 	}
 }
+
+const filterList = (alarmsFiltered: TAlarm[]) => {
+	state.alarms = alarmsFiltered
+}
 </script>
 
 <template>
 	<div class="container">
-		<div class="row">
+		<div class="header">
 			<div class="title">Alarms</div>
-			<ChipListByProperty
-				:alarms="props.alarms"
-				@selected-option="updateList"
-				property="severity"
-			/>
 			<FeatherButton
 				class="add-alarms-btn"
 				@click="showUnassignedAlarms = true"
@@ -173,50 +166,64 @@ const handleMoveClick = () => {
 				<span>Add Alarms</span>
 			</FeatherButton>
 		</div>
-		<div class="row actions">
-			<FeatherCheckbox v-model="selectAll" label="selected" />
-			<FeatherButton @click="() => handleActionMultiplyAlarms('clear')">
-				<FeatherIcon :icon="MarkComplete" class="icon clear" />
-				<span>Clear</span>
-			</FeatherButton>
-			<FeatherButton @click="() => handleActionMultiplyAlarms('ack')">
-				<FeatherIcon :icon="CheckCircle" class="icon ack" />
-				<span>Acknowledge</span>
-			</FeatherButton>
-			<FeatherButton @click="handleMoveClick">
-				<FeatherIcon :icon="ExitToApp" class="icon move" />
-				<span>Move</span>
-			</FeatherButton>
-			<FeatherButton @click="handleRemoveAlarm">
-				<FeatherIcon :icon="Delete" class="icon remove" />
-				<span>Remove</span>
-			</FeatherButton>
-		</div>
 
-		<div class="section">
-			<div class="alarm-list" v-if="state.alarms.length > 0">
-				<div v-for="alarmInfo in state.alarms" :key="alarmInfo.id">
-					<AlarmDetail
-						:alarm="alarmInfo"
-						:selectAll="selectAll"
-						:situation-id="props.situationId"
-						@alarm-selected="alarmSelected"
-					/>
+		<div class="alarms-container">
+			<div class="filters">
+				<CommonFilters
+					:list="props.alarms"
+					@filtered-list="filterList"
+					isOpen
+				/>
+			</div>
+			<div class="list">
+				<div class="row actions">
+					<FeatherCheckbox v-model="selectAll" label="selected" />
+					<FeatherButton @click="() => handleActionMultiplyAlarms('clear')">
+						<FeatherIcon :icon="MarkComplete" class="icon clear" />
+						<span>Clear</span>
+					</FeatherButton>
+					<FeatherButton @click="() => handleActionMultiplyAlarms('ack')">
+						<FeatherIcon :icon="CheckCircle" class="icon ack" />
+						<span>Acknowledge</span>
+					</FeatherButton>
+					<FeatherButton @click="handleMoveClick">
+						<FeatherIcon :icon="ExitToApp" class="icon move" />
+						<span>Move</span>
+					</FeatherButton>
+					<FeatherButton @click="handleRemoveAlarm">
+						<FeatherIcon :icon="Delete" class="icon remove" />
+						<span>Remove</span>
+					</FeatherButton>
+				</div>
+
+				<div class="section">
+					<div class="alarm-list" v-if="state.alarms.length > 0">
+						<div v-for="alarmInfo in state.alarms" :key="alarmInfo.id">
+							<AlarmDetail
+								:alarm="alarmInfo"
+								:selectAll="selectAll"
+								:situation-id="props.situationId"
+								@alarm-selected="alarmSelected"
+							/>
+						</div>
+					</div>
+					<NoResults v-else />
 				</div>
 			</div>
 		</div>
-		<DrawerSituations
-			:situationId="props.situationId"
-			:visible="showSituations"
-			@situation-selected="handleMoveToSituation"
-			@drawer-closed="() => (showSituations = false)"
-		/>
-		<DrawerAlarms
-			:visible="showUnassignedAlarms"
-			@alarms-selected="handleAddAlarmsToSituation"
-			@drawer-alarms-closed="() => (showUnassignedAlarms = false)"
-		/>
 	</div>
+
+	<DrawerSituations
+		:situationId="props.situationId"
+		:visible="showSituations"
+		@situation-selected="handleMoveToSituation"
+		@drawer-closed="() => (showSituations = false)"
+	/>
+	<DrawerAlarms
+		:visible="showUnassignedAlarms"
+		@alarms-selected="handleAddAlarmsToSituation"
+		@drawer-alarms-closed="() => (showUnassignedAlarms = false)"
+	/>
 </template>
 
 <style scoped lang="scss">
@@ -227,13 +234,17 @@ const handleMoveClick = () => {
 	padding: 15px;
 	background-color: #ffffff;
 }
-
+.header {
+	display: flex;
+}
 .row {
 	display: flex;
 	flex-direction: row;
 	align-items: baseline;
 }
-
+.list {
+	width: 100%;
+}
 .actions {
 	margin-top: 20px;
 	padding-left: 15px;
@@ -244,6 +255,10 @@ const handleMoveClick = () => {
 	> label {
 		display: none !important;
 	}
+}
+
+.alarms-container {
+	display: flex;
 }
 
 .add-alarms-btn {
@@ -265,7 +280,7 @@ const handleMoveClick = () => {
 	flex-direction: row;
 	flex-wrap: wrap;
 	> div {
-		margin-top: 20px;
+		margin-top: 15px;
 		width: 100%;
 	}
 }
@@ -290,5 +305,12 @@ const handleMoveClick = () => {
 		font-size: 21px;
 		vertical-align: text-bottom;
 	}
+}
+
+.filters {
+	min-width: 20%;
+	background-color: white;
+	margin-right: 15px;
+	margin-top: 9px;
 }
 </style>

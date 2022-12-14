@@ -100,7 +100,7 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 }
 
 .alarms-list {
-	margin-top: 5px;
+	margin-top: 10px;
 	overflow-y: scroll;
 	display: flex;
 	flex-wrap: wrap;

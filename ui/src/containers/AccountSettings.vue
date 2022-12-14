@@ -36,6 +36,8 @@ const saveConfiguration = async () => {
 	)
 	showNotification.value = true
 	if (savedEngine) {
+		userStore.getAlecInfo()
+		userStore.getEngineInfo()
 		message.value = 'The settings were saved!'
 		isError.value = false
 	} else {
@@ -62,7 +64,7 @@ const saveConfiguration = async () => {
 				(Detail information about engines
 				<a
 					target="_blank"
-					href="https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/cluster.html"
+					href="https://docs.opennms.com/alec/latest/engines/cluster.html"
 					>here</a
 				>)
 			</div>
@@ -88,7 +90,7 @@ const saveConfiguration = async () => {
 			<FeatherIcon :icon="Icons.MarkComplete" class="icon" />
 			<span>Save Changes</span>
 		</FeatherButton>
-		<FeatherSnackbar v-model="showNotification" center :error="isError">
+		<FeatherSnackbar v-model="showNotification" right :error="isError">
 			{{ message }}
 			<template v-slot:button>
 				<FeatherButton @click="showNotification = false" text

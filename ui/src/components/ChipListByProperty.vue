@@ -8,10 +8,10 @@ import StatusColor from '@/elements/StatusColor.vue'
 const emit = defineEmits(['selected-option'])
 
 type TState = {
-	alarms: TAlarm[] | TSituation[]
+	alarms: (TAlarm | TSituation)[]
 }
 const props = defineProps<{
-	alarms: TAlarm[] | TSituation[]
+	alarms: (TAlarm | TSituation)[]
 	property: string
 	preSelected?: string[]
 	isVertical?: boolean

@@ -30,7 +30,7 @@ const props = defineProps<{
 	list: (TAlarm | TSituation)[]
 	isSituation?: boolean // for situation it checks related alarms nodeLabel
 	isOpen?: boolean //for drawers is closed with button
-	saveFilters?: boolean // for situation list needs to save filters in store
+	saveFilters?: boolean // for situations list needs to save filters in store
 }>()
 
 const emit = defineEmits(['filtered-list'])
@@ -57,8 +57,11 @@ const applyStoreFilters = () => {
 				state.nodeSelectedValue = situationStore.filters.node
 			}
 
-			if (!situationStore.filters.severities.includes('all')) {
-				severityFilters.value = situationStore.filters.severities
+			if (
+				situationStore.filters?.severities &&
+				!situationStore.filters?.severities.includes('all')
+			) {
+				severityFilters.value = situationStore.filters.severities as string[]
 			}
 			selectedTimePeriod.value = situationStore.filters.timeStart
 
@@ -90,7 +93,7 @@ const updateListSeverities = (severities: string[]) => {
 	updateList()
 }
 
-const timePeriodChanged = (value) => {
+const timePeriodChanged = (value: number) => {
 	selectedTimePeriod.value = value
 	updateList()
 }

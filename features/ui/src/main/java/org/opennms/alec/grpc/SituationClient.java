@@ -42,20 +42,17 @@ import io.grpc.ManagedChannelBuilder;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
+    private final GrpcConnectionConfig grpcConnectionConfig;
 
-    private AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
-    private ManagedChannel channel;
 
     private final SituationToSituationProto mapper = new SituationToSituationProto();
-    private final boolean doStore;
+    private AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
+    private ManagedChannel channel;
+    private boolean doStore;
 
     public SituationClient(boolean doStore, GrpcConnectionConfig grpcConnectionConfig) {
-        if (doStore) {
-            channel = ManagedChannelBuilder
-                    .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
-                    .build();
-            futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
-        }
+        this.grpcConnectionConfig = grpcConnectionConfig;
+        createChannel(doStore);
         this.doStore = doStore;
     }
 
@@ -65,6 +62,20 @@ public class SituationClient {
             LOG.debug("Will try to send {} ...", request);
             futureStub.sendSituations(request);
         }
+    }
+
+    public void createChannel(boolean doStore) {
+        if (channel != null) {
+            destroy();
+        }
+
+        if (doStore) {
+            channel = ManagedChannelBuilder
+                    .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
+                    .build();
+            futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
+        }
+        this.doStore = doStore;
     }
 
     public void destroy() {

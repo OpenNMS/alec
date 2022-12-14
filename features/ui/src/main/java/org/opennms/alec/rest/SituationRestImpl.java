@@ -72,7 +72,8 @@ public class SituationRestImpl implements SituationRest {
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
     private final SituationDatasource situationDatasource;
-    private final SituationClient client;
+    private final GrpcConnectionConfig grpcConnectionConfig;
+    private SituationClient client;
     private final AlarmDatasource alarmDatasource;
     private final RuntimeInfo runtimeInfo;
 
@@ -87,22 +88,25 @@ public class SituationRestImpl implements SituationRest {
         this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
 
-        client = new SituationClient(canWeStore(kvStore), grpcConnectionConfig);
+        this.grpcConnectionConfig = grpcConnectionConfig;
+        client = new SituationClient(canWeStore(kvStore), this.grpcConnectionConfig);
     }
 
     //Only for testing
     protected SituationRestImpl(KeyValueStore<String> kvStore,
-                                SituationDatasource situationDatasource,
-                                AlarmDatasource alarmDatasource,
-                                RuntimeInfo runtimeInfo,
-                                SituationClient client) {
+                             SituationDatasource situationDatasource,
+                             AlarmDatasource alarmDatasource,
+                             RuntimeInfo runtimeInfo,
+                             GrpcConnectionConfig grpcConnectionConfig,
+                             SituationClient situationClient) {
         this.kvStore = Objects.requireNonNull(kvStore);
         this.situationDatasource = Objects.requireNonNull(situationDatasource);
         this.alarmDatasource = Objects.requireNonNull(alarmDatasource);
         this.runtimeInfo = Objects.requireNonNull(runtimeInfo);
         objectMapper = new ObjectMapper();
 
-        this.client = client;
+        this.grpcConnectionConfig = grpcConnectionConfig;
+        client = situationClient;
     }
 
     @Override
@@ -339,6 +343,11 @@ public class SituationRestImpl implements SituationRest {
             doStore = false;
         }
         return doStore;
+    }
+
+    @Override
+    public void updateAgreement(boolean doStore) {
+        client.createChannel(doStore);
     }
 
     public void destroy() {

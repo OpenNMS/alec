@@ -31,6 +31,9 @@ package org.opennms.alec.rest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -38,6 +41,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.core.Response;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,30 +64,37 @@ public class AgreementRestImplTest {
     KeyValueStore<String> kvStore;
     @Mock
     private CompletableFuture<Long> future;
+    @Mock
+    private SituationRest situationRest;
 
     private ObjectMapper objectMapper;
-
 
     @Before
     public void setUp() {
         objectMapper = new ObjectMapper();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        verifyNoMoreInteractions(situationRest);
+    }
+
     @Test
     public void testSetAgreementConfiguration() {
-        AgreementRestImpl underTest = new AgreementRestImpl(kvStore);
+        AgreementRestImpl underTest = new AgreementRestImpl(kvStore, situationRest);
 
         when(kvStore.putAsync(anyString(), anyString(), anyString())).thenReturn(future);
         when(future.join()).thenReturn(1L);
 
         try (Response result = underTest.setAgreementConfiguration(getAgreement().build())) {
             assertThat(result.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
+            verify(situationRest, times(1)).updateAgreement(true);
         }
     }
 
     @Test
     public void testGetAgreementConfiguration() throws JsonProcessingException {
-        AgreementRestImpl underTest = new AgreementRestImpl(kvStore);
+        AgreementRestImpl underTest = new AgreementRestImpl(kvStore, situationRest);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.ofNullable(getAgreementAsString(getAgreement().build())));
 
@@ -96,7 +107,7 @@ public class AgreementRestImplTest {
 
     @Test
     public void testGetAgreementConfigurationNoContent() {
-        AgreementRestImpl underTest = new AgreementRestImpl(kvStore);
+        AgreementRestImpl underTest = new AgreementRestImpl(kvStore, situationRest);
 
         when(kvStore.get(anyString(), anyString())).thenReturn(Optional.empty());
 

@@ -71,7 +71,7 @@ public class SituationRestImplTest {
         getAlarmsAndSituations();
         when(runtimeInfo.getSystemId()).thenReturn("42");
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, situationClient);
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig, situationClient);
     }
 
     @After

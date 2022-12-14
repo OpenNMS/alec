@@ -28,6 +28,8 @@
 
 package org.opennms.alec.grpc;
 
+import java.util.concurrent.TimeUnit;
+
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.grpc.generated.AlecCollectionServiceGrpc;
 import org.opennms.alec.grpc.generated.SituationSet;
@@ -35,19 +37,25 @@ import org.opennms.alec.mapper.SituationToSituationProto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.grpc.Channel;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
 
-    private final AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
+    private AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
+    private ManagedChannel channel;
 
-    private final SituationToSituationProto mapper;
+    private final SituationToSituationProto mapper = new SituationToSituationProto();
     private final boolean doStore;
 
-    public SituationClient(Channel channel, SituationToSituationProto mapper, boolean doStore) {
-        blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
-        this.mapper = mapper;
+    public SituationClient(boolean doStore, GrpcConnectionConfig grpcConnectionConfig) {
+        if (doStore) {
+            channel = ManagedChannelBuilder
+                    .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
+                    .build();
+            futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
+        }
         this.doStore = doStore;
     }
 
@@ -55,7 +63,17 @@ public class SituationClient {
         if (doStore) {
             SituationSet request = mapper.toSituationSet(situation, systemId);
             LOG.debug("Will try to send {} ...", request);
-            blockingStub.sendSituations(request);
+            futureStub.sendSituations(request);
+        }
+    }
+
+    public void destroy() {
+        try {
+            if (channel != null) {
+                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

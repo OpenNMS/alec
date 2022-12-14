@@ -3,6 +3,7 @@ package org.opennms.alec.rest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
@@ -28,7 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opennms.alec.data.AlarmSetImpl;
 import org.opennms.alec.data.CreateSituationPayloadImpl;
-import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.SituationStatus;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
@@ -40,6 +39,7 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.StaticAlarmDatasource;
 import org.opennms.alec.datasource.common.StaticSituationDatasource;
 import org.opennms.alec.grpc.GrpcConnectionConfig;
+import org.opennms.alec.grpc.SituationClient;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.opennms.integration.api.v1.runtime.RuntimeInfo;
 
@@ -56,6 +56,9 @@ public class SituationRestImplTest {
     @Mock
     GrpcConnectionConfig grpcConnectionConfig;
 
+    @Mock
+    SituationClient situationClient;
+
     private SituationDatasource situationDatasource;
 
     List<Situation> situations = new ArrayList<>();
@@ -65,32 +68,35 @@ public class SituationRestImplTest {
     @Before
     public void setUp() {
         //we don't want to store testing data to the cloud
-        when(kvStore.get(KeyEnum.AGREEMENT.toString(), ALECRestUtils.ALEC_CONFIG)).thenReturn(Optional.of("{\"agreed\":false}"));
         getAlarmsAndSituations();
         when(runtimeInfo.getSystemId()).thenReturn("42");
-        when(grpcConnectionConfig.getHost()).thenReturn("localhost");
-        when(grpcConnectionConfig.getPort()).thenReturn(80);
         situationDatasource = Mockito.spy(new StaticSituationDatasource(situations));
-        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, grpcConnectionConfig);
+        underTest = new SituationRestImpl(kvStore, situationDatasource, new StaticAlarmDatasource(alarms), runtimeInfo, situationClient);
     }
 
     @After
     public void tearDown() {
-        verifyNoMoreInteractions(situationDatasource);
+        verifyNoMoreInteractions(situationDatasource,situationClient);
     }
 
     @Test
     public void rejected() throws InterruptedException {
-        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        ArgumentCaptor<Situation> situationForwardCaptor = ArgumentCaptor.forClass(Situation.class);
         try (Response actual = underTest.rejected("11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
-            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
-            assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
-            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
-            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
-            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(0));
+            verify(situationDatasource, times(1)).forwardSituation(situationForwardCaptor.capture());
+            assertThat(situationForwardCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationForwardCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationForwardCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationForwardCaptor.getValue().getAlarms().size(), equalTo(0));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            ArgumentCaptor<Situation> situationStoreCaptor = ArgumentCaptor.forClass(Situation.class);
+            verify(situationClient, times(1)).sendSituation(situationStoreCaptor.capture(), eq("42"));
+            assertThat(situationStoreCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationStoreCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationStoreCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationStoreCaptor.getValue().getAlarms().size(), equalTo(4));
         }
     }
 
@@ -107,6 +113,7 @@ public class SituationRestImplTest {
                             .toList()).containsAll(Arrays.asList("2", "5")), equalTo(true));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -123,6 +130,7 @@ public class SituationRestImplTest {
                             .toList()).containsAll(Arrays.asList("2", "3", "4")), equalTo(true));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -174,6 +182,7 @@ public class SituationRestImplTest {
             assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm [[7, 8]] to situation [11] -- user feedback :[feedback]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(4)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -188,7 +197,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("7", "8")), equalTo(true));
-            verify(situationDatasource, times(2)).getSituations();
+            verify(situationDatasource, times(4)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -212,6 +222,7 @@ public class SituationRestImplTest {
             assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.ACCEPTED));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 

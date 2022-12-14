@@ -82,7 +82,7 @@ Three methods are exposed to the `InventoryObject` script:
 | Converts data stored in `node` to an inventory object on the network topology map.
 
 | EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm)
-| Identifies the `InventoryObject`s to which an alarm is attached.
+| Identifies the `InventoryObject` to which an alarm is attached.
 |===
 
 Because edge and node data is received via Kafka topics, the `edgeToInventory` and `toInventoryObjects` are invoked, respectively.

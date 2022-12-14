@@ -13,7 +13,7 @@ The distance function calculates a weighted combination of distance in both time
 == Hellinger distance
 
 The clustering engine can use https://en.wikipedia.org/wiki/Hellinger_distance[Hellinger distance] calculations to more accurately render the distance between alarms.
-The results of its calculations are used as scaling variables.
+ALEC uses the results of its calculations as scaling variables.
 Alarms are pushed further apart if the value is high, and vice versa.
 
 You can enable Hellinger distance calculations when you xref:quick-start:engine-config.adoc#clustering-engine-config[configure the clustering engine], or by updating your engine configuration settings:
@@ -22,7 +22,7 @@ You can enable Hellinger distance calculations when you xref:quick-start:engine-
 . Click the *gear* symbol in the top-right of the screen.
 . Select *With Hellinger Distance*, and click *Save Changes*.
 
-NOTE: You must be using the clustering engine to enable Hellinger distance calculations.
+NOTE: You must use the clustering engine to enable Hellinger distance calculations.
 
 == Performance
 

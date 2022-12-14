@@ -7,10 +7,11 @@ ALEC provides a framework for developing correlation systems.
 .Correlation system architecture diagram
 image::architecture/architecture_components.png[Correlation system architecture diagram; displays the high-level components and directionality of communicated data, 600]
 
-A xref:datasources/overview.adoc[datasource] is responsible for interacting with the monitoring system (in this case, OpenNMS) and maintaining a feed of alarms, inventory objects, and situations.
-Datasources are also responsible for creating situations in the monitoring system.
+A xref:datasources/overview.adoc[datasource] interacts with the monitoring system (in this case, OpenNMS) and maintains a feed of alarms, inventory objects, and situations.
+Datasources also create situations in the monitoring system.
+ALEC offers two datasources: the xref:datasources/direct.adoc[direct datasource], and the xref:datasources/kafka.adoc[Kafka datasource].
 
-The xref:engines/introduction.adoc[correlation engine] is responsible for linking alarms to network inventory objects.
+The xref:engines/introduction.adoc[correlation engine] links alarms to network inventory objects.
 
 A driver connects the datasource to the engine.
-We provide a main driver for real-time processing with ALEC, as well as a test driver for testing and training the machine learning algorithms.
+We provide a main driver for real-time processing with ALEC, as well as a test driver for testing and training the machine-learning algorithms.

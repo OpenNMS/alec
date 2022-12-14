@@ -23,10 +23,16 @@ const routes = [
 	{
 		path: '/',
 		name: 'home',
-		beforeEnter: async () => {
+		beforeEnter: async (to: any) => {
+			const r = (window as any).VRouter || router
 			const userStore = useUserStore()
 			await userStore.getUserRole()
 			await userStore.getAlecInfo()
+			if (userStore.firstTime) {
+				r.push({ name: 'welcome', params: to.params })
+			} else {
+				r.push({ name: 'situations', params: to.params })
+			}
 		},
 		component: {}
 	},

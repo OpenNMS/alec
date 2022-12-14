@@ -44,20 +44,23 @@ public class SituationClient {
     private static final Logger LOG = LoggerFactory.getLogger(SituationClient.class);
     private final GrpcConnectionConfig grpcConnectionConfig;
 
-    private AlecCollectionServiceGrpc.AlecCollectionServiceBlockingStub blockingStub;
-    private ManagedChannel channel;
+
     private final SituationToSituationProto mapper = new SituationToSituationProto();
+    private AlecCollectionServiceGrpc.AlecCollectionServiceFutureStub futureStub;
+    private ManagedChannel channel;
+    private boolean doStore;
 
     public SituationClient(boolean doStore, GrpcConnectionConfig grpcConnectionConfig) {
         this.grpcConnectionConfig = grpcConnectionConfig;
         createChannel(doStore);
+        this.doStore = doStore;
     }
 
     public void sendSituation(Situation situation, String systemId) {
-        if (blockingStub != null) {
+        if (doStore) {
             SituationSet request = mapper.toSituationSet(situation, systemId);
             LOG.debug("Will try to send {} ...", request);
-            blockingStub.sendSituations(request);
+            futureStub.sendSituations(request);
         }
     }
 
@@ -70,8 +73,9 @@ public class SituationClient {
             channel = ManagedChannelBuilder
                     .forAddress(grpcConnectionConfig.getHost(), grpcConnectionConfig.getPort())
                     .build();
-            blockingStub = AlecCollectionServiceGrpc.newBlockingStub(channel);
+            futureStub = AlecCollectionServiceGrpc.newFutureStub(channel);
         }
+        this.doStore = doStore;
     }
 
     public void destroy() {

@@ -3,6 +3,7 @@ package org.opennms.alec.rest;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -75,21 +76,27 @@ public class SituationRestImplTest {
 
     @After
     public void tearDown() {
-        verifyNoMoreInteractions(situationDatasource);
+        verifyNoMoreInteractions(situationDatasource,situationClient);
     }
 
     @Test
     public void rejected() throws InterruptedException {
-        ArgumentCaptor<Situation> situationCaptor = ArgumentCaptor.forClass(Situation.class);
+        ArgumentCaptor<Situation> situationForwardCaptor = ArgumentCaptor.forClass(Situation.class);
         try (Response actual = underTest.rejected("11", "rejected")) {
             assertThat(actual.getStatus(), equalTo(200));
-            verify(situationDatasource, times(1)).forwardSituation(situationCaptor.capture());
-            assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
-            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
-            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
-            assertThat(situationCaptor.getValue().getAlarms().size(), equalTo(0));
+            verify(situationDatasource, times(1)).forwardSituation(situationForwardCaptor.capture());
+            assertThat(situationForwardCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationForwardCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationForwardCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationForwardCaptor.getValue().getAlarms().size(), equalTo(0));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            ArgumentCaptor<Situation> situationStoreCaptor = ArgumentCaptor.forClass(Situation.class);
+            verify(situationClient, times(1)).sendSituation(situationStoreCaptor.capture(), eq("42"));
+            assertThat(situationStoreCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
+            assertThat(situationStoreCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationStoreCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationStoreCaptor.getValue().getAlarms().size(), equalTo(4));
         }
     }
 
@@ -106,6 +113,7 @@ public class SituationRestImplTest {
                             .toList()).containsAll(Arrays.asList("2", "5")), equalTo(true));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -122,6 +130,7 @@ public class SituationRestImplTest {
                             .toList()).containsAll(Arrays.asList("2", "3", "4")), equalTo(true));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -173,6 +182,7 @@ public class SituationRestImplTest {
             assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm [[7, 8]] to situation [11] -- user feedback :[feedback]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(4)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -187,7 +197,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("7", "8")), equalTo(true));
-            verify(situationDatasource, times(2)).getSituations();
+            verify(situationDatasource, times(4)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 
@@ -211,6 +222,7 @@ public class SituationRestImplTest {
             assertThat(situationCaptor.getValue().getStatus(), equalTo(Status.ACCEPTED));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
+            verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
         }
     }
 

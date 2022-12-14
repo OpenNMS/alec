@@ -92,8 +92,8 @@ public class SituationRestImpl implements SituationRest {
         client = new SituationClient(canWeStore(kvStore), this.grpcConnectionConfig);
     }
 
-    //for unit test
-    public SituationRestImpl(KeyValueStore<String> kvStore,
+    //Only for testing
+    protected SituationRestImpl(KeyValueStore<String> kvStore,
                              SituationDatasource situationDatasource,
                              AlarmDatasource alarmDatasource,
                              RuntimeInfo runtimeInfo,
@@ -125,6 +125,7 @@ public class SituationRestImpl implements SituationRest {
                 client.sendSituation(ImmutableSituation.newBuilderFrom(situation)
                                 .setStatus(Status.REJECTED)
                                 .setAlarms(situation.getAlarms())
+                                .addFeedback(feedback)
                                 .build(),
                         runtimeInfo.getSystemId());
                 kvStoreSituationsByStatus();
@@ -268,7 +269,7 @@ public class SituationRestImpl implements SituationRest {
                 .addFeedback(createSituationPayload.getFeedback())
                 .build();
         if (situation.getAlarms().size() >= 2) {
-            situationDatasource.forwardSituation(situation);
+            forwardAndStoreSituation(situation, alarmSetToAdd);
             return Response.ok().build();
         } else {
             return ALECRestUtils.noContent();
@@ -301,7 +302,11 @@ public class SituationRestImpl implements SituationRest {
     private Response forwardAndStoreSituation(Situation oldSituation, Set<Alarm> alarms) {
         try {
             Situation newSituation = ImmutableSituation.newBuilderFrom(oldSituation).setAlarms(alarms).build();
+            //Forward situation to ONMS
             situationDatasource.forwardSituation(newSituation);
+            //Store  situation to the cloud
+            client.sendSituation(newSituation, runtimeInfo.getSystemId());
+
             kvStoreSituationsByStatus();
             return Response.ok().build();
         } catch (InterruptedException e) {

@@ -63,8 +63,6 @@ const showSituationList = () => {
 	})
 }
 const showNextSituation = (step: number) => {
-	console.log(situationStore.filteredSituations)
-
 	const index = filteredSituationsCurrentIndex.value
 	const id = situationStore.filteredSituations[index + step]
 	router.push({

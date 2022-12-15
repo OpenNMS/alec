@@ -138,7 +138,7 @@ opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
                             --engine deeplearning
 ----
 
-Run the following command to compare the model's results to your ideal defition in `/tmp/snap1/alec.situations.xml`:
+Run the following command to compare the model's results to your ideal definition in `/tmp/snap1/alec.situations.xml`:
 
 [source]
 opennms-alec:score-situations -s peer /tmp/snap1/alec.situations.xml /tmp/snap1/alec.situations.deeplearning.trained.xml

@@ -29,7 +29,7 @@ Three methods are exposed to the `InventoryObject` script:
 | Method
 | Description
 
-| void overrideTypeAndIntance(ImmutableAlarm.Builder alarmBuilder, Alarm, alarm)
+| void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm, alarm)
 | Modifies the `ModelObjectType` and `ModelObjectIdentifier` of the associated `InventoryObject`.
 This allows the datasource to map alarms to inventory objects on the network topology map.
 

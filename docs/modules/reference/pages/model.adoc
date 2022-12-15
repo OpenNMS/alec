@@ -17,7 +17,7 @@ Requires the `ifIndex` or `ifDescr` parameters to be set.
 
 When given an `ifIndex` it will be used as-is.
 
-When given an `ifDescr` we will attempt to lookup the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
+When given an `ifDescr` we will attempt to look up the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
 
 [[snmp-interface-link]]
 === SNMP interface link (snmp-interface-link)

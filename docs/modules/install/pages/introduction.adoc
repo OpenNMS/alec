@@ -22,7 +22,7 @@ A xref:admin:distributed_install.adoc[distributed deployment], which installs AL
 | Distributed
 | 1. Removes load from the OpenNMS core.
 
-2. Fault tolerant setup (ALEC runs in high availability).
+2. Fault-tolerant setup (ALEC runs in high availability).
 | Additional complexity (more components to manage).
 |===
 

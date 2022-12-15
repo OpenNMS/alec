@@ -48,8 +48,7 @@ IMPORTANT: These topics must exist in the Kafka broker for the datasource to ope
 == Event compatibility
 
 The `eventTimeFormat` property is used to determine how event creation times are encoded when ALEC sends events to OpenNMS.
-Its value should be configured depending on your OpenNMS version: for any version below Horizon 25.1.0 or Meridian 2019.1.0, the value should be `simple`.
-Otherwise, it should use the default value (`iso`).
+It should be set to its default value (`iso`) to ensure that event data is compatible with ALEC.
 
 == Scripted extensions
 

@@ -8,6 +8,7 @@ import { FeatherButton } from '@featherds/button'
 import CommonFilters from '@/components/CommonFilters.vue'
 import { TAlarm } from '@/types/TSituation'
 import type { Ref } from 'vue'
+import NoResults from '@/elements/NoResults.vue'
 
 const emit = defineEmits(['alarms-selected', 'drawer-alarms-closed'])
 
@@ -86,7 +87,7 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 					/>
 				</div>
 			</div>
-			<div v-else class="empty">Results not found</div>
+			<NoResults v-else />
 		</div>
 	</FeatherDrawer>
 </template>

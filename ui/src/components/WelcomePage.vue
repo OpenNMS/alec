@@ -2,14 +2,19 @@
 import { FeatherButton } from '@featherds/button'
 import { FeatherIcon } from '@featherds/icon'
 import { FeatherRadioGroup, FeatherRadio } from '@featherds/radio'
-import Options from '@featherds/icon/action/Options'
-import InformationExchange from '@featherds/icon/action/InformationExchange'
 import Workflow from '@featherds/icon/action/Workflow'
-import Apps from '@featherds/icon/navigation/Apps'
-import Vitals from '@featherds/icon/medical/Vitals'
-import { ref } from 'vue'
+import ViewDetails from '@featherds/icon/action/ViewDetails'
+import FeedbackAlt from '@featherds/icon/action/FeedbackAlt'
+import { markRaw, ref } from 'vue'
 import useRouter from '@/composables/useRouter'
 import { useUserStore } from '@/store/useUserStore'
+
+const Icons = markRaw({
+	FeedbackAlt,
+	ViewDetails,
+	Workflow
+})
+
 const userStore = useUserStore()
 const router = useRouter()
 const allowSave = ref(true)
@@ -24,68 +29,56 @@ const handleClickContinue = () => {
 	<div class="container">
 		<div class="title">ALEC</div>
 		<div class="description">
-			The Architecture for Learning Enabled Correlation, or ALEC, provides a
-			machine learning powered solution for alarm correlation. Complex networks
-			produce significant, and potentially overwhelming, amount of events and
-			alarms.
+			The Architecture for Learning Enabled Correlation (ALEC) provides a
+			machine learning-powered framework for logically grouping related alarms
+			into higher-level situations. Because networks can produce an overwhelming
+			number of events and alarms, ALEC helps you to better tackle and manage
+			underlying issues.
 			<br />
-			<strong>Our goal</strong>
-			with ALEC to aid IT Operators to tackle these issues effectively
-			identifying alarm groups that are easier to manage.
+			ALEC gives IT Operators the tools to address these issues by identifying
+			alarm groups, which are easier to manage.
 		</div>
 		<div>
-			<h3>Key Benefits:</h3>
+			<h3>Key Benefits</h3>
 			<div class="list">
 				<div>
-					<FeatherIcon :icon="Apps" aria-hidden="true" class="icon" />
-					<span>
-						Alleviate alarm load by clustering them into actionable situations.
-					</span>
+					<FeatherIcon :icon="Icons.FeedbackAlt" class="icon" />
+					<span> Reduces the number of alarm and event notifications. </span>
 				</div>
 				<div>
-					<FeatherIcon :icon="Workflow" aria-hidden="true" class="icon" />
-					<span>Assist in root cause analysis.</span>
+					<FeatherIcon :icon="Icons.Workflow" aria-hidden="true" class="icon" />
+					<span>Streamlines root cause analysis.</span>
 				</div>
 				<div>
-					<FeatherIcon :icon="Vitals" aria-hidden="true" class="icon" />
-					<span>
-						Avoid potential issues flagged by alarms with low visibility.
-					</span>
-				</div>
-				<div>
-					<FeatherIcon :icon="Options" aria-hidden="true" class="icon" />
-					<span>Easy configuration.</span>
-				</div>
-				<div>
-					<FeatherIcon
-						:icon="InformationExchange"
-						aria-hidden="true"
-						class="icon"
-					/>
-					<span>
-						Continuous improvement. Provided anonymized data helps us improve
-						ALEC.
+					<FeatherIcon :icon="Icons.ViewDetails" class="icon" />
+					<span> Provides oversight for </span><br /><span>
+						low-visibility alarms.
 					</span>
 				</div>
 			</div>
 		</div>
-		<div v-if="userStore.isAdmin" class="optin">
-			<h3>Enable ALEC for more precise results:</h3>
-			<div>
-				Our goal with ALEC, is to aid IT Operators to tackle these issues
-				effectively identifying alarm groups that are easier to manage. The
-				information provided is anonymized and will be used for internal
-				purposes only.
-			</div>
-			<div class="choices">
-				<div class="radio-text">
-					By choosing “Yes” you accept that OpenNMS can store the information
-					that you provide, for educational and research purposes.
+		<div v-if="userStore.isAdmin">
+			<h3>ALEC Data Sharing</h3>
+			<div class="optin">
+				<div>
+					Opt-in to send anonymous data to The OpenNMS Group. Your anonymized
+					data helps to improve the machine learning algorithms behind the
+					plugin, subject to our
+					<a href="https://www.opennms.com/privacy/" target="_blank"
+						>privacy policy</a
+					>, so you will see more precise results.
 				</div>
-				<FeatherRadioGroup horizontal v-model="allowSave" label="">
-					<FeatherRadio :value="true">Yes</FeatherRadio>
-					<FeatherRadio :value="false">No</FeatherRadio>
-				</FeatherRadioGroup>
+				<div class="choices">
+					<div class="radio-text">
+						By opting in, you accept that we can store this information and use
+						it to improve ALEC. You can change this setting at any time in the
+						settings menu.
+					</div>
+					<FeatherRadioGroup horizontal v-model="allowSave" label="">
+						<FeatherRadio :value="true">Yes</FeatherRadio>
+						<FeatherRadio :value="false">No</FeatherRadio>
+					</FeatherRadioGroup>
+				</div>
 			</div>
 		</div>
 		<FeatherButton
@@ -116,23 +109,27 @@ const handleClickContinue = () => {
 	padding-bottom: 20px;
 }
 .description {
-	padding-bottom: 15px;
+	padding-bottom: 25px;
 	font-size: 16px;
+	margin-top: 15px;
 }
 .list {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	margin: 30px 0;
+	margin-top: 10px;
+
+	margin-bottom: 35px;
+	width: 70%;
 	> div {
-		margin-right: 20px;
-		min-width: 250px;
+		width: 300px;
 		border: 1px solid #dfdfdf;
 		padding: 30px 15px;
 		text-align: center;
 	}
-	> div:last-child {
-		margin-right: 0;
+
+	span {
+		padding: 0 10px;
 	}
 }
 .optin {
@@ -157,15 +154,15 @@ const handleClickContinue = () => {
 	margin-right: 30px;
 }
 .icon {
-	height: 45px !important;
-	width: 45px !important;
+	height: 60px !important;
+	width: 60px !important;
 	display: block !important;
 	margin: auto;
 	color: #4b5ad6 !important;
-	margin-bottom: 8px;
+	margin-bottom: 15px;
 	border: 1px solid #4b5ad6;
 	border-radius: 50px;
-	padding: 10px;
+	padding: 15px;
 }
 .continue-btn {
 	margin-top: 10px;

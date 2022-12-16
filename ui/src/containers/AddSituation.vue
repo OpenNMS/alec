@@ -19,6 +19,7 @@ import { remove, includes } from 'lodash'
 import { createSituations } from '@/services/AlecService'
 import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
+import NoResults from '@/elements/NoResults.vue'
 
 const router = useRouter()
 const situationStore = useSituationsStore()
@@ -131,7 +132,7 @@ const filterList = (list: TAlarm[]) => {
 					:error="diagnosticError"
 				></FeatherTextarea>
 				<div v-if="errorAlarmList" class="errorList">
-					It is required to add at least 2 alarms
+					You must add at least 2 alarms.
 				</div>
 				<div class="footer">
 					<FeatherButton class="btn" @click="cleanFields">
@@ -149,7 +150,7 @@ const filterList = (list: TAlarm[]) => {
 					<h3>Add Unassociated Alarms</h3>
 					<div>
 						<div class="totalAlarms" :class="{ errorList: errorAlarmList }">
-							Total alarms added:
+							Total Alarms Added:
 							<span class="total">{{ alarmIds.length }}</span>
 						</div>
 					</div>
@@ -171,7 +172,7 @@ const filterList = (list: TAlarm[]) => {
 							/>
 						</div>
 					</div>
-					<div v-else>There is no unassigned alarms</div>
+					<NoResults v-else />
 				</div>
 			</div>
 		</div>

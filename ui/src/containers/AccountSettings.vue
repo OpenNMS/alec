@@ -28,12 +28,12 @@ const message = ref('')
 
 const saveConfiguration = async () => {
 	const allow = Boolean(allowSave.value)
-	userStore.savePermission(allow)
-
-	const savedEngine = await saveEngineParameter(
+	await userStore.savePermission(allow)
+	const savedEngine = await userStore.setEngineInfo(
 		engineName.value,
 		hellinger.value
 	)
+
 	showNotification.value = true
 	if (savedEngine) {
 		userStore.getAlecInfo()
@@ -52,21 +52,21 @@ const saveConfiguration = async () => {
 		<h3>Configuration Page</h3>
 
 		<div class="section">
-			<div class="title">OpenNMS can store anonymously the information:</div>
+			<div class="title">
+				Allow ALEC to send anonymous usage data to The OpenNMS Group?
+			</div>
 			<FeatherRadioGroup horizontal v-model="allowSave" label="" hideLabel>
 				<FeatherRadio :value="true">Yes</FeatherRadio>
 				<FeatherRadio :value="false">No</FeatherRadio>
 			</FeatherRadioGroup>
 		</div>
 		<div class="section">
-			<div class="title">Engine:</div>
-			<div>
-				(Detail information about engines
-				<a
-					target="_blank"
-					href="https://docs.opennms.com/alec/latest/engines/cluster.html"
-					>here</a
-				>)
+			<div class="title">
+				Choose the correlation engine that ALEC will use (see
+				<a target="_blank" :href="CONST.URL_DOCUMENTATION"
+					>Correlation Engines documentation</a
+				>
+				for more information):
 			</div>
 			<FeatherRadioGroup vertical v-model="engineName" label="" hideLabel>
 				<FeatherRadio class="radio-item" :value="CONST.ENGINE_DBSCAN"
@@ -78,7 +78,7 @@ const saveConfiguration = async () => {
 					class="checkbox"
 				>
 					<div class="hellinger">
-						<strong>With Hellinger distance</strong>
+						<strong>Hellinger distance</strong>
 					</div>
 				</FeatherCheckbox>
 				<FeatherRadio class="radio-item" :value="CONST.ENGINE_DEEP_LEARNING"
@@ -123,7 +123,7 @@ const saveConfiguration = async () => {
 }
 
 .title {
-	font-size: 17px;
+	font-size: 16px;
 	font-weight: 600;
 }
 

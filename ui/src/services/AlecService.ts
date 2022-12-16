@@ -1,6 +1,7 @@
 import { rest } from './axiosInstances'
 import CONST from '@/helpers/constants'
 import { TSituation, TNewSituation } from '@/types/TSituation'
+import { TEngine } from '@/types/TUser'
 const base = '/alec'
 const engineEndpoint = '/alec/engine/configuration'
 const endpointAgreement = '/alec/agreement/configuration'
@@ -12,10 +13,7 @@ export const savePermission = async (allowSaveValue: boolean) => {
 		const resp = await rest.post(`${endpointAgreement}`, {
 			agreed: allowSaveValue
 		})
-		if (resp.status === 201) {
-			return true
-		}
-		return false
+		return resp.status === 200
 	} catch (err) {
 		return false
 	}
@@ -45,27 +43,10 @@ export const getEngineInfo = async () => {
 	}
 }
 
-export const saveEngineParameter = async (
-	engineName: string,
-	hellinger: boolean
-) => {
+export const saveEngineParameter = async (engineData: TEngine) => {
 	try {
-		/**
-		 * @TODO move default values to backend
-		 **/
-		const resp = await rest.post(engineEndpoint, {
-			distanceMeasureName: hellinger
-				? CONST.HELLINGER_OPTION
-				: CONST.SPACE_DISTANCE_OPTION,
-			engineName,
-			alpha: 144.47117699,
-			beta: 0.55257784,
-			epsilon: 100
-		})
-		if (resp.status === 200) {
-			return true
-		}
-		return false
+		const resp = await rest.post(engineEndpoint, engineData)
+		return resp.status === 200
 	} catch (err) {
 		return false
 	}

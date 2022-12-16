@@ -34,6 +34,6 @@ const addNewSituation = () => {
 .icon {
 	font-size: 22px;
 	margin-right: 5px;
-	vertical-align: text-bottom;
+	vertical-align: text-bottom !important;
 }
 </style>

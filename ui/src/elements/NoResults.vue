@@ -1,5 +1,5 @@
 <template>
-	<div class="empty">No results found</div>
+	<div class="empty">No results found.</div>
 </template>
 
 <style lang="scss" scoped>

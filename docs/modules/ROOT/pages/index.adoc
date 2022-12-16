@@ -3,16 +3,16 @@
 :!sectids:
 
 Welcome to the Architecture for Learning Enabled Correlation (ALEC).
-This guide provides information and procedures to understand and deploy advanced software concepts and components that make up ALEC.
+This guide provides information and procedures to help you understand and deploy the advanced software concepts and components that make up ALEC.
 
 First launched in 2019, we built ALEC after several years of research and development.
 The developer community played a significant role vetting the machine learning algorithms and deep-learning technologies that best fit OpenNMS and best correlated problems detected by their OpenNMS management systems.
 
 Now, in 2022, we have revisited ALEC to improve it:
 
-* New UI for easier management and visualization of the alarms and situations ALEC presents.
-* Situation timeline to visualize the time alarms started, for better root-cause analysis.
-* Hellinger distance mechanism to detect which alarms are related.
+* Updated the UI for easier management and visualization of alarms and situations.
+* Added the situation timeline to visualize the lifecycle of a situation's alarms, for better root-cause analysis.
+* Included the option to use Hellinger distance calculations with the clustering engine, to better detect relationships between alarms.
 
 The updated ALEC also includes the ability to opt in to share your anonymized data with The OpenNMS Group so that we can improve the machine-learning technology for more precise results.
 

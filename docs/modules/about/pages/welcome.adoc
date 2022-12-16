@@ -1,5 +1,5 @@
-:imagesdir: ../assets/images
 
+:imagesdir: ../assets/images
 = About ALEC
 
 The Architecture for Learning Enabled Correlation (ALEC) provides a machine learning-powered framework for logically grouping related alarms into higher-level situations.
@@ -36,4 +36,4 @@ ALEC implements two correlation engines:
 * *Deep Learning:* an algorithm that leverages deep-learning techniques through a neural network to correlate and group alarms.
 * *Clustering:* leverages the https://en.wikipedia.org/wiki/DBSCAN[DBSCAN algorithm] to group alarms based on their distance from each other.
 
-To learn more, see the xref:engines:introduction.adoc[Correlation Engines] section.
+To learn more, see the xref:reference:engines/introduction.adoc[Correlation Engines] section.

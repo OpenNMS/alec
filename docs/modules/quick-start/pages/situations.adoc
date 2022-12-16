@@ -72,7 +72,7 @@ Follow these steps to manage individual alarms:
 
 . Navigate to a situation's details page.
 . Select an alarm from the *Alarms* list.
-. Evaluate the alarm and select the appropriate action (for example, acknowlege an alarm that you will be working on).
+. Evaluate the alarm and select the appropriate action (for example, acknowledge an alarm that you will be working on).
 . (Optional) Create a sticky memo or a journal memo.
 ** Click the *pencil* symbol beside *Sticky Memo* or *Journal Memo*, as desired.
 ** Type your note in the text box.
@@ -95,7 +95,7 @@ In these cases, you can create a situation to represent such relationships:
 . Click *New Situation* and type a description in the *Description* box.
 . Type an explanation of the situation in the *Diagnostic Text* box.
 This can include the affected nodes, details of any root-cause investigation, and other relevant information.
-. Add alarms to the situation by finding them in the *Add Associated Alarms* list and selecting the *check box* beside their names.
+. Add alarms to the situation by finding them in the *Add Associated Alarms* list and selecting the *checkbox* beside their names.
 . Click *Add Situation*.
 
 == View unassociated alarms

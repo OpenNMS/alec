@@ -176,7 +176,7 @@ const filterList = (list: TAlarm[]) => {
 				</div>
 			</div>
 		</div>
-		<FeatherSnackbar v-model="errorSave" right error>
+		<FeatherSnackbar v-model="errorSave" right error :timeout="6000">
 			Error on creating new situation :(
 			<template v-slot:button>
 				<FeatherButton @click="errorSave = false" text>dismiss</FeatherButton>

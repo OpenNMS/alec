@@ -90,7 +90,12 @@ const saveConfiguration = async () => {
 			<FeatherIcon :icon="Icons.MarkComplete" class="icon" />
 			<span>Save Changes</span>
 		</FeatherButton>
-		<FeatherSnackbar v-model="showNotification" right :error="isError">
+		<FeatherSnackbar
+			v-model="showNotification"
+			right
+			:error="isError"
+			:timeout="6000"
+		>
 			{{ message }}
 			<template v-slot:button>
 				<FeatherButton @click="showNotification = false" text

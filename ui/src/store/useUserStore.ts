@@ -3,8 +3,11 @@ import { getUserRole } from '@/services/UserService'
 import {
 	getUserInfo,
 	savePermission,
-	getEngineInfo
+	getEngineInfo,
+	saveEngineParameter
 } from '@/services/AlecService'
+import CONST from '@/helpers/constants'
+
 import { TEngine } from '@/types/TUser'
 
 type TState = {
@@ -13,6 +16,12 @@ type TState = {
 	firstTime: boolean
 	allowSave: boolean
 	engineInfo: TEngine | null
+}
+
+const engineDefaultValues = {
+	alpha: 144.47117699,
+	beta: 0.55257784,
+	epsilon: 100
 }
 
 export const useUserStore = defineStore('userStore', {
@@ -44,6 +53,23 @@ export const useUserStore = defineStore('userStore', {
 			if (result) {
 				this.engineInfo = result
 			}
+		},
+		async setEngineInfo(engine: string, isHellinger: boolean) {
+			const engineData: TEngine = {
+				...engineDefaultValues,
+				...{
+					distanceMeasureName: isHellinger
+						? CONST.HELLINGER_OPTION
+						: CONST.SPACE_DISTANCE_OPTION,
+					engineName: engine
+				}
+			}
+			const result = await saveEngineParameter(engineData)
+			if (result) {
+				this.engineInfo = engineData
+				return true
+			}
+			return false
 		},
 		async savePermission(allowSaveValue: boolean) {
 			const result = await savePermission(allowSaveValue)

@@ -18,6 +18,7 @@ import { FeatherSpinner } from '@featherds/progress'
 import NewSituationBtn from '@/elements/NewSituationBtn.vue'
 import ConfigurationInfo from '@/components/ConfigurationInfo.vue'
 import { useUserStore } from '@/store/useUserStore'
+import NoResults from '@/elements/NoResults.vue'
 
 const Icons = markRaw({
 	Add,
@@ -58,13 +59,11 @@ const loading = ref(true)
 const currentPage = ref(0)
 const totalPages = ref(1)
 const totalSituations = ref(0)
-const withFilters = ref(false)
 
 const setNodes = () => {
 	state.nodes = situationStore.nodes
 	state.results = situationStore.nodes
 }
-
 watch(
 	() => situationStore.situations,
 	() => {
@@ -149,38 +148,29 @@ const filterList = (list: TSituation[]) => {
 				</div>
 				<FeatherSpinner class="spinner" v-if="loading" />
 				<div v-else>
-					<div
-						class="situation-list"
-						v-if="state.situations && state.situations.length > 0"
-					>
-						<div
-							class="card"
-							v-for="situationInfo in state.situations"
-							:key="situationInfo.id"
-						>
-							<SituationCard
-								@click="() => showDetail(situationInfo.id)"
-								:situation-info="situationInfo"
+					<div v-if="state.situations && state.situations.length">
+						<div class="situation-list">
+							<div
+								class="card"
+								v-for="situationInfo in state.situations"
+								:key="situationInfo.id"
+							>
+								<SituationCard
+									@click="() => showDetail(situationInfo.id)"
+									:situation-info="situationInfo"
+								/>
+							</div>
+						</div>
+						<div class="footer-pager" v-if="totalSituations > PAGE_SIZE">
+							<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
+							<SimplePagination
+								@go-to-page="onGotoPage"
+								:currentPage="currentPage"
+								:totalPages="totalPages"
 							/>
 						</div>
 					</div>
-					<div
-						v-if="!state.situations || state.situations.length == 0"
-						class="container empty"
-					>
-						No results found
-					</div>
-					<div
-						class="footer-pager"
-						v-if="!withFilters && totalSituations > PAGE_SIZE"
-					>
-						<div>Page: {{ currentPage + 1 }} of {{ totalPages }}</div>
-						<SimplePagination
-							@go-to-page="onGotoPage"
-							:currentPage="currentPage"
-							:totalPages="totalPages"
-						/>
-					</div>
+					<NoResults v-else />
 				</div>
 			</div>
 		</div>

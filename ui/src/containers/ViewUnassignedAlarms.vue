@@ -148,7 +148,7 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 			@situation-selected="handleMoveToSituation"
 			@drawer-closed="() => (showSituations = false)"
 		/>
-		<FeatherSnackbar v-model="showError" right :error="isError">
+		<FeatherSnackbar v-model="showError" right :error="isError" :timeout="6000">
 			{{ showErrorMsg }}
 			<template v-slot:button>
 				<FeatherButton @click="showError = false" text>dismiss</FeatherButton>

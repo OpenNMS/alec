@@ -216,7 +216,7 @@ const toogleFilters = () => {
 		<div>
 			<FeatherAutocomplete
 				ref="autocomplete"
-				label="Find by node"
+				label="Search by node"
 				:loading="loading"
 				v-model="state.nodeSelectedValue"
 				:results="state.results"

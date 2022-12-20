@@ -2,38 +2,39 @@
 import { useUserStore } from '@/store/useUserStore'
 import CONST from '@/helpers/constants'
 import useRouter from '@/composables/useRouter'
-
+import { watch, ref } from 'vue'
 import DeepLearning from '@/assets/option1.svg'
 import Cluster from '@/assets/option2.svg'
 const router = useRouter()
 const userStore = useUserStore()
-
 const showSettings = () => {
 	router.push({
 		name: 'settings'
 	})
 }
+
+const isClustering = ref(
+	userStore.engineInfo?.engineName == CONST.ENGINE_DBSCAN
+)
+
+watch(
+	() => userStore.engineInfo,
+	() => {
+		isClustering.value = userStore.engineInfo?.engineName == CONST.ENGINE_DBSCAN
+	}
+)
 </script>
 
 <template>
-	<div class="info-engine">
-		<img
-			:src="
-				userStore.engineInfo?.engineName == CONST.ENGINE_DBSCAN
-					? Cluster
-					: DeepLearning
-			"
-			class="icon-type"
-		/>
+	<div
+		v-if="userStore.engineInfo && userStore.engineInfo.engineName"
+		class="info-engine"
+	>
+		<img :src="isClustering ? Cluster : DeepLearning" class="icon-type" />
 
 		<div class="engine" @click="showSettings">
 			ENGINE
-			<div
-				v-if="userStore.engineInfo?.engineName == CONST.ENGINE_DBSCAN"
-				class="type"
-			>
-				CLUSTERING
-			</div>
+			<div v-if="isClustering" class="type">CLUSTERING</div>
 			<div v-else class="type">DEEP LEARNING</div>
 		</div>
 	</div>

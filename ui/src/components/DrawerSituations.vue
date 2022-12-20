@@ -5,6 +5,7 @@ import SituationCard from '@/components/SituationCard.vue'
 import { ref, watch, markRaw } from 'vue'
 import CommonFilters from '@/components/CommonFilters.vue'
 import { TSituation } from '@/types/TSituation'
+import NoResults from '@/elements/NoResults.vue'
 
 const emit = defineEmits(['situation-selected', 'drawer-closed'])
 
@@ -73,7 +74,7 @@ const filterList = (list: TSituation[]) => {
 					/>
 				</div>
 			</div>
-			<div v-else class="empty">No results found</div>
+			<NoResults v-else />
 		</div>
 	</FeatherDrawer>
 </template>

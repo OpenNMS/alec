@@ -88,11 +88,9 @@ const handleFeedbackSituation = async (action: string) => {
 			<div class="situation-info">
 				<div class="id">
 					<div>
-						Situation - {{ situationInfo?.id }} - affecting
-						{{ size(groupBy(situationInfo?.alarms, 'nodeId')) }} node
-						<span v-if="situationInfo.alarms"
-							>having {{ situationInfo.alarms.length }} alarms
-						</span>
+						Situation - {{ situationInfo?.id }} -
+						{{ situationInfo.alarms.length }} alarm(s) affects
+						{{ size(groupBy(situationInfo?.alarms, 'nodeId')) }} node(s)
 					</div>
 					<SeverityStatus :severity="situationInfo?.severity" />
 				</div>

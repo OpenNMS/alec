@@ -4,16 +4,17 @@ import { FeatherButton } from '@featherds/button'
 import { FeatherCheckbox } from '@featherds/checkbox'
 import { ref } from 'vue'
 import useRouter from '@/composables/useRouter'
-import { savePermission, saveEngineParameter } from '@/services/AlecService'
+import { saveEngineParameter } from '@/services/AlecService'
 import CONST from '@/helpers/constants'
 import { useUserStore } from '@/store/useUserStore'
-const userStore = useUserStore()
+
 const router = useRouter()
 const hellinger = ref(false)
 const engine = ref(CONST.ENGINE_DBSCAN)
+const userStore = useUserStore()
+
 const handleClickContinue = () => {
-	savePermission(userStore.allowSave)
-	saveEngineParameter(engine.value, hellinger.value)
+	userStore.setEngineInfo(engine.value, hellinger.value)
 	router.push({ name: 'situations' })
 }
 </script>
@@ -22,33 +23,27 @@ const handleClickContinue = () => {
 	<div class="container">
 		<h2>Configuration</h2>
 		<p>
-			ALEC relies on correlation engines to identify related alarm groupings
-			(situations). These engines are powered by machine learning techniques
-			that leverage alarms data to make informed decisions.
-			<br />
-			For detail information about proposed engines you can read
+			ALEC relies on correlation engines to group related alarms into
+			situations. These engines are powered by machine learning techniques that
+			leverage alarm metadata to make informed decisions. For more information
+			about the correlation engines, see the
 			<strong>
-				<a
-					target="_blank"
-					href="https://docs.opennms.com/alec/latest/engines/cluster.html"
-				>
-					here
-				</a>
+				<a target="_blank" :href="CONST.URL_DOCUMENTATION"> documentation </a>.
 			</strong>
 		</p>
 		<div>
 			<FeatherRadioGroup
 				class="radio-group"
-				:label="'Currently, ALEC provides two clustering based engines, please, select one (can be changed later):'"
+				label="You can choose from two correlation engines. We recommend that you use the clustering engine, as it is easier to implement.Select one (you can change it later):"
 				v-model="engine"
 			>
 				<FeatherRadio class="radio" :value="CONST.ENGINE_DBSCAN">
 					<div class="radio-content">
 						<strong class="title">Clustering</strong>
 						<div>
-							Groups data points (alarms) based on a distance measure. We
-							calculate alarms difference in time and add it to their distance
-							within their network topology
+							The clustering engine uses the DBSCAN algorithm to build alarm
+							clusters. It draws information from the locally persisted network
+							inventory graph.
 						</div>
 						<img class="img2" src="@/assets/engine2.png" />
 						<FeatherCheckbox
@@ -60,9 +55,9 @@ const handleClickContinue = () => {
 								<strong>With hellinger distance</strong>
 								<br />
 								<span class="description">
-									(Uses the Hellinger Distance between alarms as a scaling
-									variable. It pushes alarms further apart if its value is high
-									and vice versa.)
+									(Uses the Hellinger distance between alarms as a scaling
+									variable. This pushes alarms further apart if the value is
+									high, and vice versa.)
 								</span>
 							</div>
 						</FeatherCheckbox>
@@ -72,9 +67,9 @@ const handleClickContinue = () => {
 					<div class="radio-content">
 						<strong class="title">Deep Learning</strong>
 						<div>
-							A Neural Network network is consulted to assess if alarms are
-							related. Based on its evaluation, situations are built by
-							association.
+							The deep learning engine uses a TensorFlow model to build alarm
+							clusters. It draws information from the locally persisted network
+							inventory graph.
 						</div>
 						<img class="img2" src="@/assets/engine1.png" />
 					</div>
@@ -87,7 +82,7 @@ const handleClickContinue = () => {
 	</div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
 	display: flex;
 	padding: 30px 80px;
@@ -96,6 +91,12 @@ const handleClickContinue = () => {
 	border: #dfdfdf 1px solid;
 	background-color: #ffffff;
 	font-size: 16px;
+	> h2 {
+		padding-bottom: 12px;
+	}
+}
+.radio-group {
+	margin-top: 20px;
 }
 .radio {
 	border: 1px solid #bfbfbf;

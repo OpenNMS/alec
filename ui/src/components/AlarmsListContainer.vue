@@ -162,7 +162,7 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 				class="add-alarms-btn"
 				@click="showUnassignedAlarms = true"
 			>
-				<FeatherIcon :icon="Icons.Add" aria-hidden="true" class="icon" />
+				<FeatherIcon :icon="Icons.Add" aria-hidden="true" class="icon add" />
 				<span>Add Alarms</span>
 			</FeatherButton>
 		</div>
@@ -288,7 +288,7 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 .icon {
 	font-size: 18px;
 	margin-right: 4px;
-	vertical-align: sub;
+	vertical-align: text-bottom !important;
 
 	&.clear {
 		color: blue;
@@ -303,7 +303,9 @@ const filterList = (alarmsFiltered: TAlarm[]) => {
 	&.remove {
 		color: red;
 		font-size: 21px;
-		vertical-align: text-bottom;
+	}
+	&.add {
+		font-size: 20px;
 	}
 }
 

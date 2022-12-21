@@ -141,8 +141,8 @@ const filterList = (list: TSituation[]) => {
 
 			<div class="container">
 				<div class="autocomplete">
-					<div>
-						Result: {{ state.situations.length }} of
+					<div v-if="state.situations && state.situations.length">
+						Result: {{ state.situations?.length }} of
 						{{ totalSituations }}
 					</div>
 				</div>

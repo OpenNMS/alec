@@ -63,6 +63,8 @@ export const useSituationsStore = defineStore('situationsStore', {
 					...(groupByStatus['REJECTED'] || [])
 				]
 				this.situations = situationOrdered
+			} else {
+				this.situations = []
 			}
 		},
 		async getSituation(id: number) {

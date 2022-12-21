@@ -2,6 +2,7 @@ import { rest } from './axiosInstances'
 import CONST from '@/helpers/constants'
 import { TSituation, TNewSituation } from '@/types/TSituation'
 import { TEngine } from '@/types/TUser'
+import { sendAction } from '@/services/AlarmService'
 const base = '/alec'
 const engineEndpoint = '/alec/engine/configuration'
 const endpointAgreement = '/alec/agreement/configuration'
@@ -62,6 +63,11 @@ export const sendFeedbackAcceptSituation = async (
 				'Access-Control-Allow-Origin': '*'
 			}
 		})
+		if (action == CONST.REJECTED.toLowerCase() && resp.status === 200) {
+			//after the situation was rejected, it becomes alarm
+			// so this alarm needs to be cleared
+			await sendAction(id, 'clear')
+		}
 		return resp.status === 200
 	} catch (err) {
 		return false

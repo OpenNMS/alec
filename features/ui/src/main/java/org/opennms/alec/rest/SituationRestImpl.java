@@ -120,7 +120,7 @@ public class SituationRestImpl implements SituationRest {
                     LOG.debug("Situation {} already rejected", situationId);
                     return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
                 }
-                feedback = String.format("reject situation [%s] -- user feedback :[%s]", situationId, feedback);
+                feedback = String.format("reject situation [%s]", situationId, feedback);
                 //Store rejected situation to the cloud before removing related alarms
                 client.sendSituation(ImmutableSituation.newBuilderFrom(situation)
                                 .setStatus(Status.REJECTED)
@@ -208,7 +208,7 @@ public class SituationRestImpl implements SituationRest {
                 if (oldSituation.getAlarms().equals(alarmSet)) {
                     return ALECRestUtils.noContent();
                 }
-                String feedback = String.format("add alarm [%s] to situation [%s] -- user feedback :[%s]", alarm.getAlarmIdList(), alarm.getSituationId(), alarm.getFeedback());
+                String feedback = String.format("add alarm(s) [%s] to situation [%s]", alarm.getAlarmIdList(), alarm.getSituationId(), alarm.getFeedback());
                 return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).build(), alarmSet);
             }
         } catch (InterruptedException e) {
@@ -232,8 +232,8 @@ public class SituationRestImpl implements SituationRest {
                 if (oldSituation.getAlarms().equals(alarmSet)) {
                     return ALECRestUtils.noContent();
                 } else {
-                    String feedback = String.format("remove alarms [%s] to situation [%s] -- user feedback :[%s]", alarm.getAlarmIdList(), situationId, alarm.getFeedback());
-                    return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).build(), alarmSet);
+                    String feedback = String.format("remove alarm(s) [%s] to situation [%s]", alarm.getAlarmIdList(), situationId);
+                    return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).setStatus(Status.REMOVED_ALARM).build(), alarmSet);
                 }
             }
         } catch (InterruptedException e) {
@@ -267,6 +267,7 @@ public class SituationRestImpl implements SituationRest {
                 .setSeverity(maxSeverity)
                 .setEngineParameter("user created")
                 .addFeedback(createSituationPayload.getFeedback())
+                .setStatus(Status.USER_CREATED)
                 .build();
         if (situation.getAlarms().size() >= 2) {
             forwardAndStoreSituation(situation, alarmSetToAdd);

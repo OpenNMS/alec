@@ -34,7 +34,9 @@ public enum Status {
     ACCEPTED("ACCEPTED"),
     REJECTED("REJECTED"),
     CREATED("CREATED"),
-    MODIFIED("MODIFIED");
+    USER_CREATED("USER_CREATED"),
+    ADDED_ALARM("ADDED_ALARM"),
+    REMOVED_ALARM("REMOVED_ALARM");
 
     private final String status;
 

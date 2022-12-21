@@ -24,6 +24,7 @@ const paramId = parseInt(route.params.id as string)
 const situationId = ref(paramId)
 const situationStore = useSituationsStore()
 const appStore = useAppStore()
+const tabNumber = ref(0)
 
 situationStore.getSituation(situationId.value)
 situationStore.getUnassignedAlarms()
@@ -82,6 +83,10 @@ watch(route, () => {
 appStore.$subscribe((mutation, storeState) => {
 	showError.value = storeState.showError
 })
+
+const clickedTab = (tab: number | undefined) => {
+	tabNumber.value = tab || 0
+}
 </script>
 
 <template>
@@ -120,7 +125,7 @@ appStore.$subscribe((mutation, storeState) => {
 		<FeatherSpinner class="spinner" v-if="loading" />
 		<div v-else>
 			<div v-if="situation" class="detail">
-				<FeatherTabContainer>
+				<FeatherTabContainer @update:modelValue="clickedTab">
 					<template v-slot:tabs>
 						<FeatherTab>Details</FeatherTab>
 						<FeatherTab>Metrics</FeatherTab>
@@ -130,7 +135,7 @@ appStore.$subscribe((mutation, storeState) => {
 					</FeatherTabPanel>
 					<FeatherTabPanel class="panel"
 						><SituationMetricsTab
-							v-if="container"
+							v-if="container && tabNumber == 1"
 							:situation="situation"
 							:width="container"
 						/>

@@ -208,7 +208,7 @@ public class SituationRestImpl implements SituationRest {
                 if (oldSituation.getAlarms().equals(alarmSet)) {
                     return ALECRestUtils.noContent();
                 }
-                String feedback = String.format("add alarm(s) [%s] to situation [%s]", alarm.getAlarmIdList(), alarm.getSituationId(), alarm.getFeedback());
+                String feedback = String.format("add alarm(s) [%s] to situation [%s]", alarm.getAlarmIdList(), alarm.getSituationId());
                 return forwardAndStoreSituation(ImmutableSituation.newBuilderFrom(oldSituation).addFeedback(feedback).build(), alarmSet);
             }
         } catch (InterruptedException e) {

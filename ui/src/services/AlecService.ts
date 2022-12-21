@@ -63,9 +63,7 @@ export const sendFeedbackAcceptSituation = async (
 				'Access-Control-Allow-Origin': '*'
 			}
 		})
-		console.log(resp.status, action, CONST.REJECTED)
 		if (action == CONST.REJECTED.toLowerCase() && resp.status === 200) {
-			console.log('was rejected')
 			//after the situation was rejected, it becomes alarm
 			// so this alarm needs to be cleared
 			await sendAction(id, 'clear')

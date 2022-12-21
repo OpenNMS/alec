@@ -27,6 +27,7 @@ export const sendAcknowledge = async (
 }
 
 export const sendAction = async (alarmId: number | string, action: string) => {
+	console.log(alarmId, action)
 	try {
 		const resp = await rest.put(
 			`/alarms/${alarmId}?${action}=true`,

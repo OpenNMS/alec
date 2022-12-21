@@ -106,6 +106,12 @@ const props = defineProps<{
 		}
 	}
 
+	&.cleared {
+		&:before {
+			background-color: $severity-alarm-cleared-border;
+		}
+	}
+
 	&:before {
 		content: '';
 		position: absolute;

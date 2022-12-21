@@ -28,6 +28,8 @@
 
 package org.opennms.alec.datasource.opennms;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
@@ -44,7 +46,9 @@ public class SituationToEvent {
     public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
     public static final String SITUATION_LOG_MSG = "situationLogMsg";
     public static final String SITUATION_DESCR = "situationDescr";
+    public static final String SITUATION_CREATED = "situation created %s alarm(s) correlated";
     public static final String SITUATION_REJECTED = "situation rejected";
+    public static final String SITUATION_ACCEPTED = "situation accepted";
 
     private SituationToEvent() {
         throw new IllegalStateException("Utility class");
@@ -54,36 +58,63 @@ public class SituationToEvent {
         final Event e = Event.withDateFormat(timeFormat);
         e.setUei(SITUATION_UEI);
 
-        if (situation.getAlarms().isEmpty() && situation.getStatus() == Status.REJECTED) {
-            //situation should be cleared
-            e.setSeverity(Severity.CLEARED.name().toLowerCase());
-            e.addParam(SITUATION_LOG_MSG, SITUATION_REJECTED);
-            e.addParam(SITUATION_DESCR, SITUATION_REJECTED);
-        } else {
-            // Use the max severity as the situation severity
-            final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
-                    .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
-                    .max()
-                    .getAsInt());
-            e.setSeverity(maxSeverity.name().toLowerCase());
+        final Severity maxSeverity = Severity.fromValue(situation.getAlarms().stream()
+                .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
+                .max()
+                .getAsInt());
 
-            final Alarm alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
-            e.addParam(SITUATION_LOG_MSG, alarmForDescr.getSummary());
-
-            String description = alarmForDescr.getDescription();
-            if (situation.getDiagnosticText() != null) {
-                description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
-            }
-            e.addParam(SITUATION_DESCR, description);
-
-            // Set the related reduction keys
-            situation.getAlarms().stream()
-                    .map(Alarm::getId)
-                    .forEach(reductionKey -> e.addParam("related-reductionKey", reductionKey));
-
-            // Set a node id - use the same node associated with the alarm we used to the description
-            e.setNodeId(alarmForDescr.getNodeId());
+        Alarm alarmForDescr = null;
+        if (!Status.REJECTED.equals(situation.getStatus())) {
+            alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
         }
+
+        switch (situation.getStatus()) {
+            case ACCEPTED:
+                e.addParam(SITUATION_LOG_MSG, SITUATION_ACCEPTED);
+                e.addParam(SITUATION_DESCR, situation.getDescription());
+                e.setSeverity(situation.getSeverity().name().toLowerCase());
+                break;
+            case REJECTED:
+                e.addParam(SITUATION_LOG_MSG, SITUATION_REJECTED);
+                e.addParam(SITUATION_DESCR, situation.getDescription());
+                e.setSeverity(situation.getSeverity().name().toLowerCase());
+                break;
+            case USER_CREATED:
+                e.addParam(SITUATION_LOG_MSG,
+                        String.format(SITUATION_CREATED, situation.getAlarms().size()));
+                e.addParam(SITUATION_DESCR,
+                        situation.getDescription() + "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>");
+                e.setSeverity(maxSeverity.name().toLowerCase());
+                break;
+            case ADDED_ALARM:
+            case REMOVED_ALARM:
+                e.addParam(SITUATION_LOG_MSG, situation.getFeedback().get(situation.getFeedback().size() - 1));
+                e.addParam(SITUATION_DESCR, situation.getDescription());
+                e.setSeverity(maxSeverity.name().toLowerCase());
+                break;
+            case CREATED:
+                if (alarmForDescr != null) {
+                    e.addParam(SITUATION_LOG_MSG, alarmForDescr.getSummary());
+                    String description = alarmForDescr.getDescription();
+                    if (situation.getDiagnosticText() != null) {
+                        description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
+                    }
+                    e.addParam(SITUATION_DESCR, description);
+                }
+                e.setSeverity(maxSeverity.name().toLowerCase());
+        }
+
+        if (alarmForDescr != null) {
+            // Set a node id - use the same node associated with the alarm we used to the description
+            e.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId() : null);
+        }
+
+        // Set the related reduction keys
+        final AtomicInteger alarmIndex = new AtomicInteger(0);
+        situation.getAlarms().stream()
+                .map(Alarm::getId)
+                .forEach(reductionKey -> e.addParam("related-reductionKey" + alarmIndex.incrementAndGet(), reductionKey));
+
 
         // Relay the situation id
         e.addParam(SITUATION_ID_PARM_NAME, situation.getId());

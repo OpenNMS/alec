@@ -87,7 +87,7 @@ public class SituationRestImplTest {
             verify(situationDatasource, times(1)).forwardSituation(situationForwardCaptor.capture());
             assertThat(situationForwardCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
             assertThat(situationForwardCaptor.getValue().getFeedback().size(), equalTo(1));
-            assertThat(situationForwardCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationForwardCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11]"));
             assertThat(situationForwardCaptor.getValue().getAlarms().size(), equalTo(0));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
@@ -95,7 +95,7 @@ public class SituationRestImplTest {
             verify(situationClient, times(1)).sendSituation(situationStoreCaptor.capture(), eq("42"));
             assertThat(situationStoreCaptor.getValue().getStatus(), equalTo(Status.REJECTED));
             assertThat(situationStoreCaptor.getValue().getFeedback().size(), equalTo(1));
-            assertThat(situationStoreCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11] -- user feedback :[rejected]"));
+            assertThat(situationStoreCaptor.getValue().getFeedback().get(0), equalTo("reject situation [11]"));
             assertThat(situationStoreCaptor.getValue().getAlarms().size(), equalTo(4));
         }
     }
@@ -111,6 +111,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("2", "5")), equalTo(true));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("remove alarm(s) [[3, 4]] to situation [11]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
             verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
@@ -128,6 +130,8 @@ public class SituationRestImplTest {
                     .map(Alarm::getId)
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("2", "3", "4")), equalTo(true));
+            assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("remove alarm(s) [[5]] to situation [11]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(2)).getSituations();
             verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");
@@ -179,7 +183,7 @@ public class SituationRestImplTest {
                     .collect(Collectors
                             .toList()).containsAll(Arrays.asList("2", "3", "4", "5", "7", "8")), equalTo(true));
             assertThat(situationCaptor.getValue().getFeedback().size(), equalTo(1));
-            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm [[7, 8]] to situation [11] -- user feedback :[feedback]"));
+            assertThat(situationCaptor.getValue().getFeedback().get(0), equalTo("add alarm(s) [[7, 8]] to situation [11]"));
             verify(situationDatasource, times(1)).getSituation(11);
             verify(situationDatasource, times(4)).getSituations();
             verify(situationClient, times(1)).sendSituation(situationCaptor.getValue(), "42");

@@ -120,7 +120,7 @@ public class SituationRestImpl implements SituationRest {
                     LOG.debug("Situation {} already rejected", situationId);
                     return Response.accepted(MessageFormat.format("Situation {0} already rejected", situationId)).build();
                 }
-                feedback = String.format("reject situation [%s]", situationId, feedback);
+                feedback = String.format("reject situation [%s]", situationId);
                 //Store rejected situation to the cloud before removing related alarms
                 client.sendSituation(ImmutableSituation.newBuilderFrom(situation)
                                 .setStatus(Status.REJECTED)

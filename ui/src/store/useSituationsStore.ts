@@ -58,7 +58,7 @@ export const useSituationsStore = defineStore('situationsStore', {
 
 				const groupByStatus = groupBy(situations, 'status')
 				const sitfiltered = situations.filter(
-					(s: TSituation) => s.status !== 'REJECTED' || 'ACCEPTED'
+					(s: TSituation) => s.status !== 'REJECTED' && s.status !== 'ACCEPTED'
 				)
 
 				const situationOrdered = [

@@ -4812,7 +4812,7 @@ function nE(e, o) {
 }
 var Sv = /* @__PURE__ */ K3(Q3, [["render", nE]]);
 const ye = {
-  URL_DOCUMENTATION: "https://docs.opennms.com/alec/3.0.0-SNAPSHOT/engines/introduction.html",
+  URL_DOCUMENTATION: "https://docs.opennms.com/alec/3.0.0/engines/introduction.html",
   ENGINE_DBSCAN: "dbscan",
   ENGINE_DEEP_LEARNING: "cluster",
   HELLINGER_OPTION: "hellinger",

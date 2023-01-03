@@ -28,14 +28,39 @@
 
 package org.opennms.alec.engine.dbscan;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringJoiner;
+
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.api.EngineFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.MetricRegistry;
 
 public class DBScanEngineFactory implements EngineFactory {
 
-    private double epsilon = DBScanEngine.DEFAULT_EPSILON;
-    private double alpha = DBScanEngine.DEFAULT_ALPHA;
-    private double beta = DBScanEngine.DEFAULT_BETA;
+    private static final Logger LOG = LoggerFactory.getLogger(DBScanEngineFactory.class);
+
+    private double epsilon;
+    private double alpha;
+    private double beta;
+    private String distanceMeasureFactoryName;
+    private final AlarmInSpaceAndTimeDistanceMeasureFactory alarmInSpaceAndTimeDistanceMeasureFactory;
+    private final Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap;
+
+    public DBScanEngineFactory(double alpha, double beta, double epsilon, String distanceMeasureFactoryName,
+                               AlarmInSpaceAndTimeDistanceMeasureFactory alarmInSpaceAndTimeDistanceMeasureFactory,
+                               Map<String, DistanceMeasureFactory> distanceMeasureFactoryMap) {
+        this.epsilon = epsilon;
+        this.alpha = alpha;
+        this.beta = beta;
+        this.distanceMeasureFactoryName = distanceMeasureFactoryName;
+        this.alarmInSpaceAndTimeDistanceMeasureFactory = alarmInSpaceAndTimeDistanceMeasureFactory;
+        this.distanceMeasureFactoryMap = distanceMeasureFactoryMap;
+    }
 
     @Override
     public String getName() {
@@ -43,8 +68,36 @@ public class DBScanEngineFactory implements EngineFactory {
     }
 
     @Override
-    public AbstractClusterEngine createEngine() {
-        return new DBScanEngine(epsilon, alpha, beta);
+    public String getNameConf() {
+        return new StringJoiner(", ", getName() + "[", "]")
+                .add("epsilon=" + epsilon)
+                .add("alpha=" + alpha)
+                .add("beta=" + beta)
+                .add("distanceMeasure='" + distanceMeasureFactoryName + "'")
+                .toString();
+    }
+
+    @Override
+    public AbstractClusterEngine createEngine(MetricRegistry metrics) {
+        Optional<DistanceMeasureFactory> factory = Optional.ofNullable(distanceMeasureFactoryMap.get(distanceMeasureFactoryName));
+        if (factory.isPresent()) {
+            return new DBScanEngine(metrics, epsilon, alpha, beta, factory.get());
+        } else {
+            LOG.warn("Wrong distance measure configuration {}, we'll use default {}", distanceMeasureFactoryName, alarmInSpaceAndTimeDistanceMeasureFactory.getName());
+            this.distanceMeasureFactoryName = alarmInSpaceAndTimeDistanceMeasureFactory.getName();
+            return new DBScanEngine(metrics, epsilon, alpha, beta, alarmInSpaceAndTimeDistanceMeasureFactory);
+        }
+    }
+
+    @Override
+    public EngineFactory getEngineFactory() {
+        return this;
+    }
+
+    @Override
+    public String getParameters() {
+        return String.format("engine: %s, alpha: %s, beta: %s, epsilon: %s, distanceMeasure: %s",
+                getName(), getAlpha(), getBeta(), getEpsilon(), getDistanceMeasureFactoryName());
     }
 
     public double getEpsilon() {
@@ -69,5 +122,13 @@ public class DBScanEngineFactory implements EngineFactory {
 
     public void setBeta(double beta) {
         this.beta = beta;
+    }
+
+    public void setDistanceMeasureFactoryName(String distanceMeasureFactoryName) {
+        this.distanceMeasureFactoryName = distanceMeasureFactoryName;
+    }
+
+    public String getDistanceMeasureFactoryName() {
+        return distanceMeasureFactoryName;
     }
 }

@@ -222,7 +222,7 @@ class InventoryFactory {
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getEntPhysicalEntity(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             case ManagedObjectType.BgpPeer:
-                ios.add(OpennmsMapper.fromInventory(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), nodeCriteria)));
+                ios.addAll(OpennmsMapper.fromInventory(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), nodeCriteria)));
                 break;
             case ManagedObjectType.VpnTunnel:
                 ios.add(OpennmsMapper.fromInventory(TypeToInventory.getVpnTunnel(alarm.getManagedObjectInstance(), nodeCriteria)));

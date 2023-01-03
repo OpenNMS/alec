@@ -2,7 +2,7 @@
     <parent>
         <groupId>org.opennms.alec</groupId>
         <artifactId>datasource</artifactId>
-        <version>1.0.1</version>
+        <version>3.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.alec.datasource</groupId>
@@ -19,5 +19,11 @@
             <groupId>org.opennms.alec.datasource</groupId>
             <artifactId>org.opennms.alec.datasource.api</artifactId>
         </dependency>
+       <!-- Test -->
+       <dependency>
+           <groupId>junit</groupId>
+           <artifactId>junit</artifactId>
+           <scope>test</scope>
+       </dependency>
    </dependencies>
 </project>

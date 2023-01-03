@@ -40,7 +40,14 @@ public enum ManagedObjectType {
      * A link between two interfaces or an interface and a node.
      */
     SnmpInterfaceLink("snmp-interface-link"),
+    /**
+     * A BGP peer. Parent is node with peer IP.
+     */
     BgpPeer("bgp-peer"),
+    /**
+     * A VRF.
+     */
+    BgpVrf("bgp-vrf"),
     VpnTunnel("vpn-tunnel"),
     MplsL3Vrf("mpls-l3-vrf"),
     EntPhysicalEntity("ent-physical-entity"),

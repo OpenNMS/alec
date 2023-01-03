@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -63,6 +63,8 @@ public class Vectorizer {
     public InputVector vectorize(AlarmInSpaceTime a1, AlarmInSpaceTime a2, double distanceOnGraph) {
         // Build the input vector
         final InputVector.Builder builder = InputVector.builder()
+                .alarmAid(a1.getAlarmId())
+                .alarmBid(a2.getAlarmId())
                 .typeA(a1.getAlarm().getInventoryObjectType())
                 .typeB(a2.getAlarm().getInventoryObjectType())
                 .similarityOfInventoryObjectIds(getSimilarityOfInventoryObjectIds(a1.getAlarm().getInventoryObjectId(), a2.getAlarm().getInventoryObjectId()));
@@ -100,6 +102,7 @@ public class Vectorizer {
         return -1d;
     }
 
+    @SuppressWarnings({"java:S3776", "java:S3655"})
     private int getFirstAncestorMatch(final InventoryObject io1, final InventoryObject io2) {
         InventoryObject ioa = io1;
         InventoryObject iob = io2;
@@ -145,7 +148,7 @@ public class Vectorizer {
     }
 
     private double distanceOnGraph(AlarmInSpaceTime a1, AlarmInSpaceTime a2) {
-        return spatialDistanceCalculator.getSpatialDistanceBetween(a1.getVertex().getNumericId(), a1.getVertex().getNumericId());
+        return spatialDistanceCalculator.getSpatialDistanceBetween(a1.getVertex().getNumericId(), a2.getVertex().getNumericId());
     }
 
     public double distanceOnGraph(CEVertex v1, CEVertex v2) {

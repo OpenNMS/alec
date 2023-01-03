@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -59,6 +60,7 @@ import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.jaxb.JaxbUtils;
 import org.opennms.alec.driver.test.TestDriver;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
 import org.opennms.alec.engine.dbscan.DBScanEngineFactory;
 import org.opennms.alec.features.score.api.ScoreMetric;
@@ -155,7 +157,7 @@ public class DBScanEngineOptimizationTest {
 
         @Override
         public double value(double[] point) {
-            DBScanEngineFactory factory = new DBScanEngineFactory();
+            DBScanEngineFactory factory = new DBScanEngineFactory(2l, 3l, 1l, "", new AlarmInSpaceAndTimeDistanceMeasureFactory(), Collections.EMPTY_MAP);
             factory.setAlpha(point[0]);
             factory.setBeta(point[1]);
 

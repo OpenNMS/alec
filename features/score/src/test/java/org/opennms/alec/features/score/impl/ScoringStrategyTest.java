@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2021 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2021 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -55,7 +55,9 @@ public class ScoringStrategyTest {
         return Arrays.asList(new Object[][]{
                 { new SetIntersectionScoringStrategy() },
                 { new PeerScoringStrategy() },
-                { new MatrixScoringStrategy() }
+                { new MatrixScoringStrategy() },
+                { new ARIScoringStrategy() },
+                { new AMIScoringStrategy() }
         });
     }
 
@@ -76,13 +78,20 @@ public class ScoringStrategyTest {
         report = scorer.score(Sets.newHashSet(emtpySituation), Sets.newHashSet(emtpySituation));
         assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
 
+
         // Comparing a situation with a single alarm to an empty situation should generate a score greater than 0
         Situation situation = ImmutableSituation.newBuilderNow()
                 .setId("test")
                 .addAlarm(ImmutableAlarm.newBuilder().setId("test").build())
                 .build();
         report = scorer.score(Sets.newHashSet(situation), Sets.newHashSet(emtpySituation));
-        assertThat(report.getScore(), Matchers.greaterThan(0.0d));
+
+        // ARI and AMI currently use the intersection of the alarm sets and will return 0 
+        if(scorer.getName().equals("ari") || scorer.getName().equals("ami")){
+            assertThat(report.getScore(), IsCloseTo.closeTo(0.0d, delta));
+        } else {
+            assertThat(report.getScore(), Matchers.greaterThan(0.0d));
+        }
     }
 
 }

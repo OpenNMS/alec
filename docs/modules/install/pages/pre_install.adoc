@@ -1,0 +1,131 @@
+
+:imagesdir: ../assets/images
+= Pre-Installation Tasks
+
+This section describes the configuration tasks you must complete before installing ALEC.
+
+== OpenNMS configuration
+
+=== Set `$OPENNMS_HOME` variable
+
+The ALEC installation instructions refer to the `$OPENNMS_HOME` environment variable, which must be set.
+
+On RHEL or CentOS, use the following command: `export OPENNMS_HOME=/opt/opennms`.
+
+On Ubuntu or Debian, use the following command: `export OPENNMS_HOME=/usr/share/opennms`.
+
+=== Verify your OpenNMS installation
+
+Run the `health:check` command in an OpenNMS Karaf shell to verify the status of your OpenNMS instance.
+
+If the health check returns "Everything is awesome," continue to the next pre-installation task.
+An "Oh no, something is wrong" error message indicates a problem that you must address before moving forward.
+
+The most common result you may see involves a missing Elasticsearch configuration, similar to the following:
+
+[source, karaf]
+----
+admin@opennms> health-check
+Verifying the health of the container
+
+Verifying installed bundles                    [ Success  ]
+Connecting to ElasticSearch ReST API (Flows)   [ Success ] => Not configured
+
+=> Everything is awesome
+----
+
+OpenNMS deployments install the `opennms-flows` feature set by default, but may not point to the Elasticsearch server.
+To fix this issue, you can either uninstall the feature (using the `feature:uninstall opennms-flows` command), or point the feature to an Elasticsearch instance:
+
+[source, karaf]
+----
+config:edit org.opennms.features.flows.persistence.elastic
+config:property-set elasticUrl http://elastic:9200
+config:update
+----
+
+NOTE: Replace the sample URL (`http://elastic:9200`) with one that points to your Elasticsearch instance.
+
+Run the `health:check` command again and, if the "Everything is awesome" message is displayed, continue to the next tasks.
+
+=== Enable alarm history storage for Elasticsearch
+
+We strongly recommend that, when using ALEC, you leverage the Elasticsearch integration.
+This integration lets OpenNMS maintain historical alarm information in Elasticsearch.
+
+To set up the integration, run the following commands in an OpenNMS Karaf shell:
+
+.Point your OpenNMS instance to an Elasticsearch instance:
+
+[source, karaf]
+----
+config:edit org.opennms.features.alarms.history.elastic
+config:property-set elasticUrl http://elastic:9200
+config:update
+----
+
+NOTE: Replace the sample URL (`http://elastic:9200`) with one that points to your Elasticsearch instance.
+
+.Install the feature:
+
+[source, karaf]
+----
+feature:install opennms-alarm-history-elastic
+----
+
+After the feature is installed, run the `health:check` command.
+If everything is configured properly, an "Everything is awesome" message is displayed.
+
+=== Enable syslogd
+
+We recommend that you enable syslogd to take advantage of the syslog patterns and event definitions that ALEC provides.
+
+.Edit `$OPENNMS_HOME/etc/service-configuration.xml`
+and change the following:
+
+[source]
+----
+<service enabled="false">
+    <name>OpenNMS:Name=Syslogd</name>
+----
+
+to:
+
+[source]
+----
+<service>
+    <name>OpenNMS:Name=Syslogd</name>
+----
+
+This change will come into effect the next time OpenNMS restarts.
+Do not restart OpenNMS at this point; you will restart it as part of the ALEC installation procedure.
+
+== Set up package repositories
+
+Packages for ALEC are available in the same Debian and YUM repositories as OpenNMS.
+If you already have the stable repository installed, you can skip this step.
+
+=== Set up YUM repository (RHEL/CentOS)
+
+For RHEL- or CentOS-based distributions, install the repository:
+
+[source]
+----
+yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
+rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
+----
+
+=== Set up APT repository (Ubuntu/Debian)
+
+For Ubuntu- or Debian-based distributions, install the repository:
+
+[source]
+----
+cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
+deb https://debian.opennms.org stable main
+deb-src https://debian.opennms.org stable main
+EOF
+wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
+apt update
+----
+

@@ -1,0 +1,88 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+                http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+                http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
+                http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd">
+
+    <cm:property-placeholder id="alec-uiProperties" persistent-id="org.opennms.alec.features.ui"
+                             update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="host" value="alec.onms-dp-dev.dev.nonprod.dataservice.opennms.com"/>
+            <cm:property name="port" value="443"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+
+    <!-- Expose our UI Extension -->
+    <service id="uiExtension" interface="org.opennms.integration.api.v1.ui.UIExtension">
+        <bean class="org.opennms.alec.ui.UIExtension">
+            <property name="id" value="alecUiExtension"/>
+            <property name="menuEntry" value="ALEC"/>
+            <property name="resourceRoot" value="ui-ext"/>
+            <property name="moduleFileName" value="alecUiExtension.es.js"/>
+        </bean>
+    </service>
+
+    <!-- Build and expose the JAX-RS annotated webhook handler.
+     This will automatically mount the endpoint over the REST API. -->
+    <bean id="engineRest" class="org.opennms.alec.rest.EngineRestImpl">
+        <argument ref="keyValueStore"/>
+        <argument ref="driver"/>
+        <argument ref="engineFactories"/>
+    </bean>
+
+    <bean id="agreementRest" class="org.opennms.alec.rest.AgreementRestImpl">
+        <argument ref="keyValueStore"/>
+        <argument ref="situationRest"/>
+    </bean>
+
+    <bean id="situationRest" class="org.opennms.alec.rest.SituationRestImpl" destroy-method="destroy">
+        <argument ref="keyValueStore"/>
+        <argument ref="situationDatasource"/>
+        <argument ref="alarmDatasource"/>
+        <argument ref="runtimeInfo"/>
+        <argument ref="pasConfig"/>
+    </bean>
+
+    <!-- Config for Grpc -->
+    <bean id="pasConfig" class="org.opennms.alec.grpc.GrpcConnectionConfig" >
+        <argument value="${host}"/>
+        <argument value="${port}"/>
+    </bean>
+
+    <service interface="org.opennms.alec.rest.AgreementRest" ref="agreementRest">
+        <service-properties>
+            <entry key="application-path" value="/rest" />
+        </service-properties>
+    </service>
+
+    <service interface="org.opennms.alec.rest.EngineRest" ref="engineRest" >
+        <service-properties>
+            <entry key="application-path" value="/rest" />
+        </service-properties>
+    </service>
+
+    <service interface="org.opennms.alec.rest.SituationRest" ref="situationRest">
+        <service-properties>
+            <entry key="application-path" value="/rest" />
+        </service-properties>
+    </service>
+
+    <!--Key-value store -->
+    <reference id="keyValueStore" interface="org.opennms.integration.api.v1.distributed.KeyValueStore" availability="optional"/>
+
+    <reference id="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
+
+    <!--engines list    -->
+    <reference-list id="engineFactories" interface="org.opennms.alec.engine.api.EngineFactory"/>
+
+    <!--situation datasource    -->
+    <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
+
+    <!--alarm datasource    -->
+    <reference id="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource" />
+
+    <!--runtime Info    -->
+    <reference id="runtimeInfo" interface="org.opennms.integration.api.v1.runtime.RuntimeInfo" />
+
+</blueprint>

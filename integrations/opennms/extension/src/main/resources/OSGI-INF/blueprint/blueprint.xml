@@ -4,11 +4,13 @@
 
     <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao" />
     <reference id="snmpInterfaceDao" interface="org.opennms.integration.api.v1.dao.SnmpInterfaceDao" />
+    <reference id="interfaceToNodeCache" interface="org.opennms.integration.api.v1.dao.InterfaceToNodeCache" />
 
     <service interface="org.opennms.integration.api.v1.alarms.AlarmPersisterExtension">
         <bean class="org.opennms.alec.opennms.extension.ManagedObjectAlarmExt">
             <argument ref="nodeDao"/>
             <argument ref="snmpInterfaceDao"/>
+            <argument ref="interfaceToNodeCache"/>
         </bean>
     </service>
 </blueprint>

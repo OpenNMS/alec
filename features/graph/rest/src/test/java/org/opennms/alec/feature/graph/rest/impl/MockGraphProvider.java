@@ -39,15 +39,19 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableSituation;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceAndTimeDistanceMeasureFactory;
+import org.opennms.alec.engine.dbscan.AlarmInSpaceTimeDistanceMeasure;
 import org.opennms.alec.engine.dbscan.DBScanEngine;
+import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Lists;
 
 public class MockGraphProvider implements GraphProvider {
 
-    final DBScanEngine dbScanEngine = new DBScanEngine();
+    final DBScanEngine dbScanEngine = new DBScanEngine(new MetricRegistry(), AlarmInSpaceTimeDistanceMeasure.DEFAULT_EPSILON, DBScanEngine.DEFAULT_ALPHA, DBScanEngine.DEFAULT_BETA, new AlarmInSpaceAndTimeDistanceMeasureFactory());
 
     public MockGraphProvider() {
         final InventoryObject io1 = ImmutableInventoryObject.newBuilder()
@@ -85,5 +89,10 @@ public class MockGraphProvider implements GraphProvider {
     @Override
     public void withReadOnlyGraph(Consumer<OceGraph> consumer) {
         dbScanEngine.withReadOnlyGraph(consumer);
+    }
+
+    @Override
+    public void registerGraphChangeListener(GraphChangedListener listener) {
+        // do nothing
     }
 }

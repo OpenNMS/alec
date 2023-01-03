@@ -76,7 +76,7 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
                 .build());
 
         // Verify the situation was forwarded to Kafka
-        Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafka);
+        Map<String, Object> props = KafkaTestUtils.consumerProps("test", "true", embeddedKafkaRule.getEmbeddedKafka());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -91,12 +91,13 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
     }
 
     @Test(timeout=60000)
-    public void canRetrieveSituations() throws IOException {
+    public void canRetrieveSituations() throws IOException, InterruptedException {
         datasource.init();
         assertThat(datasource.getSituations(), hasSize(0));
 
         OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
                 .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).build()).build())
                 .setLastEventTime(1)
                 .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
                 .build();
@@ -105,8 +106,40 @@ public class OpennmsSituationDatasourceIT extends OpennmsDatasourceIT {
         await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituations(), hasSize(1));
     }
 
+    @Test(timeout=60000)
+    public void canRetrieveSituation() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getSituations(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).setValue("1").build()).build())
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituation(1).isPresent());
+    }
+
+    @Test(timeout=60000)
+    public void situationNotFound() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getSituations(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey(String.format("%s::%d", SituationToEvent.SITUATION_UEI, 1))
+                .setLastEvent(OpennmsModelProtos.Event.newBuilder().addParameter(OpennmsModelProtos.EventParameter.newBuilder().setName(SituationToEvent.SITUATION_ID_PARM_NAME).setValue("1").build()).build())
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getSituation(2).isEmpty());
+    }
+
     @Test
-    public void testDeleteIsCalled() throws IOException {
+    public void testDeleteIsCalled() throws IOException, InterruptedException {
         datasource.init();
         Engine mockEngine = mock(Engine.class);
         datasource.registerHandler(DeletingSituationHandler.newInstance(mockEngine));

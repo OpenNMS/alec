@@ -1,29 +1,29 @@
-.About
-* xref:about:welcome.adoc[Welcome]
-* xref:about:terminology.adoc[Terminology]
+
+* xref:about:welcome.adoc[About ALEC]
 
 .Installation
-* xref:install:requirements.adoc[Requirements]
-* xref:install:monolithic_vs_distributed.adoc[Monolithic vs Distributed]
-* xref:install:common_install.adoc[Common Install]
-* xref:install:monolithic_install.adoc[Monolithic Install]
-* xref:install:distributed_install.adoc[Distributed Install]
-* xref:install:verifying.adoc[Verifying your install]
-* xref:install:upgrading.adoc[Upgrading your install]
+* xref:install:introduction.adoc[Overview]
+* xref:install:pre_install.adoc[Pre-Installation Tasks]
+* xref:install:basic_install.adoc[Basic Install]
 
-.Architecture
-* xref:architecture:overview.adoc[Overview]
-* xref:architecture:opennms_integration.adoc[OpenNMS Integration]
+.xref:quick-start:introduction.adoc[Quick Start]
+* xref:quick-start:engine-config.adoc[Step 1: First-Time Login & Engine Config]
+* xref:quick-start:situations.adoc[Step 2: View & Create Situations]
 
-.Datasources
-* xref:datasources:overview.adoc[Overview]
-* xref:datasources:direct.adoc[Direct]
-* xref:datasources:kafka.adoc[Kafka]
-
-.Engines
-* xref:engines:cluster.adoc[Cluster Engine]
-* xref:engines:deeplearning.adoc[Deep Learning Engine]
-* xref:engines:dbscan.adoc[DBSCAN Engine]
+.Administration
+* xref:admin:overview.adoc[Overview]
+* xref:admin:distributed_install.adoc[Distributed Installation]
+* xref:admin:verifying.adoc[Maintenance]
+* xref:admin:upgrading.adoc[Upgrade ALEC]
 
 .Reference
+* xref:reference:architecture/overview.adoc[Architecture]
+** xref:reference:architecture/opennms_integration.adoc[OpenNMS Integration]
+* xref:reference:engines/introduction.adoc[Correlation Engines]
+** xref:reference:engines/clustering.adoc[Clustering Engine]
+** xref:reference:engines/deeplearning.adoc[Deep Learning Engine]
+* xref:reference:datasources/overview.adoc[Datasources]
+** xref:reference:datasources/direct.adoc[Direct Datasource]
+** xref:reference:datasources/kafka.adoc[Kafka Datasource]
 * xref:reference:model.adoc[Model]
+* xref:reference:glossary.adoc[Glossary]

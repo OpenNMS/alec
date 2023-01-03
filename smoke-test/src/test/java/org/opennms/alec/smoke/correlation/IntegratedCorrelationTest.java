@@ -38,7 +38,7 @@ public class IntegratedCorrelationTest extends CorrelationTestBase {
     private IntegratedOpenNMSALECContainer integratedContainer;
 
     @Override
-    protected void adjustContainersForTest() {
+    protected void adjustCorrelationContainers() {
         // Replace the base opennms container with an integrated one
         integratedContainer = new IntegratedOpenNMSALECContainer();
         replaceContainer(opennmsContainer, integratedContainer);

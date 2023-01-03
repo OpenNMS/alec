@@ -1,0 +1,116 @@
+@import '@featherds/styles/themes/variables';
+
+$border-grey: #dfdfdf;
+$dark-blue: rgba(21, 26, 69, 1);
+
+$severity-alarm-critical-text: black;
+$severity-alarm-critical-bg: #f5cdcd;
+$severity-alarm-critical-border: #cc0000;
+
+$severity-alarm-major-text: black;
+$severity-alarm-major-bg: #ffd7cd;
+$severity-alarm-major-border: #ff3300;
+
+$severity-alarm-minor-text: black;
+$severity-alarm-minor-bg: #ffebcd;
+$severity-alarm-minor-border: #ff9900;
+
+$severity-alarm-warning-text: black;
+$severity-alarm-warning-bg: #fff5cd;
+$severity-alarm-warning-border: #ffcc00;
+
+$severity-alarm-indeterminate-text: black;
+$severity-alarm-indeterminate-bg: #ebebcd;
+$severity-alarm-indeterminate-border: #999000;
+
+$severity-alarm-normal-text: black;
+$severity-alarm-normal-bg: #d7e1cd;
+$severity-alarm-normal-border: #336600;
+
+$severity-alarm-cleared-text: black;
+$severity-alarm-cleared-bg: #eeeeee;
+$severity-alarm-cleared-border: #999999;
+
+.critical-bg {
+	background-color: $severity-alarm-critical-bg !important;
+	&.dark {
+		background-color: $severity-alarm-critical-border !important;
+	}
+}
+
+.major-bg {
+	background-color: $severity-alarm-major-bg !important;
+	&.dark {
+		background-color: $severity-alarm-major-border !important;
+	}
+}
+
+.minor-bg {
+	background-color: $severity-alarm-minor-bg !important;
+	&.dark {
+		background-color: $severity-alarm-minor-border !important;
+	}
+}
+
+.warning-bg {
+	background-color: $severity-alarm-warning-bg !important;
+	&.dark {
+		background-color: $severity-alarm-warning-border !important;
+	}
+}
+
+.indeterminate-bg {
+	background-color: $severity-alarm-indeterminate-bg !important;
+	&.dark {
+		background-color: $severity-alarm-indeterminate-border !important;
+	}
+}
+
+.normal-bg {
+	background-color: $severity-alarm-normal-bg !important;
+	&.dark {
+		background-color: $severity-alarm-normal-border !important;
+	}
+}
+
+.cleared-bg {
+	background-color: $severity-alarm-cleared-bg !important;
+	&.dark {
+		background-color: $severity-alarm-cleared-border !important;
+	}
+}
+
+.critical-color {
+	border-color: $severity-alarm-critical-border !important;
+	color: $severity-alarm-critical-border !important;
+}
+
+.major-color {
+	border-color: $severity-alarm-major-border !important;
+	color: $severity-alarm-major-border !important;
+}
+
+.minor-color {
+	border-color: $severity-alarm-minor-border !important;
+	color: $severity-alarm-minor-border !important;
+}
+
+.warning-color {
+	border-color: $severity-alarm-warning-border !important;
+	color: $severity-alarm-warning-border !important;
+}
+
+.indeterminate-color {
+	border-color: $severity-alarm-indeterminate-border !important;
+	color: $severity-alarm-indeterminate-border !important;
+}
+
+.normal-color {
+	border-color: $severity-alarm-normal-border !important;
+	color: $severity-alarm-normal-border !important;
+}
+
+.cleared-color {
+	border-color: $severity-alarm-cleared-border !important;
+	color: $severity-alarm-cleared-border !important;
+}

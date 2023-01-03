@@ -45,9 +45,11 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.opennms.alec.integrations.opennms.sink.api.SinkWrapper;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.springframework.kafka.test.rule.KafkaEmbedded;
+import org.springframework.kafka.test.rule.EmbeddedKafkaRule;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 /**
@@ -56,7 +58,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 public abstract class OpennmsDatasourceIT {
 
     @Rule
-    public KafkaEmbedded embeddedKafka = new KafkaEmbedded(2, true, 2,
+    public EmbeddedKafkaRule embeddedKafkaRule = new EmbeddedKafkaRule(2, true, 2,
             "alarms", "alarmFeedback", "nodes", "alec-inventory", "edges");
 
     @Rule
@@ -64,12 +66,13 @@ public abstract class OpennmsDatasourceIT {
 
     public KafkaProducer<String, byte[]> producer;
 
+    @Spy
     public OpennmsDatasource datasource;
 
     @Before
     public void setUp() throws IOException {
         // Create the producer
-        Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafka);
+        Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafkaRule.getEmbeddedKafka());
         senderProps.put("key.serializer", StringSerializer.class.getCanonicalName());
         senderProps.put("value.serializer", ByteArraySerializer.class.getCanonicalName());
         producer = new KafkaProducer<>(senderProps);
@@ -81,11 +84,12 @@ public abstract class OpennmsDatasourceIT {
         EdgeToInventory edgeToInventory = new EdgeToInventory(inventoryService);
         SinkWrapper sinkWrapper = mock(SinkWrapper.class);
         datasource = new OpennmsDatasource(getDatasourceConfig(), nodeToInventory, alarmToInventory, edgeToInventory, sinkWrapper);
+        MockitoAnnotations.initMocks(this); // make the @Spy work
     }
 
     public ConfigurationAdmin getDatasourceConfig() throws IOException {
         final Dictionary<String,Object> streamProps = new Hashtable<>();
-        KafkaTestUtils.consumerProps("datasource", "false", embeddedKafka)
+        KafkaTestUtils.consumerProps("datasource", "false", embeddedKafkaRule.getEmbeddedKafka())
                 .forEach((key, value) -> streamProps.put(key, value.toString()));
         streamProps.put("application.id", "datasource");
         streamProps.put("state.dir", temporaryFolder.getRoot().getAbsolutePath());
@@ -96,7 +100,7 @@ public abstract class OpennmsDatasourceIT {
         when(configAdmin.getConfiguration(KAFKA_STREAMS_PID).getProperties()).thenReturn(streamProps);
 
         final Dictionary<String,Object> producerProps = new Hashtable<>();
-        KafkaTestUtils.consumerProps("datasource", "false", embeddedKafka)
+        KafkaTestUtils.consumerProps("datasource", "false", embeddedKafkaRule.getEmbeddedKafka())
                 .forEach((key, value) -> producerProps.put(key, value.toString()));
         when(configAdmin.getConfiguration(KAFKA_PRODUCER_PID).getProperties()).thenReturn(producerProps);
 

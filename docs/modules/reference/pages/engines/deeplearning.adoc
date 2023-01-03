@@ -1,0 +1,146 @@
+
+:imagesdir: ../assets/images
+= Deep Learning Engine
+
+The deep learning engine is a xref:engines/introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
+It draws information from the locally persisted network inventory graph.
+ALEC automatically creates and maintains this graph, which is based on information from the associated xref:datasources/overview.adoc[datasource].
+
+== TensorFlow
+
+To create clusters using TensorFlow, ALEC first reduces the clustering calculation to a binary classification that asks, "Are these two alarms related?"
+When the deep learning engine determines that two or more alarms are related, they are added to a cluster.
+To reduce the computational complexity of these calculations, ALEC limits the search of potential active candidates to those that are nearby.
+
+== Ludwig
+
+The current model definition for the deep learning engine has been developed using https://github.com/uber/ludwig[Ludwig]:
+
+.Ludwig training example
+image::engines/ludwig_training.png[Shell interface that shows an example of training input and output for Ludwig, 600]
+
+The model's input features include the following:
+
+* Inventory object types (categorical)
+* Relations between inventory objects (binary)
+* Difference in time (numerical)
+* Graphical distance (numerical)
+
+See https://github.com/OpenNMS/alec/blob/master/engine/deeplearning/src/main/resources/ludwig_model.yaml[ludwig_model.yaml] on the project's GitHub for more information on the model definition.
+
+== Train the engine
+
+The deep learning engine must be trained via the Karaf shell before ALEC can use it to correlate alarms.
+
+IMPORTANT: These instructions are included to help you get started with the engine.
+They are by no means all-encompassing.
+The training process will be improved in future ALEC releases.
+
+=== Install shell commands
+
+In the OpenNMS Karaf shell, run the following command to install the ALEC shell commands:
+
+[source]
+feature:install alec-features-deeplearning alec-features-shell
+
+=== Vectorize datasets
+
+First, take a snapshot of the current state of the datasource:
+
+[source]
+opennms-alec:datasource-snapshot /tmp/snap1
+
+Next, open `/tmp/snap1/alec.situations.xml` in a text editor and configure your desired situation state.
+Save your changes and return to the Karaf shell.
+
+Run the following commands to build a vectorized representation of the snapshot:
+
+[source]
+----
+opennms-alec:tensorflow-vectorize --alarms-in /tmp/snap1/alec.alarms.xml \
+                                  --inventory-in /tmp/snap1/alec.inventory.xml \
+                                  --situations-in /tmp/snap1/alec.situations.xml \
+                                  --csv-out /tmp/snap1/alec.vector.dataset.csv
+----
+
+=== Train the model with Ludwig
+
+Retrieve `model.yaml` from the source tree's `ludwig_model.yaml` file.
+
+Run the following command to train the model using Ludwig:
+
+[source]
+----
+ludwig train --data_csv /tmp/snap1/alec.vector.dataset.csv
+             --model_definition_file model.yaml
+----
+
+=== Export the model
+
+Use the following script to export the trained model to a format that ALEC can use:
+
+[source]
+----
+echo '#!/usr/bin/env python
+import numpy as np
+import tensorflow as tf
+from tensorflow.python.framework import graph_util
+from tensorflow.python.framework import ops
+from tensorflow.python.saved_model import builder as saved_model_builder
+from ludwig import LudwigModel
+
+model_path = "results/experiment_run_0/model"
+model = LudwigModel.load(model_path)
+
+builder = tf.saved_model.Builder("export")
+with tf.Session(graph=model.model.graph) as sess:
+  saver = tf.train.Saver()
+  saver.restore(sess, model.model.weights_save_path)
+  builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
+builder.save()
+
+model.close()' > export_model.py
+chmod +x export_model.py
+./export_model.py
+mkdir -p /tmp/tf-export
+cp -R ./export/* /tmp/tf-export/
+cp results/experiment_run_0/model/model_hyperparameters.json /tmp/tf-export/
+----
+
+=== Use the model in ALEC
+
+First, you must verify that the trained model can be loaded into ALEC:
+
+[source]
+opennms-alec:tensorflow-load-model /tmp/tf-export
+
+NOTE: If the command results are negative, you must retrain and re-export the training model.
+
+If the command results are positive, you can then configure the deep learning engine to use the model:
+
+[source]
+----
+config:edit org.opennms.alec.engine.deeplearning
+property-set modelPath /tmp/tf-export
+config:update
+----
+
+=== Verify using simulations
+
+You can run simulations to verify that the training model clusters alerts as expected.
+First, use the following commands to generate situations based on the dataset snapshot from earlier:
+
+[source]
+----
+opennms-alec:process-alarms --alarms-in /tmp/snap1/alec.alarms.xml \
+                            --inventory-in /tmp/snap1/alec.inventory.xml \
+                            --situations-out /tmp/snap1/alec.situations.deeplearning.trained.xml \
+                            --engine deeplearning
+----
+
+Run the following command to compare the model's results to your ideal definition in `/tmp/snap1/alec.situations.xml`:
+
+[source]
+opennms-alec:score-situations -s peer /tmp/snap1/alec.situations.xml /tmp/snap1/alec.situations.deeplearning.trained.xml
+
+From here, you can repeat the previous steps to tweak the model as desired.

@@ -45,6 +45,8 @@ public class TFModelTest {
     @Test
     public void canConvertVectorToTensor() {
         InputVector inputVector = InputVector.builder()
+                .alarmAid("a1")
+                .alarmBid("b1")
                 .typeA("a")
                 .typeB("b")
                 .sameInstance(false)
@@ -64,8 +66,11 @@ public class TFModelTest {
      * (milliseconds) it takes to compute.
      */
     @Test(timeout=30000)
+    @SuppressWarnings("java:S2699")
     public void canMeasureLatency() {
         InputVector inputVector = InputVector.builder()
+                .alarmAid("a1")
+                .alarmBid("b1")
                 .typeA("a")
                 .typeB("b")
                 .sameInstance(false)

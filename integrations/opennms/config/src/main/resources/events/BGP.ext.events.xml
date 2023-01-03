@@ -142,12 +142,7 @@
             openconfirm(5)
             established(6)
             &lt;/p>&lt;/td>&lt;/tr>&lt;/table></descr>
-        <logmsg dest="logndisplay">&lt;p>
-            bgpBackwardTransition trap received
-            bgpPeerRemoteAddr=%parm[#1]%
-            bgpPeerLastError=%parm[#2]%
-            bgpPeerState=%parm[#3]%&lt;/p>
-        </logmsg>
+        <logmsg dest="logndisplay">bgpBackwardTransition trap received bgpPeerRemoteAddr=%parm[#1]% bgpPeerLastError=%parm[#2]% bgpPeerState=%parm[#3]%</logmsg>
         <severity>Warning</severity>
         <parameter name="bgpPeer" value="%parm[#1]%" expand="true"/>
         <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[bgpPeer]%" alarm-type="1" auto-clean="true">

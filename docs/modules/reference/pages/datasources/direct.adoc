@@ -1,0 +1,41 @@
+
+= Direct Datasource
+
+The direct datasource is used with a xref:install:basic_install.adoc[basic installation of ALEC].
+It runs on the same JVM as OpenNMS, and acts on new alarms and inventory objects using the APIs provisioned by the https://docs.opennms.com/horizon/latest/development/oia/introduction.html[OpenNMS Plugin API].
+Because it uses event hooks to collect alarm and network inventory information, the direct datasource is able to interface directly with OpenNMS.
+
+== Scripted extensions
+
+You can modify or extend ALEC's mapping configuration script by updating or overwriting `inventory.groovy`.
+If you choose to overwrite the file, you must update the datasource bundle's configuration to point to the replacement script on your local file system:
+
+.Update `scriptFile` property in `org.opennms.alec.datasource.opennms.direct`
+[source]
+----
+config:edit org.opennms.alec.datasource.opennms.direct
+config:property-set scriptFile /tmp/inventory.groovy
+config:update
+----
+
+NOTE: If you replace the script, the replacement must use a scripting engine that implements `Invocable`, and the file must be UTF-8 encoded.
+
+=== API
+
+Three methods are exposed to the `InventoryObject` script:
+
+[options="header", cols="2,2"]
+|===
+| Method
+| Description
+
+| void overrideTypeAndInstance(ImmutableAlarm.Builder alarmBuilder, Alarm, alarm)
+| Modifies the `ModelObjectType` and `ModelObjectIdentifier` of the associated `InventoryObject`.
+This allows the datasource to map alarms to inventory objects on the network topology map.
+
+| List<InventoryObject> nodeToInventory(Node node)
+| Converts data stored in `node` to an inventory object on the network topology map.
+
+| List<InventoryObject> alarmToInventory(Alarm alarm)
+| Converts data stored in `alarm` to an inventory object and alarm on the network topology map.
+|===

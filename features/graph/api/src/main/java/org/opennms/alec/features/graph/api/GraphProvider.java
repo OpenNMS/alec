@@ -37,4 +37,5 @@ public interface GraphProvider {
 
     void withReadOnlyGraph(Consumer<OceGraph> consumer);
 
+    void registerGraphChangeListener(GraphChangedListener listener);
 }

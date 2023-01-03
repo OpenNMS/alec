@@ -1,0 +1,6 @@
+
+= Quick Start
+
+This Quick Start guide assumes that you have already https://docs.opennms.com/horizon/31/operation/quick-start/inventory.html[deployed an OpenNMS instance], followed the https://docs.opennms.com/horizon/31/operation/quick-start/introduction.html[core Quick Start guide], and xref:install:basic_install.adoc[installed ALEC].
+
+This guide includes steps to set up the ALEC plugin, and involves minimal configuration.

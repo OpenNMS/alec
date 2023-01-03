@@ -34,6 +34,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -75,7 +76,7 @@ public class OpenNMSContainer extends GenericContainer {
                 .withEnv("OPENNMS_DBUSER", "opennms")
                 .withEnv("OPENNMS_DBPASS", "opennms")
                 .withEnv("KARAF_FEATURES", "producer")
-                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,address=0.0.0.0:8001,suspend=n")
+                .withEnv("JAVA_OPTS", "-agentlib:jdwp=transport=dt_socket,server=y,address=0.0.0.0:8001,suspend=n -Djava.security.egd=file:/dev/./urandom")
                 .withClasspathResourceMapping(prepareOverlay().getFileName().toString(), "/opt/opennms-overlay",
                         BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)
@@ -92,6 +93,10 @@ public class OpenNMSContainer extends GenericContainer {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public InetSocketAddress getSSHAddress() {
+        return new InetSocketAddress(getContainerIpAddress(), getMappedPort(OPENNMS_SSH_PORT));
     }
 
     protected Path prepareOverlay() {

@@ -28,10 +28,15 @@
 
 package org.opennms.alec.datasource.common.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.InventoryObjectPeerEndpoint;
+import org.opennms.alec.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.alec.datasource.common.ImmutableInventoryObject;
 import org.opennms.alec.datasource.common.ImmutableInventoryObjectPeerRef;
+import org.opennms.alec.datasource.common.ImmutableInventoryObjectRelativeRef;
 
 import com.google.gson.Gson;
 
@@ -77,20 +82,47 @@ public class TypeToInventory {
                 .build();
     }
 
-    public static InventoryObject getBgpPeer(String managedObjectInstance, String nodeCriteria) {
+    public static List<InventoryObject> getBgpPeer(String managedObjectInstance, String nodeCriteria) {
+        final List<InventoryObject> ios = new ArrayList<>(2);
+
         // Retrieve the BGP peer details
         final BgpPeerInstance bgpPeerInstance = gson.fromJson(managedObjectInstance, BgpPeerInstance.class);
-        // Build the object id
-        final String ioId = String.format("%s:%s:%s", nodeCriteria, bgpPeerInstance.getPeer(),
-                bgpPeerInstance.getVrf());
-        return ImmutableInventoryObject.newBuilder()
+
+        // Build the BGP peer IO
+        final ImmutableInventoryObject.Builder peerBuilder = ImmutableInventoryObject.newBuilder()
                 .setType(ManagedObjectType.BgpPeer.getName())
-                .setId(ioId)
-                .setFriendlyName(String.format("BGP Peer %s on %s in VRF: %s",
-                        bgpPeerInstance.getPeer(), nodeCriteria, bgpPeerInstance.getVrf()))
-                .setParentType(ManagedObjectType.Node.getName())
-                .setParentId(nodeCriteria)
-                .build();
+                .setId(bgpPeerInstance.getPeer())
+                .setFriendlyName(String.format("BGP Peer %s", bgpPeerInstance.getPeer()))
+                // Add a relative relation to the node associated with the alarm
+                .addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                        .setType(ManagedObjectType.Node.getName())
+                        .setId(nodeCriteria)
+                        .build());
+
+        if (bgpPeerInstance.getPeerNodeCriteria() != null) {
+            // This peer IP address is owned by a node, so we can associate the peer with a parent
+            peerBuilder.setParentType(ManagedObjectType.Node.getName())
+                    .setParentId(bgpPeerInstance.getPeerNodeCriteria());
+        }
+        final InventoryObject bgpPeerIo = peerBuilder.build();
+        ios.add(bgpPeerIo);
+
+        if (bgpPeerInstance.getVrf() != null) {
+            // This peer is used in a VRF
+            final InventoryObject bgpVrfIo = ImmutableInventoryObject.newBuilder()
+                    .setType(ManagedObjectType.BgpVrf.getName())
+                    .setId(bgpPeerInstance.getVrf())
+                    .setFriendlyName(String.format("BGP VRF %s", bgpPeerInstance.getVrf()))
+                    // Add a relative relation to the node associated with the alarm
+                    .addRelative(ImmutableInventoryObjectRelativeRef.newBuilder()
+                            .setType(ManagedObjectType.Node.getName())
+                            .setId(nodeCriteria)
+                            .build())
+                    .build();
+            ios.add(bgpVrfIo);
+        }
+
+        return ios;
     }
 
     public static InventoryObject getVpnTunnel(String managedObjectInstance, String nodeCriteria) {

@@ -29,7 +29,6 @@
 package org.opennms.alec.datasource.opennms.jvm;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -42,10 +41,13 @@ import org.opennms.alec.datasource.api.FeedbackType;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Severity;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.datasource.api.Status;
 import org.opennms.alec.datasource.common.ImmutableAlarm;
 import org.opennms.alec.datasource.common.ImmutableAlarmFeedback;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.datasource.common.inventory.script.ScriptedInventoryException;
+import org.opennms.alec.datasource.common.util.AlarmUtil;
+import org.opennms.integration.api.v1.model.DatabaseEvent;
 import org.opennms.integration.api.v1.model.EventParameter;
 import org.opennms.integration.api.v1.model.InMemoryEvent;
 import org.opennms.integration.api.v1.model.Node;
@@ -61,6 +63,12 @@ public class ApiMapper {
     private static final Logger LOG = LoggerFactory.getLogger(ApiMapper.class);
     public static final String SITUATION_UEI = "uei.opennms.org/alarms/situation";
     public static final String SITUATION_ID_PARM_NAME = "situationId";
+    public static final String SITUATION_STATUS_PARM_NAME = "situationStatus";
+    public static final String SITUATION_LOG_MSG = "situationLogMsg";
+    public static final String SITUATION_DESCR = "situationDescr";
+    public static final String SITUATION_CREATED = "situation created %s alarm(s) correlated";
+    public static final String SITUATION_REJECTED = "situation rejected";
+    public static final String SITUATION_ACCEPTED = "situation accepted";
 
     private final ScriptedInventoryService inventoryService;
 
@@ -73,15 +81,19 @@ public class ApiMapper {
 
     public Alarm toAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
         ImmutableAlarm.Builder alarmBuilder = ImmutableAlarm.newBuilder();
-        alarmBuilder
-                .setId(alarm.getReductionKey())
+        alarmBuilder.setId(alarm.getReductionKey())
+                .setLongId(alarm.getId())
+                .setFirstTime(alarm.getFirstEventTime().getTime())
                 .setTime(alarm.getLastEventTime().getTime())
                 .setSeverity(toSeverity(alarm.getSeverity()))
                 .setInventoryObjectId(alarm.getManagedObjectInstance())
                 .setInventoryObjectType(alarm.getManagedObjectType())
                 .setSummary(alarm.getLogMessage())
                 .setDescription(alarm.getDescription())
-                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null);
+                .setNodeId(alarm.getNode() != null ? alarm.getNode().getId().longValue() : null)
+                .setNodeLabel(alarm.getNode() != null ? alarm.getNode().getLabel() : null)
+                .setNodeLocation(alarm.getNode() != null ? alarm.getNode().getLocation() : null)
+                .setReductionKey(alarm.getReductionKey());
         try {
             inventoryService.overrideTypeAndInstance(alarmBuilder, alarm);
         } catch (ScriptedInventoryException e) {
@@ -93,25 +105,40 @@ public class ApiMapper {
     }
 
     public Situation toSituation(org.opennms.integration.api.v1.model.Alarm alarm) {
+        final String situationStatus;
+        final Optional<String> situationStatusFromAlarm = getSituationParamFromAlarm(alarm, SITUATION_STATUS_PARM_NAME);
+        situationStatus = situationStatusFromAlarm.orElseGet(Status.CREATED::toString);
+
         final String situationId;
-        final Optional<String> situationIdFromAlarm = getSituationIdFromAlarm(alarm);
+        final Optional<String> situationIdFromAlarm = getSituationParamFromAlarm(alarm, SITUATION_ID_PARM_NAME);
         if (situationIdFromAlarm.isPresent()) {
             situationId = situationIdFromAlarm.get();
         } else {
-            LOG.warn("Could not find situationId on alarm: {}. Using the alarm id instead.");
+            LOG.warn("Could not find situationId on alarm: {}. Using the alarm reductionKey instead.", alarm.getId());
             situationId = Integer.toString(alarm.getId());
         }
 
         return ImmutableSituation.newBuilder()
                 .setId(situationId)
+                .setLongId(alarm.getId())
                 .setCreationTime(alarm.getFirstEventTime().toInstant().toEpochMilli())
                 .setSeverity(toSeverity(alarm.getSeverity()))
-                .setAlarms(alarm.getRelatedAlarms().stream().map(a -> this.toAlarm(a)).collect(Collectors.toSet()))
+                .setAlarms(alarm.getRelatedAlarms().stream().map(this::toAlarm).collect(Collectors.toSet()))
+                .setStatus(Status.valueOf(situationStatus))
+                .setReductionKey(alarm.getReductionKey())
+                .setLastTime(alarm.getLastEventTime().toInstant().toEpochMilli())
+                .setUei(alarm.getLastEvent() != null ? alarm.getLastEvent().getUei() : null)
+                .setDescription(alarm.getDescription())
                 .build();
     }
 
-    private Optional<String> getSituationIdFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
-        final List<EventParameter> parms = alarm.getLastEvent().getParametersByName(SITUATION_ID_PARM_NAME);
+    private Optional<String> getSituationParamFromAlarm(org.opennms.integration.api.v1.model.Alarm alarm, String param) {
+        final DatabaseEvent databaseEvent = alarm.getLastEvent();
+        if (databaseEvent == null) {
+            // Last event is missing
+            return Optional.empty();
+        }
+        final List<EventParameter> parms = databaseEvent.getParametersByName(param);
         if (parms == null) {
             // No parameter with that name
             return Optional.empty();
@@ -130,24 +157,54 @@ public class ApiMapper {
                 .mapToInt(a -> a.getSeverity() != null ? a.getSeverity().getValue() : Severity.INDETERMINATE.getValue())
                 .max()
                 .orElseGet(Severity.INDETERMINATE::getValue));
-        eventBuilder.setSeverity(toSeverity(maxSeverity));
 
-        // Relay the situation id
-        eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
+        // Populate logmsg, descr and related node with details from the most relevant alarm
+        Alarm alarmForDescr = null;
+        if (!Status.REJECTED.equals(situation.getStatus())) {
+            alarmForDescr = AlarmUtil.getAlarmForDescription(situation.getAlarms());
+        }
 
-        // Use the log message and description from the first (earliest) alarm
-        final Alarm earliestAlarm = situation.getAlarms().stream()
-                .min(Comparator.comparing(Alarm::getTime))
-                .orElse(null);
-        if (earliestAlarm != null) {
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationLogMsg",
-                    earliestAlarm.getSummary()));
+        switch (situation.getStatus()){
+            case ACCEPTED:
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG, SITUATION_ACCEPTED));
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, situation.getDescription()));
+                eventBuilder.setSeverity(toSeverity(situation.getSeverity()));
+                break;
+            case REJECTED:
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG, SITUATION_REJECTED));
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, situation.getDescription()));
+                eventBuilder.setSeverity(toSeverity(situation.getSeverity()));
+                break;
+            case USER_CREATED:
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG,
+                        String.format(SITUATION_CREATED, situation.getAlarms().size())));
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR,
+                        situation.getDescription() + "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>"));
+                eventBuilder.setSeverity(toSeverity(maxSeverity));
+                break;
+            case ADDED_ALARM:
+            case REMOVED_ALARM:
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG, situation.getFeedback().get(situation.getFeedback().size() - 1)));
+                eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, situation.getDescription()));
+                eventBuilder.setSeverity(toSeverity(maxSeverity));
+                break;
+            case CREATED:
+                if (alarmForDescr != null) {
+                    eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_LOG_MSG,
+                            alarmForDescr.getSummary()));
 
-            String description = earliestAlarm.getDescription();
-            if (situation.getDiagnosticText() != null) {
-                description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
-            }
-            eventBuilder.addParameter(ImmutableEventParameter.newInstance("situationDescr", description));
+                    String description = alarmForDescr.getDescription();
+                    if (situation.getDiagnosticText() != null) {
+                        description += "\n<p>ALEC Diagnostic: " + situation.getDiagnosticText() + "</p>";
+                    }
+                    eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_DESCR, description));
+                }
+                eventBuilder.setSeverity(toSeverity(maxSeverity));
+        }
+
+        if (alarmForDescr != null) {
+            // Set a node id - use the same node associated with the alarm we used to the description
+            eventBuilder.setNodeId(alarmForDescr.getNodeId() != null ? alarmForDescr.getNodeId().intValue() : null);
         }
 
         // Set the related reduction keys
@@ -159,6 +216,12 @@ public class ApiMapper {
                 // provided that the parameter name *starts with* 'related-reductionKey'
                 .forEach(reductionKey -> eventBuilder.addParameter(ImmutableEventParameter
                         .newInstance("related-reductionKey" + alarmIndex.incrementAndGet(), reductionKey)));
+
+        // Relay the situation id
+        eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_ID_PARM_NAME, situation.getId()));
+
+        // Add situation status
+        eventBuilder.addParameter(ImmutableEventParameter.newInstance(SITUATION_STATUS_PARM_NAME, situation.getStatus().toString()));
 
         return eventBuilder.build();
     }
@@ -180,8 +243,9 @@ public class ApiMapper {
                 return org.opennms.integration.api.v1.model.Severity.NORMAL;
             case CLEARED:
                 return org.opennms.integration.api.v1.model.Severity.CLEARED;
+            default:
+                return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
         }
-        return org.opennms.integration.api.v1.model.Severity.INDETERMINATE;
     }
 
     public Severity toSeverity(org.opennms.integration.api.v1.model.Severity severity) {
@@ -201,8 +265,9 @@ public class ApiMapper {
                 return Severity.MAJOR;
             case CRITICAL:
                 return Severity.CRITICAL;
+            default:
+                return Severity.INDETERMINATE;
         }
-        return Severity.INDETERMINATE;
     }
 
     public List<InventoryObject> toInventory(Node node) {

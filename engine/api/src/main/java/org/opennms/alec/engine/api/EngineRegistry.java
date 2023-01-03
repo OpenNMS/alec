@@ -34,4 +34,5 @@ public interface EngineRegistry {
 
     Collection<Engine> getEngines();
 
+    EngineRegistry getEngineRegistry();
 }

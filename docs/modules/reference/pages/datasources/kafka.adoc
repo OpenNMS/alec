@@ -1,0 +1,91 @@
+
+= Kafka Datasource
+
+The Kafka datasource is used with a xref:admin:distributed_install.adoc[distributed installation of ALEC].
+It interfaces with OpenNMS by leveraging the event consumer and Kafka Producer features.
+
+The Kafka Producer forwards alarms, nodes, and network topology data that is encoded in OpenNMS protocol buffers to topics (see https://docs.opennms.com/horizon/31/operation/deep-dive/kafka-producer/kafka-producer.html[Kafka Producer] in the main documentation).
+The datasource consumes data from these topics and uses it to provide ALEC with a feed of alarms and inventory information.
+
+[topics]
+== Configure topics
+
+You can update the following properties to configure the names of individual Kafka topics:
+
+[options="header", cols="1,2,2"]
+|===
+| Property
+| Description
+| Default Value
+
+| alarmTopic
+| Alarms managed by OpenNMS.
+| alarms
+
+| alarmFeedbackTopic
+| Alarm feedback managed by OpenNMS.
+| alarmFeedback
+
+| edgesTopic
+| Topology managed by OpenNMS.
+| edges
+
+| nodeTopic
+| Node inventory managed by OpenNMS.
+| nodes
+
+| eventSinkTopic
+| Used to forward events to OpenNMS.
+| OpenNMS.Sink.Events
+
+| inventoryTopic
+| Used to maintain inventory state.
+| alec-inventory
+|===
+
+IMPORTANT: These topics must exist in the Kafka broker for the datasource to operate.
+
+== Event compatibility
+
+The `eventTimeFormat` property is used to determine how event creation times are encoded when ALEC sends events to OpenNMS.
+It should be set to its default value (`iso`) to ensure that event data is compatible with ALEC.
+
+== Scripted extensions
+
+You can modify or extend ALEC's mapping configuration script by updating or overwriting `inventory.groovy`.
+If you choose to overwrite the file, you must update the datasource bundle's configuration to point to the replacement script on your local file system:
+
+.Update `scriptFile` property in `org.opennms.alec.datasource.opennms.kafka`
+[source]
+----
+config:edit org.opennms.alec.datasource.opennms.kafka
+config:property-set scriptFile /tmp/inventory.groovy
+config:update
+----
+
+NOTE: If you replace the script, the replacement must use a scripting engine that implements `Invocable`, and the file must be UTF-8 encoded.
+
+=== API
+
+Three methods are exposed to the `InventoryObject` script:
+
+[options="header", cols="2,2"]
+|===
+| Method
+| Description
+
+| InventoryObjects edgeToInventory(TopologyEdge edge)
+| Converts data stored in `edge` to an edge on the network topology map.
+
+| List<InventoryObject> toInventoryObjects(OpennmsModelProtos.Node node)
+| Converts data stored in `node` to an inventory object on the network topology map.
+
+| EnrichedAlarm enrichAlarm(OpennmsModelProtos.Alarm alarm)
+| Identifies the `InventoryObject` to which an alarm is attached.
+|===
+
+Because edge and node data is received via Kafka topics, the `edgeToInventory` and `toInventoryObjects` are invoked, respectively.
+They allow ALEC to create and maintain a full list of inventory objects.
+
+When alarms are stored in the Kafka topic, the `enrichAlarm` method is invoked.
+It uses enriched alarm data to identify all inventory objects that are affected by an alarm.

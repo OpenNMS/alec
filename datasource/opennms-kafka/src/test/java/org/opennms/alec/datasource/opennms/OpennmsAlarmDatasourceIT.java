@@ -144,6 +144,53 @@ public class OpennmsAlarmDatasourceIT extends OpennmsDatasourceIT implements Ala
         datasource.unregisterHandler(this);
     }
 
+    @Test(timeout=60000)
+    public void canRetrieveAlarms() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getAlarms(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey("nodeDown::1")
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getAlarms(), hasSize(1));
+    }
+
+    @Test(timeout=60000)
+    public void canRetrieveAlarm() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getAlarms(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey("nodeDown::1")
+                .setId(1)
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getAlarm(1).isPresent());
+    }
+
+    @Test(timeout=6000)
+    public void canRetrieveAlarmNotFound() throws IOException, InterruptedException {
+        datasource.init();
+        assertThat(datasource.getAlarms(), hasSize(0));
+
+        OpennmsModelProtos.Alarm alarm = OpennmsModelProtos.Alarm.newBuilder()
+                .setReductionKey("nodeDown::1")
+                .setId(1)
+                .setLastEventTime(1)
+                .setSeverity(OpennmsModelProtos.Severity.CRITICAL)
+                .build();
+        producer.send(new ProducerRecord<>(datasource.getAlarmTopic(), alarm.getReductionKey(), alarm.toByteArray()));
+
+        await().atMost(10, TimeUnit.SECONDS).until(() -> datasource.getAlarm(2).isEmpty());
+    }
+
     @Override
     public void onAlarmCreatedOrUpdated(Alarm alarm) {
         alarmsCreatedOrUpdatedById.put(alarm.getId(), alarm);

@@ -39,6 +39,11 @@ public interface Situation {
 
     String getId();
 
+    long getLongId();
+
+    /**
+     * Timestamp in millis
+     */
     long getCreationTime();
 
     List<ResourceKey> getResourceKeys();
@@ -53,4 +58,17 @@ public interface Situation {
      */
     String getDiagnosticText();
 
+    Status getStatus();
+
+    String getReductionKey();
+
+    Long getLastTime();
+
+    String getUei();
+
+    String getDescription();
+
+    List<String> getFeedback();
+
+    String getEngineParameter();
 }

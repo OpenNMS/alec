@@ -24,7 +24,7 @@
  *     OpenNMS(R) Licensing <license@opennms.org>
  *     http://www.opennms.org/
  *     http://www.opennms.com/
- *******************************************************************************/
+ ******************************************************************************/
 
 package org.opennms.alec.engine.dbscan;
 
@@ -35,12 +35,16 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
+import org.opennms.alec.engine.api.DistanceMeasure;
+import org.opennms.alec.engine.api.DistanceMeasureFactory;
 import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.MetricRegistry;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -67,24 +71,25 @@ import edu.uci.ics.jung.graph.Graph;
 public class DBScanEngine extends AbstractClusterEngine {
     private static final Logger LOG = LoggerFactory.getLogger(DBScanEngine.class);
 
-    public static final double  DEFAULT_EPSILON = 100d;
     public static final double DEFAULT_ALPHA = 144.47117699d;
     public static final double DEFAULT_BETA = 0.55257784d;
-
+    public static final String DEFAULT_DISTANCE_MEASURE = "alarminspaceandtimedistance";
     private final double epsilon;
-    private final AlarmInSpaceTimeDistanceMeasure distanceMeasure;
+    private final DistanceMeasure distanceMeasure;
 
-    public DBScanEngine() {
-        this(DEFAULT_EPSILON, DEFAULT_ALPHA, DEFAULT_BETA);
-    }
+    public DBScanEngine(MetricRegistry metrics, double epsilon, double alpha, double beta, DistanceMeasureFactory distanceMeasureFactory) {
+        super(metrics);
+        LOG.debug("DBScanEngine configuration alpha: {} beta: {} epsilon: {} distanceMeasure: {}",
+                alpha, beta, epsilon, distanceMeasureFactory.getName());
 
-    public DBScanEngine(double epsilon, double alpha, double beta) {
         this.epsilon = epsilon;
-        distanceMeasure = new AlarmInSpaceTimeDistanceMeasure(this, alpha, beta);
+        this.distanceMeasure = distanceMeasureFactory.createDistanceMeasure(this, alpha, beta);
     }
 
     @Override
     public List<Cluster<AlarmInSpaceTime>> cluster(long timestampInMillis, Graph<CEVertex, CEEdge> g) {
+        LOG.debug("start DBSCan clustering: DistanceMeasure: {} Alpha: {} Beta: {} Epsilon: {}",
+                distanceMeasure.getName(), distanceMeasure.getAlpha(), distanceMeasure.getBeta(), epsilon);
         // Ensure the points are sorted in order to make sure that the output of the clusterer is deterministic
         // OPTIMIZATION: Can we avoid doing this every tick?
         final List<AlarmInSpaceTime> alarms = g.getVertices().stream()
@@ -104,11 +109,11 @@ public class DBScanEngine extends AbstractClusterEngine {
     }
 
     @Override
-    public double getDistanceBetween(double t1, double t2, double distance) {
-        return distanceMeasure.compute(t1, t2, distance);
+    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
+        return distanceMeasure.compute(t1, t2, firstTimeA, firstTimeB, distance);
     }
 
-    public AlarmInSpaceTimeDistanceMeasure getDistanceMeasure() {
+    public DistanceMeasure getDistanceMeasure() {
         return distanceMeasure;
     }
 }

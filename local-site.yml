@@ -1,22 +1,24 @@
-site: 
+site:
   title: OpenNMS ALEC Documentation
   url: https://alec.opennms.com
   start_page: alec::index.adoc
-content: 
-  sources: 
+content:
+  sources:
   - url: .
     branches: HEAD
-    tags: v*
+    tags:
+      - jira/ALEC-227
     start_path: docs
 ui:
+
   bundle:
-    url: https://github.com/opennms-forge/antora-ui-opennms/releases/download/v1.0.1/ui-bundle.zip
+    url: https://github.com/opennms-forge/antora-ui-opennms/releases/download/v3.1.0/ui-bundle.zip
 asciidoc:
   attributes:
     stem: latexmath
-output: 
-  clean: true 
-  dir: ./public 
-  destinations: 
+output:
+  clean: true
+  dir: ./public
+  destinations:
   - provider: fs
-  - provider: archive 
+  - provider: archive

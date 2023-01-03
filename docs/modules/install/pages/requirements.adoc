@@ -1,8 +1,0 @@
-= Requirements
-
-Before installing ALEC, we assume that you already have an instance of OpenNMS Horizon 24.0.0 or greater up and running.
-
-TIP: See link:https://www.opennms.org/en/install[OpenNMS Installation] for help on getting started with OpenNMS.
-
-We also recommend setting up link:https://grafana.com/plugins/opennms-helm-app[OpenNMS Helm] (requires 3.0.0 or greater) to view and manage the situations, as well as link:https://www.elastic.co/products/elasticsearch[Elasticsearch] (requires 6.3.0 or greater) to maintain event and alarm history for training purposes.
-The installation guide will assume that these are also set up.

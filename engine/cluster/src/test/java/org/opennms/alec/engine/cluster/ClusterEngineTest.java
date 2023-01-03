@@ -63,13 +63,14 @@ import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.driver.test.MockInventoryBuilder;
 import org.opennms.alec.driver.test.MockInventoryType;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.Iterables;
 
 import edu.uci.ics.jung.graph.Graph;
 
 public class ClusterEngineTest implements SituationHandler {
 
-    private ClusterEngine engine = new ClusterEngine();
+    private ClusterEngine engine = new ClusterEngine(new MetricRegistry());
 
     private Map<String, Situation> situationsById = new LinkedHashMap<>();
 
@@ -151,6 +152,7 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situationsById.keySet(), hasSize(0));
 
         // Tick
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         engine.tick(now+2);
 
         // We should now have a single situation with both alarms
@@ -244,6 +246,7 @@ public class ClusterEngineTest implements SituationHandler {
         assertThat(situationsById.keySet(), hasSize(0));
 
         // Tick
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         engine.tick(now+2);
 
         // We should now have a single situation with both alarms
@@ -296,6 +299,7 @@ public class ClusterEngineTest implements SituationHandler {
         // A cluster with a single alarm that was not previously mapped to a situation should be in a new situation
         Cluster<AlarmInSpaceTime> cluster = new Cluster<>();
         cluster.addPoint(alarm1InSpaceTime);
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
         context = engine.getTickContextFor(0L);
         engine.mapClusterToSituations(cluster, context);
         situations = context.getNewOrUpdatedSituations();
@@ -375,6 +379,8 @@ public class ClusterEngineTest implements SituationHandler {
         cluster.addPoint(alarm4InSpaceTime);
 
         // Process the cluster
+        Thread.currentThread().setName("ALEC Driver Tick -- engine");
+        engine.solveEntireGraphForTesting();
         engine.setSituations(Arrays.asList(situation1, situation2));
         AbstractClusterEngine.TickContext context = engine.getTickContextFor(0L);
         engine.mapClusterToSituations(cluster, context);
@@ -405,6 +411,8 @@ public class ClusterEngineTest implements SituationHandler {
                 .withRelativeRelation(MockInventoryType.COMPONENT, "e", MockInventoryType.COMPONENT, "d")
                 .getInventory());
 
+        engine.solveEntireGraphForTesting();
+        
         // A-B is a parent relationship
         assertThat(engine.getSpatialDistanceBetween(getVertexIdForComponentId("a"), getVertexIdForComponentId("b")),
                 equalTo((double) MockInventoryBuilder.PARENT_WEIGHT));

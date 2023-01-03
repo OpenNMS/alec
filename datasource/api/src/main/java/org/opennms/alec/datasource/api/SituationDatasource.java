@@ -29,12 +29,15 @@
 package org.opennms.alec.datasource.api;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SituationDatasource {
 
-    List<Situation> getSituations();
+    List<Situation> getSituations() throws InterruptedException;
 
-    void forwardSituation(Situation situation) throws Exception;
+    Optional<Situation> getSituation(int id) throws InterruptedException;
+
+    void forwardSituation(Situation situation);
 
     void registerHandler(SituationHandler handler);
 

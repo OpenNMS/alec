@@ -33,6 +33,7 @@ java/bin/
 *.swo
 
 dependency-reduced-pom.xml
-
+coverage
 # Ignore any copied KAR files produced for the smoke tests
 *.kar
+yarn-error.log

@@ -37,8 +37,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -46,8 +48,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.runner.Description;
 import org.opennms.alec.smoke.util.Cleanup;
+import org.opennms.alec.smoke.util.DevDebugUtils;
 import org.opennms.alec.smoke.util.Karaf;
 import org.opennms.alec.smoke.util.Network;
 import org.opennms.alec.smoke.util.Overlay;
@@ -56,8 +58,10 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.SelinuxContext;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 
-public class ALECSentinelContainer extends GenericContainer {
+public class ALECSentinelContainer extends GenericContainer implements TestLifecycleAware {
     private static final Logger LOG = LoggerFactory.getLogger(ALECSentinelContainer.class);
     private static final int SENTINEL_SSH_PORT = 8301;
     private static final String OVERLAY_STANDALONE_DIR = "sentinel-overlay-standalone";
@@ -83,6 +87,7 @@ public class ALECSentinelContainer extends GenericContainer {
                 .withNetwork(Network.getNetwork())
                 .withNetworkAliases(getIndexedAlias())
                 .withCommand("-d")
+                .withEnv("JAVA_OPTS", "-Djava.security.egd=file:/dev/./urandom")
                 .withClasspathResourceMapping(overlayPath.getFileName().toString(), "/opt/sentinel-overlay",
                         BindMode.READ_ONLY,
                         SelinuxContext.SINGLE)
@@ -192,9 +197,24 @@ public class ALECSentinelContainer extends GenericContainer {
         return getIndexedAlias();
     }
 
+
     @Override
-    protected void failed(Throwable e, Description description) {
-        Cleanup.skipCleanupIfNeeded(e);
-        super.failed(e, description);
+    public void afterTest(TestDescription description, Optional<Throwable> throwable) {
+        LOG.info("Gathering logs...");
+        copyLogs(description.getFilesystemFriendlyName());
+        // Optionally skip cleanup if the test failed
+        throwable.ifPresent(Cleanup::skipCleanupIfNeeded);
+    }
+
+    private void copyLogs(String prefix) {
+        // List of known log files we expect to find in the container
+        final List<String> logFiles = Arrays.asList("karaf.log");
+        DevDebugUtils.copyLogs(this,
+                // dest
+                Paths.get("target", "logs", prefix, "sentinel"),
+                // source folder
+                Paths.get("/opt", "sentinel", "data", "log"),
+                // log files
+                logFiles);
     }
 }

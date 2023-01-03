@@ -97,8 +97,7 @@ class InventoryFactory {
                 return Collections.singletonList(TypeToInventory.getEntPhysicalEntity(
                         alarm.getManagedObjectInstance(), toNodeCriteria(alarm)));
             case ManagedObjectType.BgpPeer:
-                return Collections.singletonList(TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(),
-                        toNodeCriteria(alarm)));
+                return TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), toNodeCriteria(alarm));
             case ManagedObjectType.VpnTunnel:
                 return Collections.singletonList(TypeToInventory.getVpnTunnel(alarm.getManagedObjectInstance(),
                         toNodeCriteria(alarm)));
@@ -129,6 +128,12 @@ class InventoryFactory {
             if (!alreadyScoped.contains(type)) {
                 alarmBuilder.setInventoryObjectType(type.getName());
                 alarmBuilder.setInventoryObjectId(String.format("%s:%s", toNodeCriteria(alarm.getNode()), alarm.getManagedObjectInstance()));
+            }
+
+            // point back to the IO we created, instead of using the information that was passed via in the field
+            if (type == ManagedObjectType.BgpPeer) {
+                InventoryObject bgpIo = TypeToInventory.getBgpPeer(alarm.getManagedObjectInstance(), toNodeCriteria(alarm)).get(0);
+                alarmBuilder.setInventoryObjectId(bgpIo.getId());
             }
         }
 

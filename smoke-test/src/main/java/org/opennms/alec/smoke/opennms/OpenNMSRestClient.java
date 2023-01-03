@@ -30,15 +30,13 @@ package org.opennms.alec.smoke.opennms;
 
 import static org.awaitility.Awaitility.await;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +70,18 @@ public class OpenNMSRestClient {
 
     private final String authorizationHeader;
 
+    private static final String ADD_NODE_REQUEST = "<node foreign-id=\"%1$s\" node-label=\"%1$s\" " +
+            "xmlns=\"http://xmlns" +
+            ".opennms.org/xsd/config/model-import\"/>";
+
+    private static final String ADD_REQUISITION_REQUEST = "<model-import foreign-source=\"test\" xmlns=\"http://xmlns" +
+            ".opennms.org/xsd/config/model-import\"/>";
+
+    private static final String ADD_UDL_REQUEST = "{\"node-id-a\": %d, \"node-id-z\": %d, \"component-label-a\": " +
+            "\"tp1\", \"component-label-z\": \"tp2\", \"link-id\": \"n1:tp1->n2:tp2\", \"owner\": \"me\"}";
+
+    private final Gson gson = new Gson();
+
     public OpenNMSRestClient(InetSocketAddress addr) throws MalformedURLException {
         this(addr, DEFAULT_USERNAME, DEFAULT_PASSWORD);
     }
@@ -91,11 +101,11 @@ public class OpenNMSRestClient {
 
     public String getDisplayVersion() {
         try {
-        final WebTarget target = getTarget().path("info");
-        final String json = getBuilder(target).get(String.class);
+            final WebTarget target = getTarget().path("info");
+            final String json = getBuilder(target).get(String.class);
 
-        final ObjectMapper mapper = new ObjectMapper();
-        
+            final ObjectMapper mapper = new ObjectMapper();
+
             JsonNode actualObj = mapper.readTree(json);
             return actualObj.get("displayVersion").asText();
         } catch (IOException e) {
@@ -153,41 +163,52 @@ public class OpenNMSRestClient {
     public void triggerAlarmsForCorrelation(int nodeId) {
         Event e1 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e1);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e1.reductionKey()));
-
         Event e2 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e2);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e2.reductionKey()));
-
         Event e3 = Event.genericAlarmEventOnNode(nodeId);
         sendEvent(e3);
-        await().atMost(15, TimeUnit.SECONDS).until(() -> testForAlarmWithReductionKey(e3.reductionKey()));
+
+        await().atMost(1, TimeUnit.MINUTES).until(() ->
+                testForAlarmWithReductionKey(e1.reductionKey()) &&
+                        testForAlarmWithReductionKey(e2.reductionKey()) &&
+                        testForAlarmWithReductionKey(e3.reductionKey())
+        );
     }
-    
-    public int addTestNode() throws URISyntaxException {
+
+    public int addTestNode() {
         // The requisition foreign source is hardcoded to "test" in the XML file
         addRequisition();
-        addNodeToRequisition("test");
+        addNodeToRequisition("test", "test");
         importRequisition("test");
         return waitForNode("test:test");
     }
-    
-    private void addRequisition() throws URISyntaxException {
+
+    public Map<String, Integer> addTestNodes(String... nodeLabels) {
+        // The requisition foreign source is hardcoded to "test" in the XML file
+        addRequisition();
+        Map<String, Integer> nodeLabelsToNodeIds = new HashMap<>();
+        for (String nodeLabel : nodeLabels) {
+            addNodeToRequisition("test", nodeLabel);
+        }
+        importRequisition("test");
+        for (String nodeLabel : nodeLabels) {
+            nodeLabelsToNodeIds.put(nodeLabel, waitForNode(String.format("test:%s", nodeLabel)));
+        }
+        return nodeLabelsToNodeIds;
+    }
+
+    private void addRequisition() {
         final WebTarget target = getTarget().path("requisitions");
-        File requisitionFile = new File(getClass().getClassLoader().getResource(Paths.get("requests", "requisition" +
-                ".xml").toString()).toURI());
-        final Response response = getBuilder(target).post(Entity.xml(requisitionFile));
+        final Response response = getBuilder(target).post(Entity.xml(ADD_REQUISITION_REQUEST));
         if (!Response.Status.Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily())) {
             throw new IllegalArgumentException(String.format("Requisition add failed with %d: %s", response.getStatus(),
                     response));
         }
     }
 
-    private void addNodeToRequisition(String requisitionName) throws URISyntaxException {
+    private void addNodeToRequisition(String requisitionName, String nodeLabel) {
         final WebTarget target = getTarget().path("requisitions").path(requisitionName).path("nodes");
-        File nodeFile = new File(getClass().getClassLoader().getResource(Paths.get("requests", "node" +
-                ".xml").toString()).toURI());
-        final Response response = getBuilder(target).post(Entity.xml(nodeFile));
+        final Response response = getBuilder(target).post(Entity.xml(String.format(ADD_NODE_REQUEST, nodeLabel)));
         if (!Response.Status.Family.SUCCESSFUL.equals(response.getStatusInfo().getFamily())) {
             throw new IllegalArgumentException(String.format("Node add failed with %d: %s", response.getStatus(),
                     response));
@@ -212,7 +233,35 @@ public class OpenNMSRestClient {
         String responseBody = response.readEntity(String.class);
 
         // Return the ID of the node we waited for
-        return Integer.parseInt((String) new Gson().fromJson(responseBody, Map.class).get("id"));
+        return Integer.parseInt((String) gson.fromJson(responseBody, Map.class).get("id"));
+    }
+
+    public void addUDLBetweenNodes(int nodeAId, int nodeZId) {
+        final WebTarget target = getTargetV2().path("userdefinedlinks");
+        final Response response = getBuilder(target).post(Entity.json(String.format(ADD_UDL_REQUEST, nodeAId,
+                nodeZId)));
+        waitForLink(nodeAId, nodeZId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void waitForLink(int nodeAId, int nodeZId) {
+        final WebTarget target = getTargetV2().path("userdefinedlinks");
+        await().atMost(1, TimeUnit.MINUTES)
+                .pollInterval(5, TimeUnit.SECONDS)
+                .until(() -> {
+                    Response response = getBuilder(target).accept(MediaType.APPLICATION_JSON_TYPE).get();
+                    String responseBody = response.readEntity(String.class);
+                    Map<String, Object> jsonBody = gson.fromJson(responseBody, Map.class);
+                    List<Map<String, Object>> userDefinedLinksBody = (List<Map<String, Object>>) jsonBody.get(
+                            "user_defined_link");
+                    for (Map<String, Object> udlParams : userDefinedLinksBody) {
+                        if (udlParams.get("node-id-a").equals((double) nodeAId) &&
+                                udlParams.get("node-id-z").equals((double) nodeZId)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
     }
 
     public void clearAllAlarms() {
@@ -229,6 +278,11 @@ public class OpenNMSRestClient {
     private WebTarget getTarget() {
         final Client client = ClientBuilder.newClient();
         return client.target(url.toString()).path("rest");
+    }
+
+    private WebTarget getTargetV2() {
+        final Client client = ClientBuilder.newClient();
+        return client.target(url.toString()).path("api").path("v2");
     }
 
     private Invocation.Builder getBuilder(final WebTarget target) {

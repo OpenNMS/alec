@@ -28,6 +28,8 @@
 
 package org.opennms.alec.engine.cluster;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +47,8 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,31 +56,35 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.ml.clustering.Cluster;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmFeedback;
+import org.opennms.alec.datasource.api.FeedbackType;
 import org.opennms.alec.datasource.api.InventoryObject;
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.ImmutableSituation;
 import org.opennms.alec.engine.api.Engine;
 import org.opennms.alec.features.graph.api.Edge;
+import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.GraphProvider;
 import org.opennms.alec.features.graph.api.OceGraph;
 import org.opennms.alec.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
-import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 
 /**
  * Group alarms into situations by leveraging some clustering algorithm (i.e. DBSCAN)
  */
+@SuppressWarnings("java:S3776")
 public abstract class AbstractClusterEngine implements Engine, GraphProvider, SpatialDistanceCalculator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClusterEngine.class);
@@ -110,13 +118,27 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     private boolean alarmsChangedSinceLastTick = false;
     private boolean feedbackChangedSinceLastTick = false;
-    private DijkstraShortestPath<CEVertex, CEEdge> shortestPath;
+    private final FilterableGraphManager graphManager =
+            FilterableGraphManager.withFilter(this::filterVertex);
+    private final SolvableGraph<CEVertex> shortestPath =
+            DijkstraSolvableGraph.newInstance(graphManager.getFilteredGraph(), e -> (double) e.getWeight(),
+                    Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
+    private boolean shouldFilterGraph = true;
     private Set<Long> disconnectedVertices = new HashSet<>();
-
-    private final GraphManager graphManager = new GraphManager();
 
     // Used to prevent processing callbacks before the init has completed
     private final CountDownLatch initLock = new CountDownLatch(1);
+
+    private final AtomicInteger numVerticesFromLastTick = new AtomicInteger(-1);
+    private final AtomicInteger numEdgesFromLastTick = new AtomicInteger(-1);
+    private final AtomicInteger numAlarmsFromLastTick = new AtomicInteger(-1);
+
+    protected AbstractClusterEngine(MetricRegistry metrics) {
+        metrics.gauge(name("vertices"), () -> numVerticesFromLastTick::get);
+        metrics.gauge(name("edges"), () -> numEdgesFromLastTick::get);
+        metrics.gauge(name("alarms"), () -> numAlarmsFromLastTick::get);
+        metrics.gauge(name("situations"), () -> this::getSituationsCount);
+    }
 
     @Override
     public void registerSituationHandler(SituationHandler handler) {
@@ -145,7 +167,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     @Override
-    public void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
+    public synchronized void init(List<Alarm> alarms, List<AlarmFeedback> alarmFeedback, List<Situation> situations,
                      List<InventoryObject> inventory) {
         try {
             LOG.debug("Initialized with {} alarms, {} alarm feedback, {} situations and {} inventory objects.",
@@ -170,7 +192,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             // Process all the alarm feedback provided on init
             alarmFeedback.forEach(this::handleAlarmFeedback);
 
-            if (alarms.size() > 0) {
+            if (!alarms.isEmpty()) {
                 alarmsChangedSinceLastTick = true;
             }
 
@@ -190,6 +212,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     @Override
     public void destroy() {
+        shortestPath.destroy();
         onDestroy();
     }
 
@@ -250,7 +273,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 throw new IllegalArgumentException("Situation with id: " + situationId + " does not exist.");
             }
             return newOrUpdatedSituationsById.computeIfAbsent(situationId,
-                    (sid) -> ImmutableSituation.newBuilderFrom(existingSituation));
+                    sid -> ImmutableSituation.newBuilderFrom(existingSituation));
         }
 
         ImmutableSituation.Builder getBuilderForNewSituationWithId(String situationId) {
@@ -284,7 +307,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     Situation affectedSituation = situationsById.get(situationId);
                     if (affectedSituation == null) {
                         LOG.info("Got feedback for situation with id: {}, but the engine does not know about this " +
-                                "situation. Ignoring feedback.");
+                                "situation. Ignoring feedback.", situationId);
                         continue;
                     }
                     Set<Alarm> prevAlarms = affectedSituation.getAlarms();
@@ -324,8 +347,15 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 }
                 LOG.debug("{}: Garbage collected {} alarms.", timestampInMillis, numGarbageCollectedAlarms);
 
+                graphManager.updateAndFilter();
+                List<CEVertex> eligibleVertices =
+                        graphManager.getFilteredMatchingVertices(this::vertexIsEligibleForClustering);
+                LOG.debug("Solving {} vertices", eligibleVertices.size());
+                shortestPath.solve(eligibleVertices);
+
                 LOG.debug("{}: Clustering {} alarms.", timestampInMillis, numAlarms);
-                List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis, g);
+                List<Cluster<AlarmInSpaceTime>> clustersOfAlarms = cluster(timestampInMillis,
+                        graphManager.getFilteredGraph());
                 if (clustersOfAlarms == null) {
                     LOG.debug("{}: No clustering was performed.", timestampInMillis);
                     return;
@@ -347,6 +377,11 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                         mapClusterToSituations(clusterOfAlarms, context);
                     }
                 }
+
+                // Store statistics that are exposed via the metric registry
+                numVerticesFromLastTick.set(g.getVertexCount());
+                numEdgesFromLastTick.set(g.getEdgeCount());
+                numAlarmsFromLastTick.set(numAlarms);
             });
         }
 
@@ -365,7 +400,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
     public synchronized void resetHopCache() {
         spatialDistances.invalidateAll();
-        shortestPath = null;
+        shortestPath.invalidate();
         disconnectedVertices = graphManager.getDisconnectedVertices();
     }
 
@@ -387,7 +422,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             final Alarm alarm = alarmInSpaceTime.getAlarm();
             final Situation situation = alarmIdToSituationMap.get(alarm.getId());
             if (situation != null) {
-                alarmsBySituationId.computeIfAbsent(situation.getId(), (sid) -> new ArrayList<>()).add(alarm);
+                alarmsBySituationId.computeIfAbsent(situation.getId(), sid -> new ArrayList<>()).add(alarm);
             } else {
                 alarmsWithoutSituations.add(alarm);
             }
@@ -395,10 +430,8 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
 
         if (LOG.isDebugEnabled()) {
             final Map<String, List<String>> alarmIdsBySituationIds = new LinkedHashMap<>();
-            alarmsBySituationId.forEach((situationId, alarms) -> {
-                alarmIdsBySituationIds.put(situationId, alarms.stream()
-                        .map(Alarm::getId).collect(Collectors.toList()));
-            });
+            alarmsBySituationId.forEach((situationId, alarms) -> alarmIdsBySituationIds.put(situationId, alarms.stream()
+                    .map(Alarm::getId).collect(Collectors.toList())));
             LOG.debug("{}: Alarms IDs by Situations IDs in the cluster: {}",
                     context.getTimestampInMillis(), alarmIdsBySituationIds);
             final List<String> alarmIdsWithoutSituations = alarmsWithoutSituations.stream()
@@ -478,8 +511,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         Collection<ImmutableSituation.Builder> situationBuilders = context.getBuildersForNewOrUpdatedSituations();
         LOG.debug("{}: Generating diagnostic texts for {} situations...", context.getTimestampInMillis(),
                 situationBuilders.size());
-        situationBuilders.forEach(situationBuilder ->
-                situationBuilder.setDiagnosticText(getDiagnosticTextForSituation(situationBuilder.build())));
+        situationBuilders.forEach(situationBuilder -> {
+            situationBuilder.setDiagnosticText(getDiagnosticTextForSituation(situationBuilder.build()));
+            situationBuilder.setEngineParameter(Thread.currentThread().getName().substring(20));
+        });
         LOG.debug("{}: Done generating diagnostic texts.", context.getTimestampInMillis());
     }
 
@@ -516,10 +551,30 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
             getOptionalVertexIdForAlarm(alarm).ifPresent(vertexIds::add);
         }
 
+        boolean skippedDistanceCalc = false;
         if (vertexIds.size() < NUM_VERTEX_THRESHOLD_FOR_HOP_DIAG) {
             maxSpatialDistance = 0d;
-            for (Long vertexIdA : vertexIds) {
-                for (Long vertexIdB : vertexIds) {
+
+            // Exclude all vertices that are no longer on the filtered graph or are no longer eligible for clustering as
+            // we will no longer be able to compute distances for them. This exclusion is performed to handle the case
+            // where this situation includes vertices that no longer match the criteria we use to limit the number of
+            // distance calculations that are performed.
+            Set<Long> vertexIdsOnFilteredGraph = vertexIds.stream()
+                    .filter(id -> {
+                        CEVertex v = graphManager.getVertexWithId(id);
+                        
+                        return graphManager.getFilteredGraph().containsVertex(v) && vertexIsEligibleForClustering(v);
+                    })
+                    .collect(Collectors.toSet());
+            if (vertexIdsOnFilteredGraph.size() != vertexIds.size()) {
+                skippedDistanceCalc = true;
+                Set<Long> idsSkipped = Sets.difference(vertexIds, vertexIdsOnFilteredGraph);
+                LOG.debug("Skipped distance calculation to the following vertices which are no longer on the filtered" +
+                        " graph {}", idsSkipped);
+            }
+
+            for (Long vertexIdA : vertexIdsOnFilteredGraph) {
+                for (Long vertexIdB : vertexIdsOnFilteredGraph) {
                     if (!vertexIdA.equals(vertexIdB)) {
                         maxSpatialDistance = Math.max(maxSpatialDistance, getSpatialDistanceBetween(vertexIdA,
                                 vertexIdB));
@@ -532,6 +587,9 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                 situation.getAlarms().size(), Math.abs(maxTime - minTime) / 1000d, vertexIds.size());
         if (maxSpatialDistance != null && maxSpatialDistance > 0) {
             diagText += String.format(" %.2f distance apart", maxSpatialDistance);
+            if (skippedDistanceCalc) {
+                diagText += " based on partial vertex distance information";
+            }
         }
         diagText += ".";
         return diagText;
@@ -598,29 +656,25 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     @Override
+    @SuppressWarnings("java:S131")
     public void handleAlarmFeedback(AlarmFeedback alarmFeedback) {
         synchronized (situationsWithFeedback) {
             feedbackChangedSinceLastTick = true;
 
-            switch (alarmFeedback.getFeedbackType()) {
-                case FALSE_POSITIVE:
-                    situationAlarmBlacklist.compute(alarmFeedback.getSituationId(), (key, value) -> {
-                        Set<String> alarmIds = value == null ? new HashSet<>() : value;
-                        alarmIds.add(alarmFeedback.getAlarmKey());
+            FeedbackType feedbackType = alarmFeedback.getFeedbackType();
+            if (feedbackType == FeedbackType.FALSE_POSITIVE) {
+                situationAlarmBlacklist.compute(alarmFeedback.getSituationId(), (key, value) -> {
+                    Set<String> alarmIds = value == null ? new HashSet<>() : value;
+                    alarmIds.add(alarmFeedback.getAlarmKey());
 
-                        return alarmIds;
-                    });
+                    return alarmIds;
+                });
 
 
-                    situationsWithFeedback.add(alarmFeedback.getSituationId());
-
-                    break;
-                case FALSE_NEGATIVE:
-                    if (situationAlarmBlacklist.containsKey(alarmFeedback.getSituationId())) {
-                        situationAlarmBlacklist.get(alarmFeedback.getSituationId())
-                                .remove(alarmFeedback.getAlarmKey());
-                    }
-                    break;
+                situationsWithFeedback.add(alarmFeedback.getSituationId());
+            } else if (feedbackType == FeedbackType.FALSE_NEGATIVE && situationAlarmBlacklist.containsKey(alarmFeedback.getSituationId())) {
+                situationAlarmBlacklist.get(alarmFeedback.getSituationId())
+                        .remove(alarmFeedback.getAlarmKey());
             }
         }
     }
@@ -687,17 +741,10 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     private Optional<Long> getOptionalVertexIdForAlarm(Alarm alarm) {
-        return graphManager.withGraph(g -> {
-            for (CEVertex v : graphManager.getGraph().getVertices()) {
-                final Optional<Alarm> match = v.getAlarms().stream()
-                        .filter(a -> a.equals(alarm))
-                        .findFirst();
-                if (match.isPresent()) {
-                    return Optional.of(v.getNumericId());
-                }
-            }
-            return Optional.empty();
-        });
+        AtomicReference<Long> id = new AtomicReference<>();
+        graphManager.withVertex(alarm.getInventoryObjectType(), alarm.getInventoryObjectId(),
+                (g, v) -> id.set(v == null ? null : v.getNumericId()));
+        return Optional.ofNullable(id.get());
     }
 
     private long getVertexIdForAlarm(Alarm alarm) {
@@ -717,21 +764,24 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      * @param distance spatial distance between alarm1 and alarm2
      * @return effective distance between alarm1 and alarm2
      */
-    public double getDistanceBetween(double t1, double t2, double distance) {
+    @SuppressWarnings("java:S1172")
+    public double getDistanceBetween(double t1, double t2, double firstTimeA, double firstTimeB, double distance) {
         return Math.abs(t2 - t1) + distance;
     }
 
     private Alarm getClosestNeighborInSituation(Alarm alarm, List<Alarm> candidates) {
         final long vertexIdA = getVertexIdForAlarm(alarm);
         final double timeA = alarm.getTime();
+        final double firstTimeA = alarm.getFirstTime();
 
         return candidates.stream()
                 .map(candidate -> {
                     final double timeB = candidate.getTime();
+                    final double firstTimeB = candidate.getFirstTime();
                     final long vertexIdB = getVertexIdForAlarm(candidate);
                     final double spatialDistance = vertexIdA == vertexIdB ? 0 : getSpatialDistanceBetween(vertexIdA,
                             vertexIdB);
-                    final double distance = getDistanceBetween(timeA, timeB, spatialDistance);
+                    final double distance = getDistanceBetween(timeA, timeB, firstTimeA, firstTimeB, spatialDistance);
                     return new CandidateAlarmWithDistance(candidate, distance);
                 })
                 .min(Comparator.comparingDouble(CandidateAlarmWithDistance::getDistance)
@@ -740,6 +790,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
     }
 
     @Override
+    @SuppressWarnings("java:S112")
     public double getSpatialDistanceBetween(long vertexIdA, long vertexIdB) {
         final EdgeKey key = new EdgeKey(vertexIdA, vertexIdB);
         try {
@@ -749,6 +800,7 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         }
     }
 
+    @SuppressWarnings("java:S2153")
     private final LoadingCache<EdgeKey, Double> spatialDistances = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .build(new CacheLoader<EdgeKey, Double>() {
@@ -764,10 +816,6 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
                     final CEVertex vertexB = graphManager.getVertexWithId(key.vertexIdB);
                     if (vertexB == null) {
                         throw new IllegalStateException("Could not find vertex with id: " + key.vertexIdB);
-                    }
-
-                    if (shortestPath == null) {
-                        shortestPath = new DijkstraShortestPath<>(graphManager.getGraph(), CEEdge::getWeight, true);
                     }
 
                     Number distance = shortestPath.getDistance(vertexA, vertexB);
@@ -837,6 +885,22 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
         return alarmsById;
     }
 
+    private boolean filterVertex(CEVertex vertex, Graph<CEVertex, CEEdge> graph) {
+        if (!shouldFilterGraph) {
+            // If we are not filtering, don't mark any vertices to be dropped
+            return false;
+        }
+        return !vertexIsEligibleForClustering(vertex) && graph.getIncidentEdges(vertex).size() < 2;
+    }
+
+    private boolean vertexIsEligibleForClustering(CEVertex vertex) {
+        if (!shouldFilterGraph) {
+            // If we are not filtering, select all the vertices
+            return true;
+        }
+        return vertex.hasAlarms();
+    }
+
     @VisibleForTesting
     Graph<CEVertex, CEEdge> getGraph() {
         return graphManager.getGraph();
@@ -873,11 +937,30 @@ public abstract class AbstractClusterEngine implements Engine, GraphProvider, Sp
      *
      * @return immutable map
      */
-    Map<String, Situation> getSituationsById() {
+    synchronized Map<String, Situation> getSituationsById() {
         return ImmutableMap.copyOf(situationsById);
+    }
+
+    synchronized long getSituationsCount() {
+        return situationsById.size();
     }
 
     public GraphManager getGraphManager() {
         return graphManager;
+    }
+
+    @VisibleForTesting
+    void solveEntireGraphForTesting() {
+        // For testing purposes we can have the filtered graph be a straight copy of the original and solve distances
+        // for all vertices
+        shouldFilterGraph = false;
+        graphManager.updateAndFilter();
+        shortestPath.solve(graphManager.getFilteredGraph().getVertices());
+        shouldFilterGraph = true;
+    }
+
+    @Override
+    public void registerGraphChangeListener(final GraphChangedListener listener) {
+        this.graphManager.registerGraphChangedListener(listener);
     }
 }

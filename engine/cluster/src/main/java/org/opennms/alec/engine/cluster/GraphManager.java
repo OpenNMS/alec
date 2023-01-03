@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -51,6 +52,7 @@ import org.opennms.alec.datasource.api.InventoryObjectPeerRef;
 import org.opennms.alec.datasource.api.InventoryObjectRelativeRef;
 import org.opennms.alec.datasource.api.ResourceKey;
 import org.opennms.alec.features.graph.api.Edge;
+import org.opennms.alec.features.graph.api.GraphChangedListener;
 import org.opennms.alec.features.graph.api.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,8 @@ public class GraphManager {
     private final Map<ResourceKey, Set<InventoryObject>> deferredIosByDependency = new HashMap<>();
     private final Map<InventoryObject, Set<ResourceKey>> dependenciesByDeferredIos = new HashMap<>();
 
+    private final List<GraphChangedListener> graphChangedListeners = new CopyOnWriteArrayList<>();
+
     public synchronized void addInventory(Collection<InventoryObject> inventory) {
         addOrUpdateInventory(inventory);
     }
@@ -85,19 +89,27 @@ public class GraphManager {
         // Keep track of any vertices we've added
         final List<CEVertex> verticesAdded = new LinkedList<>();
         final List<CEVertex> verticesToVerify = new LinkedList<>();
+        final AtomicBoolean haveWeChangedGraph = new AtomicBoolean(false);
 
         // Start off by adding vertices to the graph for any new object
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
-            verticesToVerify.add(resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
+            final CEVertex ioVertex = resourceKeyVertexMap.computeIfAbsent(resourceKey, (key) -> {
                 LOG.trace("Adding vertex with resource key: {} for inventory object: {}", resourceKey, io);
                 final CEVertex vertex = createVertexFor(io);
                 g.addVertex(vertex);
-                didGraphChange.set(true);
+                haveWeChangedGraph.set(true);
                 idtoVertexMap.put(vertex.getNumericId(), vertex);
                 verticesAdded.add(vertex);
                 return vertex;
-            }));
+            });
+
+            if (ioVertex.getInventoryObject().isEmpty()) {
+                // The vertex may have been previously created from an alarm, and not have the IO
+                ioVertex.setInventoryObject(io);
+            }
+
+            verticesToVerify.add(ioVertex);
         }
 
         // Now handle the relationships
@@ -119,7 +131,7 @@ public class GraphManager {
                     final CEEdge edge = CEEdge.newParentEdge(edgeIdGenerator.getAndIncrement(), io.getWeightToParent());
                     g.addEdge(edge, parentVertex, vertex);
                     verticesToVerify.add(parentVertex);
-                    didGraphChange.set(true);
+                    haveWeChangedGraph.set(true);
                 }
             }
 
@@ -136,7 +148,7 @@ public class GraphManager {
                     final CEEdge edge = CEEdge.newPeerEdge(edgeIdGenerator.getAndIncrement(), peerRef);
                     g.addEdge(edge, peerVertex, vertex);
                     verticesToVerify.add(peerVertex);
-                    didGraphChange.set(true);
+                    haveWeChangedGraph.set(true);
                 }
             }
 
@@ -153,7 +165,7 @@ public class GraphManager {
                     final CEEdge edge = CEEdge.newRelativeEdge(edgeIdGenerator.getAndIncrement(), relativeRef);
                     g.addEdge(edge, relativeVertex, vertex);
                     verticesToVerify.add(relativeVertex);
-                    didGraphChange.set(true);
+                    haveWeChangedGraph.set(true);
                 }
             }
 
@@ -168,6 +180,11 @@ public class GraphManager {
 
         // Update the set of disconnected vertices
         trackDisconnectedVertices(verticesToVerify);
+
+        if(haveWeChangedGraph.get()) {
+            didGraphChange.set(true);
+            notifyGraphChangedListeners();
+        }
     }
 
     private void defer(InventoryObject io, ResourceKey... waitingFor) {
@@ -239,6 +256,7 @@ public class GraphManager {
     }
 
     public synchronized void removeInventory(Collection<InventoryObject> inventory) {
+        final AtomicBoolean haveWeChangedGraph = new AtomicBoolean(false);
         for (InventoryObject io : inventory) {
             final ResourceKey resourceKey = getResourceKeyFor(io);
             final CEVertex vertex = resourceKeyVertexMap.remove(resourceKey);
@@ -252,9 +270,13 @@ public class GraphManager {
                 // that we've removed one
                 disconnectedVertices.remove(vertex.getNumericId());
                 trackDisconnectedVertices(neighbors);
-                didGraphChange.set(true);
+                haveWeChangedGraph.set(true);
             }
             clearDeferralsFor(io);
+        }
+        if(haveWeChangedGraph.get()) {
+            didGraphChange.set(true);
+            this.notifyGraphChangedListeners();
         }
     }
 
@@ -292,6 +314,7 @@ public class GraphManager {
         });
         LOG.trace("Updating vertex: {} with alarm: {}", vertex, alarm);
         vertex.addOrUpdateAlarm(alarm);
+        this.notifyGraphChangedListeners();
         return Optional.of(vertex);
     }
 
@@ -313,6 +336,10 @@ public class GraphManager {
 
     public synchronized void withVertex(String type, String id, BiConsumer<Graph<CEVertex, CEEdge>, CEVertex> consumer) {
         consumer.accept(g, resourceKeyVertexMap.get(ResourceKey.key(type, id)));
+    }
+
+    public int getVertexCount() {
+        return g.getVertexCount();
     }
 
     protected Graph<CEVertex, CEEdge> getGraph() {
@@ -377,4 +404,15 @@ public class GraphManager {
         return Optional.ofNullable(resourceKeyVertexMap.get(resourceKey));
     }
 
+    public void registerGraphChangedListener(final GraphChangedListener listener) {
+        if(!this.graphChangedListeners.contains(listener)) {
+            this.graphChangedListeners.add(listener);
+        }
+    }
+
+    private void notifyGraphChangedListeners() {
+        for(GraphChangedListener listener : this.graphChangedListeners) {
+            listener.graphHasChanged();
+        }
+    }
 }

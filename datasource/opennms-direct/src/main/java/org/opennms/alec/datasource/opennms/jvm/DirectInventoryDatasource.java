@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -38,7 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +74,16 @@ import com.google.common.collect.Sets;
  */
 public class DirectInventoryDatasource implements InventoryDatasource, AlarmLifecycleListener, TopologyEdgeConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(DirectInventoryDatasource.class);
+
+    /**
+     * The set of protocols we are interested in, in this case we always want to hear about all protocols.
+     */
+    private static final Set<TopologyProtocol> TOPOLOGY_PROTOCOLS = Collections.singleton(TopologyProtocol.ALL);
+
+    /**
+     * The startup thread; handles initialization.
+     */
+    private Thread initThread;
 
     /**
      * The registry of handlers interested in receiving callbacks for inventory.
@@ -166,9 +180,9 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     private final NodeEventListener nodeEventListener = new NodeEventListener();
 
     /**
-     * The set of protocols we are interested in, in this case we always want to hear about all protocols.
+     * Used to synchronize access to the inventory related data structures.
      */
-    private static final Set<TopologyProtocol> TOPOLOGY_PROTOCOLS = Collections.singleton(TopologyProtocol.ALL);
+    private final ReadWriteLock inventoryLock = new ReentrantReadWriteLock(true);
 
     /**
      * @param nodeDao  used to retrieve the current inventory
@@ -189,19 +203,78 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * On init we will populate the inventory by retrieving all current inventory from the {@link NodeDao} and
      * {@link AlarmDao}.
      */
-    public synchronized void init() {
+    public void init() {
+        // The Blueprint requires the init method to return 'void', so we can't make it call initAsync directly
+        initAsync();
+    }
+
+    /**
+     * Perform the initialization tasks in a dedicated thread.
+     *
+     * @return the Future of the initialization thread.
+     */
+    public CompletableFuture<Void> initAsync() {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        LOG.info("Initializing...");
+
+        initThread = new Thread(() -> {
+            try {
+                doInit();
+            } catch (Exception e) {
+                if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                    LOG.warn("Initialization was interrupted.");
+                } else {
+                    LOG.error("Initialization failed with exception.", e);
+                }
+                future.completeExceptionally(e);
+                return;
+            }
+
+            LOG.info("Initialization successful.");
+            future.complete(null);
+        });
+
+        initThread.setName("ALEC Inventory Datasource Initializer");
+        initThread.start();
+        return future;
+    }
+
+    /**
+     * Perform the initialization tasks. Populate inventory from '{@link NodeDao}',
+     * '{@link AlarmDao}', and '{@link EdgeDao}'.
+     */
+    protected void doInit() {
         eventSubscriptionService.addEventListener(nodeEventListener, nodeEventListener.nodeEventUeis);
+
+        LOG.debug("Loading nodes...");
         nodeDao.getNodes().forEach(n -> processNode(n, false));
+
+        LOG.debug("Loading alarms...");
         alarmDao.getAlarms().forEach(a -> processAlarm(a, false));
+
+        LOG.debug("Loading edges...");
         edgeDao.getEdges().forEach(e -> processEdge(e, false));
+
         initLock.countDown();
     }
 
     /**
      * On destroy we have to unsubscribe our listener.
      */
-    public synchronized void destroy() {
+    public void destroy() {
         eventSubscriptionService.removeEventListener(nodeEventListener);
+
+        if (initThread != null && initThread.isAlive()) {
+            initThread.interrupt();
+            try {
+                initThread.join(TimeUnit.MINUTES.toMillis(1));
+                if (initThread.isAlive()) {
+                    LOG.warn("Initializing thread is still running.");
+                }
+            } catch (InterruptedException e) {
+                LOG.error("Interrupted while waiting for initialization thread to stop.");
+            }
+        }
     }
 
     /**
@@ -224,10 +297,18 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param notifyHandlers   whether or not to notify handlers
      * @return the newly added inventory or an empty collection if no new inventory was added
      */
-    private synchronized Collection<InventoryObject> considerNewInventory(Set<InventoryObject> inventoryObjects,
+    private Collection<InventoryObject> considerNewInventory(Set<InventoryObject> inventoryObjects,
                                                                           boolean notifyHandlers) {
         // Only add and notify for inventory that was not already known
-        Set<InventoryObject> newInventory = Sets.difference(inventoryObjects, allInventory()).immutableCopy();
+        Set<InventoryObject> diffAlarm = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromAlarms));
+        Set<InventoryObject> diffNode = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromNodes));
+        Set<InventoryObject> diffEdge = Sets.difference(
+                inventoryObjects, Collections.unmodifiableSet(inventoryFromEdges));
+
+        Set<InventoryObject> newInventory = Sets.intersection(
+                Sets.intersection(diffAlarm, diffNode), diffEdge).immutableCopy();
 
         if (!newInventory.isEmpty()) {
             if (notifyHandlers) {
@@ -249,7 +330,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param waitForInit whether or not to wait for init to finish first
      */
     @SuppressWarnings("Duplicates")
-    private synchronized void processAlarm(Alarm alarm, boolean waitForInit) {
+    private void processAlarm(Alarm alarm, boolean waitForInit) {
         if (waitForInit) {
             waitForInit();
         }
@@ -264,12 +345,15 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
         if (nodeForAlarm != null) {
             inventoryToAdd.addAll(mapper.toInventory(nodeForAlarm));
+        }
+        inventoryToAdd.addAll(mapper.toInventory(alarm));
 
-        } else {
-            inventoryToAdd.addAll(mapper.toInventory(alarm));
+        if (inventoryToAdd.isEmpty()) {
+            return;
         }
 
-        if (!inventoryToAdd.isEmpty()) {
+        inventoryLock.writeLock().lock();
+        try {
             Collection<InventoryObject> newInventory = considerNewInventory(inventoryToAdd, waitForInit);
             inventoryFromAlarms.addAll(inventoryToAdd);
 
@@ -300,6 +384,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
                 v.addAll(inventoryToAdd);
                 return v;
             });
+        } finally {
+            inventoryLock.writeLock().unlock();
         }
     }
 
@@ -314,7 +400,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param waitForInit whether or not to wait for init to finish first
      */
     @SuppressWarnings("Duplicates")
-    private synchronized void processEdge(TopologyEdge edge, boolean waitForInit) {
+    private void processEdge(TopologyEdge edge, boolean waitForInit) {
         if (waitForInit) {
             waitForInit();
         }
@@ -326,7 +412,12 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
         List<InventoryObject> inventoryToAdd = mapper.toInventory(edge);
 
-        if (!inventoryToAdd.isEmpty()) {
+        if (inventoryToAdd.isEmpty()) {
+            return;
+        }
+
+        inventoryLock.writeLock().lock();
+        try {
             Collection<InventoryObject> newInventory = considerNewInventory(new HashSet<>(inventoryToAdd), waitForInit);
             inventoryFromEdges.addAll(inventoryToAdd);
 
@@ -357,6 +448,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
                 v.addAll(inventoryToAdd);
                 return v;
             });
+        } finally {
+            inventoryLock.writeLock().unlock();
         }
     }
 
@@ -371,7 +464,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param waitForInit whether or not to wait for init to finish first
      */
     @SuppressWarnings("Duplicates")
-    private synchronized void processNode(Node node, boolean waitForInit) {
+    private void processNode(Node node, boolean waitForInit) {
         if (waitForInit) {
             waitForInit();
         }
@@ -382,8 +475,12 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
         }
 
         List<InventoryObject> inventoryToAdd = mapper.toInventory(node);
+        if (inventoryToAdd.isEmpty()) {
+            return;
+        }
 
-        if (!inventoryToAdd.isEmpty()) {
+        inventoryLock.writeLock().lock();
+        try {
             Collection<InventoryObject> newInventory = considerNewInventory(new HashSet<>(inventoryToAdd), waitForInit);
             inventoryFromNodes.addAll(inventoryToAdd);
 
@@ -405,7 +502,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
             );
 
             // Record that this node derived this inventory to make the lookup easier when it comes time to delete this
-            // alarm
+            // node
             nodeIdToInventoryMapping.compute(node.getId(), (k, v) -> {
                 if (v == null) {
                     return new HashSet<>(inventoryToAdd);
@@ -414,6 +511,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
                 v.addAll(inventoryToAdd);
                 return v;
             });
+        } finally {
+            inventoryLock.writeLock().unlock();
         }
     }
 
@@ -422,7 +521,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      *
      * @param inventoryObject the inventory to consider for removal
      */
-    private synchronized void considerInventoryForRemoval(InventoryObject inventoryObject) {
+    private void considerInventoryForRemoval(InventoryObject inventoryObject) {
         if (!isInventoryReferenced(inventoryObject)) {
             // This inventory is no longer referenced by anything so we can notify handlers of its
             // removal
@@ -437,7 +536,7 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
      * @param inventoryObject the inventory to check
      * @return true if referenced by any source, false otherwise
      */
-    private synchronized boolean isInventoryReferenced(InventoryObject inventoryObject) {
+    private boolean isInventoryReferenced(InventoryObject inventoryObject) {
         boolean isReferenced = false;
         LOG.trace("Checking if inventory is still referenced {}", inventoryObject);
         if (inventoryFromNodes.contains(inventoryObject)) {
@@ -455,11 +554,6 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
         return isReferenced;
     }
 
-    private Set<InventoryObject> allInventory() {
-        //noinspection unchecked
-        return Collections.unmodifiableSet(mergeSets(inventoryFromAlarms, inventoryFromNodes, inventoryFromEdges));
-    }
-
     @SafeVarargs
     private static Set<InventoryObject> mergeSets(Set<InventoryObject>... sets) {
         return Stream.of(sets)
@@ -468,41 +562,65 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @VisibleForTesting
-    synchronized boolean hasAnyAlarmReferences() {
-        return !inventoryFromAlarms.isEmpty() || !alarmIdToInventoryMapping.isEmpty() ||
-                !inventoryToAlarmIdMapping.isEmpty();
+    boolean hasAnyAlarmReferences() {
+        inventoryLock.readLock().lock();
+        try {
+            return !inventoryFromAlarms.isEmpty() || !alarmIdToInventoryMapping.isEmpty() ||
+                    !inventoryToAlarmIdMapping.isEmpty();
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @VisibleForTesting
-    synchronized boolean hasAnyNodeReferences() {
-        return !inventoryFromNodes.isEmpty() || !nodeIdToInventoryMapping.isEmpty() ||
-                !inventoryToNodeIdMapping.isEmpty();
+    boolean hasAnyNodeReferences() {
+        inventoryLock.readLock().lock();
+        try {
+            return !inventoryFromNodes.isEmpty() || !nodeIdToInventoryMapping.isEmpty() ||
+                    !inventoryToNodeIdMapping.isEmpty();
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @VisibleForTesting
-    synchronized boolean hasAnyEdgeReferences() {
-        return !inventoryFromEdges.isEmpty() || !edgeIdToInventoryMapping.isEmpty() ||
-                !inventoryToEdgeIdMapping.isEmpty();
+    boolean hasAnyEdgeReferences() {
+        inventoryLock.readLock().lock();
+        try {
+            return !inventoryFromEdges.isEmpty() || !edgeIdToInventoryMapping.isEmpty() ||
+                    !inventoryToEdgeIdMapping.isEmpty();
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @VisibleForTesting
-    synchronized boolean hasAnyInventoryReferences() {
-        return hasAnyAlarmReferences() || hasAnyNodeReferences() || hasAnyEdgeReferences();
+    boolean hasAnyInventoryReferences() {
+        inventoryLock.readLock().lock();
+        try {
+            return hasAnyAlarmReferences() || hasAnyNodeReferences() || hasAnyEdgeReferences();
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @Override
-    public synchronized void handleAlarmSnapshot(List<Alarm> alarms) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Received alarm snapshot {}", alarms);
-        }
-        // Derive new inventory from the snapshot
-        alarms.forEach(this::processAlarm);
+    public void handleAlarmSnapshot(List<Alarm> alarms) {
+        LOG.trace("Received alarm snapshot {}", alarms);
+        waitForInit(); // Wait for initialization before acquiring the write lock to avoid deadlocks
+        inventoryLock.writeLock().lock();
+        try {
+            // Derive new inventory from the snapshot
+            alarms.forEach(this::processAlarm);
 
-        // Determine and process the alarms that must have been deleted according to the snapshot
-        Set<Integer> authoritativeAlarmIds = alarms.stream().map(Alarm::getId).collect(Collectors.toSet());
-        Set<Integer> deletedAlarms = Sets.difference(alarmIdToInventoryMapping.keySet(),
-                authoritativeAlarmIds).immutableCopy();
-        deletedAlarms.forEach(deletedAlarmId -> handleDeletedAlarm(deletedAlarmId, null));
+            // Determine and process the alarms that must have been deleted according to the snapshot
+            Set<Integer> authoritativeAlarmIds = alarms.stream().map(Alarm::getId).collect(Collectors.toSet());
+            Set<Integer> deletedAlarms = Sets.difference(alarmIdToInventoryMapping.keySet(),
+                    authoritativeAlarmIds).immutableCopy();
+            deletedAlarms.forEach(deletedAlarmId -> handleDeletedAlarm(deletedAlarmId, null));
+        } finally {
+            inventoryLock.writeLock().unlock();
+        }
     }
 
     @Override
@@ -513,26 +631,32 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @SuppressWarnings("Duplicates")
     @Override
-    public synchronized void handleDeletedAlarm(int alarmId, String reductionKey) {
+    public void handleDeletedAlarm(int alarmId, String reductionKey) {
         LOG.trace("Received delete for alarm Id {}", alarmId);
-        // Check if this alarm had any inventory associated
-        Set<InventoryObject> inventoryForAlarm = alarmIdToInventoryMapping.get(alarmId);
+        waitForInit(); // Wait for initialization before acquiring the write lock to avoid deadlocks
+        inventoryLock.writeLock().lock();
+        try {
+            // Check if this alarm had any inventory associated
+            Set<InventoryObject> inventoryForAlarm = alarmIdToInventoryMapping.get(alarmId);
 
-        if (inventoryForAlarm != null) {
-            // Since this alarm has been deleted we can clear the inventory associated with it
-            alarmIdToInventoryMapping.remove(alarmId);
+            if (inventoryForAlarm != null) {
+                // Since this alarm has been deleted we can clear the inventory associated with it
+                alarmIdToInventoryMapping.remove(alarmId);
 
-            inventoryForAlarm.forEach(inventory -> {
-                Set<Integer> alarmIdsForInventory = inventoryToAlarmIdMapping.get(inventory);
-                alarmIdsForInventory.remove(alarmId);
+                inventoryForAlarm.forEach(inventory -> {
+                    Set<Integer> alarmIdsForInventory = inventoryToAlarmIdMapping.get(inventory);
+                    alarmIdsForInventory.remove(alarmId);
 
-                if (alarmIdsForInventory.isEmpty()) {
-                    // This inventory is no longer derived via alarms
-                    inventoryFromAlarms.remove(inventory);
-                    inventoryToAlarmIdMapping.remove(inventory);
-                }
-                considerInventoryForRemoval(inventory);
-            });
+                    if (alarmIdsForInventory.isEmpty()) {
+                        // This inventory is no longer derived via alarms
+                        inventoryFromAlarms.remove(inventory);
+                        inventoryToAlarmIdMapping.remove(inventory);
+                    }
+                    considerInventoryForRemoval(inventory);
+                });
+            }
+        } finally {
+            inventoryLock.writeLock().unlock();
         }
     }
 
@@ -544,26 +668,31 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
 
     @SuppressWarnings("Duplicates")
     @Override
-    public synchronized void onEdgeDeleted(TopologyEdge topologyEdge) {
+    public void onEdgeDeleted(TopologyEdge topologyEdge) {
         LOG.trace("Received delete for edge {}", topologyEdge);
-        // Check if this edge had any inventory associated
-        Set<InventoryObject> inventoryForEdge = edgeIdToInventoryMapping.get(topologyEdge.getId());
+        inventoryLock.writeLock().lock();
+        try {
+            // Check if this edge had any inventory associated
+            Set<InventoryObject> inventoryForEdge = edgeIdToInventoryMapping.get(topologyEdge.getId());
 
-        if (inventoryForEdge != null) {
-            // Since this edge has been deleted we can clear the inventory associated with it
-            edgeIdToInventoryMapping.remove(topologyEdge.getId());
+            if (inventoryForEdge != null) {
+                // Since this edge has been deleted we can clear the inventory associated with it
+                edgeIdToInventoryMapping.remove(topologyEdge.getId());
 
-            inventoryForEdge.forEach(inventory -> {
-                Set<String> edgeIdsForInventory = inventoryToEdgeIdMapping.get(inventory);
-                edgeIdsForInventory.remove(topologyEdge.getId());
+                inventoryForEdge.forEach(inventory -> {
+                    Set<String> edgeIdsForInventory = inventoryToEdgeIdMapping.get(inventory);
+                    edgeIdsForInventory.remove(topologyEdge.getId());
 
-                if (edgeIdsForInventory.isEmpty()) {
-                    // This inventory is no longer derived via edges
-                    inventoryFromEdges.remove(inventory);
-                    inventoryToEdgeIdMapping.remove(inventory);
-                }
-                considerInventoryForRemoval(inventory);
-            });
+                    if (edgeIdsForInventory.isEmpty()) {
+                        // This inventory is no longer derived via edges
+                        inventoryFromEdges.remove(inventory);
+                        inventoryToEdgeIdMapping.remove(inventory);
+                    }
+                    considerInventoryForRemoval(inventory);
+                });
+            }
+        } finally {
+            inventoryLock.writeLock().unlock();
         }
     }
 
@@ -573,15 +702,25 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
     }
 
     @Override
-    public synchronized List<InventoryObject> getInventory() {
+    public List<InventoryObject> getInventory() {
         waitForInit();
-        return ImmutableList.copyOf(allInventory());
+        inventoryLock.readLock().lock();
+        try {
+            return ImmutableList.copyOf(mergeSets(inventoryFromAlarms, inventoryFromNodes, inventoryFromEdges));
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @Override
     public List<InventoryObject> getInventoryAndRegisterHandler(InventoryHandler handler) {
-        inventoryHandlers.register(handler);
-        return getInventory();
+        inventoryLock.readLock().lock();
+        try {
+            inventoryHandlers.register(handler);
+            return getInventory();
+        } finally {
+            inventoryLock.readLock().unlock();
+        }
     }
 
     @Override
@@ -615,7 +754,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
             Objects.requireNonNull(nodeId);
             waitForInit();
 
-            synchronized (DirectInventoryDatasource.this) {
+            inventoryLock.writeLock().lock();
+            try {
                 // Check if this node had any inventory associated
                 Set<InventoryObject> inventoryForNode = nodeIdToInventoryMapping.get(nodeId);
 
@@ -635,6 +775,8 @@ public class DirectInventoryDatasource implements InventoryDatasource, AlarmLife
                         considerInventoryForRemoval(inventory);
                     });
                 }
+            } finally {
+                inventoryLock.writeLock().unlock();
             }
         }
 

@@ -32,6 +32,10 @@ public interface Alarm {
 
     String getId();
 
+    long getLongId();
+
+    long getFirstTime();
+
     long getTime();
 
     boolean isClear();
@@ -51,4 +55,9 @@ public interface Alarm {
      */
     Long getNodeId();
 
+    String getNodeLocation();
+
+    String getNodeLabel();
+
+    String getReductionKey();
 }

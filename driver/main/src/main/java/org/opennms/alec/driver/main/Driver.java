@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jmx.JmxReporter;
 
 public class Driver implements EngineRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(Driver.class);
@@ -71,8 +72,6 @@ public class Driver implements EngineRegistry {
     private final AlarmFeedbackDatasource alarmFeedbackDatasource;
     private final InventoryDatasource inventoryDatasource;
     private final SituationDatasource situationDatasource;
-
-    private final EngineFactory engineFactory;
     private final BundleContext bundleContext;
     private final AtomicReference<ServiceRegistration<?>> graphProviderServiceRegistrationRef = new AtomicReference<>();
     private final SituationProcessor situationProcessor;
@@ -82,10 +81,12 @@ public class Driver implements EngineRegistry {
     private Thread initThread;
     private Engine engine;
     private Timer timer;
+    private EngineFactory engineFactory;
 
     // Health
-    private final MetricRegistry metrics = new MetricRegistry();
-    private final com.codahale.metrics.Timer ticks = metrics.timer(name(Driver.class, "ticks"));
+    private final MetricRegistry metrics;
+    private final JmxReporter jmxReporter;
+    private final com.codahale.metrics.Timer ticks;
     private long tickResolutionMs = 0;
     private DriverState state = DriverState.CREATED;
 
@@ -102,6 +103,12 @@ public class Driver implements EngineRegistry {
         this.situationProcessor =
                 Objects.requireNonNull(situationProcessorFactory).getInstance();
         confirmingSituationHandler = SituationConfirmer.newInstance(situationProcessor);
+
+        metrics = new MetricRegistry();
+        jmxReporter = JmxReporter.forRegistry(metrics)
+                .inDomain(name(Driver.class, engineFactory.getName()))
+                .build();
+        ticks = metrics.timer(name("ticks"));
     }
 
     public void init() {
@@ -109,10 +116,16 @@ public class Driver implements EngineRegistry {
         initAsync();
     }
 
+    @SuppressWarnings({"java:S2142", "java:S1149"})
     public CompletableFuture<Void> initAsync() {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        LOG.info("Creating engine with name: {}", engineFactory.getName());
-        engine = engineFactory.createEngine();
+        LOG.info("Creating engine: {}", engineFactory.getNameConf());
+        try {
+            engine = engineFactory.createEngine(metrics);
+        } catch (IllegalArgumentException e) {
+            future.completeExceptionally(e);
+            return future;
+        }
         // Register the handler that confirms situations that have come round trip back to this driver
         situationDatasource.registerHandler(confirmingSituationHandler);
         // Register the situation processor responsible for accepting and processing all situations generated via the
@@ -168,9 +181,13 @@ public class Driver implements EngineRegistry {
                     props.put("name", engineFactory.getName());
                     graphProviderServiceRegistrationRef.set(bundleContext.registerService(GraphProvider.class.getCanonicalName(), engine, props));
                 }
+
+                // Expose the metrics for this engine via JMX
+                jmxReporter.start();
             } catch (Exception e) {
-                if (e.getCause() != null && e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     LOG.warn("Initialization was interrupted.");
+                    Thread.currentThread().interrupt();
                 } else {
                     LOG.error("Initialization failed with exception.", e);
                 }
@@ -183,7 +200,7 @@ public class Driver implements EngineRegistry {
             timer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("ALEC Driver Tick");
+                    Thread.currentThread().setName("ALEC Driver Tick -- " + engineFactory.getParameters());
                     try (com.codahale.metrics.Timer.Context context = ticks.time()) {
                         engine.tick(System.currentTimeMillis());
                     } catch (Exception e) {
@@ -194,7 +211,11 @@ public class Driver implements EngineRegistry {
             state = DriverState.RUNNING;
             future.complete(null);
         });
-        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getName()));
+        initThread.setName(String.format("ALEC Driver Startup [%s]", engineFactory.getNameConf()));
+        initThread.setUncaughtExceptionHandler((th,ex) -> {
+            LOG.error("Initialization failed with uncaught exception.", ex);
+            future.completeExceptionally(ex);
+        });
         initThread.start();
         return future;
     }
@@ -213,6 +234,7 @@ public class Driver implements EngineRegistry {
                 }
             } catch (InterruptedException e) {
                 LOG.error("Interrupted while waiting for initialization thread to stop.");
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -228,6 +250,9 @@ public class Driver implements EngineRegistry {
             engine.destroy();
             engine = null;
         }
+
+        jmxReporter.stop();
+
         state = DriverState.DESTROYED;
     }
 
@@ -250,5 +275,22 @@ public class Driver implements EngineRegistry {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public EngineRegistry getEngineRegistry() {
+        return this;
+    }
+
+    public EngineFactory getEngineFactory() {
+        return engineFactory;
+    }
+
+    public void setEngineFactory(EngineFactory engineFactory) {
+        this.engineFactory = engineFactory;
+    }
+
+    public MetricRegistry getMetrics() {
+        return metrics;
     }
 }

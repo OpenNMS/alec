@@ -49,13 +49,13 @@ public class DistributedRedundantCorrrelationTest extends CorrelationTestBase {
     private List<ALECSentinelContainer> redundantALECs;
 
     @Override
-    protected void adjustContainersForTest() {
+    protected void adjustCorrelationContainers() {
         redundantALECs = new ArrayList<>();
         // Define NUM_REDUNDANT_ALEC redundant ALECs
         for (int i = 0; i < NUM_REDUNDANT_ALEC; i++) {
             ALECSentinelContainer alecSentinelContainer = null;
             try {
-                alecSentinelContainer = new ALECSentinelContainer(true, () -> "oce-engine-cluster");
+                alecSentinelContainer = new ALECSentinelContainer(true, () -> "cluster");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

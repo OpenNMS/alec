@@ -3,21 +3,23 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:1.0-b5
+      - image: opennms/build-env:11.0.14_9-3.8.4-b8249
         environment:
           MAVEN_OPTS: -Xmx2g
 
   build-debian-executor:
     docker:
-      - image: circleci/openjdk:8u212-jdk-stretch
+      - image: cimg/openjdk:11.0.13
         environment:
           MAVEN_OPTS: -Xmx2g
 
   # Note: Need to investigate how we can use our own image and have it configured so we can run docker inside docker
   # rather than rely on the circleci machine VM
   smoke-test-executor:
-    machine: true
+    machine:
+      image: ubuntu-2204:2022.04.1
     environment:
+      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true
       KEEP_TMP_OVERLAY: true
@@ -25,57 +27,75 @@ executors:
 
   docs-executor:
     docker:
-      - image: antora/antora:2.0.0
-
-  netlify-cli-executor:
-    docker:
-      - image: opennms/netlify-cli:2.8.3-b1
-
-  package-cloud-cli-executor:
-    docker:
-      - image: opennms/package-cloud-cli:0.3.05-b1
+      - image: opennms/antora:2.3.4-b7274
 
   python-executor:
     docker:
-      - image: circleci/python:3.7.2
+      - image: cimg/python:3.10
+
+orbs:
+  cloudsmith: cloudsmith/cloudsmith@1.0.5
+  sign-packages: opennms/sign-packages@2.3.0
 
 workflows:
   build-deploy:
     jobs:
       # Run build jobs for all branches and any tag
       - pre-build:
+          context: "OpenNMS Build"
           filters:
             tags:
               only: /.*/
       - build:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - build-debian:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
             tags:
               only: /.*/
       - build-docs:
+          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
-      - smoke-test:
+      - smoke-test-commit:
+          context: "OpenNMS Build"
           requires:
             - build
           filters:
+            branches:
+              ignore:
+                - develop
+                - /^release-.*/
             tags:
-              only: /.*/
+              ignore: /^v.*/
+      - smoke-test-full:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - /^release-.*/
+            tags:
+              only: /^v.*/
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
+          context: "OpenNMS Build"
           requires:
-            - smoke-test
+            - smoke-test-commit
+            - smoke-test-full
           filters:
             # Maven deploy requires GPG signing for releases - we do this manually
             branches:
@@ -83,8 +103,10 @@ workflows:
                 - develop
                 - /release-.*/
       - deploy-packages:
+          context: "OpenNMS Build"
           requires:
-            - smoke-test
+            - smoke-test-commit
+            - smoke-test-full
             - build-debian
           filters:
             tags:
@@ -93,19 +115,110 @@ workflows:
               only:
                 - develop
                 - /release-.*/
-      - deploy-docs:
-          requires:
-            - build-docs
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              only:
-                - develop
-                - /release-.*/
-      - yank-snapshot-packages:
-          requires:
-            - deploy-packages
+
+
+commands:
+  smoke-test:
+    description: "Run the smoke tests"
+    parameters:
+      build_type:
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+
+        # Link root user's m2 repo from the cache with our user's m2 repo (the circleci user)
+      - run:
+          name: Link maven repo with cache
+          command: |
+            sudo chmod 777 /root
+            ln -s /root/.m2 ~/.m2
+
+      - restore_cache:
+          keys:
+          # attempt to use the cache from the last smoke-test run
+          - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+          # use the cache built for the same root pom
+          - v5-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v5-dependencies-
+
+      - restore_cache:
+          keys:
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-{{ .Revision }}
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-
+          - v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
+
+      - run:
+          name: Refresh and import Docker cache
+          command: |
+            mkdir -p /tmp/docker
+            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
+            source "${tagsFile}"
+            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
+              if [ -e /tmp/docker/"$dockerImg".tgz ]; then
+                echo "Importing ${!dockerImg} from ${!dockerImg}.tgz"
+                docker load --input /tmp/docker/"$dockerImg".tgz
+              else
+                echo "Cached image not found, pulling ${!dockerImg} from DockerHub"
+                docker pull "${!dockerImg}"
+                docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
+              fi
+            done
+            docker image ls
+
+      - run:
+          name: Run the tests
+          command: |
+            mkdir $TEST_RECORDING_DIR
+            mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
+            cd smoke-test
+            if [ "<< parameters.build_type >>" = "commit" ]; then
+              mvn surefire:test -Dtest=OnCommitSmokeTestSuite -DsmokeTest=true
+            elif [ "<< parameters.build_type >>" = "full" ]; then
+              mvn test -DsmokeTest=true
+            fi
+
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "/root/.m2/repository"
+
+      - save_cache:
+          paths:
+          - /root/.m2
+          key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
+
+      - save_cache:
+          paths:
+          - /tmp/docker
+          key: v2-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}-{{ .Branch }}-{{ .Revision }}
+
+      - run:
+          name: Gather test artifacts
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
+            mkdir -p ~/logs/
+            cp -R smoke-test/target/logs/* ~/logs/ || true
+          when: always
+
+      - store_test_results:
+          path: ~/junit
+
+      - store_artifacts:
+          path: ~/logs
+
+      # Unfortunately I can't reference the env variable containing the recording path here so I have to
+      # duplicate it
+      - store_artifacts:
+          path: /tmp/test-recordings
+
+      # Future Improvements:
+      # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
+      # - Mount the logs directories from the containers so we can copy the logs out easier
+      # - We might want to test full against the floating (latest) images for opennms and sentinel
 
 jobs:
   pre-build:
@@ -124,6 +237,12 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-rpm-dependencies:
+          skip_if_forked_pr: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           - v5-dependencies-{{ checksum "pom.xml" }}
@@ -134,6 +253,10 @@ jobs:
           name: Build
           command: |
             mvn -DskipTests -Dbuild.packages clean install dependency:resolve-plugins dependency:go-offline
+
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
 
       - save_cache:
           paths:
@@ -155,6 +278,12 @@ jobs:
 
       - store_test_results:
           path: ~/junit
+
+      - sign-packages/sign-rpms:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-rpm/target/rpm/*-alec-plugin/RPMS/noarch/*.rpm
 
       - run:
           name: Gather artifacts
@@ -180,6 +309,13 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - sign-packages/install-deb-dependencies:
+          skip_if_forked_pr: true
+          use_sudo: true
+      - sign-packages/setup-env:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+
       - restore_cache:
           keys:
           # Use a separate cache, since the the other build image runs as root
@@ -191,10 +327,20 @@ jobs:
           command: |
             mvn install --projects org.opennms.alec.assembly:org.opennms.alec.assembly.opennms.deb,org.opennms.alec.assembly:org.opennms.alec.assembly.sentinel.deb --also-make -DskipTests=true -Dbuild.packages
 
+      - run:
+          name: Remove old artifacts to keep workspace size down
+          command: .circleci/scripts/clean-dir.sh "$HOME/.m2/repository"
+
       - save_cache:
           paths:
             - ~/.m2
           key: v4-deb-dependencies-{{ checksum "pom.xml" }}
+
+      - sign-packages/sign-debs:
+          skip_if_forked_pr: true
+          gnupg_home: ~/tmp/gpg
+          gnupg_key: opennms@opennms.org
+          packages: assembly/*-deb/target/*.deb
 
       - run:
           name: Gather artifacts
@@ -212,99 +358,19 @@ jobs:
           paths:
             - project/assembly/
 
-  smoke-test:
+  smoke-test-commit:
     executor: smoke-test-executor
 
     steps:
-      - attach_workspace:
-          at: ~/
+    - smoke-test:
+        build_type: commit
 
-      # Link root user's m2 repo from the cache with our user's m2 repo (the circleci user)
-      - run:
-          name: Link maven repo with cache
-          command: |
-            sudo chmod 777 /root
-            ln -s /root/.m2 ~/.m2
+  smoke-test-full:
+    executor: smoke-test-executor
 
-      - restore_cache:
-          keys:
-          # attempt to use the cache from the last smoke-test run
-          - v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
-          # use the cache built for the same root pom
-          - v5-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v5-dependencies-
-          
-      - restore_cache:
-          keys:
-          - v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
-
-      - run:
-          name: Import docker images
-          command: |
-            if [ -z "$(ls /tmp/docker 2> /dev/null)" ]; then exit 0; fi
-            source smoke-test/src/main/resources/docker_fixed_images
-            for dockerTargz in $(ls /tmp/docker); do
-              dockerName="${dockerTargz%.*}"
-              echo "Importing ${!dockerName} from $dockerTargz"
-              docker load --input /tmp/docker/"$dockerTargz"
-            done
-            docker image ls
-  
-      - run:
-          name: Run the tests
-          command: |
-            mkdir $TEST_RECORDING_DIR
-            mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
-            cd smoke-test
-            mvn test -DsmokeTest=true
-            
-      - save_cache:
-          paths:
-          - /root/.m2
-          key: v2-smoke-dependencies-{{ checksum "smoke-test/pom.xml" }}-{{ checksum "pom.xml" }}
-
-      - run:
-          name: Save cacheable Docker images
-          command: |
-            if [ -d /tmp/docker ]; then exit 0; fi
-            mkdir /tmp/docker
-            tagsFile="smoke-test/src/main/resources/docker_fixed_images"
-            source "$tagsFile"
-            for dockerImg in $(awk -F '=' '/^[^#]/ {print $1}' "$tagsFile"); do
-              echo "Saving docker image ${!dockerImg} as ${dockerImg}.tgz"
-              docker save -o /tmp/docker/"$dockerImg".tgz "${!dockerImg}"
-            done
-
-      - save_cache:
-          paths:
-          - /tmp/docker
-          key: v1-docker-{{ checksum "smoke-test/src/main/resources/docker_fixed_images" }}
-  
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/junit/
-            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/junit/ \;
-            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/junit/ \;
-          when: always
-  
-      - store_test_results:
-          path: ~/junit
-
-      - store_artifacts:
-          path: ~/logs
-
-      # Unfortunately I can't reference the env variable containing the recording path here so I have to
-      # duplicate it
-      - store_artifacts:
-          path: /tmp/test-recordings
-
-      # Future Improvements:
-      # - Store the logs from the sentinel and OpenNMS containers for the test run in addition to the junit logs
-      #   - Mount the logs directories from the containers so we can copy the logs out easier
-      # - Add nightly test run back once tests are proven stable
-      #   - We might want to test nightly against the floating (latest) images for opennms and sentinel
+    steps:
+    - smoke-test:
+        build_type: full
 
   build-docs:
     executor: docs-executor
@@ -312,9 +378,13 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Generate HTML output for documentation
+          name: Validate Xrefs in docs
           command: |
-            antora generate site.yml
+            NODE_PATH="$(npm -g root)" antora --generator @antora/xref-validator site.yml
+      - run:
+          name: Build docs with Antora
+          command: |
+             NODE_PATH="$(npm -g root)" antora --stacktrace generate site.yml
 
       - store_artifacts:
           path: build/site.zip
@@ -344,36 +414,16 @@ jobs:
             mvn -s .circleci.settings.xml -DskipTests deploy
 
   deploy-packages:
-      executor: package-cloud-cli-executor
+      executor: cloudsmith/default
+      resource_class: small
       steps:
         - attach_workspace:
             at: ~/
-        - run:
-            name: Push RPM packages
-            command: |
-              source .circleci/env/package_cloud
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_RPM_DISTRO_VERSION} assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/*
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/opennms-deb/target/opennms-alec-plugin_*.deb
-              package_cloud push ${PACKAGECLOUD_USER}/${PACKAGECLOUD_REPO}/${PACKAGECLOUD_DEB_DISTRO_VERSION} assembly/sentinel-deb/target/sentinel-alec-plugin_*.deb
-  deploy-docs:
-    executor: netlify-cli-executor
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Deploy docs to Netlify
-          command: |
-            netlify deploy --prod -d public -s ${NETLIFY_SITE_ID}
 
-  yank-snapshot-packages:
-    executor: python-executor
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Yank SNAPSHOT packages
-          command: |
-            source .circleci/env/package_cloud
-            .circleci/scripts/packagecloud-yank-snapshot-packages.py
+        - cloudsmith/ensure-api-key
+        - cloudsmith/install-cli
+
+        - run:
+            name: Push packages to CloudSmith
+            command: .circleci/scripts/publish-cloudsmith.sh
 

@@ -1,0 +1,80 @@
+
+:imagesdir: ../assets/images
+= OpenNMS Integration
+
+The lifecycle of an alarm and the correlation process between OpenNMS and ALEC involves various components:
+
+.Alarm lifecycle architecture diagram
+image::architecture/opennms_alarm_lifecycle.png[Architecture diagram that depicts the components involved in an alarm's lifecycle, 600]
+
+Existing OpenNMS services that process unsolicited messages or actively poll monitored network inventory also generate events.
+https://docs.opennms.com/horizon/latest/reference/daemons/daemon-config-files/eventd.html[Eventd] processes and enriches these messages with the corresponding configuration data.
+
+https://docs.opennms.com/horizon/latest/reference/daemons/daemon-config-files/alarmd.html[Alarmd] listens for events that contain alarm metadata and, when it identifies them, creates or updates corresponding alarms.
+It also exposes a series of event hooks that can be used to alter or enrich alarms when they are created.
+ALEC leverages these hooks to perform additional data processing and tag alarms with a managed object type and managed object instance (see <<managed_object_tagging>>).
+OpenNMS can also generate notifications when alarms are modified in any way.
+
+The xref:datasources/direct.adoc[direct datasource] leverages API hooks within the runtime, whereas the xref:datasources/kafka.adoc[Kafka datasource] leverages the Kafka integration to interface externally.
+
+[[managed_object_tagging]]
+== Managed object tagging
+
+Managed object tagging further contextualizes alarms by associating them with a specific component instance or inventory object in ALEC.
+The process is flexible and configurable, allowing alarms to be associated with components beyond the existing node, interface, service model that is built into OpenNMS.
+
+=== Example
+
+Assume that OpenNMS captures the following syslog message:
+
+[source]
+%CDP-4-DUPLEX_MISMATCH: duplex mismatch discovered on ge1/1 (not half duplex), with sw-blue ge1/2 (half duplex).
+
+https://docs.opennms.com/horizon/latest/reference/daemons/daemon-config-files/syslogd.html[Syslogd] can generate an event from the message using the following match:
+
+[source]
+----
+<ueiMatch>
+    <match type="regex" expression="%CDP-4-DUPLEX_MISMATCH\s*: duplex mismatch discovered on (\S+) \((.+)\), with (\S+) (\S+) \((.+)\)" />
+    <uei>uei.opennms.org/vendor/cisco/syslog/duplexMismatch</uei>
+    <parameter-assignment matching-group="1" parameter-name="aIfDescr" />
+    <parameter-assignment matching-group="2" parameter-name="aDuplex" />
+    <parameter-assignment matching-group="3" parameter-name="zHostname" />
+    <parameter-assignment matching-group="4" parameter-name="zIfDescr" />
+    <parameter-assignment matching-group="5" parameter-name="zDuplex" />
+</ueiMatch>
+----
+
+After the event is generated, it can be defined using the following properties:
+
+[source]
+----
+<event>
+    <uei>uei.opennms.org/vendor/cisco/syslog/duplexMismatch</uei>
+    <event-label>CISCO defined syslog event: duplexMismatch</event-label>
+    <descr>The duplex %parm[aIfDescr]% is set to %parm[aDuplex]% which
+        does not match %parm[zDuplex]% on %parm[zHostname]% %parm[zIfDescr]%.
+    </descr>
+    <logmsg dest="logndisplay">Duplex mismatch on %parm[aIfDescr]% (%parm[aDuplex]% vs %parm[zDuplex]%)</logmsg>
+    <severity>Warning</severity>
+    <alarm-data reduction-key="%uei%:%dpname%:%nodeid%:%parm[aIfDescr]%" alarm-type="3">
+        <managed-object type="snmp-interface-link"/>
+    </alarm-data>
+</event>
+----
+
+The event triggers a type 3 alarm (trigger with no associated clear) and specifies the managed object type (`snmp-interface-link`).
+The <<model.adoc#snmp-interface-link, Model>> reference chapter shows that this managed object type requires the following tokens:
+
+. `aIfDescr`
+. `zIfDescr`
+. `zHostname`
+
+All of these tokens are automatically extracted and converted into event parameters.
+
+When an alarm is created, `ManagedObjectAlarmExt` is triggered.
+It will resolve and convert the event data as appropriate.
+In this case, it searches for a node whose label is the same as `zHostname` and tries to find the `ifIndex` value for SNMP interfaces with the given `ifDescr` values.
+The managed object instance is then updated to include any resolved attributes.
+
+When ALEC receives the tagged alarm, the alarm contains enough information that it can be reliably attached to a corresponding inventory object.

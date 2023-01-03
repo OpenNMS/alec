@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2022 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2022 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -39,6 +39,16 @@ import java.util.Objects;
  *  * similarity score between last parent that is different on A and B : continuous [0,1]
  */
 public class InputVector {
+    /**
+     * Input: Alarm A identifier
+     */
+    private final String alarmAid;
+
+    /**
+     * Input: Alarm B identifier
+     */
+    private final String alarmBid;
+
     /**
      * Input: Inventory object type of alarm A
      */
@@ -89,6 +99,8 @@ public class InputVector {
     }
 
     private InputVector(Builder builder) {
+        this.alarmAid = builder.alarmAid;
+        this.alarmBid = builder.alarmBid;
         this.typeA = builder.typeA;
         this.typeB = builder.typeB;
         this.sameInstance = builder.sameInstance;
@@ -101,6 +113,8 @@ public class InputVector {
     }
 
     public static class Builder {
+        private String alarmAid;
+        private String alarmBid;
         private String typeA;
         private String typeB;
         private Boolean sameInstance;
@@ -110,6 +124,16 @@ public class InputVector {
         private Double distanceOnGraph;
         private Double similarityOfInventoryObjectIds;
         private Double similarityOfInventoryObjectLabels;
+
+        public Builder alarmAid(String alarmAid){
+            this.alarmAid = alarmAid;
+            return this;
+        }
+
+        public Builder alarmBid(String alarmBid){
+            this.alarmBid = alarmBid;
+            return this;
+        }
 
         public Builder typeA(String typeA) {
             this.typeA = typeA;
@@ -157,6 +181,8 @@ public class InputVector {
         }
 
         public InputVector build() {
+            Objects.requireNonNull(alarmAid, "alarmAid is required");
+            Objects.requireNonNull(alarmBid, "alarmBid is required");
             Objects.requireNonNull(typeA, "typeA is required");
             Objects.requireNonNull(typeB, "typeB is required");
             Objects.requireNonNull(sameInstance, "sameInstance is required");
@@ -168,6 +194,14 @@ public class InputVector {
             Objects.requireNonNull(similarityOfInventoryObjectLabels, "similarityOfInventoryObjectLabels is required");
             return new InputVector(this);
         }
+    }
+
+    public String getAlarmAId(){
+        return alarmAid;
+    }
+
+    public String getAlarmBId(){
+        return alarmBid;
     }
 
     public String getTypeA() {
@@ -219,17 +253,21 @@ public class InputVector {
                 Double.compare(that.similarityOfInventoryObjectIds, similarityOfInventoryObjectIds) == 0 &&
                 Double.compare(that.similarityOfInventoryObjectLabels, similarityOfInventoryObjectLabels) == 0 &&
                 Objects.equals(typeA, that.typeA) &&
-                Objects.equals(typeB, that.typeB);
+                Objects.equals(typeB, that.typeB) &&
+                Objects.equals(alarmAid, that.alarmAid) &&
+                Objects.equals(alarmBid, that.alarmAid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph, similarityOfInventoryObjectIds, similarityOfInventoryObjectLabels);
+        return Objects.hash(alarmAid, alarmBid, typeA, typeB, sameInstance, sameParent, shareAncestor, timeDifferenceInSeconds, distanceOnGraph, similarityOfInventoryObjectIds, similarityOfInventoryObjectLabels);
     }
 
     @Override
     public String toString() {
         return "InputVector{" +
+                "alarmAid='" + alarmAid + '\'' +
+                "alarmBid='" + alarmBid + '\'' +
                 "typeA='" + typeA + '\'' +
                 ", typeB='" + typeB + '\'' +
                 ", sameInstance=" + sameInstance +

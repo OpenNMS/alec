@@ -28,22 +28,19 @@
 
 package org.opennms.alec.datasource.opennms.jvm;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
-import org.opennms.integration.api.v1.dao.AlarmDao;
-import org.opennms.integration.api.v1.events.EventForwarder;
-import org.opennms.integration.api.v1.model.InMemoryEvent;
-import org.opennms.integration.api.v1.model.Severity;
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.AlarmDatasource;
 import org.opennms.alec.datasource.api.AlarmHandler;
@@ -51,6 +48,11 @@ import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
 import org.opennms.alec.datasource.api.SituationHandler;
 import org.opennms.alec.datasource.common.HandlerRegistry;
+import org.opennms.integration.api.v1.alarms.AlarmLifecycleListener;
+import org.opennms.integration.api.v1.dao.AlarmDao;
+import org.opennms.integration.api.v1.events.EventForwarder;
+import org.opennms.integration.api.v1.model.InMemoryEvent;
+import org.opennms.integration.api.v1.model.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +99,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     public void handleAlarmSnapshot(List<org.opennms.integration.api.v1.model.Alarm> alarms) {
         waitForInit();
 
+        final List<Consumer<Void>> callbacks = new LinkedList<>();
         final Map<Integer,org.opennms.integration.api.v1.model.Alarm> snapshotAlarmsById = alarms.stream()
                 .collect(Collectors.toMap(org.opennms.integration.api.v1.model.Alarm::getId, a -> a));
         rwLock.writeLock().lock();
@@ -107,82 +110,90 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
             // Push clears for alarms that are in the map, but not in the snapshot
             final Set<Integer> alarmIdsToDelete = Sets.newHashSet(Sets.difference(alarmIdsInMap, alarmIdsInSnapshot));
             for (Integer alarmIdToDelete : alarmIdsToDelete) {
-                handleDeletedNoLock(alarmIdToDelete);
+                callbacks.add(handleDeletedNoLock(alarmIdToDelete));
             }
 
             // Push new alarms for ids that are in the snapshot, but not in the map
             final Set<Integer> alarmIdsToAdd = Sets.newHashSet(Sets.difference(alarmIdsInSnapshot, alarmIdsInMap));
             for (Integer alarmIdToAdd : alarmIdsToAdd) {
-                handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(alarmIdToAdd));
+                callbacks.add(handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(alarmIdToAdd)));
             }
 
             // Handle Updates
             final Set<Integer> commonAlarmIds = Sets.newHashSet(Sets.intersection(alarmIdsInSnapshot, alarmIdsInMap));
-            commonAlarmIds.forEach(id -> {
-                handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(id));
-            });
+            commonAlarmIds.forEach(id -> callbacks.add(handleNewOrUpdatedAlarmNoLock(snapshotAlarmsById.get(id))));
         } finally {
             rwLock.writeLock().unlock();
         }
+        // Issue the callbacks outside of the write lock to avoid a possible deadlock
+        callbacks.forEach(c -> c.accept(null));
     }
 
     @Override
     public void handleNewOrUpdatedAlarm(org.opennms.integration.api.v1.model.Alarm alarm) {
         waitForInit();
 
+        final Consumer<Void> callback;
         rwLock.writeLock().lock();
         try {
-            handleNewOrUpdatedAlarmNoLock(alarm);
+            callback = handleNewOrUpdatedAlarmNoLock(alarm);
         } finally {
             rwLock.writeLock().unlock();
         }
+
+        // Issue the callback outside of the write lock to avoid a possible deadlock
+        callback.accept(null);
     }
 
-    private void handleNewOrUpdatedAlarmNoLock(org.opennms.integration.api.v1.model.Alarm alarm) {
+    private Consumer<Void> handleNewOrUpdatedAlarmNoLock(org.opennms.integration.api.v1.model.Alarm alarm) {
         final org.opennms.integration.api.v1.model.Alarm existingAlarm = alarmsById.get(alarm.getId());
         alarmsById.put(alarm.getId(), alarm);
         final Alarm oceAlarm = mapper.toAlarm(alarm);
 
         if (!alarm.isSituation()) {
             if (existingAlarm == null && !isCleared(alarm)) {
-                alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
+                return a -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
                 // if there was no existing alarm, and the new one is cleared, don't bother issuing the callback
             } else if (existingAlarm != null) {
                 if (!isCleared(alarm)) {
-                    alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
+                    return a -> alarmHandlers.forEach(h -> h.onAlarmCreatedOrUpdated(oceAlarm));
                 } else {
-                    alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
+                    return a ->  alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
                 }
             }
         } else {
-            final Situation oceSituation = mapper.toSituation(existingAlarm);
-            situationHandlers.forEach(h -> h.onSituation(oceSituation));
+            final Situation oceSituation = mapper.toSituation(alarm);
+            return a ->  situationHandlers.forEach(h -> h.onSituation(oceSituation));
         }
+        return a -> {};
     }
 
     @Override
     public void handleDeletedAlarm(int alarmId, String reductionKey) {
         waitForInit();
 
+        final Consumer<Void> callback;
         rwLock.writeLock().lock();
         try {
-            handleDeletedNoLock(alarmId);
+            callback = handleDeletedNoLock(alarmId);
         } finally {
             rwLock.writeLock().unlock();
         }
+        callback.accept(null);
     }
 
-    private void handleDeletedNoLock(int alarmId) {
+    private Consumer<Void> handleDeletedNoLock(int alarmId) {
         final org.opennms.integration.api.v1.model.Alarm existingAlarm = alarmsById.remove(alarmId);
         if (existingAlarm != null) {
             if (!existingAlarm.isSituation()) {
                 final Alarm oceAlarm = mapper.toAlarm(existingAlarm);
-                alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
+                return a -> alarmHandlers.forEach(h -> h.onAlarmCleared(oceAlarm));
             } else {
                 final Situation oceSituation = mapper.toSituation(existingAlarm);
-                situationHandlers.forEach(h -> h.onSituation(oceSituation));
+                return a -> situationHandlers.forEach(h -> h.onSituation(oceSituation));
             }
         }
+        return a -> {};
     }
 
     @Override
@@ -193,7 +204,7 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         try {
             return alarmsById.values().stream()
                     .filter(a -> !a.isSituation())
-                    .map(a -> mapper.toAlarm(a))
+                    .map(mapper::toAlarm)
                     .collect(Collectors.toList());
         } finally {
             rwLock.readLock().unlock();
@@ -201,10 +212,29 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
     }
 
     @Override
+    public Optional<Alarm> getAlarm(int id) {
+        waitForInit();
+
+        rwLock.readLock().lock();
+        try {
+            return alarmsById.values().stream()
+                    .filter(alarm -> id == alarm.getId())
+                    .map(mapper::toAlarm)
+                    .findFirst();
+        } finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    @Override
     public List<Alarm> getAlarmsAndRegisterHandler(AlarmHandler handler) {
-        final List<Alarm> alarms = new ArrayList<>();
-        alarmHandlers.register(handler, (h) -> alarms.addAll(getAlarms()));
-        return alarms;
+        rwLock.readLock().lock();
+        try {
+            alarmHandlers.register(handler);
+            return getAlarms();
+        } finally {
+            rwLock.readLock().unlock();
+        }
     }
 
     @Override
@@ -234,8 +264,24 @@ public class DirectAlarmDatasource implements AlarmDatasource, AlarmLifecycleLis
         try {
             return alarmsById.values().stream()
                     .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
-                    .map(s -> mapper.toSituation(s))
+                    .map(mapper::toSituation)
                     .collect(Collectors.toList());
+        } finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public Optional<Situation> getSituation(int id) throws InterruptedException {
+        waitForInit();
+
+        rwLock.readLock().lock();
+        try {
+            return alarmsById.values().stream()
+                    .filter(alarm -> id == alarm.getId())
+                    .filter(org.opennms.integration.api.v1.model.Alarm::isSituation)
+                    .map(mapper::toSituation)
+                    .findFirst();
         } finally {
             rwLock.readLock().unlock();
         }

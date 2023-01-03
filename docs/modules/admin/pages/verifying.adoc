@@ -1,0 +1,71 @@
+
+:imagesdir: ../assets/images
+= Maintenance Tasks
+
+This section describes maintenance tasks that you may want to perform.
+They apply to both basic and distributed installations.
+
+== Test syslog message handling
+
+Follow the steps below to verify that syslog messages are being properly converted to alarms, and that ALEC can create a situation:
+
+.Provision a node for the `localhost` in OpenNMS:
+[source]
+----
+$OPENNMS_HOME/bin/provision.pl requisition add alec
+$OPENNMS_HOME/bin/provision.pl node add alec localhost localhost
+$OPENNMS_HOME/bin/provision.pl interface add alec localhost 127.0.0.1
+$OPENNMS_HOME/bin/provision.pl requisition import alec
+----
+
+IMPORTANT: This assumes that the localhost is running an SNMP agent.
+
+.Set `ifDescr` for an interface on the provisioned node:
+[source]
+export IFDESCR="eth0"
+
+.Trigger a syslog message:
+[source]
+----
+echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface $IFDESCR is down (Link failure)" | nc -v -u 127.0.0.1 10514
+----
+
+You should see a new "interface down" alarm associated with the node that you just provisioned:
+
+image::verify_ifdown_example.png[Interface down alarm,600]
+
+TIP: If the syslog message is not being recognized and formatted as a proper event and alarm, ensure that the `opennms-alec-plugin` feature is running in OpenNMS and that the related bundles are active.
+
+.Trigger a second alarm against this same interface:
+[source]
+----
+echo "<189>: $(date +"%Y %b %d %H:%m:%S %Z"): %PKT_INFRA-LINEPROTO-5-UPDOWN: Line protocol on Interface $IFDESCR, changed state to Down" | nc -v -u 127.0.0.1 10514
+----
+
+If both alarms are triggered within a brief window of time (within one minute, for the purposes of this example), ALEC should automatically create a situation:
+
+image::verify_situation_example.png[Situation,600]
+
+== View network inventory graph
+
+At any time, you can export the network inventory graph that ALEC maintains to view your network's inventory, alarms, and situations in context.
+
+.Export the ALEC graph:
+[source, karaf]
+opennms-alec:export-graph dbscan /tmp/dbscan.graph.xml
+
+NOTE: If ALEC is running on Sentinel, make sure to run this command from the Sentinel Karaf shell.
+
+.Import the graph into OpenNMS:
+[source]
+----
+curl -X POST -H "Content-Type: application/xml" -u admin:admin -d@/tmp/dbscan.graph.xml 'http://localhost:8980/opennms/rest/graphml/alec'
+----
+
+NOTE: If a "Graph with name alec already exists" error is displayed, delete the previous graph using the following command: `curl -X DELETE -u admin:admin 'http://localhost:8980/opennms/rest/graphml/alec'`.
+After the graph is deleted, you can try to create it again by following the steps above.
+
+After the graph is created, you can navigate to the OpenNMS topology map to view it.
+The graph resulting from this example is displayed as below:
+
+image::verify_topology_example.png[Network topology map, 600]

@@ -1,22 +1,21 @@
-= User's Guide to _ALEC_
+= User's Guide to ALEC
 :page-layout: home
 :!sectids:
 
-Welcome to the Architecture for Learning Enabled Correlation (ALEC)!
-This guide is intended to provide users and administrators with everything that is needed to conceptually understand and deploy some of the most advanced software concepts and components ever created for OpenNMS.
+Welcome to the Architecture for Learning Enabled Correlation (ALEC).
+This guide provides information and procedures to help you understand and deploy the advanced software concepts and components that make up ALEC.
 
-These new components were built from several years of research and development.
-Additionally, they have been written to take full advantage of being deployed on top of a great many new architectural improvements that have recently been made to the platform.
-In the tradition of OpenNMS development, these architectural changes have been created following a continuous improvement (CI) strategy; as opposed to starting from scratch with a complete rewrite (oh, so tempting!).
-This technique has proved itself well for continuity within the community as well as providing a very stable management platform; two decades in the making.
+First launched in 2019, we built ALEC after several years of research and development.
+The developer community played a significant role vetting the machine learning algorithms and deep-learning technologies that best fit OpenNMS and best correlated problems detected by their OpenNMS management systems.
 
-The developer community has spent several years in R&D as well as working with a few large corporate sponsors to realize these required architecture improvements.
-They have also played a significant role vetting the machine learning (ML) algorithms and deep learning (DL) technologies that best fit OpenNMS and that best correlated problems detected by their OpenNMS management systems.
+Now, in 2022, we have revisited ALEC to improve it:
 
-Following this guide, the user will gain sufficient knowledge about the correlation engine (CE) and the algorithms it uses to get started with transitioning from resolving Alarms (problems) to better managing the actual more complex Situations that they often represent.
+* Updated the UI for easier management and visualization of alarms and situations.
+* Added the situation timeline to visualize the lifecycle of a situation's alarms, for better root-cause analysis.
+* Included the option to use Hellinger distance calculations with the clustering engine, to better detect relationships between alarms.
 
-As a caution to the "new to OpenNMS" readers, many assumptions have been made about the reader having a basic understanding of OpenNMS as some of these CE concepts and supporting technologies are quite complex in their own right.
-However, this is a living document and every effort is being made to enable organizations to benefit from the many values provided by the CE.
+The updated ALEC also includes the ability to opt in to share your anonymized data with The OpenNMS Group so that we can improve the machine-learning technology for more precise results.
 
+This guide assumes that readers have a basic understanding of OpenNMS.
 
-For an overview of ALEC start with: xref:about:welcome.adoc[What is ALEC?]
+For an overview of ALEC, see xref:about:welcome.adoc[What is ALEC?]

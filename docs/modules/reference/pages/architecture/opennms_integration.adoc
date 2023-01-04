@@ -5,7 +5,7 @@
 The lifecycle of an alarm and the correlation process between OpenNMS and ALEC involves various components:
 
 .Alarm lifecycle architecture diagram
-image::architecture/opennms_alarm_lifecycle.png[Architecture diagram that depicts the components involved in an alarm's lifecycle, 600]
+image::architecture/opennms_alarm_lifecycle.png[Architecture diagram that depicts the components involved in an alarm's lifecycle, 750]
 
 Existing OpenNMS services that process unsolicited messages or actively poll monitored network inventory also generate events.
 https://docs.opennms.com/horizon/latest/reference/daemons/daemon-config-files/eventd.html[Eventd] processes and enriches these messages with the corresponding configuration data.

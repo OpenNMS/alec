@@ -92,7 +92,9 @@ workflows:
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
-          context: "OpenNMS Build"
+          context: 
+            - "OpenNMS Build"
+            - "OSSRH Principal"
           requires:
             - smoke-test-commit
             - smoke-test-full

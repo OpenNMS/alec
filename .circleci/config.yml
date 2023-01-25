@@ -105,7 +105,9 @@ workflows:
                 - develop
                 - /release-.*/
       - deploy-packages:
-          context: "OpenNMS Build"
+          context:
+            - "OpenNMS Build"
+            - "cloudsmith-publish-account"
           requires:
             - smoke-test-commit
             - smoke-test-full

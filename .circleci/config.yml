@@ -413,7 +413,9 @@ jobs:
       - run:
           name: Deploy the artifacts
           command: |
-            mvn -s .circleci.settings.xml -DskipTests deploy
+            export SIGN_KEY="$(echo "${GPG_SECRET_KEY}" | base64 -d)"
+            export SIGN_KEY_PASS="$(echo "${GPG_PASSPHRASE}" | base64 -d)"
+            mvn -s .circleci.settings.xml -DskipTests -Prelease deploy
 
   deploy-packages:
       executor: cloudsmith/default

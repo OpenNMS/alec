@@ -458,7 +458,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>alec-ossrh</serverId>
@@ -590,9 +590,9 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <groupId>org.simplify4u.plugins</groupId>
+                        <artifactId>sign-maven-plugin</artifactId>
+                        <version>1.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -600,6 +600,10 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <skipNoKey>false</skipNoKey>
+                                    <keyId>701E145FE26283F8C073BAAE697677243260D071</keyId>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

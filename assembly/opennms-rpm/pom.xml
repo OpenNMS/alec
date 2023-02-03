@@ -43,7 +43,9 @@
                         <defaultGroupname>wheel</defaultGroupname>
                         <release>${rpmRelease}</release>
                         <requires>
-                            <require>opennms-core &gt;= 30.0.0</require>
+                            <require>opennms-plugin-api &gt;= ${opennms.api.version}</require>
+                            <require>opennms-plugin-api &lt; ${opennms.api.version.max}</require>
+                            <require>opennms-core</require>
                         </requires>
                         <mappings>
                             <mapping>

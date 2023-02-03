@@ -78,6 +78,7 @@
         <okio.bundle.version>1.14.0_1</okio.bundle.version>
         <okhttp.bundle.version>3.10.0_2</okhttp.bundle.version>
         <opennms.api.version>1.0.0</opennms.api.version>
+        <opennms.api.version.max>2.0.0</opennms.api.version.max><!-- exclusive ver. allowed for packages dependency rpm & deb-->
         <sink.protobuf.version>2.6.1</sink.protobuf.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>

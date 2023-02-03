@@ -2,7 +2,7 @@
     <parent>
         <groupId>org.opennms.alec</groupId>
         <artifactId>assembly</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.alec.assembly</groupId>
@@ -34,7 +34,9 @@
                         <packageTitle>Architecture for Learning Enabled Correlation (ALEC)</packageTitle>
                         <packageDescription>ALEC</packageDescription>
                         <packageDependencies>
-                            <packageDependency>opennms-sentinel (&gt;= 30.0.0)</packageDependency>
+                            <packageDependency>opennms-plugin-api (&gt;= ${opennms.api.version})</packageDependency>
+                            <packageDependency>opennms-plugin-api (&lt;&lt; ${opennms.api.version.max})</packageDependency>
+                            <packageDependency>opennms-sentinel</packageDependency>
                         </packageDependencies>
                         <maintainerName>Jesse White</maintainerName>
                         <maintainerEmail>jesse@opennms.com</maintainerEmail>

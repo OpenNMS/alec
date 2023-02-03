@@ -42,33 +42,32 @@ workflows:
     jobs:
       # Run build jobs for all branches and any tag
       - pre-build:
-          context: "OpenNMS Build"
           filters:
             tags:
               only: /.*/
       - build:
-          context: "OpenNMS Build"
+          context:
+            - "gpg-signing"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - build-debian:
-          context: "OpenNMS Build"
+          context:
+            - "gpg-signing"
           requires:
             - build
           filters:
             tags:
               only: /.*/
       - build-docs:
-          context: "OpenNMS Build"
           requires:
             - pre-build
           filters:
             tags:
               only: /.*/
       - smoke-test-commit:
-          context: "OpenNMS Build"
           requires:
             - build
           filters:
@@ -79,7 +78,6 @@ workflows:
             tags:
               ignore: /^v.*/
       - smoke-test-full:
-          context: "OpenNMS Build"
           requires:
             - build
           filters:
@@ -92,8 +90,8 @@ workflows:
 
       # Run deploy jobs on version tags, release branches and develop
       - deploy-maven:
-          context: 
-            - "OpenNMS Build"
+          context:
+            - "gpg-signing"
             - "OSSRH Principal"
           requires:
             - smoke-test-commit
@@ -106,8 +104,8 @@ workflows:
                 - /release-.*/
       - deploy-packages:
           context:
-            - "OpenNMS Build"
             - "cloudsmith-publish-account"
+            - "gpg-signing"
           requires:
             - smoke-test-commit
             - smoke-test-full
@@ -415,7 +413,10 @@ jobs:
       - run:
           name: Deploy the artifacts
           command: |
-            mvn -s .circleci.settings.xml -DskipTests deploy
+            mkdir -p ~/.m2
+            echo "${GPG_SECRET_KEY_RSA_4096}" | base64 -d > ~/.m2/sign-key.asc
+            export SIGN_KEY_PASS="$(echo "${GPG_PASSPHRASE_RSA_4096}" | base64 -d)"
+            mvn -s .circleci.settings.xml -DskipTests -Prelease deploy
 
   deploy-packages:
       executor: cloudsmith/default

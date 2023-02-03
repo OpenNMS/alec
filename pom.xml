@@ -603,7 +603,7 @@
                                 </goals>
                                 <configuration>
                                     <skipNoKey>false</skipNoKey>
-                                    <keyId>701E145FE26283F8C073BAAE697677243260D071</keyId>
+                                    <keyId>${env.GPG_KEY_ID}</keyId>
                                 </configuration>
                             </execution>
                         </executions>

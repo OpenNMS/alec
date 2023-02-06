@@ -125,7 +125,6 @@ cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
 deb https://debian.opennms.org stable main
 deb-src https://debian.opennms.org stable main
 EOF
-wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
-apt update
+wget -O- https://debian.opennms.org/OPENNMS-GPG-KEY | tee -a /etc/apt/trusted.gpg.d/opennms.asc
 ----
 

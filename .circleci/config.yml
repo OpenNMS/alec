@@ -97,7 +97,8 @@ workflows:
             - smoke-test-commit
             - smoke-test-full
           filters:
-            # Maven deploy requires GPG signing for releases - we do this manually
+            tags:
+              only: /^v.*/
             branches:
               only:
                 - develop

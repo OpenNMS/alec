@@ -49,6 +49,12 @@ for FILE in assembly/*-rpm/target/rpm/*/RPMS/noarch/*.rpm; do
   publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" ||
   publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" ||
   publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" || exit 1
+  if [ "${REPO}" = "stable" ]; then
+    # also publish to "common"
+    publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" ||
+    publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" ||
+    publishPackage cloudsmith push rpm --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" || exit 1
+  fi
 done
 
 # shellcheck disable=SC2012
@@ -61,4 +67,10 @@ for FILE in assembly/*-deb/target/*.deb; do
   publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" ||
   publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" ||
   publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/$REPO/any-distro/any-version" "$FILE" || exit 1
+  if [ "${REPO}" = "stable" ]; then
+    # also publish to "common"
+    publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" ||
+    publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" ||
+    publishPackage cloudsmith push deb --no-wait-for-sync "${PROJECT}/common/any-distro/any-version" "$FILE" || exit 1
+  fi
 done

@@ -24,7 +24,7 @@ Run the Karaf container:
 
 In the Karaf shell, add the features repository:
 ```
-feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.1/xml
+feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.2-SNAPSHOT/xml
 ```
 
 ## Usage

@@ -1,5 +1,5 @@
 name: alec
-version: '3.0.1-SNAPSHOT'
+version: '3.0.1'
 title: ALEC
 nav:
   - modules/ROOT/nav.adoc

@@ -1,53 +1,44 @@
-:imagesdir: ../assets/images
+
 = Model
 
 == Types
 
-The following types are supported using the built-in inventory scripts:
+The following types are supported using built-in inventory scripts:
 
-=== Node (node)
+[cols="1,3"]
+|===
+| Type  | Description
 
-Associates the alarm with a node object.
+| node
+| Associates an alarm with a node object.
+No parameters are required.
 
-There are no parameters required aside from the alarm being associated to a node.
+| snmp-interface
+| Requires either the `ifIndex` or `ifDescr` parameter to be set. +
+When an `ifIndex` value is passed, it is used as-is. +
+When an `ifDescr` value is passed, {page-component-title} tries to look up the `ifIndex` with the matching `ifDescr` or `ifName` value on the node.
 
-=== SNMP interface (snmp-interface)
+| [[snmp-interface-link]]snmp-interface-link
+| Requires the `aIfDescr`, `zIfDescr`, and `zHostname` parameters to be set.
 
-Requires the `ifIndex` or `ifDescr` parameters to be set.
+| bgp-peer
+| Requires the `bgpPeer` parameters to be set.
 
-When given an `ifIndex` it will be used as-is.
+| vpn-tunnel
+| Requires the `peerLocalAddr`, `peerRemoteAddr`, and `tunnelId` parameters to be set.
 
-When given an `ifDescr` we will attempt to look up the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
+| mpls-l3-vrf
+| Requires either the `vrfNameOid` or `vrfName` parameter to be set.
 
-[[snmp-interface-link]]
-=== SNMP interface link (snmp-interface-link)
+| ent-physical-entity
+| Requirest the `entPhysicalIndex` parameter to be set.
 
-Requires the `aIfDescr`, `zIfDescr` and `zHostname` parameters to be set.
+| ospf-router
+| Requires the `ospfRouterId` parameter to be set.
 
-=== BGP peer (bgp-peer)
+| mpls-tunnel
+| Requires the `mpls-tunnel` parameter to be set.
 
-Requires the `bgpPeer` parameters to be set.
-
-=== VPN tunnel (vpn-tunnel)
-
-Requires the `peerLocalAddr`, `peerRemoteAddr` and `tunnelId` parameters to be set.
-
-=== MPLS L3 VRF (mpls-l3-vrf)
-
-Requires the `vrfNameOid` or `vrfName` parameter to be set.
-
-=== Entity-MIB physical entity (ent-physical-entity)
-
-Requires the `entPhysicalIndex` parameter to be set.
-
-=== OSPF router (ospf-router)
-
-Requires the `ospfRouterId` parameter to be set.
-
-=== MPLS tunnel (mpls-tunnel)
-
-Requires the `mpls-tunnel` parameter to be set.
-
-=== MPLS LDP session (mpls-tunnel)
-
-Requires the `mplsLdpEntityID` parameter to be set.
+| MPLS LDP session
+| Requires the `mlplsLdpEntityId` parameter to be set.
+|===

@@ -14,31 +14,40 @@ The following types are supported using built-in inventory scripts:
 No parameters are required.
 
 | snmp-interface
-| Requires either the `ifIndex` or `ifDescr` parameter to be set. +
+| Represents a physical or logical network device that is being monitored using SNMP.
+Requires either the `ifIndex` or `ifDescr` parameter to be set. +
 When an `ifIndex` value is passed, it is used as-is. +
 When an `ifDescr` value is passed, {page-component-title} tries to look up the `ifIndex` with the matching `ifDescr` or `ifName` value on the node.
 
 | [[snmp-interface-link]]snmp-interface-link
-| Requires the `aIfDescr`, `zIfDescr`, and `zHostname` parameters to be set.
+| Represents a logical link between two physical network interfaces on a device that is being monitored using SNMP.
+Requires the `aIfDescr`, `zIfDescr`, and `zHostname` parameters to be set.
 
 | bgp-peer
-| Requires the `bgpPeer` parameters to be set.
+| Represents a BGP peer relationship between two monitored network devices.
+Requires the `bgpPeer` parameters to be set.
 
 | vpn-tunnel
-| Requires the `peerLocalAddr`, `peerRemoteAddr`, and `tunnelId` parameters to be set.
+| Represents a VPN tunnel between two monitored network devices.
+Requires the `peerLocalAddr`, `peerRemoteAddr`, and `tunnelId` parameters to be set.
 
 | mpls-l3-vrf
-| Requires either the `vrfNameOid` or `vrfName` parameter to be set.
+| Represents a VRF instance in a monitored MPLS network.
+Requires either the `vrfNameOid` or `vrfName` parameter to be set.
 
 | ent-physical-entity
-| Requirest the `entPhysicalIndex` parameter to be set.
+| Represents a physical entity on a device that is being monitored using the Entity-MIB standard.
+Requires the `entPhysicalIndex` parameter to be set.
 
 | ospf-router
-| Requires the `ospfRouterId` parameter to be set.
+| Represents an OSPF router in a monitored network.
+Requires the `ospfRouterId` parameter to be set.
 
 | mpls-tunnel
-| Requires the `mpls-tunnel` parameter to be set.
+| Represents an MPLS tunnel between two monitored network devices.
+Requires the `mpls-tunnel` parameter to be set.
 
-| MPLS LDP session
-| Requires the `mlplsLdpEntityId` parameter to be set.
+| mpls-ldp-session
+| Represents an LDP session in a monitored MPLS network.
+Requires the `mlplsLdpEntityId` parameter to be set.
 |===

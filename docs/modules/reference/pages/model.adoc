@@ -1,53 +1,53 @@
-:imagesdir: ../assets/images
+
 = Model
 
 == Types
 
-The following types are supported using the built-in inventory scripts:
+The following types are supported using built-in inventory scripts:
 
-=== Node (node)
+[cols="1,3"]
+|===
+| Type  | Description
 
-Associates the alarm with a node object.
+| node
+| Associates an alarm with a node object.
+No parameters are required.
 
-There are no parameters required aside from the alarm being associated to a node.
+| snmp-interface
+| Represents a physical or logical network device that is being monitored using SNMP.
+Requires either the `ifIndex` or `ifDescr` parameter to be set. +
+When an `ifIndex` value is passed, it is used as-is. +
+When an `ifDescr` value is passed, {page-component-title} tries to look up the `ifIndex` with the matching `ifDescr` or `ifName` value on the node.
 
-=== SNMP interface (snmp-interface)
+| [[snmp-interface-link]]snmp-interface-link
+| Represents a logical link between two physical network interfaces on a device that is being monitored using SNMP.
+Requires the `aIfDescr`, `zIfDescr`, and `zHostname` parameters to be set.
 
-Requires the `ifIndex` or `ifDescr` parameters to be set.
-
-When given an `ifIndex` it will be used as-is.
-
-When given an `ifDescr` we will attempt to look up the associated `ifIndex` with the matching `ifDescr` or `ifName` on the node.
-
-[[snmp-interface-link]]
-=== SNMP interface link (snmp-interface-link)
-
-Requires the `aIfDescr`, `zIfDescr` and `zHostname` parameters to be set.
-
-=== BGP peer (bgp-peer)
-
+| bgp-peer
+| Represents a BGP peer relationship between two monitored network devices.
 Requires the `bgpPeer` parameters to be set.
 
-=== VPN tunnel (vpn-tunnel)
+| vpn-tunnel
+| Represents a VPN tunnel between two monitored network devices.
+Requires the `peerLocalAddr`, `peerRemoteAddr`, and `tunnelId` parameters to be set.
 
-Requires the `peerLocalAddr`, `peerRemoteAddr` and `tunnelId` parameters to be set.
+| mpls-l3-vrf
+| Represents a VRF instance in a monitored MPLS network.
+Requires either the `vrfNameOid` or `vrfName` parameter to be set.
 
-=== MPLS L3 VRF (mpls-l3-vrf)
-
-Requires the `vrfNameOid` or `vrfName` parameter to be set.
-
-=== Entity-MIB physical entity (ent-physical-entity)
-
+| ent-physical-entity
+| Represents a physical entity on a device that is being monitored using the Entity-MIB standard.
 Requires the `entPhysicalIndex` parameter to be set.
 
-=== OSPF router (ospf-router)
-
+| ospf-router
+| Represents an OSPF router in a monitored network.
 Requires the `ospfRouterId` parameter to be set.
 
-=== MPLS tunnel (mpls-tunnel)
-
+| mpls-tunnel
+| Represents an MPLS tunnel between two monitored network devices.
 Requires the `mpls-tunnel` parameter to be set.
 
-=== MPLS LDP session (mpls-tunnel)
-
-Requires the `mplsLdpEntityID` parameter to be set.
+| mpls-ldp-session
+| Represents an LDP session in a monitored MPLS network.
+Requires the `mlplsLdpEntityId` parameter to be set.
+|===

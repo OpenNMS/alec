@@ -415,8 +415,8 @@ jobs:
           name: Deploy the artifacts
           command: |
             mkdir -p ~/.m2
-            echo "${GPG_SECRET_KEY_RSA_4096}" | base64 -d > ~/.m2/sign-key.asc
-            export SIGN_KEY_PASS="$(echo "${GPG_PASSPHRASE_RSA_4096}" | base64 -d)"
+            echo "${GPG_SECRET_KEY}" | base64 -d > ~/.m2/sign-key.asc
+            export SIGN_KEY_PASS="$(echo "${GPG_PASSPHRASE}" | base64 -d)"
             mvn -s .circleci.settings.xml -DskipTests -Prelease deploy
 
   deploy-packages:

@@ -1,5 +1,4 @@
 = User's Guide to ALEC
-:page-layout: home
 :!sectids:
 
 Welcome to the Architecture for Learning Enabled Correlation (ALEC).

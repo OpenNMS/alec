@@ -2,28 +2,29 @@
 :imagesdir: ../assets/images
 = Pre-Installation Tasks
 
-This section describes the configuration tasks you must complete before installing ALEC.
+This section describes the configuration tasks that you must complete before installing ALEC.
 
 == OpenNMS configuration
 
-=== Set `$OPENNMS_HOME` variable
+Before you install ALEC, you must configure your OpenNMS instance.
 
-The ALEC installation instructions refer to the `$OPENNMS_HOME` environment variable, which must be set.
+=== Set \$OPENNMS_HOME variable
 
-On RHEL or CentOS, use the following command: `export OPENNMS_HOME=/opt/opennms`.
+The ALEC installation documentation refers to the `$OPENNMS_HOME` environment variable, which does not exist by default.
+To create it, use the command that is appropriate for your Linux distribution:
 
-On Ubuntu or Debian, use the following command: `export OPENNMS_HOME=/usr/share/opennms`.
+* *RHEL/CentOS:* `export OPENNMS_HOME=/opt/opennms`
+* *Ubuntu/Debian:* `export OPENNMS_HOME=/usr/share/opennms`
 
-=== Verify your OpenNMS installation
+=== Verify OpenNMS installation
 
-Run the `health:check` command in an OpenNMS Karaf shell to verify the status of your OpenNMS instance.
+Run `opennms:health-check` in an OpenNMS Karaf shell to verify the status of your Horizon or Meridian instance.
+If the command returns `Everything is awesome`, you can continue to <<alarm-history-storage, Enable alarm history storage>>.
+If it returns `Oh no, something is wrong`, you must address the underlying problem before moving forward.
 
-If the health check returns "Everything is awesome," continue to the next pre-installation task.
-An "Oh no, something is wrong" error message indicates a problem that you must address before moving forward.
+The most common output that you may see involves a missing Elasticsearch configuration, similar to the following example:
 
-The most common result you may see involves a missing Elasticsearch configuration, similar to the following:
-
-[source, karaf]
+[source, shell]
 ----
 admin@opennms> health-check
 Verifying the health of the container
@@ -34,56 +35,53 @@ Connecting to ElasticSearch ReST API (Flows)   [ Success ] => Not configured
 => Everything is awesome
 ----
 
-OpenNMS deployments install the `opennms-flows` feature set by default, but may not point to the Elasticsearch server.
-To fix this issue, you can either uninstall the feature (using the `feature:uninstall opennms-flows` command), or point the feature to an Elasticsearch instance:
+OpenNMS deployments install the `opennms-flows` feature set by default, but may not automatically point to the Elasticsearch server.
+This does not cause the health check to fail, but you may want to configure the feature to point to an Elasticsearch instance:
 
-[source, karaf]
+[source, shell]
 ----
 config:edit org.opennms.features.flows.persistence.elastic
-config:property-set elasticUrl http://elastic:9200
+config:property-set elasticUrl http://elastic:9200 <1>
 config:update
 ----
+<1> Replace the sample URL with one that points to your Elasticsearch instance.
 
-NOTE: Replace the sample URL (`http://elastic:9200`) with one that points to your Elasticsearch instance.
+Run `opennms:health-check` again.
+If the `Everything is awesome` message is displayed, continue to the next tasks.
 
-Run the `health:check` command again and, if the "Everything is awesome" message is displayed, continue to the next tasks.
+[[alarm-history-storage]]
+=== Enable alarm history storage
 
-=== Enable alarm history storage for Elasticsearch
+When using ALEC, we strongly recommend that you leverage the OpenNMS-Elasticsearch integration.
+It lets OpenNMS maintain historical alarm information on an Elasticsearch server.
 
-We strongly recommend that, when using ALEC, you leverage the Elasticsearch integration.
-This integration lets OpenNMS maintain historical alarm information in Elasticsearch.
+Follow these steps in an OpenNMS Karaf shell to set up the integration.
 
-To set up the integration, run the following commands in an OpenNMS Karaf shell:
-
-.Point your OpenNMS instance to an Elasticsearch instance:
-
-[source, karaf]
+. Point your OpenNMS instance to an Elasticsearch instance:
++
+[source, shell]
 ----
 config:edit org.opennms.features.alarms.history.elastic
-config:property-set elasticUrl http://elastic:9200
+config:property-set elasticUrl http://elastic:9200 <1>
 config:update
 ----
+<1> Replace the sample URL with one that points to your Elasticsearch instance.
 
-NOTE: Replace the sample URL (`http://elastic:9200`) with one that points to your Elasticsearch instance.
-
-.Install the feature:
-
-[source, karaf]
-----
+. Install the alarm history feature:
++
+[source, shell]
 feature:install opennms-alarm-history-elastic
-----
 
-After the feature is installed, run the `health:check` command.
-If everything is configured properly, an "Everything is awesome" message is displayed.
+. Run `opennms:health-check`.
+If the alarm history feature is configured properly, `Everything is awesome` is displayed.
 
 === Enable syslogd
 
-We recommend that you enable syslogd to take advantage of the syslog patterns and event definitions that ALEC provides.
+We recommend that you enable https://docs.opennms.com/horizon/latest/reference/daemons/daemon-config-files/syslogd.html[syslogd] to take advantage of the syslog patterns and event definitions that ALEC provides.
 
-.Edit `$OPENNMS_HOME/etc/service-configuration.xml`
-and change the following:
+Edit `$OPENNMS_HOME/etc/service-configuration.xml` and change the following code:
 
-[source]
+[source, xml]
 ----
 <service enabled="false">
     <name>OpenNMS:Name=Syslogd</name>
@@ -91,35 +89,34 @@ and change the following:
 
 to:
 
-[source]
+[source, xml]
 ----
 <service>
     <name>OpenNMS:Name=Syslogd</name>
 ----
 
-This change will come into effect the next time OpenNMS restarts.
-Do not restart OpenNMS at this point; you will restart it as part of the ALEC installation procedure.
+This change is effected the next time OpenNMS restarts.
+
+WARNING: Do not restart OpenNMS at this point; you will restart it as part of the ALEC installation process.
 
 == Set up package repositories
 
-Packages for ALEC are available in the same Debian and YUM repositories as OpenNMS.
+Packages for ALEC are available in the same `yum` and `apt` repositories as OpenNMS.
 If you already have the stable repository installed, you can skip this step.
 
-=== Set up YUM repository (RHEL/CentOS)
+Install the repository using the commands that are appropriate for your system:
 
-For RHEL- or CentOS-based distributions, install the repository:
-
-[source]
+* *RHEL/CentOS:*
++
+[source, shell]
 ----
 yum -y install https://yum.opennms.org/repofiles/opennms-repo-stable-rhel7.noarch.rpm
 rpm --import https://yum.opennms.org/OPENNMS-GPG-KEY
 ----
 
-=== Set up APT repository (Ubuntu/Debian)
-
-For Ubuntu- or Debian-based distributions, install the repository:
-
-[source]
+* *Ubuntu/Debian:*
++
+[source, shell]
 ----
 cat << EOF | sudo tee /etc/apt/sources.list.d/opennms.list
 deb https://debian.opennms.org stable main
@@ -128,4 +125,3 @@ EOF
 wget -O - https://debian.opennms.org/OPENNMS-GPG-KEY | apt-key add -
 apt update
 ----
-

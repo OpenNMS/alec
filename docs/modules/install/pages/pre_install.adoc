@@ -20,7 +20,7 @@ To create it, use the command that is appropriate for your Linux distribution:
 
 Run `opennms:health-check` in an OpenNMS Karaf shell to verify the status of your Horizon or Meridian instance.
 If the command returns `Everything is awesome`, you can continue to <<alarm-history-storage, Enable alarm history storage>>.
-If it returns `Oh no, something is wrong`, you must address the underlying problem before moving forward.
+If it returns `Oh no, something is wrong`, you must address the underlying problem before continuing.
 
 The most common output that you may see involves a missing Elasticsearch configuration, similar to the following example:
 
@@ -95,7 +95,7 @@ to:
     <name>OpenNMS:Name=Syslogd</name>
 ----
 
-This change is effected the next time OpenNMS restarts.
+This change occurs the next time OpenNMS restarts.
 
 WARNING: Do not restart OpenNMS at this point; you will restart it as part of the ALEC installation process.
 

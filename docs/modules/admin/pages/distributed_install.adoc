@@ -24,7 +24,7 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these in
 == OpenNMS configuration
 
 Follow these steps to configure your OpenNMS instance for a distributed installation of ALEC.
-The steps should be completed using the OpenNMS Karaf shell.
+You should use the OpenNMS Karaf shell to complete these steps. 
 
 NOTE: This procedure assumes that you are already using the Kafka strategy for the Sink API (see <<prerequisites, Prerequisites>>).
 
@@ -54,7 +54,7 @@ Make sure that you install the package repository on all systems that are runnin
 [source, shell]
 yum -y install opennms-alec-plugin
 
-. Configure the feature set to be installed when OpenNMS starts:
+. Configure the feature set to install when OpenNMS starts:
 +
 [source, shell]
 echo 'alec-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
@@ -91,7 +91,7 @@ TIP: Kafka Stream reads alarms and inventory, while the Kafka producer sends eve
 [source, shell]
 echo 'connectString=127.0.0.1:2181' > "$SENTINEL_HOME/etc/org.opennms.features.distributed.coordination.zookeeper.cfg"
 
-. Configure the feature set to be installed when Sentinel starts:
+. Configure the feature set to install when Sentinel starts:
 +
 [source, shell]
 ----

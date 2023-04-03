@@ -5,9 +5,11 @@
 A distributed installation runs ALEC as a service on top of https://docs.opennms.com/horizon/latest/deployment/sentinel/introduction.html[Sentinel], an OpenNMS component that enables scalability for data processing.
 
 .Example distributed installation network architecture
-image::distributed_deployment.png[Network architecture graphic that displays the components of a distributed installation of ALEC, 700]
+image::distributed_deployment.png["Network architecture graphic that displays the components of a distributed installation of ALEC.", 600]
 
-[[prequisites]]
+IMPORTANT: You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding.
+
+[[prerequisites]]
 == Prerequisites
 
 In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these instructions assume that you have the following:
@@ -21,110 +23,97 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these in
 
 == OpenNMS configuration
 
-Complete the following steps in the OpenNMS Karaf shell.
-They configure your OpenNMS instance in preparation for a distributed installation of ALEC.
+Follow these steps to configure your OpenNMS instance for a distributed installation of ALEC.
+You should use the OpenNMS Karaf shell to complete these steps. 
 
-.Configure Kafka Producer to point to your Kafka broker:
+NOTE: This procedure assumes that you are already using the Kafka strategy for the Sink API (see <<prerequisites, Prerequisites>>).
 
-[source, karaf]
-----
+. Configure the Kafka Producer to point to your Kafka broker:
++
+[source, shell]
 echo 'bootstrap.servers=127.0.0.1:9092' > "$OPENNMS_HOME/etc/org.opennms.features.kafka.producer.client.cfg"
-----
 
-.Disable incremental alarm suppression:
-
-[source, karaf]
-----
+. Disable incremental alarm suppression:
++
+[source, shell]
 echo 'suppressIncrementalAlarms=false' >> "$OPENNMS_HOME/etc/org.opennms.features.kafka.producer.cfg"
-----
 
-Open `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg` in a text editor and add `opennms-kafka-producer` to the `featuresBoot` property.
-
-.Enable consumption of Kafka events:
-
-[source, karaf]
-----
+. Edit `$OPENNMS_HOME/etc/org.apache.karaf.features.cfg` and add `opennms-kafka-producer` to the `featuresBoost` property.
+. Enable consumption of Kafka events:
++
+[source, shell]
 echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.properties.d/event-sink.properties"
-----
-
-IMPORTANT: This procedure assumes that you are already using the Kafka strategy for the Sink API (see <<prequisites>>).
 
 == Install ALEC in OpenNMS
 
-You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
+Follow these steps to install ALEC on your OpenNMS instance.
+Make sure that you install the package repository on all systems that are running OpenNMS.
 
-Make sure that you install the package repository on all systems that are running Sentinel and OpenNMS.
-
-.Install the ALEC plugin package on your OpenNMS server:
-
-[source, karaf]
-----
+. Install the plugin package on your OpenNMS server:
++
+[source, shell]
 yum -y install opennms-alec-plugin
-----
 
-.Configure the feature set to be installed when OpenNMS starts:
-
-[source, karaf]
-----
+. Configure the feature set to install when OpenNMS starts:
++
+[source, shell]
 echo 'alec-opennms-distributed wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
-----
 
 == Install ALEC in Sentinel
 
-.Install the ALEC plugin package on your Sentinel systems:
+Follow these steps to install ALEC on your Sentinel instance.
+Make sure that you install the package repository on all systems that are running Sentinel.
 
-[source, karaf]
-----
+. Install the plugin package on your Sentinel systems:
++
+[source, shell]
 yum -y install sentinel-alec-plugin
-----
 
-.Configure Kafka Stream (consumer):
-
-[source, karaf]
+. Configure Kafka Stream (the Kafka consumer):
++
+[source, shell]
 ----
 echo 'bootstrap.servers=127.0.0.1:9092
 commit.interval.ms=5000' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.streams.cfg"
 ----
 
-.Configure the Kafka producer:
-
-[source, karaf]
+. Configure the Kafka producer:
++
+[source, shell]
 ----
 echo 'bootstrap.servers=127.0.0.1:9092' > "$SENTINEL_HOME/etc/org.opennms.alec.datasource.opennms.kafka.producer.cfg"
 ----
-
++
 TIP: Kafka Stream reads alarms and inventory, while the Kafka producer sends events.
 
-.Configure ZooKeeper for distributed coordination:
-
-[source, karaf]
-----
+. Configure ZooKeeper for distributed coordination:
++
+[source, shell]
 echo 'connectString=127.0.0.1:2181' > "$SENTINEL_HOME/etc/org.opennms.features.distributed.coordination.zookeeper.cfg"
-----
 
-.Configure the feature set to be installed when Sentinel starts:
-
-[source, karaf]
+. Configure the feature set to install when Sentinel starts:
++
+[source, shell]
 ----
 echo 'sentinel-core
 sentinel-coordination-zookeeper
 alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/etc/featuresBoot.d/alec.boot"
 ----
 
-== Verify your installation
+== Verify installation
 
 Follow these steps to verify your distributed ALEC installation:
 
 . Restart OpenNMS and Sentinel.
 . Make sure that the required Kafka topics have been created (see xref:reference:datasources/kafka.adoc#topics[Kafka topics]).
-. Run the `health:check` command in an OpenNMS Karaf shell to check the status of your OpenNMS instance.
-. Run the `health:check` command in a Sentinel Karaf shell to check the status of the Sentinel instance.
+. Run `opennms:health-check` in an OpenNMS Karaf shell to check the status of your OpenNMS Horizon or Meridian instance.
+. Run `opennms:health-check` in a Sentinel Karaf shell to check the status of the Sentinel instance.
 ** Repeat this step for each Sentinel instance in your environment.
-. Run the `opennms-alec:list-graphs` command in a Sentinel Karaf shell to enumerate all available graphs.
+. Run `opennms-alec:list-graphs` in a Sentinel Karaf shell to enumerate all available graphs.
 
 At this point, the health check commands should return with no issues, and one graph named "dbscan" should be enumerated:
 
-[source, karaf]
+[source, shell]
 ----
 admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.

@@ -162,6 +162,212 @@ public final class OpennmsModelProtos {
     // @@protoc_insertion_point(enum_scope:Severity)
   }
 
+  /**
+   * Protobuf enum {@code TroubleTicketState}
+   */
+  public enum TroubleTicketState
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>OPEN = 0;</code>
+     */
+    OPEN(0),
+    /**
+     * <code>CREATE_PENDING = 1;</code>
+     */
+    CREATE_PENDING(1),
+    /**
+     * <code>CREATE_FAILED = 2;</code>
+     */
+    CREATE_FAILED(2),
+    /**
+     * <code>UPDATE_PENDING = 3;</code>
+     */
+    UPDATE_PENDING(3),
+    /**
+     * <code>UPDATE_FAILED = 4;</code>
+     */
+    UPDATE_FAILED(4),
+    /**
+     * <code>CLOSED = 5;</code>
+     */
+    CLOSED(5),
+    /**
+     * <code>CLOSE_PENDING = 6;</code>
+     */
+    CLOSE_PENDING(6),
+    /**
+     * <code>CLOSE_FAILED = 7;</code>
+     */
+    CLOSE_FAILED(7),
+    /**
+     * <code>RESOLVED = 8;</code>
+     */
+    RESOLVED(8),
+    /**
+     * <code>RESOLVE_PENDING = 9;</code>
+     */
+    RESOLVE_PENDING(9),
+    /**
+     * <code>RESOLVE_FAILED = 10;</code>
+     */
+    RESOLVE_FAILED(10),
+    /**
+     * <code>CANCELLED = 11;</code>
+     */
+    CANCELLED(11),
+    /**
+     * <code>CANCEL_PENDING = 12;</code>
+     */
+    CANCEL_PENDING(12),
+    /**
+     * <code>CANCEL_FAILED = 13;</code>
+     */
+    CANCEL_FAILED(13),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>OPEN = 0;</code>
+     */
+    public static final int OPEN_VALUE = 0;
+    /**
+     * <code>CREATE_PENDING = 1;</code>
+     */
+    public static final int CREATE_PENDING_VALUE = 1;
+    /**
+     * <code>CREATE_FAILED = 2;</code>
+     */
+    public static final int CREATE_FAILED_VALUE = 2;
+    /**
+     * <code>UPDATE_PENDING = 3;</code>
+     */
+    public static final int UPDATE_PENDING_VALUE = 3;
+    /**
+     * <code>UPDATE_FAILED = 4;</code>
+     */
+    public static final int UPDATE_FAILED_VALUE = 4;
+    /**
+     * <code>CLOSED = 5;</code>
+     */
+    public static final int CLOSED_VALUE = 5;
+    /**
+     * <code>CLOSE_PENDING = 6;</code>
+     */
+    public static final int CLOSE_PENDING_VALUE = 6;
+    /**
+     * <code>CLOSE_FAILED = 7;</code>
+     */
+    public static final int CLOSE_FAILED_VALUE = 7;
+    /**
+     * <code>RESOLVED = 8;</code>
+     */
+    public static final int RESOLVED_VALUE = 8;
+    /**
+     * <code>RESOLVE_PENDING = 9;</code>
+     */
+    public static final int RESOLVE_PENDING_VALUE = 9;
+    /**
+     * <code>RESOLVE_FAILED = 10;</code>
+     */
+    public static final int RESOLVE_FAILED_VALUE = 10;
+    /**
+     * <code>CANCELLED = 11;</code>
+     */
+    public static final int CANCELLED_VALUE = 11;
+    /**
+     * <code>CANCEL_PENDING = 12;</code>
+     */
+    public static final int CANCEL_PENDING_VALUE = 12;
+    /**
+     * <code>CANCEL_FAILED = 13;</code>
+     */
+    public static final int CANCEL_FAILED_VALUE = 13;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static TroubleTicketState valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static TroubleTicketState forNumber(int value) {
+      switch (value) {
+        case 0: return OPEN;
+        case 1: return CREATE_PENDING;
+        case 2: return CREATE_FAILED;
+        case 3: return UPDATE_PENDING;
+        case 4: return UPDATE_FAILED;
+        case 5: return CLOSED;
+        case 6: return CLOSE_PENDING;
+        case 7: return CLOSE_FAILED;
+        case 8: return RESOLVED;
+        case 9: return RESOLVE_PENDING;
+        case 10: return RESOLVE_FAILED;
+        case 11: return CANCELLED;
+        case 12: return CANCEL_PENDING;
+        case 13: return CANCEL_FAILED;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<TroubleTicketState>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        TroubleTicketState> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<TroubleTicketState>() {
+            public TroubleTicketState findValueByNumber(int number) {
+              return TroubleTicketState.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return OpennmsModelProtos.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final TroubleTicketState[] VALUES = values();
+
+    public static TroubleTicketState valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private TroubleTicketState(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:TroubleTicketState)
+  }
+
   public interface NodeCriteriaOrBuilder extends
       // @@protoc_insertion_point(interface_extends:NodeCriteria)
       com.google.protobuf.MessageOrBuilder {
@@ -190,6 +396,26 @@ public final class OpennmsModelProtos {
      */
     com.google.protobuf.ByteString
         getForeignIdBytes();
+
+    /**
+     * <code>string node_label = 4;</code>
+     */
+    java.lang.String getNodeLabel();
+    /**
+     * <code>string node_label = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getNodeLabelBytes();
+
+    /**
+     * <code>string location = 5;</code>
+     */
+    java.lang.String getLocation();
+    /**
+     * <code>string location = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getLocationBytes();
   }
   /**
    * Protobuf type {@code NodeCriteria}
@@ -207,6 +433,8 @@ public final class OpennmsModelProtos {
       id_ = 0L;
       foreignSource_ = "";
       foreignId_ = "";
+      nodeLabel_ = "";
+      location_ = "";
     }
 
     @java.lang.Override
@@ -255,6 +483,18 @@ public final class OpennmsModelProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               foreignId_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              nodeLabel_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              location_ = s;
               break;
             }
           }
@@ -358,6 +598,74 @@ public final class OpennmsModelProtos {
       }
     }
 
+    public static final int NODE_LABEL_FIELD_NUMBER = 4;
+    private volatile java.lang.Object nodeLabel_;
+    /**
+     * <code>string node_label = 4;</code>
+     */
+    public java.lang.String getNodeLabel() {
+      java.lang.Object ref = nodeLabel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        nodeLabel_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string node_label = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNodeLabelBytes() {
+      java.lang.Object ref = nodeLabel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        nodeLabel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int LOCATION_FIELD_NUMBER = 5;
+    private volatile java.lang.Object location_;
+    /**
+     * <code>string location = 5;</code>
+     */
+    public java.lang.String getLocation() {
+      java.lang.Object ref = location_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        location_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string location = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLocationBytes() {
+      java.lang.Object ref = location_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        location_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -379,6 +687,12 @@ public final class OpennmsModelProtos {
       if (!getForeignIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, foreignId_);
       }
+      if (!getNodeLabelBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, nodeLabel_);
+      }
+      if (!getLocationBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, location_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -396,6 +710,12 @@ public final class OpennmsModelProtos {
       }
       if (!getForeignIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, foreignId_);
+      }
+      if (!getNodeLabelBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, nodeLabel_);
+      }
+      if (!getLocationBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, location_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -419,6 +739,10 @@ public final class OpennmsModelProtos {
           .equals(other.getForeignSource());
       result = result && getForeignId()
           .equals(other.getForeignId());
+      result = result && getNodeLabel()
+          .equals(other.getNodeLabel());
+      result = result && getLocation()
+          .equals(other.getLocation());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -437,6 +761,10 @@ public final class OpennmsModelProtos {
       hash = (53 * hash) + getForeignSource().hashCode();
       hash = (37 * hash) + FOREIGN_ID_FIELD_NUMBER;
       hash = (53 * hash) + getForeignId().hashCode();
+      hash = (37 * hash) + NODE_LABEL_FIELD_NUMBER;
+      hash = (53 * hash) + getNodeLabel().hashCode();
+      hash = (37 * hash) + LOCATION_FIELD_NUMBER;
+      hash = (53 * hash) + getLocation().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -572,6 +900,10 @@ public final class OpennmsModelProtos {
 
         foreignId_ = "";
 
+        nodeLabel_ = "";
+
+        location_ = "";
+
         return this;
       }
 
@@ -597,6 +929,8 @@ public final class OpennmsModelProtos {
         result.id_ = id_;
         result.foreignSource_ = foreignSource_;
         result.foreignId_ = foreignId_;
+        result.nodeLabel_ = nodeLabel_;
+        result.location_ = location_;
         onBuilt();
         return result;
       }
@@ -647,6 +981,14 @@ public final class OpennmsModelProtos {
         }
         if (!other.getForeignId().isEmpty()) {
           foreignId_ = other.foreignId_;
+          onChanged();
+        }
+        if (!other.getNodeLabel().isEmpty()) {
+          nodeLabel_ = other.nodeLabel_;
+          onChanged();
+        }
+        if (!other.getLocation().isEmpty()) {
+          location_ = other.location_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -836,6 +1178,144 @@ public final class OpennmsModelProtos {
   checkByteStringIsUtf8(value);
         
         foreignId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object nodeLabel_ = "";
+      /**
+       * <code>string node_label = 4;</code>
+       */
+      public java.lang.String getNodeLabel() {
+        java.lang.Object ref = nodeLabel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          nodeLabel_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string node_label = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNodeLabelBytes() {
+        java.lang.Object ref = nodeLabel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          nodeLabel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string node_label = 4;</code>
+       */
+      public Builder setNodeLabel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        nodeLabel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string node_label = 4;</code>
+       */
+      public Builder clearNodeLabel() {
+        
+        nodeLabel_ = getDefaultInstance().getNodeLabel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string node_label = 4;</code>
+       */
+      public Builder setNodeLabelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        nodeLabel_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object location_ = "";
+      /**
+       * <code>string location = 5;</code>
+       */
+      public java.lang.String getLocation() {
+        java.lang.Object ref = location_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          location_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string location = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLocationBytes() {
+        java.lang.Object ref = location_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          location_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string location = 5;</code>
+       */
+      public Builder setLocation(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        location_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string location = 5;</code>
+       */
+      public Builder clearLocation() {
+        
+        location_ = getDefaultInstance().getLocation();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string location = 5;</code>
+       */
+      public Builder setLocationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        location_ = value;
         onChanged();
         return this;
       }
@@ -1687,6 +2167,1068 @@ public final class OpennmsModelProtos {
 
   }
 
+  public interface SnmpInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:SnmpInfo)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string id = 1;</code>
+     */
+    java.lang.String getId();
+    /**
+     * <code>string id = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <code>string version = 2;</code>
+     */
+    java.lang.String getVersion();
+    /**
+     * <code>string version = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <code>uint32 specific = 3;</code>
+     */
+    int getSpecific();
+
+    /**
+     * <code>uint32 generic = 4;</code>
+     */
+    int getGeneric();
+
+    /**
+     * <code>string community = 5;</code>
+     */
+    java.lang.String getCommunity();
+    /**
+     * <code>string community = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getCommunityBytes();
+
+    /**
+     * <code>string trap_oid = 6;</code>
+     */
+    java.lang.String getTrapOid();
+    /**
+     * <code>string trap_oid = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getTrapOidBytes();
+  }
+  /**
+   * Protobuf type {@code SnmpInfo}
+   */
+  public  static final class SnmpInfo extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:SnmpInfo)
+      SnmpInfoOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SnmpInfo.newBuilder() to construct.
+    private SnmpInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SnmpInfo() {
+      id_ = "";
+      version_ = "";
+      specific_ = 0;
+      generic_ = 0;
+      community_ = "";
+      trapOid_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SnmpInfo(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              id_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              version_ = s;
+              break;
+            }
+            case 24: {
+
+              specific_ = input.readUInt32();
+              break;
+            }
+            case 32: {
+
+              generic_ = input.readUInt32();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              community_ = s;
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              trapOid_ = s;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return OpennmsModelProtos.internal_static_SnmpInfo_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return OpennmsModelProtos.internal_static_SnmpInfo_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              OpennmsModelProtos.SnmpInfo.class, OpennmsModelProtos.SnmpInfo.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object id_;
+    /**
+     * <code>string id = 1;</code>
+     */
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string id = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 2;
+    private volatile java.lang.Object version_;
+    /**
+     * <code>string version = 2;</code>
+     */
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string version = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SPECIFIC_FIELD_NUMBER = 3;
+    private int specific_;
+    /**
+     * <code>uint32 specific = 3;</code>
+     */
+    public int getSpecific() {
+      return specific_;
+    }
+
+    public static final int GENERIC_FIELD_NUMBER = 4;
+    private int generic_;
+    /**
+     * <code>uint32 generic = 4;</code>
+     */
+    public int getGeneric() {
+      return generic_;
+    }
+
+    public static final int COMMUNITY_FIELD_NUMBER = 5;
+    private volatile java.lang.Object community_;
+    /**
+     * <code>string community = 5;</code>
+     */
+    public java.lang.String getCommunity() {
+      java.lang.Object ref = community_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        community_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string community = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCommunityBytes() {
+      java.lang.Object ref = community_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        community_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TRAP_OID_FIELD_NUMBER = 6;
+    private volatile java.lang.Object trapOid_;
+    /**
+     * <code>string trap_oid = 6;</code>
+     */
+    public java.lang.String getTrapOid() {
+      java.lang.Object ref = trapOid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        trapOid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string trap_oid = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTrapOidBytes() {
+      java.lang.Object ref = trapOid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        trapOid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, version_);
+      }
+      if (specific_ != 0) {
+        output.writeUInt32(3, specific_);
+      }
+      if (generic_ != 0) {
+        output.writeUInt32(4, generic_);
+      }
+      if (!getCommunityBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, community_);
+      }
+      if (!getTrapOidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, trapOid_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, version_);
+      }
+      if (specific_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(3, specific_);
+      }
+      if (generic_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, generic_);
+      }
+      if (!getCommunityBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, community_);
+      }
+      if (!getTrapOidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, trapOid_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof OpennmsModelProtos.SnmpInfo)) {
+        return super.equals(obj);
+      }
+      OpennmsModelProtos.SnmpInfo other = (OpennmsModelProtos.SnmpInfo) obj;
+
+      boolean result = true;
+      result = result && getId()
+          .equals(other.getId());
+      result = result && getVersion()
+          .equals(other.getVersion());
+      result = result && (getSpecific()
+          == other.getSpecific());
+      result = result && (getGeneric()
+          == other.getGeneric());
+      result = result && getCommunity()
+          .equals(other.getCommunity());
+      result = result && getTrapOid()
+          .equals(other.getTrapOid());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (37 * hash) + SPECIFIC_FIELD_NUMBER;
+      hash = (53 * hash) + getSpecific();
+      hash = (37 * hash) + GENERIC_FIELD_NUMBER;
+      hash = (53 * hash) + getGeneric();
+      hash = (37 * hash) + COMMUNITY_FIELD_NUMBER;
+      hash = (53 * hash) + getCommunity().hashCode();
+      hash = (37 * hash) + TRAP_OID_FIELD_NUMBER;
+      hash = (53 * hash) + getTrapOid().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static OpennmsModelProtos.SnmpInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(OpennmsModelProtos.SnmpInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code SnmpInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:SnmpInfo)
+        OpennmsModelProtos.SnmpInfoOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return OpennmsModelProtos.internal_static_SnmpInfo_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return OpennmsModelProtos.internal_static_SnmpInfo_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                OpennmsModelProtos.SnmpInfo.class, OpennmsModelProtos.SnmpInfo.Builder.class);
+      }
+
+      // Construct using OpennmsModelProtos.SnmpInfo.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        id_ = "";
+
+        version_ = "";
+
+        specific_ = 0;
+
+        generic_ = 0;
+
+        community_ = "";
+
+        trapOid_ = "";
+
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return OpennmsModelProtos.internal_static_SnmpInfo_descriptor;
+      }
+
+      public OpennmsModelProtos.SnmpInfo getDefaultInstanceForType() {
+        return OpennmsModelProtos.SnmpInfo.getDefaultInstance();
+      }
+
+      public OpennmsModelProtos.SnmpInfo build() {
+        OpennmsModelProtos.SnmpInfo result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public OpennmsModelProtos.SnmpInfo buildPartial() {
+        OpennmsModelProtos.SnmpInfo result = new OpennmsModelProtos.SnmpInfo(this);
+        result.id_ = id_;
+        result.version_ = version_;
+        result.specific_ = specific_;
+        result.generic_ = generic_;
+        result.community_ = community_;
+        result.trapOid_ = trapOid_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof OpennmsModelProtos.SnmpInfo) {
+          return mergeFrom((OpennmsModelProtos.SnmpInfo)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(OpennmsModelProtos.SnmpInfo other) {
+        if (other == OpennmsModelProtos.SnmpInfo.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          onChanged();
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          onChanged();
+        }
+        if (other.getSpecific() != 0) {
+          setSpecific(other.getSpecific());
+        }
+        if (other.getGeneric() != 0) {
+          setGeneric(other.getGeneric());
+        }
+        if (!other.getCommunity().isEmpty()) {
+          community_ = other.community_;
+          onChanged();
+        }
+        if (!other.getTrapOid().isEmpty()) {
+          trapOid_ = other.trapOid_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        OpennmsModelProtos.SnmpInfo parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (OpennmsModelProtos.SnmpInfo) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object id_ = "";
+      /**
+       * <code>string id = 1;</code>
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder clearId() {
+        
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 1;</code>
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <code>string version = 2;</code>
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string version = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string version = 2;</code>
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string version = 2;</code>
+       */
+      public Builder clearVersion() {
+        
+        version_ = getDefaultInstance().getVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string version = 2;</code>
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        version_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int specific_ ;
+      /**
+       * <code>uint32 specific = 3;</code>
+       */
+      public int getSpecific() {
+        return specific_;
+      }
+      /**
+       * <code>uint32 specific = 3;</code>
+       */
+      public Builder setSpecific(int value) {
+        
+        specific_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 specific = 3;</code>
+       */
+      public Builder clearSpecific() {
+        
+        specific_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int generic_ ;
+      /**
+       * <code>uint32 generic = 4;</code>
+       */
+      public int getGeneric() {
+        return generic_;
+      }
+      /**
+       * <code>uint32 generic = 4;</code>
+       */
+      public Builder setGeneric(int value) {
+        
+        generic_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint32 generic = 4;</code>
+       */
+      public Builder clearGeneric() {
+        
+        generic_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object community_ = "";
+      /**
+       * <code>string community = 5;</code>
+       */
+      public java.lang.String getCommunity() {
+        java.lang.Object ref = community_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          community_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string community = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCommunityBytes() {
+        java.lang.Object ref = community_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          community_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string community = 5;</code>
+       */
+      public Builder setCommunity(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        community_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string community = 5;</code>
+       */
+      public Builder clearCommunity() {
+        
+        community_ = getDefaultInstance().getCommunity();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string community = 5;</code>
+       */
+      public Builder setCommunityBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        community_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object trapOid_ = "";
+      /**
+       * <code>string trap_oid = 6;</code>
+       */
+      public java.lang.String getTrapOid() {
+        java.lang.Object ref = trapOid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          trapOid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string trap_oid = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTrapOidBytes() {
+        java.lang.Object ref = trapOid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          trapOid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string trap_oid = 6;</code>
+       */
+      public Builder setTrapOid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        trapOid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trap_oid = 6;</code>
+       */
+      public Builder clearTrapOid() {
+        
+        trapOid_ = getDefaultInstance().getTrapOid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trap_oid = 6;</code>
+       */
+      public Builder setTrapOidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        trapOid_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:SnmpInfo)
+    }
+
+    // @@protoc_insertion_point(class_scope:SnmpInfo)
+    private static final OpennmsModelProtos.SnmpInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new OpennmsModelProtos.SnmpInfo();
+    }
+
+    public static OpennmsModelProtos.SnmpInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SnmpInfo>
+        PARSER = new com.google.protobuf.AbstractParser<SnmpInfo>() {
+      public SnmpInfo parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SnmpInfo(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SnmpInfo> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SnmpInfo> getParserForType() {
+      return PARSER;
+    }
+
+    public OpennmsModelProtos.SnmpInfo getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface EventOrBuilder extends
       // @@protoc_insertion_point(interface_extends:Event)
       com.google.protobuf.MessageOrBuilder {
@@ -1821,6 +3363,29 @@ public final class OpennmsModelProtos {
      */
     com.google.protobuf.ByteString
         getIpAddressBytes();
+
+    /**
+     * <code>string dist_poller = 15;</code>
+     */
+    java.lang.String getDistPoller();
+    /**
+     * <code>string dist_poller = 15;</code>
+     */
+    com.google.protobuf.ByteString
+        getDistPollerBytes();
+
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    boolean hasSnmpInfo();
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    OpennmsModelProtos.SnmpInfo getSnmpInfo();
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    OpennmsModelProtos.SnmpInfoOrBuilder getSnmpInfoOrBuilder();
   }
   /**
    * Protobuf type {@code Event}
@@ -1848,6 +3413,7 @@ public final class OpennmsModelProtos {
       log_ = false;
       display_ = false;
       ipAddress_ = "";
+      distPoller_ = "";
     }
 
     @java.lang.Override
@@ -1968,6 +3534,25 @@ public final class OpennmsModelProtos {
               java.lang.String s = input.readStringRequireUtf8();
 
               ipAddress_ = s;
+              break;
+            }
+            case 122: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              distPoller_ = s;
+              break;
+            }
+            case 130: {
+              OpennmsModelProtos.SnmpInfo.Builder subBuilder = null;
+              if (snmpInfo_ != null) {
+                subBuilder = snmpInfo_.toBuilder();
+              }
+              snmpInfo_ = input.readMessage(OpennmsModelProtos.SnmpInfo.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(snmpInfo_);
+                snmpInfo_ = subBuilder.buildPartial();
+              }
+
               break;
             }
           }
@@ -2319,6 +3904,61 @@ public final class OpennmsModelProtos {
       }
     }
 
+    public static final int DIST_POLLER_FIELD_NUMBER = 15;
+    private volatile java.lang.Object distPoller_;
+    /**
+     * <code>string dist_poller = 15;</code>
+     */
+    public java.lang.String getDistPoller() {
+      java.lang.Object ref = distPoller_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        distPoller_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string dist_poller = 15;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDistPollerBytes() {
+      java.lang.Object ref = distPoller_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        distPoller_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SNMPINFO_FIELD_NUMBER = 16;
+    private OpennmsModelProtos.SnmpInfo snmpInfo_;
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    public boolean hasSnmpInfo() {
+      return snmpInfo_ != null;
+    }
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    public OpennmsModelProtos.SnmpInfo getSnmpInfo() {
+      return snmpInfo_ == null ? OpennmsModelProtos.SnmpInfo.getDefaultInstance() : snmpInfo_;
+    }
+    /**
+     * <code>.SnmpInfo snmpInfo = 16;</code>
+     */
+    public OpennmsModelProtos.SnmpInfoOrBuilder getSnmpInfoOrBuilder() {
+      return getSnmpInfo();
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2372,6 +4012,12 @@ public final class OpennmsModelProtos {
       }
       if (!getIpAddressBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, ipAddress_);
+      }
+      if (!getDistPollerBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 15, distPoller_);
+      }
+      if (snmpInfo_ != null) {
+        output.writeMessage(16, getSnmpInfo());
       }
       unknownFields.writeTo(output);
     }
@@ -2431,6 +4077,13 @@ public final class OpennmsModelProtos {
       if (!getIpAddressBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, ipAddress_);
       }
+      if (!getDistPollerBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, distPoller_);
+      }
+      if (snmpInfo_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(16, getSnmpInfo());
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2477,6 +4130,13 @@ public final class OpennmsModelProtos {
       }
       result = result && getIpAddress()
           .equals(other.getIpAddress());
+      result = result && getDistPoller()
+          .equals(other.getDistPoller());
+      result = result && (hasSnmpInfo() == other.hasSnmpInfo());
+      if (hasSnmpInfo()) {
+        result = result && getSnmpInfo()
+            .equals(other.getSnmpInfo());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -2525,6 +4185,12 @@ public final class OpennmsModelProtos {
       }
       hash = (37 * hash) + IP_ADDRESS_FIELD_NUMBER;
       hash = (53 * hash) + getIpAddress().hashCode();
+      hash = (37 * hash) + DIST_POLLER_FIELD_NUMBER;
+      hash = (53 * hash) + getDistPoller().hashCode();
+      if (hasSnmpInfo()) {
+        hash = (37 * hash) + SNMPINFO_FIELD_NUMBER;
+        hash = (53 * hash) + getSnmpInfo().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2691,6 +4357,14 @@ public final class OpennmsModelProtos {
         }
         ipAddress_ = "";
 
+        distPoller_ = "";
+
+        if (snmpInfoBuilder_ == null) {
+          snmpInfo_ = null;
+        } else {
+          snmpInfo_ = null;
+          snmpInfoBuilder_ = null;
+        }
         return this;
       }
 
@@ -2741,6 +4415,12 @@ public final class OpennmsModelProtos {
           result.nodeCriteria_ = nodeCriteriaBuilder_.build();
         }
         result.ipAddress_ = ipAddress_;
+        result.distPoller_ = distPoller_;
+        if (snmpInfoBuilder_ == null) {
+          result.snmpInfo_ = snmpInfo_;
+        } else {
+          result.snmpInfo_ = snmpInfoBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2853,6 +4533,13 @@ public final class OpennmsModelProtos {
         if (!other.getIpAddress().isEmpty()) {
           ipAddress_ = other.ipAddress_;
           onChanged();
+        }
+        if (!other.getDistPoller().isEmpty()) {
+          distPoller_ = other.distPoller_;
+          onChanged();
+        }
+        if (other.hasSnmpInfo()) {
+          mergeSnmpInfo(other.getSnmpInfo());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3826,6 +5513,192 @@ public final class OpennmsModelProtos {
         onChanged();
         return this;
       }
+
+      private java.lang.Object distPoller_ = "";
+      /**
+       * <code>string dist_poller = 15;</code>
+       */
+      public java.lang.String getDistPoller() {
+        java.lang.Object ref = distPoller_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          distPoller_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string dist_poller = 15;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDistPollerBytes() {
+        java.lang.Object ref = distPoller_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          distPoller_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string dist_poller = 15;</code>
+       */
+      public Builder setDistPoller(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        distPoller_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string dist_poller = 15;</code>
+       */
+      public Builder clearDistPoller() {
+        
+        distPoller_ = getDefaultInstance().getDistPoller();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string dist_poller = 15;</code>
+       */
+      public Builder setDistPollerBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        distPoller_ = value;
+        onChanged();
+        return this;
+      }
+
+      private OpennmsModelProtos.SnmpInfo snmpInfo_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.SnmpInfo, OpennmsModelProtos.SnmpInfo.Builder, OpennmsModelProtos.SnmpInfoOrBuilder> snmpInfoBuilder_;
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public boolean hasSnmpInfo() {
+        return snmpInfoBuilder_ != null || snmpInfo_ != null;
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public OpennmsModelProtos.SnmpInfo getSnmpInfo() {
+        if (snmpInfoBuilder_ == null) {
+          return snmpInfo_ == null ? OpennmsModelProtos.SnmpInfo.getDefaultInstance() : snmpInfo_;
+        } else {
+          return snmpInfoBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public Builder setSnmpInfo(OpennmsModelProtos.SnmpInfo value) {
+        if (snmpInfoBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          snmpInfo_ = value;
+          onChanged();
+        } else {
+          snmpInfoBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public Builder setSnmpInfo(
+          OpennmsModelProtos.SnmpInfo.Builder builderForValue) {
+        if (snmpInfoBuilder_ == null) {
+          snmpInfo_ = builderForValue.build();
+          onChanged();
+        } else {
+          snmpInfoBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public Builder mergeSnmpInfo(OpennmsModelProtos.SnmpInfo value) {
+        if (snmpInfoBuilder_ == null) {
+          if (snmpInfo_ != null) {
+            snmpInfo_ =
+              OpennmsModelProtos.SnmpInfo.newBuilder(snmpInfo_).mergeFrom(value).buildPartial();
+          } else {
+            snmpInfo_ = value;
+          }
+          onChanged();
+        } else {
+          snmpInfoBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public Builder clearSnmpInfo() {
+        if (snmpInfoBuilder_ == null) {
+          snmpInfo_ = null;
+          onChanged();
+        } else {
+          snmpInfo_ = null;
+          snmpInfoBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public OpennmsModelProtos.SnmpInfo.Builder getSnmpInfoBuilder() {
+        
+        onChanged();
+        return getSnmpInfoFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      public OpennmsModelProtos.SnmpInfoOrBuilder getSnmpInfoOrBuilder() {
+        if (snmpInfoBuilder_ != null) {
+          return snmpInfoBuilder_.getMessageOrBuilder();
+        } else {
+          return snmpInfo_ == null ?
+              OpennmsModelProtos.SnmpInfo.getDefaultInstance() : snmpInfo_;
+        }
+      }
+      /**
+       * <code>.SnmpInfo snmpInfo = 16;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          OpennmsModelProtos.SnmpInfo, OpennmsModelProtos.SnmpInfo.Builder, OpennmsModelProtos.SnmpInfoOrBuilder> 
+          getSnmpInfoFieldBuilder() {
+        if (snmpInfoBuilder_ == null) {
+          snmpInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              OpennmsModelProtos.SnmpInfo, OpennmsModelProtos.SnmpInfo.Builder, OpennmsModelProtos.SnmpInfoOrBuilder>(
+                  getSnmpInfo(),
+                  getParentForChildren(),
+                  isClean());
+          snmpInfo_ = null;
+        }
+        return snmpInfoBuilder_;
+      }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFieldsProto3(unknownFields);
@@ -4086,6 +5959,30 @@ public final class OpennmsModelProtos {
      */
     OpennmsModelProtos.AlarmOrBuilder getRelatedAlarmOrBuilder(
         int index);
+
+    /**
+     * <code>string trouble_ticket_id = 23;</code>
+     */
+    java.lang.String getTroubleTicketId();
+    /**
+     * <code>string trouble_ticket_id = 23;</code>
+     */
+    com.google.protobuf.ByteString
+        getTroubleTicketIdBytes();
+
+    /**
+     * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+     */
+    int getTroubleTicketStateValue();
+    /**
+     * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+     */
+    OpennmsModelProtos.TroubleTicketState getTroubleTicketState();
+
+    /**
+     * <code>uint64 last_update_time = 25;</code>
+     */
+    long getLastUpdateTime();
   }
   /**
    * Protobuf type {@code Alarm}
@@ -4120,6 +6017,9 @@ public final class OpennmsModelProtos {
       managedObjectInstance_ = "";
       managedObjectType_ = "";
       relatedAlarm_ = java.util.Collections.emptyList();
+      troubleTicketId_ = "";
+      troubleTicketState_ = 0;
+      lastUpdateTime_ = 0L;
     }
 
     @java.lang.Override
@@ -4294,6 +6194,23 @@ public final class OpennmsModelProtos {
               }
               relatedAlarm_.add(
                   input.readMessage(OpennmsModelProtos.Alarm.parser(), extensionRegistry));
+              break;
+            }
+            case 186: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              troubleTicketId_ = s;
+              break;
+            }
+            case 192: {
+              int rawValue = input.readEnum();
+
+              troubleTicketState_ = rawValue;
+              break;
+            }
+            case 200: {
+
+              lastUpdateTime_ = input.readUInt64();
               break;
             }
           }
@@ -4968,6 +6885,65 @@ public final class OpennmsModelProtos {
       return relatedAlarm_.get(index);
     }
 
+    public static final int TROUBLE_TICKET_ID_FIELD_NUMBER = 23;
+    private volatile java.lang.Object troubleTicketId_;
+    /**
+     * <code>string trouble_ticket_id = 23;</code>
+     */
+    public java.lang.String getTroubleTicketId() {
+      java.lang.Object ref = troubleTicketId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        troubleTicketId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string trouble_ticket_id = 23;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTroubleTicketIdBytes() {
+      java.lang.Object ref = troubleTicketId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        troubleTicketId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TROUBLE_TICKET_STATE_FIELD_NUMBER = 24;
+    private int troubleTicketState_;
+    /**
+     * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+     */
+    public int getTroubleTicketStateValue() {
+      return troubleTicketState_;
+    }
+    /**
+     * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+     */
+    public OpennmsModelProtos.TroubleTicketState getTroubleTicketState() {
+      OpennmsModelProtos.TroubleTicketState result = OpennmsModelProtos.TroubleTicketState.valueOf(troubleTicketState_);
+      return result == null ? OpennmsModelProtos.TroubleTicketState.UNRECOGNIZED : result;
+    }
+
+    public static final int LAST_UPDATE_TIME_FIELD_NUMBER = 25;
+    private long lastUpdateTime_;
+    /**
+     * <code>uint64 last_update_time = 25;</code>
+     */
+    public long getLastUpdateTime() {
+      return lastUpdateTime_;
+    }
+
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -5045,6 +7021,15 @@ public final class OpennmsModelProtos {
       }
       for (int i = 0; i < relatedAlarm_.size(); i++) {
         output.writeMessage(22, relatedAlarm_.get(i));
+      }
+      if (!getTroubleTicketIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, troubleTicketId_);
+      }
+      if (troubleTicketState_ != OpennmsModelProtos.TroubleTicketState.OPEN.getNumber()) {
+        output.writeEnum(24, troubleTicketState_);
+      }
+      if (lastUpdateTime_ != 0L) {
+        output.writeUInt64(25, lastUpdateTime_);
       }
       unknownFields.writeTo(output);
     }
@@ -5131,6 +7116,17 @@ public final class OpennmsModelProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(22, relatedAlarm_.get(i));
       }
+      if (!getTroubleTicketIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, troubleTicketId_);
+      }
+      if (troubleTicketState_ != OpennmsModelProtos.TroubleTicketState.OPEN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(24, troubleTicketState_);
+      }
+      if (lastUpdateTime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(25, lastUpdateTime_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -5195,6 +7191,11 @@ public final class OpennmsModelProtos {
           .equals(other.getManagedObjectType());
       result = result && getRelatedAlarmList()
           .equals(other.getRelatedAlarmList());
+      result = result && getTroubleTicketId()
+          .equals(other.getTroubleTicketId());
+      result = result && troubleTicketState_ == other.troubleTicketState_;
+      result = result && (getLastUpdateTime()
+          == other.getLastUpdateTime());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -5261,6 +7262,13 @@ public final class OpennmsModelProtos {
         hash = (37 * hash) + RELATEDALARM_FIELD_NUMBER;
         hash = (53 * hash) + getRelatedAlarmList().hashCode();
       }
+      hash = (37 * hash) + TROUBLE_TICKET_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getTroubleTicketId().hashCode();
+      hash = (37 * hash) + TROUBLE_TICKET_STATE_FIELD_NUMBER;
+      hash = (53 * hash) + troubleTicketState_;
+      hash = (37 * hash) + LAST_UPDATE_TIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLastUpdateTime());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5447,6 +7455,12 @@ public final class OpennmsModelProtos {
         } else {
           relatedAlarmBuilder_.clear();
         }
+        troubleTicketId_ = "";
+
+        troubleTicketState_ = 0;
+
+        lastUpdateTime_ = 0L;
+
         return this;
       }
 
@@ -5509,6 +7523,9 @@ public final class OpennmsModelProtos {
         } else {
           result.relatedAlarm_ = relatedAlarmBuilder_.build();
         }
+        result.troubleTicketId_ = troubleTicketId_;
+        result.troubleTicketState_ = troubleTicketState_;
+        result.lastUpdateTime_ = lastUpdateTime_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5650,6 +7667,16 @@ public final class OpennmsModelProtos {
               relatedAlarmBuilder_.addAllMessages(other.relatedAlarm_);
             }
           }
+        }
+        if (!other.getTroubleTicketId().isEmpty()) {
+          troubleTicketId_ = other.troubleTicketId_;
+          onChanged();
+        }
+        if (other.troubleTicketState_ != 0) {
+          setTroubleTicketStateValue(other.getTroubleTicketStateValue());
+        }
+        if (other.getLastUpdateTime() != 0L) {
+          setLastUpdateTime(other.getLastUpdateTime());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -7154,6 +9181,145 @@ public final class OpennmsModelProtos {
           relatedAlarm_ = null;
         }
         return relatedAlarmBuilder_;
+      }
+
+      private java.lang.Object troubleTicketId_ = "";
+      /**
+       * <code>string trouble_ticket_id = 23;</code>
+       */
+      public java.lang.String getTroubleTicketId() {
+        java.lang.Object ref = troubleTicketId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          troubleTicketId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string trouble_ticket_id = 23;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTroubleTicketIdBytes() {
+        java.lang.Object ref = troubleTicketId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          troubleTicketId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string trouble_ticket_id = 23;</code>
+       */
+      public Builder setTroubleTicketId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        troubleTicketId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trouble_ticket_id = 23;</code>
+       */
+      public Builder clearTroubleTicketId() {
+        
+        troubleTicketId_ = getDefaultInstance().getTroubleTicketId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string trouble_ticket_id = 23;</code>
+       */
+      public Builder setTroubleTicketIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        troubleTicketId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int troubleTicketState_ = 0;
+      /**
+       * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+       */
+      public int getTroubleTicketStateValue() {
+        return troubleTicketState_;
+      }
+      /**
+       * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+       */
+      public Builder setTroubleTicketStateValue(int value) {
+        troubleTicketState_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+       */
+      public OpennmsModelProtos.TroubleTicketState getTroubleTicketState() {
+        OpennmsModelProtos.TroubleTicketState result = OpennmsModelProtos.TroubleTicketState.valueOf(troubleTicketState_);
+        return result == null ? OpennmsModelProtos.TroubleTicketState.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+       */
+      public Builder setTroubleTicketState(OpennmsModelProtos.TroubleTicketState value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        troubleTicketState_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.TroubleTicketState trouble_ticket_state = 24;</code>
+       */
+      public Builder clearTroubleTicketState() {
+        
+        troubleTicketState_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long lastUpdateTime_ ;
+      /**
+       * <code>uint64 last_update_time = 25;</code>
+       */
+      public long getLastUpdateTime() {
+        return lastUpdateTime_;
+      }
+      /**
+       * <code>uint64 last_update_time = 25;</code>
+       */
+      public Builder setLastUpdateTime(long value) {
+        
+        lastUpdateTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>uint64 last_update_time = 25;</code>
+       */
+      public Builder clearLastUpdateTime() {
+        
+        lastUpdateTime_ = 0L;
+        onChanged();
+        return this;
       }
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -16096,6 +18262,18 @@ public final class OpennmsModelProtos {
        * <code>USERDEFINED = 5;</code>
        */
       USERDEFINED(5),
+      /**
+       * <code>NODES = 6;</code>
+       */
+      NODES(6),
+      /**
+       * <code>OSPFAREA = 7;</code>
+       */
+      OSPFAREA(7),
+      /**
+       * <code>NETWORKROUTER = 8;</code>
+       */
+      NETWORKROUTER(8),
       UNRECOGNIZED(-1),
       ;
 
@@ -16123,6 +18301,18 @@ public final class OpennmsModelProtos {
        * <code>USERDEFINED = 5;</code>
        */
       public static final int USERDEFINED_VALUE = 5;
+      /**
+       * <code>NODES = 6;</code>
+       */
+      public static final int NODES_VALUE = 6;
+      /**
+       * <code>OSPFAREA = 7;</code>
+       */
+      public static final int OSPFAREA_VALUE = 7;
+      /**
+       * <code>NETWORKROUTER = 8;</code>
+       */
+      public static final int NETWORKROUTER_VALUE = 8;
 
 
       public final int getNumber() {
@@ -16149,6 +18339,9 @@ public final class OpennmsModelProtos {
           case 3: return BRIDGE;
           case 4: return CDP;
           case 5: return USERDEFINED;
+          case 6: return NODES;
+          case 7: return OSPFAREA;
+          case 8: return NETWORKROUTER;
           default: return null;
         }
       }
@@ -20385,6 +22578,11 @@ public final class OpennmsModelProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_EventParameter_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_SnmpInfo_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_SnmpInfo_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_Event_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -20453,85 +22651,100 @@ public final class OpennmsModelProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\034opennms-kafka-producer.proto\"F\n\014NodeCr" +
+      "\n\034opennms-kafka-producer.proto\"l\n\014NodeCr" +
       "iteria\022\n\n\002id\030\001 \001(\004\022\026\n\016foreign_source\030\002 \001" +
-      "(\t\022\022\n\nforeign_id\030\003 \001(\t\";\n\016EventParameter" +
-      "\022\014\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004type\030\003 " +
-      "\001(\t\"\245\002\n\005Event\022\n\n\002id\030\001 \001(\004\022\013\n\003uei\030\002 \001(\t\022\r" +
-      "\n\005label\030\003 \001(\t\022\014\n\004time\030\004 \001(\004\022\016\n\006source\030\005 " +
-      "\001(\t\022\"\n\tparameter\030\006 \003(\0132\017.EventParameter\022" +
-      "\023\n\013create_time\030\007 \001(\004\022\023\n\013description\030\010 \001(" +
-      "\t\022\023\n\013log_message\030\t \001(\t\022\033\n\010severity\030\n \001(\016" +
-      "2\t.Severity\022\013\n\003log\030\013 \001(\010\022\017\n\007display\030\014 \001(" +
-      "\010\022$\n\rnode_criteria\030\r \001(\0132\r.NodeCriteria\022" +
-      "\022\n\nip_address\030\016 \001(\t\"\321\004\n\005Alarm\022\n\n\002id\030\001 \001(" +
-      "\004\022\013\n\003uei\030\002 \001(\t\022$\n\rnode_criteria\030\003 \001(\0132\r." +
-      "NodeCriteria\022\022\n\nip_address\030\004 \001(\t\022\024\n\014serv" +
-      "ice_name\030\005 \001(\t\022\025\n\rreduction_key\030\006 \001(\t\022\031\n" +
-      "\004type\030\007 \001(\0162\013.Alarm.Type\022\r\n\005count\030\010 \001(\004\022" +
-      "\033\n\010severity\030\t \001(\0162\t.Severity\022\030\n\020first_ev" +
-      "ent_time\030\n \001(\004\022\023\n\013description\030\013 \001(\t\022\023\n\013l" +
-      "og_message\030\014 \001(\t\022\020\n\010ack_user\030\r \001(\t\022\020\n\010ac" +
-      "k_time\030\016 \001(\004\022\032\n\nlast_event\030\017 \001(\0132\006.Event" +
-      "\022\027\n\017last_event_time\030\020 \001(\004\022\020\n\010if_index\030\021 " +
-      "\001(\r\022\035\n\025operator_instructions\030\022 \001(\t\022\021\n\tcl" +
-      "ear_key\030\023 \001(\t\022\037\n\027managed_object_instance" +
-      "\030\024 \001(\t\022\033\n\023managed_object_type\030\025 \001(\t\022\034\n\014r" +
-      "elatedAlarm\030\026 \003(\0132\006.Alarm\"D\n\004Type\022\026\n\022PRO" +
-      "BLEM_WITH_CLEAR\020\000\022\t\n\005CLEAR\020\001\022\031\n\025PROBLEM_" +
-      "WITHOUT_CLEAR\020\002\"\217\002\n\rAlarmFeedback\022\025\n\rsit" +
-      "uation_key\030\001 \001(\t\022\035\n\025situation_fingerprin" +
-      "t\030\002 \001(\t\022\021\n\talarm_key\030\003 \001(\t\0222\n\rfeedback_t" +
-      "ype\030\004 \001(\0162\033.AlarmFeedback.FeedbackType\022\016" +
-      "\n\006reason\030\005 \001(\t\022\014\n\004user\030\006 \001(\t\022\021\n\ttimestam" +
-      "p\030\007 \001(\004\"P\n\014FeedbackType\022\022\n\016FALSE_POSITIV" +
-      "E\020\000\022\022\n\016FALSE_NEGATIVE\020\001\022\013\n\007CORRECT\020\002\022\013\n\007" +
-      "UNKNOWN\020\003\"\275\001\n\013IpInterface\022\n\n\002id\030\001 \001(\004\022\022\n" +
-      "\nip_address\030\002 \001(\t\022\020\n\010if_index\030\003 \001(\r\022.\n\014p" +
-      "rimary_type\030\004 \001(\0162\030.IpInterface.PrimaryT" +
-      "ype\022\017\n\007service\030\005 \003(\t\";\n\013PrimaryType\022\013\n\007P" +
-      "RIMARY\020\000\022\r\n\tSECONDARY\020\001\022\020\n\014NOT_ELIGIBLE\020" +
-      "\002\"\317\001\n\rSnmpInterface\022\n\n\002id\030\001 \001(\004\022\020\n\010if_in" +
-      "dex\030\002 \001(\r\022\020\n\010if_descr\030\003 \001(\t\022\017\n\007if_type\030\004" +
-      " \001(\r\022\017\n\007if_name\030\005 \001(\t\022\020\n\010if_speed\030\006 \001(\004\022" +
-      "\027\n\017if_phys_address\030\007 \001(\t\022\027\n\017if_admin_sta" +
-      "tus\030\010 \001(\r\022\026\n\016if_oper_status\030\t \001(\r\022\020\n\010if_" +
-      "alias\030\n \001(\t\"%\n\007HwAlias\022\r\n\005index\030\001 \001(\r\022\013\n" +
-      "\003oid\030\002 \001(\t\"\210\002\n\010HwEntity\022\032\n\022ent_physical_" +
-      "index\030\001 \001(\r\022\021\n\tentity_id\030\002 \001(\r\022\032\n\022ent_ph" +
-      "ysical_class\030\003 \001(\t\022\032\n\022ent_physical_descr" +
-      "\030\004 \001(\t\022\033\n\023ent_physical_is_fru\030\005 \001(\010\022\031\n\021e" +
-      "nt_physical_name\030\006 \001(\t\022 \n\030ent_physical_v" +
-      "endor_type\030\007 \001(\t\022\036\n\014ent_hw_alias\030\010 \003(\0132\010" +
-      ".HwAlias\022\033\n\010children\030\t \003(\0132\t.HwEntity\"\270\002" +
-      "\n\004Node\022\n\n\002id\030\001 \001(\004\022\026\n\016foreign_source\030\002 \001" +
-      "(\t\022\022\n\nforeign_id\030\003 \001(\t\022\020\n\010location\030\004 \001(\t" +
-      "\022\020\n\010category\030\005 \003(\t\022\r\n\005label\030\006 \001(\t\022\023\n\013cre" +
-      "ate_time\030\007 \001(\004\022\023\n\013sys_contact\030\010 \001(\t\022\027\n\017s" +
-      "ys_description\030\t \001(\t\022\025\n\rsys_object_id\030\n " +
-      "\001(\t\022\"\n\014ip_interface\030\013 \003(\0132\014.IpInterface\022" +
-      "&\n\016snmp_interface\030\014 \003(\0132\016.SnmpInterface\022" +
-      "\037\n\014hw_inventory\030\r \001(\0132\t.HwEntity\"\222\001\n\013Top" +
-      "ologyRef\022\n\n\002id\030\001 \001(\t\022\'\n\010protocol\030\002 \001(\0162\025" +
-      ".TopologyRef.Protocol\"N\n\010Protocol\022\010\n\004LLD" +
-      "P\020\000\022\010\n\004OSPF\020\001\022\010\n\004ISIS\020\002\022\n\n\006BRIDGE\020\003\022\007\n\003C" +
-      "DP\020\004\022\017\n\013USERDEFINED\020\005\",\n\017TopologySegment" +
-      "\022\031\n\003ref\030\001 \001(\0132\014.TopologyRef\"{\n\014TopologyP" +
-      "ort\022\021\n\tvertex_id\030\001 \001(\t\022\020\n\010if_index\030\002 \001(\004" +
-      "\022\017\n\007if_name\030\003 \001(\t\022\017\n\007address\030\004 \001(\t\022$\n\rno" +
-      "de_criteria\030\005 \001(\0132\r.NodeCriteria\"\227\002\n\014Top" +
-      "ologyEdge\022\031\n\003ref\030\001 \001(\0132\014.TopologyRef\022#\n\n" +
-      "sourcePort\030\003 \001(\0132\r.TopologyPortH\000\022)\n\rsou" +
-      "rceSegment\030\004 \001(\0132\020.TopologySegmentH\000\022\033\n\n" +
-      "sourceNode\030\005 \001(\0132\005.NodeH\000\022#\n\ntargetPort\030" +
-      "\006 \001(\0132\r.TopologyPortH\001\022)\n\rtargetSegment\030" +
-      "\007 \001(\0132\020.TopologySegmentH\001\022\033\n\ntargetNode\030" +
-      "\010 \001(\0132\005.NodeH\001B\010\n\006sourceB\010\n\006target*g\n\010Se" +
-      "verity\022\021\n\rINDETERMINATE\020\000\022\013\n\007CLEARED\020\001\022\n" +
-      "\n\006NORMAL\020\002\022\013\n\007WARNING\020\003\022\t\n\005MINOR\020\004\022\t\n\005MA" +
-      "JOR\020\005\022\014\n\010CRITICAL\020\006B>\n(org.opennms.oce.d" +
-      "atasource.opennms.protoB\022OpennmsModelPro" +
-      "tosb\006proto3"
+      "(\t\022\022\n\nforeign_id\030\003 \001(\t\022\022\n\nnode_label\030\004 \001" +
+      "(\t\022\020\n\010location\030\005 \001(\t\";\n\016EventParameter\022\014" +
+      "\n\004name\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004type\030\003 \001(" +
+      "\t\"o\n\010SnmpInfo\022\n\n\002id\030\001 \001(\t\022\017\n\007version\030\002 \001" +
+      "(\t\022\020\n\010specific\030\003 \001(\r\022\017\n\007generic\030\004 \001(\r\022\021\n" +
+      "\tcommunity\030\005 \001(\t\022\020\n\010trap_oid\030\006 \001(\t\"\327\002\n\005E" +
+      "vent\022\n\n\002id\030\001 \001(\004\022\013\n\003uei\030\002 \001(\t\022\r\n\005label\030\003" +
+      " \001(\t\022\014\n\004time\030\004 \001(\004\022\016\n\006source\030\005 \001(\t\022\"\n\tpa" +
+      "rameter\030\006 \003(\0132\017.EventParameter\022\023\n\013create" +
+      "_time\030\007 \001(\004\022\023\n\013description\030\010 \001(\t\022\023\n\013log_" +
+      "message\030\t \001(\t\022\033\n\010severity\030\n \001(\0162\t.Severi" +
+      "ty\022\013\n\003log\030\013 \001(\010\022\017\n\007display\030\014 \001(\010\022$\n\rnode" +
+      "_criteria\030\r \001(\0132\r.NodeCriteria\022\022\n\nip_add" +
+      "ress\030\016 \001(\t\022\023\n\013dist_poller\030\017 \001(\t\022\033\n\010snmpI" +
+      "nfo\030\020 \001(\0132\t.SnmpInfo\"\271\005\n\005Alarm\022\n\n\002id\030\001 \001" +
+      "(\004\022\013\n\003uei\030\002 \001(\t\022$\n\rnode_criteria\030\003 \001(\0132\r" +
+      ".NodeCriteria\022\022\n\nip_address\030\004 \001(\t\022\024\n\014ser" +
+      "vice_name\030\005 \001(\t\022\025\n\rreduction_key\030\006 \001(\t\022\031" +
+      "\n\004type\030\007 \001(\0162\013.Alarm.Type\022\r\n\005count\030\010 \001(\004" +
+      "\022\033\n\010severity\030\t \001(\0162\t.Severity\022\030\n\020first_e" +
+      "vent_time\030\n \001(\004\022\023\n\013description\030\013 \001(\t\022\023\n\013" +
+      "log_message\030\014 \001(\t\022\020\n\010ack_user\030\r \001(\t\022\020\n\010a" +
+      "ck_time\030\016 \001(\004\022\032\n\nlast_event\030\017 \001(\0132\006.Even" +
+      "t\022\027\n\017last_event_time\030\020 \001(\004\022\020\n\010if_index\030\021" +
+      " \001(\r\022\035\n\025operator_instructions\030\022 \001(\t\022\021\n\tc" +
+      "lear_key\030\023 \001(\t\022\037\n\027managed_object_instanc" +
+      "e\030\024 \001(\t\022\033\n\023managed_object_type\030\025 \001(\t\022\034\n\014" +
+      "relatedAlarm\030\026 \003(\0132\006.Alarm\022\031\n\021trouble_ti" +
+      "cket_id\030\027 \001(\t\0221\n\024trouble_ticket_state\030\030 " +
+      "\001(\0162\023.TroubleTicketState\022\030\n\020last_update_" +
+      "time\030\031 \001(\004\"D\n\004Type\022\026\n\022PROBLEM_WITH_CLEAR" +
+      "\020\000\022\t\n\005CLEAR\020\001\022\031\n\025PROBLEM_WITHOUT_CLEAR\020\002" +
+      "\"\217\002\n\rAlarmFeedback\022\025\n\rsituation_key\030\001 \001(" +
+      "\t\022\035\n\025situation_fingerprint\030\002 \001(\t\022\021\n\talar" +
+      "m_key\030\003 \001(\t\0222\n\rfeedback_type\030\004 \001(\0162\033.Ala" +
+      "rmFeedback.FeedbackType\022\016\n\006reason\030\005 \001(\t\022" +
+      "\014\n\004user\030\006 \001(\t\022\021\n\ttimestamp\030\007 \001(\004\"P\n\014Feed" +
+      "backType\022\022\n\016FALSE_POSITIVE\020\000\022\022\n\016FALSE_NE" +
+      "GATIVE\020\001\022\013\n\007CORRECT\020\002\022\013\n\007UNKNOWN\020\003\"\275\001\n\013I" +
+      "pInterface\022\n\n\002id\030\001 \001(\004\022\022\n\nip_address\030\002 \001" +
+      "(\t\022\020\n\010if_index\030\003 \001(\r\022.\n\014primary_type\030\004 \001" +
+      "(\0162\030.IpInterface.PrimaryType\022\017\n\007service\030" +
+      "\005 \003(\t\";\n\013PrimaryType\022\013\n\007PRIMARY\020\000\022\r\n\tSEC" +
+      "ONDARY\020\001\022\020\n\014NOT_ELIGIBLE\020\002\"\317\001\n\rSnmpInter" +
+      "face\022\n\n\002id\030\001 \001(\004\022\020\n\010if_index\030\002 \001(\r\022\020\n\010if" +
+      "_descr\030\003 \001(\t\022\017\n\007if_type\030\004 \001(\r\022\017\n\007if_name" +
+      "\030\005 \001(\t\022\020\n\010if_speed\030\006 \001(\004\022\027\n\017if_phys_addr" +
+      "ess\030\007 \001(\t\022\027\n\017if_admin_status\030\010 \001(\r\022\026\n\016if" +
+      "_oper_status\030\t \001(\r\022\020\n\010if_alias\030\n \001(\t\"%\n\007" +
+      "HwAlias\022\r\n\005index\030\001 \001(\r\022\013\n\003oid\030\002 \001(\t\"\210\002\n\010" +
+      "HwEntity\022\032\n\022ent_physical_index\030\001 \001(\r\022\021\n\t" +
+      "entity_id\030\002 \001(\r\022\032\n\022ent_physical_class\030\003 " +
+      "\001(\t\022\032\n\022ent_physical_descr\030\004 \001(\t\022\033\n\023ent_p" +
+      "hysical_is_fru\030\005 \001(\010\022\031\n\021ent_physical_nam" +
+      "e\030\006 \001(\t\022 \n\030ent_physical_vendor_type\030\007 \001(" +
+      "\t\022\036\n\014ent_hw_alias\030\010 \003(\0132\010.HwAlias\022\033\n\010chi" +
+      "ldren\030\t \003(\0132\t.HwEntity\"\270\002\n\004Node\022\n\n\002id\030\001 " +
+      "\001(\004\022\026\n\016foreign_source\030\002 \001(\t\022\022\n\nforeign_i" +
+      "d\030\003 \001(\t\022\020\n\010location\030\004 \001(\t\022\020\n\010category\030\005 " +
+      "\003(\t\022\r\n\005label\030\006 \001(\t\022\023\n\013create_time\030\007 \001(\004\022" +
+      "\023\n\013sys_contact\030\010 \001(\t\022\027\n\017sys_description\030" +
+      "\t \001(\t\022\025\n\rsys_object_id\030\n \001(\t\022\"\n\014ip_inter" +
+      "face\030\013 \003(\0132\014.IpInterface\022&\n\016snmp_interfa" +
+      "ce\030\014 \003(\0132\016.SnmpInterface\022\037\n\014hw_inventory" +
+      "\030\r \001(\0132\t.HwEntity\"\276\001\n\013TopologyRef\022\n\n\002id\030" +
+      "\001 \001(\t\022\'\n\010protocol\030\002 \001(\0162\025.TopologyRef.Pr" +
+      "otocol\"z\n\010Protocol\022\010\n\004LLDP\020\000\022\010\n\004OSPF\020\001\022\010" +
+      "\n\004ISIS\020\002\022\n\n\006BRIDGE\020\003\022\007\n\003CDP\020\004\022\017\n\013USERDEF" +
+      "INED\020\005\022\t\n\005NODES\020\006\022\014\n\010OSPFAREA\020\007\022\021\n\rNETWO" +
+      "RKROUTER\020\010\",\n\017TopologySegment\022\031\n\003ref\030\001 \001" +
+      "(\0132\014.TopologyRef\"{\n\014TopologyPort\022\021\n\tvert" +
+      "ex_id\030\001 \001(\t\022\020\n\010if_index\030\002 \001(\004\022\017\n\007if_name" +
+      "\030\003 \001(\t\022\017\n\007address\030\004 \001(\t\022$\n\rnode_criteria" +
+      "\030\005 \001(\0132\r.NodeCriteria\"\227\002\n\014TopologyEdge\022\031" +
+      "\n\003ref\030\001 \001(\0132\014.TopologyRef\022#\n\nsourcePort\030" +
+      "\003 \001(\0132\r.TopologyPortH\000\022)\n\rsourceSegment\030" +
+      "\004 \001(\0132\020.TopologySegmentH\000\022\033\n\nsourceNode\030" +
+      "\005 \001(\0132\005.NodeH\000\022#\n\ntargetPort\030\006 \001(\0132\r.Top" +
+      "ologyPortH\001\022)\n\rtargetSegment\030\007 \001(\0132\020.Top" +
+      "ologySegmentH\001\022\033\n\ntargetNode\030\010 \001(\0132\005.Nod" +
+      "eH\001B\010\n\006sourceB\010\n\006target*g\n\010Severity\022\021\n\rI" +
+      "NDETERMINATE\020\000\022\013\n\007CLEARED\020\001\022\n\n\006NORMAL\020\002\022" +
+      "\013\n\007WARNING\020\003\022\t\n\005MINOR\020\004\022\t\n\005MAJOR\020\005\022\014\n\010CR" +
+      "ITICAL\020\006*\212\002\n\022TroubleTicketState\022\010\n\004OPEN\020" +
+      "\000\022\022\n\016CREATE_PENDING\020\001\022\021\n\rCREATE_FAILED\020\002" +
+      "\022\022\n\016UPDATE_PENDING\020\003\022\021\n\rUPDATE_FAILED\020\004\022" +
+      "\n\n\006CLOSED\020\005\022\021\n\rCLOSE_PENDING\020\006\022\020\n\014CLOSE_" +
+      "FAILED\020\007\022\014\n\010RESOLVED\020\010\022\023\n\017RESOLVE_PENDIN" +
+      "G\020\t\022\022\n\016RESOLVE_FAILED\020\n\022\r\n\tCANCELLED\020\013\022\022" +
+      "\n\016CANCEL_PENDING\020\014\022\021\n\rCANCEL_FAILED\020\rB?\n" +
+      ")org.opennms.alec.datasource.opennms.pro" +
+      "toB\022OpennmsModelProtosb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -20550,81 +22763,87 @@ public final class OpennmsModelProtos {
     internal_static_NodeCriteria_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_NodeCriteria_descriptor,
-        new java.lang.String[] { "Id", "ForeignSource", "ForeignId", });
+        new java.lang.String[] { "Id", "ForeignSource", "ForeignId", "NodeLabel", "Location", });
     internal_static_EventParameter_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_EventParameter_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_EventParameter_descriptor,
         new java.lang.String[] { "Name", "Value", "Type", });
-    internal_static_Event_descriptor =
+    internal_static_SnmpInfo_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_SnmpInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_SnmpInfo_descriptor,
+        new java.lang.String[] { "Id", "Version", "Specific", "Generic", "Community", "TrapOid", });
+    internal_static_Event_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_Event_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Event_descriptor,
-        new java.lang.String[] { "Id", "Uei", "Label", "Time", "Source", "Parameter", "CreateTime", "Description", "LogMessage", "Severity", "Log", "Display", "NodeCriteria", "IpAddress", });
+        new java.lang.String[] { "Id", "Uei", "Label", "Time", "Source", "Parameter", "CreateTime", "Description", "LogMessage", "Severity", "Log", "Display", "NodeCriteria", "IpAddress", "DistPoller", "SnmpInfo", });
     internal_static_Alarm_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_Alarm_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Alarm_descriptor,
-        new java.lang.String[] { "Id", "Uei", "NodeCriteria", "IpAddress", "ServiceName", "ReductionKey", "Type", "Count", "Severity", "FirstEventTime", "Description", "LogMessage", "AckUser", "AckTime", "LastEvent", "LastEventTime", "IfIndex", "OperatorInstructions", "ClearKey", "ManagedObjectInstance", "ManagedObjectType", "RelatedAlarm", });
+        new java.lang.String[] { "Id", "Uei", "NodeCriteria", "IpAddress", "ServiceName", "ReductionKey", "Type", "Count", "Severity", "FirstEventTime", "Description", "LogMessage", "AckUser", "AckTime", "LastEvent", "LastEventTime", "IfIndex", "OperatorInstructions", "ClearKey", "ManagedObjectInstance", "ManagedObjectType", "RelatedAlarm", "TroubleTicketId", "TroubleTicketState", "LastUpdateTime", });
     internal_static_AlarmFeedback_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_AlarmFeedback_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AlarmFeedback_descriptor,
         new java.lang.String[] { "SituationKey", "SituationFingerprint", "AlarmKey", "FeedbackType", "Reason", "User", "Timestamp", });
     internal_static_IpInterface_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_IpInterface_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_IpInterface_descriptor,
         new java.lang.String[] { "Id", "IpAddress", "IfIndex", "PrimaryType", "Service", });
     internal_static_SnmpInterface_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_SnmpInterface_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_SnmpInterface_descriptor,
         new java.lang.String[] { "Id", "IfIndex", "IfDescr", "IfType", "IfName", "IfSpeed", "IfPhysAddress", "IfAdminStatus", "IfOperStatus", "IfAlias", });
     internal_static_HwAlias_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_HwAlias_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_HwAlias_descriptor,
         new java.lang.String[] { "Index", "Oid", });
     internal_static_HwEntity_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_HwEntity_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_HwEntity_descriptor,
         new java.lang.String[] { "EntPhysicalIndex", "EntityId", "EntPhysicalClass", "EntPhysicalDescr", "EntPhysicalIsFru", "EntPhysicalName", "EntPhysicalVendorType", "EntHwAlias", "Children", });
     internal_static_Node_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_Node_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Node_descriptor,
         new java.lang.String[] { "Id", "ForeignSource", "ForeignId", "Location", "Category", "Label", "CreateTime", "SysContact", "SysDescription", "SysObjectId", "IpInterface", "SnmpInterface", "HwInventory", });
     internal_static_TopologyRef_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_TopologyRef_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TopologyRef_descriptor,
         new java.lang.String[] { "Id", "Protocol", });
     internal_static_TopologySegment_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_TopologySegment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TopologySegment_descriptor,
         new java.lang.String[] { "Ref", });
     internal_static_TopologyPort_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_TopologyPort_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TopologyPort_descriptor,
         new java.lang.String[] { "VertexId", "IfIndex", "IfName", "Address", "NodeCriteria", });
     internal_static_TopologyEdge_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_TopologyEdge_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_TopologyEdge_descriptor,

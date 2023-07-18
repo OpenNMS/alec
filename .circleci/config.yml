@@ -292,6 +292,7 @@ jobs:
           name: Gather artifacts
           command: |
             mkdir -p ~/dist/
+            cp assembly/kar/target/opennms-alec-plugin.kar ~/dist/
             cp assembly/opennms-rpm/target/rpm/opennms-alec-plugin/RPMS/noarch/* ~/dist/
             cp assembly/sentinel-rpm/target/rpm/sentinel-alec-plugin/RPMS/noarch/* ~/dist/
           when: always

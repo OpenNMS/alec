@@ -18,13 +18,14 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+            <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
             <Import-Package>
               org.eclipse.persistence.jaxb,
               org.eclipse.persistence.internal.jaxb,
               org.eclipse.persistence.internal.jaxb.many,
+              com.google.common.*;version="${guava.major.version}",
               *
             </Import-Package>
           </instructions>

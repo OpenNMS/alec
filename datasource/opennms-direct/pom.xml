@@ -17,7 +17,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+                        <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
@@ -25,6 +25,7 @@
                             org.opennms.alec.datasource.api,
                             org.opennms.alec.datasource.common,
                             org.opennms.alec.datasource.common.inventory,
+                            com.google.common.*;version="${guava.major.version}",
                             *
                         </Import-Package>
                     </instructions>

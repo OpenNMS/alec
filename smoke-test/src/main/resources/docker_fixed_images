@@ -8,5 +8,5 @@ kafka=confluentinc/cp-kafka:7.0.0
 postgres=postgres:10.7-alpine
 # Note this tag version should match the selenium version in the POM
 selenium=selenium/standalone-chrome-debug:3.4.0
-sentinel=opennms/sentinel:30.0.0
-opennms=opennms/horizon:30.0.0
+sentinel=opennms/sentinel:32.0.1
+opennms=opennms/horizon:32.0.1

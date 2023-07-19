@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2019 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
+ * Copyright (C) 2019-2023 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2023 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
@@ -62,7 +63,7 @@ public class SshClient implements AutoCloseable {
 
     private final JSch jsch = new JSch();
     private Session session;
-    private Channel channel;
+    private ChannelShell channel;
     private InputStream stdout;
     private InputStream stderr;
 
@@ -92,7 +93,8 @@ public class SshClient implements AutoCloseable {
         session.setConfig(config);
         session.connect();
 
-        channel = session.openChannel("shell");
+        channel = (ChannelShell) session.openChannel("shell");
+        channel.setPtyType("vt100", 320, 96, 2560, 1920);
         stdout = channel.getInputStream();
         stderr = channel.getExtInputStream();
         channel.connect(timeout);

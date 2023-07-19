@@ -11,7 +11,7 @@
     <artifactId>smoke-test</artifactId>
     <properties>
         <jersey.version>2.28</jersey.version>
-        <jsch.version>0.2.1</jsch.version>
+        <jsch.version>0.2.9</jsch.version>
         <selenium.version>3.6.0</selenium.version>
         <!--This module needs a newer version of guava than the root pom version -->
         <guava.version>28.0-jre</guava.version>

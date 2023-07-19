@@ -23,6 +23,7 @@
                         <Export-Package>org.opennms.alec.processor.redundant</Export-Package>
                         <Karaf-Commands>*</Karaf-Commands>
                         <Import-Package>
+                            org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
                             com.google.common.*;version="${guava.major.version}",
                             *
                         </Import-Package>

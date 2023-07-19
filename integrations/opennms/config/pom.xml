@@ -21,6 +21,10 @@
                         <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

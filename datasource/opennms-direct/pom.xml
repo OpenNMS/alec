@@ -21,7 +21,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
-                            org.opennms.integration.api.v1.model,
+                            org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
                             org.opennms.alec.datasource.api,
                             org.opennms.alec.datasource.common,
                             org.opennms.alec.datasource.common.inventory,

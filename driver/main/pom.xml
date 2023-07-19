@@ -20,6 +20,7 @@
                     <instructions>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
                         <Import-Package>
+                            org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
                             com.google.common.*;version="${guava.major.version}",
                             *
                         </Import-Package>

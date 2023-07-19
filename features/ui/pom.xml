@@ -23,7 +23,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
-                            com.google.common.*;version="${guava.major.version}",
+                            org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
+                            com.google.common.*;version="30",
                             *
                         </Import-Package>
                     </instructions>

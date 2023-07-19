@@ -30,7 +30,7 @@ A xref:admin:distributed_install.adoc[distributed deployment], which installs AL
 
 ALEC requires the following:
 
-* Horizon 30.0.1+ or Meridian 2022+ (see https://docs.opennms.com/horizon/latest/deployment/core/introduction.html[OpenNMS deployment] for help on getting started with OpenNMS).
+* Horizon 31.0.0+ or Meridian 2023+ (see https://docs.opennms.com/horizon/latest/deployment/core/introduction.html[OpenNMS deployment] for help on getting started with OpenNMS).
 * https://www.elastic.co/products/elasticsearch[Elasticsearch] 6.7.0–7.6.2 to maintain event and alarm history for training purposes (see https://docs.opennms.com/horizon/latest/operation/deep-dive/elasticsearch/introduction.html[Elasticsearch integration]).
 
 

@@ -3,6 +3,25 @@
 
     <!-- Datasources -->
 
+    <feature name="guava" version="${guava.version}" description="Google :: Guava">
+        <bundle start-level="30" dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle start-level="30" dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:org.codehaus.mojo/animal-sniffer-annotations/1.14</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:com.google.errorprone/error_prone_annotations/2.10.0</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:org.checkerframework/checker-qual/2.0.0</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:com.google.j2objc/j2objc-annotations/1.1</bundle>
+    </feature>
+
+    <feature name="guava30" version="30.1.1" description="Google :: Guava">
+        <feature prerequisite="true">wrap</feature>
+        <bundle start-level="30" dependency="true">mvn:com.google.guava/guava/30.1.1-jre</bundle>
+        <bundle start-level="30" dependency="true">mvn:com.google.guava/failureaccess/1.0.1</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:org.codehaus.mojo/animal-sniffer-annotations/1.14</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:com.google.errorprone/error_prone_annotations/2.10.0</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:org.checkerframework/checker-qual/2.0.0</bundle>
+        <bundle start-level="30" dependency="true">wrap:mvn:com.google.j2objc/j2objc-annotations/1.1</bundle>
+    </feature>
+
     <feature name="alec-datasource-api" description="ALEC :: Datasource :: API" version="${project.version}">
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.api/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.common/${project.version}</bundle>
@@ -26,11 +45,11 @@
     </feature>
 
     <feature name="alec-datasource-opennms-kafka" description="ALEC :: Datasource :: OpenNMS Kafka" version="${project.version}">
+        <feature>guava</feature>
         <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.datasource/org.opennms.alec.datasource.opennms-kafka/${project.version}</bundle>
         <feature version="${kafka.version}">alec-dependency-kafka-streams</feature>
         <feature version="${project.version}">alec-integrations-opennms-sink</feature>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -42,8 +61,8 @@
 
     <feature name="alec-datasource-opennms-direct" description="ALEC :: Datasource :: OpenNMS Direct" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
+        <feature>guava</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
         <!-- Automatically install the standalone processor when using the direct datasource -->
         <feature version="${project.version}">alec-processor-standalone</feature>
@@ -60,6 +79,7 @@
     </feature>
 
     <feature name="alec-ui" description="ALEC :: Features :: UI" version="${project.version}">
+        <feature>guava30</feature>
         <feature version="${project.version}" dependency="true">alec-datasource-opennms-direct</feature>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf-java.version}</bundle>
@@ -118,15 +138,15 @@
     <!-- Graph -->
 
     <feature name="alec-features-graph-api" description="ALEC :: Features :: Graph :: API" version="${project.version}">
+        <feature>guava</feature>
         <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.jung/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.api/${project.version}</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
     <feature name="alec-features-graph-graphml" description="ALEC :: Features :: Graph :: GraphML" version="${project.version}">
+        <feature>guava</feature>
         <feature version="${moxy.version}" dependency="true">alec-dependency-moxy</feature>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.graphml/${project.version}</bundle>
     </feature>
 
@@ -172,10 +192,10 @@
     <!-- Other features -->
 
     <feature name="alec-features-score" description="ALEC :: Features :: Score" version="${project.version}">
+        <feature>guava</feature>
         <feature version="${project.version}">alec-datasource-api</feature>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.score/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
     </feature>
 
     <feature name="alec-features-shell" description="ALEC :: Features :: Shell" version="${project.version}">
@@ -205,10 +225,10 @@
     <!-- OpenNMS Integration -->
 
     <feature name="opennms-alec-plugin" description="OpenNMS :: ALEC :: Plugin" version="${project.version}">
+        <feature>guava</feature>
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${snmp4j.bundle.version}</bundle>
         <bundle>mvn:org.opennms.alec.integrations.opennms/config/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.integrations.opennms/extension/${project.version}</bundle>

@@ -24,6 +24,7 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Import-Package>
                             org.opennms.integration.api.*;version="[${opennms.api.version},${opennms.api.version.max})",
+                            org.opennms.alec.grpc*;resolution:="optional";version="${alec-gateway.version}",
                             com.google.common.*;version="30",
                             *
                         </Import-Package>

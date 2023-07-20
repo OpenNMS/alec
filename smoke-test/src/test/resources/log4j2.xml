@@ -15,6 +15,20 @@
     <Logger name="com.jcraft.jsch" additivity="false" level="ERROR">
       <Appender-Ref ref="Console"/>
     </Logger>
+
+    <!-- Apache HTTPClient from the Java Docker stuff is _terribly_ noisy -->
+    <Logger name="com.github.dockerjava" additivity="false" level="WARN">
+      <Appender-Ref ref="Console"/>
+    </Logger>
+    <Logger name="com.github.dockerjava" additivity="false" level="OFF" />
+    <!-- the useful bits are in the headers -->
+    <Logger name="org.apache.http.impl" additivity="false" level="INFO">
+      <Appender-Ref ref="Console"/>
+    </Logger>
+    <Logger name="org.apache.http.wire" additivity="false" level="INFO">
+      <Appender-Ref ref="Console"/>
+    </Logger>
+
     <Root level="DEBUG">
       <AppenderRef ref="Console"/>
     </Root>

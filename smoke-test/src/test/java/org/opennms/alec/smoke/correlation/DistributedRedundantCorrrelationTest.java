@@ -77,6 +77,12 @@ public class DistributedRedundantCorrrelationTest extends CorrelationTestBase {
 
             if (Arrays.stream(output).anyMatch(row -> row.contains("ACTIVE"))) {
                 return Optional.of(alecSentinelContainer);
+            } else {
+                LOG.debug("current-role output: {}", String.join("\n", output));
+                String bundleList = Karaf.runKarafCommands(alecSentinelContainer.getSSHAddress(), "bundle:list -s");
+                LOG.debug("bundles: {}", bundleList);
+                String features = Karaf.runKarafCommands(alecSentinelContainer.getSSHAddress(), "feature:list");
+                LOG.debug("features: {}", features);
             }
         }
 

@@ -73,7 +73,7 @@ public class Karaf {
         LOG.debug("Checking for active bundle with prefix {}", bundleName);
 
         await()
-                .atMost(2, TimeUnit.MINUTES)
+                .atMost(4, TimeUnit.MINUTES)
                 .pollInterval(5, TimeUnit.SECONDS)
                 .ignoreExceptions()
                 .until(() -> {

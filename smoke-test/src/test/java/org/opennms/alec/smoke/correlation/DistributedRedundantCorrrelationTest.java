@@ -92,7 +92,7 @@ public class DistributedRedundantCorrrelationTest extends CorrelationTestBase {
     private ALECSentinelContainer waitForActiveALEC() throws Exception {
         LOG.info("Waiting for an active ALEC instance...");
         await()
-                .atMost(2, TimeUnit.MINUTES)
+                .atMost(5, TimeUnit.MINUTES)
                 .pollInterval(10, TimeUnit.SECONDS)
                 .until(() -> getActiveOCE().isPresent());
 

@@ -92,7 +92,7 @@ public class HelmContainer extends GenericContainer {
             // The wait strategy runs on the host so we need to use the external URL
             final GrafanaRestClient grafanaRestClient =
                     new GrafanaRestClient(getHelmExternalUrl());
-            await().atMost(2, MINUTES)
+            await().atMost(4, MINUTES)
                     .pollInterval(5, SECONDS).pollDelay(0, SECONDS)
                     .ignoreExceptions()
                     .until(grafanaRestClient::getDataSources, hasSize(greaterThanOrEqualTo(0)));

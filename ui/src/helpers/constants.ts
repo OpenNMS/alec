@@ -1,6 +1,6 @@
 export default {
 	URL_DOCUMENTATION:
-		'https://docs.opennms.com/alec/3.0.2-SNAPSHOT/engines/introduction.html',
+		'https://docs.opennms.com/alec/3.0.2-SNAPSHOT/reference/engines/introduction.html',
 	ENGINE_DBSCAN: 'dbscan',
 	ENGINE_DEEP_LEARNING: 'cluster',
 	HELLINGER_OPTION: 'hellinger',

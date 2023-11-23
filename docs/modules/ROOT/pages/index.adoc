@@ -1,5 +1,6 @@
 = User's Guide to ALEC
 :!sectids:
+:description: Get an overview of OpenNMS's Architecture for Learning Enabled Correlation (ALEC) that uses machine learning to logically group related alarms.
 
 Welcome to the Architecture for Learning Enabled Correlation (ALEC).
 This guide provides information and procedures to help you understand and deploy the advanced software concepts and components that make up ALEC.

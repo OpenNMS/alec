@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = Step 1: First-Time Login and Engine Configuration
+:description: View first-time login tasks and how to configure a correlation engine in OpenNMS's Architecture for Learning Enabled Correlation (ALEC).
 
 This section explains first-time login tasks and how to configure a correlation engine.
 ALEC includes two correlation engines: clustering and deep learning.

@@ -1,5 +1,6 @@
 
 = Kafka Datasource
+:description: Learn how the Kafka datasource works with a distributed installation of OpenNMS's Architecture for Learning Enabled Correlation (ALEC).
 
 The Kafka datasource is used with a xref:admin:distributed_install.adoc[distributed installation of ALEC].
 It interfaces with OpenNMS by leveraging the event consumer and Kafka Producer features.

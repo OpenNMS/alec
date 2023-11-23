@@ -1,9 +1,10 @@
 
 = Model
+:description: View the list of object types supported in OpenNMS's Architecture for Learning Enabled Correlation (ALEC), that uses machine learning to group related alarms.
 
-== Types
+== Object types
 
-The following types are supported using built-in inventory scripts:
+The following object types are supported using built-in inventory scripts:
 
 [cols="1,3"]
 |===

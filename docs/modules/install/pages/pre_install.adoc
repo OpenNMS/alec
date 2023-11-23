@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = Pre-Installation Tasks
+:description: View pre-installation tasks for OpenNMS's Architecture for Learning Enabled Correlation (ALEC): configuration, enable alarm history storage and syslogd, etc.
 
 This section describes the configuration tasks that you must complete before installing ALEC.
 

@@ -1,5 +1,6 @@
 
 = ALEC Datasources
+:description: Get an overview of the different datasources in OpenNMS's Architecture for Learning Enabled Correlation (ALEC): direct and Kafka.
 
 Datasources serve as the bridge between ALEC and OpenNMS.
 They provide and maintain a feed of alarms, inventory objects, and situations.

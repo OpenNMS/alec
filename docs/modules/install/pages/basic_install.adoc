@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = Basic Installation
+:description: Learn how to install OpenNMS's Architecture for Learning Enabled Correlation (ALEC) to enable machine-learning alarm grouping.
 
 This section describes a basic installation, where ALEC runs as another service within your OpenNMS Horizon or Meridian instance:
 

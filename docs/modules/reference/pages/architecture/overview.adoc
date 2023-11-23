@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = ALEC Architecture
+:description: Get an overview of OpenNMS's Architecture for Learning Enabled Correlation (ALEC) which enables machine-learning alarm grouping.
 
 ALEC provides a framework for developing correlation systems.
 

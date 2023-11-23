@@ -1,5 +1,6 @@
 
 = Correlation Engines
+:description: Learn how the correlation engines (clustering and deep learning) in OpenNMS's Architecture for Learning Enabled Correlation (ALEC) work.
 
 Correlation engines are the underlying processes that drive ALEC.
 Two engines are implemented by default: xref:engines/clustering.adoc[clustering] and xref:engines/deeplearning.adoc[deep learning].

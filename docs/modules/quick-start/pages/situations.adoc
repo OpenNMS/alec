@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = Step 2: View and Create Situations
+:description: Learn how to view and create situations in OpenNMS's Architecture for Learning Enabled Correlation (ALEC) to enable machine-learning alarm grouping.
 
 Now that you have xref:engine-config.adoc[selected the clustering engine], ALEC automatically begins to identify situations.
 This requires new alarms to be triggered within your OpenNMS environment, so--depending on your network's usual activity--this may take some time.

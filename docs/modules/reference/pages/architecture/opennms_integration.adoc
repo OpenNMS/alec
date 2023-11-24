@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = OpenNMS Integration
+:description: Understand the alarm lifecycle and correlation process between OpenNMS Horizon/Meridian and its Architecture for Learning Enabled Correlation (ALEC).
 
 The lifecycle of an alarm and the correlation process between OpenNMS and ALEC involves various components:
 

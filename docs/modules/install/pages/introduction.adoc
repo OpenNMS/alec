@@ -1,5 +1,6 @@
 
 = Installation Overview
+:description: View the prerequisites to install OpenNMS's Architecture for Learning Enabled Correlation (ALEC) and the benefits of basic vs. distributed deployment.
 
 There are two options available for ALEC deployment: basic and distributed installations.
 

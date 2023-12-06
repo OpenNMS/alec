@@ -17,7 +17,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
+                        <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <!-- we need to exclude org.apache.kafka.streams.KafkaStreams because it is otherwise treated as package,
@@ -30,6 +30,7 @@
                             org.opennms.alec.datasource.opennms.processors,
                             org.opennms.alec.datasource.opennms.proto,
                             org.opennms.alec.datasource.opennms.serialization,
+                            com.google.common.*;version="${guava.major.version}",
                             *
                         </Import-Package>
                     </instructions>

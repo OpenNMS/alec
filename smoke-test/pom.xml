@@ -14,7 +14,7 @@
         <jsch.version>0.2.1</jsch.version>
         <selenium.version>3.6.0</selenium.version>
         <!--This module needs a newer version of guava than the root pom version -->
-        <guava.version>28.0-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <testcontainers.version>1.17.2</testcontainers.version>
     </properties>
     <build>

@@ -43,6 +43,11 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>failureaccess</artifactId>
+            <version>${failureaccess.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.alec.features.graph</groupId>
             <artifactId>org.opennms.alec.features.graph.common</artifactId>
             <version>${project.version}</version>

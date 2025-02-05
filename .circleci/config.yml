@@ -17,7 +17,7 @@ executors:
   # rather than rely on the circleci machine VM
   smoke-test-executor:
     machine:
-      image: cimg/openjdk:11.0.26
+      image: ubuntu-2204:current
     environment:
       JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
@@ -315,6 +315,7 @@ jobs:
 
   build-debian:
     executor: build-debian-executor
+    resource_class: large
 
     steps:
       - attach_workspace:
@@ -371,6 +372,7 @@ jobs:
 
   smoke-test-commit:
     executor: smoke-test-executor
+    resource_class: large
 
     steps:
     - smoke-test:

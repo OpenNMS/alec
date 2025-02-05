@@ -42,11 +42,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>failureaccess</artifactId>
-            <version>${failureaccess.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

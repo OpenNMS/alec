@@ -86,12 +86,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>failureaccess</artifactId>
-            <version>${failureaccess.version}</version>
+            <version>30.1.1-jre</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -9,7 +9,7 @@ executors:
 
   build-debian-executor:
     docker:
-      - image: cimg/openjdk:11.0.13
+      - image: cimg/openjdk:11.0.26
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -174,7 +174,8 @@ commands:
       - run:
           name: Run the tests
           command: |
-            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+            sudo apt-get install openjdk-11-jdk
+
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
@@ -277,7 +278,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+            sudo apt-get install openjdk-11-jdk
             mvn test integration-test
 
       - run:

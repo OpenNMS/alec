@@ -175,7 +175,7 @@ commands:
           name: Run the tests
           command: |
             ls /usr/lib/jvm/
-            apt upgrade && apt install -y openjdk-11-jdk
+            sudo apt upgrade && sudo apt install -y openjdk-11-jdk
             ls /usr/lib/jvm/
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true

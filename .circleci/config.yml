@@ -17,7 +17,7 @@ executors:
   # rather than rely on the circleci machine VM
   smoke-test-executor:
     machine:
-      image: ubuntu-2204:2024.08.1
+      image: cimg/openjdk:11.0.26
     environment:
       JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
@@ -174,8 +174,6 @@ commands:
       - run:
           name: Run the tests
           command: |
-            apt-get install openjdk-11-jdk
-
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
@@ -278,7 +276,6 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            apt-get install openjdk-11-jdk
             mvn test integration-test
 
       - run:

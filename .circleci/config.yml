@@ -277,6 +277,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
             mvn test integration-test
 
       - run:

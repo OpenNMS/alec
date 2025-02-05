@@ -174,7 +174,7 @@ commands:
       - run:
           name: Run the tests
           command: |
-            sudo apt-get install openjdk-11-jdk
+            apt-get install openjdk-11-jdk
 
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
@@ -278,7 +278,7 @@ jobs:
       - run:
           name: Run the tests
           command: |
-            sudo apt-get install openjdk-11-jdk
+            apt-get install openjdk-11-jdk
             mvn test integration-test
 
       - run:

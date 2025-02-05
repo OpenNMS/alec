@@ -17,7 +17,7 @@ executors:
   # rather than rely on the circleci machine VM
   smoke-test-executor:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: ubuntu-2204:2024.08.1
     environment:
       JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
@@ -239,6 +239,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+
+      - run:
+          name: Update Repo list
+          command: |
+            sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/CentOS-*.repo
+            sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/CentOS-*.repo
+            sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 
       - sign-packages/install-rpm-dependencies:
           skip_if_forked_pr: true

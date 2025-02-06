@@ -31,6 +31,7 @@
         <feature version="${kafka.version}">alec-dependency-kafka-streams</feature>
         <feature version="${project.version}">alec-integrations-opennms-sink</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
         <bundle dependency="true">mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
         <bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -44,6 +45,7 @@
         <feature dependency="true">aries-blueprint</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
         <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
         <!-- Automatically install the standalone processor when using the direct datasource -->
         <feature version="${project.version}">alec-processor-standalone</feature>
@@ -122,11 +124,13 @@
         <bundle>mvn:org.opennms.alec.wrap/org.opennms.alec.wrap.jung/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.api/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
     </feature>
 
     <feature name="alec-features-graph-graphml" description="ALEC :: Features :: Graph :: GraphML" version="${project.version}">
         <feature version="${moxy.version}" dependency="true">alec-dependency-moxy</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
         <bundle>mvn:org.opennms.alec.features.graph/org.opennms.alec.features.graph.graphml/${project.version}</bundle>
     </feature>
 
@@ -176,6 +180,7 @@
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.score/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.commons/commons-math3/${commons.math.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
     </feature>
 
     <feature name="alec-features-shell" description="ALEC :: Features :: Shell" version="${project.version}">
@@ -209,6 +214,7 @@
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
+        <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${snmp4j.bundle.version}</bundle>
         <bundle>mvn:org.opennms.alec.integrations.opennms/config/${project.version}</bundle>
         <bundle>mvn:org.opennms.alec.integrations.opennms/extension/${project.version}</bundle>

@@ -599,7 +599,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
 
         final Event e = SituationToEvent.toEvent(situation, eventTimeFormat);
         final String situationXml = JaxbUtils.toXml(new Log(e), Log.class);
-        LOG.debug("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
+        LOG.info("Sending event to create situation with id '{}'. XML: {}", situation.getId(), situationXml);
 
         byte[] payload = situationXml.getBytes(StandardCharsets.UTF_8);
         if (wrapSinkMessagesInProto) {
@@ -611,7 +611,7 @@ public class OpennmsDatasource implements SituationDatasource, AlarmDatasource, 
             if (ex != null) {
                 LOG.warn("An error occurred while sending event for situation with id '{}'.", situation.getId(), ex);
             } else {
-                LOG.debug("Successfully sent event for situation with id '{}'.", situation.getId());
+                LOG.info("Successfully sent event for situation with id '{}'.", situation.getId());
             }
         });
     }

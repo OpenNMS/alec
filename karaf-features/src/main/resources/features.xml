@@ -266,7 +266,7 @@
         <bundle dependency="true">wrap:mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-streams/${kafka.bundle.version}$overwrite=merge&amp;Import-Package=com.fasterxml.jackson.databind,*</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.kafka-clients/${kafka.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.lz4/lz4-java/${lz4.version}</bundle>
-        <bundle dependency="true">wrap:mvn:org.xerial.snappy/snappy-java/${snappy-java.version}</bundle>
+        <bundle dependency="true">mvn:org.xerial.snappy/snappy-java/${snappy-java.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-json/${kafka.version}</bundle>
         <bundle dependency="true">wrap:mvn:org.apache.kafka/connect-api/${kafka.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>

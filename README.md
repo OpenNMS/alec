@@ -2,7 +2,7 @@
 
 The OpenNMS Architecture for Learning Enabled Correlation (ALEC) provides a framework for performing correlation of alarms (i.e. faults) into higher level situations.
 
-Installation instructions and additional documentation is available at: https://alec.opennms.com/
+Installation instructions and additional documentation is available at: https://docs.opennms.com/alec/latest/index.html
 
 ## Building & developing ALEC
 

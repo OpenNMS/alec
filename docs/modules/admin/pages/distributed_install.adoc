@@ -20,6 +20,7 @@ In addition to an existing instance of OpenNMS Horizon 30.0.1 or newer, these in
 ** Minions configured to use Kafka for the transport.
 ** Minions ready to receive SNMP traps and Syslog messages.
 * ZooKeeper 3.5.10 or newer.
+* Use Kafka strategy for Sink API
 
 == OpenNMS configuration
 
@@ -43,6 +44,7 @@ echo 'suppressIncrementalAlarms=false' >> "$OPENNMS_HOME/etc/org.opennms.feature
 +
 [source, shell]
 echo 'org.opennms.netmgt.eventd.sink.enable=true' > "$OPENNMS_HOME/etc/opennms.properties.d/event-sink.properties"
+
 
 == Install ALEC in OpenNMS
 
@@ -105,7 +107,7 @@ alec-sentinel-distributed wait-for-kar=opennms-alec-plugin' >> "$SENTINEL_HOME/e
 Follow these steps to verify your distributed ALEC installation:
 
 . Restart OpenNMS and Sentinel.
-. Make sure that the required Kafka topics have been created (see xref:reference:datasources/kafka.adoc#topics[Kafka topics]).
+. Make sure that the required Kafka topics have been created (see xref:reference:datasources/kafka.adoc#topics[Kafka topics]). If Kafka producer is not enabled to send data for edges, alarmFeedback and alec-inventory, those topics must be created manually.
 . Run `opennms:health-check` in an OpenNMS Karaf shell to check the status of your OpenNMS Horizon or Meridian instance.
 . Run `opennms:health-check` in a Sentinel Karaf shell to check the status of the Sentinel instance.
 ** Repeat this step for each Sentinel instance in your environment.

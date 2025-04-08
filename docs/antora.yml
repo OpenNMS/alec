@@ -1,8 +1,8 @@
 name: alec
-version: '3.0.2-SNAPSHOT'
+version: '3.0.2'
 title: ALEC
 asciidoc:
   attributes:
-    full-display-version: '3.0.2-SNAPSHOT'
+    full-display-version: '3.0.2'
 nav:
   - modules/ROOT/nav.adoc

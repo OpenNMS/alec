@@ -33,7 +33,7 @@ Password authentication
         | |                                    
         |_|                                    
 
-  OpenNMS (30.0.0-SNAPSHOT) on Apache Karaf (4.3.6)
+  OpenNMS (33.0.0-SNAPSHOT) on Apache Karaf (4.3.6)
 
 Hit '<tab>' for a list of available commands
 and '[cmd] --help' for help on a specific command.
@@ -43,8 +43,8 @@ admin@opennms()>
 
 In OpenNMS Karaf shell:
 ```
-admin@opennms()> feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.2-SNAPSHOT/xml                                                                                                          
-Adding feature url mvn:org.opennms.alec/alec-karaf-features/3.0.2-SNAPSHOT/xml
+admin@opennms()> feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.3/xml                                                                                                          
+Adding feature url mvn:org.opennms.alec/alec-karaf-features/3.0.3/xml
 admin@opennms()> feature:install alec-opennms-standalone 
 admin@opennms()> health-check                                                                                                                                                                          
 Verifying the health of the container

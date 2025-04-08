@@ -43,8 +43,8 @@ admin@opennms()>
 
 In OpenNMS Karaf shell:
 ```
-admin@opennms()> feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.3/xml                                                                                                          
-Adding feature url mvn:org.opennms.alec/alec-karaf-features/3.0.3/xml
+admin@opennms()> feature:repo-add mvn:org.opennms.alec/alec-karaf-features/3.0.4-SNAPSHOT/xml                                                                                                          
+Adding feature url mvn:org.opennms.alec/alec-karaf-features/3.0.4-SNAPSHOT/xml
 admin@opennms()> feature:install alec-opennms-standalone 
 admin@opennms()> health-check                                                                                                                                                                          
 Verifying the health of the container

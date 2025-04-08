@@ -1,5 +1,6 @@
 
 = Glossary
+:description: Read the glossary for terms and concepts related to OpenNMS's Architecture for Learning Enabled Correlation (ALEC).
 
 This glossary defines terms that are specific to the OpenNMS ALEC plugin.
 For more general terminology related to the OpenNMS project, see the https://docs.opennms.com/horizon/latest/reference/glossary.html[core documentation].

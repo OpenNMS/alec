@@ -1,42 +1,38 @@
 
 :imagesdir: ../assets/images
 = Basic Installation
+:description: Learn how to install OpenNMS's Architecture for Learning Enabled Correlation (ALEC) to enable machine-learning alarm grouping.
 
-This section describes a basic installation, where ALEC runs as another service within the OpenNMS core instance:
+This section describes a basic installation, where ALEC runs as another service within your OpenNMS Horizon or Meridian instance:
 
 .Example basic installation network architecture
-image::basic_deployment.png[Network architecture graphic that displays a basic ALEC installation, 400]
+image::basic_deployment.png["Network architecture graphic that displays a basic ALEC installation.", 400]
 
-== Before you begin
-
-You must complete the xref:install:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
+IMPORTANT: You must complete the xref:pre_install.adoc[pre-installation tasks] before proceeding with the installation.
 
 == Install ALEC
 
-. Install the package:
-.. RHEL or CentOS users, install via YUM: `yum -y install opennms-alec-plugin`.
-.. Ubuntu or Debian users, install via APT: `apt install opennms-alec-plugin`.
-. Configure the feature set to be installed when OpenNMS restarts:
+Follow these steps to install ALEC on your OpenNMS instance:
 
-[source, karaf]
-----
+. Install the package:
+** *RHEL/CentOS:* `yum -y install opennms-alec-plugin`
+** *Ubuntu/Debian:* `apt install opennms-alec-plugin`
+. Configure the feature set to be installed when OpenNMS starts:
++
+[source, shell]
 echo 'alec-opennms-standalone wait-for-kar=opennms-alec-plugin' > "$OPENNMS_HOME/etc/featuresBoot.d/alec.boot"
-----
 
 == Verify installation
 
-Run the `health:check` command in the OpenNMS Karaf shell to verify that everything loaded correctly.
+Follow these steps to verify your ALEC installation:
 
-Use the following to enumerate the available graphs:
+. Restart OpenNMS.
+. Run `opennms:health-check` in the OpenNMS Karaf shell to check the status of your Horizon or Meridian instance.
+. Run `opennms-alec:list-graphs` to enumerate the available graphs.
 
-[source,karaf]
-----
-opennms-alec:list-graphs
-----
+At this point, the health check command should return with no issues, and one graph named "dbscan" should be enumerated:
 
-At this point we expect the command to output a single graph called "dbscan":
-
-[source, karaf]
+[source, shell]
 ----
 admin@opennms> opennms-alec:list-graphs
 dbscan: 0 situations on 524 vertices and 4 edges.
@@ -44,5 +40,3 @@ dbscan: 0 situations on 524 vertices and 4 edges.
 
 NOTE: Your graph may not have any situations, vertices, or edges at this point.
 This is normal during initial setup.
-
-Refer to the ##Quick Start## section for information on how to use ALEC.

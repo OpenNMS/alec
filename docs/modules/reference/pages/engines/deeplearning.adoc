@@ -1,6 +1,7 @@
 
 :imagesdir: ../assets/images
 = Deep Learning Engine
+:description: Learn how to train the deep leaning engine in OpenNMS's Architecture for Learning Enabled Correlation (ALEC).
 
 The deep learning engine is a xref:engines/introduction.adoc[correlation engine] that uses a https://www.tensorflow.org/[TensorFlow] model to build alarm clusters.
 It draws information from the locally persisted network inventory graph.

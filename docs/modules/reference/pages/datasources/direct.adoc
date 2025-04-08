@@ -1,5 +1,6 @@
 
 = Direct Datasource
+:description: Learn how OpenNMS's Architecture for Learning Enabled Correlation (ALEC) uses event hooks to collect alarm and network inventory data.
 
 The direct datasource is used with a xref:install:basic_install.adoc[basic installation of ALEC].
 It runs on the same JVM as OpenNMS, and acts on new alarms and inventory objects using the APIs provisioned by the https://docs.opennms.com/horizon/latest/development/oia/introduction.html[OpenNMS Plugin API].

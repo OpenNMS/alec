@@ -1,5 +1,6 @@
 
 = Kafka Datasource
+:description: Learn how the Kafka datasource works with a distributed installation of OpenNMS's Architecture for Learning Enabled Correlation (ALEC).
 
 The Kafka datasource is used with a xref:admin:distributed_install.adoc[distributed installation of ALEC].
 It interfaces with OpenNMS by leveraging the event consumer and Kafka Producer features.
@@ -7,7 +8,7 @@ It interfaces with OpenNMS by leveraging the event consumer and Kafka Producer f
 The Kafka Producer forwards alarms, nodes, and network topology data that is encoded in OpenNMS protocol buffers to topics (see https://docs.opennms.com/horizon/31/operation/deep-dive/kafka-producer/kafka-producer.html[Kafka Producer] in the main documentation).
 The datasource consumes data from these topics and uses it to provide ALEC with a feed of alarms and inventory information.
 
-[topics]
+[[topics]]
 == Configure topics
 
 You can update the following properties to configure the names of individual Kafka topics:

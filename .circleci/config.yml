@@ -61,6 +61,13 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - sonar:
+          context: "OpenNMS Build"
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
       - build-docs:
           requires:
             - pre-build
@@ -442,3 +449,14 @@ jobs:
             name: Push packages to CloudSmith
             command: .circleci/scripts/publish-cloudsmith.sh
 
+  sonar:
+    executor: build-executor
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run SonarQube Code Analysis
+          when: always
+          command: |
+            mvn -Psonar,coverage -Dbuild.packages clean verify dependency:resolve-plugins dependency:go-offline \
+            sonar:sonar -Dsonar.login=$SONARCLOUD_LOGIN

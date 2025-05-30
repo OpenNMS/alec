@@ -40,7 +40,7 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
@@ -62,7 +62,7 @@ public class SshClient implements AutoCloseable {
 
     private final JSch jsch = new JSch();
     private Session session;
-    private Channel channel;
+    private ChannelShell channel;
     private InputStream stdout;
     private InputStream stderr;
 
@@ -92,7 +92,9 @@ public class SshClient implements AutoCloseable {
         session.setConfig(config);
         session.connect();
 
-        channel = session.openChannel("shell");
+        channel = (ChannelShell) session.openChannel("shell");
+        channel.setPty(true);
+        channel.setPtyType("xterm", 200, 40, 1024, 768); // width=200 columns, height=40 rows, optional pixel size
         stdout = channel.getInputStream();
         stderr = channel.getExtInputStream();
         channel.connect(timeout);

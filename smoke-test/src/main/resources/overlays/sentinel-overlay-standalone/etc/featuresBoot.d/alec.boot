@@ -1,3 +1,6 @@
+sentinel-core
+sentinel-coordination-zookeeper
+alec-sentinel-distributed wait-for-kar=opennms-alec-plugin
 alec-datasource-opennms-kafka wait-for-kar=opennms-alec-plugin
 alec-engine-%ALEC_ENGINE_FEATURE% wait-for-kar=opennms-alec-plugin
 alec-processor-standalone wait-for-kar=opennms-alec-plugin

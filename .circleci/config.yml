@@ -9,7 +9,7 @@ executors:
 
   build-debian-executor:
     docker:
-      - image: cimg/openjdk:17.0
+      - image: cimg/openjdk:11.0.13
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -19,7 +19,7 @@ executors:
     machine:
       image: ubuntu-2204:current
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true
       KEEP_TMP_OVERLAY: true
@@ -174,7 +174,7 @@ commands:
       - run:
           name: Run the tests
           command: |
-            sudo apt update && sudo apt install -y openjdk-17-jdk
+            sudo apt update && sudo apt install -y openjdk-11-jdk
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test

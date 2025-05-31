@@ -75,7 +75,7 @@ public abstract class ALECSmokeTestBase {
     protected OpenNMSRestClient openNMSRestClient;
 
     // Define the containers used by all tests
-    protected final GenericContainer kafkaContainer = new KafkaContainer("7.3.0")
+    protected final GenericContainer kafkaContainer = new KafkaContainer("7.0.0")
             .withNetwork(Network.getNetwork())
             .withNetworkAliases("kafka")
             .waitingFor(new ALECSmokeTestBase.WaitForKafkaTopics());

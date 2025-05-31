@@ -3,7 +3,7 @@
     <!-- Datasource -->
     <reference id="alarmDatasource" interface="org.opennms.alec.datasource.api.AlarmDatasource" />
     <reference id="alarmFeedbackDatasource" interface="org.opennms.alec.datasource.api.AlarmFeedbackDatasource" />
-    <reference id="inventoryDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource" availability="optional" />
+    <reference id="inventoryDatasource" interface="org.opennms.alec.datasource.api.InventoryDatasource" />
     <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />
 
     <!-- Engine -->

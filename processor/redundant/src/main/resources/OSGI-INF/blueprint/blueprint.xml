@@ -2,7 +2,7 @@
     <reference id="situationDataSource"
                interface="org.opennms.alec.datasource.api.SituationDatasource"/>
     <reference id="domainManagerFactory"
-               interface="org.opennms.integration.api.v1.coordination.DomainManagerFactory" availability="optional"/>
+               interface="org.opennms.integration.api.v1.coordination.DomainManagerFactory" />
     <bean id="activeStandbySituationProcessor"
           class="org.opennms.alec.processor.redundant.ActiveStandbySituationProcessorFactory" destroy-method="destroy">
         <argument ref="situationDataSource"/>

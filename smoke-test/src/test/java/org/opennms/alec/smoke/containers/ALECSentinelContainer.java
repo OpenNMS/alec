@@ -147,8 +147,8 @@ public class ALECSentinelContainer extends GenericContainer implements TestLifec
         LOG.info("Waiting for {} to terminate...", getIndexedAlias());
 
         await()
-                .atMost(1, TimeUnit.MINUTES)
-                .pollInterval(5, TimeUnit.SECONDS)
+                .atMost(3, TimeUnit.MINUTES)
+                .pollInterval(10, TimeUnit.SECONDS)
                 .until(() -> {
                     try {
                         Karaf.runKarafCommands(getSSHAddress(), "logout");

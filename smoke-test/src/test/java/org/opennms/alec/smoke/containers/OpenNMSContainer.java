@@ -83,7 +83,6 @@ public class OpenNMSContainer extends GenericContainer {
                 .withNetwork(Network.getNetwork())
                 .withNetworkAliases(ALIAS)
                 .withCommand("-s")
-                .withExtraHost("localhost", "host-gateway")
                 .waitingFor(new WaitForOpenNMS());
     }
 

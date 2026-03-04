@@ -71,6 +71,8 @@ public abstract class OpennmsDatasourceIT {
 
     @Before
     public void setUp() throws IOException {
+        System.setProperty("karaf.data", temporaryFolder.getRoot().getAbsolutePath());
+
         // Create the producer
         Map<String, Object> senderProps = KafkaTestUtils.producerProps(embeddedKafkaRule.getEmbeddedKafka());
         senderProps.put("key.serializer", StringSerializer.class.getCanonicalName());

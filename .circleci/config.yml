@@ -314,6 +314,11 @@ jobs:
       - attach_workspace:
           at: ~/
 
+      - run:
+          name: Install build dependencies
+          command: |
+            sudo apt-get update && sudo apt-get install -y fakeroot dpkg-dev debhelper
+
       - sign-packages/install-deb-dependencies:
           skip_if_forked_pr: true
           use_sudo: true

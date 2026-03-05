@@ -77,7 +77,7 @@ public class Karaf {
                 .pollInterval(5, TimeUnit.SECONDS)
                 .ignoreExceptions()
                 .until(() -> {
-                    String[] output = runKarafCommands(serviceAddress, "bundle:list -s").split("\n");
+                    String[] output = runKarafCommands(serviceAddress, "bundle:list -s --no-format").split("\n");
                     return Arrays.stream(output).anyMatch(row -> row.contains(bundleName) &&
                             row.contains("Active"));
                 });

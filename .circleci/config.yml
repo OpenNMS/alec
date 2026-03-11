@@ -3,13 +3,13 @@ version: 2.1
 executors:
   build-executor:
     docker:
-      - image: opennms/build-env:11.0.14_9-3.8.4-b8249
+      - image: opennms/build-env:17.0.6.0.10-3.8.8-b10459
         environment:
           MAVEN_OPTS: -Xmx2g
 
   build-debian-executor:
     docker:
-      - image: cimg/openjdk:11.0.13
+      - image: cimg/openjdk:17.0
         environment:
           MAVEN_OPTS: -Xmx2g
 
@@ -19,7 +19,7 @@ executors:
     machine:
       image: ubuntu-2204:current
     environment:
-      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m
       TESTCONTAINERS_RYUK_DISABLED: true
       KEEP_TMP_OVERLAY: true
@@ -174,7 +174,7 @@ commands:
       - run:
           name: Run the tests
           command: |
-            sudo apt update && sudo apt install -y openjdk-11-jdk
+            sudo apt update && sudo apt install -y openjdk-17-jdk
             mkdir $TEST_RECORDING_DIR
             mvn install --projects org.opennms.alec:smoke-test --also-make -DskipTests=true
             cd smoke-test
@@ -240,13 +240,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-
-      - run:
-          name: Update Repo list
-          command: |
-            sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/CentOS-*.repo
-            sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/CentOS-*.repo
-            sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/CentOS-*.repo
 
       - sign-packages/install-rpm-dependencies:
           skip_if_forked_pr: true
@@ -320,6 +313,11 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+
+      - run:
+          name: Install build dependencies
+          command: |
+            sudo apt-get update && sudo apt-get install -y fakeroot dpkg-dev debhelper
 
       - sign-packages/install-deb-dependencies:
           skip_if_forked_pr: true

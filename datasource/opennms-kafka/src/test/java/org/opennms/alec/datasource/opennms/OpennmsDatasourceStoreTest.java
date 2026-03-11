@@ -88,6 +88,7 @@ public class OpennmsDatasourceStoreTest {
         datasource.setInventoryGcIntervalMs(step);
 
         Topology topology = datasource.getKTopology();
+        System.setProperty("karaf.data", temporaryFolder.getRoot().getAbsolutePath());
         Properties props = datasource.loadStreamsProperties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "test");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234");

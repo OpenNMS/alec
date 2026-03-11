@@ -62,7 +62,7 @@
         <gson.version>2.8.2</gson.version>
         <hamcrest.version>1.3</hamcrest.version>
         <jakarta.version>2.3.3</jakarta.version>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <jackson.version>2.12.3</jackson.version>
         <jaxrs.version>2.1.1</jaxrs.version>
         <jung.version>2.1.1</jung.version>
@@ -79,8 +79,9 @@
         <okhttp.version>3.10.0</okhttp.version>
         <okio.bundle.version>1.14.0_1</okio.bundle.version>
         <okhttp.bundle.version>3.10.0_2</okhttp.bundle.version>
-        <opennms.api.version>1.0.0</opennms.api.version>
-        <opennms.api.version.max>2.0.0</opennms.api.version.max><!-- exclusive ver. allowed for packages dependency rpm & deb-->
+        <opennms.api.version>2.0.0</opennms.api.version>
+        <opennms.api.version.max>3.0.0</opennms.api.version.max><!-- exclusive ver. allowed for packages dependency rpm & deb-->
+        <opennms.api.version.range>[1.6,3.0)</opennms.api.version.range>
         <sink.protobuf.version>2.6.1</sink.protobuf.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
@@ -423,6 +424,10 @@
                     <configuration>
                         <instructions>
                             <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
+                            <Import-Package>
+                                org.opennms.integration.api.*;version="${opennms.api.version.range}",
+                                *
+                            </Import-Package>
                         </instructions>
                     </configuration>
                 </plugin>
@@ -530,8 +535,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>2.22.1</version>
             <configuration>
-                <!-- see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
-                <argLine>-Xmx1024m -Xms1024m -XX:MaxPermSize=512m -Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+                <argLine>-Xmx1024m -Xms1024m</argLine>
             </configuration>
           </plugin>
           <plugin>

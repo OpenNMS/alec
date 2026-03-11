@@ -43,7 +43,7 @@
 
     <feature name="alec-datasource-opennms-direct" description="ALEC :: Datasource :: OpenNMS Direct" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
-        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <feature dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>
         <feature dependency="true" version="${project.version}">alec-datasource-opennms-common</feature>
@@ -111,7 +111,7 @@
     <!-- Drivers -->
 
     <feature name="alec-driver-main" description="ALEC :: Driver :: Main" version="${project.version}">
-        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <feature dependency="true">opennms-integration-api</feature>
         <feature version="${project.version}">alec-engine-api</feature>
         <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec.driver/org.opennms.alec.driver.main/${project.version}</bundle>
@@ -169,7 +169,7 @@
         <feature version="${project.version}">alec-processor-api</feature>
         <bundle>mvn:org.opennms.alec/processor-redundant/${project.version}</bundle>
 
-        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <feature dependency="true">opennms-integration-api</feature>
         <feature dependency="true">shell</feature>
     </feature>
 
@@ -211,7 +211,7 @@
 
     <feature name="opennms-alec-plugin" description="OpenNMS :: ALEC :: Plugin" version="${project.version}">
         <feature dependency="true">aries-blueprint</feature>
-        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <feature dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">wrap:mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/failureaccess/${failureaccess.version}</bundle>

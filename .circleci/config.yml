@@ -18,6 +18,7 @@ executors:
   smoke-test-executor:
     machine:
       image: ubuntu-2204:current
+    resource_class: large
     environment:
       JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       MAVEN_OPTS: -Xmx3200m

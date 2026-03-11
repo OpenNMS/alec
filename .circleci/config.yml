@@ -85,6 +85,7 @@ workflows:
               only:
                 - develop
                 - /^release-.*/
+                - /^.*smoke.*$/
             tags:
               only: /^v.*/
 
@@ -439,4 +440,3 @@ jobs:
         - run:
             name: Push packages to CloudSmith
             command: .circleci/scripts/publish-cloudsmith.sh
-

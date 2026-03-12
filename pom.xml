@@ -81,7 +81,7 @@
         <okhttp.bundle.version>3.10.0_2</okhttp.bundle.version>
         <opennms.api.version>2.0.0</opennms.api.version>
         <opennms.api.version.max>3.0.0</opennms.api.version.max><!-- exclusive ver. allowed for packages dependency rpm & deb-->
-        <opennms.api.version.range>[1.6,3.0)</opennms.api.version.range>
+
         <sink.protobuf.version>2.6.1</sink.protobuf.version>
         <osgi.version>6.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
@@ -93,7 +93,7 @@
         <snmp4j.bundle.version>2.6.3_1</snmp4j.bundle.version>
         <spring.kafka.version>2.8.6</spring.kafka.version>
         <string.similarity.version>1.1.0</string.similarity.version>
-        <tensorflow.version>1.15.0</tensorflow.version>
+        <tensorflow.version>1.13.1</tensorflow.version>
         <camel-test-blueprint.version>2.19.1</camel-test-blueprint.version>
         <jersey-client.version>2.36</jersey-client.version>
         <grpc.version>1.46.0</grpc.version>
@@ -424,10 +424,6 @@
                     <configuration>
                         <instructions>
                             <Bundle-RequiredExecutionEnvironment>JavaSE-${java.version}</Bundle-RequiredExecutionEnvironment>
-                            <Import-Package>
-                                org.opennms.integration.api.*;version="${opennms.api.version.range}",
-                                *
-                            </Import-Package>
                         </instructions>
                     </configuration>
                 </plugin>

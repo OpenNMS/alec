@@ -23,6 +23,7 @@
 ** xref:reference:engines/clustering.adoc[Clustering Engine]
 ** xref:reference:engines/llm-clustering.adoc[LLM Clustering Engine]
 * xref:reference:llm-root-cause-analysis.adoc[LLM Root Cause Analysis]
+* xref:reference:mcp-server.adoc[MCP Server and Tool Access]
 * xref:reference:datasources/overview.adoc[Datasources]
 ** xref:reference:datasources/direct.adoc[Direct Datasource]
 ** xref:reference:datasources/kafka.adoc[Kafka Datasource]

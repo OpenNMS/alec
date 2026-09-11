@@ -44,7 +44,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @JsonDeserialize(builder = LlmConfigImpl.Builder.class)
 @JsonPropertyOrder({"enabled", "autoEvaluate", "baseUrl", "model", "systemPrompt",
-        "dailyTokenLimit", "monthlyTokenLimit", "apiKey", "clearApiKey"})
+        "dailyTokenLimit", "monthlyTokenLimit", "apiKey", "clearApiKey",
+        "toolsEnabled", "opennmsUrl", "opennmsUsername", "opennmsPassword", "clearOpennmsPassword"})
 public interface LlmConfig {
     boolean isEnabled();
 
@@ -110,4 +111,18 @@ public interface LlmConfig {
     String getApiKey();
 
     boolean isClearApiKey();
+
+    /** ALEC-308: offer the MCP data tools to ALEC's own model calls (RCA + clustering). */
+    boolean isToolsEnabled();
+
+    /** ALEC-308: OpenNMS base URL for the REST-backed tools; blank = http://localhost:8980/opennms. */
+    String getOpennmsUrl();
+
+    /** ALEC-308: OpenNMS login for the REST-backed tools (events, metrics, device config). */
+    String getOpennmsUsername();
+
+    /** ALEC-308: write-only, like the API key — never echoed back. */
+    String getOpennmsPassword();
+
+    boolean isClearOpennmsPassword();
 }

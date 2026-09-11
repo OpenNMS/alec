@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
  */
 @JsonDeserialize(builder = UsageRecord.Builder.class)
 @JsonPropertyOrder({"ts", "situationId", "model", "success",
-        "inputTokens", "outputTokens", "cacheReadInputTokens", "cacheCreationInputTokens"})
+        "inputTokens", "outputTokens", "cacheReadInputTokens", "cacheCreationInputTokens", "toolCalls"})
 public final class UsageRecord {
 
     private final long ts;
@@ -54,6 +54,7 @@ public final class UsageRecord {
     private final long outputTokens;
     private final long cacheReadInputTokens;
     private final long cacheCreationInputTokens;
+    private final long toolCalls;
 
     private UsageRecord(Builder b) {
         this.ts = b.ts;
@@ -64,6 +65,7 @@ public final class UsageRecord {
         this.outputTokens = b.outputTokens;
         this.cacheReadInputTokens = b.cacheReadInputTokens;
         this.cacheCreationInputTokens = b.cacheCreationInputTokens;
+        this.toolCalls = b.toolCalls;
     }
 
     public long getTs() {
@@ -98,6 +100,11 @@ public final class UsageRecord {
         return cacheCreationInputTokens;
     }
 
+    /** MCP data-tool calls made during this LLM call (ALEC-308); 0 for records written before it existed. */
+    public long getToolCalls() {
+        return toolCalls;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -113,6 +120,7 @@ public final class UsageRecord {
         private long outputTokens;
         private long cacheReadInputTokens;
         private long cacheCreationInputTokens;
+        private long toolCalls;
 
         private Builder() {
         }
@@ -154,6 +162,11 @@ public final class UsageRecord {
 
         public Builder cacheCreationInputTokens(long v) {
             cacheCreationInputTokens = v;
+            return this;
+        }
+
+        public Builder toolCalls(long v) {
+            toolCalls = Math.max(0, v);
             return this;
         }
 

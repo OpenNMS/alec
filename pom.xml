@@ -181,6 +181,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.opennms.alec.features</groupId>
+                <artifactId>org.opennms.alec.features.mcp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.opennms.alec.features.graph</groupId>
                 <artifactId>org.opennms.alec.features.graph.api</artifactId>
                 <version>${project.version}</version>

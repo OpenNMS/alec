@@ -104,6 +104,7 @@ public class UsageStore {
         long calls = 0;
         long successes = 0;
         long failures = 0;
+        long toolCalls = 0;
         if (all != null) {
             for (String raw : all.values()) {
                 UsageRecord r;
@@ -121,6 +122,7 @@ public class UsageStore {
                 cacheReadTokens += r.getCacheReadInputTokens();
                 cacheCreateTokens += r.getCacheCreationInputTokens();
                 calls++;
+                toolCalls += r.getToolCalls();
                 if (r.isSuccess()) {
                     successes++;
                 } else {
@@ -131,7 +133,7 @@ public class UsageStore {
         double cacheHitRatio = computeCacheHitRatio(inputTokens, cacheCreateTokens, cacheReadTokens);
         double costUsd = estimateCostUsd(inputTokens, outputTokens, cacheReadTokens, cacheCreateTokens);
         return new UsageReport(days, inputTokens, outputTokens, cacheReadTokens, cacheCreateTokens,
-                calls, successes, failures, cacheHitRatio, costUsd, PRICING_NOTE);
+                calls, successes, failures, toolCalls, cacheHitRatio, costUsd, PRICING_NOTE);
     }
 
     /**

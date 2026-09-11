@@ -107,8 +107,11 @@ public class LlmConfigReader {
             // values are treated as no limit.
             long dailyTokenLimit = Math.max(0, node.path("dailyTokenLimit").asLong(0));
             long monthlyTokenLimit = Math.max(0, node.path("monthlyTokenLimit").asLong(0));
+            // ALEC-308: whether the model is offered the MCP tools. Absent in
+            // records persisted before the option existed -> off.
+            boolean toolsEnabled = node.path("toolsEnabled").asBoolean(false);
             return Optional.of(new Config(enabled, autoEvaluate, apiKey, baseUrl, model, systemPrompt,
-                    dailyTokenLimit, monthlyTokenLimit));
+                    dailyTokenLimit, monthlyTokenLimit, toolsEnabled));
         } catch (IOException e) {
             // Jackson parse-exception messages embed a snippet of the source
             // document — which here is the persisted config blob containing the
@@ -136,6 +139,7 @@ public class LlmConfigReader {
         private final String systemPrompt;
         private final long dailyTokenLimit;
         private final long monthlyTokenLimit;
+        private final boolean toolsEnabled;
 
         public Config(boolean enabled, boolean autoEvaluate, String apiKey, String baseUrl, String model,
                       String systemPrompt) {
@@ -144,6 +148,12 @@ public class LlmConfigReader {
 
         public Config(boolean enabled, boolean autoEvaluate, String apiKey, String baseUrl, String model,
                       String systemPrompt, long dailyTokenLimit, long monthlyTokenLimit) {
+            this(enabled, autoEvaluate, apiKey, baseUrl, model, systemPrompt, dailyTokenLimit, monthlyTokenLimit,
+                    false);
+        }
+
+        public Config(boolean enabled, boolean autoEvaluate, String apiKey, String baseUrl, String model,
+                      String systemPrompt, long dailyTokenLimit, long monthlyTokenLimit, boolean toolsEnabled) {
             this.enabled = enabled;
             this.autoEvaluate = autoEvaluate;
             // Trim defends against keys persisted with paste artifacts (trailing
@@ -156,6 +166,7 @@ public class LlmConfigReader {
                     LlmSuggestionServiceImpl.DEFAULT_SYSTEM_PROMPT);
             this.dailyTokenLimit = Math.max(0, dailyTokenLimit);
             this.monthlyTokenLimit = Math.max(0, monthlyTokenLimit);
+            this.toolsEnabled = toolsEnabled;
         }
 
         public boolean isEnabled() {
@@ -204,6 +215,11 @@ public class LlmConfigReader {
             return monthlyTokenLimit;
         }
 
+        /** Whether ALEC's own model calls are offered the MCP data tools (ALEC-308). */
+        public boolean isToolsEnabled() {
+            return toolsEnabled;
+        }
+
         @Override
         public String toString() {
             // Never include the API key in toString — it ends up in log lines.
@@ -211,7 +227,8 @@ public class LlmConfigReader {
                     + ", autoEvaluate=" + autoEvaluate
                     + ", apiKeyPresent=" + hasApiKey()
                     + ", baseUrl=" + baseUrl
-                    + ", model=" + model + "]";
+                    + ", model=" + model
+                    + ", toolsEnabled=" + toolsEnabled + "]";
         }
     }
 }

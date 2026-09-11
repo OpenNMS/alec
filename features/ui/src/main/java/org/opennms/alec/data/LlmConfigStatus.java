@@ -41,7 +41,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({"enabled", "autoEvaluate", "baseUrl", "model", "defaultBaseUrl",
         "defaultModel", "systemPrompt", "defaultSystemPrompt", "defaultClusterPrompt",
-        "dailyTokenLimit", "monthlyTokenLimit", "apiKeyPresent"})
+        "dailyTokenLimit", "monthlyTokenLimit", "apiKeyPresent",
+        "toolsEnabled", "opennmsUrl", "opennmsUsername", "opennmsPasswordPresent"})
 public class LlmConfigStatus {
 
     private final boolean enabled;
@@ -63,11 +64,27 @@ public class LlmConfigStatus {
     private final long dailyTokenLimit;
     private final long monthlyTokenLimit;
     private final boolean apiKeyPresent;
+    // ALEC-308
+    private final boolean toolsEnabled;
+    private final String opennmsUrl;
+    private final String opennmsUsername;
+    private final boolean opennmsPasswordPresent;
 
     public LlmConfigStatus(boolean enabled, boolean autoEvaluate, String baseUrl, String model,
                            String defaultBaseUrl, String defaultModel,
                            String systemPrompt, String defaultSystemPrompt,
                            long dailyTokenLimit, long monthlyTokenLimit, boolean apiKeyPresent) {
+        this(enabled, autoEvaluate, baseUrl, model, defaultBaseUrl, defaultModel, systemPrompt,
+                defaultSystemPrompt, dailyTokenLimit, monthlyTokenLimit, apiKeyPresent,
+                false, "", "", false);
+    }
+
+    public LlmConfigStatus(boolean enabled, boolean autoEvaluate, String baseUrl, String model,
+                           String defaultBaseUrl, String defaultModel,
+                           String systemPrompt, String defaultSystemPrompt,
+                           long dailyTokenLimit, long monthlyTokenLimit, boolean apiKeyPresent,
+                           boolean toolsEnabled, String opennmsUrl, String opennmsUsername,
+                           boolean opennmsPasswordPresent) {
         this.enabled = enabled;
         this.autoEvaluate = autoEvaluate;
         this.baseUrl = baseUrl;
@@ -79,6 +96,10 @@ public class LlmConfigStatus {
         this.dailyTokenLimit = dailyTokenLimit;
         this.monthlyTokenLimit = monthlyTokenLimit;
         this.apiKeyPresent = apiKeyPresent;
+        this.toolsEnabled = toolsEnabled;
+        this.opennmsUrl = opennmsUrl;
+        this.opennmsUsername = opennmsUsername;
+        this.opennmsPasswordPresent = opennmsPasswordPresent;
     }
 
     public static LlmConfigStatus from(LlmConfig config) {
@@ -108,7 +129,11 @@ public class LlmConfigStatus {
                 LlmConfigImpl.DEFAULT_SYSTEM_PROMPT,
                 config.getDailyTokenLimit(),
                 config.getMonthlyTokenLimit(),
-                key != null && !key.isEmpty());
+                key != null && !key.isEmpty(),
+                config.isToolsEnabled(),
+                nz(config.getOpennmsUrl()),
+                nz(config.getOpennmsUsername()),
+                config.getOpennmsPassword() != null && !config.getOpennmsPassword().isEmpty());
     }
 
     private static String nz(String s) {
@@ -167,5 +192,21 @@ public class LlmConfigStatus {
 
     public boolean isApiKeyPresent() {
         return apiKeyPresent;
+    }
+
+    public boolean isToolsEnabled() {
+        return toolsEnabled;
+    }
+
+    public String getOpennmsUrl() {
+        return opennmsUrl;
+    }
+
+    public String getOpennmsUsername() {
+        return opennmsUsername;
+    }
+
+    public boolean isOpennmsPasswordPresent() {
+        return opennmsPasswordPresent;
     }
 }

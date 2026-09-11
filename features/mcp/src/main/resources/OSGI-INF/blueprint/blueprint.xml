@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+                               http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <!-- OpenNMS Integration API services the built-in tools read from. -->
+    <reference id="keyValueStore" interface="org.opennms.integration.api.v1.distributed.KeyValueStore"/>
+    <reference id="nodeDao" interface="org.opennms.integration.api.v1.dao.NodeDao"/>
+    <reference id="alarmDao" interface="org.opennms.integration.api.v1.dao.AlarmDao"/>
+    <reference id="edgeDao" interface="org.opennms.integration.api.v1.dao.EdgeDao"/>
+    <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource"/>
+
+    <bean id="mcpObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+    <bean id="mcpConfigReader" class="org.opennms.alec.mcp.KvMcpConfigReader">
+        <argument ref="keyValueStore"/>
+        <argument ref="mcpObjectMapper"/>
+    </bean>
+
+    <bean id="openNmsRestClient" class="org.opennms.alec.mcp.OkHttpOpenNmsRestClient">
+        <argument ref="mcpConfigReader"/>
+        <argument ref="mcpObjectMapper"/>
+    </bean>
+    <service ref="openNmsRestClient" interface="org.opennms.alec.mcp.OpenNmsRestClient"/>
+
+    <!--
+        Tool-call counters. Published as a Dropwizard MetricSet so the ALEC
+        driver folds them into the engine's JMX-reported registry, where
+        OpenNMS's stock JMX collection charts them as "ALEC Graph Stats".
+    -->
+    <bean id="mcpMetrics" class="org.opennms.alec.mcp.McpMetrics"/>
+    <service ref="mcpMetrics" interface="com.codahale.metrics.MetricSet">
+        <service-properties>
+            <entry key="name" value="alec-mcp"/>
+        </service-properties>
+    </service>
+
+    <!--
+        LLM token usage as gauges, same JMX route as the tool-call counters.
+        Consumed by the chat tool loop in features/llm-suggestions and engine/llm.
+    -->
+    <bean id="llmUsageMetrics" class="org.opennms.alec.mcp.llm.DefaultLlmUsageMetrics"/>
+    <service ref="llmUsageMetrics" interface="com.codahale.metrics.MetricSet">
+        <service-properties>
+            <entry key="name" value="alec-llm-usage"/>
+        </service-properties>
+    </service>
+    <service ref="llmUsageMetrics" interface="org.opennms.alec.mcp.llm.LlmUsageMetrics"/>
+
+    <bean id="toolRegistry" class="org.opennms.alec.mcp.DefaultToolRegistry">
+        <argument ref="mcpMetrics"/>
+        <argument ref="mcpObjectMapper"/>
+    </bean>
+    <service ref="toolRegistry" interface="org.opennms.alec.mcp.ToolRegistry"/>
+    <service ref="mcpConfigReader" interface="org.opennms.alec.mcp.McpConfigReader"/>
+
+    <!--
+        Tools contributed by other bundles (whiteboard). Built-ins below are
+        published the same way so there is exactly one registration path.
+    -->
+    <reference-list id="contributedTools" interface="org.opennms.alec.mcp.McpTool" availability="optional">
+        <reference-listener bind-method="addTool" unbind-method="removeTool">
+            <ref component-id="toolRegistry"/>
+        </reference-listener>
+    </reference-list>
+
+    <!-- Built-in tools -->
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.AlecStatusTool">
+            <argument ref="situationDatasource"/>
+            <argument ref="toolRegistry"/>
+            <argument ref="openNmsRestClient"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.ListSituationsTool">
+            <argument ref="situationDatasource"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.GetSituationTool">
+            <argument ref="situationDatasource"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.GetNodeTool">
+            <argument ref="nodeDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.ListAlarmsTool">
+            <argument ref="alarmDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.GetNodeNeighborsTool">
+            <argument ref="edgeDao"/>
+            <argument ref="nodeDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.ListNodeEventsTool">
+            <argument ref="openNmsRestClient"/>
+            <argument ref="nodeDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.ListNodeResourcesTool">
+            <argument ref="openNmsRestClient"/>
+            <argument ref="nodeDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.GetMetricSeriesTool">
+            <argument ref="openNmsRestClient"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+    <service interface="org.opennms.alec.mcp.McpTool">
+        <bean class="org.opennms.alec.mcp.tools.GetDeviceConfigTool">
+            <argument ref="openNmsRestClient"/>
+            <argument ref="nodeDao"/>
+            <argument ref="mcpObjectMapper"/>
+        </bean>
+    </service>
+
+    <!-- REST: the MCP endpoint + status document, mounted under /opennms/rest by the host. -->
+    <bean id="mcpRest" class="org.opennms.alec.mcp.rest.McpRestImpl">
+        <argument ref="toolRegistry"/>
+        <argument ref="mcpConfigReader"/>
+        <argument ref="openNmsRestClient"/>
+        <argument ref="mcpObjectMapper"/>
+    </bean>
+    <service ref="mcpRest" interface="org.opennms.alec.mcp.rest.McpRest">
+        <service-properties>
+            <entry key="application-path" value="/rest"/>
+        </service-properties>
+    </service>
+</blueprint>

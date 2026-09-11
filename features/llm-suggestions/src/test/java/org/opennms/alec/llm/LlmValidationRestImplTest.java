@@ -41,6 +41,8 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.opennms.alec.mcp.McpConfig;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -195,5 +197,91 @@ public class LlmValidationRestImplTest {
         ValidationResult body = (ValidationResult) resp.getEntity();
         assertThat(body.isOk(), is(false));
         assertThat(body.getMessage(), equalTo("HTTP 401 from provider: bad key"));
+    }
+
+    // --- validateTools (ALEC-308) ---
+
+    @Test
+    public void validateToolsPassesResolvedKeyEndpointAndModelWithNullOverrideWhenNoOpenNmsFields() {
+        kv.put(LlmConfigReader.CONFIG_KEY,
+                "{\"enabled\":true,\"apiKey\":\"sk-stored\","
+                        + "\"baseUrl\":\"https://api.anthropic.com/v1\",\"model\":\"claude-sonnet-4-6\"}",
+                LlmConfigReader.CONFIG_CONTEXT);
+        when(service.validateTools(eq("sk-stored"), eq("https://api.anthropic.com/v1"), eq("claude-sonnet-4-6"),
+                (McpConfig) org.mockito.ArgumentMatchers.isNull()))
+                .thenReturn(ValidationResult.ok("Yes — fine"));
+
+        ValidationRequest req = new ValidationRequest(); // everything blank -> stored values
+        req.setOpennmsUrl("  ");
+        Response resp = rest.validateTools(req);
+        assertThat(resp.getStatus(), is(200));
+        ValidationResult body = (ValidationResult) resp.getEntity();
+        assertThat(body.isOk(), is(true));
+        assertThat(body.getMessage(), equalTo("Yes — fine"));
+        verify(service).validateTools("sk-stored", "https://api.anthropic.com/v1", "claude-sonnet-4-6", null);
+    }
+
+    @Test
+    public void validateToolsBuildsAnOverrideWhenAnyOpenNmsFieldIsSet() {
+        when(service.validateTools(eq("sk-typed"), eq("https://api.openai.com/v1"), eq("openai/gpt-4o"),
+                org.mockito.ArgumentMatchers.any(McpConfig.class)))
+                .thenReturn(ValidationResult.fail("No — nope"));
+
+        ValidationRequest req = new ValidationRequest();
+        req.setApiKey("sk-typed");
+        req.setBaseUrl("https://api.openai.com/v1");
+        req.setModel("openai/gpt-4o");
+        req.setOpennmsUrl("http://nms:8980/opennms");
+        req.setOpennmsUsername("admin");
+        req.setOpennmsPassword("pw");
+
+        Response resp = rest.validateTools(req);
+        assertThat(resp.getStatus(), is(200));
+        assertThat(((ValidationResult) resp.getEntity()).isOk(), is(false));
+
+        ArgumentCaptor<McpConfig> captor = ArgumentCaptor.forClass(McpConfig.class);
+        verify(service).validateTools(eq("sk-typed"), eq("https://api.openai.com/v1"), eq("openai/gpt-4o"),
+                captor.capture());
+        McpConfig override = captor.getValue();
+        assertThat(override.isToolsEnabled(), is(true));
+        assertThat(override.getOpennmsUrl(), equalTo("http://nms:8980/opennms"));
+        assertThat(override.getOpennmsUsername(), equalTo("admin"));
+        assertThat(override.getOpennmsPassword(), equalTo("pw"));
+        assertThat(override.hasOpennmsCredentials(), is(true));
+    }
+
+    @Test
+    public void validateToolsOverrideIsBuiltFromAPartialLogin() {
+        when(service.validateTools(eq("sk-typed"), eq(LlmConfigReader.DEFAULT_BASE_URL),
+                eq(LlmConfigReader.DEFAULT_MODEL), org.mockito.ArgumentMatchers.any(McpConfig.class)))
+                .thenReturn(ValidationResult.ok("ok"));
+
+        ValidationRequest req = new ValidationRequest();
+        req.setApiKey("sk-typed");
+        req.setOpennmsUsername("only-user");
+
+        rest.validateTools(req);
+        ArgumentCaptor<McpConfig> captor = ArgumentCaptor.forClass(McpConfig.class);
+        verify(service).validateTools(eq("sk-typed"), eq(LlmConfigReader.DEFAULT_BASE_URL),
+                eq(LlmConfigReader.DEFAULT_MODEL), captor.capture());
+        assertThat(captor.getValue().getOpennmsUsername(), equalTo("only-user"));
+        assertThat(captor.getValue().getOpennmsPassword(), equalTo(""));
+        assertThat(captor.getValue().getOpennmsUrl(), equalTo(""));
+        assertThat(captor.getValue().hasOpennmsCredentials(), is(false));
+    }
+
+    @Test
+    public void validateToolsAppliesTheSameStoredKeyRuleAsValidate() {
+        kv.put(LlmConfigReader.CONFIG_KEY,
+                "{\"enabled\":true,\"apiKey\":\"sk-stored\","
+                        + "\"baseUrl\":\"https://api.anthropic.com/v1\",\"model\":\"claude-sonnet-4-6\"}",
+                LlmConfigReader.CONFIG_CONTEXT);
+        ValidationRequest req = new ValidationRequest();
+        req.setBaseUrl("https://attacker.example/v1"); // differs from stored; key blank
+
+        Response resp = rest.validateTools(req);
+        assertThat(resp.getStatus(), is(200));
+        assertThat(((ValidationResult) resp.getEntity()).isOk(), is(false));
+        verifyZeroInteractions(service);
     }
 }

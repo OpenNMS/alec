@@ -212,4 +212,33 @@ public class LlmConfigReaderTest {
         Optional<LlmConfigReader.Config> c = reader.read();
         assertTrue(c.isPresent());
     }
+
+    // --- toolsEnabled (ALEC-308) ---
+
+    @Test
+    public void toolsEnabledDefaultsToFalseWhenMissingFromJson() {
+        kv.put(LlmConfigReader.CONFIG_KEY,
+                "{\"enabled\":true,\"apiKey\":\"sk\"}",
+                LlmConfigReader.CONFIG_CONTEXT);
+        LlmConfigReader.Config c = reader.read().orElseThrow(AssertionError::new);
+        assertFalse("records persisted before the option existed keep tools off", c.isToolsEnabled());
+        assertThat(c.toString(), containsString("toolsEnabled=false"));
+    }
+
+    @Test
+    public void toolsEnabledIsParsedWhenPresent() {
+        kv.put(LlmConfigReader.CONFIG_KEY,
+                "{\"enabled\":true,\"apiKey\":\"sk\",\"toolsEnabled\":true}",
+                LlmConfigReader.CONFIG_CONTEXT);
+        assertTrue(reader.read().orElseThrow(AssertionError::new).isToolsEnabled());
+
+        kv.put(LlmConfigReader.CONFIG_KEY,
+                "{\"enabled\":true,\"apiKey\":\"sk\",\"toolsEnabled\":false}",
+                LlmConfigReader.CONFIG_CONTEXT);
+        assertFalse(reader.read().orElseThrow(AssertionError::new).isToolsEnabled());
+
+        // The shorter constructors default the flag off.
+        assertFalse(new LlmConfigReader.Config(true, true, "k", "u", "m", "p").isToolsEnabled());
+        assertTrue(new LlmConfigReader.Config(true, true, "k", "u", "m", "p", 0, 0, true).isToolsEnabled());
+    }
 }

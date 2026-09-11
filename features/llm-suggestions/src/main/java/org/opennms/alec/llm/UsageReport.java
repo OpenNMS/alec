@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonPropertyOrder({"daysWindow", "totalTokens", "inputTokens", "outputTokens",
         "cacheReadInputTokens", "cacheCreationInputTokens",
-        "calls", "successfulCalls", "failedCalls",
+        "calls", "successfulCalls", "failedCalls", "toolCalls",
         "cacheHitRatio", "estimatedCostUsd", "pricingNote"})
 public final class UsageReport {
 
@@ -51,6 +51,7 @@ public final class UsageReport {
     private final long calls;
     private final long successfulCalls;
     private final long failedCalls;
+    private final long toolCalls;
     private final double cacheHitRatio;
     private final double estimatedCostUsd;
     private final String pricingNote;
@@ -61,6 +62,16 @@ public final class UsageReport {
                        long calls, long successfulCalls, long failedCalls,
                        double cacheHitRatio, double estimatedCostUsd,
                        String pricingNote) {
+        this(daysWindow, inputTokens, outputTokens, cacheReadInputTokens, cacheCreationInputTokens,
+                calls, successfulCalls, failedCalls, 0L, cacheHitRatio, estimatedCostUsd, pricingNote);
+    }
+
+    public UsageReport(int daysWindow,
+                       long inputTokens, long outputTokens,
+                       long cacheReadInputTokens, long cacheCreationInputTokens,
+                       long calls, long successfulCalls, long failedCalls, long toolCalls,
+                       double cacheHitRatio, double estimatedCostUsd,
+                       String pricingNote) {
         this.daysWindow = daysWindow;
         this.inputTokens = inputTokens;
         this.outputTokens = outputTokens;
@@ -69,6 +80,7 @@ public final class UsageReport {
         this.calls = calls;
         this.successfulCalls = successfulCalls;
         this.failedCalls = failedCalls;
+        this.toolCalls = toolCalls;
         this.cacheHitRatio = cacheHitRatio;
         this.estimatedCostUsd = estimatedCostUsd;
         this.pricingNote = pricingNote;
@@ -108,6 +120,11 @@ public final class UsageReport {
 
     public long getFailedCalls() {
         return failedCalls;
+    }
+
+    /** MCP data-tool calls made by ALEC's own LLM requests in the window (ALEC-308). */
+    public long getToolCalls() {
+        return toolCalls;
     }
 
     public double getCacheHitRatio() {

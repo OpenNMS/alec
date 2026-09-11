@@ -69,6 +69,9 @@ public class BlueprintContextTest extends CamelBlueprintTestSupport {
 
         AlarmDatasource alarmDatasource = mock(AlarmDatasource.class);
         services.put(AlarmDatasource.class.getName(), asService(alarmDatasource, null));
+
+        org.opennms.alec.mcp.OpenNmsRestClient openNmsRestClient = mock(org.opennms.alec.mcp.OpenNmsRestClient.class);
+        services.put(org.opennms.alec.mcp.OpenNmsRestClient.class.getName(), asService(openNmsRestClient, null));
     }
 
     @Test

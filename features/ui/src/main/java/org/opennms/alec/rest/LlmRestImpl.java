@@ -37,6 +37,8 @@ import org.opennms.alec.data.LlmConfig;
 import org.opennms.alec.data.LlmConfigImpl;
 import org.opennms.alec.data.LlmConfigStatus;
 import org.opennms.alec.data.KeyEnum;
+import org.opennms.alec.mcp.McpConfig;
+import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +52,19 @@ public class LlmRestImpl implements LlmRest {
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
+    // ALEC-308: used to verify the OpenNMS login before a save that enables
+    // tool access. Null (tests) skips the connectivity probe but not the
+    // presence check.
+    private final OpenNmsRestClient openNmsRest;
 
     public LlmRestImpl(KeyValueStore<String> kvStore) {
+        this(kvStore, null);
+    }
+
+    public LlmRestImpl(KeyValueStore<String> kvStore, OpenNmsRestClient openNmsRest) {
         this.kvStore = kvStore;
         this.objectMapper = new ObjectMapper();
+        this.openNmsRest = openNmsRest;
     }
 
     @Override
@@ -102,6 +113,28 @@ public class LlmRestImpl implements LlmRest {
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity("Cannot enable LLM integration without " + missing)
                             .build();
+                }
+            }
+            // ALEC-308: tool access must not be saved without a working OpenNMS
+            // login — the REST-backed tools would silently be missing and the UI
+            // check would have been skipped. Presence is checked here; the login
+            // itself is probed against /rest/info.
+            if (merged.isToolsEnabled()) {
+                if (isBlank(merged.getOpennmsUsername()) || isBlank(merged.getOpennmsPassword())) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Cannot enable MCP tool access without an OpenNMS login "
+                                    + "(use a dedicated read-only OpenNMS account)")
+                            .build();
+                }
+                if (openNmsRest != null) {
+                    String outcome = openNmsRest.checkConnectivity(new McpConfig(true, merged.getOpennmsUrl(),
+                            merged.getOpennmsUsername(), merged.getOpennmsPassword()));
+                    if (!outcome.startsWith("OK:")) {
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity("Cannot enable MCP tool access: the OpenNMS login does not work ("
+                                        + outcome + ")")
+                                .build();
+                    }
                 }
             }
             persist(merged);
@@ -159,9 +192,28 @@ public class LlmRestImpl implements LlmRest {
                 existing == null ? null : existing.getDefaultModel());
         String systemPrompt = choose(request.getSystemPrompt(),
                 existing == null ? null : existing.getSystemPrompt());
+        // ALEC-308: same preserve-when-absent rule for the OpenNMS REST fields;
+        // the password behaves like the API key (replace when sent, keep when
+        // omitted, drop when clearOpennmsPassword is set).
+        String opennmsUrl = choose(request.getOpennmsUrl(),
+                existing == null ? null : existing.getOpennmsUrl());
+        String opennmsUsername = choose(request.getOpennmsUsername(),
+                existing == null ? null : existing.getOpennmsUsername());
+        String opennmsPassword;
+        if (request.isClearOpennmsPassword()) {
+            opennmsPassword = null;
+        } else if (request.getOpennmsPassword() != null && !request.getOpennmsPassword().isEmpty()) {
+            opennmsPassword = request.getOpennmsPassword();
+        } else {
+            opennmsPassword = existing == null ? null : existing.getOpennmsPassword();
+        }
 
         LlmConfigImpl.Builder builder = LlmConfigImpl.newBuilder()
                 .autoEvaluate(request.isAutoEvaluate())
+                .toolsEnabled(request.isToolsEnabled())
+                .opennmsUrl(nz(opennmsUrl))
+                .opennmsUsername(nz(opennmsUsername))
+                .opennmsPassword(opennmsPassword)
                 .baseUrl(nz(baseUrl))
                 .model(nz(model))
                 .defaultBaseUrl(nz(defaultBaseUrl))

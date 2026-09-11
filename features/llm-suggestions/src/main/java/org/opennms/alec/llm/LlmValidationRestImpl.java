@@ -33,6 +33,8 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import org.opennms.alec.mcp.McpConfig;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +52,45 @@ public class LlmValidationRestImpl implements LlmValidationRest {
 
     @Override
     public Response validate(ValidationRequest request) {
+        Resolved r = resolve(request);
+        if (r.rejection != null) {
+            return r.rejection;
+        }
+        ValidationResult result = suggestionService.validate(r.apiKey, r.baseUrl, r.model);
+        return Response.ok().entity(result).build();
+    }
+
+    @Override
+    public Response validateTools(ValidationRequest request) {
+        Resolved r = resolve(request);
+        if (r.rejection != null) {
+            return r.rejection;
+        }
+        ValidationRequest req = request == null ? new ValidationRequest() : request;
+        // An unsaved OpenNMS login typed into the form is tested as-is; when the
+        // form sends nothing the stored login is used (null -> stored).
+        McpConfig override = null;
+        if (!isBlank(req.getOpennmsUsername()) || !isBlank(req.getOpennmsPassword()) || !isBlank(req.getOpennmsUrl())) {
+            override = new McpConfig(true, req.getOpennmsUrl(), req.getOpennmsUsername(), req.getOpennmsPassword());
+        }
+        ValidationResult result = suggestionService.validateTools(r.apiKey, r.baseUrl, r.model, override);
+        return Response.ok().entity(result).build();
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    /** Endpoint/model/key resolved from the request + stored config, or a rejection Response. */
+    private static final class Resolved {
+        String apiKey;
+        String baseUrl;
+        String model;
+        Response rejection;
+    }
+
+    private Resolved resolve(ValidationRequest request) {
+        Resolved out = new Resolved();
         ValidationRequest req = request == null ? new ValidationRequest() : request;
         Optional<LlmConfigReader.Config> stored = configReader.read();
 
@@ -73,18 +114,20 @@ public class LlmValidationRestImpl implements LlmValidationRest {
         } else if (sameEndpoint(baseUrl, storedUrl)) {
             apiKey = stored.map(LlmConfigReader.Config::getApiKey).orElse("");
         } else {
-            return Response.ok().entity(ValidationResult.fail(
+            out.rejection = Response.ok().entity(ValidationResult.fail(
                     "The endpoint differs from the saved one — re-enter the API key to validate "
                             + "a new endpoint. (The stored key is only ever sent to the endpoint "
                             + "it was saved with.)")).build();
+            return out;
         }
 
         // Never log the key; the result message is key-free by construction.
         LOG.debug("Validating LLM config: baseUrl={}, model={}, keyProvided={}",
                 baseUrl, model, !apiKey.isEmpty());
-
-        ValidationResult result = suggestionService.validate(apiKey, baseUrl, model);
-        return Response.ok().entity(result).build();
+        out.apiKey = apiKey;
+        out.baseUrl = baseUrl;
+        out.model = model;
+        return out;
     }
 
     /** Endpoint equality for the stored-key rule: trim + ignore trailing slashes. */

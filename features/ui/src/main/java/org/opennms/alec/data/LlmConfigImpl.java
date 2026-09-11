@@ -108,6 +108,12 @@ public class LlmConfigImpl implements LlmConfig {
     private final long monthlyTokenLimit;
     private final String apiKey;
     private final boolean clearApiKey;
+    // ALEC-308: MCP tool access + the OpenNMS REST login the REST-backed tools use.
+    private final boolean toolsEnabled;
+    private final String opennmsUrl;
+    private final String opennmsUsername;
+    private final String opennmsPassword;
+    private final boolean clearOpennmsPassword;
 
     private LlmConfigImpl(Builder builder) {
         this.enabled = builder.enabled;
@@ -121,6 +127,11 @@ public class LlmConfigImpl implements LlmConfig {
         this.monthlyTokenLimit = builder.monthlyTokenLimit;
         this.apiKey = builder.apiKey;
         this.clearApiKey = builder.clearApiKey;
+        this.toolsEnabled = builder.toolsEnabled;
+        this.opennmsUrl = builder.opennmsUrl;
+        this.opennmsUsername = builder.opennmsUsername;
+        this.opennmsPassword = builder.opennmsPassword;
+        this.clearOpennmsPassword = builder.clearOpennmsPassword;
     }
 
     public static Builder newBuilder() {
@@ -140,6 +151,11 @@ public class LlmConfigImpl implements LlmConfig {
         builder.monthlyTokenLimit = copy.getMonthlyTokenLimit();
         builder.apiKey = copy.getApiKey();
         builder.clearApiKey = copy.isClearApiKey();
+        builder.toolsEnabled = copy.isToolsEnabled();
+        builder.opennmsUrl = copy.getOpennmsUrl();
+        builder.opennmsUsername = copy.getOpennmsUsername();
+        builder.opennmsPassword = copy.getOpennmsPassword();
+        builder.clearOpennmsPassword = copy.isClearOpennmsPassword();
         return builder;
     }
 
@@ -198,6 +214,31 @@ public class LlmConfigImpl implements LlmConfig {
         return clearApiKey;
     }
 
+    @Override
+    public boolean isToolsEnabled() {
+        return toolsEnabled;
+    }
+
+    @Override
+    public String getOpennmsUrl() {
+        return opennmsUrl;
+    }
+
+    @Override
+    public String getOpennmsUsername() {
+        return opennmsUsername;
+    }
+
+    @Override
+    public String getOpennmsPassword() {
+        return opennmsPassword;
+    }
+
+    @Override
+    public boolean isClearOpennmsPassword() {
+        return clearOpennmsPassword;
+    }
+
     @JsonPOJOBuilder(withPrefix = "")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
@@ -229,6 +270,13 @@ public class LlmConfigImpl implements LlmConfig {
         private long monthlyTokenLimit = 0;
         private String apiKey;
         private boolean clearApiKey;
+        // ALEC-308. Strings stay null until set (same "not provided" semantics
+        // as the fields above); the toggle defaults off.
+        private boolean toolsEnabled;
+        private String opennmsUrl;
+        private String opennmsUsername;
+        private String opennmsPassword;
+        private boolean clearOpennmsPassword;
 
         private Builder() {
         }
@@ -294,6 +342,33 @@ public class LlmConfigImpl implements LlmConfig {
             return this;
         }
 
+        public Builder toolsEnabled(boolean val) {
+            toolsEnabled = val;
+            return this;
+        }
+
+        public Builder opennmsUrl(String val) {
+            opennmsUrl = (val == null) ? null : val.trim();
+            return this;
+        }
+
+        public Builder opennmsUsername(String val) {
+            opennmsUsername = (val == null) ? null : val.trim();
+            return this;
+        }
+
+        public Builder opennmsPassword(String val) {
+            // Trimmed for the same reason as the API key: a pasted trailing
+            // newline is an illegal header character.
+            opennmsPassword = (val == null) ? null : val.trim();
+            return this;
+        }
+
+        public Builder clearOpennmsPassword(boolean val) {
+            clearOpennmsPassword = val;
+            return this;
+        }
+
         public LlmConfigImpl build() {
             return new LlmConfigImpl(this);
         }
@@ -314,6 +389,11 @@ public class LlmConfigImpl implements LlmConfig {
                 .add("customSystemPrompt=" + !DEFAULT_SYSTEM_PROMPT.equals(systemPrompt))
                 .add("apiKeyPresent=" + (apiKey != null && !apiKey.isEmpty()))
                 .add("clearApiKey=" + clearApiKey)
+                .add("toolsEnabled=" + toolsEnabled)
+                .add("opennmsUrl=" + opennmsUrl)
+                .add("opennmsUsername=" + opennmsUsername)
+                // Never include the OpenNMS password either.
+                .add("opennmsPasswordPresent=" + (opennmsPassword != null && !opennmsPassword.isEmpty()))
                 .toString();
     }
 }

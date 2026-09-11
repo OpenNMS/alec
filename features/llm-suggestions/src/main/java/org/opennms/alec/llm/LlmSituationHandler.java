@@ -209,7 +209,7 @@ public class LlmSituationHandler implements SituationHandler {
         store.putPending(situationId, requestedAt, model);
 
         suggestionService.requestSuggestions(situation, config.getApiKey(),
-                        config.getBaseUrl(), model, config.getSystemPrompt())
+                        config.getBaseUrl(), model, config.getSystemPrompt(), config.isToolsEnabled())
                 .whenComplete((suggestions, error) -> {
                     long completedAt = timeSource.now();
                     if (error != null) {
@@ -245,6 +245,7 @@ public class LlmSituationHandler implements SituationHandler {
                             .outputTokens(u.getOutputTokens())
                             .cacheReadInputTokens(u.getCacheReadInputTokens())
                             .cacheCreationInputTokens(u.getCacheCreationInputTokens())
+                            .toolCalls(suggestions.getToolCalls())
                             .build());
                 });
     }

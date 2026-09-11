@@ -31,7 +31,7 @@ package org.opennms.alec.mcp.tools;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Backup), optionally with the latest stored configuration text — redacted
  * of the usual secret-bearing lines and size-capped.
  */
-public class GetDeviceConfigTool implements McpTool {
+public class GetDeviceConfigTool extends AlecTool {
 
     public static final String NAME = "get_device_config";
     static final int MAX_CONFIG_CHARS = 12_000;
@@ -93,7 +93,10 @@ public class GetDeviceConfigTool implements McpTool {
         boolean includeContent = args.boolOr("includeContent", false);
         // The "latest" listing searches by device name / IP; filter by node id
         // afterwards because the search is a substring match.
-        JsonNode body = rest.get("device-config/latest?limit=25&search=" + urlEncode(node.getLabel()));
+        // The search is a substring match over device name / IP, so ask for a
+        // generous page: the node we want must not be paged out before the
+        // nodeId filter below gets to see it.
+        JsonNode body = rest.get("device-config/latest?limit=200&search=" + urlEncode(node.getLabel()));
         ObjectNode out = om.createObjectNode();
         out.put("nodeId", node.getId());
         out.put("label", node.getLabel());

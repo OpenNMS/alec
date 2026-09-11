@@ -31,14 +31,16 @@ package org.opennms.alec.mcp;
 import java.util.List;
 import java.util.Optional;
 
+import org.opennms.integration.api.v1.mcp.McpToolProvider;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * The single catalogue of tools, published as an OSGi service so that ALEC's
- * own chat tool loop (RCA, LLM clustering) and the MCP REST endpoint dispatch
- * through the same {@link #call}. An interface (not the implementation class)
- * because blueprint service references in other bundles are proxied by
- * interface.
+ * ALEC's view of every {@link McpToolProvider} published in the container —
+ * ALEC's own tools and any other plugin's — used by the chat tool loop (RCA,
+ * LLM clustering) and the configuration page. Only read tools are ever
+ * offered to the model. An interface (not the implementation class) because
+ * blueprint service references in other bundles are proxied by interface.
  */
 public interface ToolRegistry {
 
@@ -49,30 +51,34 @@ public interface ToolRegistry {
      */
     int MAX_RESULT_CHARS = 16_000;
 
-    /** Register a tool (blueprint whiteboard bind method). */
-    void addTool(McpTool tool);
+    /** Register a provider (blueprint whiteboard bind method). */
+    void addTool(McpToolProvider tool);
 
-    /** Unregister a tool (blueprint whiteboard unbind method). */
-    void removeTool(McpTool tool);
+    /** Unregister a provider (blueprint whiteboard unbind method). */
+    void removeTool(McpToolProvider tool);
 
     McpMetrics getMetrics();
 
-    /** Specs of every tool that can currently work, sorted by name. */
+    /** Specs of every read tool that can currently work, sorted by name. */
     List<ToolSpec> availableSpecs();
 
-    List<McpTool> availableTools();
+    /** Every registered provider, available or not, sorted by name (for the status endpoint). */
+    List<McpToolProvider> allTools();
 
-    /** Every registered tool, available or not (for the status endpoint). */
-    List<McpTool> allTools();
+    /** Whether a provider can currently work: write tools never can (for the model); ALEC tools may be unconfigured. */
+    boolean isAvailable(McpToolProvider tool);
 
-    Optional<McpTool> find(String name);
+    Optional<McpToolProvider> find(String name);
+
+    /** The spec of a registered provider, empty when unknown or its schema is unusable. */
+    Optional<ToolSpec> findSpec(String name);
 
     boolean isEmpty();
 
     /**
-     * Invoke a tool by name. Never throws: unknown tools, unavailable tools,
-     * {@link ToolException}s and unexpected runtime failures all come back as
-     * an error result the caller can relay to the model.
+     * Invoke a tool by name on the model's behalf. Never throws: unknown,
+     * unavailable or write tools, {@link ToolException}s and unexpected
+     * failures all come back as an error result the caller can relay.
      */
     ToolResult call(ToolConsumer consumer, String name, JsonNode arguments);
 }

@@ -425,6 +425,8 @@ test('Save sends new API key + enabled flag when both provided', async () => {
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: '',
 		apiKey: 'sk-ant-new-key'
 	})
@@ -448,6 +450,8 @@ test('Save omits apiKey when the input is blank so server preserves stored key',
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: ''
 	})
 })
@@ -476,6 +480,8 @@ test('Clear Key sends clearApiKey=true and forces enabled=false', async () => {
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: '',
 		clearApiKey: true
 	})
@@ -505,6 +511,8 @@ test('Auto-evaluate checkbox is exposed, defaults to true, and rides along on Sa
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: '',
 		apiKey: 'sk-ant-fresh'
 	})
@@ -590,6 +598,8 @@ test('Endpoint + model inputs are exposed and custom values ride along on Save',
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: '',
 		apiKey: 'sk-openai-test'
 	})
@@ -739,6 +749,8 @@ test('System prompt textarea is exposed and a custom prompt rides along on Save'
 		monthlyTokenLimit: 0,
 		toolsEnabled: false,
 		clearOpennmsPassword: false,
+		opennmsUrl: '',
+		opennmsUsername: '',
 		systemPrompt: 'You are an ACME network expert.',
 		apiKey: 'sk-ant-fresh'
 	})
@@ -973,7 +985,8 @@ const mcpStatusFixture = {
 	toolsEnabled: false,
 	opennmsRestConfigured: false,
 	opennmsUrl: 'http://localhost:8980/opennms',
-	endpointPath: '/opennms/rest/alec/mcp',
+	endpointPath: '/opennms/rest/mcp',
+	nativeServerInstalled: true,
 	tools: [
 		{ name: 'alec_status', description: 'Check ALEC', available: true },
 		{ name: 'get_node', description: 'Node inventory', available: true },
@@ -1008,7 +1021,7 @@ test('MCP block renders the option, the login fields and the check button', asyn
 	expect(stats.exists()).toBe(true)
 	expect(stats.text()).toContain('7')
 	expect(stats.text()).toContain('4 root cause')
-	expect(stats.text()).toContain('/opennms/rest/alec/mcp')
+	expect(stats.text()).toContain('/opennms/rest/mcp')
 })
 
 test('MCP (i) toggles the verbose help with the flow diagram and tool list', async () => {
@@ -1030,7 +1043,7 @@ test('MCP (i) toggles the verbose help with the flow diagram and tool list', asy
 	expect(list.text()).toContain('needs the OpenNMS login')
 	// The endpoint URL shown to external clients uses the server-provided path.
 	expect(wrapper.find('[data-test="llm-tools-endpoint"]').text()).toContain(
-		'/opennms/rest/alec/mcp'
+		'/opennms/rest/mcp'
 	)
 	// Toggle closes it again.
 	await wrapper.find('[data-test="llm-tools-help"]').trigger('click')
@@ -1280,6 +1293,98 @@ test('A failed check (No) does not satisfy the save gate', async () => {
 	await wrapper.vm.saveConfiguration()
 	await flushPromises()
 	expect(store.setLLMConfig).not.toHaveBeenCalled()
+})
+
+test('Typing a password after Clear password replaces it instead of clearing', async () => {
+	vi.spyOn(AlecService, 'getMCPStatus').mockResolvedValue(mcpStatusFixture as any)
+	const { wrapper, store } = buildWrapper()
+	await flushPromises()
+	wrapper.vm.llmOpennmsPasswordPresent = true
+	await wrapper.vm.$nextTick()
+	await wrapper.find('[data-test="llm-opennms-clear-password"]').trigger('click')
+	await wrapper.vm.$nextTick()
+	expect(wrapper.vm.llmOpennmsPasswordCleared).toBe(true)
+	wrapper.vm.llmOpennmsPassword = 'new-pw'
+	await wrapper.vm.$nextTick()
+	expect(wrapper.vm.llmOpennmsPasswordCleared).toBe(false)
+	await wrapper.vm.saveConfiguration()
+	await flushPromises()
+	const posted = (store.setLLMConfig as any).mock.calls[0][0]
+	expect(posted.opennmsPassword).toBe('new-pw')
+	expect(posted.clearOpennmsPassword).toBe(false)
+})
+
+test('Save always sends the OpenNMS URL and username so blanks clear the stored values', async () => {
+	vi.spyOn(AlecService, 'getMCPStatus').mockResolvedValue(mcpStatusFixture as any)
+	const { wrapper, store } = buildWrapper()
+	await flushPromises()
+	wrapper.vm.llmOpennmsUrl = ''
+	wrapper.vm.llmOpennmsUsername = ''
+	await wrapper.vm.$nextTick()
+	await wrapper.vm.saveConfiguration()
+	await flushPromises()
+	const posted = (store.setLLMConfig as any).mock.calls[0][0]
+	expect(posted.opennmsUrl).toBe('')
+	expect(posted.opennmsUsername).toBe('')
+	expect(posted.opennmsPassword).toBeUndefined()
+})
+
+test('A changed OpenNMS URL with a stored password demands the password again', async () => {
+	vi.spyOn(AlecService, 'getMCPStatus').mockResolvedValue(mcpStatusFixture as any)
+	const { wrapper, store } = buildWrapper()
+	store.llmConfig = {
+		...(store.llmConfig as any),
+		toolsEnabled: true,
+		opennmsUrl: '',
+		opennmsUsername: 'ro',
+		opennmsPasswordPresent: true
+	}
+	wrapper.vm.llmApiKeyPresent = true
+	wrapper.vm.llmToolsEnabled = true
+	wrapper.vm.llmOpennmsUsername = 'ro'
+	wrapper.vm.llmOpennmsPasswordPresent = true
+	await wrapper.vm.$nextTick()
+	expect(wrapper.find('[data-test="llm-tools-gate-hint"]').exists()).toBe(false)
+	wrapper.vm.llmOpennmsUrl = 'http://other:8980/opennms'
+	await wrapper.vm.$nextTick()
+	expect(wrapper.find('[data-test="llm-tools-gate-hint"]').text()).toContain('re-enter the OpenNMS password')
+	await wrapper.vm.saveConfiguration()
+	await flushPromises()
+	expect(store.setLLMConfig).not.toHaveBeenCalled()
+	// Typing the password lifts that reason (the check is then required as usual).
+	wrapper.vm.llmOpennmsPassword = 'pw'
+	await wrapper.vm.$nextTick()
+	expect(wrapper.find('[data-test="llm-tools-gate-hint"]').text()).toContain('Run Check tool access')
+})
+
+test('Clearing the API key with tool access on is not blocked by the tool check', async () => {
+	vi.spyOn(AlecService, 'getMCPStatus').mockResolvedValue(mcpStatusFixture as any)
+	const { wrapper, store } = buildWrapper()
+	await flushPromises()
+	wrapper.vm.llmApiKeyPresent = true
+	wrapper.vm.llmToolsEnabled = true
+	await wrapper.vm.$nextTick()
+	wrapper.vm.clearLLMApiKey()
+	await wrapper.vm.$nextTick()
+	expect(wrapper.find('[data-test="llm-tools-gate-hint"]').exists()).toBe(false)
+	await wrapper.vm.saveConfiguration()
+	await flushPromises()
+	expect(store.setLLMConfig).toHaveBeenCalledTimes(1)
+	expect((store.setLLMConfig as any).mock.calls[0][0].clearApiKey).toBe(true)
+})
+
+test('A rejected LLM save shows the server reason in the toast', async () => {
+	vi.spyOn(AlecService, 'getMCPStatus').mockResolvedValue(mcpStatusFixture as any)
+	vi.spyOn(AlecService, 'getLastLlmConfigError').mockReturnValue(
+		'Cannot enable MCP tool access: the OpenNMS login does not work (OpenNMS rejected the login (HTTP 401))'
+	)
+	const { wrapper, store } = buildWrapper()
+	store.setLLMConfig = vi.fn().mockResolvedValue(false)
+	await flushPromises()
+	await wrapper.vm.saveConfiguration()
+	await flushPromises()
+	expect(wrapper.vm.isError).toBe(true)
+	expect(wrapper.vm.message).toContain('HTTP 401')
 })
 
 test('Save is not gated when tool access is off', async () => {

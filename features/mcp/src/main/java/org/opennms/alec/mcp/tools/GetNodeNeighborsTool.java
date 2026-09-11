@@ -30,7 +30,7 @@ package org.opennms.alec.mcp.tools;
 
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 import org.opennms.integration.api.v1.dao.EdgeDao;
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /** Directly connected devices from the discovered topology (LLDP, CDP, bridge, OSPF, IS-IS, user-defined). */
-public class GetNodeNeighborsTool implements McpTool {
+public class GetNodeNeighborsTool extends AlecTool {
 
     public static final String NAME = "get_node_neighbors";
     static final int MAX_LINKS = 80;
@@ -81,19 +81,24 @@ public class GetNodeNeighborsTool implements McpTool {
     public JsonNode call(JsonNode arguments) throws ToolException {
         Node node = lookup.resolve(new Args(arguments));
         final int nodeId = node.getId();
+        final String fs = node.getForeignSource();
+        final String fid = node.getForeignId();
         ObjectNode out = om.createObjectNode();
         out.put("nodeId", nodeId);
         out.put("label", node.getLabel());
         ArrayNode links = out.putArray("links");
         int total = 0;
         for (TopologyEdge edge : edgeDao.getEdges()) {
-            Endpoint[] ends = endpoints(edge);
-            Endpoint local;
-            Endpoint remote;
-            if (ends[0] != null && ends[0].nodeId != null && ends[0].nodeId == nodeId) {
+            // Cheap first: decide from the endpoints' own identity whether this
+            // edge touches the node at all. Only matching edges pay for a node
+            // lookup, and only to label the remote end.
+            RawEndpoint[] ends = endpoints(edge);
+            RawEndpoint local;
+            RawEndpoint remote;
+            if (ends[0] != null && ends[0].isNode(nodeId, fs, fid)) {
                 local = ends[0];
                 remote = ends[1];
-            } else if (ends[1] != null && ends[1].nodeId != null && ends[1].nodeId == nodeId) {
+            } else if (ends[1] != null && ends[1].isNode(nodeId, fs, fid)) {
                 local = ends[1];
                 remote = ends[0];
             } else {
@@ -110,14 +115,17 @@ public class GetNodeNeighborsTool implements McpTool {
             }
             if (remote == null) {
                 l.put("remote", "unknown");
-            } else if (remote.nodeId != null) {
-                l.put("remoteNodeId", remote.nodeId);
-                l.put("remoteLabel", remote.label);
-                if (remote.port != null) {
-                    l.put("remotePort", remote.port);
-                }
+            } else if (remote.segment != null) {
+                l.put("remoteSegment", remote.segment);
             } else {
-                l.put("remoteSegment", remote.label);
+                Endpoint resolved = remote.resolve(nodeDao);
+                if (resolved.nodeId != null) {
+                    l.put("remoteNodeId", resolved.nodeId);
+                }
+                l.put("remoteLabel", resolved.label);
+                if (resolved.port != null) {
+                    l.put("remotePort", resolved.port);
+                }
             }
         }
         out.put("linkCount", total);
@@ -127,76 +135,113 @@ public class GetNodeNeighborsTool implements McpTool {
         return out;
     }
 
-    private Endpoint[] endpoints(TopologyEdge edge) {
-        final Endpoint[] ends = new Endpoint[2];
+    private RawEndpoint[] endpoints(TopologyEdge edge) {
+        final RawEndpoint[] ends = new RawEndpoint[2];
         edge.visitEndpoints(new TopologyEdge.EndpointVisitor() {
             @Override
             public void visitSource(Node n) {
-                ends[0] = fromNode(n);
+                ends[0] = RawEndpoint.ofNode(n);
             }
 
             @Override
             public void visitSource(TopologyPort p) {
-                ends[0] = fromPort(p);
+                ends[0] = RawEndpoint.ofPort(p);
             }
 
             @Override
             public void visitSource(TopologySegment s) {
-                ends[0] = fromSegment(s);
+                ends[0] = RawEndpoint.ofSegment(s);
             }
 
             @Override
             public void visitTarget(Node n) {
-                ends[1] = fromNode(n);
+                ends[1] = RawEndpoint.ofNode(n);
             }
 
             @Override
             public void visitTarget(TopologyPort p) {
-                ends[1] = fromPort(p);
+                ends[1] = RawEndpoint.ofPort(p);
             }
 
             @Override
             public void visitTarget(TopologySegment s) {
-                ends[1] = fromSegment(s);
+                ends[1] = RawEndpoint.ofSegment(s);
             }
         });
         return ends;
     }
 
-    private Endpoint fromNode(Node n) {
-        return n == null ? null : new Endpoint(n.getId(), n.getLabel(), null);
-    }
+    /** An edge end as the topology model describes it — no DAO access needed to build one. */
+    private static final class RawEndpoint {
+        final Integer nodeId;
+        final String foreignSource;
+        final String foreignId;
+        final String label;   // known only for Node endpoints
+        final String port;
+        final String segment;
+        final String criteriaRef; // the port's node criteria as text, for an unresolvable node
 
-    private Endpoint fromPort(TopologyPort p) {
-        if (p == null) {
-            return null;
+        private RawEndpoint(Integer nodeId, String foreignSource, String foreignId, String label, String port,
+                            String segment, String criteriaRef) {
+            this.nodeId = nodeId;
+            this.foreignSource = foreignSource;
+            this.foreignId = foreignId;
+            this.label = label;
+            this.port = port;
+            this.segment = segment;
+            this.criteriaRef = criteriaRef;
         }
-        Integer id = null;
-        String label = null;
-        NodeCriteria criteria = p.getNodeCriteria();
-        if (criteria != null) {
-            id = criteria.getId();
+
+        static RawEndpoint ofNode(Node n) {
+            return n == null ? null : new RawEndpoint(n.getId(), n.getForeignSource(), n.getForeignId(),
+                    n.getLabel(), null, null, null);
+        }
+
+        static RawEndpoint ofPort(TopologyPort p) {
+            if (p == null) {
+                return null;
+            }
+            NodeCriteria c = p.getNodeCriteria();
+            String port = p.getIfName() != null ? p.getIfName()
+                    : (p.getIfIndex() != null ? "ifIndex " + p.getIfIndex() : p.getIfAddress());
+            return new RawEndpoint(c == null ? null : c.getId(), c == null ? null : c.getForeignSource(),
+                    c == null ? null : c.getForeignId(), null, port, null, c == null ? null : c.toRef());
+        }
+
+        static RawEndpoint ofSegment(TopologySegment s) {
+            return s == null ? null : new RawEndpoint(null, null, null, null, null,
+                    (s.getProtocol() == null ? "" : s.getProtocol().name() + " ") + "segment " + s.getSegmentCriteria(),
+                    null);
+        }
+
+        boolean isNode(int id, String fs, String fid) {
+            if (segment != null) {
+                return false;
+            }
+            if (nodeId != null) {
+                return nodeId == id;
+            }
+            return fs != null && fs.equals(foreignSource) && fid != null && fid.equals(foreignId);
+        }
+
+        /** Label the remote end, looking the node up only now that the edge is known to matter. */
+        Endpoint resolve(NodeDao nodeDao) {
+            if (label != null) {
+                return new Endpoint(nodeId, label, port);
+            }
             Node n = null;
-            if (id != null) {
-                n = nodeDao.getNodeById(id);
-            } else if (criteria.getForeignSource() != null) {
-                n = nodeDao.getNodeByForeignSourceAndForeignId(criteria.getForeignSource(), criteria.getForeignId());
+            if (nodeId != null) {
+                n = nodeDao.getNodeById(nodeId);
+            } else if (foreignSource != null) {
+                n = nodeDao.getNodeByForeignSourceAndForeignId(foreignSource, foreignId);
             }
             if (n != null) {
-                id = n.getId();
-                label = n.getLabel();
-            } else {
-                label = criteria.toRef();
+                return new Endpoint(n.getId(), n.getLabel(), port);
             }
+            String ref = criteriaRef != null ? criteriaRef
+                    : (nodeId != null ? "node " + nodeId : foreignSource + ":" + foreignId);
+            return new Endpoint(nodeId, ref, port);
         }
-        String port = p.getIfName() != null ? p.getIfName()
-                : (p.getIfIndex() != null ? "ifIndex " + p.getIfIndex() : p.getIfAddress());
-        return new Endpoint(id, label, port);
-    }
-
-    private Endpoint fromSegment(TopologySegment s) {
-        return s == null ? null : new Endpoint(null,
-                (s.getProtocol() == null ? "" : s.getProtocol().name() + " ") + "segment " + s.getSegmentCriteria(), null);
     }
 
     private static final class Endpoint {

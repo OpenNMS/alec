@@ -86,6 +86,16 @@
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <!--
+            The OpenNMS MCP server (Integration API's opennms-mcp-server
+            feature): serves every McpToolProvider — ALEC's tools included — at
+            /opennms/rest/mcp. Listed as a bundle rather than the feature so the
+            KAR carries it: the OpenNMS container registers the Integration API
+            feature repository but does not ship this artifact in its system
+            repository. Installing the feature separately dedupes on the same
+            bundle location.
+        -->
+        <bundle>mvn:org.opennms.integration.api/mcp-server/${opennms.api.version}</bundle>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.mcp/${project.version}</bundle>
     </feature>
 

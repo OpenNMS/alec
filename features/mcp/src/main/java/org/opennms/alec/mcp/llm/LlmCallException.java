@@ -61,6 +61,9 @@ public class LlmCallException extends Exception {
 
     private final Kind kind;
     private final int httpStatus;
+    // Tokens the provider already billed for the rounds that did complete
+    // before the failure; empty when nothing was returned. Set by the loop.
+    private TokenUsage usage = TokenUsage.empty();
 
     public LlmCallException(Kind kind, String message) {
         this(kind, message, 0, null);
@@ -83,5 +86,15 @@ public class LlmCallException extends Exception {
     /** The HTTP status for {@link Kind#HTTP}, else 0. */
     public int getHttpStatus() {
         return httpStatus;
+    }
+
+    /** Usage accumulated over the rounds that completed before this failure. */
+    public TokenUsage getUsage() {
+        return usage;
+    }
+
+    LlmCallException withUsage(TokenUsage usage) {
+        this.usage = usage == null ? TokenUsage.empty() : usage;
+        return this;
     }
 }

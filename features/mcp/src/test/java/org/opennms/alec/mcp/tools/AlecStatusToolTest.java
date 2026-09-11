@@ -88,10 +88,10 @@ public class AlecStatusToolTest {
                 SituationFixtures.situation("b", 2, Status.ACCEPTED, 2L),
                 SituationFixtures.situation("c", 3, null, 3L),
                 SituationFixtures.situation("d", 4, Status.REJECTED, 4L));
-        registry.addTool(StubTool.returning("list_alarms", "{}"));
+        registry.addTool(StubTool.returning("list_node_alarms", "{}"));
         registry.addTool(StubTool.unavailable("get_metric_series"));
         registry.addTool(tool);
-        registry.addTool(StubTool.returning("get_node", "{}"));
+        registry.addTool(StubTool.returning("get_node_inventory", "{}"));
         rest.configured = true;
 
         JsonNode out = tool.call(om.createObjectNode());
@@ -102,8 +102,8 @@ public class AlecStatusToolTest {
         JsonNode tools = out.get("tools");
         assertThat(tools.size(), equalTo(3));
         assertThat(tools.get(0).asText(), equalTo("alec_status"));
-        assertThat(tools.get(1).asText(), equalTo("get_node"));
-        assertThat(tools.get(2).asText(), equalTo("list_alarms"));
+        assertThat(tools.get(1).asText(), equalTo("get_node_inventory"));
+        assertThat(tools.get(2).asText(), equalTo("list_node_alarms"));
     }
 
     @Test

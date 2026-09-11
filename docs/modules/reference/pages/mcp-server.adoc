@@ -1,14 +1,16 @@
 = MCP Server and Tool Access
-:description: ALEC's embedded Model Context Protocol (MCP) server: read-only tools over OpenNMS data that the LLM can call during root cause analysis and clustering, and that external MCP clients can use.
+:description: ALEC's tools for the OpenNMS Model Context Protocol (MCP) server: read-only tools over OpenNMS data that the LLM can call during root cause analysis and clustering, and that external MCP clients can use.
 
-ALEC embeds a https://modelcontextprotocol.io/[Model Context Protocol (MCP)] server: a catalogue of read-only *tools* over OpenNMS data — situations, node inventory, current alarms, discovered topology, recent events, collected metrics, device configuration backups and ALEC's own past analyses.
+OpenNMS ships a https://modelcontextprotocol.io/[Model Context Protocol (MCP)] server — the `opennms-mcp-server` feature of the OpenNMS Integration API — that exposes tools over OpenNMS data to MCP clients.
+ALEC extends it with a catalogue of read-only *tools*: situations, node inventory, current alarms, discovered topology, recent events, collected metrics, device configuration backups and ALEC's own past analyses.
+Each ALEC tool is an Integration API *tool provider* (`org.opennms.integration.api.v1.mcp.McpToolProvider`), so the OpenNMS MCP server advertises ALEC's tools next to its own without any further configuration.
 
 The tools serve two consumers:
 
 * *ALEC's own LLM features.* When tool access is enabled, xref:reference:llm-root-cause-analysis.adoc[Root Cause Analysis] and the xref:reference:engines/llm-clustering.adoc[LLM clustering engine] offer the tools to the model and execute its tool calls before it reports. Instead of reasoning from the alarm text alone, the model can look up the affected nodes, what else is alarming on them, what they are connected to, what happened just before, how a metric behaved, and whether a configuration changed.
-* *External MCP clients.* The same tools are served over MCP at `/opennms/rest/alec/mcp` for interactive use from an MCP-capable client such as LM Studio's chat, Claude Desktop or an agent framework.
+* *External MCP clients.* The OpenNMS MCP server serves the same tools at `/opennms/rest/mcp` for interactive use from an MCP-capable client such as LM Studio's chat, Claude Desktop, Claude Code or an agent framework.
 
-NOTE: Tool access is off by default. Every tool is read-only: no tool acknowledges, clears or changes anything.
+NOTE: Tool access is off by default. Every ALEC tool is read-only: no tool acknowledges, clears or changes anything. ALEC's model calls are never offered a tool that writes, including the OpenNMS server's own `update_alarms` and `send_event`.
 
 == How it works
 
@@ -24,8 +26,8 @@ NOTE: Tool access is off by default. Every tool is read-only: no tool acknowledg
  |                                 |     |     calls / report)<----|                        |
  |                             4   |     | 3                 |     +------------------------+
  |                                 |     v                   |
- |                        MCP tool registry <----------------+---- External MCP client
- |                          /        \        (JSON-RPC,     |     (LM Studio chat,
+ |                        MCP tool registry <-- OpenNMS MCP  <---- External MCP client
+ |                          /        \        server (/rest/mcp) |  (LM Studio chat,
  |          Integration API tools   REST-backed tools        |      Claude Desktop, ...)
  |          (situations, nodes,     (events, metrics,        |
  |           alarms, topology)       device configuration)   |
@@ -34,7 +36,7 @@ NOTE: Tool access is off by default. Every tool is read-only: no tool acknowledg
 
 . *ALEC → LLM.* For a new situation (root cause analysis) or a cluster interval (LLM clustering), ALEC sends the alarms to the LLM server together with the tool list and forces a tool call (`tool_choice: required`), so the model can never answer in free text.
 . *LLM → ALEC.* The model replies with a tool call, for example `get_node_neighbors(nodeId: 17)`.
-. *ALEC executes it.* The call is dispatched through the MCP tool registry inside the OpenNMS JVM. In-process tools read the OpenNMS Integration API directly; events, metrics and device configuration are read through the OpenNMS REST API with the login you configure.
+. *ALEC executes it.* The call is dispatched through ALEC's tool registry inside the OpenNMS JVM — the same tool-provider services the OpenNMS MCP server uses. In-process tools read the OpenNMS Integration API directly; events, metrics and device configuration are read through the OpenNMS REST API with the login you configure.
 . *ALEC → LLM.* The result is appended to the conversation and the exchange continues. Results are size-capped so one tool cannot flood the model's context.
 . *Loop.* Steps 2–4 repeat for as many rounds as the model needs, up to a cap (six rounds for root cause analysis, four for clustering). On the final round only the report tool is offered, so an exploring model is still made to conclude.
 . *Report.* The model calls `report_suggestions` (or `group_alarms` for clustering); the arguments are schema-checked and stored exactly as before.
@@ -50,6 +52,7 @@ Give the model access to ALEC's MCP tools:: Turns tool access on for ALEC's own 
 
 OpenNMS URL / username / password:: An OpenNMS REST login, required when tool access is on. The events, metrics and device configuration tools read through the OpenNMS REST API with it. Leave the URL blank for the local server (`http://localhost:8980/opennms`). The password is write-only, like the API key.
 +
+The stored password is only ever sent to the URL it was saved with: after changing the URL, re-enter the password before checking or saving.
 Use a *dedicated read-only account, not an administrator*: a user with only the `ROLE_USER` and `ROLE_READONLY` roles can read events, resources and metrics. Add `ROLE_DEVICE_CONFIG_BACKUP` only if the model should read device configuration backups. Do not grant `ROLE_REST` or `ROLE_ADMIN` — they allow writes and nothing here needs them.
 
 Check tool access:: Verifies the OpenNMS login against `/rest/info`, then sends a probe to the configured LLM: the model is asked to call the `alec_status` tool and then report, through a second tool, whether it could read ALEC's tools. The result is the model's own *Yes* or *No* with a one-line explanation. A model that answers without calling the tool fails the check — it will not use tools in real analyses either.
@@ -65,8 +68,8 @@ Click *Save Changes* to persist the settings. When you turn tool access on, or c
 | `alec_status` | Liveness check: situation counts and the tool names available on this system.
 | `list_situations` | Current situations, newest first (id, status, severity, timestamps, alarm count).
 | `get_situation` | One situation with all of its alarms.
-| `get_node` | Node inventory: label, location, categories, asset record, IP interfaces with services, SNMP interfaces, metadata.
-| `list_alarms` | OpenNMS alarms, optionally for one node, including recently cleared ones.
+| `get_node_inventory` | Node inventory: label, location, categories, asset record, IP interfaces with services, SNMP interfaces, metadata. (Named apart from the OpenNMS server's own `get_node`.)
+| `list_node_alarms` | OpenNMS alarms for one node or for all nodes, including recently cleared ones.
 | `get_node_neighbors` | Directly connected devices from the discovered topology (LLDP, CDP, bridge, OSPF, IS-IS, user-defined).
 | `get_past_analyses` | Root-cause analyses ALEC produced for earlier situations.
 | `list_node_events` footnote:rest[Needs the OpenNMS REST login.] | The most recent events recorded for a node.
@@ -75,25 +78,33 @@ Click *Save Changes* to persist the settings. When you turn tool access on, or c
 | `get_device_config` footnote:rest[] | Device Config Backup status for a node and, on request, the latest configuration text with password, secret and community lines redacted.
 |===
 
-Other ALEC bundles can contribute tools by publishing an `org.opennms.alec.mcp.McpTool` OSGi service; `get_past_analyses` is contributed that way by the LLM suggestions bundle.
+Any bundle can contribute tools the same way ALEC does — publish an `org.opennms.integration.api.v1.mcp.McpToolProvider` OSGi service — and both the OpenNMS MCP server and ALEC's own model calls pick it up; `get_past_analyses` is contributed that way by the LLM suggestions bundle.
+ALEC's model calls also use tools contributed by other plugins, but never a tool that declares write access.
 
 == External MCP clients
 
-The endpoint implements the MCP *Streamable HTTP* transport, stateless, at:
+ALEC's tools are served by the OpenNMS MCP server (the `opennms-mcp-server` feature of the Integration API), which the ALEC KAR installs alongside its own bundles, at:
 
 ----
-POST http://<opennms-host>:8980/opennms/rest/alec/mcp
+POST http://<opennms-host>:8980/opennms/rest/mcp
 ----
 
-It requires an OpenNMS login with the *ADMIN* role (HTTP Basic), because the tools can read device configuration through the stored OpenNMS REST login.
-The supported methods are `initialize`, `ping`, `tools/list` and `tools/call`; notifications are accepted and acknowledged with `202`.
+It sits behind the regular OpenNMS REST authentication (HTTP Basic; the user needs the `ROLE_REST` or `ROLE_ADMIN` role) and implements the stateless Streamable HTTP transport; see the Integration API's `mcp-server` documentation for the protocol details.
+OpenNMS's own write tools are offered to administrators only; ALEC's tools are all read-only.
 
-.Example: list the tools
+.Example: list the tools (legacy request form)
 [source,console]
 ----
 curl -u admin:admin -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
-  http://localhost:8980/opennms/rest/alec/mcp
+  http://localhost:8980/opennms/rest/mcp
+----
+
+.Example: Claude Code
+[source,console]
+----
+claude mcp add --transport http opennms http://localhost:8980/opennms/rest/mcp \
+    --header "Authorization: Basic $(echo -n admin:admin | base64)"
 ----
 
 .Example: LM Studio `mcp.json`
@@ -101,15 +112,16 @@ curl -u admin:admin -H 'Content-Type: application/json' \
 ----
 {
   "mcpServers": {
-    "opennms-alec": {
-      "url": "http://localhost:8980/opennms/rest/alec/mcp",
+    "opennms": {
+      "url": "http://localhost:8980/opennms/rest/mcp",
       "headers": { "Authorization": "Basic YWRtaW46YWRtaW4=" }
     }
   }
 }
 ----
 
-The endpoint is always available; the *Give the model access* checkbox only controls whether ALEC's own analyses use the tools.
+The endpoint is available whenever the server bundle is active; the *Give the model access* checkbox only controls whether ALEC's own analyses use the tools.
+The *(i)* panel on the LLM Setup tab reports whether the server is active and lists every tool it serves, including OpenNMS's own and any other plugin's.
 
 == Usage metrics
 

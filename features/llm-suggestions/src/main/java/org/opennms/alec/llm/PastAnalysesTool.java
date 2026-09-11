@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
@@ -50,7 +50,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * MCP tool registry through the whiteboard, so the registry bundle never has
  * to know this bundle's record format — the pattern any bundle can follow.
  */
-public class PastAnalysesTool implements McpTool {
+public class PastAnalysesTool extends AlecTool {
 
     public static final String NAME = "get_past_analyses";
     static final int DEFAULT_LIMIT = 10;

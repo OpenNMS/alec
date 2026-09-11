@@ -102,11 +102,17 @@ public class ChatToolLoop {
      * already spent by an exchange that then fails.
      */
     public ChatResult run(ChatRequest request) throws LlmCallException {
+        final TokenUsage[] spent = {TokenUsage.empty()};
         try {
-            ChatResult result = doRun(request);
+            ChatResult result = doRun(request, spent);
             recordCall(request, true);
             return result;
-        } catch (LlmCallException | RuntimeException e) {
+        } catch (LlmCallException e) {
+            recordCall(request, false);
+            // The provider billed the completed rounds even though the exchange
+            // failed; hand that on so budgets and usage rows stay truthful.
+            throw e.withUsage(spent[0]);
+        } catch (RuntimeException e) {
             recordCall(request, false);
             throw e;
         }
@@ -137,7 +143,7 @@ public class ChatToolLoop {
         }
     }
 
-    private ChatResult doRun(ChatRequest request) throws LlmCallException {
+    private ChatResult doRun(ChatRequest request, TokenUsage[] spent) throws LlmCallException {
         final String url = chatCompletionsUrl(request.getEndpoint().getBaseUrl());
         final ArrayNode messages = objectMapper.createArrayNode();
         messages.addObject().put("role", "system").put("content", request.getSystemPrompt());
@@ -166,6 +172,7 @@ public class ChatToolLoop {
             final TokenUsage roundUsage = readUsage(root);
             recordRound(request, roundUsage);
             usage = usage.plus(roundUsage);
+            spent[0] = usage;
 
             final JsonNode message;
             try {
@@ -185,6 +192,15 @@ public class ChatToolLoop {
 
             final JsonNode terminalArgs = findArguments(calls, request.getTerminalTool().getName());
             if (terminalArgs != null) {
+                if (!terminalArgs.isObject()) {
+                    // The model emitted the terminal call but its arguments were not
+                    // a JSON object (typically truncated at max_tokens). Treating that
+                    // as a success would hand callers an empty answer they persist —
+                    // or, for clustering, dissolve every existing grouping.
+                    throw new LlmCallException(LlmCallException.Kind.MALFORMED,
+                            "The model's " + request.getTerminalTool().getName()
+                                    + " arguments were not a JSON object (truncated or malformed output)");
+                }
                 LOG.debug("Tool loop finished after {} round(s), {} tool call(s), {}", round, toolCalls, usage);
                 return new ChatResult(terminalArgs, usage, toolCalls, round);
             }
@@ -195,13 +211,17 @@ public class ChatToolLoop {
             }
 
             // Echo the assistant turn (with its tool_calls) and then one tool
-            // message per call, in order, as the wire format requires.
-            messages.add(assistantTurn(message, calls));
+            // message per call, in order, as the wire format requires. When the
+            // provider omits call ids, both sides use the same synthetic ids
+            // (numbered from this exchange's running tool-call count).
+            messages.add(assistantTurn(message, calls, toolCalls));
+            int synthetic = toolCalls;
             for (JsonNode call : calls) {
                 String name = call.path("function").path("name").asText("");
                 String id = call.path("id").asText("");
+                synthetic++;
                 if (id.isEmpty()) {
-                    id = "call_" + (toolCalls + 1);
+                    id = "call_" + synthetic;
                 }
                 JsonNode args = parseArguments(call.path("function").path("arguments"));
                 ToolResult result = request.getExecutor().call(request.getConsumer(), name, args);
@@ -414,7 +434,7 @@ public class ChatToolLoop {
         return argsNode;
     }
 
-    private ObjectNode assistantTurn(JsonNode message, JsonNode calls) {
+    private ObjectNode assistantTurn(JsonNode message, JsonNode calls, int idOffset) {
         ObjectNode turn = objectMapper.createObjectNode();
         turn.put("role", "assistant");
         JsonNode content = message.get("content");
@@ -424,7 +444,7 @@ public class ChatToolLoop {
             turn.set("content", content);
         }
         ArrayNode echoed = turn.putArray("tool_calls");
-        int i = 0;
+        int i = idOffset;
         for (JsonNode call : calls) {
             i++;
             ObjectNode c = echoed.addObject();

@@ -71,7 +71,10 @@ public class LlmSituationHandler implements SituationHandler {
      * Age past which a {@code pending} record no longer blocks a fresh
      * auto-evaluation. See the staleness check in {@link #onSituation}.
      */
-    static final long PENDING_STALE_MS = 10 * 60 * 1000L;
+    // A pending record older than this is treated as abandoned (crash mid-call)
+    // and re-fired. Sized for the worst legitimate exchange: MAX_TOOL_ROUNDS
+    // rounds each waiting up to the 180 s read timeout (~18 min), plus slack.
+    static final long PENDING_STALE_MS = 25 * 60 * 1000L;
 
     private final LlmConfigReader configReader;
     private final LlmSuggestionService suggestionService;
@@ -222,12 +225,19 @@ public class LlmSituationHandler implements SituationHandler {
                         store.putFailed(situationId, requestedAt, completedAt,
                                 model, reason);
                         // Record the failed attempt too — call count and success rate matter
-                        // for the dashboard even when no tokens were billed.
+                        // for the dashboard, and a multi-round exchange that never reported
+                        // still billed its completed rounds, which the budget must see.
+                        Suggestions.TokenUsage spent = cause instanceof LlmApiException
+                                ? ((LlmApiException) cause).getUsage() : Suggestions.TokenUsage.empty();
                         usageStore.record(UsageRecord.newBuilder()
                                 .ts(completedAt)
                                 .situationId(situationId)
                                 .model(model)
                                 .success(false)
+                                .inputTokens(spent.getInputTokens())
+                                .outputTokens(spent.getOutputTokens())
+                                .cacheReadInputTokens(spent.getCacheReadInputTokens())
+                                .cacheCreationInputTokens(spent.getCacheCreationInputTokens())
                                 .build());
                         return;
                     }

@@ -70,7 +70,7 @@ public class GetNodeToolTest {
 
     @Test
     public void specDeclaresNodeIdAndNodeLabel() {
-        assertThat(tool.getSpec().getName(), equalTo("get_node"));
+        assertThat(tool.getSpec().getName(), equalTo("get_node_inventory"));
         JsonNode props = tool.getSpec().parametersSchema(om).get("properties");
         assertThat(props.has("nodeId"), is(true));
         assertThat(props.has("nodeLabel"), is(true));

@@ -64,9 +64,9 @@ public class McpMetricsTest {
     @Test
     public void gaugesReflectRecordedCalls() {
         McpMetrics m = new McpMetrics();
-        m.recordCall(ToolConsumer.RCA, "get_node", false);
-        m.recordCall(ToolConsumer.RCA, "list_alarms", true);
-        m.recordCall(ToolConsumer.EXTERNAL, "get_node", false);
+        m.recordCall(ToolConsumer.RCA, "get_node_inventory", false);
+        m.recordCall(ToolConsumer.RCA, "list_node_alarms", true);
+        m.recordCall(ToolConsumer.EXTERNAL, "get_node_inventory", false);
         m.recordCall(ToolConsumer.VALIDATION, "alec_status", false);
 
         Map<String, Metric> metrics = m.getMetrics();
@@ -76,7 +76,7 @@ public class McpMetricsTest {
         assertThat(gauge(metrics, McpMetrics.TOOL_CALLS_CLUSTERING), equalTo(0L));
         assertThat(gauge(metrics, McpMetrics.TOOL_CALLS_EXTERNAL), equalTo(1L));
         // The gauges are live views, not copies.
-        m.recordCall(ToolConsumer.CLUSTERING, "get_node", false);
+        m.recordCall(ToolConsumer.CLUSTERING, "get_node_inventory", false);
         assertThat(gauge(metrics, McpMetrics.TOOL_CALLS_CLUSTERING), equalTo(1L));
         assertThat(gauge(metrics, McpMetrics.TOOL_CALLS), equalTo(5L));
 
@@ -91,9 +91,9 @@ public class McpMetricsTest {
     public void snapshotBreaksDownByConsumerAndTool() {
         long before = System.currentTimeMillis();
         McpMetrics m = new McpMetrics();
-        m.recordCall(ToolConsumer.RCA, "get_node", false);
-        m.recordCall(ToolConsumer.RCA, "get_node", true);
-        m.recordCall(ToolConsumer.EXTERNAL, "list_alarms", false);
+        m.recordCall(ToolConsumer.RCA, "get_node_inventory", false);
+        m.recordCall(ToolConsumer.RCA, "get_node_inventory", true);
+        m.recordCall(ToolConsumer.EXTERNAL, "list_node_alarms", false);
 
         McpMetrics.Snapshot s = m.snapshot();
         assertThat(s.getToolCalls(), equalTo(3L));
@@ -107,13 +107,13 @@ public class McpMetricsTest {
         assertThat(s.getByConsumer().get("clustering"), equalTo(0L));
         assertThat(s.getByConsumer().get("validation"), equalTo(0L));
         assertThat(s.getByTool().size(), equalTo(2));
-        assertThat(s.getByTool().get("get_node"), equalTo(2L));
-        assertThat(s.getByTool().get("list_alarms"), equalTo(1L));
+        assertThat(s.getByTool().get("get_node_inventory"), equalTo(2L));
+        assertThat(s.getByTool().get("list_node_alarms"), equalTo(1L));
         assertThat(s.getRate1m() >= 0d, is(true));
         assertThat(s.getRate5m() >= 0d, is(true));
 
         // A snapshot is a copy: later calls don't change it.
-        m.recordCall(ToolConsumer.RCA, "get_node", false);
+        m.recordCall(ToolConsumer.RCA, "get_node_inventory", false);
         assertThat(s.getToolCalls(), equalTo(3L));
     }
 

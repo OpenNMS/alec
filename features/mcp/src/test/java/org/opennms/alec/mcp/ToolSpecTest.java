@@ -45,14 +45,14 @@ public class ToolSpecTest {
 
     @Test
     public void openAiShapeWrapsFunctionWithNameDescriptionAndParameters() {
-        ToolSpec spec = ToolSpec.builder("get_node")
+        ToolSpec spec = ToolSpec.builder("get_node_inventory")
                 .description("Get a node")
                 .string("nodeId", "The id", true)
                 .build();
         ObjectNode tool = spec.toOpenAiTool(om);
         assertThat(tool.get("type").asText(), equalTo("function"));
         JsonNode fn = tool.get("function");
-        assertThat(fn.get("name").asText(), equalTo("get_node"));
+        assertThat(fn.get("name").asText(), equalTo("get_node_inventory"));
         assertThat(fn.get("description").asText(), equalTo("Get a node"));
         JsonNode params = fn.get("parameters");
         assertThat(params.get("type").asText(), equalTo("object"));
@@ -62,10 +62,10 @@ public class ToolSpecTest {
 
     @Test
     public void mcpShapeUsesInputSchema() {
-        ToolSpec spec = ToolSpec.builder("get_node").description("Get a node")
+        ToolSpec spec = ToolSpec.builder("get_node_inventory").description("Get a node")
                 .string("nodeId", "The id", true).build();
         ObjectNode tool = spec.toMcpTool(om);
-        assertThat(tool.get("name").asText(), equalTo("get_node"));
+        assertThat(tool.get("name").asText(), equalTo("get_node_inventory"));
         assertThat(tool.get("description").asText(), equalTo("Get a node"));
         JsonNode schema = tool.get("inputSchema");
         assertThat(schema.get("type").asText(), equalTo("object"));

@@ -29,6 +29,7 @@
 package org.opennms.alec.mcp;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -146,15 +147,14 @@ public class OkHttpOpenNmsRestClient implements OpenNmsRestClient {
         if (url == null) {
             throw new ToolException("Invalid OpenNMS REST URL");
         }
-        try {
-            return new Request.Builder()
-                    .url(url)
-                    .header("Authorization", Credentials.basic(config.getOpennmsUsername(), config.getOpennmsPassword()))
-                    .header("Accept", "application/json");
-        } catch (IllegalArgumentException e) {
-            // OkHttp's message would embed the header value (the password).
-            throw new ToolException("The OpenNMS login contains characters that cannot be sent in an HTTP header");
-        }
+        // UTF-8, explicitly: OkHttp's two-argument overload encodes ISO-8859-1,
+        // while OpenNMS (Spring Security) decodes the Basic header as UTF-8, so
+        // a non-ASCII password would be rejected with a misleading 401.
+        return new Request.Builder()
+                .url(url)
+                .header("Authorization", Credentials.basic(config.getOpennmsUsername(), config.getOpennmsPassword(),
+                        StandardCharsets.UTF_8))
+                .header("Accept", "application/json");
     }
 
     private JsonNode execute(Request request) throws ToolException {

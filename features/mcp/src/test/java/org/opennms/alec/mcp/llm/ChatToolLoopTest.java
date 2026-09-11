@@ -154,7 +154,7 @@ public class ChatToolLoopTest {
     }
 
     private static ToolSpec dataTool() {
-        return ToolSpec.builder("get_node").description("node").string("nodeId", "id", true).build();
+        return ToolSpec.builder("get_node_inventory").description("node").string("nodeId", "id", true).build();
     }
 
     private ChatRequest.Builder request() {
@@ -244,7 +244,7 @@ public class ChatToolLoopTest {
     public void dataToolCallIsExecutedEchoedAndFollowedByTheTerminalCall() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(
                 ToolResult.ok(om.createObjectNode().put("nodeId", 1), "{\"nodeId\":1}"));
-        respond(toolCalls(usage(100, 10, 0), call("call_abc", "get_node", "{\"nodeId\":\"1\"}")));
+        respond(toolCalls(usage(100, 10, 0), call("call_abc", "get_node_inventory", "{\"nodeId\":\"1\"}")));
         respond(toolCalls(usage(200, 5, 50), call("call_2", "report", "{\"answer\":\"done\"}")));
 
         ChatResult result = loop.run(request()
@@ -255,7 +255,7 @@ public class ChatToolLoopTest {
                 .build());
 
         // executor saw the parsed arguments
-        assertThat(executor.names, equalTo(Collections.singletonList("get_node")));
+        assertThat(executor.names, equalTo(Collections.singletonList("get_node_inventory")));
         assertThat(executor.args.get(0).get("nodeId").asText(), equalTo("1"));
         assertThat(executor.consumers.get(0), equalTo(ToolConsumer.CLUSTERING));
 
@@ -271,7 +271,7 @@ public class ChatToolLoopTest {
         JsonNode echoed = assistant.get("tool_calls").get(0);
         assertThat(echoed.get("id").asText(), equalTo("call_abc"));
         assertThat(echoed.get("type").asText(), equalTo("function"));
-        assertThat(echoed.path("function").path("name").asText(), equalTo("get_node"));
+        assertThat(echoed.path("function").path("name").asText(), equalTo("get_node_inventory"));
         assertThat("arguments echoed as a string", echoed.path("function").path("arguments").isTextual(), is(true));
         assertThat(echoed.path("function").path("arguments").asText(), equalTo("{\"nodeId\":\"1\"}"));
         JsonNode toolMsg = messages.get(3);
@@ -291,7 +291,7 @@ public class ChatToolLoopTest {
     @Test
     public void toolCallWithoutIdGetsASyntheticIdUsedInBothEchoAndToolMessage() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
-        respond(toolCalls(null, call(null, "get_node", "{}")));
+        respond(toolCalls(null, call(null, "get_node_inventory", "{}")));
         respond(toolCalls(null, call("c", "report", "{}")));
         loop.run(request().dataTools(Collections.singletonList(dataTool())).executor(executor).maxRounds(2).build());
         JsonNode messages = bodies.get(1).get("messages");
@@ -303,7 +303,7 @@ public class ChatToolLoopTest {
     public void toolErrorResultIsRelayedAsTheToolMessageContent() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(
                 ToolResult.failure(om.createObjectNode().put("error", "No node"), "{\"error\":\"No node\"}"));
-        respond(toolCalls(null, call("a", "get_node", "{\"nodeId\":\"9\"}")));
+        respond(toolCalls(null, call("a", "get_node_inventory", "{\"nodeId\":\"9\"}")));
         respond(toolCalls(null, call("c", "report", "{}")));
         ChatResult result = loop.run(request().dataTools(Collections.singletonList(dataTool()))
                 .executor(executor).maxRounds(2).build());
@@ -314,7 +314,7 @@ public class ChatToolLoopTest {
     @Test
     public void multipleToolCallsInOneRoundAreAllExecutedInOrder() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
-        respond(toolCalls(null, call("a", "get_node", "{\"nodeId\":\"1\"}"), call("b", "get_node", "{\"nodeId\":\"2\"}")));
+        respond(toolCalls(null, call("a", "get_node_inventory", "{\"nodeId\":\"1\"}"), call("b", "get_node_inventory", "{\"nodeId\":\"2\"}")));
         respond(toolCalls(null, call("c", "report", "{}")));
         ChatResult result = loop.run(request().dataTools(Collections.singletonList(dataTool()))
                 .executor(executor).maxRounds(2).build());
@@ -333,7 +333,7 @@ public class ChatToolLoopTest {
     @Test
     public void lastRoundOffersOnlyTheTerminalTool() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
-        respond(toolCalls(null, call("a", "get_node", "{}")));
+        respond(toolCalls(null, call("a", "get_node_inventory", "{}")));
         respond(toolCalls(null, call("c", "report", "{}")));
         loop.run(request().dataTools(Collections.singletonList(dataTool())).executor(executor).maxRounds(2).build());
         assertThat(bodies.get(0).get("tools").size(), equalTo(2));
@@ -347,8 +347,8 @@ public class ChatToolLoopTest {
     @Test
     public void modelThatNeverReportsIsRoundsExhausted() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
-        respond(toolCalls(null, call("a", "get_node", "{}")));
-        respond(toolCalls(null, call("b", "get_node", "{}")));
+        respond(toolCalls(null, call("a", "get_node_inventory", "{}")));
+        respond(toolCalls(null, call("b", "get_node_inventory", "{}")));
         try {
             loop.run(request().dataTools(Collections.singletonList(dataTool())).executor(executor).maxRounds(2).build());
             fail("expected LlmCallException");
@@ -560,7 +560,7 @@ public class ChatToolLoopTest {
     public void argumentsGivenAsAnObjectAreAccepted() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
         respond("{\"choices\":[{\"message\":{\"tool_calls\":[{\"id\":\"a\",\"type\":\"function\","
-                + "\"function\":{\"name\":\"get_node\",\"arguments\":{\"nodeId\":\"7\"}}}]}}]}");
+                + "\"function\":{\"name\":\"get_node_inventory\",\"arguments\":{\"nodeId\":\"7\"}}}]}}]}");
         respond("{\"choices\":[{\"message\":{\"tool_calls\":[{\"id\":\"b\",\"type\":\"function\","
                 + "\"function\":{\"name\":\"report\",\"arguments\":{\"answer\":\"obj\"}}}]}}]}");
         ChatResult result = loop.run(request().dataTools(Collections.singletonList(dataTool()))
@@ -586,7 +586,7 @@ public class ChatToolLoopTest {
     @Test
     public void unparseableArgumentStringIsHandedToTheExecutorAsText() throws Exception {
         RecordingExecutor executor = new RecordingExecutor(ToolResult.ok(om.createObjectNode(), "{}"));
-        respond(toolCalls(null, call("a", "get_node", "{not json")));
+        respond(toolCalls(null, call("a", "get_node_inventory", "{not json")));
         respond(toolCalls(null, call("b", "report", "{}")));
         loop.run(request().dataTools(Collections.singletonList(dataTool())).executor(executor).maxRounds(2).build());
         assertThat(executor.args.get(0).isTextual(), is(true));

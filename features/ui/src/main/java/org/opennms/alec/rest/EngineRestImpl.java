@@ -73,6 +73,38 @@ public class EngineRestImpl implements EngineRest {
         }
     }
 
+    /**
+     * Blueprint reference-list bind method. The persisted engine choice is
+     * replayed once, in the constructor; an engine factory that registers
+     * afterwards (engine/llm waits on the MCP bundle's services, so it often
+     * arrives after this bean) would otherwise stay inactive until an operator
+     * re-saves the engine page. Re-run the replay when the factory the stored
+     * choice names shows up and is not the one the driver is running.
+     */
+    public void onEngineFactoryBound(EngineFactory factory) {
+        if (factory == null) {
+            return;
+        }
+        try {
+            EngineParameter stored = (EngineParameter) getEngineConfiguration().getEntity();
+            if (stored == null || stored.getEngineName() == null) {
+                return;
+            }
+            if (!stored.getEngineName().equals(factory.getName())) {
+                return;
+            }
+            EngineFactory running = driver.getEngineFactory();
+            if (running != null && stored.getEngineName().equals(running.getName())) {
+                return;
+            }
+            LOG.info("Engine factory '{}' registered after startup; applying the persisted engine choice",
+                    factory.getName());
+            setEngineConfiguration(stored);
+        } catch (RuntimeException e) {
+            LOG.warn("Could not apply the persisted engine choice for '{}': {}", factory.getName(), e.getMessage());
+        }
+    }
+
     @Override
     public Response setEngineConfiguration(EngineParameter engineParameter) {
         LOG.debug("Set engine configuration: {}", engineParameter);

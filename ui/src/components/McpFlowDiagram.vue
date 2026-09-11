@@ -63,8 +63,8 @@ defineProps<{
 		<!-- Registry -->
 		<rect x="222" y="252" width="200" height="70" rx="6" class="box box-core" />
 		<text x="322" y="278" class="box-title">MCP tool registry</text>
-		<text x="322" y="296" class="box-sub">dispatch, size cap,</text>
-		<text x="322" y="312" class="box-sub">tool-call metrics (JMX)</text>
+		<text x="322" y="296" class="box-sub">Integration API McpToolProvider</text>
+		<text x="322" y="312" class="box-sub">services · size cap · metrics (JMX)</text>
 
 		<!-- loop <-> registry -->
 		<line x1="307" y1="214" x2="307" y2="250" class="edge" marker-end="url(#mcp-arrow)" />
@@ -74,8 +74,8 @@ defineProps<{
 		<!-- Tools -->
 		<rect x="44" y="350" width="270" height="90" rx="6" class="box" />
 		<text x="179" y="372" class="box-title">In-process tools (Integration API)</text>
-		<text x="179" y="392" class="box-sub">list_situations · get_situation · get_node</text>
-		<text x="179" y="408" class="box-sub">list_alarms · get_node_neighbors</text>
+		<text x="179" y="392" class="box-sub">list_situations · get_situation</text>
+		<text x="179" y="408" class="box-sub">get_node_inventory · list_node_alarms · get_node_neighbors</text>
 		<text x="179" y="424" class="box-sub">get_past_analyses · alec_status</text>
 
 		<rect x="330" y="350" width="284" height="90" rx="6" class="box" />
@@ -90,9 +90,9 @@ defineProps<{
 
 		<!-- MCP endpoint -->
 		<rect x="444" y="252" width="170" height="70" rx="6" class="box box-dashed" />
-		<text x="529" y="274" class="box-title">MCP endpoint</text>
-		<text x="529" y="292" class="box-sub">POST {{ endpointPath || '/opennms/rest/alec/mcp' }}</text>
-		<text x="529" y="308" class="box-sub">JSON-RPC · admin login</text>
+		<text x="529" y="274" class="box-title">OpenNMS MCP server</text>
+		<text x="529" y="292" class="box-sub">POST {{ endpointPath || '/opennms/rest/mcp' }}</text>
+		<text x="529" y="308" class="box-sub">opennms-mcp-server · REST login</text>
 		<line x1="442" y1="287" x2="424" y2="287" class="edge" marker-end="url(#mcp-arrow)" />
 
 		<!-- LLM server (outside) -->
@@ -112,8 +112,8 @@ defineProps<{
 		<!-- External MCP client -->
 		<rect x="720" y="252" width="250" height="70" rx="8" class="box box-external box-dashed" />
 		<text x="845" y="276" class="box-title">External MCP client (optional)</text>
-		<text x="845" y="294" class="box-sub">LM Studio chat, Claude Desktop, agents</text>
-		<text x="845" y="310" class="box-sub">initialize · tools/list · tools/call</text>
+		<text x="845" y="294" class="box-sub">LM Studio chat, Claude Desktop, Claude Code</text>
+		<text x="845" y="310" class="box-sub">tools/list · tools/call</text>
 		<line x1="718" y1="287" x2="616" y2="287" class="edge" marker-end="url(#mcp-arrow)" />
 
 		<!-- Result store -->

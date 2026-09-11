@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 import org.opennms.integration.api.v1.dao.AlarmDao;
@@ -50,14 +50,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * cleared ones that have not yet been purged, which is the closest thing to
  * alarm history the Integration API offers.
  */
-public class ListAlarmsTool implements McpTool {
+public class ListAlarmsTool extends AlecTool {
 
-    public static final String NAME = "list_alarms";
+    public static final String NAME = "list_node_alarms";
     static final int DEFAULT_LIMIT = 30;
     static final int MAX_LIMIT = 100;
 
     private static final ToolSpec SPEC = ToolSpec.builder(NAME)
-            .description("List OpenNMS alarms, most recent first, optionally for one node. Includes recently "
+            .description("List OpenNMS alarms, most recent first, for one node or for all nodes. Includes recently "
                     + "cleared alarms, so it shows what else happened on a node around a situation.")
             .string("nodeId", "Numeric node id; omit for all nodes.", false)
             .string("minSeverity", "Lowest severity to include: INDETERMINATE, CLEARED, NORMAL, WARNING, MINOR, MAJOR or CRITICAL. Default WARNING.", false)

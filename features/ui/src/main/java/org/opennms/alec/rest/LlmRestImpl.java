@@ -120,6 +120,18 @@ public class LlmRestImpl implements LlmRest {
             // check would have been skipped. Presence is checked here; the login
             // itself is probed against /rest/info.
             if (merged.isToolsEnabled()) {
+                // The stored password is only ever sent to the URL it was saved
+                // with — a new URL needs the password re-entered (same rule as
+                // the API key), else the save-time probe would hand the stored
+                // password to whatever host the request names.
+                if (existing != null && !isBlank(existing.getOpennmsPassword())
+                        && isBlank(request.getOpennmsPassword())
+                        && !sameOpennmsUrl(merged.getOpennmsUrl(), existing.getOpennmsUrl())) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Cannot enable MCP tool access: the OpenNMS URL changed — re-enter the "
+                                    + "OpenNMS password for the new URL")
+                            .build();
+                }
                 if (isBlank(merged.getOpennmsUsername()) || isBlank(merged.getOpennmsPassword())) {
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity("Cannot enable MCP tool access without an OpenNMS login "
@@ -146,6 +158,12 @@ public class LlmRestImpl implements LlmRest {
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    /** Blank means the default local URL; trailing slashes and case do not matter. */
+    static boolean sameOpennmsUrl(String a, String b) {
+        return new McpConfig(false, a, "", "").getEffectiveOpennmsUrl()
+                .equalsIgnoreCase(new McpConfig(false, b, "", "").getEffectiveOpennmsUrl());
     }
 
     /**

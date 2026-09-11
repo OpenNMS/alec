@@ -35,9 +35,13 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.integration.api.v1.mcp.McpToolContext;
+import org.opennms.integration.api.v1.mcp.McpToolProvider;
+import org.opennms.integration.api.v1.mcp.McpToolResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -92,11 +96,11 @@ public class ToolRegistryTest {
         assertThat(specs.get(0).getName(), equalTo("alpha"));
         assertThat(specs.get(1).getName(), equalTo("zeta"));
 
-        List<McpTool> all = registry.allTools();
+        List<McpToolProvider> all = registry.allTools();
         assertThat(all.size(), equalTo(3));
-        assertThat(all.get(0).getSpec().getName(), equalTo("alpha"));
-        assertThat(all.get(1).getSpec().getName(), equalTo("mid"));
-        assertThat(all.get(2).getSpec().getName(), equalTo("zeta"));
+        assertThat(all.get(0).getToolName(), equalTo("alpha"));
+        assertThat(all.get(1).getToolName(), equalTo("mid"));
+        assertThat(all.get(2).getToolName(), equalTo("zeta"));
     }
 
     @Test
@@ -245,7 +249,246 @@ public class ToolRegistryTest {
         assertThat(metrics.getCalls(ToolConsumer.VALIDATION), equalTo(1L));
         McpMetrics.Snapshot s = metrics.snapshot();
         assertThat(s.getByTool().get("ok"), equalTo(4L));
-        assertThat(s.getByTool().get("missing"), equalTo(1L));
+        // Unknown names share one bucket so hallucinated tool names cannot grow the map without bound.
+        assertThat(s.getByTool().get("missing"), org.hamcrest.CoreMatchers.nullValue());
+        assertThat(s.getByTool().get(McpMetrics.UNKNOWN_TOOL), equalTo(1L));
         assertThat(registry.getMetrics() == metrics, is(true));
+    }
+
+    // -------------------------------------------------------------------------
+    // Providers contributed by other bundles (plain McpToolProvider, not AlecTool)
+    // -------------------------------------------------------------------------
+
+    private static final String FOREIGN_SCHEMA =
+            "{\"type\":\"object\",\"properties\":{\"q\":{\"type\":\"string\"}},\"required\":[\"q\"]}";
+
+    /** A scripted provider from "another bundle": map in, text out, no ALEC base class. */
+    private static class ForeignProvider implements McpToolProvider {
+        private final String name;
+        private final String schema;
+        private final boolean write;
+        private final java.util.function.Function<McpToolContext, McpToolResult> body;
+        McpToolContext lastContext;
+        int calls;
+
+        ForeignProvider(String name, String schema, boolean write,
+                        java.util.function.Function<McpToolContext, McpToolResult> body) {
+            this.name = name;
+            this.schema = schema;
+            this.write = write;
+            this.body = body;
+        }
+
+        static ForeignProvider returning(String name, String text) {
+            return new ForeignProvider(name, FOREIGN_SCHEMA, false, ctx -> McpToolResult.text(text));
+        }
+
+        @Override
+        public String getToolName() {
+            return name;
+        }
+
+        @Override
+        public String getToolDescription() {
+            return "foreign " + name;
+        }
+
+        @Override
+        public String getInputSchema() {
+            return schema;
+        }
+
+        @Override
+        public boolean isWriteAccess() {
+            return write;
+        }
+
+        @Override
+        public McpToolResult execute(McpToolContext context) {
+            calls++;
+            lastContext = context;
+            return body.apply(context);
+        }
+    }
+
+    @Test
+    public void foreignProviderIsListedWithItsExactSchema() throws Exception {
+        registry.addTool(ForeignProvider.returning("foreign", "{}"));
+        List<ToolSpec> specs = registry.availableSpecs();
+        assertThat(specs.size(), equalTo(1));
+        ToolSpec spec = specs.get(0);
+        assertThat(spec.getName(), equalTo("foreign"));
+        assertThat(spec.getDescription(), equalTo("foreign foreign"));
+        assertThat("the declared schema is passed through verbatim (no additionalProperties injected)",
+                spec.parametersSchema(om), equalTo(om.readTree(FOREIGN_SCHEMA)));
+        assertThat(spec.toOpenAiTool(om).path("function").path("parameters"), equalTo(om.readTree(FOREIGN_SCHEMA)));
+        assertThat(registry.findSpec("foreign").isPresent(), is(true));
+        assertThat(registry.findSpec("foreign").get().parametersSchema(om), equalTo(om.readTree(FOREIGN_SCHEMA)));
+    }
+
+    @Test
+    public void foreignProviderIsCalledThroughExecuteWithMapArgumentsAndInternalContext() {
+        ForeignProvider p = ForeignProvider.returning("foreign", "{\"hits\":[1,2]}");
+        registry.addTool(p);
+        ObjectNode args = om.createObjectNode().put("q", "abc").put("n", 7);
+        args.putArray("list").add("x");
+        ToolResult r = registry.call(ToolConsumer.RCA, "foreign", args);
+        assertThat(r.isError(), is(false));
+        assertThat(p.calls, equalTo(1));
+        Map<String, Object> received = p.lastContext.getArguments();
+        assertThat(received.get("q"), equalTo("abc"));
+        assertThat(received.get("n"), equalTo(7));
+        assertThat(received.get("list"), equalTo(List.of("x")));
+        assertThat("the registry's in-process context is used", p.lastContext instanceof AlecTool.InternalContext,
+                is(true));
+        assertThat(p.lastContext.getUserName(), equalTo("alec"));
+        assertThat(p.lastContext.isUserInRole("ROLE_ADMIN"), is(false));
+        assertThat(p.lastContext.isUserInRole("ROLE_USER"), is(false));
+        assertThat(p.lastContext.isUserInRole(null), is(false));
+        // JSON text is parsed into structured content
+        assertThat(r.getContent().get("hits").isArray(), is(true));
+        assertThat(r.getContent().get("hits").get(1).asInt(), equalTo(2));
+        assertThat(r.getText(), equalTo("{\"hits\":[1,2]}"));
+        assertThat(metrics.getCalls(ToolConsumer.RCA), equalTo(1L));
+        assertThat(metrics.getTotalErrors(), equalTo(0L));
+    }
+
+    @Test
+    public void foreignProviderNonJsonTextBecomesATextNode() {
+        registry.addTool(ForeignProvider.returning("foreign", "plain words, not json"));
+        ToolResult r = registry.call(ToolConsumer.RCA, "foreign", om.createObjectNode());
+        assertThat(r.isError(), is(false));
+        assertThat(r.getContent().isTextual(), is(true));
+        assertThat(r.getContent().asText(), equalTo("plain words, not json"));
+        assertThat(r.getText(), equalTo("plain words, not json"));
+    }
+
+    @Test
+    public void foreignProviderErrorResultBecomesAnErrorToolResult() {
+        registry.addTool(new ForeignProvider("foreign", FOREIGN_SCHEMA, false,
+                ctx -> McpToolResult.error("upstream said no")));
+        ToolResult r = registry.call(ToolConsumer.CLUSTERING, "foreign", om.createObjectNode());
+        assertThat(r.isError(), is(true));
+        assertThat(r.getContent().get("error").asText(), equalTo("upstream said no"));
+        assertThat(r.getText(), containsString("upstream said no"));
+        assertThat(metrics.getTotalErrors(), equalTo(1L));
+        assertThat(metrics.getCalls(ToolConsumer.CLUSTERING), equalTo(1L));
+    }
+
+    @Test
+    public void foreignProviderNullResultIsAnError() {
+        registry.addTool(new ForeignProvider("foreign", FOREIGN_SCHEMA, false, ctx -> null));
+        ToolResult r = registry.call(ToolConsumer.RCA, "foreign", om.createObjectNode());
+        assertThat(r.isError(), is(true));
+        assertThat(r.getContent().get("error").asText(), containsString("returned no result"));
+    }
+
+    @Test
+    public void foreignProviderRuntimeExceptionBecomesGenericError() {
+        registry.addTool(new ForeignProvider("foreign", FOREIGN_SCHEMA, false, ctx -> {
+            throw new IllegalArgumentException("secret detail");
+        }));
+        ToolResult r = registry.call(ToolConsumer.RCA, "foreign", om.createObjectNode());
+        assertThat(r.isError(), is(true));
+        String msg = r.getContent().get("error").asText();
+        assertThat(msg, containsString("Tool 'foreign' failed unexpectedly: IllegalArgumentException"));
+        assertThat(msg, not(containsString("secret detail")));
+    }
+
+    @Test
+    public void writeProviderIsNeverOfferedNorCallable() {
+        ForeignProvider w = new ForeignProvider("writer", FOREIGN_SCHEMA, true, ctx -> McpToolResult.text("{}"));
+        registry.addTool(w);
+        registry.addTool(ForeignProvider.returning("reader", "{}"));
+        assertThat(registry.isAvailable(w), is(false));
+        List<ToolSpec> specs = registry.availableSpecs();
+        assertThat(specs.size(), equalTo(1));
+        assertThat(specs.get(0).getName(), equalTo("reader"));
+        assertThat("still visible to the status page", registry.allTools().size(), equalTo(2));
+        assertThat(registry.find("writer").isPresent(), is(true));
+
+        ToolResult r = registry.call(ToolConsumer.RCA, "writer", om.createObjectNode());
+        assertThat(r.isError(), is(true));
+        assertThat(r.getContent().get("error").asText(), containsString("not available"));
+        assertThat("execute was never reached", w.calls, equalTo(0));
+        assertThat(metrics.getTotalErrors(), equalTo(1L));
+    }
+
+    @Test
+    public void providerWhoseIsWriteAccessThrowsIsTreatedAsUnavailable() {
+        ForeignProvider p = new ForeignProvider("flaky", FOREIGN_SCHEMA, false, ctx -> McpToolResult.text("{}")) {
+            @Override
+            public boolean isWriteAccess() {
+                throw new IllegalStateException("boom");
+            }
+        };
+        registry.addTool(p);
+        assertThat(registry.isAvailable(p), is(false));
+        assertThat(registry.availableSpecs().isEmpty(), is(true));
+        assertThat(registry.call(ToolConsumer.RCA, "flaky", null).isError(), is(true));
+    }
+
+    @Test
+    public void providerWithUnparseableSchemaIsRegisteredButNotOffered() {
+        registry.addTool(ForeignProvider.returning("good", "{}"));
+        registry.addTool(new ForeignProvider("broken", "{not json", false, ctx -> McpToolResult.text("{}")));
+        registry.addTool(new ForeignProvider("array", "[1,2]", false, ctx -> McpToolResult.text("{}")));
+        registry.addTool(new ForeignProvider("nullSchema", null, false, ctx -> McpToolResult.text("{}")));
+
+        List<ToolSpec> specs = registry.availableSpecs();
+        assertThat(specs.size(), equalTo(1));
+        assertThat(specs.get(0).getName(), equalTo("good"));
+        assertThat(registry.findSpec("broken").isPresent(), is(false));
+        assertThat(registry.findSpec("array").isPresent(), is(false));
+        assertThat(registry.findSpec("nullSchema").isPresent(), is(false));
+        assertThat(registry.findSpec("good").isPresent(), is(true));
+
+        List<McpToolProvider> all = registry.allTools();
+        assertThat(all.size(), equalTo(4));
+        assertThat(all.get(0).getToolName(), equalTo("array"));
+        assertThat(all.get(1).getToolName(), equalTo("broken"));
+        assertThat(all.get(2).getToolName(), equalTo("good"));
+        assertThat(all.get(3).getToolName(), equalTo("nullSchema"));
+        assertThat(registry.find("broken").isPresent(), is(true));
+    }
+
+    @Test
+    public void findSpecWorksForAlecToolsAndIsEmptyForUnknownNames() {
+        StubTool t = StubTool.returning("alpha", "{}");
+        registry.addTool(t);
+        assertThat(registry.findSpec("alpha").isPresent(), is(true));
+        assertThat(registry.findSpec("alpha").get() == t.getSpec(), is(true));
+        assertThat(registry.findSpec("alpha").get().parametersSchema(om).path("properties").has("x"), is(true));
+        assertThat(registry.findSpec("nope").isPresent(), is(false));
+        assertThat(registry.findSpec(null).isPresent(), is(false));
+    }
+
+    @Test
+    public void providerWithBlankOrThrowingNameIsIgnored() {
+        registry.addTool(new ForeignProvider("   ", FOREIGN_SCHEMA, false, ctx -> McpToolResult.text("{}")));
+        registry.addTool(new ForeignProvider(null, FOREIGN_SCHEMA, false, ctx -> McpToolResult.text("{}")));
+        registry.addTool(new ForeignProvider("x", FOREIGN_SCHEMA, false, ctx -> McpToolResult.text("{}")) {
+            @Override
+            public String getToolName() {
+                throw new IllegalStateException("no name for you");
+            }
+        });
+        assertThat(registry.isEmpty(), is(true));
+        assertThat(registry.allTools().isEmpty(), is(true));
+        assertThat(registry.availableSpecs().isEmpty(), is(true));
+        assertThat(registry.find("").isPresent(), is(false));
+    }
+
+    @Test
+    public void unknownToolMessageListsForeignAndAlecToolsButNotWriteOrBrokenOnes() {
+        registry.addTool(StubTool.returning("alpha", "{}"));
+        registry.addTool(ForeignProvider.returning("foreign", "{}"));
+        registry.addTool(new ForeignProvider("writer", FOREIGN_SCHEMA, true, ctx -> McpToolResult.text("{}")));
+        registry.addTool(new ForeignProvider("broken", "nope", false, ctx -> McpToolResult.text("{}")));
+        ToolResult r = registry.call(ToolConsumer.RCA, "missing", null);
+        String msg = r.getContent().get("error").asText();
+        assertThat(msg, containsString("alpha, foreign"));
+        assertThat(msg, not(containsString("writer")));
+        assertThat(msg, not(containsString("broken")));
     }
 }

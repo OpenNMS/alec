@@ -53,7 +53,7 @@ import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
 import org.opennms.alec.mcp.McpMetrics;
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolConsumer;
 import org.opennms.alec.mcp.DefaultToolRegistry;
 import org.opennms.alec.mcp.ToolRegistry;
@@ -495,7 +495,7 @@ public class LlmClusterEngineTest {
     private static ToolRegistry registryWith(String... toolNames) {
         ToolRegistry registry = new DefaultToolRegistry(new McpMetrics(), new ObjectMapper());
         for (String name : toolNames) {
-            registry.addTool(new McpTool() {
+            registry.addTool(new AlecTool() {
                 private final ToolSpec spec = ToolSpec.builder(name).description("stub").build();
 
                 @Override
@@ -519,7 +519,7 @@ public class LlmClusterEngineTest {
     @Test
     public void buildChatRequestWithoutToolsIsSingleRoundWithNoDataTools() {
         LlmClusterEngine withRegistry = new LlmClusterEngine(new MetricRegistry(), kvStore, om, null,
-                registryWith("get_node"));
+                registryWith("get_node_inventory"));
         ChatRequest r = withRegistry.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
                 config(false));
         assertThat(r.getDataTools().isEmpty(), is(true));
@@ -538,17 +538,17 @@ public class LlmClusterEngineTest {
 
     @Test
     public void buildChatRequestWithToolsOffersTheRegistryAndAllowsSeveralRounds() {
-        ToolRegistry registry = registryWith("get_node");
+        ToolRegistry registry = registryWith("get_node_inventory");
         LlmClusterEngine withRegistry = new LlmClusterEngine(new MetricRegistry(), kvStore, om, "CUSTOM", registry);
         ChatRequest r = withRegistry.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
                 config(true));
         assertThat(r.getDataTools().size(), equalTo(1));
-        assertThat(r.getDataTools().get(0).getName(), equalTo("get_node"));
+        assertThat(r.getDataTools().get(0).getName(), equalTo("get_node_inventory"));
         assertThat(r.getMaxRounds(), equalTo(LlmClusterEngine.MAX_TOOL_ROUNDS));
         assertThat(r.getSystemPrompt(), equalTo("CUSTOM" + LlmClusterEngine.TOOLS_GUIDANCE));
         assertThat(r.getExecutor() != null, is(true));
         // the executor dispatches through the registry (and is metered there)
-        r.getExecutor().call(ToolConsumer.CLUSTERING, "get_node", om.createObjectNode());
+        r.getExecutor().call(ToolConsumer.CLUSTERING, "get_node_inventory", om.createObjectNode());
         assertThat(registry.getMetrics().getCalls(ToolConsumer.CLUSTERING), equalTo(1L));
     }
 

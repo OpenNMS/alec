@@ -28,43 +28,20 @@
 
 package org.opennms.alec.mcp.rest;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 /**
- * ALEC's MCP server endpoint at {@code /opennms/rest/alec/mcp} (Streamable
- * HTTP transport, stateless), plus a status document for the configuration
- * page. Sits behind OpenNMS's normal REST authentication; JSON-RPC calls
- * additionally require the ADMIN role, since the tools can read device
- * configuration through the operator's stored OpenNMS login.
+ * Tool inventory and usage counters for the configuration page. ALEC's tools
+ * themselves are served to MCP clients by the OpenNMS MCP server at
+ * {@code /opennms/rest/mcp}; this document only describes them.
  */
 @Path("alec/mcp")
-public interface McpRest {
+public interface McpStatusRest {
 
-    /** One JSON-RPC 2.0 request (or batch). Notifications get 202 with no body. */
-    @POST
-    @Consumes({MediaType.APPLICATION_JSON})
-    @Produces({MediaType.APPLICATION_JSON})
-    Response rpc(String body, @Context SecurityContext securityContext);
-
-    /** No server-initiated stream is offered: 405 per the transport spec. */
-    @GET
-    @Produces({MediaType.APPLICATION_JSON})
-    Response stream();
-
-    /** Session termination is a no-op for a stateless server. */
-    @DELETE
-    Response endSession();
-
-    /** Tool inventory and usage counters for the UI. */
     @GET
     @Path("/status")
     @Produces({MediaType.APPLICATION_JSON})

@@ -46,7 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GetDeviceConfigToolTest {
 
-    private static final String LATEST_PATH = "device-config/latest?limit=25&search=core-1";
+    private static final String LATEST_PATH = "device-config/latest?limit=200&search=core-1";
     private static final String LATEST = "["
             + "{\"id\":11,\"nodeId\":5,\"ipAddress\":\"10.0.0.1\",\"configType\":\"default\",\"backupStatus\":\"SUCCESS\","
             + "\"lastBackupDate\":1700000000000,\"lastSucceededDate\":1700000000000,\"lastFailedDate\":null,"
@@ -187,9 +187,9 @@ public class GetDeviceConfigToolTest {
         when(node.getLabel()).thenReturn("core 1&2");
         when(nodeDao.getNodeById(5)).thenReturn(node);
         tool = new GetDeviceConfigTool(rest, nodeDao, om);
-        rest.onGet("device-config/latest?limit=25&search=core+1%262", "[]");
+        rest.onGet("device-config/latest?limit=200&search=core+1%262", "[]");
         tool.call(om.createObjectNode().put("nodeId", "5"));
-        assertThat(rest.getPaths.get(0), equalTo("device-config/latest?limit=25&search=core+1%262"));
+        assertThat(rest.getPaths.get(0), equalTo("device-config/latest?limit=200&search=core+1%262"));
     }
 
     @Test

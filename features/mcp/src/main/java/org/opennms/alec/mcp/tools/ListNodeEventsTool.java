@@ -30,7 +30,7 @@ package org.opennms.alec.mcp.tools;
 
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /** Recent event history for a node, via {@code GET /rest/events}. */
-public class ListNodeEventsTool implements McpTool {
+public class ListNodeEventsTool extends AlecTool {
 
     public static final String NAME = "list_node_events";
     static final int DEFAULT_LIMIT = 25;

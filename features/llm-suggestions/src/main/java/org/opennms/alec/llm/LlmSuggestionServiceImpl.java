@@ -128,7 +128,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     // configured prompt itself stays provider-neutral and unchanged.
     static final String TOOLS_GUIDANCE =
             "\n\nTools: you may call the provided read-only tools to investigate before reporting — "
-                    + "get_node for inventory, list_alarms for what else is alarming on a node, "
+                    + "get_node_inventory for inventory, list_node_alarms for what else is alarming on a node, "
                     + "get_node_neighbors for upstream/downstream devices, list_node_events for the raw "
                     + "event history, list_node_resources + get_metric_series for collected metrics, and "
                     + "get_device_config for recent configuration backups. Use a few targeted calls on the "
@@ -193,9 +193,16 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     static final int READ_TIMEOUT_SECONDS = 180;
     private static final int WRITE_TIMEOUT_SECONDS = 30;
 
+    // Interactive probes ("Validate key", "Check tool access") run on the REST
+    // request thread; cap each of their rounds well below the analysis timeout
+    // so a stalled local model fails the check in a minute, not in nine.
+    static final int PROBE_READ_TIMEOUT_SECONDS = 60;
+
     private final OkHttpClient httpClient;
+    private final OkHttpClient probeClient;
     private final ObjectMapper objectMapper;
     private final ChatToolLoop loop;
+    private final ChatToolLoop probeLoop;
     private final ExecutorService executor;
     private final Semaphore inFlight;
     private final boolean ownsExecutor;
@@ -249,8 +256,12 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
                              OpenNmsRestClient openNmsRest,
                              LlmUsageMetrics usageMetrics) {
         this.httpClient = httpClient;
+        this.probeClient = httpClient.newBuilder()
+                .readTimeout(PROBE_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build();
         this.objectMapper = objectMapper;
         this.loop = new ChatToolLoop(httpClient, objectMapper, usageMetrics);
+        this.probeLoop = new ChatToolLoop(probeClient, objectMapper, usageMetrics);
         this.executor = executor;
         this.inFlight = new Semaphore(maxConcurrent);
         this.ownsExecutor = ownsExecutor;
@@ -308,7 +319,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
                 .consumer(ToolConsumer.VALIDATION)
                 .build();
         try {
-            loop.run(request);
+            probeLoop.run(request);
         } catch (LlmCallException e) {
             return ValidationResult.fail(describeFailure(e, model, baseUrl));
         }
@@ -329,7 +340,16 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
         // Tool access requires a working OpenNMS login (a read-only account) —
         // checked BEFORE spending a model round trip, and a hard failure: the
         // configuration page will not save the option until this passes.
-        McpConfig login = mergeOverride(opennmsOverride, mcpConfigReader == null ? null : mcpConfigReader.read());
+        McpConfig stored = mcpConfigReader == null ? null : mcpConfigReader.read();
+        if (needsPasswordForNewUrl(opennmsOverride, stored)) {
+            // Mirrors the API-key rule: a stored secret is only ever sent to the
+            // URL it was saved with. Otherwise any REST caller could point the
+            // check at a host they control and collect the OpenNMS password.
+            return ValidationResult.fail("No — the OpenNMS URL differs from the saved one; re-enter the OpenNMS "
+                    + "password to check a new URL. (The stored password is only ever sent to the URL it was "
+                    + "saved with.)");
+        }
+        McpConfig login = mergeOverride(opennmsOverride, stored);
         if (login == null || !login.hasOpennmsCredentials()) {
             return ValidationResult.fail("No — an OpenNMS login is required for tool access. Enter the username "
                     + "and password of a dedicated read-only OpenNMS account and check again.");
@@ -347,7 +367,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
         }
 
         final List<ToolSpec> dataTools = new ArrayList<>();
-        toolRegistry.find(AlecStatusTool.NAME).ifPresent(t -> dataTools.add(t.getSpec()));
+        toolRegistry.findSpec(AlecStatusTool.NAME).ifPresent(dataTools::add);
         if (dataTools.isEmpty()) {
             return ValidationResult.fail("No — the alec_status tool is not registered, so the probe cannot run. " + restNote);
         }
@@ -370,7 +390,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
                 .build();
         ChatResult result;
         try {
-            result = loop.run(request);
+            result = probeLoop.run(request);
         } catch (LlmCallException e) {
             return ValidationResult.fail("No — " + describeFailure(e, model, baseUrl) + " " + restNote);
         }
@@ -395,9 +415,26 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     }
 
     /**
+     * True when the caller supplies a URL other than the saved one without a
+     * password: the stored password must then not be used. Package-private for tests.
+     */
+    static boolean needsPasswordForNewUrl(McpConfig override, McpConfig stored) {
+        if (override == null || !override.getOpennmsPassword().isEmpty()) {
+            return false;
+        }
+        if (stored == null || stored.getOpennmsPassword().isEmpty()) {
+            return false; // nothing stored that could leak
+        }
+        return !override.getEffectiveOpennmsUrl().equalsIgnoreCase(stored.getEffectiveOpennmsUrl());
+    }
+
+    /**
      * An unsaved login typed into the form may be partial (a new username with
      * the already-stored password, say): fill each blank field from the stored
-     * config. Package-private for tests.
+     * config. The form always sends the URL it shows, so a blank override URL
+     * means the default, not the stored one. The stored password is only
+     * borrowed for the URL it was saved with (see {@link #needsPasswordForNewUrl}).
+     * Package-private for tests.
      */
     static McpConfig mergeOverride(McpConfig override, McpConfig stored) {
         if (override == null) {
@@ -406,10 +443,15 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
         if (stored == null) {
             return override;
         }
+        boolean sameUrl = override.getEffectiveOpennmsUrl().equalsIgnoreCase(stored.getEffectiveOpennmsUrl());
+        String password = override.getOpennmsPassword();
+        if (password.isEmpty() && sameUrl) {
+            password = stored.getOpennmsPassword();
+        }
         return new McpConfig(true,
-                override.getOpennmsUrl().isEmpty() ? stored.getOpennmsUrl() : override.getOpennmsUrl(),
+                override.getOpennmsUrl(),
                 override.getOpennmsUsername().isEmpty() ? stored.getOpennmsUsername() : override.getOpennmsUsername(),
-                override.getOpennmsPassword().isEmpty() ? stored.getOpennmsPassword() : override.getOpennmsPassword());
+                password);
     }
 
     private static ValidationResult requireFields(String apiKey, String baseUrl, String model) {
@@ -513,21 +555,26 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
             return toSuggestions(result.getTerminalArguments(), result.getUsage(), result.getToolCalls());
         } catch (LlmCallException e) {
             // The failure reason is logged and served to the UI; LlmCallException
-            // messages are key-free by construction.
+            // messages are key-free by construction. The usage the provider billed
+            // for the rounds that did complete rides along for the usage row.
+            TokenUsage u = e.getUsage();
+            Suggestions.TokenUsage spent = new Suggestions.TokenUsage(u.getInputTokens(), u.getOutputTokens(),
+                    u.getCacheReadInputTokens(), u.getCacheCreationInputTokens());
             switch (e.getKind()) {
                 case HTTP:
                     throw new LlmApiException("LLM API returned HTTP " + e.getHttpStatus() + ": "
-                            + e.getMessage().replaceFirst("^HTTP \\d+ from provider: ", ""), e);
+                            + e.getMessage().replaceFirst("^HTTP \\d+ from provider: ", ""), e).withUsage(spent);
                 case NETWORK:
-                    throw new LlmApiException("Network error calling LLM", e);
+                    throw new LlmApiException("Network error calling LLM", e).withUsage(spent);
                 case BAD_REQUEST:
                     throw new LlmApiException("Endpoint URL or API key is malformed (check for stray "
-                            + "whitespace or line breaks in the key, and re-validate the endpoint)", e);
+                            + "whitespace or line breaks in the key, and re-validate the endpoint)", e).withUsage(spent);
                 case NO_TOOL_CALL:
                 case ROUNDS_EXHAUSTED:
-                    throw new LlmApiException("Response missing tool_calls; model did not call " + TOOL_NAME, e);
+                    throw new LlmApiException("Response missing tool_calls; model did not call " + TOOL_NAME, e)
+                            .withUsage(spent);
                 default:
-                    throw new LlmApiException(e.getMessage(), e);
+                    throw new LlmApiException(e.getMessage(), e).withUsage(spent);
             }
         }
     }

@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * The performance-data resources collected for a node and the metric names
  * on each — the first step before {@link GetMetricSeriesTool}.
  */
-public class ListNodeResourcesTool implements McpTool {
+public class ListNodeResourcesTool extends AlecTool {
 
     public static final String NAME = "list_node_resources";
     static final int MAX_RESOURCES = 60;

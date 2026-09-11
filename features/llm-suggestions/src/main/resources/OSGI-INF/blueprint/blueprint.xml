@@ -49,7 +49,7 @@
 
     <!-- Per-call token-usage log; aggregated by /alec/llm/usage. -->
     <!-- ALEC-308: this bundle's contribution to the MCP tool catalogue. -->
-    <service interface="org.opennms.alec.mcp.McpTool">
+    <service interface="org.opennms.integration.api.v1.mcp.McpToolProvider">
         <bean class="org.opennms.alec.llm.PastAnalysesTool">
             <argument ref="keyValueStore"/>
             <argument ref="llmObjectMapper"/>

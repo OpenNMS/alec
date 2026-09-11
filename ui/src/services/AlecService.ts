@@ -57,9 +57,13 @@ export const getLLMConfig = async (): Promise<TLLMConfigStatus | false> => {
 	}
 }
 
+// The plain-text reason of the last rejected saveLLMConfig call, or ''.
+let lastLlmConfigError = ''
+
 export const saveLLMConfig = async (
 	config: TLLMConfigRequest
 ): Promise<TLLMConfigStatus | false> => {
+	lastLlmConfigError = ''
 	try {
 		const resp = await rest.post(llmConfigEndpoint, config)
 		if (resp.status === 200) {
@@ -67,9 +71,15 @@ export const saveLLMConfig = async (
 		}
 		return false
 	} catch (err) {
+		// A 400 carries the server's reason as a plain-text body (e.g. the
+		// MCP tool-access login probe failed). Keep it for the UI toast.
+		const data = (err as any)?.response?.data
+		lastLlmConfigError = typeof data === 'string' && data.length > 0 ? data : ''
 		return false
 	}
 }
+
+export const getLastLlmConfigError = () => lastLlmConfigError
 
 // Probe the endpoint/model/key. Send the current form values; a blank apiKey
 // tells the server to use the already-stored key. Returns the server's

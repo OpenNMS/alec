@@ -145,13 +145,20 @@ export type TMCPTool = {
 	name: string
 	description: string
 	available: boolean
+	// True for tools that change state (never offered to the model).
+	writeAccess?: boolean
+	// "alec" for ALEC's own tools, else the contributing bundle.
+	source?: string
 }
 
 export type TMCPStatus = {
 	toolsEnabled: boolean
 	opennmsRestConfigured: boolean
 	opennmsUrl: string
+	// Path of the OpenNMS MCP server that serves the tools to external clients.
 	endpointPath: string
+	// Whether that server (the opennms-mcp-server feature) is active.
+	nativeServerInstalled?: boolean
 	tools: TMCPTool[]
 	stats: {
 		sinceMs: number

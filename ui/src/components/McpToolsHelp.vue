@@ -19,13 +19,16 @@ defineProps<{
 	<div class="mcp-help" data-test="llm-tools-help-popover">
 		<h4>What the MCP server is</h4>
 		<p>
-			ALEC embeds a <strong>Model Context Protocol (MCP) server</strong>: a
-			catalogue of read-only tools over OpenNMS data — situations, node
-			inventory, current alarms, discovered topology neighbours, recent events,
-			collected metrics, device configuration backups and ALEC's own past
-			analyses. A tool is a small function with a name, a description and a
-			JSON argument schema. The model reads those descriptions and decides for
-			itself which tools to call and with which arguments.
+			OpenNMS ships a <strong>Model Context Protocol (MCP) server</strong>
+			(the <code>opennms-mcp-server</code> feature of the Integration API)
+			that exposes tools over OpenNMS data to MCP clients. ALEC extends it:
+			every ALEC tool is an Integration API <em>tool provider</em>, so the
+			OpenNMS server advertises ALEC's tools next to its own — situations,
+			node inventory, current alarms, discovered topology neighbours, recent
+			events, collected metrics, device configuration backups and ALEC's
+			past analyses. A tool is a small function with a name, a description
+			and a JSON argument schema; the model reads those descriptions and
+			decides for itself which tools to call and with which arguments.
 		</p>
 
 		<h4>How a tool-assisted analysis flows</h4>
@@ -77,13 +80,26 @@ defineProps<{
 
 		<h4>External MCP clients</h4>
 		<p>
-			The same tools are served over MCP (JSON-RPC over HTTP, stateless) at
-			<code data-test="llm-tools-endpoint">{{ endpointUrl }}</code> for
-			interactive use from an MCP-capable client such as LM Studio's chat,
-			Claude Desktop or an agent framework. The client authenticates with an
-			OpenNMS <strong>admin</strong> login (HTTP Basic). This endpoint is
-			always available; the checkbox only controls whether ALEC's own
-			analyses use the tools.
+			ALEC's tools are served by the OpenNMS MCP server at
+			<code data-test="llm-tools-endpoint">{{ endpointUrl }}</code>
+			(Streamable HTTP, stateless) for interactive use from an MCP-capable
+			client such as LM Studio's chat, Claude Desktop, Claude Code or an
+			agent framework. The client authenticates with an OpenNMS login
+			(HTTP Basic) holding the <code>ROLE_REST</code> or
+			<code>ROLE_ADMIN</code> role; OpenNMS's own write tools are offered
+			to administrators only, and ALEC's tools are all read-only. That
+			endpoint is always available while the server feature is installed;
+			the checkbox only controls whether ALEC's own analyses use the tools.
+		</p>
+		<p
+			v-if="status && status.nativeServerInstalled === false"
+			class="mcp-help-warning"
+			data-test="llm-tools-native-missing"
+		>
+			The OpenNMS MCP server bundle is not active on this system, so external
+			clients cannot reach the tools yet. ALEC's own analyses are unaffected.
+			Install it from the Karaf shell with
+			<code>feature:install opennms-mcp-server</code>.
 		</p>
 
 		<h4>Which OpenNMS account to use</h4>
@@ -125,8 +141,17 @@ defineProps<{
 		<ul v-if="status" class="mcp-tool-list" data-test="llm-tools-list">
 			<li v-for="tool in status.tools" :key="tool.name">
 				<code>{{ tool.name }}</code>
-				<span v-if="!tool.available" class="mcp-tool-unavailable">
+				<span v-if="tool.writeAccess" class="mcp-tool-unavailable">
+					(writes — never offered to the model)
+				</span>
+				<span v-else-if="!tool.available" class="mcp-tool-unavailable">
 					(needs the OpenNMS login)
+				</span>
+				<span
+					v-if="tool.source && tool.source !== 'alec'"
+					class="mcp-tool-source"
+				>
+					[{{ tool.source }}]
 				</span>
 				<span class="mcp-tool-desc"> — {{ tool.description }}</span>
 			</li>
@@ -187,5 +212,14 @@ defineProps<{
 		color: var(--feather-warning);
 		font-size: 12px;
 	}
+
+	.mcp-tool-source {
+		color: var(--feather-secondary-text-on-surface);
+		font-size: 12px;
+	}
+}
+
+.mcp-help-warning {
+	color: var(--feather-warning);
 }
 </style>

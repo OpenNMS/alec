@@ -30,7 +30,7 @@ package org.opennms.alec.mcp.tools;
 
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * returned as a summary plus a bounded number of samples — never the raw
  * series.
  */
-public class GetMetricSeriesTool implements McpTool {
+public class GetMetricSeriesTool extends AlecTool {
 
     public static final String NAME = "get_metric_series";
     static final int DEFAULT_HOURS = 2;

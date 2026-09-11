@@ -35,24 +35,31 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.opennms.integration.api.v1.mcp.McpToolProvider;
+import org.opennms.integration.api.v1.mcp.McpToolResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * Default {@link ToolRegistry}: tools are added by the blueprint wiring and
- * through the {@link McpTool} whiteboard (bind/unbind). Every invocation —
- * whoever made it — is counted in {@link McpMetrics} and size-capped.
+ * Default {@link ToolRegistry}: providers arrive through the
+ * {@link McpToolProvider} whiteboard (bind/unbind). ALEC's own tools are
+ * dispatched natively on JSON; providers from other bundles go through the
+ * Integration API's map-based {@code execute}. Every invocation is counted in
+ * {@link McpMetrics} and size-capped.
  */
 public class DefaultToolRegistry implements ToolRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultToolRegistry.class);
+    private static final TypeReference<Map<String, Object>> MAP = new TypeReference<Map<String, Object>>() {
+    };
 
-    private final Map<String, McpTool> tools = new ConcurrentHashMap<>();
+    private final Map<String, McpToolProvider> tools = new ConcurrentHashMap<>();
     private final McpMetrics metrics;
     private final ObjectMapper objectMapper;
 
@@ -61,27 +68,32 @@ public class DefaultToolRegistry implements ToolRegistry {
         this.objectMapper = Objects.requireNonNull(objectMapper);
     }
 
-    /** Blueprint reference-list bind method (also used for built-ins). */
     @Override
-    public void addTool(McpTool tool) {
+    public void addTool(McpToolProvider tool) {
         if (tool == null) {
             return;
         }
-        String name = tool.getSpec().getName();
-        McpTool previous = tools.put(name, tool);
+        String name = safeName(tool);
+        if (name.isEmpty()) {
+            LOG.warn("Ignoring MCP tool provider {} with a blank name", tool.getClass().getName());
+            return;
+        }
+        if (tool instanceof AlecTool) {
+            ((AlecTool) tool).attachMetrics(metrics);
+        }
+        McpToolProvider previous = tools.put(name, tool);
         if (previous != null && previous != tool) {
             LOG.warn("MCP tool '{}' registered twice; the later registration wins", name);
         }
         LOG.debug("MCP tool registered: {}", name);
     }
 
-    /** Blueprint reference-list unbind method. */
     @Override
-    public void removeTool(McpTool tool) {
+    public void removeTool(McpToolProvider tool) {
         if (tool == null) {
             return;
         }
-        String name = tool.getSpec().getName();
+        String name = safeName(tool);
         if (tools.remove(name, tool)) {
             LOG.debug("MCP tool unregistered: {}", name);
         }
@@ -92,37 +104,48 @@ public class DefaultToolRegistry implements ToolRegistry {
         return metrics;
     }
 
-    /** Specs of every tool that can currently work, sorted by name. */
     @Override
     public List<ToolSpec> availableSpecs() {
         List<ToolSpec> specs = new ArrayList<>();
-        for (McpTool t : availableTools()) {
-            specs.add(t.getSpec());
+        for (McpToolProvider t : allTools()) {
+            if (!isAvailable(t)) {
+                continue;
+            }
+            ToolSpec spec = specOf(t);
+            if (spec != null) {
+                specs.add(spec);
+            }
         }
         return specs;
     }
 
     @Override
-    public List<McpTool> availableTools() {
-        List<McpTool> out = new ArrayList<>();
-        tools.values().stream()
-                .filter(McpTool::isAvailable)
-                .sorted((a, b) -> a.getSpec().getName().compareTo(b.getSpec().getName()))
-                .forEach(out::add);
-        return out;
-    }
-
-    /** Every registered tool, available or not (for the status endpoint). */
-    @Override
-    public List<McpTool> allTools() {
-        List<McpTool> out = new ArrayList<>(tools.values());
-        out.sort((a, b) -> a.getSpec().getName().compareTo(b.getSpec().getName()));
+    public List<McpToolProvider> allTools() {
+        List<McpToolProvider> out = new ArrayList<>(tools.values());
+        out.sort((a, b) -> safeName(a).compareTo(safeName(b)));
         return out;
     }
 
     @Override
-    public Optional<McpTool> find(String name) {
+    public boolean isAvailable(McpToolProvider tool) {
+        try {
+            if (tool.isWriteAccess()) {
+                return false; // the model is never offered a tool that changes anything
+            }
+        } catch (RuntimeException e) {
+            return false;
+        }
+        return !(tool instanceof AlecTool) || ((AlecTool) tool).isAvailable();
+    }
+
+    @Override
+    public Optional<McpToolProvider> find(String name) {
         return name == null ? Optional.empty() : Optional.ofNullable(tools.get(name));
+    }
+
+    @Override
+    public Optional<ToolSpec> findSpec(String name) {
+        return find(name).map(this::specOf);
     }
 
     @Override
@@ -130,21 +153,18 @@ public class DefaultToolRegistry implements ToolRegistry {
         return tools.isEmpty();
     }
 
-    /**
-     * Invoke a tool by name. Never throws: unknown tools, unavailable tools,
-     * {@link ToolException}s and unexpected runtime failures all come back as
-     * an error result the caller can relay to the model.
-     */
     @Override
     public ToolResult call(ToolConsumer consumer, String name, JsonNode arguments) {
         String toolName = name == null ? "" : name;
-        Optional<McpTool> maybe = find(toolName);
+        Optional<McpToolProvider> maybe = find(toolName);
         if (maybe.isEmpty()) {
-            metrics.recordCall(consumer, toolName, true);
+            // One bucket for every unknown name so a model hallucinating tool
+            // names cannot grow the per-tool counters without bound.
+            metrics.recordCall(consumer, McpMetrics.UNKNOWN_TOOL, true);
             return error("Unknown tool '" + toolName + "'. Available tools: " + availableNames());
         }
-        McpTool tool = maybe.get();
-        if (!tool.isAvailable()) {
+        McpToolProvider tool = maybe.get();
+        if (!isAvailable(tool)) {
             metrics.recordCall(consumer, toolName, true);
             return error("Tool '" + toolName + "' is not available on this system");
         }
@@ -154,16 +174,11 @@ public class DefaultToolRegistry implements ToolRegistry {
             return error("Tool arguments must be a JSON object");
         }
         try {
-            JsonNode content = tool.call(args);
-            if (content == null) {
-                content = objectMapper.createObjectNode();
-            }
-            metrics.recordCall(consumer, toolName, false);
-            return ToolResult.ok(content, serialize(content));
-        } catch (ToolException e) {
-            metrics.recordCall(consumer, toolName, true);
-            LOG.debug("MCP tool '{}' failed ({}): {}", toolName, consumer.getKey(), e.getMessage());
-            return error(e.getMessage());
+            ToolResult result = tool instanceof AlecTool
+                    ? callAlecTool((AlecTool) tool, args)
+                    : callProvider(tool, args);
+            metrics.recordCall(consumer, toolName, result.isError());
+            return result;
         } catch (RuntimeException e) {
             // A bug or an unexpected upstream failure. Log it (with the stack)
             // for the operator; give the model a generic message so nothing
@@ -171,6 +186,66 @@ public class DefaultToolRegistry implements ToolRegistry {
             metrics.recordCall(consumer, toolName, true);
             LOG.warn("MCP tool '{}' threw unexpectedly", toolName, e);
             return error("Tool '" + toolName + "' failed unexpectedly: " + e.getClass().getSimpleName());
+        }
+    }
+
+    private ToolResult callAlecTool(AlecTool tool, JsonNode args) {
+        try {
+            JsonNode content = tool.call(args);
+            if (content == null) {
+                content = objectMapper.createObjectNode();
+            }
+            return ToolResult.ok(content, serialize(content));
+        } catch (ToolException e) {
+            LOG.debug("MCP tool '{}' failed: {}", tool.getToolName(), e.getMessage());
+            return error(e.getMessage());
+        }
+    }
+
+    /** A provider from another bundle: the Integration API's map-in, text-out contract. */
+    private ToolResult callProvider(McpToolProvider tool, JsonNode args) {
+        Map<String, Object> arguments = objectMapper.convertValue(args, MAP);
+        McpToolResult result = tool.execute(new AlecTool.InternalContext(arguments));
+        if (result == null) {
+            return error("Tool '" + safeName(tool) + "' returned no result");
+        }
+        String text = String.join("\n", result.getTextContents());
+        if (result.isError()) {
+            return error(text);
+        }
+        JsonNode content;
+        try {
+            content = objectMapper.readTree(text);
+        } catch (JsonProcessingException e) {
+            content = objectMapper.getNodeFactory().textNode(text);
+        }
+        return ToolResult.ok(content, cap(text));
+    }
+
+    /** A provider's declaration in ALEC's spec form; null when its schema is unusable. */
+    ToolSpec specOf(McpToolProvider tool) {
+        if (tool instanceof AlecTool) {
+            return ((AlecTool) tool).getSpec();
+        }
+        try {
+            JsonNode schema = objectMapper.readTree(tool.getInputSchema());
+            if (schema == null || !schema.isObject()) {
+                LOG.warn("MCP tool '{}' has a non-object input schema; not offered to the model", safeName(tool));
+                return null;
+            }
+            return ToolSpec.of(tool.getToolName(), tool.getToolDescription(), (ObjectNode) schema);
+        } catch (RuntimeException | JsonProcessingException e) {
+            LOG.warn("MCP tool '{}' has an unparseable input schema; not offered to the model", safeName(tool));
+            return null;
+        }
+    }
+
+    private static String safeName(McpToolProvider tool) {
+        try {
+            String n = tool.getToolName();
+            return n == null ? "" : n.trim();
+        } catch (RuntimeException e) {
+            return "";
         }
     }
 
@@ -195,11 +270,15 @@ public class DefaultToolRegistry implements ToolRegistry {
         } catch (JsonProcessingException e) {
             text = "{\"error\":\"result could not be serialized\"}";
         }
+        return cap(text);
+    }
+
+    private static String cap(String text) {
         if (text.length() > MAX_RESULT_CHARS) {
             // Truncate as text rather than trimming the structure: the model
             // still sees the leading (most important) part, plus an explicit
             // marker so it knows the tail is missing.
-            text = text.substring(0, MAX_RESULT_CHARS) + "\n...[truncated: result exceeded "
+            return text.substring(0, MAX_RESULT_CHARS) + "\n...[truncated: result exceeded "
                     + MAX_RESULT_CHARS + " characters; narrow the request]";
         }
         return text;

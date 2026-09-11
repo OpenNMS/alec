@@ -35,24 +35,32 @@ import org.opennms.alec.mcp.McpMetrics;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /** GET /alec/mcp/status body. */
-@JsonPropertyOrder({"toolsEnabled", "opennmsRestConfigured", "opennmsUrl", "endpointPath", "tools", "stats"})
+@JsonPropertyOrder({"toolsEnabled", "opennmsRestConfigured", "opennmsUrl", "endpointPath", "nativeServerInstalled", "tools", "stats"})
 public final class McpStatus {
 
-    public static final String ENDPOINT_PATH = "/opennms/rest/alec/mcp";
+    /** The OpenNMS MCP server (opennms-mcp-server feature) that serves ALEC's tools to external clients. */
+    public static final String ENDPOINT_PATH = "/opennms/rest/mcp";
 
     private final boolean toolsEnabled;
     private final boolean opennmsRestConfigured;
     private final String opennmsUrl;
+    private final boolean nativeServerInstalled;
     private final List<ToolInfo> tools;
     private final McpMetrics.Snapshot stats;
 
     public McpStatus(boolean toolsEnabled, boolean opennmsRestConfigured, String opennmsUrl,
-                     List<ToolInfo> tools, McpMetrics.Snapshot stats) {
+                     boolean nativeServerInstalled, List<ToolInfo> tools, McpMetrics.Snapshot stats) {
         this.toolsEnabled = toolsEnabled;
         this.opennmsRestConfigured = opennmsRestConfigured;
         this.opennmsUrl = opennmsUrl;
+        this.nativeServerInstalled = nativeServerInstalled;
         this.tools = tools;
         this.stats = stats;
+    }
+
+    /** Whether the OpenNMS MCP server bundle is active, i.e. the endpoint above exists. */
+    public boolean isNativeServerInstalled() {
+        return nativeServerInstalled;
     }
 
     public boolean isToolsEnabled() {
@@ -79,16 +87,34 @@ public final class McpStatus {
         return stats;
     }
 
-    @JsonPropertyOrder({"name", "description", "available"})
+    @JsonPropertyOrder({"name", "description", "available", "writeAccess", "source"})
     public static final class ToolInfo {
         private final String name;
         private final String description;
         private final boolean available;
+        private final boolean writeAccess;
+        private final String source;
 
         public ToolInfo(String name, String description, boolean available) {
+            this(name, description, available, false, "alec");
+        }
+
+        public ToolInfo(String name, String description, boolean available, boolean writeAccess, String source) {
             this.name = name;
             this.description = description;
             this.available = available;
+            this.writeAccess = writeAccess;
+            this.source = source;
+        }
+
+        /** True for tools that change state; never offered to the model. */
+        public boolean isWriteAccess() {
+            return writeAccess;
+        }
+
+        /** "alec" for ALEC's own tools, else the contributing bundle's symbolic name. */
+        public String getSource() {
+            return source;
         }
 
         public String getName() {

@@ -32,7 +32,7 @@ import java.util.Objects;
 
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolRegistry;
@@ -48,7 +48,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * model to call this first, so it doubles as proof that the whole
  * model-to-tool round trip works.
  */
-public class AlecStatusTool implements McpTool {
+public class AlecStatusTool extends AlecTool {
 
     public static final String NAME = "alec_status";
 

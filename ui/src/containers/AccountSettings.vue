@@ -12,7 +12,7 @@ import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import { FeatherIcon } from '@featherds/icon'
 import CONST from '@/helpers/constants'
 import { useUserStore } from '@/store/useUserStore'
-import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue'
+import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
 import { FeatherButton } from '@featherds/button'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import {
@@ -26,7 +26,8 @@ import {
 	reEvaluateAllOpenAlarms,
 	validateLLMConfig,
 	validateLLMTools,
-	getMCPStatus
+	getMCPStatus,
+	getLastLlmConfigError
 } from '@/services/AlecService'
 import McpToolsHelp from '@/components/McpToolsHelp.vue'
 import {
@@ -301,7 +302,7 @@ const llmToolsValidationResult = ref<TLLMValidationResult | null>(null)
 // Absolute URL external MCP clients connect to; the path comes from the
 // server when known so the two can't drift.
 const mcpEndpointUrl = computed(() => {
-	const path = mcpStatus.value?.endpointPath || '/opennms/rest/alec/mcp'
+	const path = mcpStatus.value?.endpointPath || '/opennms/rest/mcp'
 	const origin =
 		typeof window !== 'undefined' && window.location ? window.location.origin : ''
 	return origin + path
@@ -315,16 +316,38 @@ const clearOpennmsPassword = () => {
 	llmOpennmsPasswordCleared.value = true
 	llmOpennmsPasswordPresent.value = false
 }
-// Adds the OpenNMS login fields the user has typed (never a stored secret).
+// Typing a new password after "Clear password" replaces the stored one; the
+// pending clear must not win over it on save.
+watch(llmOpennmsPassword, (value) => {
+	if (value.trim().length > 0 && llmOpennmsPasswordCleared.value) {
+		llmOpennmsPasswordCleared.value = false
+	}
+})
+// Adds the OpenNMS login fields as shown in the form. URL and username are
+// always sent — an explicit blank clears the stored value, an omitted field
+// would keep it — while the password goes only when typed (never a stored
+// secret).
 const withOpennmsLogin = (req: TLLMConfigRequest): TLLMConfigRequest => {
-	const url = llmOpennmsUrl.value.trim()
-	const user = llmOpennmsUsername.value.trim()
+	req.opennmsUrl = llmOpennmsUrl.value.trim()
+	req.opennmsUsername = llmOpennmsUsername.value.trim()
 	const pass = llmOpennmsPassword.value.trim()
-	if (url.length > 0) req.opennmsUrl = url
-	if (user.length > 0) req.opennmsUsername = user
 	if (pass.length > 0) req.opennmsPassword = pass
 	return req
 }
+// The stored OpenNMS password is only ever sent to the URL it was saved with
+// (same rule as the API key): a different URL needs the password typed again.
+const normalizeOpennmsUrl = (u: string | undefined) =>
+	(u && u.trim() ? u.trim() : 'http://localhost:8980/opennms')
+		.replace(/\/+$/, '')
+		.toLowerCase()
+const llmOpennmsUrlNeedsPassword = computed(
+	() =>
+		llmOpennmsPasswordPresent.value &&
+		!llmOpennmsPasswordCleared.value &&
+		llmOpennmsPassword.value.trim().length === 0 &&
+		normalizeOpennmsUrl(llmOpennmsUrl.value) !==
+			normalizeOpennmsUrl(userStore.llmConfig?.opennmsUrl)
+)
 // Save gate: with the checkbox set, the form may only be saved after "Check
 // tool access" passed for the values currently in the form. The check's
 // fingerprint covers every field the probe depends on, so editing any of them
@@ -378,6 +401,12 @@ const llmToolsDirty = computed(() => {
 // The reason a save is blocked by the MCP block, or '' when it may proceed.
 const llmToolsSaveBlockedReason = computed(() => {
 	if (!llmToolsEnabled.value) return ''
+	// Clearing the API key disables the LLM integration on save (the server
+	// forces enabled=false), so no tool check is possible or needed.
+	if (llmApiKeyCleared.value) return ''
+	if (llmOpennmsUrlNeedsPassword.value) {
+		return 'The OpenNMS URL changed — re-enter the OpenNMS password for the new URL, then run Check tool access.'
+	}
 	if (llmToolsLoginMissing.value) {
 		return 'MCP tool access needs an OpenNMS login (a read-only account). Enter it, then run Check tool access.'
 	}
@@ -521,7 +550,8 @@ const buildLLMRequest = (): TLLMConfigRequest => {
 			monthlyTokenLimit: Math.max(0, Number(llmMonthlyTokenLimit.value) || 0),
 			clearApiKey: true,
 			toolsEnabled: llmToolsEnabled.value,
-			clearOpennmsPassword: llmOpennmsPasswordCleared.value
+			clearOpennmsPassword:
+				llmOpennmsPasswordCleared.value && llmOpennmsPassword.value.trim().length === 0
 		})
 	}
 	const trimmedKey = llmApiKey.value.trim()
@@ -536,7 +566,8 @@ const buildLLMRequest = (): TLLMConfigRequest => {
 		dailyTokenLimit: Math.max(0, Number(llmDailyTokenLimit.value) || 0),
 		monthlyTokenLimit: Math.max(0, Number(llmMonthlyTokenLimit.value) || 0),
 		toolsEnabled: llmToolsEnabled.value,
-		clearOpennmsPassword: llmOpennmsPasswordCleared.value
+		clearOpennmsPassword:
+			llmOpennmsPasswordCleared.value && llmOpennmsPassword.value.trim().length === 0
 	}
 	if (trimmedKey.length > 0) {
 		request.apiKey = trimmedKey
@@ -664,8 +695,11 @@ const saveConfiguration = async () => {
 		userStore.getEngineInfo()
 		notify('The settings were saved!', false)
 	} else if (savedEngine && !savedLLM) {
+		const reason = getLastLlmConfigError()
 		notify(
-			'Engine settings saved, but the LLM configuration was rejected — enabling the integration requires an endpoint URL, a model and an API key.',
+			reason
+				? `Engine settings saved, but the LLM configuration was rejected: ${reason}`
+				: 'Engine settings saved, but the LLM configuration was rejected — enabling the integration requires an endpoint URL, a model and an API key.',
 			true
 		)
 	} else {
@@ -1479,8 +1513,15 @@ const handleReEvaluate = async () => {
 					{{ mcpStatus.stats.byConsumer.clustering ?? 0 }} clustering,
 					{{ mcpStatus.stats.byConsumer.external ?? 0 }} external MCP clients,
 					{{ mcpStatus.stats.byConsumer.validation ?? 0 }} checks);
-					{{ mcpStatus.stats.toolErrors }} errors. External MCP endpoint:
+					{{ mcpStatus.stats.toolErrors }} errors. OpenNMS MCP server for external
+					clients:
 					<code data-test="llm-tools-endpoint-inline">{{ mcpEndpointUrl }}</code>
+					<span
+						v-if="mcpStatus.nativeServerInstalled === false"
+						data-test="llm-tools-native-missing-inline"
+					>
+						(not active — install the <code>opennms-mcp-server</code> feature)
+					</span>
 				</div>
 			</div>
 

@@ -33,8 +33,8 @@ import java.util.function.Supplier;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/** A configurable {@link McpTool} for registry / handler tests. */
-public class StubTool implements McpTool {
+/** A configurable {@link AlecTool} for registry / loop tests. */
+public class StubTool extends AlecTool {
 
     @FunctionalInterface
     public interface Body {

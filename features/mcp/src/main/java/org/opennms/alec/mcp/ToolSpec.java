@@ -51,15 +51,31 @@ public final class ToolSpec {
     private final String name;
     private final String description;
     private final List<Param> params;
+    // Whole input schema as declared by a foreign McpToolProvider; null for
+    // specs built with the builder.
+    private final ObjectNode schema;
 
     private ToolSpec(Builder b) {
         this.name = b.name;
         this.description = b.description;
         this.params = Collections.unmodifiableList(new ArrayList<>(b.params));
+        this.schema = null;
+    }
+
+    private ToolSpec(String name, String description, ObjectNode schema) {
+        this.name = Objects.requireNonNull(name);
+        this.description = description == null ? "" : description;
+        this.params = Collections.emptyList();
+        this.schema = schema.deepCopy();
     }
 
     public static Builder builder(String name) {
         return new Builder(name);
+    }
+
+    /** A spec wrapping a ready-made JSON input schema (another plugin's provider). */
+    public static ToolSpec of(String name, String description, ObjectNode inputSchema) {
+        return new ToolSpec(name, description, Objects.requireNonNull(inputSchema));
     }
 
     public String getName() {
@@ -76,6 +92,9 @@ public final class ToolSpec {
 
     /** JSON-schema object for the tool's arguments. */
     public ObjectNode parametersSchema(ObjectMapper om) {
+        if (this.schema != null) {
+            return this.schema.deepCopy();
+        }
         ObjectNode schema = om.createObjectNode();
         schema.put("type", "object");
         ObjectNode props = schema.putObject("properties");

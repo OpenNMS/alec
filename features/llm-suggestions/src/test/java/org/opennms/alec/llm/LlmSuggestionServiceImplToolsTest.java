@@ -56,7 +56,7 @@ import org.opennms.alec.mcp.McpConfig;
 import org.opennms.alec.mcp.KvMcpConfigReader;
 import org.opennms.alec.mcp.McpConfigReader;
 import org.opennms.alec.mcp.McpMetrics;
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.DefaultToolRegistry;
@@ -124,7 +124,7 @@ public class LlmSuggestionServiceImplToolsTest {
         kv = new InMemoryKVStore();
         mcpReader = new KvMcpConfigReader(kv, om);
         registry = new DefaultToolRegistry(new McpMetrics(), om);
-        registry.addTool(new McpTool() {
+        registry.addTool(new AlecTool() {
             private final ToolSpec spec = ToolSpec.builder("alec_status").description("status").build();
 
             @Override
@@ -215,10 +215,10 @@ public class LlmSuggestionServiceImplToolsTest {
     public void validateToolsFailsWhenAlecStatusIsNotRegistered() {
         storeOpenNmsLogin();
         ToolRegistry other = new DefaultToolRegistry(new McpMetrics(), om);
-        other.addTool(new McpTool() {
+        other.addTool(new AlecTool() {
             @Override
             public ToolSpec getSpec() {
-                return ToolSpec.builder("get_node").build();
+                return ToolSpec.builder("get_node_inventory").build();
             }
 
             @Override

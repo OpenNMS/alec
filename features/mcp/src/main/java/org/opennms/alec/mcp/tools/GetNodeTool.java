@@ -31,7 +31,7 @@ package org.opennms.alec.mcp.tools;
 import java.util.List;
 import java.util.Objects;
 
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 import org.opennms.integration.api.v1.dao.NodeDao;
@@ -47,10 +47,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-/** Inventory detail for one node. */
-public class GetNodeTool implements McpTool {
+/** Inventory detail for one node. Named to coexist with the OpenNMS MCP server's own {@code get_node}. */
+public class GetNodeTool extends AlecTool {
 
-    public static final String NAME = "get_node";
+    public static final String NAME = "get_node_inventory";
     static final int MAX_INTERFACES = 60;
     static final int MAX_METADATA = 40;
 

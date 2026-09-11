@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 
@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /** The current situations, newest first, without their alarms. */
-public class ListSituationsTool implements McpTool {
+public class ListSituationsTool extends AlecTool {
 
     public static final String NAME = "list_situations";
     static final int DEFAULT_LIMIT = 20;

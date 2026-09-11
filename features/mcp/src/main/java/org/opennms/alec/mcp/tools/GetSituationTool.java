@@ -34,7 +34,7 @@ import java.util.Optional;
 
 import org.opennms.alec.datasource.api.Situation;
 import org.opennms.alec.datasource.api.SituationDatasource;
-import org.opennms.alec.mcp.McpTool;
+import org.opennms.alec.mcp.AlecTool;
 import org.opennms.alec.mcp.ToolException;
 import org.opennms.alec.mcp.ToolSpec;
 
@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /** One situation with every alarm in it. */
-public class GetSituationTool implements McpTool {
+public class GetSituationTool extends AlecTool {
 
     public static final String NAME = "get_situation";
 

@@ -68,6 +68,8 @@ public class McpMetrics implements MetricSet {
     public static final String TOOL_CALLS_EXTERNAL = "mcpToolCallsExternal";
     public static final String TOOL_CALL_RATE_1M = "mcpToolCallRate1m";
     public static final String TOOL_CALL_RATE_5M = "mcpToolCallRate5m";
+    /** Per-tool bucket used for calls to names that are not registered. */
+    public static final String UNKNOWN_TOOL = "(unknown)";
 
     private final long startedAt = System.currentTimeMillis();
     private final Meter calls = new Meter();

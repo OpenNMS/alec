@@ -112,15 +112,28 @@ public class ChatToolLoop {
         }
     }
 
+    // The sink is usually a blueprint service proxy; during a bundle shutdown it
+    // throws ServiceUnavailableException. Metrics are best-effort — never let
+    // them fail (or, worse, mask the outcome of) the exchange itself.
     private void recordCall(ChatRequest request, boolean success) {
-        if (usageMetrics != null) {
+        if (usageMetrics == null) {
+            return;
+        }
+        try {
             usageMetrics.recordCall(request.getConsumer(), success);
+        } catch (RuntimeException e) {
+            LOG.debug("Usage metrics unavailable: {}", e.getMessage());
         }
     }
 
     private void recordRound(ChatRequest request, TokenUsage usage) {
-        if (usageMetrics != null) {
+        if (usageMetrics == null) {
+            return;
+        }
+        try {
             usageMetrics.recordRound(request.getConsumer(), usage);
+        } catch (RuntimeException e) {
+            LOG.debug("Usage metrics unavailable: {}", e.getMessage());
         }
     }
 

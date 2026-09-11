@@ -627,4 +627,24 @@ public class LlmClusterEngineTest {
         assertThat(new LlmClusterEngine.LlmConfig("k", "u", "m", 0L, 0L).toolsEnabled, is(false));
         assertThat(config(true).toolsEnabled, is(true));
     }
+
+    @Test
+    public void recordFailedCallWritesAFailureRowWithZeroTokens() throws Exception {
+        long now = 1_700_000_000_000L;
+        engine.recordFailedCall(MODEL, now);
+        Map<String, String> rows = kvStore.enumerateContext(LlmClusterEngine.USAGE_CONTEXT);
+        assertThat(rows.size(), equalTo(1));
+        JsonNode rec = om.readTree(rows.values().iterator().next());
+        assertThat(rec.get("success").asBoolean(), equalTo(false));
+        assertThat(rec.get("situationId").asText(), equalTo(LlmClusterEngine.CLUSTER_USAGE_MARKER));
+        assertThat(rec.get("model").asText(), equalTo(MODEL));
+        assertThat(rec.get("ts").asLong(), equalTo(now));
+        assertThat(rec.get("inputTokens").asLong() + rec.get("outputTokens").asLong(), equalTo(0L));
+        assertThat(rec.get("toolCalls").asLong(), equalTo(0L));
+    }
+
+    @Test
+    public void readTimeoutIsGenerousEnoughForLocalModels() {
+        assertThat(LlmClusterEngine.READ_TIMEOUT_SECONDS >= 120, equalTo(true));
+    }
 }

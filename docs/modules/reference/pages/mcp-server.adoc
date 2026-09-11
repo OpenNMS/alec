@@ -138,6 +138,7 @@ The number of tool calls per analysis is also recorded there (*Tool calls* in th
 == Cost, load and privacy
 
 Each tool round is a full chat request, so a tool-assisted analysis uses several times the tokens of a single-shot one and takes longer.
+ALEC waits up to three minutes for each round; a locally hosted model that needs longer than that on a large alarm set logs a timeout and the analysis (or the clustering pass) is abandoned — use a faster model, a shorter cluster interval prompt, or fewer alarms per request.
 The shared token budgets apply to the whole exchange.
 
 With tools enabled the model can read more than the situation's alarms: node inventory, other alarms, topology links, recent events, metric summaries and — only when it asks for the content — device configuration text with secrets redacted.

@@ -121,6 +121,11 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     // is throttled separately to the configured cluster frequency
     // (clusterRequestIntervalMs). See setClusterRequestIntervalMs / the factory.
     static final long RECONCILE_INTERVAL_MS = 30_000L;
+    // Per-round wait for the model's grouping. A local model clustering a
+    // large alarm set with the tool list offered needs far more than 30 s;
+    // a timeout discards the whole grouping, so this is generous. The call
+    // runs off the tick thread and one request is in flight at a time.
+    static final int READ_TIMEOUT_SECONDS = 180;
 
     public static final String DEFAULT_CLUSTER_PROMPT =
             "You are a senior network reliability engineer analyzing alarms for OpenNMS ALEC.\n"
@@ -200,7 +205,7 @@ public class LlmClusterEngine extends AbstractClusterEngine {
                 ? DEFAULT_CLUSTER_PROMPT : clusterPrompt;
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
         this.loop = new ChatToolLoop(httpClient, objectMapper, usageMetrics);
@@ -336,6 +341,7 @@ public class LlmClusterEngine extends AbstractClusterEngine {
                 latestGroups = parseGroups(result.getTerminalArguments());
             } catch (LlmCallException e) {
                 LOG.warn("LLM clustering call failed ({}): {}", e.getKind(), e.getMessage());
+                recordFailedCall(model, timestampInMillis);
             } catch (Exception e) {
                 LOG.error("Unexpected error during LLM clustering", e);
             } finally {
@@ -723,6 +729,29 @@ public class LlmClusterEngine extends AbstractClusterEngine {
             }
         } catch (Exception e) {
             LOG.warn("Failed to record LLM clustering token usage: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * A failed clustering exchange: zero tokens, success=false — the same row
+     * RCA writes for its failures, so the usage dashboard's call/failure
+     * counts cover clustering too instead of silently showing nothing.
+     */
+    void recordFailedCall(String model, long now) {
+        try {
+            ObjectNode rec = objectMapper.createObjectNode();
+            rec.put("ts", now);
+            rec.put("situationId", CLUSTER_USAGE_MARKER);
+            rec.put("model", model);
+            rec.put("success", false);
+            rec.put("inputTokens", 0);
+            rec.put("outputTokens", 0);
+            rec.put("cacheReadInputTokens", 0);
+            rec.put("cacheCreationInputTokens", 0);
+            rec.put("toolCalls", 0);
+            kvStore.put(UUID.randomUUID().toString(), objectMapper.writeValueAsString(rec), USAGE_CONTEXT);
+        } catch (Exception e) {
+            LOG.warn("Failed to record failed LLM clustering call: {}", e.getMessage());
         }
     }
 

@@ -186,7 +186,11 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     private static final int DEFAULT_POOL_SIZE = 4;
     private static final int DEFAULT_MAX_CONCURRENT = 5;
     private static final int CONNECT_TIMEOUT_SECONDS = 5;
-    private static final int READ_TIMEOUT_SECONDS = 30;
+    // Per-round wait for the model's answer. A locally hosted model (LM
+    // Studio, Ollama) prefilling a large alarm prompt plus the tool list, and
+    // then generating up to MAX_TOKENS, routinely needs well over the 30 s this
+    // used to be — and a timeout here silently discards the whole analysis.
+    static final int READ_TIMEOUT_SECONDS = 180;
     private static final int WRITE_TIMEOUT_SECONDS = 30;
 
     private final OkHttpClient httpClient;

@@ -718,4 +718,31 @@ public class ChatToolLoopTest {
                 .build());
         assertThat(result.getRounds(), equalTo(1));
     }
+
+    @Test
+    public void aThrowingMetricsSinkDoesNotBreakTheExchange() throws Exception {
+        respond(toolCalls(usage(10, 1, 0), call("c1", "report", "{}")));
+        LlmUsageMetrics broken = new LlmUsageMetrics() {
+            @Override
+            public void recordRound(ToolConsumer consumer, TokenUsage usage) {
+                throw new IllegalStateException("container is being destroyed");
+            }
+
+            @Override
+            public void recordCall(ToolConsumer consumer, boolean success) {
+                throw new IllegalStateException("container is being destroyed");
+            }
+        };
+        ChatToolLoop fragile = new ChatToolLoop(new OkHttpClient.Builder().addInterceptor(chain -> {
+            Scripted next = script.poll();
+            return new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200)
+                    .message("OK").body(ResponseBody.create(MediaType.parse("application/json"), next.body)).build();
+        }).build(), om, broken);
+        ChatResult result = fragile.run(ChatRequest.builder()
+                .endpoint(new LlmEndpoint("http://x/v1", "k", "m"))
+                .systemPrompt("s").userContent("u")
+                .terminalTool(ToolSpec.builder("report").build())
+                .build());
+        assertThat(result.getUsage().getTotalTokens(), equalTo(11L));
+    }
 }

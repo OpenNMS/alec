@@ -37,6 +37,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.opennms.integration.api.v1.mcp.McpToolProvider;
 import org.opennms.integration.api.v1.mcp.McpToolResult;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,12 +62,64 @@ public class DefaultToolRegistry implements ToolRegistry {
     };
 
     private final Map<String, McpToolProvider> tools = new ConcurrentHashMap<>();
+    // Service reference -> the real service object we fetched for it, so
+    // unbind can release exactly what bind acquired.
+    private final Map<ServiceReference<?>, McpToolProvider> bound = new ConcurrentHashMap<>();
     private final McpMetrics metrics;
     private final ObjectMapper objectMapper;
+    private final BundleContext bundleContext;
 
     public DefaultToolRegistry(McpMetrics metrics, ObjectMapper objectMapper) {
+        this(metrics, objectMapper, null);
+    }
+
+    public DefaultToolRegistry(McpMetrics metrics, ObjectMapper objectMapper, BundleContext bundleContext) {
         this.metrics = Objects.requireNonNull(metrics);
         this.objectMapper = Objects.requireNonNull(objectMapper);
+        this.bundleContext = bundleContext;
+    }
+
+    /**
+     * Blueprint whiteboard bind method, by service reference. A reference-list
+     * of service objects would hand us blueprint proxies, which are not
+     * {@link AlecTool} instances: the JSON fast path, availability and the
+     * external-call counter would all silently miss. Fetching the real service
+     * object from the framework avoids that.
+     */
+    public void bindTool(ServiceReference<McpToolProvider> reference) {
+        if (reference == null || bundleContext == null) {
+            return;
+        }
+        McpToolProvider tool;
+        try {
+            tool = bundleContext.getService(reference);
+        } catch (RuntimeException e) {
+            LOG.warn("Could not fetch MCP tool provider service: {}", e.getMessage());
+            return;
+        }
+        if (tool == null) {
+            return;
+        }
+        bound.put(reference, tool);
+        addTool(tool);
+    }
+
+    /** Blueprint whiteboard unbind method. */
+    public void unbindTool(ServiceReference<McpToolProvider> reference) {
+        if (reference == null) {
+            return;
+        }
+        McpToolProvider tool = bound.remove(reference);
+        if (tool != null) {
+            removeTool(tool);
+        }
+        if (bundleContext != null) {
+            try {
+                bundleContext.ungetService(reference);
+            } catch (RuntimeException ignore) {
+                // framework going down
+            }
+        }
     }
 
     @Override

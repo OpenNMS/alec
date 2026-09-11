@@ -491,4 +491,29 @@ public class ToolRegistryTest {
         assertThat(msg, not(containsString("writer")));
         assertThat(msg, not(containsString("broken")));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void bindsTheRealServiceObjectByReferenceAndReleasesItOnUnbind() {
+        org.osgi.framework.BundleContext ctx = org.mockito.Mockito.mock(org.osgi.framework.BundleContext.class);
+        org.osgi.framework.ServiceReference<McpToolProvider> ref = org.mockito.Mockito.mock(org.osgi.framework.ServiceReference.class);
+        StubTool real = StubTool.returning("bound", "{}");
+        org.mockito.Mockito.when(ctx.getService(ref)).thenReturn(real);
+        DefaultToolRegistry byRef = new DefaultToolRegistry(metrics, om, ctx);
+
+        byRef.bindTool(ref);
+        assertThat(byRef.find("bound").isPresent(), is(true));
+        assertThat("the real object, not a proxy, so the AlecTool fast path applies",
+                byRef.find("bound").get() == real, is(true));
+        // External calls on the bound object are counted from now on.
+        real.execute(null);
+        assertThat(metrics.getCalls(ToolConsumer.EXTERNAL), equalTo(1L));
+
+        byRef.unbindTool(ref);
+        assertThat(byRef.find("bound").isPresent(), is(false));
+        org.mockito.Mockito.verify(ctx).ungetService(ref);
+        // Unknown references and a missing context are tolerated.
+        byRef.unbindTool(ref);
+        new DefaultToolRegistry(metrics, om).bindTool(ref);
+    }
 }

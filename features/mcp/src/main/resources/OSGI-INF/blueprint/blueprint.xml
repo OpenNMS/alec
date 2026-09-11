@@ -51,6 +51,7 @@
     <bean id="toolRegistry" class="org.opennms.alec.mcp.DefaultToolRegistry">
         <argument ref="mcpMetrics"/>
         <argument ref="mcpObjectMapper"/>
+        <argument ref="blueprintBundleContext"/>
     </bean>
     <service ref="toolRegistry" interface="org.opennms.alec.mcp.ToolRegistry"/>
     <service ref="mcpConfigReader" interface="org.opennms.alec.mcp.McpConfigReader"/>
@@ -62,8 +63,9 @@
         and serves them at /opennms/rest/mcp, so publishing a tool once makes
         it available to external MCP clients and to ALEC's own model calls.
     -->
-    <reference-list id="contributedTools" interface="org.opennms.integration.api.v1.mcp.McpToolProvider" availability="optional">
-        <reference-listener bind-method="addTool" unbind-method="removeTool">
+    <reference-list id="contributedTools" interface="org.opennms.integration.api.v1.mcp.McpToolProvider"
+                    availability="optional" member-type="service-reference">
+        <reference-listener bind-method="bindTool" unbind-method="unbindTool">
             <ref component-id="toolRegistry"/>
         </reference-listener>
     </reference-list>

@@ -73,6 +73,42 @@ public class EngineRestImpl implements EngineRest {
         }
     }
 
+    /**
+     * Blueprint reference-list bind method. The persisted engine choice is
+     * replayed once, in the constructor; an engine factory that registers
+     * afterwards (engine/llm waits on the MCP bundle's services, so it often
+     * arrives after this bean) would otherwise stay inactive until an operator
+     * re-saves the engine page. Re-run the replay when the factory the stored
+     * choice names shows up and is not the one the driver is running.
+     */
+    public void onEngineFactoryBound(EngineFactory factory) {
+        if (factory == null) {
+            return;
+        }
+        try {
+            EngineParameter stored = (EngineParameter) getEngineConfiguration().getEntity();
+            if (stored == null || stored.getEngineName() == null) {
+                return;
+            }
+            if (!stored.getEngineName().equals(factory.getName())) {
+                return;
+            }
+            // Identity, not name: a re-registered factory (bundle restart) has the
+            // same name as the dead instance the driver still holds.
+            if (driver.getEngineFactory() == factory) {
+                return;
+            }
+            LOG.info("Engine factory '{}' registered after startup; applying the persisted engine choice",
+                    factory.getName());
+            Response r = activate(stored, factory);
+            if (r != null && r.getStatus() >= 400) {
+                LOG.warn("Persisted engine choice '{}' was not applied: {}", factory.getName(), r.getEntity());
+            }
+        } catch (RuntimeException e) {
+            LOG.warn("Could not apply the persisted engine choice for '{}': {}", factory.getName(), e.getMessage());
+        }
+    }
+
     @Override
     public Response setEngineConfiguration(EngineParameter engineParameter) {
         LOG.debug("Set engine configuration: {}", engineParameter);
@@ -164,10 +200,28 @@ public class EngineRestImpl implements EngineRest {
         return Response.ok(future.join()).build();
     }
 
+    /**
+     * Activate {@code factory} for the stored parameters. Uses the factory it
+     * is handed (the freshly bound service) rather than looking it up in the
+     * other reference-list, whose tracker may not have been notified yet.
+     */
+    private Response activate(EngineParameter engineParameter, EngineFactory factory) {
+        if ("llm".equals(factory.getName())) {
+            return configureAndStoreLlm(engineParameter, driver, Optional.of(factory));
+        }
+        driver.setEngineFactory(factory.getEngineFactory());
+        Response response = driverInit(driver);
+        return response;
+    }
+
     private Response configureAndStoreLlm(EngineParameter engineParameter, Driver driver) {
-        Optional<EngineFactory> llmFactoryOpt = engineFactories.stream()
+        return configureAndStoreLlm(engineParameter, driver, engineFactories.stream()
                 .filter(f -> "llm".equals(f.getName()))
-                .findFirst();
+                .findFirst());
+    }
+
+    private Response configureAndStoreLlm(EngineParameter engineParameter, Driver driver,
+                                          Optional<EngineFactory> llmFactoryOpt) {
         // getClusterFrequencyMs() is a nullable Integer ("null when unset") and
         // feeds a long setter (setClusterFrequencyMs) plus the engine's tick
         // resolution — a null NPEs and a 0/negative would set a zero-interval

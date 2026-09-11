@@ -49,6 +49,8 @@ API key:: The credential used to authenticate to the endpoint. The key is write-
 
 Use the *Validate key* button to confirm — without saving — that the endpoint, model, and key all work and that the model supports function calling.
 
+Give the model access to ALEC's MCP tools:: Lets the model look up node inventory, other alarms, topology neighbours, recent events, metrics and device configuration through ALEC's embedded MCP server before it reports, instead of reasoning from the alarm text alone. See xref:reference:mcp-server.adoc[MCP Server and Tool Access].
+
 == Choose a provider
 
 ALEC ships with no provider selected; pick one on the configuration page (the Endpoint/Model *▾* menus offer curated suggestions).

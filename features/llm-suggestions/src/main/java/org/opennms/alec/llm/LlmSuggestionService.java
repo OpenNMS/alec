@@ -31,6 +31,7 @@ package org.opennms.alec.llm;
 import java.util.concurrent.CompletableFuture;
 
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.mcp.McpConfig;
 
 /**
  * Asks an LLM for diagnostic suggestions about a given Situation.
@@ -60,12 +61,14 @@ public interface LlmSuggestionService {
      * @param systemPrompt the system prompt that frames the analysis. A blank or
      *                  null value falls back to the built-in default
      *                  ({@link LlmSuggestionServiceImpl#DEFAULT_SYSTEM_PROMPT}).
+     * @param useTools  ALEC-308: offer the model the MCP data tools and execute
+     *                  its tool calls before it reports (a multi-round exchange)
      * @return future completing with the suggestions, or completing
      *         exceptionally on any failure
      */
     CompletableFuture<Suggestions> requestSuggestions(Situation situation, String apiKey,
                                                       String baseUrl, String model,
-                                                      String systemPrompt);
+                                                      String systemPrompt, boolean useTools);
 
     /**
      * Synchronously probe the configured endpoint with a minimal request to
@@ -79,4 +82,16 @@ public interface LlmSuggestionService {
      * @param model   model identifier to probe
      */
     ValidationResult validate(String apiKey, String baseUrl, String model);
+
+    /**
+     * ALEC-308: probe the endpoint with the MCP tools offered. The model is
+     * asked to call {@code alec_status} and then answer, through a report
+     * tool, whether it could read ALEC's tools ({@code ok}) with a one-line
+     * explanation — which becomes the result message. Also checks the OpenNMS
+     * REST login the REST-backed tools depend on.
+     *
+     * @param opennmsOverride an unsaved OpenNMS login to test instead of the
+     *                        stored one, or null to test what is stored
+     */
+    ValidationResult validateTools(String apiKey, String baseUrl, String model, McpConfig opennmsOverride);
 }

@@ -57,4 +57,15 @@ public interface LlmValidationRest {
     @POST
     @Path("/validate")
     Response validate(ValidationRequest request);
+
+    /**
+     * ALEC-308: probe the endpoint <em>with the MCP tools offered</em> — the
+     * model is asked to call {@code alec_status} and then report whether it
+     * could read ALEC's tools, as a yes/no plus a one-line explanation. Same
+     * key/endpoint fallback rules as {@link #validate}. Optional OpenNMS login
+     * fields test an unsaved login for the REST-backed tools.
+     */
+    @POST
+    @Path("/validate-tools")
+    Response validateTools(ValidationRequest request);
 }

@@ -37,6 +37,8 @@ import org.opennms.alec.data.LlmConfig;
 import org.opennms.alec.data.LlmConfigImpl;
 import org.opennms.alec.data.LlmConfigStatus;
 import org.opennms.alec.data.KeyEnum;
+import org.opennms.alec.mcp.McpConfig;
+import org.opennms.alec.mcp.OpenNmsRestClient;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +52,19 @@ public class LlmRestImpl implements LlmRest {
 
     private final ObjectMapper objectMapper;
     private final KeyValueStore<String> kvStore;
+    // ALEC-308: used to verify the OpenNMS login before a save that enables
+    // tool access. Null (tests) skips the connectivity probe but not the
+    // presence check.
+    private final OpenNmsRestClient openNmsRest;
 
     public LlmRestImpl(KeyValueStore<String> kvStore) {
+        this(kvStore, null);
+    }
+
+    public LlmRestImpl(KeyValueStore<String> kvStore, OpenNmsRestClient openNmsRest) {
         this.kvStore = kvStore;
         this.objectMapper = new ObjectMapper();
+        this.openNmsRest = openNmsRest;
     }
 
     @Override
@@ -104,6 +115,43 @@ public class LlmRestImpl implements LlmRest {
                             .build();
                 }
             }
+            // ALEC-308: tool access must not be saved without a working OpenNMS
+            // login — the REST-backed tools would silently be missing and the UI
+            // check would have been skipped. Presence is checked here; the login
+            // itself is probed against /rest/info.
+            // Clearing the API key turns the integration off; the tool-access
+            // login must not stand in the way of that (it is re-checked when
+            // tool access is next saved with a key).
+            if (merged.isToolsEnabled() && !request.isClearApiKey()) {
+                // The stored password is only ever sent to the URL it was saved
+                // with — merge() already dropped it if the URL changed without a
+                // new password, so this reads as "login incomplete" below; say
+                // why explicitly.
+                if (existing != null && !isBlank(existing.getOpennmsPassword())
+                        && isBlank(request.getOpennmsPassword()) && !request.isClearOpennmsPassword()
+                        && !sameOpennmsUrl(merged.getOpennmsUrl(), existing.getOpennmsUrl())) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Cannot enable MCP tool access: the OpenNMS URL changed — re-enter the "
+                                    + "OpenNMS password for the new URL")
+                            .build();
+                }
+                if (isBlank(merged.getOpennmsUsername()) || isBlank(merged.getOpennmsPassword())) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Cannot enable MCP tool access without an OpenNMS login "
+                                    + "(use a dedicated read-only OpenNMS account)")
+                            .build();
+                }
+                if (openNmsRest != null) {
+                    String outcome = openNmsRest.checkConnectivity(new McpConfig(true, merged.getOpennmsUrl(),
+                            merged.getOpennmsUsername(), merged.getOpennmsPassword()));
+                    if (!outcome.startsWith("OK:")) {
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity("Cannot enable MCP tool access: the OpenNMS login does not work ("
+                                        + outcome + ")")
+                                .build();
+                    }
+                }
+            }
             persist(merged);
             return Response.ok().entity(LlmConfigStatus.from(merged)).build();
         } catch (JsonProcessingException e) {
@@ -113,6 +161,12 @@ public class LlmRestImpl implements LlmRest {
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    /** Blank means the default local URL; trailing slashes and case do not matter. */
+    static boolean sameOpennmsUrl(String a, String b) {
+        return new McpConfig(false, a, "", "").getEffectiveOpennmsUrl()
+                .equalsIgnoreCase(new McpConfig(false, b, "", "").getEffectiveOpennmsUrl());
     }
 
     /**
@@ -159,9 +213,34 @@ public class LlmRestImpl implements LlmRest {
                 existing == null ? null : existing.getDefaultModel());
         String systemPrompt = choose(request.getSystemPrompt(),
                 existing == null ? null : existing.getSystemPrompt());
+        // ALEC-308: same preserve-when-absent rule for the OpenNMS REST fields;
+        // the password behaves like the API key (replace when sent, keep when
+        // omitted, drop when clearOpennmsPassword is set).
+        String opennmsUrl = choose(request.getOpennmsUrl(),
+                existing == null ? null : existing.getOpennmsUrl());
+        String opennmsUsername = choose(request.getOpennmsUsername(),
+                existing == null ? null : existing.getOpennmsUsername());
+        String opennmsPassword;
+        if (request.isClearOpennmsPassword()) {
+            opennmsPassword = null;
+        } else if (request.getOpennmsPassword() != null && !request.getOpennmsPassword().isEmpty()) {
+            opennmsPassword = request.getOpennmsPassword();
+        } else if (existing != null && !sameOpennmsUrl(opennmsUrl, existing.getOpennmsUrl())) {
+            // A stored password belongs to the URL it was saved with. Repointing
+            // the URL without a new password must not carry it along — whatever
+            // the tool-access flag says — or a later check/save would send it
+            // to the new host.
+            opennmsPassword = null;
+        } else {
+            opennmsPassword = existing == null ? null : existing.getOpennmsPassword();
+        }
 
         LlmConfigImpl.Builder builder = LlmConfigImpl.newBuilder()
                 .autoEvaluate(request.isAutoEvaluate())
+                .toolsEnabled(request.isToolsEnabled())
+                .opennmsUrl(nz(opennmsUrl))
+                .opennmsUsername(nz(opennmsUsername))
+                .opennmsPassword(opennmsPassword)
                 .baseUrl(nz(baseUrl))
                 .model(nz(model))
                 .defaultBaseUrl(nz(defaultBaseUrl))

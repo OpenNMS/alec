@@ -42,6 +42,11 @@ public class ValidationRequest {
     private String baseUrl;
     private String model;
     private String apiKey;
+    // ALEC-308 (validate-tools only): an unsaved OpenNMS REST login to test
+    // instead of the stored one. Blank fields fall back to the stored values.
+    private String opennmsUrl;
+    private String opennmsUsername;
+    private String opennmsPassword;
 
     public String getBaseUrl() {
         return baseUrl;
@@ -65,5 +70,29 @@ public class ValidationRequest {
 
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public String getOpennmsUrl() {
+        return opennmsUrl;
+    }
+
+    public void setOpennmsUrl(String opennmsUrl) {
+        this.opennmsUrl = opennmsUrl;
+    }
+
+    public String getOpennmsUsername() {
+        return opennmsUsername;
+    }
+
+    public void setOpennmsUsername(String opennmsUsername) {
+        this.opennmsUsername = opennmsUsername;
+    }
+
+    public String getOpennmsPassword() {
+        return opennmsPassword;
+    }
+
+    public void setOpennmsPassword(String opennmsPassword) {
+        this.opennmsPassword = opennmsPassword;
     }
 }

@@ -52,6 +52,14 @@ import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.mcp.McpMetrics;
+import org.opennms.alec.mcp.AlecTool;
+import org.opennms.alec.mcp.ToolConsumer;
+import org.opennms.alec.mcp.DefaultToolRegistry;
+import org.opennms.alec.mcp.ToolRegistry;
+import org.opennms.alec.mcp.ToolSpec;
+import org.opennms.alec.mcp.llm.ChatRequest;
+import org.opennms.alec.mcp.llm.TokenUsage;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -478,5 +486,165 @@ public class LlmClusterEngineTest {
         return "{"
                 + "\"choices\":[{\"message\":{\"tool_calls\":[{\"function\":{\"name\":\"group_alarms\","
                 + "\"arguments\":\"" + args + "\"}}]}}]}";
+    }
+
+    // -------------------------------------------------------------------------
+    // ALEC-308: tool-enabled chat requests
+    // -------------------------------------------------------------------------
+
+    private static ToolRegistry registryWith(String... toolNames) {
+        ToolRegistry registry = new DefaultToolRegistry(new McpMetrics(), new ObjectMapper());
+        for (String name : toolNames) {
+            registry.addTool(new AlecTool() {
+                private final ToolSpec spec = ToolSpec.builder(name).description("stub").build();
+
+                @Override
+                public ToolSpec getSpec() {
+                    return spec;
+                }
+
+                @Override
+                public JsonNode call(JsonNode arguments) {
+                    return new ObjectMapper().createObjectNode();
+                }
+            });
+        }
+        return registry;
+    }
+
+    private static LlmClusterEngine.LlmConfig config(boolean toolsEnabled) {
+        return new LlmClusterEngine.LlmConfig("key", "https://api.example.com/v1", MODEL, 0L, 0L, toolsEnabled);
+    }
+
+    @Test
+    public void buildChatRequestWithoutToolsIsSingleRoundWithNoDataTools() {
+        LlmClusterEngine withRegistry = new LlmClusterEngine(new MetricRegistry(), kvStore, om, null,
+                registryWith("get_node_inventory"));
+        ChatRequest r = withRegistry.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
+                config(false));
+        assertThat(r.getDataTools().isEmpty(), is(true));
+        assertThat(r.getMaxRounds(), equalTo(1));
+        assertThat(r.getSystemPrompt(), equalTo(LlmClusterEngine.DEFAULT_CLUSTER_PROMPT));
+        assertThat(r.getSystemPrompt().endsWith(LlmClusterEngine.TOOLS_GUIDANCE), is(false));
+        assertThat(r.getTerminalTool().getName(), equalTo(LlmClusterEngine.TOOL_NAME));
+        assertThat(r.getConsumer(), equalTo(ToolConsumer.CLUSTERING));
+        assertThat(r.getMaxTokens(), equalTo(LlmClusterEngine.MAX_TOKENS));
+        assertThat(r.getEndpoint().getApiKey(), equalTo("key"));
+        assertThat(r.getEndpoint().getBaseUrl(), equalTo("https://api.example.com/v1"));
+        assertThat(r.getEndpoint().getModel(), equalTo(MODEL));
+        assertThat(r.getUserContent(), containsString("alarm-1"));
+        assertThat(r.getUserContent(), containsString("Topology"));
+    }
+
+    @Test
+    public void buildChatRequestWithToolsOffersTheRegistryAndAllowsSeveralRounds() {
+        ToolRegistry registry = registryWith("get_node_inventory");
+        LlmClusterEngine withRegistry = new LlmClusterEngine(new MetricRegistry(), kvStore, om, "CUSTOM", registry);
+        ChatRequest r = withRegistry.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
+                config(true));
+        assertThat(r.getDataTools().size(), equalTo(1));
+        assertThat(r.getDataTools().get(0).getName(), equalTo("get_node_inventory"));
+        assertThat(r.getMaxRounds(), equalTo(LlmClusterEngine.MAX_TOOL_ROUNDS));
+        assertThat(r.getSystemPrompt(), equalTo("CUSTOM" + LlmClusterEngine.TOOLS_GUIDANCE));
+        assertThat(r.getExecutor() != null, is(true));
+        // the executor dispatches through the registry (and is metered there)
+        r.getExecutor().call(ToolConsumer.CLUSTERING, "get_node_inventory", om.createObjectNode());
+        assertThat(registry.getMetrics().getCalls(ToolConsumer.CLUSTERING), equalTo(1L));
+    }
+
+    @Test
+    public void buildChatRequestWithToolsButNoRegistryOffersNothing() {
+        ChatRequest r = engine.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
+                config(true));
+        assertThat(r.getDataTools().isEmpty(), is(true));
+        assertThat(r.getMaxRounds(), equalTo(1));
+        assertThat(r.getSystemPrompt().endsWith(LlmClusterEngine.TOOLS_GUIDANCE), is(false));
+
+        LlmClusterEngine emptyRegistry = new LlmClusterEngine(new MetricRegistry(), kvStore, om, null, registryWith());
+        ChatRequest r2 = emptyRegistry.buildChatRequest(Collections.singletonList(makeAlarm("alarm-1", 1L)), null,
+                config(true));
+        assertThat(r2.getDataTools().isEmpty(), is(true));
+        assertThat(r2.getMaxRounds(), equalTo(1));
+    }
+
+    @Test
+    public void parseGroupsFromArgumentsHandlesNumericIdsAndMissingGroups() throws IOException {
+        JsonNode args = om.readTree("{\"groups\":[{\"alarm_ids\":[1,2,\"three\"]},{\"nope\":[]},{\"alarm_ids\":\"x\"}]}");
+        List<List<String>> groups = LlmClusterEngine.parseGroups(args);
+        assertThat(groups.size(), equalTo(1));
+        assertThat(groups.get(0), equalTo(Arrays.asList("1", "2", "three")));
+        assertThat(LlmClusterEngine.parseGroups(om.readTree("{}")).isEmpty(), is(true));
+        assertThat(LlmClusterEngine.parseGroups((JsonNode) null).isEmpty(), is(true));
+        assertThat(LlmClusterEngine.parseGroups(om.readTree("{\"groups\":{}}")).isEmpty(), is(true));
+    }
+
+    @Test
+    public void recordUsageFromTokenUsageWritesAllBucketsAndToolCalls() throws IOException {
+        long now = 1_700_000_000_000L;
+        engine.recordUsage(new TokenUsage(800L, 50L, 200L, 10L), 3, MODEL, now);
+
+        Map<String, String> rows = kvStore.enumerateContext(LlmClusterEngine.USAGE_CONTEXT);
+        assertThat(rows.size(), equalTo(1));
+        JsonNode rec = om.readTree(rows.values().iterator().next());
+        assertThat(rec.get("ts").asLong(), equalTo(now));
+        assertThat(rec.get("situationId").asText(), equalTo(LlmClusterEngine.CLUSTER_USAGE_MARKER));
+        assertThat(rec.get("model").asText(), equalTo(MODEL));
+        assertThat(rec.get("success").asBoolean(), is(true));
+        assertThat(rec.get("inputTokens").asLong(), equalTo(800L));
+        assertThat(rec.get("outputTokens").asLong(), equalTo(50L));
+        assertThat(rec.get("cacheReadInputTokens").asLong(), equalTo(200L));
+        assertThat(rec.get("cacheCreationInputTokens").asLong(), equalTo(10L));
+        assertThat(rec.get("toolCalls").asInt(), equalTo(3));
+        assertThat("USAGE_CONTEXT matches the RCA UsageStore context",
+                LlmClusterEngine.USAGE_CONTEXT, equalTo("ALEC_LLM_USAGE"));
+    }
+
+    @Test
+    public void recordUsageFromTokenUsageFoldsIntoTheBudgetCache() {
+        long now = 1_700_000_000_000L;
+        assertThat(engine.budgetExceeded(now, 1000L, 0L), equalTo(false));
+        engine.recordUsage(new TokenUsage(500L, 300L, 150L, 50L), 0, MODEL, now);
+        assertThat("all four buckets count toward the budget", engine.budgetExceeded(now, 1000L, 0L), equalTo(true));
+    }
+
+    @Test
+    public void groupAlarmsSpecDeclaresNestedAlarmIdsSchema() {
+        ToolSpec spec = LlmClusterEngine.groupAlarmsSpec();
+        assertThat(spec.getName(), equalTo("group_alarms"));
+        JsonNode schema = spec.parametersSchema(om);
+        JsonNode groups = schema.path("properties").path("groups");
+        assertThat(groups.path("type").asText(), equalTo("array"));
+        JsonNode alarmIds = groups.path("items").path("properties").path("alarm_ids");
+        assertThat(alarmIds.path("type").asText(), equalTo("array"));
+        assertThat(alarmIds.path("items").path("type").asText(), equalTo("string"));
+        assertThat(groups.path("items").path("required").get(0).asText(), equalTo("alarm_ids"));
+        assertThat(schema.path("required").get(0).asText(), equalTo("groups"));
+        assertThat(schema.path("additionalProperties").asBoolean(), is(false));
+    }
+
+    @Test
+    public void llmConfigToolsEnabledDefaultsToFalseAndIsReadFromJson() {
+        assertThat(new LlmClusterEngine.LlmConfig("k", "u", "m", 0L, 0L).toolsEnabled, is(false));
+        assertThat(config(true).toolsEnabled, is(true));
+    }
+
+    @Test
+    public void recordFailedCallWritesAFailureRowWithZeroTokens() throws Exception {
+        long now = 1_700_000_000_000L;
+        engine.recordFailedCall(MODEL, now);
+        Map<String, String> rows = kvStore.enumerateContext(LlmClusterEngine.USAGE_CONTEXT);
+        assertThat(rows.size(), equalTo(1));
+        JsonNode rec = om.readTree(rows.values().iterator().next());
+        assertThat(rec.get("success").asBoolean(), equalTo(false));
+        assertThat(rec.get("situationId").asText(), equalTo(LlmClusterEngine.CLUSTER_USAGE_MARKER));
+        assertThat(rec.get("model").asText(), equalTo(MODEL));
+        assertThat(rec.get("ts").asLong(), equalTo(now));
+        assertThat(rec.get("inputTokens").asLong() + rec.get("outputTokens").asLong(), equalTo(0L));
+        assertThat(rec.get("toolCalls").asLong(), equalTo(0L));
+    }
+
+    @Test
+    public void readTimeoutIsGenerousEnoughForLocalModels() {
+        assertThat(LlmClusterEngine.READ_TIMEOUT_SECONDS >= 120, equalTo(true));
     }
 }

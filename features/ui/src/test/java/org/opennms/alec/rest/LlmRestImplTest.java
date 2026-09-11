@@ -28,6 +28,7 @@
 
 package org.opennms.alec.rest;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -36,8 +37,12 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import javax.ws.rs.core.Response;
+
+import org.opennms.alec.data.KeyEnum;
 import org.opennms.alec.data.LlmConfig;
 import org.opennms.alec.data.LlmConfigImpl;
+import org.opennms.alec.data.LlmConfigStatus;
 
 @RunWith(JUnit4.class)
 public class LlmRestImplTest {
@@ -202,5 +207,217 @@ public class LlmRestImplTest {
         assertThat(merged.isEnabled(), is(false));
         assertThat(merged.getBaseUrl(), equalTo("https://api.example/v1"));
         assertThat(merged.getModel(), equalTo("some/model"));
+    }
+
+    // --- ALEC-308: MCP tool access + OpenNMS REST login ---
+
+    @Test
+    public void mergePreservesStoredOpenNmsLoginWhenRequestOmitsIt() {
+        LlmConfig existing = LlmConfigImpl.newBuilder()
+                .enabled(true)
+                .apiKey("sk-existing")
+                .opennmsUrl("http://nms:8980/opennms")
+                .opennmsUsername("admin")
+                .opennmsPassword("pw")
+                .build();
+        LlmConfig request = LlmConfigImpl.newBuilder() // e.g. {"enabled":true}
+                .enabled(true)
+                .build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsUrl(), equalTo("http://nms:8980/opennms"));
+        assertThat(merged.getOpennmsUsername(), equalTo("admin"));
+        assertThat("the password is never re-sent by the UI, so it must survive a save",
+                merged.getOpennmsPassword(), equalTo("pw"));
+    }
+
+    @Test
+    public void mergePreservesStoredOpenNmsPasswordWhenRequestSendsBlank() {
+        LlmConfig existing = LlmConfigImpl.newBuilder()
+                .apiKey("sk-existing")
+                .opennmsUsername("admin")
+                .opennmsPassword("pw")
+                .build();
+        LlmConfig request = LlmConfigImpl.newBuilder()
+                .enabled(false)
+                .opennmsUsername("admin")
+                .opennmsPassword("")
+                .build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsPassword(), equalTo("pw"));
+    }
+
+    @Test
+    public void mergeReplacesOpenNmsPasswordWhenSent() {
+        LlmConfig existing = LlmConfigImpl.newBuilder()
+                .apiKey("sk-existing")
+                .opennmsUsername("admin")
+                .opennmsPassword("old-pw")
+                .build();
+        LlmConfig request = LlmConfigImpl.newBuilder()
+                .enabled(false)
+                .opennmsPassword("new-pw\n")
+                .build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat("trimmed like the API key", merged.getOpennmsPassword(), equalTo("new-pw"));
+        assertThat(merged.getOpennmsUsername(), equalTo("admin"));
+    }
+
+    @Test
+    public void mergeDropsOpenNmsPasswordWhenClearOpennmsPasswordIsSet() {
+        LlmConfig existing = LlmConfigImpl.newBuilder()
+                .apiKey("sk-existing")
+                .opennmsUsername("admin")
+                .opennmsPassword("pw")
+                .build();
+        LlmConfig request = LlmConfigImpl.newBuilder()
+                .enabled(false)
+                .opennmsPassword("attempted")
+                .clearOpennmsPassword(true)
+                .build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsPassword() == null || merged.getOpennmsPassword().isEmpty(), is(true));
+        assertThat("clearing the OpenNMS password does not touch the API key",
+                merged.getApiKey(), equalTo("sk-existing"));
+        assertThat("the transient flag is not carried into the persisted record",
+                merged.isClearOpennmsPassword(), is(false));
+    }
+
+    @Test
+    public void mergeCarriesToolsEnabledFromTheRequest() {
+        LlmConfig existing = LlmConfigImpl.newBuilder().apiKey("sk-existing").toolsEnabled(false).build();
+        LlmConfig on = LlmRestImpl.merge(existing, LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(true).build());
+        assertThat(on.isToolsEnabled(), is(true));
+        LlmConfig off = LlmRestImpl.merge(on, LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(false).build());
+        assertThat(off.isToolsEnabled(), is(false));
+    }
+
+    @Test
+    public void mergeExplicitEmptyOpenNmsUrlClearsItAndNullsComeOutBlank() {
+        LlmConfig existing = LlmConfigImpl.newBuilder()
+                .apiKey("sk-existing")
+                .opennmsUrl("http://nms:8980/opennms")
+                .build();
+        LlmConfig request = LlmConfigImpl.newBuilder().enabled(false).opennmsUrl("").build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsUrl(), equalTo(""));
+        assertThat("never-set string fields come out blank, not null",
+                merged.getOpennmsUsername(), equalTo(""));
+    }
+
+    // --- ALEC-308: saving with tool access enabled requires a verified OpenNMS login ---
+
+    @Test
+    public void saveWithToolsEnabledButNoLoginIsRejected() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        LlmRestImpl rest = new LlmRestImpl(kv, null);
+        LlmConfig req = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(true)
+                .baseUrl("http://x").model("m").apiKey("k").build();
+        Response r = rest.setConfiguration(req);
+        assertThat(r.getStatus(), equalTo(400));
+        assertThat(String.valueOf(r.getEntity()), containsString("without an OpenNMS login"));
+        assertThat("nothing persisted", kv.get(KeyEnum.LLM_CONFIG.toString(), ALECRestUtils.ALEC_CONFIG).isPresent(),
+                equalTo(false));
+    }
+
+    @Test
+    public void saveWithToolsEnabledAndBrokenLoginIsRejected() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        LlmRestImpl rest = new LlmRestImpl(kv, new StubRest("OpenNMS rejected the login (HTTP 401)"));
+        LlmConfig req = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(true)
+                .opennmsUsername("ro").opennmsPassword("pw").build();
+        Response r = rest.setConfiguration(req);
+        assertThat(r.getStatus(), equalTo(400));
+        assertThat(String.valueOf(r.getEntity()), containsString("HTTP 401"));
+    }
+
+    @Test
+    public void saveWithToolsEnabledAndWorkingLoginPersists() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        StubRest stub = new StubRest("OK: reached OpenNMS 37 at http://x as ro");
+        LlmRestImpl rest = new LlmRestImpl(kv, stub);
+        LlmConfig req = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(true)
+                .opennmsUrl("http://x").opennmsUsername("ro").opennmsPassword("pw").build();
+        Response r = rest.setConfiguration(req);
+        assertThat(r.getStatus(), equalTo(200));
+        assertThat(((LlmConfigStatus) r.getEntity()).isToolsEnabled(), equalTo(true));
+        assertThat("probed with the merged login", stub.probed.getOpennmsUsername(), equalTo("ro"));
+        assertThat(stub.probed.getOpennmsUrl(), equalTo("http://x"));
+    }
+
+    @Test
+    public void saveWithToolsDisabledDoesNotProbeTheLogin() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        StubRest stub = new StubRest("OpenNMS rejected the login (HTTP 401)");
+        LlmRestImpl rest = new LlmRestImpl(kv, stub);
+        LlmConfig req = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(false)
+                .opennmsUsername("ro").opennmsPassword("bad").build();
+        assertThat(rest.setConfiguration(req).getStatus(), equalTo(200));
+        assertThat(stub.probed, org.hamcrest.CoreMatchers.nullValue());
+    }
+
+    private static final class StubRest implements org.opennms.alec.mcp.OpenNmsRestClient {
+        private final String outcome;
+        org.opennms.alec.mcp.McpConfig probed;
+
+        StubRest(String outcome) {
+            this.outcome = outcome;
+        }
+
+        @Override
+        public boolean isConfigured() {
+            return true;
+        }
+
+        @Override
+        public com.fasterxml.jackson.databind.JsonNode get(String pathWithQuery) {
+            return null;
+        }
+
+        @Override
+        public com.fasterxml.jackson.databind.JsonNode post(String path, com.fasterxml.jackson.databind.JsonNode body) {
+            return null;
+        }
+
+        @Override
+        public String checkConnectivity(org.opennms.alec.mcp.McpConfig config) {
+            probed = config;
+            return outcome;
+        }
+    }
+
+    // --- second-review fixes ---
+
+    @Test
+    public void repointingTheUrlWithoutAPasswordDropsTheStoredPasswordEvenWithToolsOff() {
+        LlmConfig existing = LlmConfigImpl.newBuilder().opennmsUrl("http://nms:8980/opennms")
+                .opennmsUsername("ro").opennmsPassword("pw").toolsEnabled(false).build();
+        LlmConfig request = LlmConfigImpl.newBuilder().toolsEnabled(false)
+                .opennmsUrl("http://attacker:8980/opennms").build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsUrl(), equalTo("http://attacker:8980/opennms"));
+        assertThat("the stored password belongs to the old URL", merged.getOpennmsPassword(), nullValue());
+        // Same URL (modulo slash/case) keeps it.
+        LlmConfig same = LlmConfigImpl.newBuilder().opennmsUrl("HTTP://nms:8980/opennms/").build();
+        assertThat(LlmRestImpl.merge(existing, same).getOpennmsPassword(), equalTo("pw"));
+        // Blank means the default URL: changing from an explicit URL to blank also drops it.
+        LlmConfig blank = LlmConfigImpl.newBuilder().opennmsUrl("").build();
+        assertThat(LlmRestImpl.merge(existing, blank).getOpennmsPassword(), nullValue());
+    }
+
+    @Test
+    public void clearingTheApiKeySkipsTheToolAccessGate() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        StubRest stub = new StubRest("OpenNMS rejected the login (HTTP 401)");
+        LlmRestImpl rest = new LlmRestImpl(kv, stub);
+        // Tools on with a login that no longer works; turning the integration
+        // off by clearing the key must still be possible.
+        LlmConfig first = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(false)
+                .opennmsUsername("ro").opennmsPassword("pw").build();
+        assertThat(rest.setConfiguration(first).getStatus(), equalTo(200));
+        LlmConfig clear = LlmConfigImpl.newBuilder().enabled(true).toolsEnabled(true).clearApiKey(true).build();
+        Response r = rest.setConfiguration(clear);
+        assertThat(r.getStatus(), equalTo(200));
+        assertThat(((LlmConfigStatus) r.getEntity()).isEnabled(), is(false));
+        assertThat("no probe while clearing the key", stub.probed, nullValue());
     }
 }

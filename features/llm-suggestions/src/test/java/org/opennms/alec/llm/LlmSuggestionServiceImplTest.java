@@ -392,7 +392,7 @@ public class LlmSuggestionServiceImplTest {
     public void requestSuggestionsRejectsNullSituationWithFailedFuture() throws Exception {
         LlmSuggestionServiceImpl svc = newServiceForGuardrails();
         try {
-            Throwable cause = futureCause(svc.requestSuggestions(null, "sk-x", BASE_URL, MODEL, PROMPT));
+            Throwable cause = futureCause(svc.requestSuggestions(null, "sk-x", BASE_URL, MODEL, PROMPT, false));
             assertThat(cause, instanceOfMatcher(LlmApiException.class));
         } finally {
             svc.shutdown();
@@ -403,7 +403,7 @@ public class LlmSuggestionServiceImplTest {
     public void requestSuggestionsRejectsEmptyApiKeyWithFailedFuture() throws Exception {
         LlmSuggestionServiceImpl svc = newServiceForGuardrails();
         try {
-            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "", BASE_URL, MODEL, PROMPT));
+            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "", BASE_URL, MODEL, PROMPT, false));
             assertThat(cause, instanceOfMatcher(LlmApiException.class));
             assertThat(cause.getMessage(), containsString("API key"));
         } finally {
@@ -415,7 +415,7 @@ public class LlmSuggestionServiceImplTest {
     public void requestSuggestionsRejectsEmptyBaseUrlWithFailedFuture() throws Exception {
         LlmSuggestionServiceImpl svc = newServiceForGuardrails();
         try {
-            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "sk-x", "", MODEL, PROMPT));
+            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "sk-x", "", MODEL, PROMPT, false));
             assertThat(cause, instanceOfMatcher(LlmApiException.class));
             assertThat(cause.getMessage(), containsString("Base URL"));
         } finally {
@@ -427,7 +427,7 @@ public class LlmSuggestionServiceImplTest {
     public void requestSuggestionsRejectsEmptyModelWithFailedFuture() throws Exception {
         LlmSuggestionServiceImpl svc = newServiceForGuardrails();
         try {
-            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "sk-x", BASE_URL, "", PROMPT));
+            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "sk-x", BASE_URL, "", PROMPT, false));
             assertThat(cause, instanceOfMatcher(LlmApiException.class));
             assertThat(cause.getMessage(), containsString("Model"));
         } finally {

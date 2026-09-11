@@ -37,6 +37,20 @@
     </bean>
     <service ref="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 
+    <!--
+        Metric sets contributed by other ALEC bundles (ALEC-308: the MCP tool
+        registry's counters). They are folded into the driver's registry so
+        they appear under the engine's JMX domain and get charted by OpenNMS
+        like the engine's own gauges.
+    -->
+    <reference-list id="contributedMetricSets"
+                    interface="com.codahale.metrics.MetricSet"
+                    availability="optional">
+        <reference-listener bind-method="registerMetricSet" unbind-method="unregisterMetricSet">
+            <ref component-id="driver"/>
+        </reference-listener>
+    </reference-list>
+
     <!-- Expose a health check that can be used when we're running in an OpenNMS container -->
     <bean id="healthCheck" class="org.opennms.alec.driver.main.DriverHealthCheck">
         <argument ref="driver"/>

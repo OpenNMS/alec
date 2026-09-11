@@ -29,6 +29,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.opennms.alec.features</groupId>
+            <artifactId>org.opennms.alec.features.mcp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opennms.alec.engine</groupId>
             <artifactId>org.opennms.alec.engine.cluster</artifactId>
         </dependency>

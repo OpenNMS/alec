@@ -6,10 +6,16 @@
 
     <bean id="llmEngineObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
+    <!-- ALEC-308: MCP data tools offered to the clustering model when enabled. -->
+    <reference id="toolRegistry" interface="org.opennms.alec.mcp.ToolRegistry"/>
+    <reference id="llmUsageMetrics" interface="org.opennms.alec.mcp.llm.LlmUsageMetrics"/>
+
     <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="15">
         <bean class="org.opennms.alec.engine.llm.LlmEngineFactory">
             <argument ref="keyValueStore"/>
             <argument ref="llmEngineObjectMapper"/>
+            <argument ref="toolRegistry"/>
+            <argument ref="llmUsageMetrics"/>
         </bean>
     </service>
 

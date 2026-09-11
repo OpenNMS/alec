@@ -35,6 +35,19 @@ package org.opennms.alec.llm;
 public class LlmApiException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
+    // Tokens the provider billed before the failure (a multi-round exchange
+    // that never reported still cost its completed rounds). Empty by default.
+    private transient Suggestions.TokenUsage usage = Suggestions.TokenUsage.empty();
+
+    public Suggestions.TokenUsage getUsage() {
+        return usage;
+    }
+
+    public LlmApiException withUsage(Suggestions.TokenUsage usage) {
+        this.usage = usage == null ? Suggestions.TokenUsage.empty() : usage;
+        return this;
+    }
+
     public LlmApiException(String message) {
         super(message);
     }

@@ -63,8 +63,41 @@
 
     <feature name="alec-ui" description="ALEC :: Features :: UI" version="${project.version}">
         <feature version="${project.version}" dependency="true">alec-datasource-opennms-direct</feature>
+        <feature version="${project.version}">alec-features-mcp</feature>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
         <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.ui/${project.version}</bundle>
+    </feature>
+
+    <!--
+        ALEC-308: ALEC's read-only tools over OpenNMS (situations, nodes,
+        alarms, topology, events, metrics, device configuration) published as
+        Integration API McpToolProvider services, the registry and shared
+        OpenAI-style tool loop used by RCA and LLM clustering, the status
+        document for the configuration page, and the tool-call and token
+        metrics (Dropwizard MetricSets the driver folds into its JMX-reported
+        registry). External MCP clients are served by the OpenNMS MCP server.
+    -->
+    <feature name="alec-features-mcp" description="ALEC :: Features :: MCP" version="${project.version}">
+        <feature version="${project.version}">alec-datasource-api</feature>
+        <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
+        <feature dependency="true" version="${metrics.version}">alec-dependency-dropwizard-metrics</feature>
+        <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <!--
+            The OpenNMS MCP server (Integration API's opennms-mcp-server
+            feature): serves every McpToolProvider — ALEC's tools included — at
+            /opennms/rest/mcp. Listed as a bundle rather than the feature so the
+            KAR carries it: the OpenNMS container registers the Integration API
+            feature repository but does not ship this artifact in its system
+            repository. Installing the feature separately dedupes on the same
+            bundle location.
+        -->
+        <bundle>mvn:org.opennms.integration.api/mcp-server/${opennms.api.version}</bundle>
+        <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.mcp/${project.version}</bundle>
     </feature>
 
     <!--
@@ -80,6 +113,7 @@
     <feature name="alec-features-llm-suggestions"
              description="ALEC :: Features :: LLM Suggestions" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
+        <feature version="${project.version}">alec-features-mcp</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
@@ -118,6 +152,7 @@
 
     <feature name="alec-engine-llm" description="ALEC :: Engine :: LLM Clustering" version="${project.version}">
         <feature dependency="true" version="${project.version}">alec-engine-cluster</feature>
+        <feature version="${project.version}">alec-features-mcp</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -247,6 +282,7 @@
         <feature>alec-processor-standalone</feature>
         <feature>alec-features-graph-shell</feature>
         <feature>alec-ui</feature>
+        <feature>alec-features-mcp</feature>
         <feature>alec-features-llm-suggestions</feature>
     </feature>
 

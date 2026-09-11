@@ -14,9 +14,23 @@
         endpoint (OpenRouter by default) to produce up to 3 probable root
         causes + 3 possible resolutions for a given Situation.
     -->
+    <!--
+        ALEC-308: the MCP tool registry (+ config reader and OpenNMS REST
+        client) from alec-features-mcp. Mandatory: the feature depends on it.
+    -->
+    <reference id="toolRegistry" interface="org.opennms.alec.mcp.ToolRegistry"/>
+    <reference id="mcpConfigReader" interface="org.opennms.alec.mcp.McpConfigReader"/>
+    <reference id="openNmsRestClient" interface="org.opennms.alec.mcp.OpenNmsRestClient"/>
+    <reference id="llmUsageMetrics" interface="org.opennms.alec.mcp.llm.LlmUsageMetrics"/>
+
     <bean id="llmSuggestionService"
           class="org.opennms.alec.llm.LlmSuggestionServiceImpl"
-          destroy-method="shutdown"/>
+          destroy-method="shutdown">
+        <argument ref="toolRegistry"/>
+        <argument ref="mcpConfigReader"/>
+        <argument ref="openNmsRestClient"/>
+        <argument ref="llmUsageMetrics"/>
+    </bean>
 
     <service ref="llmSuggestionService"
              interface="org.opennms.alec.llm.LlmSuggestionService"/>
@@ -34,6 +48,14 @@
     </bean>
 
     <!-- Per-call token-usage log; aggregated by /alec/llm/usage. -->
+    <!-- ALEC-308: this bundle's contribution to the MCP tool catalogue. -->
+    <service interface="org.opennms.integration.api.v1.mcp.McpToolProvider">
+        <bean class="org.opennms.alec.llm.PastAnalysesTool">
+            <argument ref="keyValueStore"/>
+            <argument ref="llmObjectMapper"/>
+        </bean>
+    </service>
+
     <bean id="usageStore" class="org.opennms.alec.llm.UsageStore">
         <argument ref="keyValueStore"/>
         <argument ref="llmObjectMapper"/>
@@ -110,6 +132,7 @@
     <bean id="llmValidationRest" class="org.opennms.alec.llm.LlmValidationRestImpl">
         <argument ref="llmSuggestionService"/>
         <argument ref="llmConfigReader"/>
+        <argument ref="mcpConfigReader"/>
     </bean>
     <service ref="llmValidationRest" interface="org.opennms.alec.llm.LlmValidationRest">
         <service-properties>

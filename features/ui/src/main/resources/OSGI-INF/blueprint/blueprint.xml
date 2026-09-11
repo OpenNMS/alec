@@ -25,8 +25,12 @@
         <argument ref="alarmDatasource"/>
     </bean>
 
+    <!-- ALEC-308: verifies the OpenNMS login before a save enables tool access. -->
+    <reference id="openNmsRestClient" interface="org.opennms.alec.mcp.OpenNmsRestClient"/>
+
     <bean id="llmRest" class="org.opennms.alec.rest.LlmRestImpl">
         <argument ref="keyValueStore"/>
+        <argument ref="openNmsRestClient"/>
     </bean>
 
     <service interface="org.opennms.alec.rest.EngineRest" ref="engineRest" >
@@ -54,6 +58,20 @@
 
     <!--engines list    -->
     <reference-list id="engineFactories" interface="org.opennms.alec.engine.api.EngineFactory"/>
+
+    <!--
+        A second view of the same services, carrying the bind listener that
+        re-applies the persisted engine choice when a factory (typically
+        engine/llm, which waits on the MCP bundle) registers after engineRest
+        was constructed. Kept separate from engineFactories: a listener on the
+        list engineRest is built from would be a circular blueprint dependency.
+    -->
+    <reference-list id="engineFactoryBindings" interface="org.opennms.alec.engine.api.EngineFactory"
+                    availability="optional">
+        <reference-listener bind-method="onEngineFactoryBound">
+            <ref component-id="engineRest"/>
+        </reference-listener>
+    </reference-list>
 
     <!--situation datasource    -->
     <reference id="situationDatasource" interface="org.opennms.alec.datasource.api.SituationDatasource" />

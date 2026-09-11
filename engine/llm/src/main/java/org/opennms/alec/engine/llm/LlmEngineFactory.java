@@ -29,6 +29,8 @@
 package org.opennms.alec.engine.llm;
 
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.mcp.ToolRegistry;
+import org.opennms.alec.mcp.llm.LlmUsageMetrics;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 
 import com.codahale.metrics.MetricRegistry;
@@ -41,13 +43,28 @@ public class LlmEngineFactory implements EngineFactory {
 
     private final KeyValueStore<String> kvStore;
     private final ObjectMapper objectMapper;
+    // ALEC-308: null when the MCP bundle is absent -> clustering never offers tools.
+    private final ToolRegistry toolRegistry;
+    // Token-usage gauges (JMX); null when absent.
+    private final LlmUsageMetrics usageMetrics;
 
     private long clusterFrequencyMs = DEFAULT_CLUSTER_FREQUENCY_MS;
     private String clusterPrompt = "";
 
     public LlmEngineFactory(KeyValueStore<String> kvStore, ObjectMapper objectMapper) {
+        this(kvStore, objectMapper, null, null);
+    }
+
+    public LlmEngineFactory(KeyValueStore<String> kvStore, ObjectMapper objectMapper, ToolRegistry toolRegistry) {
+        this(kvStore, objectMapper, toolRegistry, null);
+    }
+
+    public LlmEngineFactory(KeyValueStore<String> kvStore, ObjectMapper objectMapper, ToolRegistry toolRegistry,
+                            LlmUsageMetrics usageMetrics) {
         this.kvStore = kvStore;
         this.objectMapper = objectMapper;
+        this.toolRegistry = toolRegistry;
+        this.usageMetrics = usageMetrics;
     }
 
     @Override
@@ -62,7 +79,8 @@ public class LlmEngineFactory implements EngineFactory {
 
     @Override
     public LlmClusterEngine createEngine(MetricRegistry metrics) {
-        LlmClusterEngine engine = new LlmClusterEngine(metrics, kvStore, objectMapper, clusterPrompt);
+        LlmClusterEngine engine = new LlmClusterEngine(metrics, kvStore, objectMapper, clusterPrompt, toolRegistry,
+                usageMetrics);
         // Decouple the (possibly hour-long) LLM query cadence from the reconcile
         // cadence. The configured frequency throttles how often a NEW grouping is
         // requested; the engine still ticks at the faster reconcile interval so a

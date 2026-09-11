@@ -6,12 +6,13 @@ import { FeatherInput } from '@featherds/input'
 import { FeatherTextarea } from '@featherds/textarea'
 import MarkComplete from '@featherds/icon/action/MarkComplete'
 import Help from '@featherds/icon/action/Help'
+import Info from '@featherds/icon/action/Info'
 import Restore from '@featherds/icon/action/Restore'
 import ExpandMore from '@featherds/icon/navigation/ExpandMore'
 import { FeatherIcon } from '@featherds/icon'
 import CONST from '@/helpers/constants'
 import { useUserStore } from '@/store/useUserStore'
-import { computed, markRaw, onMounted, onUnmounted, ref } from 'vue'
+import { computed, markRaw, onMounted, onUnmounted, ref, watch } from 'vue'
 import { FeatherButton } from '@featherds/button'
 import { FeatherSnackbar } from '@featherds/snackbar'
 import {
@@ -23,9 +24,17 @@ import { FeatherSelect } from '@featherds/select'
 import {
 	closeAllOpenSituations,
 	reEvaluateAllOpenAlarms,
-	validateLLMConfig
+	validateLLMConfig,
+	validateLLMTools,
+	getMCPStatus,
+	getLastLlmConfigError
 } from '@/services/AlecService'
-import { TLLMConfigRequest, TLLMValidationResult } from '@/types/TUser'
+import McpToolsHelp from '@/components/McpToolsHelp.vue'
+import {
+	TLLMConfigRequest,
+	TLLMValidationResult,
+	TMCPStatus
+} from '@/types/TUser'
 import {
 	endpointSuggestions,
 	modelSuggestionsForUrl,
@@ -51,6 +60,7 @@ const humanizeTokens = (n: number): string => {
 const Icons = markRaw({
 	MarkComplete,
 	Help,
+	Info,
 	Restore,
 	ExpandMore
 })
@@ -272,6 +282,169 @@ const validateLlm = async () => {
 	}
 }
 
+// --- MCP tool access (ALEC-308) ---
+// When on, ALEC's own model calls (root cause analysis + LLM clustering) offer
+// the model the read-only MCP tools and execute its tool calls. The OpenNMS
+// REST login is optional: it unlocks the events/metrics/device-config tools.
+// The password is write-only, like the API key.
+const llmToolsEnabled = ref(userStore.llmConfig?.toolsEnabled ?? false)
+const llmOpennmsUrl = ref(userStore.llmConfig?.opennmsUrl ?? '')
+const llmOpennmsUsername = ref(userStore.llmConfig?.opennmsUsername ?? '')
+const llmOpennmsPassword = ref('')
+const llmOpennmsPasswordPresent = ref(
+	userStore.llmConfig?.opennmsPasswordPresent ?? false
+)
+const llmOpennmsPasswordCleared = ref(false)
+const showToolsHelp = ref(false)
+const mcpStatus = ref<TMCPStatus | null>(null)
+const llmValidatingTools = ref(false)
+const llmToolsValidationResult = ref<TLLMValidationResult | null>(null)
+// Absolute URL external MCP clients connect to; the path comes from the
+// server when known so the two can't drift.
+const mcpEndpointUrl = computed(() => {
+	const path = mcpStatus.value?.endpointPath || '/opennms/rest/mcp'
+	const origin =
+		typeof window !== 'undefined' && window.location ? window.location.origin : ''
+	return origin + path
+})
+const refreshMcpStatus = async () => {
+	const result = await getMCPStatus()
+	mcpStatus.value = result || null
+}
+// "Present" tracks what the server holds; "cleared" is the pending removal.
+// Keeping them separate means Clear -> type -> erase lands back exactly where
+// it started (stored password still shown as saved), instead of a state where
+// the UI claims no password while the server keeps one.
+const clearOpennmsPassword = () => {
+	llmOpennmsPassword.value = ''
+	llmOpennmsPasswordCleared.value = true
+}
+// Typing a new password after "Clear password" replaces the stored one; the
+// pending clear must not win over it on save.
+watch(llmOpennmsPassword, (value) => {
+	if (value.trim().length > 0 && llmOpennmsPasswordCleared.value) {
+		llmOpennmsPasswordCleared.value = false
+	}
+})
+// Adds the OpenNMS login fields as shown in the form. URL and username are
+// always sent — an explicit blank clears the stored value, an omitted field
+// would keep it — while the password goes only when typed (never a stored
+// secret).
+const withOpennmsLogin = (req: TLLMConfigRequest): TLLMConfigRequest => {
+	req.opennmsUrl = llmOpennmsUrl.value.trim()
+	req.opennmsUsername = llmOpennmsUsername.value.trim()
+	const pass = llmOpennmsPassword.value.trim()
+	if (pass.length > 0) req.opennmsPassword = pass
+	return req
+}
+// The stored OpenNMS password is only ever sent to the URL it was saved with
+// (same rule as the API key): a different URL needs the password typed again.
+const normalizeOpennmsUrl = (u: string | undefined) =>
+	(u && u.trim() ? u.trim() : 'http://localhost:8980/opennms')
+		.replace(/\/+$/, '')
+		.toLowerCase()
+const llmOpennmsUrlNeedsPassword = computed(
+	() =>
+		llmOpennmsPasswordPresent.value &&
+		!llmOpennmsPasswordCleared.value &&
+		llmOpennmsPassword.value.trim().length === 0 &&
+		normalizeOpennmsUrl(llmOpennmsUrl.value) !==
+			normalizeOpennmsUrl(userStore.llmConfig?.opennmsUrl)
+)
+// Save gate: with the checkbox set, the form may only be saved after "Check
+// tool access" passed for the values currently in the form. The check's
+// fingerprint covers every field the probe depends on, so editing any of them
+// (endpoint, model, key, OpenNMS login) invalidates the check until it is run
+// again. The server enforces the login part too (presence + /rest/info probe).
+const llmToolsFingerprint = computed(() =>
+	JSON.stringify([
+		llmBaseUrl.value.trim(),
+		llmModel.value.trim(),
+		llmApiKey.value.trim(),
+		llmApiKeyCleared.value,
+		llmOpennmsUrl.value.trim(),
+		llmOpennmsUsername.value.trim(),
+		llmOpennmsPassword.value.trim(),
+		llmOpennmsPasswordCleared.value
+	])
+)
+const llmToolsCheckedFingerprint = ref<string | null>(null)
+const llmToolsValidated = computed(
+	() =>
+		llmToolsValidationResult.value?.ok === true &&
+		llmToolsCheckedFingerprint.value === llmToolsFingerprint.value
+)
+// True when tool access is on and the login is incomplete: no username, or no
+// password either typed or stored.
+const llmToolsLoginMissing = computed(
+	() =>
+		llmOpennmsUsername.value.trim().length === 0 ||
+		(llmOpennmsPassword.value.trim().length === 0 &&
+			(!llmOpennmsPasswordPresent.value || llmOpennmsPasswordCleared.value))
+)
+// True when the values the tool check depends on differ from what is saved.
+// A stored configuration with tool access on was checked (UI) and its login
+// verified (server) when it was saved, so it needs no re-check until the
+// endpoint, model, key or OpenNMS login changes — or tool access is being
+// turned on now.
+const llmToolsDirty = computed(() => {
+	const stored = userStore.llmConfig
+	if (!stored || !stored.toolsEnabled) return true
+	return (
+		llmBaseUrl.value.trim() !== (stored.baseUrl ?? '') ||
+		llmModel.value.trim() !== (stored.model ?? '') ||
+		llmApiKey.value.trim().length > 0 ||
+		llmApiKeyCleared.value ||
+		llmOpennmsUrl.value.trim() !== (stored.opennmsUrl ?? '') ||
+		llmOpennmsUsername.value.trim() !== (stored.opennmsUsername ?? '') ||
+		llmOpennmsPassword.value.trim().length > 0 ||
+		llmOpennmsPasswordCleared.value
+	)
+})
+// The reason a save is blocked by the MCP block, or '' when it may proceed.
+const llmToolsSaveBlockedReason = computed(() => {
+	if (!llmToolsEnabled.value) return ''
+	// Clearing the API key disables the LLM integration on save (the server
+	// forces enabled=false), so no tool check is possible or needed.
+	if (llmApiKeyCleared.value) return ''
+	if (llmOpennmsUrlNeedsPassword.value) {
+		return 'The OpenNMS URL changed — re-enter the OpenNMS password for the new URL, then run Check tool access.'
+	}
+	if (llmToolsLoginMissing.value) {
+		return 'MCP tool access needs an OpenNMS login (a read-only account). Enter it, then run Check tool access.'
+	}
+	if (llmToolsDirty.value && !llmToolsValidated.value) {
+		return 'Run Check tool access (and get a Yes) before saving with MCP tool access enabled.'
+	}
+	return ''
+})
+
+// Ask the model, through the tools, whether it can read ALEC's MCP server.
+// The server answers with the model's own yes/no + one-line explanation.
+const validateLlmTools = async () => {
+	llmToolsValidationResult.value = null
+	llmToolsCheckedFingerprint.value = null
+	llmValidatingTools.value = true
+	const fingerprint = llmToolsFingerprint.value
+	try {
+		const req: TLLMConfigRequest = withOpennmsLogin({
+			enabled: llmEnabled.value,
+			autoEvaluate: llmAutoEvaluate.value,
+			baseUrl: llmBaseUrl.value.trim(),
+			model: llmModel.value.trim()
+		})
+		const typedKey = llmApiKey.value.trim()
+		if (typedKey.length > 0) {
+			req.apiKey = typedKey
+		}
+		llmToolsValidationResult.value = await validateLLMTools(req)
+		llmToolsCheckedFingerprint.value = fingerprint
+		refreshMcpStatus()
+	} finally {
+		llmValidatingTools.value = false
+	}
+}
+
 // True when there's nothing the server could persist as a key — neither one
 // already stored nor one freshly typed.
 const llmNoKeyAvailable = computed(
@@ -332,8 +505,15 @@ onMounted(async () => {
 				clusterPrompt.value = llmDefaultClusterPrompt.value
 			}
 			llmApiKeyPresent.value = result.apiKeyPresent
+			llmToolsEnabled.value = result.toolsEnabled ?? false
+			llmOpennmsUrl.value = result.opennmsUrl || ''
+			llmOpennmsUsername.value = result.opennmsUsername || ''
+			llmOpennmsPasswordPresent.value = result.opennmsPasswordPresent ?? false
 		}
 	}
+	// Tool inventory + counters for the MCP block (null when the bundle is
+	// absent). Not awaited: it must not wait behind the usage fetch.
+	refreshMcpStatus()
 	// Fetch the usage rollup once on mount; refreshed after every successful save.
 	await userStore.getLLMUsage(30)
 })
@@ -361,7 +541,7 @@ const buildLLMRequest = (): TLLMConfigRequest => {
 		// Clearing wins regardless of any text in the input — server forces enabled=false.
 		// Carry the user's autoEvaluate / endpoint / model preferences through so
 		// re-enabling later doesn't surprise them with different defaults.
-		return {
+		return withOpennmsLogin({
 			enabled: false,
 			autoEvaluate: llmAutoEvaluate.value,
 			baseUrl: llmBaseUrl.value.trim(),
@@ -371,8 +551,11 @@ const buildLLMRequest = (): TLLMConfigRequest => {
 			systemPrompt: llmSystemPrompt.value,
 			dailyTokenLimit: Math.max(0, Number(llmDailyTokenLimit.value) || 0),
 			monthlyTokenLimit: Math.max(0, Number(llmMonthlyTokenLimit.value) || 0),
-			clearApiKey: true
-		}
+			clearApiKey: true,
+			toolsEnabled: llmToolsEnabled.value,
+			clearOpennmsPassword:
+				llmOpennmsPasswordCleared.value && llmOpennmsPassword.value.trim().length === 0
+		})
 	}
 	const trimmedKey = llmApiKey.value.trim()
 	const request: TLLMConfigRequest = {
@@ -384,12 +567,15 @@ const buildLLMRequest = (): TLLMConfigRequest => {
 		defaultModel: llmDefaultModel.value.trim(),
 		systemPrompt: llmSystemPrompt.value,
 		dailyTokenLimit: Math.max(0, Number(llmDailyTokenLimit.value) || 0),
-		monthlyTokenLimit: Math.max(0, Number(llmMonthlyTokenLimit.value) || 0)
+		monthlyTokenLimit: Math.max(0, Number(llmMonthlyTokenLimit.value) || 0),
+		toolsEnabled: llmToolsEnabled.value,
+		clearOpennmsPassword:
+			llmOpennmsPasswordCleared.value && llmOpennmsPassword.value.trim().length === 0
 	}
 	if (trimmedKey.length > 0) {
 		request.apiKey = trimmedKey
 	}
-	return request
+	return withOpennmsLogin(request)
 }
 
 const saveConfiguration = async () => {
@@ -400,6 +586,12 @@ const saveConfiguration = async () => {
 			'LLM-based clustering needs a configured LLM. Set the endpoint, model and API key on the LLM Setup tab first.',
 			true
 		)
+		return
+	}
+	// MCP tool access (ALEC-308): never save the option without a verified
+	// OpenNMS login and a passed tool-access check for the current form values.
+	if (llmConfigLoaded.value && llmToolsSaveBlockedReason.value) {
+		notify(llmToolsSaveBlockedReason.value, true)
 		return
 	}
 	// Saving with the integration enabled means ALEC will start sending alarm
@@ -420,6 +612,12 @@ const saveConfiguration = async () => {
 					'This calls a third-party provider with your API key and may incur ' +
 					'usage charges billed by that provider. You are responsible for any ' +
 					'costs on the associated account.\n\n' +
+					(llmToolsEnabled.value
+						? 'MCP tool access is on: each analysis may make several requests, ' +
+							'and the model can read node inventory, alarms, topology, events, ' +
+							'metrics and device configuration (secrets redacted) through the ' +
+							'tools.\n\n'
+						: '') +
 					'Continue and save?'
 			)
 		) {
@@ -482,18 +680,29 @@ const saveConfiguration = async () => {
 		}
 		llmSystemPrompt.value =
 			userStore.llmConfig?.systemPrompt ?? llmSystemPrompt.value
+		llmToolsEnabled.value = userStore.llmConfig?.toolsEnabled ?? false
+		llmOpennmsUrl.value = userStore.llmConfig?.opennmsUrl ?? ''
+		llmOpennmsUsername.value = userStore.llmConfig?.opennmsUsername ?? ''
+		llmOpennmsPassword.value = ''
+		llmOpennmsPasswordCleared.value = false
+		llmOpennmsPasswordPresent.value =
+			userStore.llmConfig?.opennmsPasswordPresent ?? false
 		// Refresh the usage rollup — enabling/disabling doesn't generate calls
 		// immediately, but the next render should reflect any usage that
 		// arrived since the page loaded.
 		userStore.getLLMUsage(30)
+		refreshMcpStatus()
 	}
 
 	if (savedEngine && savedLLM) {
 		userStore.getEngineInfo()
 		notify('The settings were saved!', false)
 	} else if (savedEngine && !savedLLM) {
+		const reason = getLastLlmConfigError()
 		notify(
-			'Engine settings saved, but the LLM configuration was rejected — enabling the integration requires an endpoint URL, a model and an API key.',
+			reason
+				? `Engine settings saved, but the LLM configuration was rejected: ${reason}`
+				: 'Engine settings saved, but the LLM configuration was rejected — enabling the integration requires an endpoint URL, a model and an API key.',
 			true
 		)
 	} else {
@@ -1159,7 +1368,168 @@ const handleReEvaluate = async () => {
 				Stored API key will be removed on save.
 			</div>
 
+			<!-- MCP tool access (ALEC-308) -->
+			<hr class="llm-section-divider" />
+			<div class="llm-field-block llm-tools" data-test="llm-tools">
+				<span class="llm-field-label">MCP tool access</span>
+				<div class="llm-tools-row">
+					<FeatherCheckbox
+						v-model="llmToolsEnabled"
+						class="checkbox"
+						data-test="llm-tools-enabled"
+					>
+						<strong>Give the model access to ALEC's MCP tools</strong>
+					</FeatherCheckbox>
+					<button
+						type="button"
+						class="icon-btn help-icon"
+						:aria-expanded="showToolsHelp"
+						aria-label="About the MCP server and tool access"
+						data-test="llm-tools-help"
+						@click="showToolsHelp = !showToolsHelp"
+					>
+						<FeatherIcon :icon="Icons.Info" />
+					</button>
+				</div>
+				<div class="llm-prompt-help" data-test="llm-tools-summary">
+					When on, every root cause analysis and LLM clustering request offers
+					the model read-only tools over OpenNMS — situations, node inventory,
+					alarms, topology neighbours, recent events, collected metrics and
+					device configuration backups — and ALEC executes the model's tool
+					calls itself. The LLM server does <strong>not</strong> need network
+					access to OpenNMS, but the model must support tool calling and each
+					analysis may take several rounds and more tokens. Click
+					<FeatherIcon :icon="Icons.Info" class="inline-icon" /> for the full
+					explanation and a diagram.
+				</div>
+				<McpToolsHelp
+					v-if="showToolsHelp"
+					:status="mcpStatus"
+					:endpoint-url="mcpEndpointUrl"
+				/>
+				<div class="llm-prompt-help" data-test="llm-tools-login-help">
+					Tool access needs an OpenNMS login: events, metrics and device
+					configuration are read through the OpenNMS REST API with it, and the
+					login is verified when you check tool access and again on save.
+					<strong>Use a dedicated read-only account, not an administrator</strong>
+					— a user with only the <code>ROLE_USER</code> and
+					<code>ROLE_READONLY</code> roles is enough (add
+					<code>ROLE_DEVICE_CONFIG_BACKUP</code> if the model should read
+					device configuration backups; avoid <code>ROLE_REST</code>, which
+					allows writes). Leave the URL blank for this server
+					(<code>http://localhost:8980/opennms</code>).
+				</div>
+				<div class="variables">
+					<FeatherInput
+						v-model="llmOpennmsUrl"
+						label="OpenNMS URL"
+						placeholder="http://localhost:8980/opennms"
+						data-test="llm-opennms-url"
+						class="llm-opennms-input"
+					/>
+					<FeatherInput
+						v-model="llmOpennmsUsername"
+						label="OpenNMS username"
+						autocomplete="off"
+						data-test="llm-opennms-username"
+					/>
+					<FeatherInput
+						v-model="llmOpennmsPassword"
+						type="password"
+						autocomplete="new-password"
+						label="OpenNMS password"
+						data-test="llm-opennms-password"
+					/>
+					<FeatherButton
+						v-if="llmOpennmsPasswordPresent && !llmOpennmsPasswordCleared"
+						secondary
+						data-test="llm-opennms-clear-password"
+						@click="clearOpennmsPassword"
+					>
+						Clear password
+					</FeatherButton>
+				</div>
+				<div
+					v-if="llmOpennmsPasswordPresent && !llmOpennmsPasswordCleared"
+					class="llm-key-saved"
+					data-test="llm-opennms-password-saved"
+				>
+					<FeatherIcon :icon="Icons.MarkComplete" class="saved-icon" />
+					<span>
+						OpenNMS password saved. Leave the field blank to keep it, or type a
+						new one to replace it.
+					</span>
+				</div>
+				<div
+					v-if="llmOpennmsPasswordCleared"
+					class="caption"
+					data-test="llm-opennms-cleared-hint"
+				>
+					Stored OpenNMS password will be removed on save.
+				</div>
+				<div class="llm-validate-row">
+					<FeatherButton
+						secondary
+						:disabled="llmValidatingTools || llmCannotValidate"
+						data-test="llm-validate-tools-btn"
+						@click="validateLlmTools"
+					>
+						{{ llmValidatingTools ? 'Checking…' : 'Check tool access' }}
+					</FeatherButton>
+					<span
+						v-if="llmCannotValidate"
+						class="caption"
+						data-test="llm-validate-tools-hint"
+					>
+						Enter an API key to check.
+					</span>
+					<span
+						v-else-if="llmToolsValidationResult"
+						class="llm-validate-result"
+						:class="llmToolsValidationResult.ok ? 'is-ok' : 'is-error'"
+						data-test="llm-validate-tools-result"
+					>
+						<FeatherIcon
+							:icon="llmToolsValidationResult.ok ? Icons.MarkComplete : Icons.Help"
+							class="result-icon"
+						/>
+						<strong data-test="llm-validate-tools-verdict">{{
+							llmToolsValidationResult.ok ? 'Yes' : 'No'
+						}}</strong>
+						{{ llmToolsValidationResult.message }}
+					</span>
+				</div>
+				<div
+					v-if="llmToolsSaveBlockedReason"
+					class="caption llm-tools-gate"
+					data-test="llm-tools-gate-hint"
+				>
+					{{ llmToolsSaveBlockedReason }}
+				</div>
+				<div
+					v-if="mcpStatus"
+					class="caption llm-tools-stats"
+					data-test="llm-tools-stats"
+				>
+					Tool calls since ALEC started: {{ mcpStatus.stats.toolCalls }}
+					({{ mcpStatus.stats.byConsumer.rca ?? 0 }} root cause,
+					{{ mcpStatus.stats.byConsumer.clustering ?? 0 }} clustering,
+					{{ mcpStatus.stats.byConsumer.external ?? 0 }} external MCP clients,
+					{{ mcpStatus.stats.byConsumer.validation ?? 0 }} checks);
+					{{ mcpStatus.stats.toolErrors }} errors. OpenNMS MCP server for external
+					clients:
+					<code data-test="llm-tools-endpoint-inline">{{ mcpEndpointUrl }}</code>
+					<span
+						v-if="mcpStatus.nativeServerInstalled === false"
+						data-test="llm-tools-native-missing-inline"
+					>
+						(not active — install the <code>opennms-mcp-server</code> feature)
+					</span>
+				</div>
+			</div>
+
 			<!-- Token budget (shared across all LLM features) -->
+			<hr class="llm-section-divider" />
 			<div class="llm-field-block llm-limits" data-test="llm-token-limits">
 				<span class="llm-field-label">Token budget (0 = no limit)</span>
 				<div class="llm-prompt-help">
@@ -1253,6 +1623,12 @@ const handleReEvaluate = async () => {
 					<div>
 						<dt>Cache hit</dt>
 						<dd>{{ (userStore.llmUsage.cacheHitRatio * 100).toFixed(0) }}%</dd>
+					</div>
+					<div>
+						<dt>Tool calls</dt>
+						<dd data-test="llm-usage-tool-calls">
+							{{ userStore.llmUsage.toolCalls ?? 0 }}
+						</dd>
 					</div>
 					<!--
 						Pricing note hidden alongside the dollar estimate above — see note
@@ -1682,6 +2058,48 @@ const handleReEvaluate = async () => {
 	gap: 12px;
 	margin-top: 8px;
 	flex-wrap: wrap;
+}
+
+.llm-tools {
+	max-width: 1000px;
+}
+
+.llm-section-divider {
+	border: 0;
+	border-top: 1px solid var(--feather-border-on-surface);
+	margin: 20px 0 12px;
+	max-width: 1000px;
+}
+
+.llm-tools-gate {
+	margin-top: 8px;
+	color: var(--feather-warning);
+}
+
+.llm-tools-row {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.llm-tools-stats {
+	margin-top: 8px;
+
+	code {
+		background: var(--feather-elevation-background-2);
+		padding: 0 3px;
+		border-radius: 3px;
+	}
+}
+
+.llm-opennms-input {
+	min-width: 320px;
+	flex: 1;
+}
+
+.inline-icon {
+	font-size: 14px;
+	vertical-align: -2px;
 }
 
 .llm-validate-result {

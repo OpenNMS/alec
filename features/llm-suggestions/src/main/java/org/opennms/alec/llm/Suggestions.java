@@ -42,11 +42,17 @@ public final class Suggestions {
     private final List<String> rootCauses;
     private final List<String> resolutions;
     private final TokenUsage usage;
+    private final int toolCalls;
 
     public Suggestions(List<String> rootCauses, List<String> resolutions, TokenUsage usage) {
+        this(rootCauses, resolutions, usage, 0);
+    }
+
+    public Suggestions(List<String> rootCauses, List<String> resolutions, TokenUsage usage, int toolCalls) {
         this.rootCauses = rootCauses == null ? Collections.emptyList() : List.copyOf(rootCauses);
         this.resolutions = resolutions == null ? Collections.emptyList() : List.copyOf(resolutions);
         this.usage = usage == null ? TokenUsage.empty() : usage;
+        this.toolCalls = Math.max(0, toolCalls);
     }
 
     public List<String> getRootCauses() {
@@ -59,6 +65,11 @@ public final class Suggestions {
 
     public TokenUsage getUsage() {
         return usage;
+    }
+
+    /** Number of MCP data-tool calls the model made while producing this analysis. */
+    public int getToolCalls() {
+        return toolCalls;
     }
 
     public static final class TokenUsage {

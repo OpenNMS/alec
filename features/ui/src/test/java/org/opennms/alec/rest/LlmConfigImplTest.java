@@ -206,4 +206,99 @@ public class LlmConfigImplTest {
         assertThat(config.isEnabled(), is(true));
         assertThat(config.getApiKey(), equalTo("k"));
     }
+
+    // --- ALEC-308: MCP tool access + OpenNMS REST login ---
+
+    @Test
+    public void mcpFieldsRoundTripThroughJson() throws JsonProcessingException {
+        LlmConfig original = LlmConfigImpl.newBuilder()
+                .enabled(true)
+                .apiKey("k")
+                .toolsEnabled(true)
+                .opennmsUrl(" http://nms:8980/opennms ")
+                .opennmsUsername(" admin ")
+                .opennmsPassword(" pw\n")
+                .clearOpennmsPassword(true)
+                .build();
+        assertThat("trimmed on the way in", original.getOpennmsUrl(), equalTo("http://nms:8980/opennms"));
+        assertThat(original.getOpennmsUsername(), equalTo("admin"));
+        assertThat(original.getOpennmsPassword(), equalTo("pw"));
+
+        String json = objectMapper.writeValueAsString(original);
+        assertThat(json.contains("\"toolsEnabled\":true"), is(true));
+        assertThat(json.contains("\"opennmsUrl\":\"http://nms:8980/opennms\""), is(true));
+        assertThat(json.contains("\"opennmsUsername\":\"admin\""), is(true));
+        assertThat(json.contains("\"opennmsPassword\":\"pw\""), is(true));
+        assertThat(json.contains("\"clearOpennmsPassword\":true"), is(true));
+
+        LlmConfig back = objectMapper.readValue(json, LlmConfigImpl.class);
+        assertThat(back.isToolsEnabled(), is(true));
+        assertThat(back.getOpennmsUrl(), equalTo("http://nms:8980/opennms"));
+        assertThat(back.getOpennmsUsername(), equalTo("admin"));
+        assertThat(back.getOpennmsPassword(), equalTo("pw"));
+        assertThat(back.isClearOpennmsPassword(), is(true));
+    }
+
+    @Test
+    public void legacyRecordWithoutMcpFieldsDeserializesWithDefaults() throws JsonProcessingException {
+        String legacy = "{\"enabled\":true,\"autoEvaluate\":true,\"baseUrl\":\"https://api.example/v1\","
+                + "\"model\":\"m\",\"systemPrompt\":\"p\",\"dailyTokenLimit\":0,\"monthlyTokenLimit\":0,"
+                + "\"apiKey\":\"k\",\"clearApiKey\":false}";
+        LlmConfig config = objectMapper.readValue(legacy, LlmConfigImpl.class);
+        assertThat("tools are opt-in", config.isToolsEnabled(), is(false));
+        assertThat(config.getOpennmsUrl(), nullValue());
+        assertThat(config.getOpennmsUsername(), nullValue());
+        assertThat(config.getOpennmsPassword(), nullValue());
+        assertThat(config.isClearOpennmsPassword(), is(false));
+        // and the status projection copes with those nulls
+        LlmConfigStatus status = LlmConfigStatus.from(config);
+        assertThat(status.isToolsEnabled(), is(false));
+        assertThat(status.getOpennmsUrl(), equalTo(""));
+        assertThat(status.getOpennmsUsername(), equalTo(""));
+        assertThat(status.isOpennmsPasswordPresent(), is(false));
+    }
+
+    @Test
+    public void statusExposesMcpFieldsButNeverTheOpenNmsPassword() throws JsonProcessingException {
+        LlmConfig config = LlmConfigImpl.newBuilder()
+                .enabled(true)
+                .apiKey("k")
+                .toolsEnabled(true)
+                .opennmsUrl("http://nms:8980/opennms")
+                .opennmsUsername("admin")
+                .opennmsPassword("s3cret-nms-pw")
+                .build();
+        LlmConfigStatus status = LlmConfigStatus.from(config);
+        assertThat(status.isToolsEnabled(), is(true));
+        assertThat(status.getOpennmsUrl(), equalTo("http://nms:8980/opennms"));
+        assertThat(status.getOpennmsUsername(), equalTo("admin"));
+        assertThat(status.isOpennmsPasswordPresent(), is(true));
+
+        String json = objectMapper.writeValueAsString(status);
+        assertThat("status JSON must not leak the OpenNMS password", json.contains("s3cret-nms-pw"), is(false));
+        assertThat(json.contains("opennmsPassword\""), is(false));
+        assertThat(json.contains("\"opennmsPasswordPresent\":true"), is(true));
+        assertThat(json.contains("\"toolsEnabled\":true"), is(true));
+        assertThat(json.contains("\"opennmsUsername\":\"admin\""), is(true));
+
+        LlmConfigStatus blank = LlmConfigStatus.from(LlmConfigImpl.newBuilder().apiKey("k").opennmsPassword("").build());
+        assertThat(blank.isOpennmsPasswordPresent(), is(false));
+        LlmConfigStatus fromNull = LlmConfigStatus.from(null);
+        assertThat(fromNull.isToolsEnabled(), is(false));
+        assertThat(fromNull.getOpennmsUrl(), equalTo(""));
+        assertThat(fromNull.isOpennmsPasswordPresent(), is(false));
+    }
+
+    @Test
+    public void toStringNeverIncludesTheOpenNmsPassword() {
+        LlmConfig config = LlmConfigImpl.newBuilder()
+                .apiKey("k")
+                .opennmsUsername("admin")
+                .opennmsPassword("s3cret-nms-pw")
+                .build();
+        String rendered = config.toString();
+        assertThat(rendered.contains("s3cret-nms-pw"), is(false));
+        assertThat(rendered.contains("opennmsPasswordPresent=true"), is(true));
+        assertThat(rendered.contains("opennmsUsername=admin"), is(true));
+    }
 }

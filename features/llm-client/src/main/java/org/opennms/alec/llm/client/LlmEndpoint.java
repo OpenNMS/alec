@@ -26,33 +26,38 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.llm;
+package org.opennms.alec.llm.client;
 
-/**
- * Thrown when a call to the LLM API fails — network error, non-2xx
- * HTTP status, malformed response, or in-flight rate limit exceeded.
- */
-public class LlmApiException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+import java.util.Objects;
 
-    // Tokens the provider billed before the failure (a multi-round exchange
-    // that never reported still cost its completed rounds). Empty by default.
-    private transient Suggestions.TokenUsage usage = Suggestions.TokenUsage.empty();
+/** Where to send a chat request: an OpenAI-compatible base URL, a bearer key and a model id. */
+public final class LlmEndpoint {
 
-    public Suggestions.TokenUsage getUsage() {
-        return usage;
+    private final String baseUrl;
+    private final String apiKey;
+    private final String model;
+
+    public LlmEndpoint(String baseUrl, String apiKey, String model) {
+        this.baseUrl = Objects.requireNonNull(baseUrl);
+        this.apiKey = Objects.requireNonNull(apiKey);
+        this.model = Objects.requireNonNull(model);
     }
 
-    public LlmApiException withUsage(Suggestions.TokenUsage usage) {
-        this.usage = usage == null ? Suggestions.TokenUsage.empty() : usage;
-        return this;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
-    public LlmApiException(String message) {
-        super(message);
+    public String getApiKey() {
+        return apiKey;
     }
 
-    public LlmApiException(String message, Throwable cause) {
-        super(message, cause);
+    public String getModel() {
+        return model;
+    }
+
+    @Override
+    public String toString() {
+        // Never include the key — this ends up in log lines.
+        return "LlmEndpoint[" + baseUrl + ", model=" + model + "]";
     }
 }

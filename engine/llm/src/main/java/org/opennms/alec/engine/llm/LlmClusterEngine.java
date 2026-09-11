@@ -55,6 +55,12 @@ import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.llm.client.LlmRequest;
+import org.opennms.alec.llm.client.LlmResult;
+import org.opennms.alec.llm.client.LlmExchange;
+import org.opennms.alec.llm.client.LlmCallException;
+import org.opennms.alec.llm.client.LlmEndpoint;
+import org.opennms.alec.llm.client.ToolSpec;
 import org.opennms.alec.engine.api.llm.LlmUsageMetrics;
 import org.opennms.alec.engine.api.llm.TokenUsage;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
@@ -69,12 +75,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.util.Pair;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class LlmClusterEngine extends AbstractClusterEngine {
 
@@ -109,7 +110,11 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     // is throttled separately to the configured cluster frequency
     // (clusterRequestIntervalMs). See setClusterRequestIntervalMs / the factory.
     static final long RECONCILE_INTERVAL_MS = 30_000L;
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    // Per-round wait for the model's grouping. A local model clustering a
+    // large alarm set with the tool list offered needs far more than 30 s;
+    // a timeout discards the whole grouping, so this is generous. The call
+    // runs off the tick thread and one request is in flight at a time.
+    static final int READ_TIMEOUT_SECONDS = 180;
 
     public static final String DEFAULT_CLUSTER_PROMPT =
             "You are a senior network reliability engineer analyzing alarms for OpenNMS ALEC.\n"
@@ -129,9 +134,7 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     private final ObjectMapper objectMapper;
     private final String clusterPrompt;
     private final OkHttpClient httpClient;
-    // ALEC-308: token-usage gauges. Null, or a blueprint proxy that may throw
-    // when the driver is absent — recording is best-effort either way.
-    private final LlmUsageMetrics usageMetrics;
+    private final LlmExchange exchange;
 
     // The LLM call is made off the engine tick thread so it never blocks under
     // the graph lock. Each tick fires at most one request (requestInFlight) and
@@ -177,16 +180,16 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     LlmClusterEngine(MetricRegistry metrics, KeyValueStore<String> kvStore,
                      ObjectMapper objectMapper, String clusterPrompt, LlmUsageMetrics usageMetrics) {
         super(metrics);
-        this.usageMetrics = usageMetrics;
         this.kvStore = kvStore;
         this.objectMapper = objectMapper;
         this.clusterPrompt = (clusterPrompt == null || clusterPrompt.trim().isEmpty())
                 ? DEFAULT_CLUSTER_PROMPT : clusterPrompt;
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
+        this.exchange = new LlmExchange(httpClient, objectMapper, usageMetrics);
     }
 
     /**
@@ -298,11 +301,9 @@ public class LlmClusterEngine extends AbstractClusterEngine {
                             (x, y) -> x, LinkedHashMap::new));
         }
 
-        final String body;
-        final String url;
+        final LlmRequest chatRequest;
         try {
-            body = buildRequestBody(selected.values(), g, config.model, objectMapper);
-            url = chatCompletionsUrl(config.baseUrl);
+            chatRequest = buildLlmRequest(selected.values(), g, config);
         } catch (Exception e) {
             requestInFlight.set(false);
             LOG.warn("LLM clustering: failed to build request: {}", e.getMessage());
@@ -312,40 +313,43 @@ public class LlmClusterEngine extends AbstractClusterEngine {
         // request is not issued until a full query interval has elapsed, even
         // though reconcile ticks continue in between.
         lastRequestAtMs = timestampInMillis;
-        final String apiKey = config.apiKey;
         final String model = config.model;
         httpExecutor.submit(() -> {
             try {
-                Request request = new Request.Builder()
-                        .url(url)
-                        .header("Authorization", "Bearer " + apiKey)
-                        .header("Content-Type", "application/json")
-                        .header("X-Title", "OpenNMS ALEC")
-                        .post(RequestBody.create(JSON, body))
-                        .build();
-                try (Response response = httpClient.newCall(request).execute()) {
-                    ResponseBody respBody = response.body();
-                    String text = respBody == null ? "" : respBody.string();
-                    if (!response.isSuccessful()) {
-                        LOG.warn("LLM clustering API returned HTTP {}: {}", response.code(),
-                                truncate(text, 300));
-                        recordCallMetric(false);
-                        return;
-                    }
-                    recordUsage(text, model, timestampInMillis);
-                    latestGroups = parseGroups(text, objectMapper);
-                    recordCallMetric(true);
-                }
-            } catch (IOException e) {
-                LOG.warn("LLM clustering call failed: {}", e.getMessage());
-                recordCallMetric(false);
+                LlmResult result = exchange.run(chatRequest);
+                recordUsage(result.getUsage(), model, timestampInMillis);
+                latestGroups = parseGroups(result.getTerminalArguments());
+            } catch (LlmCallException e) {
+                LOG.warn("LLM clustering call failed ({}): {}", e.getKind(), e.getMessage());
+                recordFailedCall(model, timestampInMillis, e.getUsage());
             } catch (Exception e) {
                 LOG.error("Unexpected error during LLM clustering", e);
-                recordCallMetric(false);
+                recordFailedCall(model, timestampInMillis, TokenUsage.empty());
             } finally {
                 requestInFlight.set(false);
             }
         });
+    }
+
+    /**
+     * The exchange for one clustering request: the operator's cluster prompt,
+     * the alarms + topology as the user message, and group_alarms as the
+     * terminal tool — a single round, since no data tools are offered.
+     */
+    LlmRequest buildLlmRequest(Collection<AlarmInSpaceTime> alarms, Graph<CEVertex, CEEdge> g,
+                                 LlmConfig config) {
+        LlmRequest.Builder b = LlmRequest.builder()
+                .endpoint(new LlmEndpoint(config.baseUrl, config.apiKey, config.model))
+                .systemPrompt(clusterPrompt)
+                // The topology-aware grouping the prompt asks for only works if the model
+                // actually sees the connectivity — send the device adjacency, not just
+                // the alarm attributes.
+                .userContent(renderAlarmsForPrompt(alarms) + renderTopology(alarms, g))
+                .terminalTool(groupAlarmsSpec())
+                .maxTokens(MAX_TOKENS)
+                .consumer(LlmUsageMetrics.Consumer.CLUSTERING)
+                .maxRounds(1);
+        return b.build();
     }
 
     // Retained for tests / callers that parse-and-resolve in one step.
@@ -376,52 +380,40 @@ public class LlmClusterEngine extends AbstractClusterEngine {
         return map;
     }
 
-    String buildRequestBody(Collection<AlarmInSpaceTime> alarms, Graph<CEVertex, CEEdge> g,
-                            String model, ObjectMapper om) throws IOException {
-        ObjectNode root = om.createObjectNode();
-        root.put("model", model);
-        root.put("max_tokens", MAX_TOKENS);
+    /** The {@code group_alarms} function the model must call to deliver its grouping. */
+    private static final ToolSpec GROUP_ALARMS_SPEC = buildGroupAlarmsSpec();
 
-        ArrayNode messages = root.putArray("messages");
-        ObjectNode sysMsg = messages.addObject();
-        sysMsg.put("role", "system");
-        sysMsg.put("content", clusterPrompt);
-        ObjectNode userMsg = messages.addObject();
-        userMsg.put("role", "user");
-        // The topology-aware grouping the prompt asks for only works if the model
-        // actually sees the connectivity — send the device adjacency, not just
-        // the alarm attributes.
-        userMsg.put("content", renderAlarmsForPrompt(alarms) + renderTopology(alarms, g));
+    static ToolSpec groupAlarmsSpec() {
+        return GROUP_ALARMS_SPEC;
+    }
 
-        ArrayNode tools = root.putArray("tools");
-        ObjectNode tool = tools.addObject();
-        tool.put("type", "function");
-        ObjectNode fn = tool.putObject("function");
-        fn.put("name", TOOL_NAME);
-        fn.put("description",
-                "Group the provided network alarms into correlated clusters, "
-                + "where alarms in the same cluster likely share a common root cause.");
-        ObjectNode schema = fn.putObject("parameters");
-        schema.put("type", "object");
-        ObjectNode props = schema.putObject("properties");
-        ObjectNode groupsProp = props.putObject("groups");
-        groupsProp.put("type", "array");
-        groupsProp.put("description",
+    private static ToolSpec buildGroupAlarmsSpec() {
+        ObjectMapper om = new ObjectMapper();
+        ObjectNode groups = om.createObjectNode();
+        groups.put("type", "array");
+        groups.put("description",
                 "Each element is a correlated cluster. Omit singleton alarms that have no clear correlation.");
-        ObjectNode items = groupsProp.putObject("items");
+        ObjectNode items = groups.putObject("items");
         items.put("type", "object");
         ObjectNode itemProps = items.putObject("properties");
         ObjectNode alarmIdsProp = itemProps.putObject("alarm_ids");
         alarmIdsProp.put("type", "array");
         alarmIdsProp.put("description", "IDs of alarms in this cluster");
         alarmIdsProp.putObject("items").put("type", "string");
-        ArrayNode itemRequired = items.putArray("required");
-        itemRequired.add("alarm_ids");
-        ArrayNode required = schema.putArray("required");
-        required.add("groups");
+        items.putArray("required").add("alarm_ids");
+        return ToolSpec.builder(TOOL_NAME)
+                .description("Group the provided network alarms into correlated clusters, "
+                        + "where alarms in the same cluster likely share a common root cause.")
+                .raw("groups", "", true, groups)
+                .build();
+    }
 
-        root.put("tool_choice", "required");
-        return om.writeValueAsString(root);
+    /** Single-shot request body (no data tools) — kept for tests asserting the wire shape. */
+    String buildRequestBody(Collection<AlarmInSpaceTime> alarms, Graph<CEVertex, CEEdge> g,
+                            String model, ObjectMapper om) throws IOException {
+        return LlmExchange.buildRequestBody(model, clusterPrompt,
+                renderAlarmsForPrompt(alarms) + renderTopology(alarms, g),
+                List.of(groupAlarmsSpec()), MAX_TOKENS, om);
     }
 
     private static String renderAlarmsForPrompt(Collection<AlarmInSpaceTime> alarms) {
@@ -503,31 +495,20 @@ public class LlmClusterEngine extends AbstractClusterEngine {
      */
     static List<List<String>> parseGroups(String json, ObjectMapper om) throws IOException {
         JsonNode root = om.readTree(json);
-        JsonNode choices = root.get("choices");
-        if (choices == null || !choices.isArray() || choices.isEmpty()) {
-            throw new IOException("LLM response missing choices array");
-        }
-        JsonNode message = choices.get(0).get("message");
-        if (message == null) {
-            throw new IOException("LLM response missing message in first choice");
-        }
-        JsonNode toolCalls = message.get("tool_calls");
-        if (toolCalls == null || !toolCalls.isArray() || toolCalls.isEmpty()) {
-            throw new IOException("LLM response missing tool_calls; model did not call " + TOOL_NAME);
-        }
-        JsonNode argsNode = null;
-        for (JsonNode call : toolCalls) {
-            JsonNode fn = call.get("function");
-            if (fn != null && TOOL_NAME.equals(textOrEmpty(fn, "name"))) {
-                argsNode = fn.get("arguments");
-                break;
+        JsonNode args = LlmExchange.extractTerminalArguments(root, TOOL_NAME);
+        if (args == null) {
+            JsonNode toolCalls = root.path("choices").path(0).path("message").path("tool_calls");
+            if (!toolCalls.isArray() || toolCalls.isEmpty()) {
+                throw new IOException("LLM response missing tool_calls; model did not call " + TOOL_NAME);
             }
-        }
-        if (argsNode == null) {
             throw new IOException("LLM response missing tool_call for " + TOOL_NAME);
         }
-        JsonNode input = argsNode.isTextual() ? om.readTree(argsNode.asText()) : argsNode;
-        JsonNode groups = input.get("groups");
+        return parseGroups(args);
+    }
+
+    /** Raw alarm-id groups from the group_alarms arguments object. */
+    static List<List<String>> parseGroups(JsonNode input) {
+        JsonNode groups = input == null ? null : input.get("groups");
         if (groups == null || !groups.isArray()) {
             return List.of();
         }
@@ -538,6 +519,8 @@ public class LlmClusterEngine extends AbstractClusterEngine {
             List<String> g = new ArrayList<>();
             for (JsonNode idNode : ids) {
                 if (idNode.isTextual()) {
+                    g.add(idNode.asText());
+                } else if (idNode.isNumber()) {
                     g.add(idNode.asText());
                 }
             }
@@ -680,32 +663,39 @@ public class LlmClusterEngine extends AbstractClusterEngine {
      */
     void recordUsage(String responseText, String model, long now) {
         try {
-            JsonNode usage = objectMapper.readTree(responseText).get("usage");
-            if (usage == null) {
+            JsonNode root = objectMapper.readTree(responseText);
+            if (root.get("usage") == null) {
                 return;
             }
-            long prompt = usage.path("prompt_tokens").asLong(0);
-            // cached_tokens is a subset of prompt_tokens (see the RCA usage
-            // handling); store the buckets disjointly to avoid double-counting.
-            long cached = Math.min(prompt,
-                    usage.path("prompt_tokens_details").path("cached_tokens").asLong(0));
-            recordRoundMetric(new TokenUsage(prompt - cached, usage.path("completion_tokens").asLong(0), cached, 0L));
+            recordUsage(LlmExchange.readUsage(root), model, now);
+        } catch (Exception e) {
+            LOG.warn("Failed to record LLM clustering token usage: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Record one clustering exchange's usage (summed over every round of the
+     * tool loop) into the shared usage store, in the same record shape the RCA
+     * UsageStore writes, so it counts toward the shared budget and appears in
+     * the usage dashboard.
+     */
+    void recordUsage(TokenUsage usage, String model, long now) {
+        try {
             ObjectNode rec = objectMapper.createObjectNode();
             rec.put("ts", now);
             rec.put("situationId", CLUSTER_USAGE_MARKER);
             rec.put("model", model);
             rec.put("success", true);
-            long output = usage.path("completion_tokens").asLong(0);
-            rec.put("inputTokens", prompt - cached);
-            rec.put("outputTokens", output);
-            rec.put("cacheReadInputTokens", cached);
-            rec.put("cacheCreationInputTokens", 0);
+            rec.put("inputTokens", usage.getInputTokens());
+            rec.put("outputTokens", usage.getOutputTokens());
+            rec.put("cacheReadInputTokens", usage.getCacheReadInputTokens());
+            rec.put("cacheCreationInputTokens", usage.getCacheCreationInputTokens());
             kvStore.put(UUID.randomUUID().toString(), objectMapper.writeValueAsString(rec), USAGE_CONTEXT);
 
             // Fold our own spend into the cached budget totals immediately so it
-            // counts before the next full rescan (prompt + output = all buckets).
+            // counts before the next full rescan (all buckets).
             // Guarded: this runs on the HTTP thread, budgetExceeded on the tick thread.
-            long total = prompt + output;
+            long total = usage.getTotalTokens();
             synchronized (budgetLock) {
                 if (now >= cacheDayStart) {
                     cachedDailyTokens += total;
@@ -719,26 +709,46 @@ public class LlmClusterEngine extends AbstractClusterEngine {
         }
     }
 
-    /** Best-effort: the metrics sink is a blueprint proxy that throws when the driver bundle is down. */
-    private void recordRoundMetric(TokenUsage usage) {
-        if (usageMetrics == null) {
-            return;
-        }
-        try {
-            usageMetrics.recordRound(LlmUsageMetrics.Consumer.CLUSTERING, usage);
-        } catch (RuntimeException e) {
-            LOG.debug("LLM usage metrics unavailable: {}", e.getMessage());
-        }
+    /**
+     * A failed clustering exchange: zero tokens, success=false — the same row
+     * RCA writes for its failures, so the usage dashboard's call/failure
+     * counts cover clustering too instead of silently showing nothing.
+     */
+    void recordFailedCall(String model, long now) {
+        recordFailedCall(model, now, TokenUsage.empty());
     }
 
-    private void recordCallMetric(boolean success) {
-        if (usageMetrics == null) {
-            return;
-        }
+    /**
+     * A failed clustering exchange, with whatever the provider billed for the
+     * rounds that did complete (a tool loop that never reported still cost its
+     * data-tool rounds) — so the shared budget cannot be bypassed by failures.
+     */
+    void recordFailedCall(String model, long now, TokenUsage spent) {
+        TokenUsage usage = spent == null ? TokenUsage.empty() : spent;
         try {
-            usageMetrics.recordCall(LlmUsageMetrics.Consumer.CLUSTERING, success);
-        } catch (RuntimeException e) {
-            LOG.debug("LLM usage metrics unavailable: {}", e.getMessage());
+            ObjectNode rec = objectMapper.createObjectNode();
+            rec.put("ts", now);
+            rec.put("situationId", CLUSTER_USAGE_MARKER);
+            rec.put("model", model);
+            rec.put("success", false);
+            rec.put("inputTokens", usage.getInputTokens());
+            rec.put("outputTokens", usage.getOutputTokens());
+            rec.put("cacheReadInputTokens", usage.getCacheReadInputTokens());
+            rec.put("cacheCreationInputTokens", usage.getCacheCreationInputTokens());
+            kvStore.put(UUID.randomUUID().toString(), objectMapper.writeValueAsString(rec), USAGE_CONTEXT);
+            long total = usage.getTotalTokens();
+            if (total > 0) {
+                synchronized (budgetLock) {
+                    if (now >= cacheDayStart) {
+                        cachedDailyTokens += total;
+                    }
+                    if (now >= cacheMonthStart) {
+                        cachedMonthlyTokens += total;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to record failed LLM clustering call: {}", e.getMessage());
         }
     }
 
@@ -753,21 +763,15 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     }
 
     static String chatCompletionsUrl(String baseUrl) {
-        String trimmed = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        return trimmed + "/chat/completions";
-    }
-
-    private static String textOrEmpty(JsonNode parent, String field) {
-        JsonNode v = parent.get(field);
-        return v == null || v.isNull() ? "" : v.asText("");
+        try {
+            return LlmExchange.chatCompletionsUrl(baseUrl);
+        } catch (LlmCallException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     private static String safe(String s) {
         return s == null ? "" : s;
-    }
-
-    private static String truncate(String s, int max) {
-        return s.length() <= max ? s : s.substring(0, max) + "...";
     }
 
     static final class LlmConfig {

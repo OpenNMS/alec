@@ -68,6 +68,22 @@
     </feature>
 
     <!--
+        ALEC-308: the one HTTP client ALEC's LLM features share — an exchange
+        with an OpenAI-compatible /chat/completions endpoint that forces a
+        tool call, runs the model's data-tool calls when a caller offers any,
+        and returns the terminal tool call's arguments plus token usage.
+    -->
+    <feature name="alec-features-llm-client" description="ALEC :: Features :: LLM Client" version="${project.version}">
+        <feature dependency="true" version="${project.version}">alec-engine-api</feature>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle>mvn:org.opennms.alec.features/org.opennms.alec.features.llm-client/${project.version}</bundle>
+    </feature>
+
+    <!--
         ALEC-299: LLM-powered situation suggestions. Owns the outbound call
         to a configured OpenAI-compatible LLM endpoint (OpenRouter by
         default), the sidecar suggestion + usage stores, the
@@ -81,6 +97,7 @@
              description="ALEC :: Features :: LLM Suggestions" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
         <feature version="${project.version}">alec-engine-api</feature>
+        <feature version="${project.version}">alec-features-llm-client</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
@@ -119,6 +136,7 @@
 
     <feature name="alec-engine-llm" description="ALEC :: Engine :: LLM Clustering" version="${project.version}">
         <feature dependency="true" version="${project.version}">alec-engine-cluster</feature>
+        <feature version="${project.version}">alec-features-llm-client</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okhttp/${okhttp.bundle.version}</bundle>
@@ -248,6 +266,7 @@
         <feature>alec-processor-standalone</feature>
         <feature>alec-features-graph-shell</feature>
         <feature>alec-ui</feature>
+        <feature>alec-features-llm-client</feature>
         <feature>alec-features-llm-suggestions</feature>
     </feature>
 

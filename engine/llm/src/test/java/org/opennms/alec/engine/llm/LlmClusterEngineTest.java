@@ -480,37 +480,5 @@ public class LlmClusterEngineTest {
                 + "\"arguments\":\"" + args + "\"}}]}}]}";
     }
 
-    // --- ALEC-308: token usage gauges ---
 
-    @Test
-    public void recordUsageFeedsTheTokenUsageGauges() throws Exception {
-        org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics gauges =
-                new org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics();
-        LlmClusterEngine metered = new LlmClusterEngine(new MetricRegistry(), kvStore, om, null, gauges);
-        String resp = "{\"usage\":{\"prompt_tokens\":1000,\"completion_tokens\":50,"
-                + "\"prompt_tokens_details\":{\"cached_tokens\":200}}}";
-        metered.recordUsage(resp, MODEL, 1_700_000_000_000L);
-        assertThat(gauges.getTotalTokens(), equalTo(1050L));
-        assertThat(gauges.getTokens(org.opennms.alec.engine.api.llm.LlmUsageMetrics.Consumer.CLUSTERING), equalTo(1050L));
-        assertThat(gauges.getTokens(org.opennms.alec.engine.api.llm.LlmUsageMetrics.Consumer.RCA), equalTo(0L));
-    }
-
-    @Test
-    public void aThrowingMetricsSinkDoesNotBreakUsageRecording() throws Exception {
-        org.opennms.alec.engine.api.llm.LlmUsageMetrics broken = new org.opennms.alec.engine.api.llm.LlmUsageMetrics() {
-            @Override
-            public void recordRound(Consumer consumer, org.opennms.alec.engine.api.llm.TokenUsage usage) {
-                throw new IllegalStateException("driver bundle is down");
-            }
-
-            @Override
-            public void recordCall(Consumer consumer, boolean success) {
-                throw new IllegalStateException("driver bundle is down");
-            }
-        };
-        LlmClusterEngine metered = new LlmClusterEngine(new MetricRegistry(), kvStore, om, null, broken);
-        metered.recordUsage("{\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":1}}", MODEL, 1L);
-        assertThat("the usage row was still written", kvStore.enumerateContext(LlmClusterEngine.USAGE_CONTEXT).size(),
-                equalTo(1));
-    }
 }

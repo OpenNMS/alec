@@ -26,33 +26,47 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.llm;
+package org.opennms.alec.llm.client;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Thrown when a call to the LLM API fails — network error, non-2xx
- * HTTP status, malformed response, or in-flight rate limit exceeded.
+ * Outcome of a tool invocation through the registry. Never carries an
+ * exception: an error is a normal result with {@code error=true} and a
+ * message, so a tool loop can hand it back to the model and let it recover
+ * (retry with a different argument, or report without that data).
  */
-public class LlmApiException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+public final class ToolResult {
 
-    // Tokens the provider billed before the failure (a multi-round exchange
-    // that never reported still cost its completed rounds). Empty by default.
-    private transient Suggestions.TokenUsage usage = Suggestions.TokenUsage.empty();
+    private final boolean error;
+    private final JsonNode content;
+    private final String text;
 
-    public Suggestions.TokenUsage getUsage() {
-        return usage;
+    private ToolResult(boolean error, JsonNode content, String text) {
+        this.error = error;
+        this.content = content;
+        this.text = text;
     }
 
-    public LlmApiException withUsage(Suggestions.TokenUsage usage) {
-        this.usage = usage == null ? Suggestions.TokenUsage.empty() : usage;
-        return this;
+    public static ToolResult ok(JsonNode content, String text) {
+        return new ToolResult(false, content, text);
     }
 
-    public LlmApiException(String message) {
-        super(message);
+    public static ToolResult failure(JsonNode content, String text) {
+        return new ToolResult(true, content, text);
     }
 
-    public LlmApiException(String message, Throwable cause) {
-        super(message, cause);
+    public boolean isError() {
+        return error;
+    }
+
+    /** The JSON payload (for an error: {@code {"error": "..."}}). */
+    public JsonNode getContent() {
+        return content;
+    }
+
+    /** The payload serialized (and size-capped) for a chat {@code tool} message. */
+    public String getText() {
+        return text;
     }
 }

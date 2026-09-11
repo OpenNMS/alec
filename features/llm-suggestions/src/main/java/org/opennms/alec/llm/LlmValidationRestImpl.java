@@ -34,6 +34,7 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import org.opennms.alec.mcp.McpConfig;
+import org.opennms.alec.mcp.McpConfigReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,10 +45,19 @@ public class LlmValidationRestImpl implements LlmValidationRest {
 
     private final LlmSuggestionService suggestionService;
     private final LlmConfigReader configReader;
+    // Stored OpenNMS login, to fill fields a validate-tools request leaves out
+    // entirely (null), as opposed to blank (""), which means "none".
+    private final McpConfigReader mcpConfigReader;
 
     public LlmValidationRestImpl(LlmSuggestionService suggestionService, LlmConfigReader configReader) {
+        this(suggestionService, configReader, null);
+    }
+
+    public LlmValidationRestImpl(LlmSuggestionService suggestionService, LlmConfigReader configReader,
+                                 McpConfigReader mcpConfigReader) {
         this.suggestionService = Objects.requireNonNull(suggestionService);
         this.configReader = Objects.requireNonNull(configReader);
+        this.mcpConfigReader = mcpConfigReader;
     }
 
     @Override
@@ -67,11 +77,17 @@ public class LlmValidationRestImpl implements LlmValidationRest {
             return r.rejection;
         }
         ValidationRequest req = request == null ? new ValidationRequest() : request;
-        // An unsaved OpenNMS login typed into the form is tested as-is; when the
-        // form sends nothing the stored login is used (null -> stored).
+        // The login as the form shows it is tested as-is. A field that is absent
+        // from the request (null) falls back to the stored value; a field sent
+        // blank ("") means exactly that — the form always sends URL and username,
+        // so a blank username is a missing login, not the stored one. The
+        // password is resolved by the service (stored only for the saved URL).
         McpConfig override = null;
-        if (!isBlank(req.getOpennmsUsername()) || !isBlank(req.getOpennmsPassword()) || !isBlank(req.getOpennmsUrl())) {
-            override = new McpConfig(true, req.getOpennmsUrl(), req.getOpennmsUsername(), req.getOpennmsPassword());
+        if (req.getOpennmsUrl() != null || req.getOpennmsUsername() != null || req.getOpennmsPassword() != null) {
+            McpConfig stored = mcpConfigReader == null ? McpConfig.DISABLED : mcpConfigReader.read();
+            String url = req.getOpennmsUrl() != null ? req.getOpennmsUrl() : stored.getOpennmsUrl();
+            String user = req.getOpennmsUsername() != null ? req.getOpennmsUsername() : stored.getOpennmsUsername();
+            override = new McpConfig(true, url, user, req.getOpennmsPassword());
         }
         ValidationResult result = suggestionService.validateTools(r.apiKey, r.baseUrl, r.model, override);
         return Response.ok().entity(result).build();

@@ -61,20 +61,6 @@ public class ToolSpecTest {
     }
 
     @Test
-    public void mcpShapeUsesInputSchema() {
-        ToolSpec spec = ToolSpec.builder("get_node_inventory").description("Get a node")
-                .string("nodeId", "The id", true).build();
-        ObjectNode tool = spec.toMcpTool(om);
-        assertThat(tool.get("name").asText(), equalTo("get_node_inventory"));
-        assertThat(tool.get("description").asText(), equalTo("Get a node"));
-        JsonNode schema = tool.get("inputSchema");
-        assertThat(schema.get("type").asText(), equalTo("object"));
-        assertThat(schema.path("properties").path("nodeId").path("type").asText(), equalTo("string"));
-        // Both wire shapes are rendered from the same schema.
-        assertThat(schema, equalTo(spec.toOpenAiTool(om).get("function").get("parameters")));
-    }
-
-    @Test
     public void requiredArrayListsOnlyRequiredParamsAndIsOmittedWhenNoneRequired() {
         ObjectNode schema = ToolSpec.builder("t")
                 .string("a", "", true)

@@ -28,6 +28,7 @@
 
 package org.opennms.alec.mcp.rest;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -207,43 +208,65 @@ public class McpStatusRestImplTest {
     }
 
     @Test
-    public void nativeServerIsInstalledWhenItsBundleIsActive() {
-        Bundle other = mock(Bundle.class);
-        when(other.getSymbolicName()).thenReturn("org.opennms.alec.features.mcp");
-        when(other.getState()).thenReturn(Bundle.ACTIVE);
-        Bundle server = mock(Bundle.class);
-        when(server.getSymbolicName()).thenReturn("org.opennms.integration.api.mcp-server");
-        when(server.getState()).thenReturn(Bundle.ACTIVE);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void nativeServerIsInstalledWhenItsEndpointServiceExists() {
         BundleContext ctx = mock(BundleContext.class);
-        when(ctx.getBundles()).thenReturn(new Bundle[] {other, server});
+        org.osgi.framework.ServiceReference ref = mock(org.osgi.framework.ServiceReference.class);
+        when(ctx.getServiceReference(McpStatusRestImpl.NATIVE_ENDPOINT_SERVICE)).thenReturn(ref);
 
         McpStatusRestImpl impl = impl(ctx);
         assertThat(impl.isNativeServerInstalled(), is(true));
-        assertThat(McpStatusRestImpl.NATIVE_SERVER_BUNDLE, equalTo("org.opennms.integration.api.mcp-server"));
+        assertThat(McpStatusRestImpl.NATIVE_ENDPOINT_SERVICE,
+                equalTo("org.opennms.integration.api.mcpserver.McpRestEndpoint"));
         McpStatus status = (McpStatus) impl.status().getEntity();
         assertThat(status.isNativeServerInstalled(), is(true));
     }
 
     @Test
-    public void nativeServerIsNotInstalledWhenItsBundleIsAbsentOrNotActive() {
-        Bundle resolved = mock(Bundle.class);
-        when(resolved.getSymbolicName()).thenReturn("org.opennms.integration.api.mcp-server");
-        when(resolved.getState()).thenReturn(Bundle.RESOLVED);
-        Bundle other = mock(Bundle.class);
-        when(other.getSymbolicName()).thenReturn("org.opennms.alec.features.mcp");
-        when(other.getState()).thenReturn(Bundle.ACTIVE);
-        BundleContext ctx = mock(BundleContext.class);
-        when(ctx.getBundles()).thenReturn(new Bundle[] {resolved, other});
-        assertThat("resolved but not started", impl(ctx).isNativeServerInstalled(), is(false));
-
+    public void nativeServerIsNotInstalledWithoutItsEndpointService() {
+        // An ACTIVE bundle whose blueprint container is still waiting or has
+        // failed registers no endpoint; only the service proves the endpoint.
         BundleContext none = mock(BundleContext.class);
-        when(none.getBundles()).thenReturn(new Bundle[] {other});
+        when(none.getServiceReference(McpStatusRestImpl.NATIVE_ENDPOINT_SERVICE)).thenReturn(null);
         assertThat(impl(none).isNativeServerInstalled(), is(false));
 
         BundleContext stopping = mock(BundleContext.class);
-        when(stopping.getBundles()).thenThrow(new IllegalStateException("framework stopping"));
+        when(stopping.getServiceReference(McpStatusRestImpl.NATIVE_ENDPOINT_SERVICE))
+                .thenThrow(new IllegalStateException("framework stopping"));
         assertThat("a stopping framework reports not installed", impl(stopping).isNativeServerInstalled(),
                 is(false));
         assertThat(((McpStatus) impl(stopping).status().getEntity()).isNativeServerInstalled(), is(false));
+    }
+
+    @Test
+    public void aMisbehavingProviderDoesNotBreakTheStatusDocument() {
+        McpToolProvider broken = new McpToolProvider() {
+            @Override
+            public String getToolName() {
+                return "broken";
+            }
+
+            @Override
+            public String getToolDescription() {
+                throw new IllegalStateException("config missing");
+            }
+
+            @Override
+            public String getInputSchema() {
+                return "{\"type\":\"object\"}";
+            }
+
+            @Override
+            public McpToolResult execute(McpToolContext context) {
+                return McpToolResult.text("{}");
+            }
+        };
+        registry.addTool(broken);
+        registry.addTool(StubTool.returning("fine", "{}"));
+        McpStatus status = (McpStatus) impl(null).status().getEntity();
+        assertThat(status.getTools().size(), equalTo(2));
+        McpStatus.ToolInfo b = status.getTools().stream().filter(t -> t.getName().equals("broken")).findFirst().get();
+        assertThat(b.getDescription(), containsString("provider failed"));
+        assertThat(b.isAvailable(), is(false));
     }
 }

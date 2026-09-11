@@ -113,6 +113,18 @@ public abstract class AlecTool implements McpToolProvider {
         return false;
     }
 
+    /**
+     * Roles an <em>external</em> caller must hold (any one of them) to run this
+     * tool through the OpenNMS MCP server; empty means any REST user. ALEC's
+     * own model calls bypass this (they run with ALEC's stored OpenNMS login
+     * through {@link #call}), so it only ever narrows what outside callers
+     * can reach with that login. Mirror the OpenNMS REST rule of the data
+     * the tool reads.
+     */
+    protected java.util.List<String> requiredRoles() {
+        return java.util.Collections.emptyList();
+    }
+
     /** The {@link McpToolProvider} entry point used by the OpenNMS MCP server. */
     @Override
     public final McpToolResult execute(McpToolContext context) {
@@ -122,12 +134,19 @@ public abstract class AlecTool implements McpToolProvider {
             return McpToolResult.error("Tool '" + name + "' is not available on this system"
                     + " (OpenNMS REST access is not configured on ALEC's LLM Setup page)");
         }
+        java.util.List<String> roles = requiredRoles();
+        if (!roles.isEmpty() && (context == null || roles.stream().noneMatch(context::isUserInRole))) {
+            count(true);
+            return McpToolResult.error("Tool '" + name + "' requires one of the roles " + roles);
+        }
         Map<String, Object> arguments = context == null ? null : context.getArguments();
         JsonNode args = arguments == null ? MAPPER.createObjectNode() : MAPPER.valueToTree(arguments);
         try {
             JsonNode content = call(args);
             count(false);
-            return McpToolResult.text(MAPPER.writeValueAsString(content == null ? MAPPER.createObjectNode() : content));
+            // Same cap as the in-process path: a result is bounded whoever asked.
+            return McpToolResult.text(ToolRegistry.cap(
+                    MAPPER.writeValueAsString(content == null ? MAPPER.createObjectNode() : content)));
         } catch (ToolException e) {
             count(true);
             return McpToolResult.error(e.getMessage() == null ? "tool failed" : e.getMessage());

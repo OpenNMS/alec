@@ -119,13 +119,16 @@ public class LlmRestImpl implements LlmRest {
             // login — the REST-backed tools would silently be missing and the UI
             // check would have been skipped. Presence is checked here; the login
             // itself is probed against /rest/info.
-            if (merged.isToolsEnabled()) {
+            // Clearing the API key turns the integration off; the tool-access
+            // login must not stand in the way of that (it is re-checked when
+            // tool access is next saved with a key).
+            if (merged.isToolsEnabled() && !request.isClearApiKey()) {
                 // The stored password is only ever sent to the URL it was saved
-                // with — a new URL needs the password re-entered (same rule as
-                // the API key), else the save-time probe would hand the stored
-                // password to whatever host the request names.
+                // with — merge() already dropped it if the URL changed without a
+                // new password, so this reads as "login incomplete" below; say
+                // why explicitly.
                 if (existing != null && !isBlank(existing.getOpennmsPassword())
-                        && isBlank(request.getOpennmsPassword())
+                        && isBlank(request.getOpennmsPassword()) && !request.isClearOpennmsPassword()
                         && !sameOpennmsUrl(merged.getOpennmsUrl(), existing.getOpennmsUrl())) {
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity("Cannot enable MCP tool access: the OpenNMS URL changed — re-enter the "
@@ -222,6 +225,12 @@ public class LlmRestImpl implements LlmRest {
             opennmsPassword = null;
         } else if (request.getOpennmsPassword() != null && !request.getOpennmsPassword().isEmpty()) {
             opennmsPassword = request.getOpennmsPassword();
+        } else if (existing != null && !sameOpennmsUrl(opennmsUrl, existing.getOpennmsUrl())) {
+            // A stored password belongs to the URL it was saved with. Repointing
+            // the URL without a new password must not carry it along — whatever
+            // the tool-access flag says — or a later check/save would send it
+            // to the new host.
+            opennmsPassword = null;
         } else {
             opennmsPassword = existing == null ? null : existing.getOpennmsPassword();
         }

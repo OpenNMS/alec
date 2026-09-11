@@ -328,13 +328,8 @@ public class DefaultToolRegistry implements ToolRegistry {
     }
 
     private static String cap(String text) {
-        if (text.length() > MAX_RESULT_CHARS) {
-            // Truncate as text rather than trimming the structure: the model
-            // still sees the leading (most important) part, plus an explicit
-            // marker so it knows the tail is missing.
-            return text.substring(0, MAX_RESULT_CHARS) + "\n...[truncated: result exceeded "
-                    + MAX_RESULT_CHARS + " characters; narrow the request]";
-        }
-        return text;
+        // Truncate as text rather than trimming the structure: the model still
+        // sees the leading (most important) part, plus an explicit marker.
+        return ToolRegistry.cap(text);
     }
 }

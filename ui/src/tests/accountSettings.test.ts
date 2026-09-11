@@ -1307,6 +1307,13 @@ test('Typing a password after Clear password replaces it instead of clearing', a
 	wrapper.vm.llmOpennmsPassword = 'new-pw'
 	await wrapper.vm.$nextTick()
 	expect(wrapper.vm.llmOpennmsPasswordCleared).toBe(false)
+	// Erasing the typed text lands back on the stored state, not on "no password".
+	wrapper.vm.llmOpennmsPassword = ''
+	await wrapper.vm.$nextTick()
+	expect(wrapper.vm.llmOpennmsPasswordPresent).toBe(true)
+	expect(wrapper.find('[data-test="llm-opennms-password-saved"]').exists()).toBe(true)
+	wrapper.vm.llmOpennmsPassword = 'new-pw'
+	await wrapper.vm.$nextTick()
 	await wrapper.vm.saveConfiguration()
 	await flushPromises()
 	const posted = (store.setLLMConfig as any).mock.calls[0][0]

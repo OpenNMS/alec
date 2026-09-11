@@ -137,7 +137,12 @@ defineProps<{
 			them alongside the engine's graph statistics.
 		</p>
 
-		<h4 v-if="status">Tools on this system</h4>
+		<h4 v-if="status">ALEC and plugin tools on this system</h4>
+		<p v-if="status" class="mcp-tool-list-note">
+			OpenNMS's own built-in tools (node search, alarm updates, events) are
+			served by the same server but are not listed here; ask the server's
+			<code>tools/list</code> for the complete catalogue.
+		</p>
 		<ul v-if="status" class="mcp-tool-list" data-test="llm-tools-list">
 			<li v-for="tool in status.tools" :key="tool.name">
 				<code>{{ tool.name }}</code>

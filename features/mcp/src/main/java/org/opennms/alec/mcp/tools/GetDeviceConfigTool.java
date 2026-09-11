@@ -86,6 +86,16 @@ public class GetDeviceConfigTool extends AlecTool {
         return rest.isConfigured();
     }
 
+    /**
+     * Configuration text can carry secrets and is read with ALEC's stored login,
+     * so an external caller must hold a role that lets them read backups
+     * themselves (ROLE_DEVICE_CONFIG_BACKUP) or administer OpenNMS.
+     */
+    @Override
+    protected java.util.List<String> requiredRoles() {
+        return java.util.List.of("ROLE_ADMIN", "ROLE_DEVICE_CONFIG_BACKUP");
+    }
+
     @Override
     public JsonNode call(JsonNode arguments) throws ToolException {
         Args args = new Args(arguments);

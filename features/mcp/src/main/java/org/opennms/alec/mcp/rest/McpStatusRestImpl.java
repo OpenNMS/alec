@@ -67,28 +67,47 @@ public class McpStatusRestImpl implements McpStatusRest {
         McpConfig config = configReader.read();
         List<McpStatus.ToolInfo> tools = new ArrayList<>();
         for (McpToolProvider t : registry.allTools()) {
-            tools.add(new McpStatus.ToolInfo(t.getToolName(), t.getToolDescription(), registry.isAvailable(t),
-                    t.isWriteAccess(), sourceOf(t)));
+            // One misbehaving provider must not take the status document down.
+            try {
+                tools.add(new McpStatus.ToolInfo(t.getToolName(), t.getToolDescription(), registry.isAvailable(t),
+                        t.isWriteAccess(), sourceOf(t)));
+            } catch (RuntimeException e) {
+                tools.add(new McpStatus.ToolInfo(safeName(t), "(provider failed: " + e.getClass().getSimpleName() + ")",
+                        false, false, sourceOf(t)));
+            }
         }
         return Response.ok(new McpStatus(config.isToolsEnabled(), rest.isConfigured(),
                 config.getEffectiveOpennmsUrl(), isNativeServerInstalled(), tools,
                 registry.getMetrics().snapshot())).build();
     }
 
+    /** Class name of the service the OpenNMS MCP server registers once its endpoint is up. */
+    static final String NATIVE_ENDPOINT_SERVICE = "org.opennms.integration.api.mcpserver.McpRestEndpoint";
+
+    /**
+     * True when the server's REST endpoint service exists — the fact that
+     * matters. A blueprint bundle is ACTIVE while its container is still
+     * waiting on references or has failed, so the bundle state alone would
+     * say "installed" exactly when the endpoint is missing.
+     */
     boolean isNativeServerInstalled() {
         if (bundleContext == null) {
             return false;
         }
         try {
-            for (Bundle b : bundleContext.getBundles()) {
-                if (NATIVE_SERVER_BUNDLE.equals(b.getSymbolicName()) && b.getState() == Bundle.ACTIVE) {
-                    return true;
-                }
-            }
+            return bundleContext.getServiceReference(NATIVE_ENDPOINT_SERVICE) != null;
         } catch (RuntimeException ignore) {
-            // a stopping framework; report "not installed"
+            return false; // a stopping framework
         }
-        return false;
+    }
+
+    private static String safeName(McpToolProvider t) {
+        try {
+            String n = t.getToolName();
+            return n == null ? "?" : n;
+        } catch (RuntimeException e) {
+            return "?";
+        }
     }
 
     private static String sourceOf(McpToolProvider tool) {

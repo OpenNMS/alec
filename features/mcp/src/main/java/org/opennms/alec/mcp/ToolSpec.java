@@ -144,15 +144,6 @@ public final class ToolSpec {
         return tool;
     }
 
-    /** MCP {@code tools/list} element. */
-    public ObjectNode toMcpTool(ObjectMapper om) {
-        ObjectNode tool = om.createObjectNode();
-        tool.put("name", name);
-        tool.put("description", description);
-        tool.set("inputSchema", parametersSchema(om));
-        return tool;
-    }
-
     @Override
     public String toString() {
         return "ToolSpec[" + name + "]";

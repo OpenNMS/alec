@@ -259,4 +259,71 @@ public class AlecToolTest {
         assertThat(ctx.isUserInRole("ROLE_USER"), is(false));
         assertThat(ctx.isUserInRole(null), is(false));
     }
+
+    // --- second-review fixes: size cap and role gate on the external path ---
+
+    @Test
+    public void externalResultsAreCappedLikeInProcessOnes() throws Exception {
+        StringBuilder big = new StringBuilder();
+        for (int i = 0; i < ToolRegistry.MAX_RESULT_CHARS + 500; i++) {
+            big.append('x');
+        }
+        StubTool tool = StubTool.returning("big", "{\"blob\":\"" + big + "\"}");
+        McpToolResult r = tool.execute(null);
+        assertThat(r.isError(), is(false));
+        String text = r.getTextContents().get(0);
+        assertThat(text.length() < ToolRegistry.MAX_RESULT_CHARS + 200, is(true));
+        assertThat(text, containsString("[truncated: result exceeded"));
+    }
+
+    @Test
+    public void requiredRolesGateExternalCallersOnly() {
+        AlecTool gated = new AlecTool() {
+            private final ToolSpec spec = ToolSpec.builder("gated").description("d").build();
+
+            @Override
+            public ToolSpec getSpec() {
+                return spec;
+            }
+
+            @Override
+            public JsonNode call(JsonNode arguments) {
+                return om.createObjectNode().put("ok", true);
+            }
+
+            @Override
+            protected java.util.List<String> requiredRoles() {
+                return java.util.List.of("ROLE_ADMIN", "ROLE_DEVICE_CONFIG_BACKUP");
+            }
+        };
+        McpToolResult denied = gated.execute(roleContext("ro", java.util.Set.of("ROLE_REST")));
+        assertThat(denied.isError(), is(true));
+        assertThat(denied.getTextContents().get(0), containsString("requires one of the roles"));
+        assertThat(gated.execute(null).isError(), is(true));
+        McpToolResult allowed = gated.execute(roleContext("backup", java.util.Set.of("ROLE_DEVICE_CONFIG_BACKUP")));
+        assertThat(allowed.isError(), is(false));
+        // The in-process path (ALEC's own model calls) is not gated.
+        DefaultToolRegistry registry = new DefaultToolRegistry(new McpMetrics(), om);
+        registry.addTool(gated);
+        assertThat(registry.call(ToolConsumer.RCA, "gated", null).isError(), is(false));
+    }
+
+    private static McpToolContext roleContext(String user, java.util.Set<String> roles) {
+        return new McpToolContext() {
+            @Override
+            public java.util.Map<String, Object> getArguments() {
+                return java.util.Map.of();
+            }
+
+            @Override
+            public String getUserName() {
+                return user;
+            }
+
+            @Override
+            public boolean isUserInRole(String role) {
+                return roles.contains(role);
+            }
+        };
+    }
 }

@@ -51,6 +51,15 @@ public interface ToolRegistry {
      */
     int MAX_RESULT_CHARS = 16_000;
 
+    /** Truncate a serialized result to {@link #MAX_RESULT_CHARS} with an explicit marker the model can see. */
+    static String cap(String text) {
+        if (text == null || text.length() <= MAX_RESULT_CHARS) {
+            return text;
+        }
+        return text.substring(0, MAX_RESULT_CHARS) + "\n...[truncated: result exceeded "
+                + MAX_RESULT_CHARS + " characters; narrow the request]";
+    }
+
     /** Register a provider (blueprint whiteboard bind method). */
     void addTool(McpToolProvider tool);
 

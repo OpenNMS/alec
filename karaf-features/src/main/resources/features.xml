@@ -69,12 +69,13 @@
     </feature>
 
     <!--
-        ALEC-308: the MCP tool registry, the read-only tools over OpenNMS
-        (situations, nodes, alarms, topology, events, metrics, device
-        configuration), the shared OpenAI-style tool loop used by RCA and LLM
-        clustering, the JSON-RPC MCP endpoint at /opennms/rest/alec/mcp and the
-        tool-call metrics (a Dropwizard MetricSet the driver folds into its
-        JMX-reported registry).
+        ALEC-308: ALEC's read-only tools over OpenNMS (situations, nodes,
+        alarms, topology, events, metrics, device configuration) published as
+        Integration API McpToolProvider services, the registry and shared
+        OpenAI-style tool loop used by RCA and LLM clustering, the status
+        document for the configuration page, and the tool-call and token
+        metrics (Dropwizard MetricSets the driver folds into its JMX-reported
+        registry). External MCP clients are served by the OpenNMS MCP server.
     -->
     <feature name="alec-features-mcp" description="ALEC :: Features :: MCP" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>

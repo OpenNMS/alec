@@ -132,6 +132,7 @@
     <bean id="llmValidationRest" class="org.opennms.alec.llm.LlmValidationRestImpl">
         <argument ref="llmSuggestionService"/>
         <argument ref="llmConfigReader"/>
+        <argument ref="mcpConfigReader"/>
     </bean>
     <service ref="llmValidationRest" interface="org.opennms.alec.llm.LlmValidationRest">
         <service-properties>

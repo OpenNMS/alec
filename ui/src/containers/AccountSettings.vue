@@ -311,10 +311,13 @@ const refreshMcpStatus = async () => {
 	const result = await getMCPStatus()
 	mcpStatus.value = result || null
 }
+// "Present" tracks what the server holds; "cleared" is the pending removal.
+// Keeping them separate means Clear -> type -> erase lands back exactly where
+// it started (stored password still shown as saved), instead of a state where
+// the UI claims no password while the server keeps one.
 const clearOpennmsPassword = () => {
 	llmOpennmsPassword.value = ''
 	llmOpennmsPasswordCleared.value = true
-	llmOpennmsPasswordPresent.value = false
 }
 // Typing a new password after "Clear password" replaces the stored one; the
 // pending clear must not win over it on save.

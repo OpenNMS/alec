@@ -429,12 +429,11 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     }
 
     /**
-     * An unsaved login typed into the form may be partial (a new username with
-     * the already-stored password, say): fill each blank field from the stored
-     * config. The form always sends the URL it shows, so a blank override URL
-     * means the default, not the stored one. The stored password is only
-     * borrowed for the URL it was saved with (see {@link #needsPasswordForNewUrl}).
-     * Package-private for tests.
+     * An unsaved login typed into the form may omit the password (kept stored):
+     * the stored password is borrowed only for the URL it was saved with (see
+     * {@link #needsPasswordForNewUrl}). URL and username are taken as given —
+     * the REST layer already filled fields the request left out entirely, and
+     * a blank username means no login. Package-private for tests.
      */
     static McpConfig mergeOverride(McpConfig override, McpConfig stored) {
         if (override == null) {
@@ -448,10 +447,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
         if (password.isEmpty() && sameUrl) {
             password = stored.getOpennmsPassword();
         }
-        return new McpConfig(true,
-                override.getOpennmsUrl(),
-                override.getOpennmsUsername().isEmpty() ? stored.getOpennmsUsername() : override.getOpennmsUsername(),
-                password);
+        return new McpConfig(true, override.getOpennmsUrl(), override.getOpennmsUsername(), password);
     }
 
     private static ValidationResult requireFields(String apiKey, String baseUrl, String model) {

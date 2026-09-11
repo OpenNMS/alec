@@ -384,4 +384,40 @@ public class LlmRestImplTest {
             return outcome;
         }
     }
+
+    // --- second-review fixes ---
+
+    @Test
+    public void repointingTheUrlWithoutAPasswordDropsTheStoredPasswordEvenWithToolsOff() {
+        LlmConfig existing = LlmConfigImpl.newBuilder().opennmsUrl("http://nms:8980/opennms")
+                .opennmsUsername("ro").opennmsPassword("pw").toolsEnabled(false).build();
+        LlmConfig request = LlmConfigImpl.newBuilder().toolsEnabled(false)
+                .opennmsUrl("http://attacker:8980/opennms").build();
+        LlmConfig merged = LlmRestImpl.merge(existing, request);
+        assertThat(merged.getOpennmsUrl(), equalTo("http://attacker:8980/opennms"));
+        assertThat("the stored password belongs to the old URL", merged.getOpennmsPassword(), nullValue());
+        // Same URL (modulo slash/case) keeps it.
+        LlmConfig same = LlmConfigImpl.newBuilder().opennmsUrl("HTTP://nms:8980/opennms/").build();
+        assertThat(LlmRestImpl.merge(existing, same).getOpennmsPassword(), equalTo("pw"));
+        // Blank means the default URL: changing from an explicit URL to blank also drops it.
+        LlmConfig blank = LlmConfigImpl.newBuilder().opennmsUrl("").build();
+        assertThat(LlmRestImpl.merge(existing, blank).getOpennmsPassword(), nullValue());
+    }
+
+    @Test
+    public void clearingTheApiKeySkipsTheToolAccessGate() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        StubRest stub = new StubRest("OpenNMS rejected the login (HTTP 401)");
+        LlmRestImpl rest = new LlmRestImpl(kv, stub);
+        // Tools on with a login that no longer works; turning the integration
+        // off by clearing the key must still be possible.
+        LlmConfig first = LlmConfigImpl.newBuilder().enabled(false).toolsEnabled(false)
+                .opennmsUsername("ro").opennmsPassword("pw").build();
+        assertThat(rest.setConfiguration(first).getStatus(), equalTo(200));
+        LlmConfig clear = LlmConfigImpl.newBuilder().enabled(true).toolsEnabled(true).clearApiKey(true).build();
+        Response r = rest.setConfiguration(clear);
+        assertThat(r.getStatus(), equalTo(200));
+        assertThat(((LlmConfigStatus) r.getEntity()).isEnabled(), is(false));
+        assertThat("no probe while clearing the key", stub.probed, nullValue());
+    }
 }

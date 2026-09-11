@@ -93,11 +93,11 @@ test('McpToolsHelp warns when the OpenNMS MCP server is not active and flags wri
 				tools: [
 					{ name: 'get_situation', description: 'One situation', available: true, source: 'alec' },
 					{
-						name: 'send_event',
-						description: 'Send an event',
+						name: 'acme_reboot_device',
+						description: 'Reboot a device (third-party plugin)',
 						available: false,
 						writeAccess: true,
-						source: 'org.opennms.integration.api.mcp-server'
+						source: 'com.acme.opennms.plugin'
 					}
 				],
 				stats: { sinceMs: 0, toolCalls: 0, toolErrors: 0, rate1m: 0, rate5m: 0, byConsumer: {}, byTool: {} }
@@ -109,6 +109,6 @@ test('McpToolsHelp warns when the OpenNMS MCP server is not active and flags wri
 	)
 	const list = wrapper.find('[data-test="llm-tools-list"]').text()
 	expect(list).toContain('never offered to the model')
-	expect(list).toContain('[org.opennms.integration.api.mcp-server]')
+	expect(list).toContain('[com.acme.opennms.plugin]')
 	expect(list).not.toContain('[alec]')
 })

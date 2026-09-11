@@ -211,8 +211,8 @@ public class LlmValidationRestImplTest {
                 (McpConfig) org.mockito.ArgumentMatchers.isNull()))
                 .thenReturn(ValidationResult.ok("Yes — fine"));
 
-        ValidationRequest req = new ValidationRequest(); // everything blank -> stored values
-        req.setOpennmsUrl("  ");
+        // No OpenNMS fields at all (absent, not blank) -> the stored login is used.
+        ValidationRequest req = new ValidationRequest();
         Response resp = rest.validateTools(req);
         assertThat(resp.getStatus(), is(200));
         ValidationResult body = (ValidationResult) resp.getEntity();
@@ -283,5 +283,42 @@ public class LlmValidationRestImplTest {
         assertThat(resp.getStatus(), is(200));
         assertThat(((ValidationResult) resp.getEntity()).isOk(), is(false));
         verifyZeroInteractions(service);
+    }
+
+    @Test
+    public void validateToolsFillsOmittedLoginFieldsFromTheStoredConfigButKeepsBlanksBlank() {
+        InMemoryKVStore kv = new InMemoryKVStore();
+        kv.put("LLM_CONFIG", "{\"opennmsUrl\":\"http://stored:8980/opennms\",\"opennmsUsername\":\"stored-user\","
+                + "\"opennmsPassword\":\"pw\",\"apiKey\":\"sk-stored\",\"baseUrl\":\"https://api.anthropic.com/v1\","
+                + "\"model\":\"m\"}", "ALEC_CONFIG");
+        LlmValidationRestImpl withStored = new LlmValidationRestImpl(service,
+                new LlmConfigReader(kv, new com.fasterxml.jackson.databind.ObjectMapper()),
+                new org.opennms.alec.mcp.KvMcpConfigReader(kv, new com.fasterxml.jackson.databind.ObjectMapper()));
+        when(service.validateTools(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(ValidationResult.ok("Yes"));
+
+        // Only a username sent: the URL is filled from the stored config.
+        ValidationRequest partial = new ValidationRequest();
+        partial.setOpennmsUsername("new-user");
+        withStored.validateTools(partial);
+        ArgumentCaptor<McpConfig> captor = ArgumentCaptor.forClass(McpConfig.class);
+        verify(service).validateTools(eq("sk-stored"), eq("https://api.anthropic.com/v1"), eq("m"), captor.capture());
+        assertThat(captor.getValue().getOpennmsUrl(), equalTo("http://stored:8980/opennms"));
+        assertThat(captor.getValue().getOpennmsUsername(), equalTo("new-user"));
+
+        // Blank URL and username sent (the form was emptied): blank stays blank.
+        org.mockito.Mockito.reset(service);
+        when(service.validateTools(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(ValidationResult.ok("Yes"));
+        ValidationRequest blank = new ValidationRequest();
+        blank.setOpennmsUrl("");
+        blank.setOpennmsUsername("");
+        withStored.validateTools(blank);
+        verify(service).validateTools(eq("sk-stored"), eq("https://api.anthropic.com/v1"), eq("m"), captor.capture());
+        assertThat(captor.getValue().getOpennmsUrl(), equalTo(""));
+        assertThat(captor.getValue().getOpennmsUsername(), equalTo(""));
+        assertThat(captor.getValue().hasOpennmsCredentials(), is(false));
     }
 }

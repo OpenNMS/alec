@@ -8,13 +8,16 @@ import {
 	TLLMValidationResult,
 	TLLMSuggestion,
 	TLLMUsage,
-	TLLMBudget
+	TLLMBudget,
+	TMCPStatus
 } from '@/types/TUser'
 import { sendAction } from '@/services/AlarmService'
 const base = '/alec'
 const engineEndpoint = '/alec/engine/configuration'
 const llmConfigEndpoint = '/alec/llm/configuration'
 const llmValidateEndpoint = '/alec/llm/validate'
+const llmValidateToolsEndpoint = '/alec/llm/validate-tools'
+const mcpStatusEndpoint = '/alec/mcp/status'
 const llmSuggestionsEndpoint = '/alec/llm/suggestions'
 const llmUsageEndpoint = '/alec/llm/usage'
 const llmBudgetEndpoint = '/alec/llm/budget'
@@ -82,6 +85,37 @@ export const validateLLMConfig = async (
 		return { ok: false, message: `Unexpected response (HTTP ${resp.status}).` }
 	} catch (err) {
 		return { ok: false, message: 'Could not reach the server to validate.' }
+	}
+}
+
+// ALEC-308: probe the endpoint with the MCP tools offered. The server asks the
+// model to call alec_status and report back; `ok` is the model's yes/no and
+// `message` its one-line explanation plus the OpenNMS REST login state.
+// Unsaved OpenNMS login fields in the request are tested instead of the stored ones.
+export const validateLLMTools = async (
+	config: TLLMConfigRequest
+): Promise<TLLMValidationResult> => {
+	try {
+		const resp = await rest.post(llmValidateToolsEndpoint, config)
+		if (resp.status === 200) {
+			return resp.data as TLLMValidationResult
+		}
+		return { ok: false, message: `Unexpected response (HTTP ${resp.status}).` }
+	} catch (err) {
+		return { ok: false, message: 'Could not reach the server to check tool access.' }
+	}
+}
+
+// ALEC-308: tool inventory + usage counters for the configuration page.
+export const getMCPStatus = async (): Promise<TMCPStatus | false> => {
+	try {
+		const resp = await rest.get(mcpStatusEndpoint)
+		if (resp.status === 200) {
+			return resp.data as TMCPStatus
+		}
+		return false
+	} catch (err) {
+		return false
 	}
 }
 

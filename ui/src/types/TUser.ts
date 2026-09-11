@@ -49,6 +49,13 @@ export type TLLMConfigStatus = {
 	dailyTokenLimit: number
 	monthlyTokenLimit: number
 	apiKeyPresent: boolean
+	// ALEC-308: MCP tool access for ALEC's own model calls, plus the OpenNMS
+	// REST login the events/metrics/device-config tools use. The password is
+	// write-only like the API key — only its presence is reported.
+	toolsEnabled?: boolean
+	opennmsUrl?: string
+	opennmsUsername?: string
+	opennmsPasswordPresent?: boolean
 }
 
 // Wire shape for POST /alec/llm/configuration.
@@ -71,6 +78,13 @@ export type TLLMConfigRequest = {
 	monthlyTokenLimit?: number
 	apiKey?: string
 	clearApiKey?: boolean
+	// ALEC-308 (see TLLMConfigStatus). opennmsPassword is sent only when typed;
+	// clearOpennmsPassword: true wipes the stored one.
+	toolsEnabled?: boolean
+	opennmsUrl?: string
+	opennmsUsername?: string
+	opennmsPassword?: string
+	clearOpennmsPassword?: boolean
 }
 
 // POST /alec/llm/validate — probe the endpoint/model/key. Blank fields fall
@@ -117,7 +131,35 @@ export type TLLMUsage = {
 	calls: number
 	successfulCalls: number
 	failedCalls: number
+	// ALEC-308: MCP data-tool calls made by ALEC's own LLM requests in the window.
+	toolCalls?: number
 	cacheHitRatio: number
 	estimatedCostUsd: number
 	pricingNote: string
+}
+
+// GET /alec/mcp/status — the MCP tool inventory and usage counters (ALEC-308).
+// `available` is false for tools that need an OpenNMS REST login that isn't
+// configured; such tools are hidden from the model and from MCP clients.
+export type TMCPTool = {
+	name: string
+	description: string
+	available: boolean
+}
+
+export type TMCPStatus = {
+	toolsEnabled: boolean
+	opennmsRestConfigured: boolean
+	opennmsUrl: string
+	endpointPath: string
+	tools: TMCPTool[]
+	stats: {
+		sinceMs: number
+		toolCalls: number
+		toolErrors: number
+		rate1m: number
+		rate5m: number
+		byConsumer: Record<string, number>
+		byTool: Record<string, number>
+	}
 }

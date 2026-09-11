@@ -88,7 +88,14 @@
                                 <feature>alec-datasource-jaxb</feature>
                                 <feature>alec-datasource-opennms-kafka</feature>
                                 <feature>alec-datasource-shell</feature>
+                                <!-- The umbrella pulls in alec-engine-llm, which depends on
+                                     alec-features-mcp: its tools reference the Integration
+                                     API's NodeDao/AlarmDao/EdgeDao and ALEC's
+                                     SituationDatasource, all runtime-only services the
+                                     verifier cannot satisfy (same reason as
+                                     alec-features-llm-suggestions below).
                                 <feature>alec-engine</feature>
+                                -->
                                 <feature>alec-engine-cluster</feature>
                                 <feature>alec-engine-dbscan</feature>
                                 <!-- Depends on a reference to a datasource impl.

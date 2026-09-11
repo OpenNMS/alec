@@ -80,6 +80,7 @@
     <feature name="alec-features-llm-suggestions"
              description="ALEC :: Features :: LLM Suggestions" version="${project.version}">
         <feature version="${project.version}">alec-datasource-api</feature>
+        <feature version="${project.version}">alec-engine-api</feature>
         <feature version="${opennms.api.version}" dependency="true">opennms-integration-api</feature>
         <bundle dependency="true">mvn:javax.ws.rs/javax.ws.rs-api/${jaxrs.version}</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.okio/${okio.bundle.version}</bundle>

@@ -55,6 +55,8 @@ import org.opennms.alec.engine.cluster.AbstractClusterEngine;
 import org.opennms.alec.engine.cluster.AlarmInSpaceTime;
 import org.opennms.alec.engine.cluster.CEEdge;
 import org.opennms.alec.engine.cluster.CEVertex;
+import org.opennms.alec.engine.api.llm.LlmUsageMetrics;
+import org.opennms.alec.engine.api.llm.TokenUsage;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,6 +129,9 @@ public class LlmClusterEngine extends AbstractClusterEngine {
     private final ObjectMapper objectMapper;
     private final String clusterPrompt;
     private final OkHttpClient httpClient;
+    // ALEC-308: token-usage gauges. Null, or a blueprint proxy that may throw
+    // when the driver is absent — recording is best-effort either way.
+    private final LlmUsageMetrics usageMetrics;
 
     // The LLM call is made off the engine tick thread so it never blocks under
     // the graph lock. Each tick fires at most one request (requestInFlight) and
@@ -166,7 +171,13 @@ public class LlmClusterEngine extends AbstractClusterEngine {
 
     LlmClusterEngine(MetricRegistry metrics, KeyValueStore<String> kvStore,
                      ObjectMapper objectMapper, String clusterPrompt) {
+        this(metrics, kvStore, objectMapper, clusterPrompt, null);
+    }
+
+    LlmClusterEngine(MetricRegistry metrics, KeyValueStore<String> kvStore,
+                     ObjectMapper objectMapper, String clusterPrompt, LlmUsageMetrics usageMetrics) {
         super(metrics);
+        this.usageMetrics = usageMetrics;
         this.kvStore = kvStore;
         this.objectMapper = objectMapper;
         this.clusterPrompt = (clusterPrompt == null || clusterPrompt.trim().isEmpty())
@@ -318,15 +329,19 @@ public class LlmClusterEngine extends AbstractClusterEngine {
                     if (!response.isSuccessful()) {
                         LOG.warn("LLM clustering API returned HTTP {}: {}", response.code(),
                                 truncate(text, 300));
+                        recordCallMetric(false);
                         return;
                     }
                     recordUsage(text, model, timestampInMillis);
                     latestGroups = parseGroups(text, objectMapper);
+                    recordCallMetric(true);
                 }
             } catch (IOException e) {
                 LOG.warn("LLM clustering call failed: {}", e.getMessage());
+                recordCallMetric(false);
             } catch (Exception e) {
                 LOG.error("Unexpected error during LLM clustering", e);
+                recordCallMetric(false);
             } finally {
                 requestInFlight.set(false);
             }
@@ -674,6 +689,7 @@ public class LlmClusterEngine extends AbstractClusterEngine {
             // handling); store the buckets disjointly to avoid double-counting.
             long cached = Math.min(prompt,
                     usage.path("prompt_tokens_details").path("cached_tokens").asLong(0));
+            recordRoundMetric(new TokenUsage(prompt - cached, usage.path("completion_tokens").asLong(0), cached, 0L));
             ObjectNode rec = objectMapper.createObjectNode();
             rec.put("ts", now);
             rec.put("situationId", CLUSTER_USAGE_MARKER);
@@ -700,6 +716,29 @@ public class LlmClusterEngine extends AbstractClusterEngine {
             }
         } catch (Exception e) {
             LOG.warn("Failed to record LLM clustering token usage: {}", e.getMessage());
+        }
+    }
+
+    /** Best-effort: the metrics sink is a blueprint proxy that throws when the driver bundle is down. */
+    private void recordRoundMetric(TokenUsage usage) {
+        if (usageMetrics == null) {
+            return;
+        }
+        try {
+            usageMetrics.recordRound(LlmUsageMetrics.Consumer.CLUSTERING, usage);
+        } catch (RuntimeException e) {
+            LOG.debug("LLM usage metrics unavailable: {}", e.getMessage());
+        }
+    }
+
+    private void recordCallMetric(boolean success) {
+        if (usageMetrics == null) {
+            return;
+        }
+        try {
+            usageMetrics.recordCall(LlmUsageMetrics.Consumer.CLUSTERING, success);
+        } catch (RuntimeException e) {
+            LOG.debug("LLM usage metrics unavailable: {}", e.getMessage());
         }
     }
 

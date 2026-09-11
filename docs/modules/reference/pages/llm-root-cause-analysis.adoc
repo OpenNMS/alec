@@ -91,6 +91,25 @@ To reduce or eliminate cost, you can:
 * Choose a less expensive model.
 * Use a xref:reference:llm-root-cause-analysis.adoc#local-llm[locally run LLM].
 
+== Usage metrics on the Resource Graphs
+
+Every LLM token ALEC spends — by root cause analysis, by the LLM clustering engine and by the configuration page's validation probes — is counted and exposed as ALEC metrics over JMX, in the same JMX domain as the correlation engine's own gauges.
+OpenNMS's stock JMX data collection already collects that domain, so the counters appear as *ALEC Graph Stats* resource graphs of the OpenNMS node with no configuration change, and OpenNMS thresholds can alert on them.
+
+[cols="1,2"]
+|===
+| Gauge | Meaning
+
+| `llmTokens` | Total LLM tokens since ALEC started, all buckets and consumers.
+| `llmInputTokens`, `llmOutputTokens`, `llmCacheReadTokens`, `llmCacheCreationTokens` | Tokens by bucket, kept disjoint so they sum to `llmTokens`.
+| `llmTokensRca`, `llmTokensClustering`, `llmTokensValidation` | Tokens by consumer.
+| `llmCalls`, `llmFailedCalls`, `llmCallsRca`, `llmCallsClustering` | LLM exchanges and failures, overall and by consumer.
+| `llmTokenRate1m`, `llmTokenRate5m` | Tokens per second, one- and five-minute moving averages — the graph to watch for a runaway model.
+|===
+
+The counters reset when the ALEC bundles restart.
+The durable per-call history that the usage summary and the token budgets use is kept separately in the OpenNMS key-value store; the JMX gauges are the time-series view of the same activity.
+
 == Data privacy
 
 When the feature is enabled, ALEC sends the affected situation's alarm data — including node, interface, service, severity, timing, and any embedded SNMP or syslog text — to the configured endpoint.

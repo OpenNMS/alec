@@ -64,8 +64,8 @@ public class DriverTest {
     private static MetricSet gaugeSet(AtomicLong calls, AtomicLong errors) {
         return () -> {
             Map<String, Metric> m = new LinkedHashMap<>();
-            m.put("mcpToolCalls", (Gauge<Long>) calls::get);
-            m.put("mcpToolErrors", (Gauge<Long>) errors::get);
+            m.put("toolCalls", (Gauge<Long>) calls::get);
+            m.put("toolErrors", (Gauge<Long>) errors::get);
             return m;
         };
     }
@@ -90,17 +90,17 @@ public class DriverTest {
 
         driver.registerMetricSet(set);
         MetricRegistry registry = driver.getMetrics();
-        assertThat(registry.getGauges().containsKey("mcpToolCalls"), is(true));
-        assertThat(registry.getGauges().containsKey("mcpToolErrors"), is(true));
+        assertThat(registry.getGauges().containsKey("toolCalls"), is(true));
+        assertThat(registry.getGauges().containsKey("toolErrors"), is(true));
         assertThat("the gauge is live, not a copy",
-                (Long) registry.getGauges().get("mcpToolCalls").getValue(), equalTo(3L));
+                (Long) registry.getGauges().get("toolCalls").getValue(), equalTo(3L));
         calls.incrementAndGet();
-        assertThat((Long) registry.getGauges().get("mcpToolCalls").getValue(), equalTo(4L));
+        assertThat((Long) registry.getGauges().get("toolCalls").getValue(), equalTo(4L));
         assertThat("the driver's own metrics are untouched", registry.getTimers().containsKey("ticks"), is(true));
 
         driver.unregisterMetricSet(set);
-        assertThat(registry.getGauges().containsKey("mcpToolCalls"), is(false));
-        assertThat(registry.getGauges().containsKey("mcpToolErrors"), is(false));
+        assertThat(registry.getGauges().containsKey("toolCalls"), is(false));
+        assertThat(registry.getGauges().containsKey("toolErrors"), is(false));
         assertThat(registry.getTimers().containsKey("ticks"), is(true));
     }
 
@@ -115,7 +115,7 @@ public class DriverTest {
         AtomicLong second = new AtomicLong(42);
         driver.registerMetricSet(gaugeSet(second, new AtomicLong())); // a replacement after a bundle restart
         assertThat("the later registration wins",
-                (Long) driver.getMetrics().getGauges().get("mcpToolCalls").getValue(), equalTo(42L));
+                (Long) driver.getMetrics().getGauges().get("toolCalls").getValue(), equalTo(42L));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class DriverTest {
         Driver driver = newDriver();
         driver.registerMetricSet(null);
         driver.unregisterMetricSet(null);
-        assertThat(driver.getMetrics().getGauges().get("mcpToolCalls"), nullValue());
+        assertThat(driver.getMetrics().getGauges().get("toolCalls"), nullValue());
         // unregistering something never registered is harmless too
         driver.unregisterMetricSet(gaugeSet(new AtomicLong(), new AtomicLong()));
     }

@@ -61,13 +61,13 @@ import com.codahale.metrics.MetricSet;
  */
 public class McpMetrics implements MetricSet {
 
-    public static final String TOOL_CALLS = "mcpToolCalls";
-    public static final String TOOL_ERRORS = "mcpToolErrors";
-    public static final String TOOL_CALLS_RCA = "mcpToolCallsRca";
-    public static final String TOOL_CALLS_CLUSTERING = "mcpToolCallsClustering";
-    public static final String TOOL_CALLS_EXTERNAL = "mcpToolCallsExternal";
-    public static final String TOOL_CALL_RATE_1M = "mcpToolCallRate1m";
-    public static final String TOOL_CALL_RATE_5M = "mcpToolCallRate5m";
+    public static final String TOOL_CALLS = "toolCalls";
+    public static final String TOOL_ERRORS = "toolErrors";
+    public static final String TOOL_CALLS_RCA = "toolCallsRca";
+    public static final String TOOL_CALLS_CLUSTERING = "toolCallsClustering";
+    public static final String TOOL_CALLS_EXTERNAL = "toolCallsExternal";
+    public static final String TOOL_CALL_RATE_1M = "toolCallRate1m";
+    public static final String TOOL_CALL_RATE_5M = "toolCallRate5m";
     /** Per-tool bucket used for calls to names that are not registered. */
     public static final String UNKNOWN_TOOL = "(unknown)";
 

@@ -133,9 +133,9 @@ OpenNMS's stock JMX data collection already collects that domain, so they appear
 |===
 | Gauge | Meaning
 
-| `mcpToolCalls`, `mcpToolErrors` | Tool calls since ALEC started, and how many failed.
-| `mcpToolCallsRca`, `mcpToolCallsClustering`, `mcpToolCallsExternal` | Tool calls by consumer.
-| `mcpToolCallRate1m`, `mcpToolCallRate5m` | Tool calls per second, one- and five-minute moving averages.
+| `toolCalls`, `toolErrors` | Tool calls since ALEC started, and how many failed.
+| `toolCallsRca`, `toolCallsClustering`, `toolCallsExternal` | Tool calls by consumer.
+| `toolCallRate1m`, `toolCallRate5m` | Tool calls per second, one- and five-minute moving averages.
 | `llmTokens` | Total LLM tokens since ALEC started, all buckets and consumers.
 | `llmInputTokens`, `llmOutputTokens`, `llmCacheReadTokens`, `llmCacheCreationTokens` | Tokens by bucket, kept disjoint so they sum to `llmTokens`.
 | `llmTokensRca`, `llmTokensClustering`, `llmTokensValidation` | Tokens by consumer.

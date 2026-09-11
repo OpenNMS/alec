@@ -54,11 +54,11 @@ public class McpMetricsTest {
                     metrics.get(name) instanceof Gauge, is(true));
             assertThat("JMX-safe name (no dots)", name.contains("."), is(false));
         }
-        assertThat(McpMetrics.TOOL_CALLS, equalTo("mcpToolCalls"));
-        assertThat(McpMetrics.TOOL_ERRORS, equalTo("mcpToolErrors"));
-        assertThat(McpMetrics.TOOL_CALLS_RCA, equalTo("mcpToolCallsRca"));
-        assertThat(McpMetrics.TOOL_CALLS_CLUSTERING, equalTo("mcpToolCallsClustering"));
-        assertThat(McpMetrics.TOOL_CALLS_EXTERNAL, equalTo("mcpToolCallsExternal"));
+        assertThat(McpMetrics.TOOL_CALLS, equalTo("toolCalls"));
+        assertThat(McpMetrics.TOOL_ERRORS, equalTo("toolErrors"));
+        assertThat(McpMetrics.TOOL_CALLS_RCA, equalTo("toolCallsRca"));
+        assertThat(McpMetrics.TOOL_CALLS_CLUSTERING, equalTo("toolCallsClustering"));
+        assertThat(McpMetrics.TOOL_CALLS_EXTERNAL, equalTo("toolCallsExternal"));
     }
 
     @Test

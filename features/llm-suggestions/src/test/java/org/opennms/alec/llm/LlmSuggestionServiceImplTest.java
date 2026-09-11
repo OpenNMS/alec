@@ -516,4 +516,57 @@ public class LlmSuggestionServiceImplTest {
         assertNotNull(s);
         return s;
     }
+
+    // --- ALEC-308: token usage gauges ---
+
+    private static okhttp3.OkHttpClient scripted(java.util.Deque<String> bodies, java.util.Deque<Integer> codes) {
+        return new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> new okhttp3.Response.Builder()
+                .request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
+                .code(codes.isEmpty() ? 200 : codes.pop()).message("OK")
+                .body(okhttp3.ResponseBody.create(okhttp3.MediaType.parse("application/json"), bodies.pop()))
+                .build()).build();
+    }
+
+    @Test
+    public void successfulAnalysisRecordsTokensAndACallUnderRca() throws Exception {
+        org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics gauges =
+                new org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics();
+        java.util.Deque<String> bodies = new java.util.ArrayDeque<>();
+        bodies.push("{\"choices\":[{\"message\":{\"tool_calls\":[{\"function\":{\"name\":\"report_suggestions\","
+                + "\"arguments\":\"{\\\"rootCauses\\\":[\\\"a\\\"],\\\"resolutions\\\":[]}\"}}]}}],"
+                + "\"usage\":{\"prompt_tokens\":300,\"completion_tokens\":20,\"prompt_tokens_details\":{\"cached_tokens\":100}}}");
+        LlmSuggestionServiceImpl svc = new LlmSuggestionServiceImpl(scripted(bodies, new java.util.ArrayDeque<>()), om,
+                java.util.concurrent.Executors.newSingleThreadExecutor(), 1, true, gauges);
+        try {
+            Suggestions s = svc.requestSuggestions(stubSituation(), "sk-x", BASE_URL, MODEL, PROMPT).get();
+            assertThat(s.getRootCauses().size(), equalTo(1));
+            assertThat(gauges.getTotalTokens(), equalTo(320L));
+            assertThat(gauges.getTokens(org.opennms.alec.engine.api.llm.LlmUsageMetrics.Consumer.RCA), equalTo(320L));
+            assertThat(gauges.getCalls(), equalTo(1L));
+            assertThat(gauges.getFailedCalls(), equalTo(0L));
+        } finally {
+            svc.shutdown();
+        }
+    }
+
+    @Test
+    public void failedAnalysisStillCountsTheCallAndAnyBilledTokens() throws Exception {
+        org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics gauges =
+                new org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics();
+        java.util.Deque<String> bodies = new java.util.ArrayDeque<>();
+        // A 200 with no tool call but a usage block: billed, unusable.
+        bodies.push("{\"choices\":[{\"message\":{\"content\":\"hi\"},\"finish_reason\":\"stop\"}],"
+                + "\"usage\":{\"prompt_tokens\":40,\"completion_tokens\":2}}");
+        LlmSuggestionServiceImpl svc = new LlmSuggestionServiceImpl(scripted(bodies, new java.util.ArrayDeque<>()), om,
+                java.util.concurrent.Executors.newSingleThreadExecutor(), 1, true, gauges);
+        try {
+            Throwable cause = futureCause(svc.requestSuggestions(stubSituation(), "sk-x", BASE_URL, MODEL, PROMPT));
+            assertThat(cause instanceof LlmApiException, is(true));
+            assertThat(gauges.getCalls(), equalTo(1L));
+            assertThat(gauges.getFailedCalls(), equalTo(1L));
+            assertThat(gauges.getTotalTokens(), equalTo(42L));
+        } finally {
+            svc.shutdown();
+        }
+    }
 }

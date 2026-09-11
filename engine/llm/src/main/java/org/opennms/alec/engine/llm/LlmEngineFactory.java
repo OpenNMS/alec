@@ -29,6 +29,7 @@
 package org.opennms.alec.engine.llm;
 
 import org.opennms.alec.engine.api.EngineFactory;
+import org.opennms.alec.engine.api.llm.LlmUsageMetrics;
 import org.opennms.integration.api.v1.distributed.KeyValueStore;
 
 import com.codahale.metrics.MetricRegistry;
@@ -41,13 +42,20 @@ public class LlmEngineFactory implements EngineFactory {
 
     private final KeyValueStore<String> kvStore;
     private final ObjectMapper objectMapper;
+    // Token-usage gauges (JMX); null when absent.
+    private final LlmUsageMetrics usageMetrics;
 
     private long clusterFrequencyMs = DEFAULT_CLUSTER_FREQUENCY_MS;
     private String clusterPrompt = "";
 
     public LlmEngineFactory(KeyValueStore<String> kvStore, ObjectMapper objectMapper) {
+        this(kvStore, objectMapper, null);
+    }
+
+    public LlmEngineFactory(KeyValueStore<String> kvStore, ObjectMapper objectMapper, LlmUsageMetrics usageMetrics) {
         this.kvStore = kvStore;
         this.objectMapper = objectMapper;
+        this.usageMetrics = usageMetrics;
     }
 
     @Override
@@ -62,7 +70,7 @@ public class LlmEngineFactory implements EngineFactory {
 
     @Override
     public LlmClusterEngine createEngine(MetricRegistry metrics) {
-        LlmClusterEngine engine = new LlmClusterEngine(metrics, kvStore, objectMapper, clusterPrompt);
+        LlmClusterEngine engine = new LlmClusterEngine(metrics, kvStore, objectMapper, clusterPrompt, usageMetrics);
         // Decouple the (possibly hour-long) LLM query cadence from the reconcile
         // cadence. The configured frequency throttles how often a NEW grouping is
         // requested; the engine still ticks at the faster reconcile interval so a

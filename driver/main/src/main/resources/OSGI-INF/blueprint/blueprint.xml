@@ -37,6 +37,35 @@
     </bean>
     <service ref="driver" interface="org.opennms.alec.engine.api.EngineRegistry"/>
 
+    <!--
+        LLM token usage gauges (ALEC-308). The driver owns the bean and
+        publishes it both as the LlmUsageMetrics sink the LLM features record
+        into and as a MetricSet the whiteboard below folds into the driver's
+        JMX-reported registry, so OpenNMS charts the counters next to the
+        engine's own gauges.
+    -->
+    <bean id="llmUsageMetrics" class="org.opennms.alec.engine.api.llm.DefaultLlmUsageMetrics"/>
+    <service ref="llmUsageMetrics" interface="org.opennms.alec.engine.api.llm.LlmUsageMetrics"/>
+    <service ref="llmUsageMetrics" interface="com.codahale.metrics.MetricSet">
+        <service-properties>
+            <entry key="name" value="alec-llm-usage"/>
+        </service-properties>
+    </service>
+
+    <!--
+        Metric sets contributed by ALEC bundles (the LLM usage gauges above,
+        and any a later feature publishes). They are folded into the driver's
+        registry so they appear under the engine's JMX domain and get charted
+        by OpenNMS like the engine's own gauges.
+    -->
+    <reference-list id="contributedMetricSets"
+                    interface="com.codahale.metrics.MetricSet"
+                    availability="optional">
+        <reference-listener bind-method="registerMetricSet" unbind-method="unregisterMetricSet">
+            <ref component-id="driver"/>
+        </reference-listener>
+    </reference-list>
+
     <!-- Expose a health check that can be used when we're running in an OpenNMS container -->
     <bean id="healthCheck" class="org.opennms.alec.driver.main.DriverHealthCheck">
         <argument ref="driver"/>

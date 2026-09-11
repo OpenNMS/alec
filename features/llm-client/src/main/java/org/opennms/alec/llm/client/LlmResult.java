@@ -26,33 +26,43 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.alec.llm;
+package org.opennms.alec.llm.client;
 
-/**
- * Thrown when a call to the LLM API fails — network error, non-2xx
- * HTTP status, malformed response, or in-flight rate limit exceeded.
- */
-public class LlmApiException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+import org.opennms.alec.engine.api.llm.TokenUsage;
+import com.fasterxml.jackson.databind.JsonNode;
 
-    // Tokens the provider billed before the failure (a multi-round exchange
-    // that never reported still cost its completed rounds). Empty by default.
-    private transient Suggestions.TokenUsage usage = Suggestions.TokenUsage.empty();
+/** The terminal tool call's arguments plus what the whole exchange cost. */
+public final class LlmResult {
 
-    public Suggestions.TokenUsage getUsage() {
+    private final JsonNode terminalArguments;
+    private final TokenUsage usage;
+    private final int toolCalls;
+    private final int rounds;
+
+    public LlmResult(JsonNode terminalArguments, TokenUsage usage, int toolCalls, int rounds) {
+        this.terminalArguments = terminalArguments;
+        this.usage = usage == null ? TokenUsage.empty() : usage;
+        this.toolCalls = toolCalls;
+        this.rounds = rounds;
+    }
+
+    /** Parsed arguments object of the terminal tool call. */
+    public JsonNode getTerminalArguments() {
+        return terminalArguments;
+    }
+
+    /** Summed over every round. */
+    public TokenUsage getUsage() {
         return usage;
     }
 
-    public LlmApiException withUsage(Suggestions.TokenUsage usage) {
-        this.usage = usage == null ? Suggestions.TokenUsage.empty() : usage;
-        return this;
+    /** Number of data-tool invocations made on the model's behalf. */
+    public int getToolCalls() {
+        return toolCalls;
     }
 
-    public LlmApiException(String message) {
-        super(message);
-    }
-
-    public LlmApiException(String message, Throwable cause) {
-        super(message, cause);
+    /** Number of chat-completions calls made. */
+    public int getRounds() {
+        return rounds;
     }
 }

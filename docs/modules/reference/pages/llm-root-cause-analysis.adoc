@@ -76,6 +76,12 @@ IMPORTANT: The OpenNMS server must be able to reach this host and port. If OpenN
 
 NOTE: Not every local model implements function calling correctly. If validation succeeds but situations show no suggestions (or report that the model did not call the reporting function), try a different, function-calling-capable model.
 
+=== Timeouts
+
+ALEC waits up to three minutes for the model's answer to each request.
+A locally hosted model that needs longer than that on a large alarm set — prefilling the prompt and then generating up to a few thousand tokens — logs a timeout and the analysis (or the clustering pass) is abandoned; use a faster model or a machine with a GPU.
+The *Validate key* probe waits one minute.
+
 == Cost and usage
 
 When the feature is enabled against a hosted provider, each analyzed situation calls a third-party API using your stored key and may incur usage charges billed by that provider.

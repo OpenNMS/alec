@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.opennms.alec</groupId>
         <artifactId>features</artifactId>
@@ -7,8 +6,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opennms.alec.features</groupId>
-    <artifactId>org.opennms.alec.features.llm-suggestions</artifactId>
-    <name>ALEC :: Features :: LLM Suggestions</name>
+    <artifactId>org.opennms.alec.features.llm-client</artifactId>
+    <name>ALEC :: Features :: LLM Client</name>
     <packaging>bundle</packaging>
 
     <build>
@@ -35,20 +34,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opennms.alec.datasource</groupId>
-            <artifactId>org.opennms.alec.datasource.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.integration.api</groupId>
-            <artifactId>api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.opennms.alec.engine</groupId>
             <artifactId>org.opennms.alec.engine.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opennms.alec.features</groupId>
-            <artifactId>org.opennms.alec.features.llm-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -60,14 +47,9 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -81,13 +63,6 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- JAX-RS RuntimeDelegate provider needed when our REST tests build Response objects. -->
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${jersey-client.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

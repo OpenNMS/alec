@@ -71,7 +71,10 @@ public class LlmSituationHandler implements SituationHandler {
      * Age past which a {@code pending} record no longer blocks a fresh
      * auto-evaluation. See the staleness check in {@link #onSituation}.
      */
-    static final long PENDING_STALE_MS = 10 * 60 * 1000L;
+    // A pending record older than this is treated as abandoned (crash mid-call)
+    // and re-fired. Sized for the longest legitimate call: the 180 s read
+    // timeout of a slow local model, with generous slack.
+    static final long PENDING_STALE_MS = 25 * 60 * 1000L;
 
     private final LlmConfigReader configReader;
     private final LlmSuggestionService suggestionService;
@@ -222,12 +225,19 @@ public class LlmSituationHandler implements SituationHandler {
                         store.putFailed(situationId, requestedAt, completedAt,
                                 model, reason);
                         // Record the failed attempt too — call count and success rate matter
-                        // for the dashboard even when no tokens were billed.
+                        // for the dashboard, and a response the provider billed but that
+                        // carried no usable answer still spent tokens the budget must see.
+                        Suggestions.TokenUsage spent = cause instanceof LlmApiException
+                                ? ((LlmApiException) cause).getUsage() : Suggestions.TokenUsage.empty();
                         usageStore.record(UsageRecord.newBuilder()
                                 .ts(completedAt)
                                 .situationId(situationId)
                                 .model(model)
                                 .success(false)
+                                .inputTokens(spent.getInputTokens())
+                                .outputTokens(spent.getOutputTokens())
+                                .cacheReadInputTokens(spent.getCacheReadInputTokens())
+                                .cacheCreationInputTokens(spent.getCacheCreationInputTokens())
                                 .build());
                         return;
                     }

@@ -9,6 +9,10 @@
 
     <bean id="llmObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
+    <!-- ALEC-308: LLM token usage gauges, published by the driver bundle (best-effort). -->
+    <reference id="llmUsageMetrics" interface="org.opennms.alec.engine.api.llm.LlmUsageMetrics"
+               availability="optional"/>
+
     <!--
         LlmSuggestionService — calls a configured OpenAI-compatible chat
         endpoint (OpenRouter by default) to produce up to 3 probable root
@@ -16,7 +20,9 @@
     -->
     <bean id="llmSuggestionService"
           class="org.opennms.alec.llm.LlmSuggestionServiceImpl"
-          destroy-method="shutdown"/>
+          destroy-method="shutdown">
+        <argument ref="llmUsageMetrics"/>
+    </bean>
 
     <service ref="llmSuggestionService"
              interface="org.opennms.alec.llm.LlmSuggestionService"/>

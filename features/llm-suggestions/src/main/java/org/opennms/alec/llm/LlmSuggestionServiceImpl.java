@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opennms.alec.datasource.api.Alarm;
 import org.opennms.alec.datasource.api.Situation;
+import org.opennms.alec.engine.api.llm.LlmUsageMetrics;
+import org.opennms.alec.engine.api.llm.TokenUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,13 +157,22 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
     private final ExecutorService executor;
     private final Semaphore inFlight;
     private final boolean ownsExecutor;
+    // ALEC-308: token-usage gauges (JMX). Null, or a blueprint proxy that may
+    // throw while the driver bundle is down — recording is best-effort.
+    private final LlmUsageMetrics usageMetrics;
 
     public LlmSuggestionServiceImpl() {
+        this((LlmUsageMetrics) null);
+    }
+
+    /** Blueprint constructor. */
+    public LlmSuggestionServiceImpl(LlmUsageMetrics usageMetrics) {
         this(buildDefaultHttpClient(),
                 new ObjectMapper(),
                 buildDefaultExecutor(),
                 DEFAULT_MAX_CONCURRENT,
-                true);
+                true,
+                usageMetrics);
     }
 
     // Visible for testing.
@@ -170,11 +181,37 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
                              ExecutorService executor,
                              int maxConcurrent,
                              boolean ownsExecutor) {
+        this(httpClient, objectMapper, executor, maxConcurrent, ownsExecutor, null);
+    }
+
+    // Visible for testing.
+    LlmSuggestionServiceImpl(OkHttpClient httpClient,
+                             ObjectMapper objectMapper,
+                             ExecutorService executor,
+                             int maxConcurrent,
+                             boolean ownsExecutor,
+                             LlmUsageMetrics usageMetrics) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.executor = executor;
         this.inFlight = new Semaphore(maxConcurrent);
         this.ownsExecutor = ownsExecutor;
+        this.usageMetrics = usageMetrics;
+    }
+
+    private void recordMetrics(LlmUsageMetrics.Consumer consumer, Suggestions.TokenUsage usage, boolean success) {
+        if (usageMetrics == null) {
+            return;
+        }
+        try {
+            if (usage != null) {
+                usageMetrics.recordRound(consumer, new TokenUsage(usage.getInputTokens(), usage.getOutputTokens(),
+                        usage.getCacheReadInputTokens(), usage.getCacheCreationInputTokens()));
+            }
+            usageMetrics.recordCall(consumer, success);
+        } catch (RuntimeException e) {
+            LOG.debug("LLM usage metrics unavailable: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -257,6 +294,7 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
             ResponseBody respBody = response.body();
             String text = respBody == null ? "" : respBody.string();
             if (!response.isSuccessful()) {
+                recordMetrics(LlmUsageMetrics.Consumer.VALIDATION, null, false);
                 return ValidationResult.fail("HTTP " + response.code() + " from provider: "
                         + providerError(text, objectMapper));
             }
@@ -264,8 +302,11 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
             JsonNode root = objectMapper.readTree(text);
             JsonNode err = root.get("error");
             if (err != null && !err.isNull()) {
+                recordMetrics(LlmUsageMetrics.Consumer.VALIDATION, null, false);
                 return ValidationResult.fail("Provider error: " + providerError(text, objectMapper));
             }
+            // The probe is billed like any other call; count it under its own consumer.
+            recordMetrics(LlmUsageMetrics.Consumer.VALIDATION, readUsage(root), responseHasReportToolCall(root));
             // The probe forces a tool call. If the response carries none, the
             // model is unusable for ALEC — but there are two distinct reasons,
             // and they need different fixes:
@@ -400,14 +441,26 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
             ResponseBody respBody = response.body();
             String text = respBody == null ? "" : respBody.string();
             if (!response.isSuccessful()) {
+                recordMetrics(LlmUsageMetrics.Consumer.RCA, null, false);
                 // providerError never reflects the raw body — the failure reason
                 // is persisted and displayed in the UI.
                 throw new LlmApiException(
                         "LLM API returned HTTP " + response.code() + ": "
                                 + providerError(text, objectMapper));
             }
-            return parseResponse(text, objectMapper);
+            Suggestions suggestions;
+            try {
+                suggestions = parseResponse(text, objectMapper);
+            } catch (LlmApiException | IOException e) {
+                // A 200 the provider billed but that carried no usable answer
+                // (error envelope, no tool call): still a call, and still spent.
+                recordMetrics(LlmUsageMetrics.Consumer.RCA, safeUsage(text), false);
+                throw e;
+            }
+            recordMetrics(LlmUsageMetrics.Consumer.RCA, suggestions.getUsage(), true);
+            return suggestions;
         } catch (IOException e) {
+            recordMetrics(LlmUsageMetrics.Consumer.RCA, null, false);
             throw new LlmApiException("Network error calling LLM", e);
         }
     }
@@ -599,6 +652,15 @@ public class LlmSuggestionServiceImpl implements LlmSuggestionService {
         List<String> rootCauses = readStringArray(input, "rootCauses");
         List<String> resolutions = readStringArray(input, "resolutions");
         return new Suggestions(rootCauses, resolutions, readUsage(root));
+    }
+
+    /** The usage block of a response that failed to parse as an answer, if the JSON is readable at all. */
+    private Suggestions.TokenUsage safeUsage(String text) {
+        try {
+            return readUsage(objectMapper.readTree(text));
+        } catch (IOException | RuntimeException e) {
+            return null;
+        }
     }
 
     private static Suggestions.TokenUsage readUsage(JsonNode root) {

@@ -6,10 +6,19 @@
 
     <bean id="llmEngineObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
 
+    <!--
+        ALEC-308: LLM token usage gauges, published by the driver bundle.
+        Optional so this bundle resolves without the driver (offline feature
+        verification, Sentinel); recording is best-effort.
+    -->
+    <reference id="llmUsageMetrics" interface="org.opennms.alec.engine.api.llm.LlmUsageMetrics"
+               availability="optional"/>
+
     <service interface="org.opennms.alec.engine.api.EngineFactory" ranking="15">
         <bean class="org.opennms.alec.engine.llm.LlmEngineFactory">
             <argument ref="keyValueStore"/>
             <argument ref="llmEngineObjectMapper"/>
+            <argument ref="llmUsageMetrics"/>
         </bean>
     </service>
 

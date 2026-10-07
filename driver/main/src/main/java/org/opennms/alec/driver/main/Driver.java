@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricSet;
 import com.codahale.metrics.jmx.JmxReporter;
 
 public class Driver implements EngineRegistry {
@@ -366,5 +368,40 @@ public class Driver implements EngineRegistry {
 
     public MetricRegistry getMetrics() {
         return metrics;
+    }
+
+    /**
+     * Blueprint reference-list bind method: fold a {@link MetricSet} published
+     * by another ALEC bundle into this driver's registry, so its gauges are
+     * reported over JMX in the same domain as the engine's own metrics
+     * ({@code org.opennms.alec.driver.main.Driver.<engine>}) — the domain
+     * OpenNMS's stock JMX collection already charts. ALEC-308 uses this for
+     * the LLM token-usage gauges. Safe to call before or after the reporter
+     * starts: JmxReporter registers metrics added later as they appear.
+     */
+    public void registerMetricSet(MetricSet metricSet) {
+        if (metricSet == null) {
+            return;
+        }
+        for (Map.Entry<String, com.codahale.metrics.Metric> e : metricSet.getMetrics().entrySet()) {
+            // Re-binding after a bundle restart must not throw on the duplicate name.
+            metrics.remove(e.getKey());
+            try {
+                metrics.register(e.getKey(), e.getValue());
+            } catch (IllegalArgumentException ex) {
+                LOG.warn("Could not register contributed metric {}: {}", e.getKey(), ex.getMessage());
+            }
+        }
+        LOG.debug("Registered {} contributed metric(s)", metricSet.getMetrics().size());
+    }
+
+    /** Blueprint reference-list unbind method. */
+    public void unregisterMetricSet(MetricSet metricSet) {
+        if (metricSet == null) {
+            return;
+        }
+        for (String name : metricSet.getMetrics().keySet()) {
+            metrics.remove(name);
+        }
     }
 }

@@ -29,13 +29,19 @@
 package org.opennms.alec.driver.main;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import org.opennms.alec.datasource.api.AlarmDatasource;
@@ -47,9 +53,80 @@ import org.opennms.alec.processor.api.SituationProcessor;
 import org.opennms.alec.processor.api.SituationProcessorFactory;
 import org.osgi.framework.BundleContext;
 
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricSet;
 
 public class DriverTest {
+
+    /** A contributed MetricSet in the shape the MCP bundle publishes (ALEC-308): live gauges. */
+    private static MetricSet gaugeSet(AtomicLong calls, AtomicLong errors) {
+        return () -> {
+            Map<String, Metric> m = new LinkedHashMap<>();
+            m.put("toolCalls", (Gauge<Long>) calls::get);
+            m.put("toolErrors", (Gauge<Long>) errors::get);
+            return m;
+        };
+    }
+
+    private static Driver newDriver() {
+        BundleContext bundleContext = mock(BundleContext.class);
+        EngineFactory engineFactory = mock(EngineFactory.class);
+        when(engineFactory.getName()).thenReturn("test-engine");
+        SituationProcessorFactory situationProcessorFactory = mock(SituationProcessorFactory.class);
+        when(situationProcessorFactory.getInstance()).thenReturn(mock(SituationProcessor.class));
+        return new Driver(bundleContext, mock(AlarmDatasource.class), mock(AlarmFeedbackDatasource.class),
+                mock(InventoryDatasource.class), mock(SituationDatasource.class), engineFactory,
+                situationProcessorFactory);
+    }
+
+    @Test
+    public void registerMetricSetFoldsContributedGaugesIntoTheDriverRegistry() {
+        Driver driver = newDriver();
+        AtomicLong calls = new AtomicLong(3);
+        AtomicLong errors = new AtomicLong(1);
+        MetricSet set = gaugeSet(calls, errors);
+
+        driver.registerMetricSet(set);
+        MetricRegistry registry = driver.getMetrics();
+        assertThat(registry.getGauges().containsKey("toolCalls"), is(true));
+        assertThat(registry.getGauges().containsKey("toolErrors"), is(true));
+        assertThat("the gauge is live, not a copy",
+                (Long) registry.getGauges().get("toolCalls").getValue(), equalTo(3L));
+        calls.incrementAndGet();
+        assertThat((Long) registry.getGauges().get("toolCalls").getValue(), equalTo(4L));
+        assertThat("the driver's own metrics are untouched", registry.getTimers().containsKey("ticks"), is(true));
+
+        driver.unregisterMetricSet(set);
+        assertThat(registry.getGauges().containsKey("toolCalls"), is(false));
+        assertThat(registry.getGauges().containsKey("toolErrors"), is(false));
+        assertThat(registry.getTimers().containsKey("ticks"), is(true));
+    }
+
+    @Test
+    public void reRegisteringTheSameMetricNamesDoesNotThrow() {
+        Driver driver = newDriver();
+        AtomicLong first = new AtomicLong(1);
+        MetricSet original = gaugeSet(first, new AtomicLong());
+        driver.registerMetricSet(original);
+        driver.registerMetricSet(original); // same instance again (bundle refresh)
+
+        AtomicLong second = new AtomicLong(42);
+        driver.registerMetricSet(gaugeSet(second, new AtomicLong())); // a replacement after a bundle restart
+        assertThat("the later registration wins",
+                (Long) driver.getMetrics().getGauges().get("toolCalls").getValue(), equalTo(42L));
+    }
+
+    @Test
+    public void nullMetricSetsAreIgnored() {
+        Driver driver = newDriver();
+        driver.registerMetricSet(null);
+        driver.unregisterMetricSet(null);
+        assertThat(driver.getMetrics().getGauges().get("toolCalls"), nullValue());
+        // unregistering something never registered is harmless too
+        driver.unregisterMetricSet(gaugeSet(new AtomicLong(), new AtomicLong()));
+    }
 
     @Test
     public void canGenerateTicks() throws InterruptedException, ExecutionException {
